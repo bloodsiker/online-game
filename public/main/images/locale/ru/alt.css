@@ -1,0 +1,16 @@
+.rating-races li a {background:url("images/r_races.gif") no-repeat;}
+
+.dummy-scroll .ds-content p {width: 375px; margin: 0 auto; padding: 10px 0 20px; font: 20px Tahoma, Verdana, Arial, sans-serif; color: #360000;}
+.dummy-scroll .ds-content p em {color: #c22728; font-style: normal;}
+
+.artifact-slot__action {position: absolute; left: 0; top: 23px; display: block; width: 60px; height: 13px; background: url('images/action.gif') 0 13px no-repeat;}
+.artifact-slot__action.info {background-position: 0 0;}
+.artifact-slot__action.equip {background-position: 0 -13px;}
+.artifact-slot__action.remove {background-position: 0 -26px;}
+.artifact-slot__action.drop {background-position: 0 -39px;}
+.artifact-slot__action.extract {background-position: 0 -52px;}
+.artifact-slot__action.use {background-position: 0 -65px;}
+.artifact-slot__action.repair {background-position: 0 -78px;}
+.artifact-slot__action.add {background-position: 0 -91px;}
+.artifact-slot__action.sell {background-position: 0 -104px;}
+.artifact-slot__action.perp {background-position: 0 -117px;}

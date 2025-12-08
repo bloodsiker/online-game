@@ -1,0 +1,218 @@
+* {font-family:tahoma;font-size: 12px;}
+body {font-family: tahoma;font-size: 12px;color: #633113;font-weight: normal;}
+a {color:#AC0000;font-family: tahoma;font-size: 12px;font-weight: normal;}
+.login {width:145px;height:17px;background-color: #B48D5E;border-width:1px;border-color:#957445;background-image: url(https://dwar.ltd/info/library/images/login_bg2.gif);font-size:10px;padding:0px;padding-left:2px}
+.menuitem {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:url(https://dwar.ltd/info/library/images/menuitem.gif) no-repeat bottom left;}
+.menuitemsel {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:13px;background:url(https://dwar.ltd/info/library/images/menuitemsel.gif) no-repeat bottom left;}
+.menuitemseladv {color:#B20000;font:bold 12px tahoma;padding:1 0 1 30;height:16px;background:url(https://dwar.ltd/info/library/images/menuitemseladv.gif) no-repeat bottom left;}
+.menusubitem {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:url(https://dwar.ltd/info/library/images/menusubitem.gif) no-repeat bottom left;}
+.menusubitemsel {color:#3a6178;font:normal 11px tahoma;padding:1 0 1 42;height:13px;background:url(https://dwar.ltd/info/library/images/menusubitemsel.gif) no-repeat bottom left;}
+.menuitem a,.menuitemsel a,.menuitemseladv a {color:#A00000;font:bold 11px tahoma;text-decoration:none}
+.menusubitem a {color:#B20000;font:normal 11px tahoma;text-decoration:none}
+.menusubitemsel a {color:#B20000;font:bold 11px tahoma;text-decoration:none;}
+.menuitem a:hover,.menuitemsel a:hover,.menuitemseladv a:hover,.menusubitem a:hover,.menusubitemsel a:hover {text-decoration:underline}
+.title {color:#B20000;font:bold 13px tahoma;}
+.titlenews {color:#B20000;font:bold 14px tahoma;}
+.pages {color:#9fb9d1;font-size:11px}
+.pages u {color:#6e99c1;font-size:11px;font-weight:bold;text-decoration:none}
+.pages b {color:#9fb9d1;font-size:11px}
+.pages a {font-size:11px;text-decoration:underline;font-weight:normal}
+.bottommenu {font-size:11px;font-weight:bold;color:#1a4b71}
+.bottommenu a {font-size:13px;font-weight:bold;color:#1a4b71;text-decoration:underline}
+.copyrights {font-size:10px}
+.copyrights a {font-size:13px}
+.rd {color: #0068b9}
+.calendmonth {font:bold 13px tahoma;text-transform:uppercase;color:#B20000;text-align:center}
+.calendar .calenddays td {font-weight:bold;font-size:12px;text-align:center}
+.calendar .old {font-size:12px;color:#B1B1B1}
+.calendar .cur {font-size:12px;color:#895D51}
+.calendar .cur a {font-size:12px;color:#AC0000}
+.calendar .cur1 {font-size:12px;color:#AE4022}
+.calendar .cur1 a {font-size:12px;color:#AC0000}
+.calendar .sel {font-size:12px;background:url(https://dwar.ltd/info/library/images/calendsel.gif) no-repeat top center;color:white;font-weight:bold}
+P,UL,LI {margin: 0px;}
+
+strong.butt1 {
+  height: 26px;
+  font-size: 26px;
+  background: url('../../images/tbl-btn_c-left.gif') left top no-repeat;
+}
+strong.butt1 strong {
+  height: 26px;
+  font-size: 26px;
+  background: url('../../images/tbl-btn_c-right.gif') right top no-repeat;
+}
+strong.butt1 input, strong.butt1 button {
+  height: 26px;
+  border: 0px solid;
+  color: #955C4A;
+  font-family: Tahoma; 
+  font-size: 11px;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 42 0 42;
+  background: transparent url('../../images/tbl-btn_center.gif');
+}
+
+strong.butt2 {
+  height: 15px;
+  font-size: 15px;
+  background: url('../../images/btn2-c-left.gif') left top no-repeat;
+}
+strong.butt2 strong {
+  height: 15px;
+  font-size: 15px;
+  background: url('../../images/btn2-c-right.gif') right top no-repeat;
+}
+strong.butt2 input, strong.butt2 button {
+  height: 15px;
+  border: 0px solid;
+  color: #2D1600;
+  font-family: Tahoma; 
+  font-size: 9px;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 8 0 8;
+  background: transparent url('../../images/btn2-center.gif');
+}
+/* Shop */
+.tbl-shp-red {
+	color: #8D2616;
+}
+.tbl-shp_sml-bottom {
+	background-image: url('../../images/tbl-shp_sml-bottom.gif');
+	background-repeat: repeat-x;
+	height: 18px;	
+}
+.tbl-shp_sml-top {
+	background-image: url('../../images/tbl-shp_sml-top.gif');
+	background-repeat: repeat-x;
+	height: 22px;	
+}
+.tbl-shp_menu-center-inact {
+	background-image: url('../../images/tbl-shp_menu-center-inact.gif');
+	background-repeat: repeat-x;
+	height: 19px;
+	font-family: Tahoma;
+	font-size: 11px;
+	font-weight: bold;
+	text-decoration: none;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-bottom: 2px;
+}
+
+.tbl-shp_menu-center-act {
+	background-image: url('../../images/tbl-shp_menu-center-act.gif');
+	background-repeat: repeat-x;
+	height: 19px;
+	font-family: Tahoma;
+	font-size: 11px;
+	font-weight: bold;
+	text-decoration: none;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-bottom: 2px;
+	color: #FFE9BA;
+	font-weight: bold;
+}
+.tbl-shp_menu-link_inact {
+	color: #461C0B !important;
+	text-decoration: none;
+}
+.tbl-shp_menu-link_act {
+	color: #FFE9BA !important;
+	text-decoration: none;
+}
+
+.tbl-shp_item-input-price {
+	background-image: url('../../images/tbl-shp_item-input-price.gif');
+	background-repeat: no-repeat;
+	width: 31px;
+	height: 15px;
+	font-size: 11px;
+	color: #BA0000;
+	font-family: Tahoma;
+	border: 0;
+	background-attachment:fixed;
+
+}
+/* User Info Table */
+.tbl-usi_label-center {
+	background-image: url('../../images/tbl-usi_label-center.gif');
+	background-repeat: repeat-x;
+	height: 22px;
+	font-family: Tahoma;
+	font-weight: bold;
+	font-size: 11px;
+	color: #FCF5B7;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 3px;
+}
+.tbl-usi_label-link_inact {
+	color: #FCF5B7 !important;
+	text-decoration: none;
+}
+.tbl-usi_label-link_act {
+	color: red !important;
+	text-decoration: none;
+}
+.tbl-usi_left {
+	background-image: url('../images/tbl-usi_left.gif');
+	background-repeat: repeat-y;
+	background-position: right;
+	width: 20px;
+}
+.tbl-usi_right {
+	background-image: url('../images/tbl-usi_right.gif');
+	background-repeat: repeat-y;
+	width: 20px;
+}
+.tbl-usi_bottom {
+	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bottom.gif');
+	background-repeat: repeat-x;
+	height: 40px;
+}
+.tbl-usi_top {
+	background-image: url('https://dwar.ltd/v2/images/tbl-usi_top.gif');
+	background-repeat: repeat-x;
+	height: 36px;
+}
+.tbl-usi_bg {
+	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bg.gif');
+	background-repeat: repeat;
+}
+.tbl-usi_bg-light {
+	background-image: url('https://dwar.ltd/v2/images/tbl-usi_bg-light.gif');
+	background-repeat: repeat;
+}
+.curly_label_c {
+	background: url('https://dwar.ltd/v2/images/tbl-aft_label-center.gif') repeat-x;
+	height:18px;
+}
+.backpack_overflow {
+	height: 100%;
+	overflow: scroll;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+.lscroll {
+	scrollbar-3dlight-color: #E2D9C3;
+	scrollbar-arrow-color: #760000;
+	scrollbar-base-color: #FFE2A8;
+	scrollbar-darkshadow-color: #4F3224;
+	scrollbar-face-color: #FFE2A8;
+	scrollbar-highlight-color: #FFFFFF;
+	scrollbar-shadow-color: #CF805F;
+	scrollbar-track-color: #FFFBD6;
+}
+
+/*
+     FILE ARCHIVED ON 23:51:13 Oct 06, 2011 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 13:49:19 Jan 25, 2018.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/

@@ -1,0 +1,291 @@
+.font-server-name {background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-server-name.png");}
+
+.pop-content .logo {
+	background: url(https://dwar.ltd/static/images/register/img/logo.png) no-repeat;
+    left: 105px;
+}
+
+.pop-logo-text {
+    background: url(https://dwar.ltd/static/images/new/fonts/ru/pop-logo.png) no-repeat;
+    position: absolute;
+    width: 230px;
+    height: 65px;
+    left: 190px;
+    top: 5px;
+}
+
+.ribbon-title {
+	background: url("https://dwar.ltd/static/images/new/fonts/ru/font-pop-reg.png") no-repeat;
+}
+
+.ribbon-top .ribbon-title {
+	background: url(https://dwar.ltd/static/images/new/fonts/ru/font-pop-ribbon.png) center center no-repeat;
+}
+
+.ribbon-title.acc-manage {
+	width: 245px;
+	background-position: 0 -5px;
+}
+
+.ribbon-title.pass {
+	width: 260px;
+	background-position: 0 -41px;
+}
+
+.ribbon-title.quick-start {
+	width: 165px;
+	background-position: 0 -72px;
+}
+.ribbon-title.new-acc {
+	width: 250px;
+	background-position: 0 -5px;
+}
+.ribbon-title.choose-server {
+	width: 195px;
+	background-position: 0 -100px;
+}
+.ribbon-title.new-char{
+	width: 180px;
+	background-position: 0 -140px;
+}
+.ribbon-title.new-account {
+	width: 165px;
+	background-position: 0 -173px;
+}
+.ribbon-title.login {
+	width: 140px;
+	background-position: 0 -205px;
+}
+.ribbon-title.char-manage {
+	width: 270px;
+	background-position: 0 -238px;
+}
+.ribbon-title.account-union {
+	width: 260px;
+	background-position: 0 -270px;
+}
+.ribbon-title.choose-char {
+	background-position: 0 -300px;
+	width: 395px;
+}
+
+.men-char, .women-char {
+	background: url("https://dwar.ltd/static/images/new/pop-reg/human.png");
+}
+
+.land-block .men-char, .land-block .women-char, .fb-land-block .men-char, .fb-land-block .women-char {
+	background-image: url("https://dwar.ltd/static/images/register/img/min-human.png");
+}
+
+.sadar-char, .valor-char {
+	background: url("https://dwar.ltd/static/images/new/pop-reg/char.png");
+}
+
+.land-block .sadar-char, .land-block .valor-char, .fb-land-block .sadar-char, .fb-land-block .valor-char {
+	background-image: url("https://dwar.ltd/static/images/register/img/min-char.png");
+}
+
+.start-btn {background: url("https://dwar.ltd/static/images/register/img/start-game-btn.png");}
+.land-block .logo, .game-block .logo {background: url(https://dwar.ltd/static/images/register/img/big-logo-ru.png) no-repeat;}
+.land-block .ribbon-title {background: url(https://dwar.ltd/static/images/register/img/register.png) no-repeat;}
+.fb-land-block .ribbon-title {background: url("https://dwar.ltd/static/images/new/fonts/ru/font-pop-reg.png") no-repeat;background-position: 0 -325px;width: 270px !important;}
+
+.pop-loader {
+	width: 256px;
+	height: 72px;
+	background-image:url("../img/loader-ru.png");
+	position: absolute;
+	top:50%;
+	left:50%;
+	margin-top: -36px;
+	margin-left: -128px;
+	background-repeat: no-repeat;
+	z-index: 15;
+}
+
+.war-type {
+	background-image: url(https://dwar.ltd/static/images/register/img/type.png);
+    width: 110px;
+    height: 120px;
+    background-repeat: no-repeat;
+}
+
+.war-type.pl{
+	background-position: 5px 0px;
+}
+
+.war-type.vd {
+    background-position: -105px 0;
+}
+
+.war-type.br {
+    background-position: -215px 0;
+}
+
+.war-type-title {
+    margin-top: -8px;
+}
+
+.war-type.pl:hover {
+    background-position: 5px -127px;
+}
+
+.war-type.vd:hover {
+    background-position: -105px -127px;
+}
+
+.war-type.br:hover {
+    background-position: -215px -127px;
+}
+
+.war-type-title {
+    margin-top: -8px;
+}
+
+/*old style*/
+.head-txt.head{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-head-b64.png");}
+.head-txt.char-info{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-char-info-b64.png");}
+.head-txt.battle-results{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-battle-results-b64.png");}
+.head-txt.stats-battle{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/stats-battle-b64.png");}
+.head-txt.property{background-position:center 0;background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-property-b64.png");}
+.head-txt.addons{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-addons-b64.png");}
+.head-txt.achieve{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-achieve-b64.png");}
+.head-txt.victory{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-vic-b64.png");}
+.head-txt.fail{background-position:center 4px;background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-fail-b64.png");}
+.head-txt.gift{background-position:center 4px;background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-gifts-b64.png");}
+.head-txt.hist{background-position:center 4px;background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-progressi-b64.png");}
+.head-txt.info{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-info-b64.png");}
+.head-txt.effects{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/clan-effects-b64.png");}
+.head-txt.font-entringame{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-entringame-b64.png");}
+.head-txt.quests{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-quests-b64.png");}
+.head-txt.calendar{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-calendar-b64.png");}
+.head-txt.support{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-support-b64.png");}
+.head-txt.top-clans{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-top-clans-b64.png");}
+.head-txt.players{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-players-b64.png");}
+.head-txt.top-players{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-top-players-b64.png");}
+.head-txt.most-dsd{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-most-dsd-b64.png");}
+.head-txt.social{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-social-b64.png");}
+.head-txt.news-world{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-news-world-b64.png");height: 25px;}
+.head-txt.screens{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-screens-b64.png");}
+.head-txt.demo-fight{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/demo-fight.png");padding-top: 8px;}
+
+.font-demo-fight{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-demo-fight.png");}
+.font-quick-start{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-quick-start.png");}
+
+.font-enter{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-enter1.png");}
+
+.font-show-info{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-show-info.png");}
+.font-hide-info{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-hide-info.png");}
+.font-reg{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-reg-b64.png");}
+
+.font-share{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-share.png");width:197px;height:16px;}
+
+.font-fight-1vs1{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-fight-1vs1-b64.png");width: 140px;height: 32px}
+.font-fight-group{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-fight-group-b64.png");width: 151px; height: 54px;}
+.font-fight-greatbattle{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-fight-greatbattle.png");width: 174px; height:54px;}
+.font-fight-arena{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-fight-arena.png");width: 127px; height:40px;}
+
+.font-friends{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-friends-b64.png");}
+.font-news-friends{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-news-friends-b64.png");}
+
+.menu-logo{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/logo.png");}
+
+.font-reg-new{background-image:url("https://dwar.ltd/static/images/new/fonts/ru/font-reg-new.png");}
+
+
+
+.clanLeavePopUp .titleText {width:106px; height:13px; background:url(https://dwar.ltd/static/images/new/fonts/ru/font-leave-clan.png);}
+
+/*
+.font-magic{background-image:url("/static/images/new/fonts/ru/font-magic-b64.png");}
+.font-get-started{background-image:url("/static/images/new/fonts/ru/font-get-started-b64.png");}
+.font-reputation{background-image:url("/static/images/new/fonts/ru/font-reputation-b64.png");}
+.font-dragons{background-image:url("/static/images/new/fonts/ru/font-dragons-b64.png");}
+*/
+
+.font-menu.main  {width:83px;}
+.font-menu.main:hover,.font-menu .active{background-position:0 -27px;}
+.font-menu.about {width:50px;background-position:-83px 0;}
+.font-menu.about:hover,.font-menu .active {background-position:-83px -27px;}
+.font-menu.library {width:76px;background-position:-133px 0;}
+.font-menu.library:hover,.font-menu .active {background-position:-133px -27px;}
+.font-menu.community  {width:123px;background-position:-209px 0;}
+.font-menu.community:hover,.font-menu .active {background-position:-209px -27px;}
+.font-menu.profile  {width:18px;background-position:-332px 0;}
+.font-menu.profile:hover,.font-menu .active {background-position:-332px -27px;} 
+.font-menu.searchIcon {width:23px;background-position:-350px 0;}
+.font-menu.searchIcon:hover,.font-menu .active {background-position:-350px -27px;}
+.font-menu.play  {width:73px;background-position:-373px 0;}
+.font-menu.play:hover,.font-menu .active {background-position:-373px -27px;}
+.font-menu.close  {width:20px;background-position:-446px 0;}
+.font-menu.close:hover,.font-menu .active {background-position:-446px -27px;}
+
+.banner-announce-mp,.banner-announce-mp span{background-image:url(https://dwar.ltd/static/images/new/banners/ru/banner-announce-mp.png);}
+.banner-announce-mp{background-position: 5px -27px;}
+.banner-announce-mp span{background-position:-335px 0;}
+.banner-promo-mp {background-image:url(https://dwar.ltd/static/images/new/banners/ru/banner-promo-mp.png);}
+.banner-promo-mp-surv {background-image:url(https://dwar.ltd/static/images/new/banners/ru/banner-promo-mp-surv.png);}
+.banner-announce{background-image: url(https://dwar.ltd/static/images/new/banners/ru/banner-promo.png);}
+.banner-promo{background-image: url(https://dwar.ltd/static/images/new/banners/ru/banner-promo.png);}
+
+
+.icon-btn-war{background-image:url(https://dwar.ltd/static/images/new/fonts/ru/icon-btn-war.png);}
+
+.landing-logo{background-image: url("https://dwar.ltd/static/images/landing/logo-ru.png");}
+.landing-title{background-image:url("https://dwar.ltd/static/images/landing/title.png");}
+.btn-sadar.men:after,.btn-sadar.women:after,.btn-valor.men:after,.btn-valor.women:after{background-image: url("https://dwar.ltd/static/images/landing/btn-text.png");}
+.btn-start-text {background:url("https://dwar.ltd/static/images/landing/btn-start.png") no-repeat;}
+
+
+.mobile-btn.ios, .mobile-btn.android {
+    background-image:url(https://dwar.ltd/static/images/ru/mobile-btn.png?ux=1);
+}
+.mobile-btn.ios {
+    margin-right: 10px;
+	background-position: 0px -37px;
+}
+.mobile-btn.android {
+    width: 104px;
+	background-position: 0px 0px;
+}
+
+/* old styles images */
+
+.complaintPopUp .titleText, .complaintResult .titleText {background-image: url(https://dwar.ltd/static/images/new/fonts/ru/font-report-post.png);}
+
+/* old styles images end */
+
+
+/* edit */
+
+.social-block-mp {background-image: url(https://dwar.ltd/static/images/ru/sprite24.png?v1);}
+
+/* edit end */
+
+/* pop-reg */
+.pop-content .form-label {
+	width: 25% !important;
+}
+
+.pop-content .btn {
+	font-size: 14px
+}
+.pop-panel .form-input {
+	width: 162px !important;
+}
+
+.fll .form-label, .flr .form-label {
+	width: auto !important;
+}
+/* pop-reg end */
+
+/*old style*/
+.char-info .admin, .char-info_payment .admin {background-image:url(https://dwar.ltd/static/images/ru/texts12.png?v1);}
+
+.side-vk-widget {
+    margin-left: auto;
+    display: block;
+    width: 220px;
+    margin-right: auto;
+    margin-bottom: 20px;
+}

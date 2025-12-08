@@ -1,0 +1,108 @@
+/* ====== Avatar ====== */
+
+.b-user-avatar {
+	width: 295px;
+	margin: 10px auto 0;
+}
+
+	.b-user-avatar__img {
+		display: block;
+		width: 295px;
+		height: 387px;
+	}
+
+	.b-user-avatar__img_human {
+		background: url('../images/bg-avatar-human.jpg') 0 0 no-repeat;
+	}
+
+	.b-user-avatar__img_magmar {
+		background: url('../images/bg-avatar-magmar.jpg') 0 0 no-repeat;
+	}
+
+	.b-user-avatar.active .b-user-avatar__img_human,
+	.b-user-avatar.active .b-user-avatar__img_magmar {
+		background-position: 0 100%;
+	}
+
+		.b-user-avatar__img img {
+			width: 100%;
+			height: 100%;
+		}
+
+/* ====== /Avatar ====== */
+
+
+/* ====== Appearance ====== */
+
+.b-user-appearance {
+	width: 295px;
+	margin: 10px auto 0;
+	padding: 25px 0 0;
+}
+
+	.b-user-appearance__customization {
+		margin: 10px 0 0;
+	}
+
+		.b-user-appearance__customization-item {
+			overflow: hidden;
+			padding: 2px 0;
+		}
+
+			.b-user-appearance__customization-arr-left,
+			.b-user-appearance__customization-arr-right {
+				width: 22px;
+				height: 23px;
+				background: url('../images/buttons/register-arr.png') no-repeat;
+			}
+
+			.b-user-appearance__customization-arr-left img,
+			.b-user-appearance__customization-arr-right img {
+				width: 100%;
+				height: 100%;
+			}
+
+			.b-user-appearance__customization-arr-left {
+				float: left;
+				margin: 0 5px 0 0;
+				background-position: 0 0;
+			}
+
+			.b-user-appearance__customization-arr-left:hover {
+				background-position: 0 -23px;
+			}
+
+			.b-user-appearance__customization-arr-right {
+				float: right;
+				margin: 0 0 0 5px;
+				background-position: 100% 0;
+			}
+
+			.b-user-appearance__customization-arr-right:hover {
+				background-position: 100% -23px;
+			}
+
+			.b-user-appearance__field {
+				overflow: hidden;
+				padding: 0 0 0 5px;
+				background: url('../images/bg-form-select.png') 0 0 no-repeat;
+			}
+			
+				.b-user-appearance__field-inner {
+					height: 22px;
+					padding: 0 5px 0 0;
+					font-weight: bold;
+					font-size: 12px;
+					line-height: 20px;
+					text-align: center;
+					text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+					color: #61492f;
+					background: url('../images/bg-form-select.png') 100% -22px no-repeat;
+				}
+
+		.b-user-appearance__random {
+			margin: 10px 0 0;
+			text-align: center;
+		}
+
+/* ====== /Appearance ====== */

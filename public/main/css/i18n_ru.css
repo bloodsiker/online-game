@@ -1,0 +1,37 @@
+.b-font--profile-enter, .b-font--register {
+  content: '';
+  display: inline-block;
+  vertical-align: middle;
+  background-image: url("https://dwar.ltd/static/assets/img/eb8bdc997a554c7d.png");
+}
+
+.b-font {
+  border: 0;
+  font: 0/0 a;
+  text-shadow: none;
+  color: transparent;
+  background-color: transparent;
+}
+
+.b-font--profile-enter {
+  margin: 5px auto 0;
+  width: 130px;
+  height: 20px;
+  background-position: 0px -22px;
+}
+
+.b-font--register {
+  width: 131px;
+  height: 20px;
+  background-position: 0px 0px;
+}
+
+.b-shape__header {
+  line-height: 28px;
+}
+
+.b-shape__header .cufon-mp {
+  margin: 0 0 4px !important;
+  display: inline-block;
+  vertical-align: middle;
+}
