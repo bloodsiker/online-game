@@ -183,9 +183,8 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="https://fun-dwar.com//images/m_game3.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ number_format($user->money, 0, '', ' ') }} </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Рубин"><img src="https://fun-dwar.com//images/m_rub.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;676.96 </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="https://fun-dwar.com//images/m_dmd.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;3.82 </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -213,17 +212,20 @@
                 @foreach($shop->shopItems as $item)
                     <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
                         <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                            <img src="{{ $item->image }}" style="width: 100%" alt="">
+                            <img src="{{ $item->item->image }}" style="width: 100%" alt="">
                         </td>
                         <td align="left" >
-                            <a href="{{ route('items.info', ['id' => $item->id]) }}"
+                            <a href="{{ route('items.info', ['id' => $item->item->id]) }}"
                                onclick="showArtifactInfo(22195638,false);return false;"
-                               style="color:#666666" class="b">{{ $item->name }}</a><br>
+                               style="color:#666666" class="b">{{ $item->item->name }}</a><br>
                             <span title="Тип предмета">
-                                <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->getTypeName() }}
+                                <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->item->getTypeName() }}
                             </span>
                         </td>
-                        <td nowrap="">{{ number_format($item->price, 0, ',', ' ') }}</td>
+                        <td nowrap="">
+                            {{ format_money($item->price, 0, ',') }}
+                            <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle" alt="">
+                        </td>
                         <td nowrap="">
                             <div class="cart-amount-sell-price">
                                 <span class="cart-amount-input-cont">
@@ -231,14 +233,14 @@
                                         <span class="b-input__inner">
                                             <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
                                             <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                            <input type="text" data-id="{{ $item->id }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
+                                            <input type="text" data-id="{{ $item->item->id }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
                                         </span>
                                     </span>
                                 </span>
                             </div>
                         </td>
                         <td nowrap="">
-                            <b class="butt2 pointer"><b><input value="купить" type="submit" class="buy-item" data-id="{{ $item->id }}" data-href="{{ route('shop.buy_item', ['id' => $shop->id, 'itemId' => $item->id]) }}"></b></b>
+                            <b class="butt2 pointer"><b><input value="купить" type="submit" class="buy-item" data-id="{{ $item->item->id }}" data-href="{{ route('shop.buy_item', ['id' => $shop->id, 'itemId' => $item->item->id]) }}"></b></b>
                         </td>
                     </tr>
                 @endforeach
@@ -374,6 +376,11 @@
             }
         });
     });
+
+    let money = parseInt('{{ $user->money }}');
+    let diamond = parseInt('{{ $user->diamond }}');
+
+    parent.sendToFrame('character-frame', { money, diamond });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

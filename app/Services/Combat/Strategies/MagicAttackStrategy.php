@@ -3,10 +3,8 @@
 namespace App\Services\Combat\Strategies;
 
 use App\DTO\FightHitDTO;
-use App\Models\Item\Item;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
-use App\Models\Player\PlayerEquipment;
 use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
 
@@ -14,7 +12,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
 {
     public function __construct(
         private HitCalculator       $hitCalc,
-        private FightHitInterface   $player,     // это твой декорированный Player (с EquipmentDecorator + BuffDecorator)
+        private FightHitInterface   $player,     // это декорированный Player (с EquipmentDecorator + BuffDecorator)
         private Monster             $monster,
         private MagicSkill          $magicSkill,
     ) {}
@@ -45,13 +43,14 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-        $this->player->mp_now -= $this->magicSkill->mana_cost;
+//        $this->player->mp_now -= $this->magicSkill->mana_cost;
 
         // 1. Проверка уклонения — магию тоже можно увернуться (баланс настраивается в HitCalculator)
         $dodgeHit = $this->hitCalc->playerHit($this->player, $this->monster, 0, 0);
         if ($dodgeHit->isDodge()) {
             return [
                 $dodgeHit
+                    ->setMagicSkill($this->magicSkill)
                     ->setWeaponName($this->magicSkill->name)
                     ->setWeapon(null)
             ];
@@ -79,27 +78,17 @@ class MagicAttackStrategy implements AttackStrategyInterface
         // Если вдруг хит критовал — всё ок, HitCalculator уже это посчитал
         // Если уклонения нет — продолжаем
 
-        // 5. Применяем эффекты скилла с вероятностью
-        foreach ($this->skill->effects as $effectData) {
-            if (random_int(1, 100) <= $effectData->chance) {
-                $appliedEffect = new AppliedEffect(
-                    name:       $effectData->name,
-                    type:       $effectData->type,
-                    value:      $effectData->value,
-                    duration:   $effectData->duration,
-                    target:     $effectData->target, // 'enemy' или 'self'
-                    icon:       $effectData->icon ?? null,
-                );
-
-                $hit->addAppliedEffect($appliedEffect);
+        foreach ($this->magicSkill->skillEffects as $effectData) {
+            if (random_int(1, 100) <= $effectData->pivot->chance) {
+                $hit->addAppliedEffect($effectData);
             }
         }
 
-        // 6. Устанавливаем красивые данные для лога и опыта
         return [
             $hit
+                ->setMagicSkill($this->magicSkill)
                 ->setWeaponName("заклинанием «{$this->magicSkill->name}»")
-                ->setWeapon(null)                  // магия — не оружие
+                ->setWeapon(null)
         ];
     }
 }

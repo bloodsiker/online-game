@@ -20,6 +20,17 @@
             color: #353434
         }
 
+        .card-money {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-image: url('/img/bg/bgg.gif');
+            padding: 3px 12px;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 11px;
+        }
+
     </style>
 </head>
 <body>
@@ -37,39 +48,6 @@
     <tr>
         <td class="tbl-shp-sides ls">&nbsp;</td>
         <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-{{--            <table class="w100 ach_menu" cellpadding="0" cellspacing="0" width="100%">--}}
-{{--                <tbody>--}}
-{{--                <tr>--}}
-{{--                    <td>--}}
-{{--                        <div class="character-info">--}}
-{{--                            <div class="indicator">--}}
-{{--                                <div id="health-bar" class="life_scale" style="width: 100%"></div>--}}
-{{--                            </div>--}}
-{{--                            <div class="indicator">--}}
-{{--                                <div id="mp-bar" class="mp_scale" style="width: 100%"></div>--}}
-{{--                            </div>--}}
-
-{{--                            <div class="avatar">--}}
-{{--                                <img src="{{ asset('img/avatar/dark_elf.jpg') }}" width="150" border="0" hspace="0" vspace="0" alt="Изменить" title="Изменить">--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </td>--}}
-{{--                </tr>--}}
-
-{{--                <tr>--}}
-{{--                    <td height="10" class="c-s-n-fon ach_menu_act">--}}
-{{--                        <ul style="display: none">--}}
-{{--                            <li><a href="?&amp;group_id=last&amp;group_id=last"><img src="{{ asset('img/icon/users-arrow.gif') }}" align="absMiddle">Общая сводка</a></li>--}}
-{{--                            <li><a href="?&amp;group_id=last&amp;group_id=last"><img src="{{ asset('img/icon/users-arrow.gif') }}" align="absMiddle">Персонаж</a></li>--}}
-{{--                            <li><a href="?&amp;group_id=last&amp;group_id=last"><img src="{{ asset('img/icon/users-arrow.gif') }}" align="absMiddle">Пособия</a></li>--}}
-{{--                        </ul>--}}
-
-{{--                    </td>--}}
-{{--                </tr>--}}
-{{--                </tbody>--}}
-{{--            </table>--}}
-
-
             <div class="player-card">
                 <div class="card-header">
                     <div class="level-info">
@@ -86,6 +64,25 @@
                             <div class="stat-text" id="manaText">{{ $player->mp_now }} / {{ $player->mp_max }}</div>
                         </div>
                     </div>
+                </div>
+
+                <div class="card-money">
+                    <b class="redd">
+                        <span title="Монеты">
+                            <img src="{{ asset('img/icon/m_game.gif') }}" alt="Монеты" width="11" height="11" align="absmiddle">
+                        </span>
+                        <span id="playerMoney">
+                              {{ format_money($player->user->money) }}
+                        </span>
+                    </b>
+                    <b class="redd">
+                        <span title="Бриллиант">
+                            <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="Бриллиант" width="11" height="11" align="absmiddle">
+                        </span>
+                        <span id="playerDiamond">
+                            {{ format_money($player->user->diamond) }}
+                        </span>
+                    </b>
                 </div>
 
                 <div class="avatar-container">
@@ -105,18 +102,10 @@
                 </div>
 
                 <div class="cooldown-section">
-                    <div class="cooldown-header">
-{{--                        <span class="cooldown-label"></span>--}}
-{{--                        <span class="cooldown-time" id="cooldownTime">Готово</span>--}}
-                    </div>
                     <div class="cooldown-bar">
                         <div class="cooldown-fill" id="cooldownBar" style="width: 0%"></div>
                     </div>
                 </div>
-
-{{--                <button class="action-button" id="attackButton" onclick="simulateDamage()">--}}
-{{--                    ⚔️ Атака--}}
-{{--                </button>--}}
             </div>
 
         </td>
@@ -513,7 +502,7 @@
     // Обработка полученных данных
     window.addEventListener('message', function(event) {
         // console.log('Получены данные в character:', event.data);
-        const { hp, mp, experience, lvl, blessing, curse } = event.data;
+        const { hp, mp, experience, lvl, blessing, curse, money, diamond } = event.data;
 
         if (hp !== undefined) {
             const hpBar = document.getElementById('hpBar');
@@ -527,6 +516,16 @@
             const manaText = document.getElementById('manaText');
             manaBar.style.width = ((mp.current / mp.max) * 100) + '%';
             manaText.textContent = `${mp.current} / ${mp.max}`;
+        }
+
+        if (money !== undefined) {
+            const playerMoney = document.getElementById('playerMoney');
+            playerMoney.textContent = money;
+        }
+
+        if (diamond !== undefined) {
+            const playerDiamond = document.getElementById('playerDiamond');
+            playerDiamond.textContent = diamond;
         }
 
         if (lvl !== undefined) {

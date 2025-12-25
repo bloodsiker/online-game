@@ -7,8 +7,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    /*background: linear-gradient(135deg, #c9a961 0%, #a88b4a 100%);*/
     background-image: url('/img/bg/bgg.gif');
     padding: 8px 12px;
     border-radius: 10px;
@@ -221,8 +219,6 @@
 }
 
 .cooldown-section {
-    margin-top: 8px;
-    /*background: linear-gradient(135deg, #8b7355 0%, #6b5644 100%);*/
     background-image: url('/img/bg/bgg.gif');
     padding: 7px;
     border-radius: 5px;

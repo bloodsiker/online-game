@@ -7,7 +7,6 @@
     <style>
         body {
             margin: 0;
-            /*background-color: #97e0f6;*/
             color: #f4d06e;
             font-family: tahoma;
             font-size: 14px;
@@ -36,7 +35,7 @@
         <li><a href="#" onclick="sendDataToGame('{{ route('clan') }}')">Клан</a></li>
         <li><a href="#" onclick="sendDataToGame('{{ route('clan.member') }}')">Состав клана</a></li>
         <li><a href="#" onclick="sendDataToGame('{{ route('quests') }}')">Квесты</a></li>
-        <li>Премиум</li>
+        <li><a href="#" onclick="sendDataToGame('{{ route('premium.shop') }}')">Премиум</a></li>
         <li><a href="{{ route('logout') }}">Выход</a></li>
     </ul>
 </div>

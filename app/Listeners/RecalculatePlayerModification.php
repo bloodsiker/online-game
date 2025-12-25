@@ -9,7 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 class RecalculatePlayerModification
 {
     public const DEFAULT_HP = 10;
-    public const DEFAULT_MP = 0;
+    public const DEFAULT_MP = 10;
     public const HP_PER_STR = 3;
     public const MP_PER_MUD = 3;
     public const DODGE_PER_AGILITY = 1;

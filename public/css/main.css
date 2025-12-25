@@ -12,16 +12,14 @@ a {
     color: #000000;
 }
 a:hover{
-    color: #353434
+    color: #353434;
+    text-decoration: underline;
 }
 .fs-12, .fs-12 * {
     font-size: 12px;
 }
 .b {
     font-weight: 700;
-}
-a:hover {
-    text-decoration: underline;
 }
 .regblk, .regblk * {
     color: #49382D;
@@ -52,6 +50,9 @@ a:hover {
 }
 .color-info {
     color: #129df0;
+}
+.color-purple {
+    color: purple;
 }
 .float {
     float: left;

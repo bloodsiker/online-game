@@ -42,6 +42,9 @@
         .color-info {
             color: #129df0;
         }
+        .color-purple {
+            color: purple;
+        }
         a.r:link, a.r:visited {
             color: red;
         }
@@ -411,6 +414,8 @@
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');
+    let money = parseInt('{{ $player->user->money }}');
+    let diamond = parseInt('{{ $player->user->diamond }}');
 
     function playerAction() {
         // Пример изменения состояния игрока
@@ -419,7 +424,7 @@
 
         // Отправка данных в родительский iframe
         // window.parent.postMessage({ health, mp, experience, lvl }, '*');
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
+        parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
     }
     playerAction();
     // setInterval(playerAction, 5000);

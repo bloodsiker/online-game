@@ -19,6 +19,7 @@ use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MonsterController;
 use App\Http\Controllers\NpcController;
+use App\Http\Controllers\PremiumShopController;
 use App\Http\Controllers\QuestController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserController;
@@ -96,6 +97,8 @@ Route::get('/auction/{id}', [AuctionController::class, 'index'])->name('auction'
 Route::get('/shop/{id}/buy-item/{itemId}', [ShopController::class, 'buyItem'])->name('shop.buy_item');
 Route::match(['GET', 'POST'], '/shop/{id}/sell-item', [ShopController::class, 'sellItem'])->name('shop.sell_item');
 Route::get('/shop/{id}', [ShopController::class, 'index'])->name('shop');
+
+Route::get('/premium/shop', [PremiumShopController::class, 'index'])->name('premium.shop');
 
 Route::match(['GET', 'POST'], '/warehouse/{id}/take-item', [WarehouseController::class, 'takeItem'])->name('warehouse.take_item');
 Route::match(['GET', 'POST'], '/warehouse/{id}', [WarehouseController::class, 'index'])->name('warehouse');

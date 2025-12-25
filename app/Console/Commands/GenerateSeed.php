@@ -17,6 +17,8 @@ use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Race;
+use App\Models\Share\ShareShopCategory;
+use App\Models\Share\ShareStructureCategory;
 use App\Models\ShareAction;
 use App\Models\ShareItem;
 use App\Models\ShareRecipe;
@@ -53,6 +55,9 @@ class GenerateSeed extends Command
     protected $monster2 = null;
     protected $skill = null;
     protected $skill2 = null;
+    protected $shopCategory1 = null;
+    protected $shopCategory2 = null;
+    protected $shopCategory3 = null;
 
     /**
      * Execute the console command.
@@ -71,6 +76,7 @@ class GenerateSeed extends Command
         $this->createRecipeItems();
         $this->createBoxItems();
         $this->createShareActions();
+        $this->createShareShopCategory();
         $this->createStructures();
         $this->createNpcAndQuest();
     }
@@ -229,8 +235,8 @@ class GenerateSeed extends Command
         $player->intel = 1;
         $player->hp_now = 10;
         $player->hp_max = 10;
-        $player->mp_now = 0;
-        $player->mp_max = 0;
+        $player->mp_now = 10;
+        $player->mp_max = 10;
         $player->min_dmg = 1;
         $player->max_dmg = 2;
         $player->dodge = 0;
@@ -271,6 +277,8 @@ class GenerateSeed extends Command
         $player->intel = 1;
         $player->hp_now = 10;
         $player->hp_max = 10;
+        $player->mp_now = 10;
+        $player->mp_max = 10;
         $player->min_dmg = 1;
         $player->max_dmg = 2;
         $player->dodge = 0;
@@ -358,7 +366,7 @@ class GenerateSeed extends Command
         $effect->is_dispellable = false;
         $effect->save();
 
-        $skill->effects()->attach($effect->id, [
+        $skill->skillEffects()->attach($effect->id, [
             'chance' => $effect->chance
         ]);
 
@@ -407,7 +415,7 @@ class GenerateSeed extends Command
         $effect4->is_dispellable = false;
         $effect4->save();
 
-        $skill3->effects()->attach($effect4->id, ['chance' => $effect4->chance]);
+        $skill3->skillEffects()->attach($effect4->id, ['chance' => $effect4->chance]);
 
         $player = $this->user1->player;
 
@@ -723,7 +731,7 @@ class GenerateSeed extends Command
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sIte12 = new ShareItem();
-        $sIte12->type = 'resource';
+        $sIte12->type = ShareItem::TYPE_RESOURCE;
         $sIte12->price = 10;
         $sIte12->name = 'Слиток';
         $sIte12->description = 'Слиток';
@@ -738,6 +746,20 @@ class GenerateSeed extends Command
         $item12->save();
 
         $this->location1->itemsOnLocation()->attach($item12->id, ['count' => 10]);
+
+        $sIte13 = new ShareItem();
+        $sIte13->type = ShareItem::TYPE_SCROLL;
+        $sIte13->name = 'Сертификат «Новое имя»';
+        $sIte13->description = 'Документ, подтверждающий ваше право воспользоваться услугой по смене игрового ника. Будьте внимательны! Новое имя должно быть уникально';
+        $sIte13->image = '/img/resource/sert_rename.gif';
+        $sIte13->save();
+
+        $sIte14 = new ShareItem();
+        $sIte14->type = ShareItem::TYPE_SCROLL;
+        $sIte14->name = 'Сертификат «Смена расы»';
+        $sIte14->description = 'Позволяет один раз изменить расу.';
+        $sIte14->image = '/img/resource/sert_obraz.gif';
+        $sIte14->save();
 
         $this->info('Create Items success');
     }
@@ -879,6 +901,27 @@ class GenerateSeed extends Command
         $action9->save();
     }
 
+    public function createShareShopCategory()
+    {
+        $category1 = new ShareStructureCategory();
+        $category1->name = 'Оружие';
+        $category1->save();
+
+        $this->shopCategory1 = $category1;
+
+        $category2 = new ShareStructureCategory();
+        $category2->name = 'Артефакты';
+        $category2->save();
+
+        $this->shopCategory2 = $category2;
+
+        $category3 = new ShareStructureCategory();
+        $category3->name = 'Услуги';
+        $category3->save();
+
+        $this->shopCategory3 = $category3;
+    }
+
     public function createStructures()
     {
         $locationArmorShop = Location::find(18);
@@ -888,13 +931,34 @@ class GenerateSeed extends Command
         $shop1->location_id = $locationArmorShop->id;
         $shop1->save();
 
-        $shop1->shopItems()->attach(7);
-        $shop1->shopItems()->attach(8);
-        $shop1->shopItems()->attach(9);
-        $shop1->shopItems()->attach(10);
-        $shop1->shopItems()->attach(11);
-        $shop1->shopItems()->attach(12);
-        $shop1->shopItems()->attach(13);
+        $shop1->shopItems()->create([
+            'share_item_id' => 7,
+            'price' => 100,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 8,
+            'price' => 2000,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 9,
+            'price' => 24000,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 10,
+            'price' => 100,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 11,
+            'price' => 90,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 12,
+            'price' => 110,
+        ]);
+        $shop1->shopItems()->create([
+            'share_item_id' => 13,
+            'price' => 105,
+        ]);
 
         $shop1->actions()->attach(2);
         $shop1->actions()->attach(3);
@@ -906,9 +970,18 @@ class GenerateSeed extends Command
         $shop2->location_id = $locationWeaponShop->id;
         $shop2->save();
 
-        $shop2->shopItems()->attach(2);
-        $shop2->shopItems()->attach(5);
-        $shop2->shopItems()->attach(6);
+        $shop2->shopItems()->create([
+            'share_item_id' => 2,
+            'price' => 10,
+        ]);
+        $shop2->shopItems()->create([
+            'share_item_id' => 5,
+            'price' => 300,
+        ]);
+        $shop2->shopItems()->create([
+            'share_item_id' => 6,
+            'price' => 1000,
+        ]);
 
         $shop2->actions()->attach(2);
         $shop2->actions()->attach(3);
@@ -961,6 +1034,27 @@ class GenerateSeed extends Command
         $auctionObj->price = 200;
         $auctionObj->is_anonymous = 0;
         $auctionObj->save();
+
+        $premium = new Structure();
+        $premium->type = Structure::TYPE_SHOP;
+        $premium->name = 'Премиум';
+        $premium->save();
+
+        $premium->categories()->attach($this->shopCategory1->id);
+        $premium->categories()->attach($this->shopCategory2->id);
+        $premium->categories()->attach($this->shopCategory3->id);
+
+        $premium->shopItems()->create([
+            'share_item_id' => 15,
+            'share_structure_category_id' => $this->shopCategory3->id,
+            'diamond' => 100,
+        ]);
+
+        $premium->shopItems()->create([
+            'share_item_id' => 16,
+            'share_structure_category_id' => $this->shopCategory3->id,
+            'diamond' => 100,
+        ]);
     }
 
     public function createNpcAndQuest()

@@ -40,10 +40,35 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('share_structure_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
         Schema::create('shop_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
             $table->foreignId('share_item_id')->constrained('share_items')->cascadeOnDelete();
+            $table->foreignId('share_structure_category_id')->nullable()->constrained('share_structure_categories')->nullOnDelete();
+            $table->integer('price')->default(0);
+            $table->integer('diamond')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('shop_categories', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
+            $table->foreignId('share_structure_category_id')->constrained('share_structure_categories')->cascadeOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('shop_item_requirements', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('shop_item_id')->constrained('shop_items')->cascadeOnDelete();
+            $table->foreignId('share_item_id')->constrained('share_items')->cascadeOnDelete();
+            $table->integer('quantity')->unsigned();
             $table->timestamps();
         });
 

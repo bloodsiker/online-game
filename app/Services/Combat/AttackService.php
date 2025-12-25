@@ -3,6 +3,8 @@
 namespace App\Services\Combat;
 
 use App\DTO\AttackResultDTO;
+use App\DTO\FightDTO;
+use App\DTO\FightHitDTO;
 use App\Events\PlayerLeveledUp;
 use App\Models\Battle\BattleDetail;
 use App\Models\Monster\Monster;
@@ -26,6 +28,7 @@ readonly class AttackService
         $result = new AttackResultDTO();
         $strategy = $this->resolver->resolve($player, $locMonster->monster, $action);
 
+        /** @var FightHitDTO $hit */
         foreach ($strategy->getHits() as $hit) {
             if ($hit->isCantCast()) {
                 $result->log(sprintf('<p><b class="color-info">%s</b></p>', $hit->getMessage()));
@@ -48,6 +51,25 @@ readonly class AttackService
                 ? sprintf('<p>Вы ударили врага %s... <b class="color-red">нанесен критический урон!</b> <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>', $hit->getWeaponName(), $hit->getDamage(), $exp)
                 : sprintf('<p>Вы ударили врага %s! <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>', $hit->getWeaponName(), $hit->getDamage(), $exp)
             );
+
+            if (!$hit->getAppliedEffects()->isEmpty()) {
+                foreach ($hit->getAppliedEffects() as $effect) {
+//                    if ($effect->isHeal()) {
+//                        $locMonster->hp_now = min($locMonster->monster->hp, $locMonster->hp_now + $effect->power);
+//                    }
+//
+//                    if ($effect) {
+//
+//                    }
+
+                    $result->log(sprintf(
+                        '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',
+                        $locMonster->monster->name,
+                        $hit->getMagicSkill()->name,
+                        $effect->name
+                    ));
+                }
+            }
         }
 
         return $result;

@@ -15,7 +15,7 @@ class ShopController extends Controller
     public function index($id)
     {
         $user = Auth::user();
-        $shop = Structure::find($id);
+        $shop = Structure::with('shopItems.item', 'shopItems.requirements.item')->find($id);
 
         if (!$shop) {
             abort(404);
@@ -60,7 +60,6 @@ class ShopController extends Controller
             session()->flash('message', sprintf('Куплено %s %s шт', $shareItem->name, $countBuy));
         } else {
             session()->flash('message', 'Не достаточно монет для покупки.');
-            return redirect()->back();
         }
 
         return redirect()->back();

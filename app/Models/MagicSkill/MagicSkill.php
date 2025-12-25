@@ -4,7 +4,6 @@ namespace App\Models\MagicSkill;
 
 use App\Models\Player\Player;
 use App\Models\Player\PlayerEffect;
-use App\Models\Skill;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,18 +48,16 @@ class MagicSkill extends Model
         'is_passive' => false,
     ];
 
-    public function effects(): BelongsToMany
+    public function skillEffects(): BelongsToMany
     {
         return $this->belongsToMany(Effect::class, 'magic_skill_effects')
-            ->withPivot('chance')
-            ->withTimestamps();
+            ->withPivot('chance');
     }
 
     public function players(): BelongsToMany
     {
         return $this->belongsToMany(Player::class, 'player_magic_skills')
-            ->withPivot(['cooldown_end_at', 'is_equipped'])
-            ->withTimestamps();
+            ->withPivot(['cooldown_end_at', 'is_equipped']);
     }
 
     public function appliedEffects(): HasMany

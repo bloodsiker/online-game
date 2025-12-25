@@ -203,7 +203,6 @@
                     <td id="body_content" class="bgg" align="left" valign="top" width="100%">
 
                         <iframe width="100%" name="game" height="100%" frameborder="0" id="game-frame" src="{{ route('location') }}"></iframe>
-{{--                        <iframe width="100%" height="100%" frameborder="0" id="game-frame" src="{{ route('fight') }}"></iframe>--}}
 
                     </td>
                     <td valign="top" class="tbl-sts_right">

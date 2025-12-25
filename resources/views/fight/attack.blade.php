@@ -42,6 +42,9 @@
         .color-info {
             color: #129df0;
         }
+        .color-purple {
+            color: purple;
+        }
         a.r:link, a.r:visited {
             color: red;
         }
@@ -457,9 +460,11 @@
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');
+    let money = parseInt('{{ $player->user->money }}');
+    let diamond = parseInt('{{ $player->user->diamond }}');
 
     function playerAction() {
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
+        parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
     }
     playerAction();
 </script>

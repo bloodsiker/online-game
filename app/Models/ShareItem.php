@@ -23,6 +23,7 @@ class ShareItem extends Model
     public const TYPE_ARTIFACT = 'artifact';
     public const TYPE_RECIPE = 'recipe';
     public const TYPE_CHEST = 'chest';
+    public const TYPE_SCROLL = 'scroll';
 
 
     public const SLOT_HAND = 'hand';
@@ -38,6 +39,7 @@ class ShareItem extends Model
         self::TYPE_ARTIFACT => 'Артифакт',
         self::TYPE_RECIPE => 'Рецепт',
         self::TYPE_CHEST => 'Сундук',
+        self::TYPE_SCROLL => 'Свиток',
     ];
 
 //    protected $with = ['recipe'];
@@ -48,6 +50,7 @@ class ShareItem extends Model
         'is_active' => 1,
         'is_sell' => 1,
         'break_crystal' => 0,
+        'price' => 0,
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

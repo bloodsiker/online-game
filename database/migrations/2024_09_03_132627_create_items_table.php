@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('share_items', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'heal', 'key', 'quest', 'artifact', 'recipe', 'chest'])->default('resource');
+            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'heal', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll'])->default('resource');
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();

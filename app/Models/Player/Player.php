@@ -41,7 +41,7 @@ class Player extends Model implements PlayerInterface, FightHitInterface
 
     public function magicSkills()
     {
-        return $this->belongsToMany(MagicSkill::class, 'player_magic_skills')->with('effects')
+        return $this->belongsToMany(MagicSkill::class, 'player_magic_skills')->with('skillEffects')
             ->withPivot(['cooldown_end_at', 'is_equipped']);
     }
 
@@ -134,7 +134,7 @@ class Player extends Model implements PlayerInterface, FightHitInterface
 
     public function getPercentMp()
     {
-        return round($this->mp_now * 100 / $this->mp_max);
+        return $this->mp_max === 0 ? 100 : round($this->mp_now * 100 / $this->mp_max);
     }
 
     public function getSumStats()

@@ -184,9 +184,8 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="https://fun-dwar.com//images/m_game3.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ number_format($user->money, 0, '', ' ') }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Рубин"><img src="https://fun-dwar.com//images/m_rub.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;676.96 </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="https://fun-dwar.com//images/m_dmd.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;3.82 </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -245,10 +244,13 @@
                                    style="color:#666666" class="b">{{ $item->item->itemInfo->name }}</a>
                                 <br>
                                 <span title="Тип предмета">
-                                    <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}
+                                    <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}
                                 </span>
                             </td>
-                            <td nowrap="">{{ number_format(round($item->item->itemInfo->price / 2), 0, ',', ' ') }}</td>
+                            <td nowrap="">
+                                {{ format_money(round($item->item->itemInfo->price / 2), 0, ',') }}
+                                <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle" alt="">
+                            </td>
                         </tr>
                     @endforeach
                     <tr height="17" class="bg_l">
@@ -398,6 +400,11 @@
             }
         });
     });
+
+    let money = parseInt('{{ $user->money }}');
+    let diamond = parseInt('{{ $user->diamond }}');
+
+    parent.sendToFrame('character-frame', { money, diamond });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

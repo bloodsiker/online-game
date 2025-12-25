@@ -3,8 +3,11 @@
 namespace App\DTO;
 
 
+use App\Models\MagicSkill\Effect;
+use App\Models\MagicSkill\MagicSkill;
 use App\Models\ShareItem;
 use App\Models\Skill;
+use Illuminate\Support\Collection;
 
 class FightHitDTO
 {
@@ -16,6 +19,14 @@ class FightHitDTO
     protected ?Skill $skill = null;
     protected bool $cantCast = false;
     protected ?string $message = null;
+    protected ?MagicSkill $magicSkill = null;
+
+    protected Collection $appliedEffects;
+
+    public function __construct()
+    {
+        $this->appliedEffects = collect();
+    }
 
     public function getDamage(): int
     {
@@ -111,5 +122,29 @@ class FightHitDTO
         $this->message = $message;
 
         return $this;
+    }
+
+    public function getMagicSkill(): ?MagicSkill
+    {
+        return $this->magicSkill;
+    }
+
+    public function setMagicSkill(?MagicSkill $magicSkill): self
+    {
+        $this->magicSkill = $magicSkill;
+
+        return $this;
+    }
+
+    public function addAppliedEffect(Effect $effect): self
+    {
+        $this->appliedEffects->push($effect);
+
+        return $this;
+    }
+
+    public function getAppliedEffects(): Collection
+    {
+        return $this->appliedEffects;
     }
 }

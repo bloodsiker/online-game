@@ -6,9 +6,6 @@
     <title>Игра</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        html {
-            height: 100%;
-        }
         body {
             height: 100%;
             margin: 0;
@@ -469,16 +466,7 @@
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');
 
-    function playerAction() {
-        // Пример изменения состояния игрока
-        health = Math.max(0, health - 10);
-        mp = Math.max(0, mp - 3);
-        if (experience < 100) {
-            experience += 10;
-        }
-
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
-    }
+    parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
 
     const currentLocationId = {{ auth()->user()->location_id }};
     parent.sendToFrame('map-frame', { currentLocationId });

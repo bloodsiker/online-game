@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Share\ShareStructureCategory;
+use App\Models\Shop\ShopItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Structure extends Model
 {
@@ -43,9 +47,27 @@ class Structure extends Model
         return $this->belongsTo(Npc::class, 'npc_id');
     }
 
-    public function shopItems(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
+        return $this->belongsToMany(ShareStructureCategory::class, 'shop_categories', 'structure_id', 'share_structure_category_id');
+    }
+
+    public function shopItems(): HasMany
+    {
+//        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
+        return $this->hasMany(ShopItem::class);
+    }
+
+    public function items(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ShareItem::class,
+            ShopItem::class,
+            'structure_id',
+            'id',
+            'id',
+            'share_item_id'
+        );
     }
 
     public function actions(): BelongsToMany
