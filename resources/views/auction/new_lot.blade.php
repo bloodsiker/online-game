@@ -332,7 +332,8 @@
                                             <tr>
                                                 <td align="center" colspan="2">
                                                     <br>
-                                                    <span class="butt1 pointer"><span>
+                                                    <span class="butt1 pointer">
+                                                        <span>
                                                             <input value="Выставить" type="submit" onclick="if(document._submit)return false;document._submit=true;">
                                                         </span>
                                                     </span>

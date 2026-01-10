@@ -14,7 +14,13 @@ class ShopItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['structure_id', 'share_item_id', 'share_structure_category_id', 'price', 'diamond'];
+    protected $fillable = ['structure_id', 'share_item_id', 'share_structure_category_id', 'price', 'diamond', 'sort_order'];
+
+    protected $attributes = [
+        'price' => 0,
+        'diamond' => 0,
+        'sort_order' => 0,
+    ];
 
     public function requirements(): HasMany
     {

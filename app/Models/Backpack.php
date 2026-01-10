@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Item\Item;
 
+/**
+ * @property int $user_id
+ * @property int $item_id
+ * @property bool $equipped
+ * @property int $count
+ */
 class Backpack extends Model
 {
     use HasFactory;
@@ -30,6 +36,6 @@ class Backpack extends Model
 
     public function isEquipped(): bool
     {
-        return $this->equipped === 1;
+        return $this->equipped == 1;
     }
 }

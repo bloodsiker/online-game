@@ -49,6 +49,7 @@ return new class extends Migration
             $table->integer('death')->default(0);
             $table->tinyInteger('is_main')->default(0);
             $table->tinyInteger('is_active')->default(0);
+            $table->timestamp('last_regen_at')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');

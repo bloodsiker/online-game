@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('level')->default(1);
             $table->enum('type', ['attack', 'defense', 'buff', 'debuff', 'heal', 'utility']);
-            $table->integer('mana_cost')->default(0);              // Стоимость маны
+            $table->integer('mana_cost')->default(0);
             $table->integer('min_damage')->default(0);
             $table->integer('max_damage')->default(0);
             $table->integer('base_healing')->default(0);

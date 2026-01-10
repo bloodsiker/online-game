@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('structures', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['shop', 'auction', 'heal', 'warehouse', 'bank', 'blacksmith'])->default('shop');
+            $table->enum('type', ['shop', 'auction', 'heal', 'warehouse', 'bank', 'blacksmith', 'exchange'])->default('shop');
             $table->string('name');
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->timestamps();
@@ -54,6 +54,15 @@ return new class extends Migration
             $table->foreignId('share_structure_category_id')->nullable()->constrained('share_structure_categories')->nullOnDelete();
             $table->integer('price')->default(0);
             $table->integer('diamond')->default(0);
+            $table->integer('sort_order')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('shop_carts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('shop_item_id')->constrained('shop_items')->cascadeOnDelete();
+            $table->integer('quantity')->default(1);
             $table->timestamps();
         });
 
@@ -69,6 +78,17 @@ return new class extends Migration
             $table->foreignId('shop_item_id')->constrained('shop_items')->cascadeOnDelete();
             $table->foreignId('share_item_id')->constrained('share_items')->cascadeOnDelete();
             $table->integer('quantity')->unsigned();
+            $table->timestamps();
+        });
+
+        Schema::create('exchanges', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
+            $table->foreignId('from_share_item_id')->constrained('share_items')->cascadeOnDelete();
+            $table->foreignId('to_share_item_id')->constrained('share_items')->cascadeOnDelete();
+            $table->integer('from_amount')->default(1);
+            $table->integer('to_amount')->default(1);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
 
@@ -114,7 +134,11 @@ return new class extends Migration
         Schema::dropIfExists('structure_actions');
         Schema::dropIfExists('structure_actions');
         Schema::dropIfExists('share_actions');
+        Schema::dropIfExists('share_structure_categories');
+        Schema::dropIfExists('shop_carts');
         Schema::dropIfExists('shop_items');
+        Schema::dropIfExists('shop_categories');
+        Schema::dropIfExists('shop_item_requirements');
         Schema::dropIfExists('structures');
     }
 };

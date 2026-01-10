@@ -25,6 +25,12 @@ class InterfaceController extends Controller
         return view('interface.index');
     }
 
+    public function interface(Request $request)
+    {
+//        dd($request);
+        return view('interface.interface');
+    }
+
     public function onMap(Request $request)
     {
         if ($request->get('s')) {

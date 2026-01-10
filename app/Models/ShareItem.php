@@ -25,7 +25,6 @@ class ShareItem extends Model
     public const TYPE_CHEST = 'chest';
     public const TYPE_SCROLL = 'scroll';
 
-
     public const SLOT_HAND = 'hand';
 
     public const TYPES = [
@@ -36,11 +35,27 @@ class ShareItem extends Model
         self::TYPE_KEY => 'Ключ',
         self::TYPE_HEAL => 'Восстанавливающие',
         self::TYPE_QUEST => 'Квест',
-        self::TYPE_ARTIFACT => 'Артифакт',
+        self::TYPE_ARTIFACT => 'Артефакт',
         self::TYPE_RECIPE => 'Рецепт',
         self::TYPE_CHEST => 'Сундук',
         self::TYPE_SCROLL => 'Свиток',
     ];
+
+    const GROUPS = [
+        'main' => [self::TYPE_HEAL, self::TYPE_WEAPON, self::TYPE_SHIELD, self::TYPE_ARMOR, self::TYPE_RESOURCE, self::TYPE_RECIPE, self::TYPE_SCROLL],
+        'key' => [self::TYPE_KEY],
+        'quest' => [self::TYPE_QUEST],
+        'artifact' => [self::TYPE_ARTIFACT],
+        'gift' => ['gift'],
+    ];
+
+    public function scopeByGroup($query, string $group)
+    {
+        return $query->whereIn(
+            'type',
+            self::GROUPS[$group] ?? self::GROUPS['main']
+        );
+    }
 
 //    protected $with = ['recipe'];
 

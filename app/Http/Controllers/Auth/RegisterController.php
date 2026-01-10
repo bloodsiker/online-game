@@ -48,6 +48,6 @@ class RegisterController extends Controller
     {
         $user = User::where('name', $request->get('nick'))->first();
 
-        return response()->json(['exists' => $user ? true : false]);
+        return response()->json(['exists' => (bool)$user]);
     }
 }

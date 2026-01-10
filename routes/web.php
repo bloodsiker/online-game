@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BlacksmithController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\ErrorController;
+use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
@@ -84,28 +85,35 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/location', [LocationController::class, 'index'])->name('location');
 
     Route::get('/backpack', [BackpackController::class, 'index'])->name('backpack');
+
+    Route::get('/auction/{id}/buyItem/{itemId}', [AuctionController::class, 'buyItem'])->name('auction.buy_item');
+    Route::match(['GET', 'POST'],'/auction/{id}/my-lot/edit/{slotId}', [AuctionController::class, 'myLotEdit'])->name('auction.my_lot.edit');
+    Route::get('/auction/{id}/my-lot/cancel/{slotId}', [AuctionController::class, 'myLotCancel'])->name('auction.my_lot.cancel');
+    Route::get('/auction/{id}/my-lot', [AuctionController::class, 'myLot'])->name('auction.my_lot');
+    Route::post('/auction/{id}/new-lot/save', [AuctionController::class, 'newLotSave'])->name('auction.new_lot.save');
+    Route::get('/auction/{id}/new-lot', [AuctionController::class, 'newLot'])->name('auction.new_lot');
+    Route::get('/auction/{id}', [AuctionController::class, 'index'])->name('auction');
+
+    Route::get('/shop/{id}/buy-item/{itemId}', [ShopController::class, 'buyItem'])->name('shop.buy_item');
+    Route::match(['GET', 'POST'], '/shop/{id}/sell-item', [ShopController::class, 'sellItem'])->name('shop.sell_item');
+    Route::get('/shop/{id}', [ShopController::class, 'index'])->name('shop');
+
+    Route::post('/exchange/{id}/apply', [ExchangeController::class, 'apply'])->name('exchange.apply');
+    Route::get('/exchange/{id}', [ExchangeController::class, 'index'])->name('exchange');
+
+    Route::match(['GET', 'POST'], '/warehouse/{id}/take-item', [WarehouseController::class, 'takeItem'])->name('warehouse.take_item');
+    Route::match(['GET', 'POST'], '/warehouse/{id}', [WarehouseController::class, 'index'])->name('warehouse');
+
+    Route::get('/premium/shop', [PremiumShopController::class, 'index'])->name('premium.shop');
+    Route::post('/premium/buy', [PremiumShopController::class, 'buy'])->name('premium.buy');
+    Route::post('/premium/add-cart', [PremiumShopController::class, 'addCart'])->name('premium.add_cart');
+    Route::get('/premium/delete-cart/{id}', [PremiumShopController::class, 'deleteCart'])->name('premium.delete_cart');
+    Route::get('/premium/clear-cart', [PremiumShopController::class, 'clearCart'])->name('premium.clear_cart');
+
+    Route::get('/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])->name('blacksmith.kraft');
+    Route::get('/blacksmith/{id}/break', [BlacksmithController::class, 'breakItem'])->name('blacksmith.break');
+    Route::get('/blacksmith/{id}', [BlacksmithController::class, 'index'])->name('blacksmith');
 });
-
-Route::get('/auction/{id}/buyItem/{itemId}', [AuctionController::class, 'buyItem'])->name('auction.buy_item');
-Route::match(['GET', 'POST'],'/auction/{id}/my-lot/edit/{slotId}', [AuctionController::class, 'myLotEdit'])->name('auction.my_lot.edit');
-Route::get('/auction/{id}/my-lot/cancel/{slotId}', [AuctionController::class, 'myLotCancel'])->name('auction.my_lot.cancel');
-Route::get('/auction/{id}/my-lot', [AuctionController::class, 'myLot'])->name('auction.my_lot');
-Route::post('/auction/{id}/new-lot/save', [AuctionController::class, 'newLotSave'])->name('auction.new_lot.save');
-Route::get('/auction/{id}/new-lot', [AuctionController::class, 'newLot'])->name('auction.new_lot');
-Route::get('/auction/{id}', [AuctionController::class, 'index'])->name('auction');
-
-Route::get('/shop/{id}/buy-item/{itemId}', [ShopController::class, 'buyItem'])->name('shop.buy_item');
-Route::match(['GET', 'POST'], '/shop/{id}/sell-item', [ShopController::class, 'sellItem'])->name('shop.sell_item');
-Route::get('/shop/{id}', [ShopController::class, 'index'])->name('shop');
-
-Route::get('/premium/shop', [PremiumShopController::class, 'index'])->name('premium.shop');
-
-Route::match(['GET', 'POST'], '/warehouse/{id}/take-item', [WarehouseController::class, 'takeItem'])->name('warehouse.take_item');
-Route::match(['GET', 'POST'], '/warehouse/{id}', [WarehouseController::class, 'index'])->name('warehouse');
-
-Route::get('/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])->name('blacksmith.kraft');
-Route::get('/blacksmith/{id}/break', [BlacksmithController::class, 'breakItem'])->name('blacksmith.break');
-Route::get('/blacksmith/{id}', [BlacksmithController::class, 'index'])->name('blacksmith');
 
 Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monster');
 Route::get('/info/u/{id}', [UserController::class, 'info'])->name('info.user');
@@ -140,5 +148,6 @@ Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
 Route::get('/who',  [InterfaceController::class, 'who'])->name('who');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
-Route::get('/main', [InterfaceController::class, 'main'])->name('main');
+Route::get('/game', [InterfaceController::class, 'game'])->name('game');
+Route::get('/interface', [InterfaceController::class, 'interface'])->name('interface');
 Route::get('/',     [MainController::class, 'index'])->name('index');

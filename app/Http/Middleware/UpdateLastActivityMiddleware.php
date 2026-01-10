@@ -21,6 +21,8 @@ class UpdateLastActivityMiddleware
             $user = Auth::user();
             $user->last_online_at = Carbon::now();
             $user->save();
+
+            $user->player->regenerate();
         }
 
         return $next($request);

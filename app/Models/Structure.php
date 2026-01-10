@@ -21,14 +21,16 @@ class Structure extends Model
     public const TYPE_WAREHOUSE = 'warehouse';
     public const TYPE_BANK = 'bank';
     public const TYPE_BLACKSMITH = 'blacksmith';
+    public const TYPE_EXCHANGE = 'exchange';
 
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
         self::TYPE_AUCTION => 'Аукцион',
-        self::TYPE_HEAL => 'Востановление',
+        self::TYPE_HEAL => 'Восстановление',
         self::TYPE_WAREHOUSE => 'Хранилище',
         self::TYPE_BANK => 'Банк',
         self::TYPE_BLACKSMITH => 'Кузня',
+        self::TYPE_EXCHANGE => 'Обмен',
     ];
 
     protected $with = ['location'];
@@ -70,6 +72,12 @@ class Structure extends Model
         );
     }
 
+    public function exchangeItems(): HasMany
+    {
+//        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
+        return $this->hasMany(Exchange::class);
+    }
+
     public function actions(): BelongsToMany
     {
         return $this->belongsToMany(ShareAction::class, 'structure_actions', 'structure_id', 'share_action_id');
@@ -84,27 +92,32 @@ class Structure extends Model
         return $this->type;
     }
 
-    public function isShop()
+    public function isShop(): bool
     {
         return $this->type === self::TYPE_SHOP;
     }
 
-    public function isAuction()
+    public function isExchange(): bool
+    {
+        return $this->type === self::TYPE_EXCHANGE;
+    }
+
+    public function isAuction(): bool
     {
         return $this->type === self::TYPE_AUCTION;
     }
 
-    public function isHeal()
+    public function isHeal(): bool
     {
         return $this->type === self::TYPE_HEAL;
     }
 
-    public function isWarehouse()
+    public function isWarehouse(): bool
     {
         return $this->type === self::TYPE_WAREHOUSE;
     }
 
-    public function isBlacksmith()
+    public function isBlacksmith(): bool
     {
         return $this->type === self::TYPE_BLACKSMITH;
     }

@@ -9,6 +9,7 @@ use App\Models\Quest\QuestPlayer;
 use App\Models\Race;
 use App\Models\User;
 use App\Services\Combat\FightHitInterface;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Player extends Model implements PlayerInterface, FightHitInterface
 {
     use HasFactory;
+
+    const REGEN_INTERVAL = 5; // секунд
+    const FULL_REGEN_TIME = 300; // 20 минут в секундах
+
+    protected $casts = [
+        'last_regen_at' => 'datetime'
+    ];
 
     public function user(): BelongsTo
     {
@@ -147,5 +155,45 @@ class Player extends Model implements PlayerInterface, FightHitInterface
         return $this->magicSkills()
             ->wherePivot('is_equipped', true)
             ->exists();
+    }
+
+    public function regenerate(): void
+    {
+        $now = Carbon::now();
+
+        if (!$this->last_regen_at) {
+            $this->last_regen_at = $now;
+            $this->save();
+            return;
+        }
+
+        $seconds = $this->last_regen_at->diffInSeconds($now);
+        $ticks = intdiv($seconds, self::REGEN_INTERVAL);
+
+        if ($ticks <= 0) {
+            return;
+        }
+
+        // сколько тиков нужно для полного восстановления
+        $totalTicks = self::FULL_REGEN_TIME / self::REGEN_INTERVAL;
+
+        // процент / количество за 1 тик
+        $multiplier = 1;
+        $hpPerTick = ($this->hp_max / $totalTicks) * $multiplier;
+        $mpPerTick = ($this->mp_max / $totalTicks) * $multiplier;
+
+        $this->hp_now = min(
+            $this->hp_max,
+            (int) floor($this->hp_now + ($hpPerTick * $ticks))
+        );
+
+        $this->mp_now = min(
+            $this->mp_max,
+            (int) floor($this->mp_now + ($mpPerTick * $ticks))
+        );
+
+        $this->last_regen_at = $this->last_regen_at->addSeconds($ticks * self::REGEN_INTERVAL);
+
+        $this->save();
     }
 }

@@ -29,22 +29,16 @@
 
 <div class="game-area">
     <ul>
-        <li><a href="#" onclick="sendDataToGame('{{ route('location') }}')">Перемещение</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('character') }}')">Персонаж</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('backpack') }}')">Вещи</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('clan') }}')">Клан</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('clan.member') }}')">Состав клана</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('quests') }}')">Квесты</a></li>
-        <li><a href="#" onclick="sendDataToGame('{{ route('premium.shop') }}')">Премиум</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('location') }}')">Перемещение</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('character') }}', true)">Персонаж</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('backpack') }}', true)">Вещи</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('clan') }}', true)">Клан</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('clan.member') }}', true)">Состав клана</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('quests') }}', true)">Квесты</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('premium.shop') }}', true)">Премиум</a></li>
         <li><a href="{{ route('logout') }}">Выход</a></li>
     </ul>
 </div>
-
-<script>
-    function sendDataToGame(url) {
-        window.parent.postMessage({ url: url }, '*');
-    }
-</script>
 
 </body>
 </html>

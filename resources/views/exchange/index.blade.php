@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра</title>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    <style>
+        * {
+            font-family: Tahoma, Geneva, sans-serif;
+            font-size: 11px;
+        }
+        .bg {
+            background-color: #000;
+            background-image: url({{ asset('img/bg/bg.gif') }});
+            background-attachment: fixed;
+            background-position: 0 5px;
+        }
+        .tbl-sts b {
+            background: url({{ asset('img/bg/tbl-sts.png') }}) no-repeat;
+            display: block;
+            height: 19px;
+            overflow: hidden;
+            width: 19px;
+        }
+        .tbl-sts-lt b {
+            background-position: 0 -50px;
+        }
+        .tbl-sts-rt b {
+            background-position: 0 -100px;
+        }
+        .tbl-sts-lb b {
+            background-position: 0 -170px;
+        }
+        .tbl-sts-rb b {
+            background-position: 0 -219px;
+        }
+        .tbl-sts-ltb b {
+            background-position: 0 -69px;
+            height: 20px;
+        }
+        .tbl-sts-lbt b {
+            background-position: 0 -150px;
+            height: 20px;
+        }
+        .tbl-sts-rtb b {
+            background-position: 0 -119px;
+            height: 20px;
+        }
+        .tbl-sts-rbt b {
+            background-position: 0 -200px;
+            height: 20px;
+        }
+        .tbl-sts_left {
+            background-image: url({{ asset('img/bg/tbl-sts_left.gif') }});
+            background-repeat: repeat-y;
+            width: 19px;
+            background-position: right;
+        }
+        .tbl-sts_right {
+            background-image: url({{ asset('img/bg/tbl-sts_right.gif') }});
+            background-repeat: repeat-y;
+            width: 19px;
+        }
+        .bgg {
+            background-image: url({{ asset('img/bg/bgg.gif') }});
+        }
+
+
+
+        table.coll {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+        .brd2-all {
+            border: 1px solid #db9f73;
+        }
+        .brd2-top {
+            border-top: 1px solid #db9f73;
+        }
+        .brd2, .brd2 td {
+            border: 1px solid #db9f73;
+        }
+        .w100 {
+            width: 100%;
+        }
+        .p10h, .p10h td {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        .p10v, .p10v td {
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .p2v, .p2v td {
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+        .regblk, .regblk * {
+            color: #49382d;
+        }
+        .bg_l {
+            background-image: url(/img/bg/bg_l.gif);
+        }
+        .p6h, .p6h td {
+            padding-left: 6px;
+            padding-right: 6px;
+        }
+        .p6v, .p6v td {
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        .pointer, .pointer input {
+            cursor: pointer;
+        }
+
+        .btn_1 {
+            color: #461c0b !important;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+        }
+        .btn_2 {
+            color: #ffe9ba !important;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+        }
+        .collections-title, .collection-body {
+            padding: 5px;
+        }
+        .collections-divider {
+            display: block;
+            height: 5px;
+            margin: 0 0 5px;
+            font-size: 0;
+            border-bottom: #db9f73 1px solid;
+        }
+        .collection-slot {
+            display: inline-block;
+            position: relative;
+            width: 52px;
+            height: 70px;
+            overflow: hidden;
+            vertical-align: top;
+        }
+        .collection-slot__img {
+            display: block;
+            width: 50px;
+            height: 50px;
+            padding: 1px;
+            background: url(../images/slot-empty.png) no-repeat;
+        }
+        .collection-slot.active .collection-slot__qty, .collection-slot.active .collection-slot__qty-current {
+            color: #489200;
+        }
+        .collection-slot__img.grayscale {
+            background: #000;
+        }
+        .collection-slot__img.grayscale img {
+            opacity: .3;
+        }
+        .collection-slot__qty {
+            display: block;
+            font-weight: 700;
+            text-align: center;
+        }
+        .collection-slot__qty, .collection-slot__qty-current {
+            font-size: 11px;
+        }
+        .collection-slot__qty-current {
+            color: #c00000;
+        }
+        .collection-ico {
+            display: inline-block;
+            height: 65px;
+            padding: 5px 0 0;
+            vertical-align: top;
+            font-weight: 700;
+            font-size: 40px;
+        }
+        .collection-resource-img {
+            width: 100%;
+        }
+        .regcolor, .regcolor * {
+            color: #955c4a;
+        }
+
+        .cart-amount-sell-price input {
+            width: 50px;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body leftmargin="0" rightmargin="0">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+    <tbody>
+    @php
+        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
+        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
+        $btnRight1 = 'img/bg/btn/btn-right1.gif';
+
+        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
+        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
+        $btnRight2 = 'img/bg/btn/btn-right2.gif';
+    @endphp
+    <tr height="21">
+        <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
+        <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_1" href="{{ route('exchange', ['id' => $exchange->id]) }}" title="Купить" class="btn_2">Обмен</a>
+        </td>
+        <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
+
+        <td></td>
+
+        <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+        <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
+        <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+    </tr>
+    </tbody>
+</table>
+
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+    <tbody>
+    <tr height="22">
+        <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+        <td class="tbl-shp-sml tt" valign="top" align="left"></td>
+        <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
+    </tr>
+    <tr>
+        <td class="tbl-shp-sides ls">&nbsp;</td>
+        <td class="tbl-usi_bg" valign="top" align="left" style="padding: 10 6 10 6">
+
+            <table class="w100" border="0" width="100%">
+                <tbody>
+                <tr height="5">
+                    <td align="left" width="33%" nowrap=""></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
+                <tbody>
+                <tr class="bg_l">
+                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                @foreach($items as $item)
+                    <form action="{{ route('exchange.apply', ['id' => $exchange->id]) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="from_id" value="{{ $item->getFromItem()->id }}">
+                        <input type="hidden" name="to_id" value="{{ $item->getToItem()->id }}">
+
+                        <tr class="collection-group-13">
+                            <td colspan="3">
+                                <table class="coll w100 p10h p6v brd2-all">
+                                    <tbody>
+                                    <tr class="bg_l">
+                                        <td>
+                                            <div class="collections-body">
+                                                <table>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="collection-slot">
+                                                                <span class="collection-slot__img">
+                                                                    <a href="#" class="collection-resource redd">
+                                                                        <img src="{{ asset($item->getFromItem()->image) }}" class="collection-resource-img" alt="{{ $item->getFromItem()->name }}">
+                                                                    </a>
+                                                                </span>
+                                                                 <span class="collection-slot__qty qty_from" data-count="{{ $item->getFromAmount() }}">{{ $item->getFromAmount() }} шт</span>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="cart-amount-sell-price">
+                                                                <span class="cart-amount-input-cont">
+                                                                    <span class="b-input">
+                                                                        <span class="b-input__inner">
+                                                                            <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
+                                                                            <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
+                                                                            <input type="text" data-id="{{ $item->getFromItem()->id }}" data-min="0" data-max="{{ $item->getAvailableCount() }}" name="count" value="{{ $item->getAvailableCount() }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="collection-slot">
+                                                                <span class="collection-slot__img">
+                                                                    <a href="#" class="collection-resource redd">
+                                                                        <img src="{{ asset($item->getToItem()->image) }}" class="collection-resource-img" alt="{{ $item->getToItem()->name }}">
+                                                                    </a>
+                                                                </span>
+                                                                <span class="collection-slot__qty qty_to" data-count="{{ $item->getToAmount() }}">{{ $item->getToAmount() }} шт</span>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <b class="collection-ico">=</b>
+                                                        </td>
+                                                        <td>
+                                                            <span class="collection-slot">
+                                                                <span class="collection-slot__img">
+                                                                    <a href="#" class="collection-resource redd">
+                                                                        <img src="{{ asset($item->getToItem()->image) }}" class="collection-resource-img" alt="{{ $item->getToItem()->name }}">
+                                                                    </a>
+                                                                </span>
+                                                                <span class="collection-slot__qty qty_total">0</span>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="butt1 pointer">
+                                                                <span>
+                                                                    <input value="Обменять" type="submit">
+                                                                </span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr class="canc-sort">
+                            <td colspan="3"><img src="{{ asset('img/bg/blank.gif') }}" height="5" alt=""></td>
+                        </tr>
+                    </form>
+                @endforeach
+                </tbody>
+            </table>
+        </td>
+        <td class="tbl-shp-sides rs">&nbsp;</td>
+    </tr>
+    <tr height="18">
+        <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+        <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+        <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    function handleKeydown(event) {
+        switch (event.key.toLowerCase()) {
+            case 'i':
+                sendDataToGame('{{ route('backpack') }}');
+                break;
+            case 'c':
+                sendDataToGame('{{ route('character') }}');
+                break;
+            case ' ':
+                sendDataToGame('{{ route('location') }}');
+                break;
+            default:
+                return;
+        }
+        event.preventDefault();
+    }
+
+    document.addEventListener('keydown', handleKeydown);
+
+    function recalcRow(input) {
+        const row = input.closest('tr');
+
+        const count = shopCounterValue(input);
+
+        const qtyFromEl = row.querySelector('.qty_from');
+        const qtyToEl = row.querySelector('.qty_to');
+        const qtyTotalEl = row.querySelector('.qty_total');
+
+        const qtyFrom = parseFloat(qtyFromEl.dataset.count);
+        const qtyTo = parseFloat(qtyToEl.dataset.count);
+
+        if (!qtyFrom || !qtyTo || count === 0) {
+            qtyTotalEl.textContent = 0;
+            return;
+        }
+
+        const rate = qtyTo / qtyFrom;
+        const total = Math.floor(count * rate);
+
+        qtyTotalEl.textContent = total;
+    }
+
+    function shopItemCounter(el) {
+        if (el.classList.contains('left-disabled') || el.classList.contains('right-disabled')) {
+            return false;
+        }
+
+        const container = el.closest('.b-input__inner');
+        const input = container.querySelector('input');
+
+        const min = parseInt(input.dataset.min) ?? 0;
+        const max = parseInt(input.dataset.max) ?? Infinity;
+
+        let value = shopCounterValue(input);
+
+        if (el.classList.contains('left')) {
+            if (value > min) {
+                value--;
+            }
+        }
+
+        if (el.classList.contains('right')) {
+            if (value < max) {
+                value++;
+            }
+        }
+
+        input.value = value;
+        shopChangeCounter(input);
+        recalcRow(input);
+    }
+
+    function shopCounterValue(el) {
+        const min = parseInt(el.dataset.min) ?? 0;
+        const max = parseInt(el.dataset.max) ?? Infinity;
+
+        let value = parseInt(el.value);
+
+        if (isNaN(value)) value = min;
+
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function shopChangeCounter(el) {
+        const value = shopCounterValue(el);
+        const min = parseInt(el.dataset.min) ?? 0;
+        const max = parseInt(el.dataset.max) ?? Infinity;
+
+        const container = el.closest('.b-input__inner');
+        const left = container.querySelector('.left');
+        const right = container.querySelector('.right');
+
+        if (value <= min) {
+            left.classList.add('left-disabled');
+        } else {
+            left.classList.remove('left-disabled');
+        }
+
+        if (value >= max) {
+            right.classList.add('right-disabled');
+        } else {
+            right.classList.remove('right-disabled');
+        }
+
+        el.value = value;
+    }
+
+    document.querySelectorAll('.cart_amount_sell_input').forEach(input => {
+        shopChangeCounter(input);
+        recalcRow(input);
+
+        input.addEventListener('input', function () {
+            shopChangeCounter(this);
+            recalcRow(this);
+        });
+
+        input.addEventListener('blur', function () {
+            this.value = shopCounterValue(this);
+            shopChangeCounter(this);
+            recalcRow(this);
+        });
+    });
+
+    function shopCounterKeypress(e, el) {
+        const key = e.keyCode || e.which;
+        const container = el.closest('.b-input__inner');
+
+        if (key === 38) { // ↑
+            e.preventDefault();
+            shopItemCounter(container.querySelector('.right'));
+        }
+
+        if (key === 40) { // ↓
+            e.preventDefault();
+            shopItemCounter(container.querySelector('.left'));
+        }
+    }
+
+    // document.removeEventListener('keydown', handleKeydown);
+
+    function sendDataToGame(url) {
+        window.parent.postMessage({ url: url }, '*');
+    }
+
+    let money = parseInt('{{ $user->money }}');
+    let diamond = parseInt('{{ $user->diamond }}');
+
+    parent.sendToFrame('character-frame', { money, diamond });
+
+    @if (session()->has('message'))
+        window.parent.showErrorIframe('{{ session('message') }}')
+    @endif
+</script>
+
+</body>
+</html>

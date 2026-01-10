@@ -184,8 +184,8 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -224,15 +224,15 @@
                             </td>
                             <td nowrap="">
                                 <div class="cart-amount-sell-price">
-                                <span class="cart-amount-input-cont">
-                                <span class="b-input">
-                                    <span class="b-input__inner">
-                                        <span class="arrow left @if($item->count === 1) left-disabled @endif" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
-                                        <span class="arrow right right-disabled" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                        <input type="text" data-id="{{ $item->id }}" data-max="{{ $item->count }}" name="item[{{ $item->item_id }}][count]" value="{{ $item->count }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                    <span class="cart-amount-input-cont">
+                                        <span class="b-input">
+                                            <span class="b-input__inner">
+                                                <span class="arrow left @if($item->count === 1) left-disabled @endif" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
+                                                <span class="arrow right right-disabled" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
+                                                <input type="text" data-id="{{ $item->id }}" data-max="{{ $item->count }}" name="item[{{ $item->item_id }}][count]" value="{{ $item->count }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                            </span>
+                                        </span>
                                     </span>
-                                </span>
-                            </span>
                                 </div>
                             </td>
                             <td class="brd2-top brd2" style="padding: 0" width="50" height="50">

@@ -43,7 +43,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-//        $this->player->mp_now -= $this->magicSkill->mana_cost;
+        $this->player->mp_now -= $this->magicSkill->mana_cost;
 
         // 1. Проверка уклонения — магию тоже можно увернуться (баланс настраивается в HitCalculator)
         $dodgeHit = $this->hitCalc->playerHit($this->player, $this->monster, 0, 0);

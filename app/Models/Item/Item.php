@@ -12,6 +12,8 @@ class Item extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['share_item_id'];
+
     protected $with = ['itemInfo'];
 
     protected $attributes = [

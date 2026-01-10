@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\QuestType;
 use App\Models\Auction\Auction;
+use App\Models\Exchange;
 use App\Models\Experience;
 use App\Models\Item\Item;
 use App\Models\Location;
@@ -17,7 +18,6 @@ use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Race;
-use App\Models\Share\ShareShopCategory;
 use App\Models\Share\ShareStructureCategory;
 use App\Models\ShareAction;
 use App\Models\ShareItem;
@@ -1048,12 +1048,14 @@ class GenerateSeed extends Command
             'share_item_id' => 15,
             'share_structure_category_id' => $this->shopCategory3->id,
             'diamond' => 100,
+            'sort_order' => 1,
         ]);
 
         $premium->shopItems()->create([
             'share_item_id' => 16,
             'share_structure_category_id' => $this->shopCategory3->id,
             'diamond' => 100,
+            'sort_order' => 0,
         ]);
     }
 
@@ -1105,5 +1107,70 @@ class GenerateSeed extends Command
 
         $shop1->actions()->attach(2);
         $shop1->actions()->attach(3);
+
+        $exchangeStructure = new Structure();
+        $exchangeStructure->type = Structure::TYPE_EXCHANGE;
+        $exchangeStructure->name = 'Обмен у кузнеца';
+        $exchangeStructure->npc_id = $npc->id;
+        $exchangeStructure->save();
+
+        $sItem1 = new ShareItem();
+        $sItem1->type = ShareItem::TYPE_RESOURCE;
+        $sItem1->price = 10;
+        $sItem1->name = 'Монета древности';
+        $sItem1->description = 'Монета древности';
+        $sItem1->image = '/img/resource/ancient_coin.jpg';
+        $sItem1->save();
+
+        $sItem2 = new ShareItem();
+        $sItem2->type = ShareItem::TYPE_RESOURCE;
+        $sItem2->price = 3;
+        $sItem2->name = 'Синий Камень Печати';
+        $sItem2->description = 'Синий Камень Печати';
+        $sItem2->image = '/img/resource/water_rune.jpg';
+        $sItem2->save();
+
+        $sItem3 = new ShareItem();
+        $sItem3->type = ShareItem::TYPE_RESOURCE;
+        $sItem3->price = 5;
+        $sItem3->name = 'Зеленый Камень Печати';
+        $sItem3->description = 'Зеленый Камень Печати';
+        $sItem3->image = '/img/resource/wind_rune.jpg';
+        $sItem3->save();
+
+        $sItem4 = new ShareItem();
+        $sItem4->type = ShareItem::TYPE_RESOURCE;
+        $sItem4->price = 10;
+        $sItem4->name = 'Красный Камень Печати';
+        $sItem4->description = 'Красный Камень Печати';
+        $sItem4->image = '/img/resource/fire_rune.jpg';
+        $sItem4->save();
+
+        $exchange = new Exchange();
+        $exchange->structure_id = $exchangeStructure->id;
+        $exchange->from_share_item_id = $sItem2->id;
+        $exchange->to_share_item_id = $sItem1->id;
+        $exchange->from_amount = 1;
+        $exchange->to_amount = 3;
+        $exchange->sort_order = 1;
+        $exchange->save();
+
+        $exchange = new Exchange();
+        $exchange->structure_id = $exchangeStructure->id;
+        $exchange->from_share_item_id = $sItem3->id;
+        $exchange->to_share_item_id = $sItem1->id;
+        $exchange->from_amount = 1;
+        $exchange->to_amount = 5;
+        $exchange->sort_order = 2;
+        $exchange->save();
+
+        $exchange = new Exchange();
+        $exchange->structure_id = $exchangeStructure->id;
+        $exchange->from_share_item_id = $sItem4->id;
+        $exchange->to_share_item_id = $sItem1->id;
+        $exchange->from_amount = 1;
+        $exchange->to_amount = 10;
+        $exchange->sort_order = 3;
+        $exchange->save();
     }
 }
