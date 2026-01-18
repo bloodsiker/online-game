@@ -166,14 +166,14 @@
                             <img src="{{ $playerEquip->helmetSlot->itemInfo->image }}" class="hero-itm" id="i2n1" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->helmetSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
 
                     </td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i3n1"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i3n2"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i3n3"></td>
-                    <td><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i10n1"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i3n1"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i3n2"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i3n3"></td>
+                    <td><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i10n1"></td>
                 </tr>
                 <tr>
                     <td class="item-hero">
@@ -181,18 +181,18 @@
                             <img src="{{ $playerEquip->handLeft->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handLeft->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
-                        <img src="https://skazanie.com/portrait/mm4.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
+                        <img src="https://game.elders.com.ua/img/avatar/dark_elf.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
                     </td>
                     <td class="item-hero">
                         @if($playerEquip->handRight)
                             <img src="{{ $playerEquip->handRight->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handRight->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
@@ -202,10 +202,10 @@
                             <img src="{{ $playerEquip->armorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->armorSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
                 </tr>
                 <tr>
                     <td class="item-hero">
@@ -213,7 +213,7 @@
                             <img src="{{ $playerEquip->chainArmorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->chainArmorSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero">
@@ -221,7 +221,7 @@
                             <img src="{{ $playerEquip->cloakSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->cloakSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
@@ -231,7 +231,7 @@
                             <img src="{{ $playerEquip->shoesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->shoesSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero">
@@ -239,23 +239,27 @@
                             <img src="{{ $playerEquip->glovesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->glovesSlot->id]) }}" class="item-put-off">снять</a>
                         @else
-                            <img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm" id="i4n1">
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                 </tr>
                 <tr>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
                 </tr>
+                </tbody>
+            </table>
+            <table cellspacing="0" cellpadding="0" border="0">
+                <tbody>
                 <tr>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
-                    <td align="center"><img src="https://skazanie.com/img-item/empty-slot.jpg" class="hero-itm"></td>
+                    <td align="center" width="30"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
                 </tr>
                 </tbody>
             </table>
@@ -363,8 +367,8 @@
                             }
                             .backpack_list li {
                                 list-style: none;
-                                height: 55px;
-                                width: 55px;
+                                height: 60px;
+                                width: 60px;
                                 margin: 1px;
                                 float: left;
                                 position: relative;
@@ -1098,7 +1102,7 @@
                                                                                 class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                                <table width="55" height="55" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
                                                                                         <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
@@ -1113,8 +1117,8 @@
                                                                                                 act1="5" act2="5" act3="0" rune_h="0"
                                                                                                 aid="23867698" art_id="" cnt="1"
                                                                                                 div_id="AA_23867698" psell="16"
-                                                                                                onmouseover="artifactAlt(this,event,2)"
-                                                                                                onmouseout="artifactAlt(this,event,0)"
+                                                                                                onmouseover="showItemInfo(this,event,2)"
+                                                                                                onmouseout="showItemInfo(this,event,0)"
                                                                                                 valign="bottom">
                                                                                             </span>
                                                                                         </td>
@@ -1134,7 +1138,7 @@
                                                                                 class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                                <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
@@ -1150,8 +1154,8 @@
                                                                                                 act1="5" act2="5" act3="0" rune_h="0"
                                                                                                 aid="23867698" art_id="" cnt="1"
                                                                                                 div_id="AA_23867698" psell="16"
-                                                                                                onmouseover="artifactAlt(this,event,2)"
-                                                                                                onmouseout="artifactAlt(this,event,0)"
+                                                                                                onmouseover="showItemInfo(this,event,2)"
+                                                                                                onmouseout="showItemInfo(this,event,0)"
                                                                                                 valign="bottom">
                                                                                             </span>
                                                                                         </td>
@@ -1191,7 +1195,7 @@
                                                                             class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1207,8 +1211,8 @@
                                                                                             act1="5" act2="5" act3="0" rune_h="0"
                                                                                             aid="23867698" art_id="" cnt="1"
                                                                                             div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="artifactAlt(this,event,2)"
-                                                                                            onmouseout="artifactAlt(this,event,0)"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
                                                                                             </span>
                                                                                     </td>
@@ -1247,7 +1251,7 @@
                                                                             class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1263,8 +1267,8 @@
                                                                                             act1="5" act2="5" act3="0" rune_h="0"
                                                                                             aid="23867698" art_id="" cnt="1"
                                                                                             div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="artifactAlt(this,event,2)"
-                                                                                            onmouseout="artifactAlt(this,event,0)"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
                                                                                         </span>
                                                                                     </td>
@@ -1303,11 +1307,11 @@
                                                                             class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td act1="1" act2="3" act3="0" data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1319,8 +1323,8 @@
                                                                                             act1="5" act2="5" act3="0" rune_h="0"
                                                                                             aid="23867698" art_id="" cnt="1"
                                                                                             div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="artifactAlt(this,event,2)"
-                                                                                            onmouseout="artifactAlt(this,event,0)"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
                                                                                         </span>
                                                                                     </td>
@@ -1360,7 +1364,7 @@
                                                                             class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1376,8 +1380,8 @@
                                                                                             act1="5" act2="5" act3="0" rune_h="0"
                                                                                             aid="23867698" art_id="" cnt="1"
                                                                                             div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="artifactAlt(this,event,2)"
-                                                                                            onmouseout="artifactAlt(this,event,0)"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
                                                                                     </span>
                                                                                     </td>
@@ -1416,7 +1420,7 @@
                                                                             class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1432,8 +1436,8 @@
                                                                                             act1="5" act2="5" act3="0" rune_h="0"
                                                                                             aid="23867698" art_id="" cnt="1"
                                                                                             div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="artifactAlt(this,event,2)"
-                                                                                            onmouseout="artifactAlt(this,event,0)"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
                                                                                         </span>
                                                                                     </td>
@@ -1458,7 +1462,7 @@
                                                                     class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                    <table width="55" height="55" cellpadding="0" cellspacing="0" border="0"
+                                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                            style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                         <tbody>
                                                                         <tr>
@@ -1474,8 +1478,8 @@
                                                                                     act1="5" act2="5" act3="0" rune_h="0"
                                                                                     aid="23867698" art_id="" cnt="1"
                                                                                     div_id="AA_23867698" psell="16"
-                                                                                    onmouseover="artifactAlt(this,event,2)"
-                                                                                    onmouseout="artifactAlt(this,event,0)"
+                                                                                    onmouseover="showItemInfo(this,event,2)"
+                                                                                    onmouseout="showItemInfo(this,event,0)"
                                                                                     valign="bottom">
                                                                                     </span>
                                                                             </td>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ShareAction;
+use App\Models\Share\ShareAction;
 use Illuminate\Http\Request;
 
 class ActionController extends Controller

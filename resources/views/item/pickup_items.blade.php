@@ -78,7 +78,7 @@
                                     x{{ $item->count }}
                                 </td>
                                 <td>
-                                    @if($item->item->itemInfo->type === \App\Models\ShareItem::TYPE_CHEST)
+                                    @if($item->item->itemInfo->type === \App\Models\Share\ShareItem::TYPE_CHEST)
                                         @if($item->item->is_open)
                                             <a href="{{ route('items.view_chest', ['id' => $item->item->id]) }}">заглянуть</a>&nbsp;»
                                         @else

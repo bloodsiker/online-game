@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use App\Events\UserRegistered;
 use App\Models\Item\Item;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 
 class GiveStarterBonus
 {
@@ -22,7 +22,7 @@ class GiveStarterBonus
         $item3->share_item_id = $itemCristal->id;
         $item3->save();
 
-        $user->backpack()->attach($item2->id, ['equipped' => 0]);
-        $user->backpack()->attach($item3->id, ['equipped' => 0, 'count' => 200]);
+        $user->backpack()->attach($item2->id, ['equipped' => false]);
+        $user->backpack()->attach($item3->id, ['equipped' => false, 'count' => 200]);
     }
 }

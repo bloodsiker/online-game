@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Share\ShareItem;
+use App\Models\Share\ShareAction;
 use App\Models\Share\ShareStructureCategory;
 use App\Models\Shop\ShopItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

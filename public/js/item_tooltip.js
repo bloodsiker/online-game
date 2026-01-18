@@ -9,6 +9,12 @@ let showItemInfo = (obj, evnt, show) => {
 
     if (!itemInfo) return;
 
+    var act1 = obj.getAttribute('act1');
+    var act2 = obj.getAttribute('act2');
+    var act3 = obj.getAttribute('act3');
+    if (act3 == 0 || act3 === null) act3 = ''
+    if (act1 == null) act1 = 0;
+
     if (show === 2) {
         document.onmousemove = function(e) {showItemInfo(obj, e||event, 1);}
 
@@ -23,8 +29,15 @@ let showItemInfo = (obj, evnt, show) => {
         } else {
             itemInfo.style.display = 'none';
         }
+
+        if (act1 || act2 || act3) {
+            _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
+        }
     }
     if (!show) {
+        if (act1 || act2 || act3) {
+            _background(obj, '/img/icon/d.gif');
+        }
         itemInfo.style.display = 'none';
         document.onmousemove = function(){}
         return;
@@ -37,6 +50,62 @@ let showItemInfo = (obj, evnt, show) => {
     if (_top().noIframeAlt) {
         ex = evnt.clientX + _top().document.body.scrollLeft;
         ey = evnt.clientY + _top().document.body.scrollTop;
+    }
+
+    if (act1 || act2 || act3) {
+        obj.style.cursor = 'pointer'
+        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){showArtifactInfo(itemId, null, null, e||event)});
+        _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
+
+        var coord = getCoords(obj);
+        var cont = gebi("item_list");
+
+        var scroll_x = window.scrollX || window.document.body.scrollLeft;
+        var scroll_y = window.scrollY || window.document.body.scrollTop;
+        if(cont.scrollTop > 0) scroll_y = cont.scrollTop;
+        var rel_x = (ex + scroll_x - coord.l - coor.left);
+        var rel_y = (ey + scroll_y - coord.t - coor.top);
+
+        /*
+        console.log('rel_x' + ': ' + rel_x);
+        console.log('rel_y' + ': ' + rel_y);
+        console.log('scroll_x' + ': ' + scroll_x);
+        console.log('scroll_y' + ': ' + scroll_y);
+         */
+
+        if (evnt.altKey && evnt.shiftKey && evnt.ctrlKey) {
+            obj.onclick = function(e){showCommonHelpAdminArtifact(obj.getAttribute('aid'), obj.getAttribute('art_id'), e||event)};
+        } else {
+            if (rel_x >= 40) {
+                if (rel_y < 20) {
+                    if (obj.getAttribute('gift_id')) { // РґР»СЏ РїРѕРґР°СЂРєРѕРІ
+                        obj.onclick = function(e){showArtifactInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
+                    } else if (obj.getAttribute('store')) { // РІ РјР°РіР°Р·РёРЅРµ РїСЂРё РєР»РёРєРµ РЅР° info РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РІРѕРґРёС‚СЊ С‚РѕРІР°СЂ РїРѕ Р°СЂС‚РёРєСѓР»Сѓ
+                        obj.onclick = function(e){showArtifactInfo(false, obj.getAttribute('art_id'), null, e||event)};
+                    } else {
+                        obj.onclick = function(e){showArtifactInfo(itemId, null, null, e||event)}
+                    }
+
+                    _background(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
+                    try{obj.style.cursor = 'hand'} catch(e){}
+                    try{obj.style.cursor = 'pointer'} catch(e){}
+                }
+                if (act2 != 0 && rel_y >= 40) {
+                    obj.onclick = function(e){try{showItemInfo(obj, act2, e||event)}catch(e){ console.trace(e); }}
+                    _background(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
+                    try{obj.style.cursor = 'hand'} catch(e){}
+                    try{obj.style.cursor = 'pointer'} catch(e){}
+                }
+            }
+            if (act3 > 0 && rel_x < 20) {
+                if (rel_y < 20) {
+                    obj.onclick = function(e){try{showItemInfo(obj, act3, e||event)}catch(e){ console.trace(e); }};
+                    _background(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
+                    try {obj.style.cursor = 'hand'} catch(e){}
+                    try {obj.style.cursor = 'pointer'} catch(e){}
+                }
+            }
+        }
     }
 
     var x = ex + itemInfo.offsetWidth > _top().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
@@ -266,6 +335,16 @@ let _background = (obj, name) => {
     } else {
         obj.style.backgroundImage = 'url('+name+')'
     }
+}
+
+function getCoords(obj){
+    var o=typeof(obj) == 'string' ? gebi(obj) : obj
+    var ret={'l':o.offsetLeft,'t':o.offsetTop,'w':o.offsetWidth,'h':o.offsetHeight}
+    while(o=o.offsetParent){
+        ret.l+=o.offsetLeft
+        ret.t+=o.offsetTop
+    }
+    return ret
 }
 
 let _top = () => {

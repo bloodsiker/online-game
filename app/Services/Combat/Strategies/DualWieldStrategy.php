@@ -3,7 +3,7 @@
 namespace App\Services\Combat\Strategies;
 
 use App\Models\Monster\Monster;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
 

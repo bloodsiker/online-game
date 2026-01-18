@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Персонаж</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/hero.css?v='.time()) }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/hero.css') }}">
     <style>
         body {
             margin: 0;
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<table width="240" border="0" cellspacing="0" cellpadding="0">
+<table width="220" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="10">
         <td colspan="3"></td>
@@ -121,7 +121,7 @@
 
 <br>
 
-<table  width="240" cellspacing="0" cellpadding="0" border="0"  class="achieve_bg" id="effectsContainer" style="display: none">
+<table width="220" cellspacing="0" cellpadding="0" border="0"  class="achieve_bg" id="effectsContainer" style="display: none">
     <tbody>
     <tr>
         <td class="achieve_bg_lt"></td>

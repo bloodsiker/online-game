@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 
 class ExchangeItemDTO {
     public function __construct(

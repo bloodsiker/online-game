@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Models\Npc;
-use App\Models\ShareAction;
-use App\Models\ShareItem;
+use App\Models\Share\ShareAction;
+use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use Illuminate\Http\Request;
 

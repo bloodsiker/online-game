@@ -2,7 +2,7 @@
 
 namespace App\Models\Quest;
 
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

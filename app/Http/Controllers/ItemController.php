@@ -6,7 +6,7 @@ use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;
 use App\Models\Item\ItemOnLocation;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

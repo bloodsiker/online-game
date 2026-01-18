@@ -6,7 +6,7 @@ use App\Models\Auction\Auction;
 use App\Models\Auction\AuctionHistory;
 use App\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -7,7 +7,7 @@ use App\Decorator\Player\EquipmentDecorator;
 use App\Models\Item\Item;
 use App\Models\Monster\Monster;
 use App\Models\Player\Player;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Services\Combat\Strategies\AttackStrategyInterface;
 use App\Services\Combat\Strategies\FistAttackStrategy;
 use App\Services\Combat\Strategies\DualWieldStrategy;

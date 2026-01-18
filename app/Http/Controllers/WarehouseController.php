@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Backpack;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;

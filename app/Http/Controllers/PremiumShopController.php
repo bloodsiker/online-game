@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Models\Shop\ShopItem;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;

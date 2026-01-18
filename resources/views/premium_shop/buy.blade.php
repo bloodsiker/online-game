@@ -371,7 +371,7 @@
             </table>
         </td>
         <td width="10"></td>
-        <td valign="top" width="33%">
+        <td valign="top" width="35%">
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
                 <tr height="22">

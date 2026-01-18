@@ -311,7 +311,7 @@
 {{--            <iframe id="interface-frame" width="100%" height="100%" frameborder="0" src="{{ route('interface') }}"></iframe><--}}
 {{--        </td>--}}
 
-        <td width="250px">
+        <td width="220px">
             <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
                 <tr height="33">
@@ -337,7 +337,7 @@
                     </td>
                     <td id="hero_content" class="bgg" align="left" valign="top" width="100%">
 
-                        <iframe width="250px" name="hero" height="100%" frameborder="0" id="character-frame" src="{{ route('hero') }}"></iframe>
+                        <iframe width="220px" name="hero" height="100%" frameborder="0" id="character-frame" src="{{ route('hero') }}"></iframe>
 
                     </td>
                     <td valign="top" class="tbl-sts_right">
@@ -506,7 +506,7 @@
                         }
 
                         .hotbar-container {
-                            z-index: 9999;
+                            z-index: 999;
                             /*transition: all 0.3s ease;*/
                         }
                     </style>
@@ -1064,37 +1064,41 @@
     }
 </script>
 <script>
-    {{--document.addEventListener('keydown', function(event) {--}}
-    {{--    switch (event.key.toLowerCase()) {--}}
-    {{--        case 'arrowup':--}}
-    {{--            document.getElementById('move-north').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowdown':--}}
-    {{--            document.getElementById('move-south').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowleft':--}}
-    {{--            document.getElementById('move-west').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowright':--}}
-    {{--            document.getElementById('move-east').click();--}}
-    {{--            break;--}}
-    {{--        case 'f':--}}
-    {{--            document.getElementById('take-item').click();--}}
-    {{--            break;--}}
-    {{--        case 'i':--}}
-    {{--            toLocation('{{ route('backpack') }}');--}}
-    {{--            break;--}}
-    {{--        case 'c':--}}
-    {{--            toLocation('{{ route('character') }}');--}}
-    {{--            break;--}}
-    {{--        case ' ':--}}
-    {{--            toLocation('{{ route('location') }}');--}}
-    {{--            break;--}}
-    {{--        default:--}}
-    {{--            return;--}}
-    {{--    }--}}
-    {{--    event.preventDefault();--}}
-    {{--});--}}
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+            return;
+        }
+
+        switch (event.key.toLowerCase()) {
+            case 'arrowup':
+                document.getElementById('move-north').click();
+                break;
+            case 'arrowdown':
+                document.getElementById('move-south').click();
+                break;
+            case 'arrowleft':
+                document.getElementById('move-west').click();
+                break;
+            case 'arrowright':
+                document.getElementById('move-east').click();
+                break;
+            case 'f':
+                document.getElementById('take-item').click();
+                break;
+            case 'i':
+                toLocation('{{ route('backpack') }}');
+                break;
+            case 'c':
+                toLocation('{{ route('character') }}');
+                break;
+            case ' ':
+                toLocation('{{ route('location') }}');
+                break;
+            default:
+                return;
+        }
+        event.preventDefault();
+    });
 
     // Обработка сообщений от игрового iframe
     window.addEventListener('message', function(event) {

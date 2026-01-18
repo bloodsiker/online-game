@@ -107,7 +107,7 @@
                         Базовое повреждение: <b>{{ $item->itemInfo->min_attack }}-{{ $item->itemInfo->max_attack }}</b>
                     @endif
 
-                    @if($item->itemInfo->slot === App\Models\ShareItem::SLOT_HAND)
+                    @if($item->itemInfo->slot === App\Models\Share\ShareItem::SLOT_HAND)
                         <br>
                         @if($item->itemInfo->is_two_hand)
                             Использование: <b>требуются обе руки</b>
@@ -132,7 +132,7 @@
             </p>
             <p>Вы можете: </p>
             <ul>
-                @if($item->itemInfo->slot === App\Models\ShareItem::SLOT_HAND)
+                @if($item->itemInfo->slot === App\Models\Share\ShareItem::SLOT_HAND)
                     <li><a href="itemto.php?iid=116001041">взять в руки</a> »</li>
                 @endif
                 <li><a href="{{ route('items.hand_over', array_merge(request()->query(), ['id' => $item->id])) }}">передать</a> »</li>

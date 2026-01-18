@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ShareItem;
-use App\Models\ShareRecipe;
+use App\Models\Share\ShareItem;
+use App\Models\Share\ShareRecipe;
 use App\Models\Skill;
 use Illuminate\Http\Request;
 

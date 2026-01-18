@@ -4,7 +4,7 @@ namespace App\Models\Monster;
 
 use App\Models\Location;
 use App\Models\MagicSkill\Effect;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Services\Combat\FightHitInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

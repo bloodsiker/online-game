@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('share_items', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'heal', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone'])->default('resource');
+            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'belt', 'bag', 'heal', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone'])->default('resource');
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
@@ -21,12 +21,13 @@ return new class extends Migration
             $table->integer('max_attack')->default(0);
             $table->integer('armor')->default(0);
             $table->integer('count_use')->default(0);
-            $table->tinyInteger('is_heal')->default(0);
-            $table->tinyInteger('is_active')->default(1);
-            $table->tinyInteger('is_sell')->default(1);
+            $table->boolean('is_heal')->default(false);
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_sell')->default(true);
+            $table->boolean('is_slot_usable')->default(false);
             $table->integer('price')->default(0);
             $table->integer('break_crystal')->default(0);
-            $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves'])->nullable();
+            $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'belt', 'bag'])->nullable();
             $table->timestamps();
         });
 
@@ -62,7 +63,7 @@ return new class extends Migration
             $table->integer('upgrade_lvl')->default(0);
             $table->integer('additional_attack')->default(0);
             $table->integer('count_use')->default(0);
-            $table->boolean('is_open')->default(0);
+            $table->boolean('is_open')->default(false);
             $table->timestamps();
         });
 

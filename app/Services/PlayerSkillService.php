@@ -4,7 +4,7 @@ namespace app\Services;
 
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSkill;
-use App\Models\ShareItem;
+use App\Models\Share\ShareItem;
 use App\Models\Skill;
 
 class PlayerSkillService

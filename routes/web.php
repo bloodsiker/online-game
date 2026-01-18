@@ -23,6 +23,7 @@ use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PremiumShopController;
 use App\Http\Controllers\QuestController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -75,6 +76,9 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
     Route::post('/magic-skill/update', [MagicSkillController::class, 'updateSkill'])->name('magic_skill.update');
     Route::get('/magic-skill', [MagicSkillController::class, 'index'])->name('magic_skill');
+
+    Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
+    Route::get('/slots', [SlotController::class, 'index'])->name('slots');
 
     Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])->name('fight.run-away');
     Route::get('/fight/attack/monster/{id}', [FightController::class, 'attackMonster'])->name('fight.attack.monster');

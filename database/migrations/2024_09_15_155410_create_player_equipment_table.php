@@ -26,6 +26,8 @@ return new class extends Migration
             $table->foreignId('shoes')->nullable()->comment('Обувь')->constrained('items')->nullOnDelete();
             $table->foreignId('gloves')->nullable()->comment('Перчатки')->constrained('items')->nullOnDelete();
             $table->timestamps();
+
+            $table->unique('player_id');
         });
     }
 
