@@ -78,7 +78,7 @@ class PremiumShopController extends Controller
                     ->join('items', 'backpacks.item_id', '=', 'items.id')
                     ->first();
 
-                if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItem::TYPE_RESOURCE) {
+                if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                     $hasBackpack->count += $itemInCart->quantity;
                     $hasBackpack->save();
                 } else {

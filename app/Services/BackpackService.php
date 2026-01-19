@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\BackpackDTO;
+use App\Enums\ShareItemType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
@@ -12,13 +13,13 @@ use Illuminate\Database\Eloquent\Collection;
 class BackpackService
 {
     private const COUNTABLE_TYPES = [
-        ShareItem::TYPE_HEAL,
-        ShareItem::TYPE_WEAPON,
-        ShareItem::TYPE_SHIELD,
-        ShareItem::TYPE_ARMOR,
-        ShareItem::TYPE_RESOURCE,
-        ShareItem::TYPE_RECIPE,
-        ShareItem::TYPE_SCROLL
+        ShareItemType::POTION->value,
+        ShareItemType::WEAPON->value,
+        ShareItemType::SHIELD->value,
+        ShareItemType::ARMOR->value,
+        ShareItemType::RESOURCE->value,
+        ShareItemType::RECIPE->value,
+        ShareItemType::SCROLL->value,
     ];
 
     public function getBaseQuery(User $user)
@@ -234,17 +235,17 @@ class BackpackService
         $itemType = $itemInfo->type;
 
         switch ($itemType) {
-            case 'heal':
+            case ShareItemType::POTION:
                 if ($itemInfo->heal_hp) {
-                    $user->player->heal($itemInfo->heal_hp);
+                    $user->player->changeHp($itemInfo->heal_hp);
                 }
 
                 if ($itemInfo->heal_mp) {
-                    $user->player->restoreMana($itemInfo->heal_mp);
+                    $user->player->changeMp($itemInfo->heal_mp);
                 }
                 break;
 
-            case ShareItem::TYPE_SCROLL:
+            case ShareItemType::SCROLL:
                 break;
         }
     }

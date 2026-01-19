@@ -4,7 +4,7 @@ namespace App\Services\Battle;
 
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Repositories\BattleRepository;
 
 class BattleFinder

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ShareItemType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;
@@ -28,7 +29,7 @@ class ItemController extends Controller
                 ->join('items', 'backpacks.item_id', '=', 'items.id')
                 ->first();
 
-            if ($hasBackpack instanceof Backpack && $item->itemInfo->type === ShareItem::TYPE_RESOURCE) {
+            if ($hasBackpack instanceof Backpack && $item->itemInfo->type === ShareItemType::RESOURCE) {
                 $hasBackpack->count += $itemPickUp->count;
                 $hasBackpack->save();
 
@@ -244,7 +245,7 @@ class ItemController extends Controller
 
         $item = Item::find($id);
 
-        if ($item->itemInfo->type === ShareItem::TYPE_CHEST) {
+        if ($item->itemInfo->type === ShareItemType::CHEST) {
             foreach ($item->itemInfo->itemHasItems as $hasItem) {
                 $randomChance = mt_rand(0, 100000) / 1000;  // деление на 1000 для преобразования в проценты с тремя десятичными
                 if ($randomChance <= $hasItem->pivot->drop_chance) {
@@ -269,7 +270,7 @@ class ItemController extends Controller
     {
         $chest = Item::with('itemsInChest')->find($id);
 
-        if ($chest->itemInfo->type === ShareItem::TYPE_CHEST) {
+        if ($chest->itemInfo->type === ShareItemType::CHEST) {
 
             return view('item.chest_items', compact('chest'));
         }
@@ -294,7 +295,7 @@ class ItemController extends Controller
                     ->join('items', 'backpacks.item_id', '=', 'items.id')
                     ->first();
 
-                if ($hasBackpack instanceof Backpack && $item->itemInfo->type === ShareItem::TYPE_RESOURCE) {
+                if ($hasBackpack instanceof Backpack && $item->itemInfo->type === ShareItemType::RESOURCE) {
                     $hasBackpack->count += $itemPickUp->count;
                     $hasBackpack->save();
 

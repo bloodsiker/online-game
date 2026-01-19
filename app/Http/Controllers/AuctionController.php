@@ -82,7 +82,7 @@ class AuctionController extends Controller
                 ->join('items', 'backpacks.item_id', '=', 'items.id')
                 ->first();
 
-            if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItem::TYPE_RESOURCE) {
+            if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                 $hasBackpack->increment('count', $itemTake->count);
             } else {
                 $user->backpack()->attach($itemTake->item->id, [
@@ -220,7 +220,7 @@ class AuctionController extends Controller
                 ->join('items', 'backpacks.item_id', '=', 'items.id')
                 ->first();
 
-            if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItem::TYPE_RESOURCE) {
+            if ($hasBackpack instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                 $hasBackpack->increment('count', $itemBuy->count);
             } else {
                 $user->backpack()->attach($itemBuy->item->id, [

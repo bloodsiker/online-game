@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ShareItemType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
@@ -26,7 +27,7 @@ class BlacksmithController extends Controller
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
-            ->where('share_items.type', ShareItem::TYPE_RECIPE)
+            ->where('share_items.type', ShareItemType::RECIPE->value)
             ->get();
 
         $resources = DB::table('share_items')
@@ -35,7 +36,7 @@ class BlacksmithController extends Controller
             ->join('backpacks', 'backpacks.item_id', '=', 'items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.type', ShareItem::TYPE_RESOURCE)
+            ->where('share_items.type', ShareItemType::RESOURCE)
             ->get()
             ->map(function ($item) {
                 return [
@@ -69,7 +70,7 @@ class BlacksmithController extends Controller
             ->join('backpacks', 'backpacks.item_id', '=', 'items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.type', ShareItem::TYPE_RESOURCE)
+            ->where('share_items.type', ShareItemType::RESOURCE)
             ->get()
             ->map(function ($item) {
                 return [
@@ -156,7 +157,7 @@ class BlacksmithController extends Controller
 
             $countCrystal = $item->item->itemInfo->break_crystal;
 
-            if ($hasBackpack instanceof Backpack && $crystal->type === ShareItem::TYPE_RESOURCE) {
+            if ($hasBackpack instanceof Backpack && $crystal->type === ShareItemType::RESOURCE) {
                 $hasBackpack->count += $countCrystal;
                 $hasBackpack->save();
 
@@ -186,7 +187,7 @@ class BlacksmithController extends Controller
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->whereIn('share_items.type', [ShareItem::TYPE_WEAPON, ShareItem::TYPE_SHIELD, ShareItem::TYPE_ARMOR])
+            ->whereIn('share_items.type', [ShareItemType::WEAPON->value, ShareItemType::SHIELD->value, ShareItemType::ARMOR->value])
             ->get();
 
         return view('blacksmith.break', compact('blacksmith', 'user', 'items', 'crystal'));

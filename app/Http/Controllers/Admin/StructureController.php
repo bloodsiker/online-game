@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\Npc;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;

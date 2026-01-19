@@ -25,6 +25,10 @@ return new class extends Migration
             $table->foreignId('cloak')->nullable()->comment('Накидка')->constrained('items')->nullOnDelete();
             $table->foreignId('shoes')->nullable()->comment('Обувь')->constrained('items')->nullOnDelete();
             $table->foreignId('gloves')->nullable()->comment('Перчатки')->constrained('items')->nullOnDelete();
+            $table->foreignId('belt_first')->nullable()->comment('Пояс')->constrained('items')->nullOnDelete();
+            $table->foreignId('belt_second')->nullable()->comment('Пояс')->constrained('items')->nullOnDelete();
+            $table->foreignId('bag_first')->nullable()->comment('Сумка')->constrained('items')->nullOnDelete();
+            $table->foreignId('bag_second')->nullable()->comment('Сумка')->constrained('items')->nullOnDelete();
             $table->timestamps();
 
             $table->unique('player_id');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Quest\Quest;
+use App\Models\Location\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

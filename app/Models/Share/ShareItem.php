@@ -2,9 +2,9 @@
 
 namespace App\Models\Share;
 
+use App\Enums\ShareItemType;
 use App\Models\Skill;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +14,7 @@ use App\Models\Monster\Monster;
 
 /**
  * @property int $id
- * @property string $type
+ * @property ShareItemType $type
  * @property string $name
  * @property string|null $description
  * @property string|null $image
@@ -38,63 +38,14 @@ use App\Models\Monster\Monster;
  */
 class ShareItem extends Model
 {
-    use HasFactory;
-
-    public const TYPE_RESOURCE = 'resource';
-    public const TYPE_WEAPON = 'weapon';
-    public const TYPE_SHIELD = 'shield';
-    public const TYPE_ARMOR = 'armor';
-    public const TYPE_BELT = 'belt';
-    public const TYPE_BAG = 'bag';
-    public const TYPE_KEY = 'key';
-    public const TYPE_HEAL = 'heal';
-    public const TYPE_QUEST = 'quest';
-    public const TYPE_ARTIFACT = 'artifact';
-    public const TYPE_RECIPE = 'recipe';
-    public const TYPE_CHEST = 'chest';
-    public const TYPE_SCROLL = 'scroll';
-
     public const SLOT_HAND = 'hand';
-
-    public const TYPES = [
-        self::TYPE_RESOURCE => 'Ресурсы',
-        self::TYPE_WEAPON => 'Оружие',
-        self::TYPE_SHIELD => 'Щит',
-        self::TYPE_ARMOR => 'Броня',
-        self::TYPE_BELT => 'Пояс',
-        self::TYPE_BAG => 'Сумка',
-        self::TYPE_KEY => 'Ключ',
-        self::TYPE_HEAL => 'Восстанавливающие',
-        self::TYPE_QUEST => 'Квест',
-        self::TYPE_ARTIFACT => 'Артефакт',
-        self::TYPE_RECIPE => 'Рецепт',
-        self::TYPE_CHEST => 'Сундук',
-        self::TYPE_SCROLL => 'Свиток',
-    ];
-
-    const GROUPS = [
-        'main' => [
-            self::TYPE_HEAL,
-            self::TYPE_WEAPON,
-            self::TYPE_SHIELD,
-            self::TYPE_ARMOR,
-            self::TYPE_BELT,
-            self::TYPE_BAG,
-            self::TYPE_RESOURCE,
-            self::TYPE_RECIPE,
-            self::TYPE_SCROLL
-        ],
-        'key' => [self::TYPE_KEY],
-        'quest' => [self::TYPE_QUEST],
-        'artifact' => [self::TYPE_ARTIFACT],
-        'gift' => ['gift'],
-    ];
 
     public function scopeByGroup($query, string $group)
     {
-        return $query->whereIn(
-            'type',
-            self::GROUPS[$group] ?? self::GROUPS['main']
+        return $query->whereIn('type',
+            ShareItemType::values(
+                ShareItemType::group($group)
+            )
         );
     }
 
@@ -115,6 +66,7 @@ class ShareItem extends Model
         'is_sell' => 'boolean',
         'is_active' => 'boolean',
         'is_heal' => 'boolean',
+        'type' => ShareItemType::class,
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -146,11 +98,7 @@ class ShareItem extends Model
 
     public function getTypeName(): string
     {
-        if (array_key_exists($this->type, self::TYPES)) {
-            return self::TYPES[$this->type];
-        }
-
-        return $this->type;
+        return $this->type->label();
     }
 
     public function getCountItemPerRecipe(array $items)

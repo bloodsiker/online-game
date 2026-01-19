@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
 use Illuminate\Database\Eloquent\Collection;

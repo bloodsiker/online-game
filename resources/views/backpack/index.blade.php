@@ -1226,15 +1226,15 @@
                                                             <br>
                                                         @endif
 
-                                                        @if($data->hasHeal())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
+                                                        @if($data->hasBag() || $data->hasBelt())
+                                                            <div id="bag_section" class="bag_section">
                                                                 <div align="center">
                                                                     <table border="0" cellspacing="0" cellpadding="0"
                                                                            style="margin: 0 auto;">
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Восстанавливающие</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">Аксессуары</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1243,7 +1243,101 @@
 
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getHeal() as $item)
+                                                                    @if($data->hasBag())
+                                                                        @foreach($data->getBag() as $item)
+                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
+                                                                                data-id="23867698" data-dateti="23867698"
+                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
+                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
+                                                                                class="item ui-sortable-handle" style="opacity: 1;">
+
+
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                            &nbsp;
+                                                                                            @if($item->count > 1)
+                                                                                                <div class="bpdig">
+                                                                                                    {{ $item->count }}
+                                                                                                </div>
+                                                                                            @endif
+                                                                                            <span
+                                                                                                style="position: absolute;right: -1px;top: 41px;"
+                                                                                                act1="5" act2="5" act3="0" rune_h="0"
+                                                                                                aid="23867698" art_id="" cnt="1"
+                                                                                                div_id="AA_23867698" psell="16"
+                                                                                                onmouseover="showItemInfo(this,event,2)"
+                                                                                                onmouseout="showItemInfo(this,event,0)"
+                                                                                                valign="bottom">
+                                                                                        </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </li>
+                                                                        @endforeach
+                                                                    @endif
+
+                                                                    @if($data->hasBelt())
+                                                                        @foreach($data->getBelt() as $item)
+                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
+                                                                                data-id="23867698" data-dateti="23867698"
+                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
+                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
+                                                                                class="item ui-sortable-handle" style="opacity: 1;">
+
+
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                                       style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                            &nbsp;
+                                                                                            @if($item->count > 1)
+                                                                                                <div class="bpdig">
+                                                                                                    {{ $item->count }}
+                                                                                                </div>
+                                                                                            @endif
+                                                                                            <span
+                                                                                                style="position: absolute;right: -1px;top: 41px;"
+                                                                                                act1="5" act2="5" act3="0" rune_h="0"
+                                                                                                aid="23867698" art_id="" cnt="1"
+                                                                                                div_id="AA_23867698" psell="16"
+                                                                                                onmouseover="showItemInfo(this,event,2)"
+                                                                                                onmouseout="showItemInfo(this,event,0)"
+                                                                                                valign="bottom">
+                                                                                        </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </li>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </ul>
+                                                            </div>
+                                                            <br>
+                                                        @endif
+
+                                                        @if($data->hasPotion())
+                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
+                                                                <div align="center">
+                                                                    <table border="0" cellspacing="0" cellpadding="0"
+                                                                           style="margin: 0 auto;">
+                                                                        <tbody>
+                                                                        <tr height="22">
+                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">Боевые эффекты</td>
+                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                                                                        </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                                <br>
+                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
+                                                                    @foreach($data->getPotion() as $item)
                                                                         <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
                                                                             data-id="23867698" data-dateti="23867698"
                                                                             data-quality="2" data-kind="" data-ttl="-1767624247"

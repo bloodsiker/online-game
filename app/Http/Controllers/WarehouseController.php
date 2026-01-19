@@ -93,7 +93,7 @@ class WarehouseController extends Controller
 
                 $itemInBackpack = $itemPutToWarehouse['item'];
 
-                if ($hasInWarehouse instanceof Warehouse && $itemPutToWarehouse['type'] === ShareItem::TYPE_RESOURCE) {
+                if ($hasInWarehouse instanceof Warehouse && $itemPutToWarehouse['type'] === ShareItemType::RESOURCE) {
                     $hasInWarehouse->count += $itemPutToWarehouse['count'];
                     $hasInWarehouse->save();
                     unset($data[$key]);
@@ -173,7 +173,7 @@ class WarehouseController extends Controller
                     ->join('items', 'backpacks.item_id', '=', 'items.id')
                     ->first();
 
-                if ($hasBackpack instanceof Backpack && $takeItem->item->itemInfo->type === ShareItem::TYPE_RESOURCE) {
+                if ($hasBackpack instanceof Backpack && $takeItem->item->itemInfo->type === ShareItemType::RESOURCE) {
                     $hasBackpack->count += $countTake;
                     $hasBackpack->save();
                 } else {

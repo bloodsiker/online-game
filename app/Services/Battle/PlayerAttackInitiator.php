@@ -3,7 +3,7 @@
 namespace App\Services\Battle;
 
 use App\Models\Battle\Battle;
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
 use App\Repositories\BattleRepository;
 

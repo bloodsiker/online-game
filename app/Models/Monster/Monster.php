@@ -2,7 +2,7 @@
 
 namespace App\Models\Monster;
 
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\Share\ShareItem;
 use App\Services\Combat\FightHitInterface;

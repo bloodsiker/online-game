@@ -43,6 +43,26 @@ class BackpackDTO
         return $this->items->get( 'weapon');
     }
 
+    public function hasBag(): bool
+    {
+        return $this->items->has( 'bag');
+    }
+
+    public function getBag(): Collection
+    {
+        return $this->items->get( 'bag');
+    }
+
+    public function hasBelt(): bool
+    {
+        return $this->items->has( 'belt');
+    }
+
+    public function getBelt(): Collection
+    {
+        return $this->items->get( 'belt');
+    }
+
     public function hasShield(): bool
     {
         return $this->items->has( 'shield');
@@ -63,14 +83,14 @@ class BackpackDTO
         return $this->items->get( 'armor');
     }
 
-    public function hasHeal(): bool
+    public function hasPotion(): bool
     {
-        return $this->items->has( 'heal');
+        return $this->items->has( 'potion');
     }
 
-    public function getHeal(): Collection
+    public function getPotion(): Collection
     {
-        return $this->items->get( 'heal');
+        return $this->items->get( 'potion');
     }
 
     public function hasResource(): bool

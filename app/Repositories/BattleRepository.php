@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;

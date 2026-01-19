@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\ItemEffectType;
+use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
+use App\Enums\ShareItemType;
 use App\Models\Auction\Auction;
 use App\Models\Exchange;
 use App\Models\Experience;
 use App\Models\Item\Item;
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
@@ -18,6 +21,7 @@ use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Race;
+use App\Models\Share\ShareItemEffect;
 use App\Models\Share\ShareStructureCategory;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;
@@ -564,7 +568,7 @@ class GenerateSeed extends Command
         $this->location2->itemsOnLocation()->attach($item2->id);
 
         $sItem3 = new ShareItem();
-        $sItem3->type = 'heal';
+        $sItem3->type = ShareItemType::POTION;
         $sItem3->price = 150;
         $sItem3->name = 'Сухой паек';
         $sItem3->description = 'Сухой паек';
@@ -731,7 +735,7 @@ class GenerateSeed extends Command
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sIte12 = new ShareItem();
-        $sIte12->type = ShareItem::TYPE_RESOURCE;
+        $sIte12->type = ShareItemType::RESOURCE;
         $sIte12->price = 10;
         $sIte12->name = 'Слиток';
         $sIte12->description = 'Слиток';
@@ -748,18 +752,88 @@ class GenerateSeed extends Command
         $this->location1->itemsOnLocation()->attach($item12->id, ['count' => 10]);
 
         $sIte13 = new ShareItem();
-        $sIte13->type = ShareItem::TYPE_SCROLL;
+        $sIte13->type = ShareItemType::SCROLL;
         $sIte13->name = 'Сертификат «Новое имя»';
         $sIte13->description = 'Документ, подтверждающий ваше право воспользоваться услугой по смене игрового ника. Будьте внимательны! Новое имя должно быть уникально';
         $sIte13->image = '/img/resource/sert_rename.gif';
         $sIte13->save();
 
         $sIte14 = new ShareItem();
-        $sIte14->type = ShareItem::TYPE_SCROLL;
+        $sIte14->type = ShareItemType::SCROLL;
         $sIte14->name = 'Сертификат «Смена расы»';
         $sIte14->description = 'Позволяет один раз изменить расу.';
         $sIte14->image = '/img/resource/sert_obraz.gif';
         $sIte14->save();
+
+        $sIte15 = new ShareItem();
+        $sIte15->type = ShareItemType::POTION;
+        $sIte15->price = 1000;
+        $sIte15->name = 'Эликсир жизни';
+        $sIte15->description = 'После применения, этот эликсир восстанавливает 50% жизни';
+        $sIte15->image = '/img/resource/life_red.gif';
+        $sIte15->save();
+
+        $sIteEffect15 = new ShareItemEffect();
+        $sIteEffect15->share_item_id = $sIte15->id;
+        $sIteEffect15->effect_type = ItemEffectType::HEAL_HP;
+        $sIteEffect15->value = 50;
+        $sIteEffect15->value_type = ItemEffectValueType::PERCENT;
+        $sIteEffect15->save();
+
+        $item15 = new Item();
+        $item15->share_item_id = $sIte15->id;
+        $item15->save();
+
+        $this->user1->backpack()->attach($item15->id, ['equipped' => 0, 'count' => 200]);
+
+        $sIte16 = new ShareItem();
+        $sIte16->type = ShareItemType::POTION;
+        $sIte16->price = 1500;
+        $sIte16->name = 'Эликсир маны';
+        $sIte16->description = 'После применения, этот эликсир восстанавливает 55% маны';
+        $sIte16->image = '/img/resource/mp_red.gif';
+        $sIte16->save();
+
+        $sIteEffect16 = new ShareItemEffect();
+        $sIteEffect16->share_item_id = $sIte16->id;
+        $sIteEffect16->effect_type = ItemEffectType::HEAL_MP;
+        $sIteEffect16->value = 55;
+        $sIteEffect16->value_type = ItemEffectValueType::PERCENT;
+        $sIteEffect16->save();
+
+        $item16 = new Item();
+        $item16->share_item_id = $sIte16->id;
+        $item16->save();
+
+        $this->user1->backpack()->attach($item16->id, ['equipped' => 0, 'count' => 200]);
+
+        $sIte17 = new ShareItem();
+        $sIte17->type = ShareItemType::BELT;
+        $sIte17->price = 20000;
+        $sIte17->name = 'Пояс титана';
+        $sIte17->description = 'Пояс добавляет три слота для эликсиров, свитков и прочих вспомогательных эффектов';
+        $sIte17->image = '/img/resource/bluebelt.gif';
+        $sIte17->save();
+
+        $item17 = new Item();
+        $item17->share_item_id = $sIte17->id;
+        $item17->save();
+
+        $this->user1->backpack()->attach($item17->id, ['equipped' => 0, 'count' => 1]);
+
+        $sIte18 = new ShareItem();
+        $sIte18->type = ShareItemType::BAG;
+        $sIte18->price = 30000;
+        $sIte18->name = 'Рюкзак путешественника';
+        $sIte18->description = 'Кожаная сумка позволит вам взять с собой на 11 вещей больше';
+        $sIte18->image = '/img/resource/bag2.gif';
+        $sIte18->save();
+
+        $item18 = new Item();
+        $item18->share_item_id = $sIte18->id;
+        $item18->save();
+
+        $this->user1->backpack()->attach($item18->id, ['equipped' => 0, 'count' => 1]);
 
         $this->info('Create Items success');
     }
@@ -791,7 +865,7 @@ class GenerateSeed extends Command
         $sItem2->price = 1000;
         $sItem2->name = 'Рецепт "Кнут Архангела"';
         $sItem2->description = 'Рецепт "Кнут Архангела"';
-        $sItem2->image = '/img/resource/recipe_red.png';
+        $sItem2->image = '/img/resource/scroll_weapon.gif';
         $sItem2->save();
 
         $item2 = new Item();
@@ -809,15 +883,15 @@ class GenerateSeed extends Command
         $sItem3->price = 1000;
         $sItem3->name = 'Кристалл';
         $sItem3->description = 'Кристалл';
-        $sItem3->image = '/img/resource/crystal_gold.png';
+        $sItem3->image = '/img/resource/crystal_gold.gif';
         $sItem3->save();
 
         $item3 = new Item();
         $item3->share_item_id = $sItem3->id;
         $item3->save();
 
-        $details1 = ShareItem::find(1);
-        $details2 = ShareItem::find(14);
+        $details1 = ShareItem::where('name', 'Коготь медведя')->first();
+        $details2 = ShareItem::where('name', 'Слиток')->first();
         $shareRecipe->items()->attach($details1->id, ['count' => 2]);
         $shareRecipe->items()->attach($details2->id, ['count' => 1]);
         $shareRecipe->items()->attach($sItem3->id, ['count' => 100]);
@@ -1115,7 +1189,7 @@ class GenerateSeed extends Command
         $exchangeStructure->save();
 
         $sItem1 = new ShareItem();
-        $sItem1->type = ShareItem::TYPE_RESOURCE;
+        $sItem1->type = ShareItemType::RESOURCE;
         $sItem1->price = 10;
         $sItem1->name = 'Монета древности';
         $sItem1->description = 'Монета древности';
@@ -1123,7 +1197,7 @@ class GenerateSeed extends Command
         $sItem1->save();
 
         $sItem2 = new ShareItem();
-        $sItem2->type = ShareItem::TYPE_RESOURCE;
+        $sItem2->type = ShareItemType::RESOURCE;
         $sItem2->price = 3;
         $sItem2->name = 'Синий Камень Печати';
         $sItem2->description = 'Синий Камень Печати';
@@ -1131,7 +1205,7 @@ class GenerateSeed extends Command
         $sItem2->save();
 
         $sItem3 = new ShareItem();
-        $sItem3->type = ShareItem::TYPE_RESOURCE;
+        $sItem3->type = ShareItemType::RESOURCE;
         $sItem3->price = 5;
         $sItem3->name = 'Зеленый Камень Печати';
         $sItem3->description = 'Зеленый Камень Печати';
@@ -1139,7 +1213,7 @@ class GenerateSeed extends Command
         $sItem3->save();
 
         $sItem4 = new ShareItem();
-        $sItem4->type = ShareItem::TYPE_RESOURCE;
+        $sItem4->type = ShareItemType::RESOURCE;
         $sItem4->price = 10;
         $sItem4->name = 'Красный Камень Печати';
         $sItem4->description = 'Красный Камень Печати';

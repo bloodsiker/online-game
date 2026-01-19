@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Location;
+use App\Models\Location\Location;
 
 class LocationRepository extends AbstractRepository
 {

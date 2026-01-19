@@ -4,10 +4,10 @@ namespace App\Services\Combat;
 
 use App\Decorator\Player\BuffDecorator;
 use App\Decorator\Player\EquipmentDecorator;
+use App\Enums\ShareItemType;
 use App\Models\Item\Item;
 use App\Models\Monster\Monster;
 use App\Models\Player\Player;
-use App\Models\Share\ShareItem;
 use App\Services\Combat\Strategies\AttackStrategyInterface;
 use App\Services\Combat\Strategies\FistAttackStrategy;
 use App\Services\Combat\Strategies\DualWieldStrategy;
@@ -51,15 +51,15 @@ readonly class AttackStrategyResolver
         if (
             !$left instanceof Item &&
             $right instanceof Item &&
-            $right->itemInfo->type === ShareItem::TYPE_SHIELD
+            $right->itemInfo->type === ShareItemType::SHIELD
         ) {
             return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
         }
 
         // Weapon in left hand + shield in right hand — only left weapon
         if (
-            $left instanceof Item && $left->itemInfo->type === ShareItem::TYPE_WEAPON &&
-            $right instanceof Item && $right->itemInfo->type === ShareItem::TYPE_SHIELD
+            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
+            $right instanceof Item && $right->itemInfo->type === ShareItemType::SHIELD
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
@@ -71,8 +71,8 @@ readonly class AttackStrategyResolver
 
         // Two weapons — dual
         if (
-            $left instanceof Item && $left->itemInfo->type === ShareItem::TYPE_WEAPON &&
-            $right instanceof Item && $right->itemInfo->type === ShareItem::TYPE_WEAPON
+            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
+            $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON
         ) {
             return new DualWieldStrategy(
                 hitCalc: $this->hitCalc,
@@ -86,7 +86,7 @@ readonly class AttackStrategyResolver
         // Only the right weapon (the left one is empty)
         if (
             !$left instanceof Item &&
-            $right instanceof Item && $right->itemInfo->type === ShareItem::TYPE_WEAPON
+            $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
@@ -98,7 +98,7 @@ readonly class AttackStrategyResolver
 
         // Only the left weapon (the right one is empty)
         if (
-            $left instanceof Item && $left->itemInfo->type === ShareItem::TYPE_WEAPON &&
+            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
             !$right instanceof Item
         ) {
             return new OneHandWeaponStrategy(

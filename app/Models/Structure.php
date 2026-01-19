@@ -6,6 +6,7 @@ use App\Models\Share\ShareItem;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareStructureCategory;
 use App\Models\Shop\ShopItem;
+use App\Models\Location\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

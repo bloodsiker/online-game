@@ -25,7 +25,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#skill" href="#skill" data-bs-toggle="tab">Навык</a>
                             </li>
-                            @if($item->type === \App\Models\Share\ShareItem::TYPE_RECIPE)
+                            @if($item->type === \App\Enums\ShareItemType::RECIPE)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#recent" href="#recent" data-bs-toggle="tab">Рецепт</a>
                                 </li>
@@ -45,8 +45,10 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="type">Тип</label>
                                                 <select class="form-control" name="type" id="type">
-                                                    @foreach(App\Models\Share\ShareItem::TYPES as $key => $type)
-                                                        <option value="{{ $key }}" @if($item->type === $key) selected @endif>{{ $type }}</option>
+                                                    @foreach(\App\Enums\ShareItemType::cases() as $type)
+                                                        <option value="{{ $type->value }}" @selected(old('type', $item->type?->value) === $type->value)>
+                                                            {{ $type->label() }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -55,8 +57,10 @@
                                                 <label class="col-form-label" for="slot">Слот</label>
                                                 <select class="form-control" name="slot" id="slot">
                                                     <option value=""></option>
-                                                    @foreach(App\Models\Share\ShareItem::TYPES as $key => $type)
-                                                        <option value="{{ $key }}" @if($item->type === $key) selected @endif>{{ $type }}</option>
+                                                    @foreach(\App\Enums\ShareItemType::cases() as $key => $type)
+                                                        <option value="{{ $type->value }}" @selected(old('type', $item->type?->value) === $type->value)>
+                                                            {{ $type->label() }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -180,7 +184,7 @@
                                 </div>
                             </div>
 
-                            @if($item->type === \App\Models\Share\ShareItem::TYPE_RECIPE)
+                            @if($item->type === \App\Enums\ShareItemType::RECIPE)
                                 <div id="recent" class="tab-pane">
                                     <div class="row pb-3">
                                         <div class="col-lg-4">
@@ -251,7 +255,7 @@
         </div>
     </div>
 
-    @if($item->type === \App\Models\Share\ShareItem::TYPE_RECIPE)
+    @if($item->type === \App\Enums\ShareItemType::RECIPE)
         <div id="modalForm" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
             <section class="card">
                 <form action="{{ route('admin.item.recipe.add_item', ['recipe' => $item->recipe->id]) }}" method="post">

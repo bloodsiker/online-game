@@ -2,7 +2,7 @@
 
 namespace App\Services\Battle;
 
-use App\Models\Location;
+use App\Models\Location\Location;
 use App\Models\Battle\Battle;
 
 class BattleOrchestrator
