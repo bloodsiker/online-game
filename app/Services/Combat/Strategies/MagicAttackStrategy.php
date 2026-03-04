@@ -87,7 +87,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
         return [
             $hit
                 ->setMagicSkill($this->magicSkill)
-                ->setWeaponName("заклинанием «{$this->magicSkill->name}»")
+                ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))
                 ->setWeapon(null)
         ];
     }

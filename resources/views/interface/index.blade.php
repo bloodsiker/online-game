@@ -299,7 +299,7 @@
 </style>
 
 
-<table cellpadding="0" cellspacing="0" width="100%" height="70%" border="0">
+<table cellpadding="0" cellspacing="0" width="100%" height="69%" border="0">
     <tbody>
     <tr class="tbl-main_top-bg" style="height: 73px">
         <td colspan="3">
@@ -880,11 +880,9 @@
 <table cellpadding="0" cellspacing="0" width="100%" height="30%" border="0">
     <tbody>
     <tr>
-        <td width="100%"><iframe id="chat-frame" height="100%" width="100%" frameborder="0" src="{{ route('chat') }}"></iframe></td>
-        <td width="335px"><iframe id="who-frame" height="100%" width="335px" frameborder="0" src="{{ route('who') }}"></iframe></td>
-    </tr>
-    <tr style="height: 40px">
-        <td colspan="2"><iframe height="45px" width="100%" frameborder="0" id="bottom-frame" src="{{ route('chat-action') }}"></iframe></td>
+        <td>
+            <iframe id="chat-frame" height="100%" width="100%" frameborder="0" src="{{ route('chat') }}"></iframe>
+        </td>
     </tr>
     </tbody>
 </table>

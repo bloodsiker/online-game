@@ -3,10 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\ItemEffectType;
 use App\Models\Clan\ClanMember;
 use App\Models\Player\Player;
 use App\Models\Location\Location;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,6 +16,29 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property string $name
+ * @property string $email
+ * @property int $player_id
+ * @property int $location_id
+ * @property int $prev_location_id
+ * @property bool $is_admin
+ * @property string $last_online_at
+ * @property string $email_verified_at
+ * @property string $password
+ * @property string $remember_token
+ * @property int $money
+ * @property int $diamond
+ * @property int $warehouse_count
+ * @property int $bag_count
+ * @property int $slot_count
+ *
+ * @property-read Collection|Backpack[] $backpack
+ * @property-read Location $currentLocation
+ * @property-read Location $prevLocation
+ * @property-read Player $player
+ * @property-read ClanMember|null $clanMembership
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
@@ -61,6 +86,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $attributes = [
         'is_admin' => false,
         'warehouse_count' => 50,
+        'bag_count' => 25,
+        'slot_count' => 3,
     ];
 
     public function backpack(): BelongsToMany
@@ -86,5 +113,23 @@ class User extends Authenticatable implements MustVerifyEmail
     public function clanMembership(): HasOne
     {
         return $this->hasOne(ClanMember::class);
+    }
+
+    public function getBagCount(): int
+    {
+        $playerEquip = $this->player->playerEquip;
+        $bags = collect([
+            $playerEquip->bagFirstSlot,
+            $playerEquip->bagSecondSlot,
+        ])->filter();
+
+        $extraSlots = $bags->sum(function ($bag) {
+            return $bag->itemInfo
+                ->effects
+                ->where('effect_type', ItemEffectType::BAG_SLOT)
+                ->sum('value');
+        });
+
+        return $this->bag_count + $extraSlots;
     }
 }

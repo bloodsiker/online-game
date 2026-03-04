@@ -67,6 +67,7 @@
 <table cellpadding="0" cellspacing="0" width="100%" height="100%" border="0">
     <tbody>
     <tr class="lgb" width="100%" height="100%" style="vertical-align: top">
+        <td width="1%" class="lgb-left" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
         <td>
             <center><b style="color:green">На локации: {{ $countOnlineLocation }}</b></center>
             <br>
@@ -110,6 +111,7 @@
                 </div>
             @endforeach
         </td>
+        <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
     </tr>
     <tr style="position: absolute; bottom: 0; left: -3px">
         <td class="tbl-main_separator-v" width="3">

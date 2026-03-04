@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use App\Models\Share\ShareItem;
 
-class ExchangeItemDTO {
+final class ExchangeItemDTO {
     public function __construct(
         protected int $id,
         protected ShareItem $fromItem,

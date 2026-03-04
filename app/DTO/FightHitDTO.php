@@ -9,7 +9,7 @@ use App\Models\Share\ShareItem;
 use App\Models\Skill;
 use Illuminate\Support\Collection;
 
-class FightHitDTO
+final class FightHitDTO
 {
     protected int $damage;
     protected bool $dodge = false;

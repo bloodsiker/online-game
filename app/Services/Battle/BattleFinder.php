@@ -7,7 +7,7 @@ use App\Models\Battle\BattleDetail;
 use App\Models\Location\Location;
 use App\Repositories\BattleRepository;
 
-class BattleFinder
+readonly class BattleFinder
 {
     public function __construct(
         private BattleRepository $battleRepository,

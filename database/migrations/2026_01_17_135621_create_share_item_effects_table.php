@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('share_item_effects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('share_item_id')->constrained('share_items')->onDelete('cascade');
-            $table->enum('effect_type', ['heal_hp', 'heal_mp', 'buff_attack', 'buff_armor', 'damage_hp']);
+            $table->enum('effect_type', ['heal_hp', 'heal_mp', 'buff_attack', 'buff_armor', 'damage_hp', 'attack_min', 'attack_max', 'armor', 'bag_slot', 'belt_slot']);
             $table->integer('value');
             $table->enum('value_type', ['flat', 'percent']);
             $table->timestamps();

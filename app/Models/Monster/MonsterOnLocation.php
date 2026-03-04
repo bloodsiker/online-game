@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $location_id
+ * @property int $monster_id
+ * @property int $hp_max
+ * @property int $hp_now
+ * @property int $active
+ * @property int $is_drop_money
+ * @property int $current_phase
+ *
+ * @property-read Location $location
+ * @property-read Monster $monster
+ */
 class MonsterOnLocation extends Model
 {
     use HasFactory;

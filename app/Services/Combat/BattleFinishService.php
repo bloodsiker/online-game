@@ -38,7 +38,7 @@ readonly class BattleFinishService
         $location->save();
 
         foreach ($battle->detailsWithUsers as $userInBattle) {
-            if ($userInBattle->status === 1) {
+            if ($userInBattle->status->isLife()) {
                 $userInBattle->user->player->victory++;
                 $userInBattle->user->player->save();
             }

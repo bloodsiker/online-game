@@ -66,8 +66,6 @@ Route::post('/register/check', [RegisterController::class, 'registerCheck'])->na
 
 
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
-Route::get('/chat', [ChatController::class, 'index'])->name('chat');
-Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat-action');
 
 Route::middleware(['updateLastOnline'])->group(function () {
     Route::post('/character/points-save', [CharacterController::class, 'pointSave'])->name('character.point_save');
@@ -146,6 +144,11 @@ Route::get('/items/hand-over-to-user/{id}', [ItemController::class, 'handOverToU
 Route::get('/items/drop/{id}', [ItemController::class, 'dropItem'])->name('items.drop');
 
 Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');
+
+Route::get('/chat', [ChatController::class, 'index'])->name('chat');
+Route::get('/chat-text', [ChatController::class, 'chat'])->name('chat.text');
+Route::get('/chat-log', [ChatController::class, 'chatLog'])->name('chat.log');
+Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat.action');
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');

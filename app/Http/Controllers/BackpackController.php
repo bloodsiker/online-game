@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Decorator\Player\EquipmentDecorator;
 use App\Services\BackpackService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipRenderer;
@@ -36,6 +37,9 @@ class BackpackController extends Controller
         }
 
         $itemTooltipScript = $this->renderer->render($this->collector->all());
+
+//        $playerDecorator = new EquipmentDecorator($user->player);
+//        dd($playerDecorator->getArmor());
 
         return view('backpack.index', compact('data', 'user', 'playerEquip', 'itemTooltipScript'));
     }

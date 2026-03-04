@@ -2,18 +2,32 @@
 
 namespace App\Models\Battle;
 
+use App\Enums\BattleDetailStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Monster\MonsterOnLocation;
 
+/**
+ * @property int $user_id
+ * @property int $location_monster_id
+ * @property BattleDetailStatus $status
+ *
+ * @property-read User $user
+ * @property-read MonsterOnLocation $locationMonster
+ */
 class BattleDetail extends Model
 {
     use HasFactory;
 
-    public const STATUS_DEATH = 0;
-    public const STATUS_LIFE = 1;
+    protected $casts = [
+        'status' => BattleDetailStatus::class,
+    ];
+
+    protected $attributes = [
+        'status' => BattleDetailStatus::LIFE,
+    ];
 
     public function user(): BelongsTo
     {

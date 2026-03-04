@@ -9,6 +9,7 @@ use App\Repositories\MonsterOnLocationRepository;
 use App\Services\Battle\BattleOrchestrator;
 use App\Services\Battle\MonsterSelector;
 use App\Services\BattleService;
+use App\Services\PlayerMovementService;
 use Illuminate\Support\Facades\Auth;
 
 class LocationController extends Controller
@@ -19,6 +20,7 @@ class LocationController extends Controller
         readonly protected MonsterSelector $monsterSelector,
         readonly protected MonsterOnLocationRepository $monsterOnLocationRepository,
         readonly protected LocationRepository $locationRepository,
+        readonly protected PlayerMovementService $playerMovementService,
     ) {}
 
     public function index()
@@ -48,13 +50,11 @@ class LocationController extends Controller
     public function moveTo($direction)
     {
         $user = Auth::user();
-        $player = $user->player;
-        $location = $user->currentLocation;
 
-        if ($location->$direction) {
-            $user->prev_location_id = $user->location_id;
-            $user->location_id = $location->$direction;
-            $user->save();
+        $result = $this->playerMovementService->move($user, $direction);
+
+        if (!$result->success) {
+            session()->flash('message', $result->message);
         }
 
         $location = $this->locationRepository->getOneById($user->location_id);
@@ -64,7 +64,13 @@ class LocationController extends Controller
 
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
-        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player'));
+        return view('location.index', [
+            'location' => $location,
+            'battle' => $battle,
+            'monsterOnLocation' => $monsterOnLocation,
+            'player' => $user->player,
+            'speedModifier' => $result->speedModifier,
+        ]);
     }
 
     public function takeItems()

@@ -2,20 +2,39 @@
 
 namespace App\Models\Battle;
 
+use App\Enums\BattleStatus;
 use App\Models\Location\Location;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $location_id
+ * @property int $rounds
+ * @property array $boss_metadata
+ * @property BattleStatus $status
+ *
+ * @property-read Location $location
+ * @property-read Collection|BattleDetail[] $details
+ * @property-read Collection|BattleDetail[] $detailsWithUsers
+ * @property-read Collection|BattleDetail[] $detailsWithMonsters
+ */
 class Battle extends Model
 {
     use HasFactory;
 
-    public const STATUS_FINISH = 0;
-    public const STATUS_ACTIVE = 1;
+    protected $fillable = ['location_id', 'status', 'rounds', 'boss_metadata'];
 
-    protected $fillable = ['location_id', 'status', 'rounds'];
+    protected $casts = [
+        'boss_metadata' => 'array',
+        'status' => BattleStatus::class,
+    ];
+
+    protected $attributes = [
+        'status' => BattleStatus::ACTIVE,
+    ];
 
     public function location(): BelongsTo
     {
@@ -35,15 +54,5 @@ class Battle extends Model
     public function detailsWithMonsters(): HasMany
     {
         return $this->hasMany(BattleDetail::class, 'battle_id')->with(['locationMonster'])->whereNotNull('location_monster_id');
-    }
-
-    public function isFinish(): bool
-    {
-        return $this->status === self::STATUS_FINISH;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->status === self::STATUS_ACTIVE;
     }
 }

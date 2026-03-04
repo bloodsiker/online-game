@@ -11,6 +11,11 @@ enum ItemEffectType: string
     case BUFF_DEFENSE = 'buff_armor';
 
     case DAMAGE_HP = 'damage_hp';
+    case ATTACK_MIN = 'attack_min';
+    case ATTACK_MAX = 'attack_max';
+    case ARMOR = 'armor';
+    case BAG_SLOT = 'bag_slot';
+    case BELT_SLOT = 'belt_slot';
 
     public function isInstant(): bool
     {

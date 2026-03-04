@@ -63,25 +63,24 @@
                 </form>
             </td>
             <td width="30"><img src="{{ asset('img/bg/chat/tbl-main_chat-bg-left.gif') }}" width="30" height="43/"></td>
-            <td width="52" class="tbl-main_chat-btn"><a href="#"
-                                                        onclick="if (!window.__cfRLUnblockHandlers) return false; chatSend();return false;"><img
+            <td width="52" class="tbl-main_chat-btn">
+                <a href="#" onclick="chatSend();return false;"><img
                         id="send_btn" src="{{ asset('img/bg/chat/send-reg.gif') }}" width="52" height="34" border="0"
                         title="Отправить сообщение в чат"></a></td>
-            <td width="67" class="tbl-main_chat-btn"><a href="#"
-                                                        onclick="if (!window.__cfRLUnblockHandlers) return false; chatClearText();return false;"><img
+            <td width="67" class="tbl-main_chat-btn">
+                <a href="#" onclick="chatClearText();return false;"><img
                         id="clear_btn" src="{{ asset('img/bg/chat/clear-reg.gif') }}" width="67" height="34" border="0"
                         title="Очистить окно чата"></a></td>
-            <td width="68" class="tbl-main_chat-btn"><a href="#"
-                                                        onclick="if (!window.__cfRLUnblockHandlers) return false; chatShowSmiles(this);return false;"><img
+            <td width="68" class="tbl-main_chat-btn">
+                <a href="#" onclick="chatShowSmiles(this);return false;"><img
                         id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34" border="0"
                         title="Смайлики"></a></td>
-            <td width="68" class="tbl-main_chat-btn"><a href="#"
-                                                        onclick="if (!window.__cfRLUnblockHandlers) return false; return false;"><img
+            <td width="68" class="tbl-main_chat-btn"><a href="#" onclick=" return false;"><img
                         id="priv_btn" src="{{ asset('img/bg/chat/priv-reg.gif') }}" width="68" height="34" border="0"
                         title="Получать только сообщения адресованные вам" title1="Получать только приватные сообщения"
                         title2="Получать все сообщения"></a></td>
-            <td width="74" class="tbl-main_chat-btn"><a href="#"
-                                                        onclick="if (!window.__cfRLUnblockHandlers) return false; chatRefreshUsers();return false;"><img
+            <td width="74" class="tbl-main_chat-btn">
+                <a href="#" onclick="chatRefreshUsers();return false;"><img
                         id="refresh_btn" src="{{ asset('img/bg/chat/refresh-reg.gif') }}" width="74" height="34" border="0"
                         title="Обновить список игроков в этой локации"></a></td>
             <td width="15"><img src="{{ asset('img/bg/chat/tbl-main_chat-bg-right.gif') }}" width="15" height="43/"></td>
@@ -95,6 +94,106 @@
     function sendDataToGame(url) {
         window.parent.postMessage({ url: url }, '*');
     }
+
+    function gebi(id){
+        return document.getElementById(id)
+    }
+
+    var chatButtons = {
+        // 'party_btn': ['images/des/group_inact.png', 'images/des/group_act.png', 'images/des/group_act.png', 'images/des/group_act.png'],
+        'send_btn': ['{{ asset('img/bg/chat/send-reg.gif') }}', '{{ asset('img/bg/chat/send-roll.gif') }}', '{{ asset('img/bg/chat/send-pressed.gif') }}'],
+        'clear_btn': ['{{ asset('img/bg/chat/clear-reg.gif') }}', '{{ asset('img/bg/chat/clear-roll.gif') }}', '{{ asset('img/bg/chat/clear-pressed.gif') }}'],
+        'smile_btn': ['{{ asset('img/bg/chat/smile-reg.gif') }}', '{{ asset('img/bg/chat/smile-roll.gif') }}', '{{ asset('img/bg/chat/smile-pressed.gif') }}', '{{ asset('img/bg/chat/smile-pressed.gif') }}'],
+        'priv_btn': ['{{ asset('img/bg/chat/priv-reg.gif') }}', '{{ asset('img/bg/chat/priv-roll.gif') }}', '{{ asset('img/bg/chat/priv-pressed.gif') }}', '{{ asset('img/bg/chat/priv-pressed-on.gif') }}'],
+        'refresh_btn': ['{{ asset('img/bg/chat/refresh-reg.gif') }}', '{{ asset('img/bg/chat/refresh-roll.gif') }}', '{{ asset('img/bg/chat/refresh-pressed.gif') }}']
+    }
+    var chatButtonState = {};
+
+    var chatChButtons = {
+        '1'  : ['{{ asset('img/bg/chat/chat_1_off.png') }}', '{{ asset('img/bg/chat/chat_1_inact.png') }}', '{{ asset('img/bg/chat/chat_1_act.png') }}'],
+        '8' : ['{{ asset('img/bg/chat/chat_2_off.png') }}', '{{ asset('img/bg/chat/chat_2_inact.png') }}', '{{ asset('img/bg/chat/chat_2_act.png') }}'],
+        '4'  : ['{{ asset('img/bg/chat/chat_3_off.png') }}', '{{ asset('img/bg/chat/chat_3_inact.png') }}', '{{ asset('img/bg/chat/chat_3_act.png') }}'],
+        '16' : ['{{ asset('img/bg/chat/chat_4_off.png') }}', '{{ asset('img/bg/chat/chat_4_inact.png') }}', '{{ asset('img/bg/chat/chat_4_act.png') }}'],
+        '32'  : ['{{ asset('img/bg/chat/chat_5_off.png') }}', '{{ asset('img/bg/chat/chat_5_inact.png') }}', '{{ asset('img/bg/chat/chat_5_act.png') }}'],
+        '64'  : ['{{ asset('img/bg/chat/chat_6_off.png') }}', '{{ asset('img/bg/chat/chat_6_inact.png') }}', '{{ asset('img/bg/chat/chat_6_act.png') }}']
+    };
+
+    for (i in chatButtons) {
+        for (j in chatButtons[i]) {
+            preloadImages(chatButtons[i][j]);
+        }
+    }
+    for (i in chatChButtons) {
+        for (j in chatChButtons[i]) {
+            preloadImages(chatChButtons[i][j]);
+        }
+    }
+
+    preloadImages(
+        'images/des/4_left_act.png',
+        'images/des/4_center_act.png',
+        'images/des/4_right_act.png',
+        'images/des/4_left_inact.png',
+        'images/des/4_center_inact.png',
+        'images/des/4_right_inact.png'
+    );
+
+    function preloadImages() {
+        var d = document;
+        if(!d._prImg) d._prImg = new Array();
+        var i, j = d._prImg.length, a = preloadImages.arguments;
+        for (i=0; i<a.length; i++) {
+            d._prImg[j] = new Image;
+            d._prImg[j++].src = a[i];
+        }
+    }
+
+    function chatSetButtonHandlers() {
+        for (i in chatButtons) {
+            obj = gebi(i);
+            if (!obj) continue;
+            obj.onmouseout = function() {
+                this.src = !chatButtonState[this.id] ? chatButtons[this.id][0]: chatButtons[this.id][3];
+            };
+            obj.onmouseover = function() {
+                this.src = !chatButtonState[this.id] ? chatButtons[this.id][1]: chatButtons[this.id][3];
+            };
+            obj.onmousedown = function() {
+                this.src = !chatButtonState[this.id] ? chatButtons[this.id][2]: chatButtons[this.id][3];
+            };
+            obj.onmouseup = function() {
+                if (chatButtons[this.id][3]) {
+                    chatButtonState[this.id] = !chatButtonState[this.id];
+                    this.title = chatButtonState[this.id] ?
+                        this.getAttribute('title2') || this.title :
+                        this.getAttribute('title1') || this.title ;
+                }
+                this.src = !chatButtonState[this.id] ? chatButtons[this.id][1]: chatButtons[this.id][3];
+            };
+        }
+    }
+
+    function chatClearText() {
+        const iframe = parent.document.querySelector('iframe[name="chat_text"]');
+        console.log(iframe);
+
+        if (!iframe || !iframe.contentDocument) {
+            setTimeout(chatClearText, 1000);
+            return;
+        }
+
+        const obj = iframe.contentDocument.getElementById('content');
+        console.log(obj);
+
+        if (!obj) {
+            setTimeout(chatClearText, 1000);
+            return;
+        }
+
+        obj.innerHTML = '';
+    }
+
+    chatSetButtonHandlers();
 </script>
 
 <script>

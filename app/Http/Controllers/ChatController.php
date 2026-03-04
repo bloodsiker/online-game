@@ -9,6 +9,16 @@ class ChatController extends Controller
         return view('chat.index');
     }
 
+    public function chat()
+    {
+        return view('chat.chat');
+    }
+
+    public function chatLog()
+    {
+        return view('chat.log');
+    }
+
     public function chatAction()
     {
         return view('chat.chat-action');

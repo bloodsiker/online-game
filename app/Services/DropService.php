@@ -35,7 +35,7 @@ class DropService
 
     public function dropItemsFromMonsters(Battle $battle, Location $location): void
     {
-        if ($battle->isFinish()) {
+        if ($battle->status->isFinish()) {
             $detailsWithMonsters = BattleDetail::with('locationMonster.monster.items')
                 ->whereNotNull('location_monster_id')
                 ->where('battle_id', $battle->id)->get();

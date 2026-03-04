@@ -10,12 +10,26 @@ use App\Models\Race;
 use App\Models\User;
 use App\Services\Combat\FightHitInterface;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $hp_now
+ * @property int $hp_max
+ * @property int $mp_now
+ * @property int $mp_max
+ *
+ * @property-read User $user
+ * @property-read Race $race
+ * @property-read PlayerEquipment $playerEquip
+ * @property-read Collection|PlayerSkill[] $skills
+ * @property-read Collection|MagicSkill[] $magicSkills
+ * @property-read Collection|QuestPlayer[] $quests
+ */
 class Player extends Model implements PlayerInterface, FightHitInterface
 {
     use HasFactory;
@@ -132,7 +146,7 @@ class Player extends Model implements PlayerInterface, FightHitInterface
     {
         $expGive = $this->exp - ($this->exp_up - $this->exp_diff);
 
-        return round($expGive * 100 / $this->exp_diff, 2);
+        return max(round($expGive * 100 / $this->exp_diff, 2), 100);
     }
 
     public function getPercentHp()
@@ -167,7 +181,7 @@ class Player extends Model implements PlayerInterface, FightHitInterface
             return;
         }
 
-        $seconds = $this->last_regen_at->diffInSeconds($now);
+        $seconds = (int) $this->last_regen_at->diffInSeconds($now);
         $ticks = intdiv($seconds, self::REGEN_INTERVAL);
 
         if ($ticks <= 0) {

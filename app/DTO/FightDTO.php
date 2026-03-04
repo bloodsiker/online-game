@@ -7,7 +7,7 @@ use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
 use App\Models\Player\Player;
 
-class FightDTO
+final class FightDTO
 {
     protected Battle $battle;
     protected BattleRound $battleRound;

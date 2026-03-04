@@ -1059,7 +1059,7 @@
                                                 <table class="coll w100 p10h p2v brd2-all">
                                                     <tbody>
                                                     <tr class="bg_l">
-                                                        <td nowrap=""><b>Вместимость:</b> &nbsp;&nbsp;&nbsp;<b class="redd"><span id="artifact_amount">23</span>/<span id="artifact_amount_max">25</span></b></td>
+                                                        <td nowrap=""><b>Вместимость:</b> &nbsp;&nbsp;&nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
                                                         <td align="right" nowrap="">
                                                             <b>Монет:</b>
                                                             &nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>

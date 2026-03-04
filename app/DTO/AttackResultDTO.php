@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class AttackResultDTO
+final class AttackResultDTO
 {
     private array $logs = [];
 

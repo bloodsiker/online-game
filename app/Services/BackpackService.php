@@ -12,16 +12,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class BackpackService
 {
-    private const COUNTABLE_TYPES = [
-        ShareItemType::POTION->value,
-        ShareItemType::WEAPON->value,
-        ShareItemType::SHIELD->value,
-        ShareItemType::ARMOR->value,
-        ShareItemType::RESOURCE->value,
-        ShareItemType::RECIPE->value,
-        ShareItemType::SCROLL->value,
-    ];
-
     public function getBaseQuery(User $user)
     {
         return Backpack::select('backpacks.*')
@@ -51,7 +41,7 @@ class BackpackService
     public function getCountableItemsCount(User $user): int
     {
         return $this->getBaseQuery($user)
-            ->whereIn('share_items.type', self::COUNTABLE_TYPES)
+            ->where('share_items.is_weight', true)
             ->count();
     }
 

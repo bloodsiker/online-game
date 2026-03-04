@@ -146,7 +146,11 @@
                 @if($monsterOnLocation->count())
                     <div class="battle-description">
                         @foreach($monsterOnLocation as $monsterLocation)
-                            <div><a href="{{ route('info.monster', ['id' => $monsterLocation->id]) }}" target="_blank" class="color-red">{{ $monsterLocation->monster->name }}</a> [<a href="{{ route('fight.attack.monster', ['id' => $monsterLocation->id]) }}">атаковать</a>]</div>
+                            @if($monsterLocation->monster->isBoss())
+                                <div><b><a href="{{ route('info.monster', ['id' => $monsterLocation->id]) }}" target="_blank" class="color-red">{{ $monsterLocation->monster->name }}</a></b> [<a href="{{ route('fight.attack.monster', ['id' => $monsterLocation->id]) }}">атаковать</a>]</div>
+                            @else
+                                <div><a href="{{ route('info.monster', ['id' => $monsterLocation->id]) }}" target="_blank" class="color-red">{{ $monsterLocation->monster->name }}</a> [<a href="{{ route('fight.attack.monster', ['id' => $monsterLocation->id]) }}">атаковать</a>]</div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
@@ -337,6 +341,10 @@
 
 <script>
     function handleKeydown(event) {
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+            return;
+        }
+
         switch (event.key.toLowerCase()) {
             case 'arrowup':
                 document.getElementById('move-north').click();
@@ -470,6 +478,10 @@
 
     const currentLocationId = {{ auth()->user()->location_id }};
     parent.sendToFrame('map-frame', { currentLocationId });
+
+    @if (session()->has('message'))
+        window.parent.showErrorIframe('{{ session('message') }}')
+    @endif
 </script>
 
 </body>

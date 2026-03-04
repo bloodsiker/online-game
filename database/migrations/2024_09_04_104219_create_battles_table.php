@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('location_id')->constrained('locations')->cascadeOnDelete();
             $table->integer('rounds')->default(1);
             $table->tinyInteger('status')->default(1);
+            $table->json('boss_metadata')->nullable();
             $table->timestamps();
         });
 
@@ -45,6 +46,20 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
             $table->foreign('location_monster_id')->references('id')->on('monster_on_locations')->nullOnDelete();
         });
+
+        // Логи перемог над босами
+        Schema::create('boss_defeat_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('battle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('monster_id')->constrained()->onDelete('cascade');
+            $table->foreignId('player_id')->constrained()->onDelete('cascade');
+            $table->integer('turns_taken');
+            $table->json('mechanics_triggered')->nullable();
+            $table->integer('final_phase')->default(1);
+            $table->timestamps();
+
+            $table->index(['monster_id', 'created_at']);
+        });
     }
 
     /**
@@ -52,6 +67,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('boss_defeat_logs');
         Schema::dropIfExists('battle_rounds');
         Schema::dropIfExists('battle_details');
         Schema::dropIfExists('battles');

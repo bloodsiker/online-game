@@ -61,6 +61,8 @@ return new class extends Migration
             $table->integer('money')->default(0);
             $table->integer('diamond')->default(0);
             $table->integer('warehouse_count')->default(50);
+            $table->integer('bag_count')->default(25);
+            $table->integer('slot_count')->default(3);
 
             $table->foreign('player_id')->references('id')->on('players');
         });

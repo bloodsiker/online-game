@@ -2,55 +2,130 @@
 
 namespace App\Decorator\Player;
 
+use App\Enums\ItemEffectType;
+use App\Enums\ItemEffectValueType;
 use App\Models\Item\Item;
 
 class EquipmentDecorator extends PlayerDecorator
 {
-    public function getLeftHandMinDmg(): int
+//    private function getEffectValue(ItemEffectType $type): int
+//    {
+//        return $this->equippedItems()->sum(function (Item $item) use ($type) {
+//            return $item->itemInfo
+//                ->effects
+//                ->where('effect_type', $type)
+//                ->sum('value');
+//        });
+//    }
+
+    private function getEffectValue(ItemEffectType $type): int
     {
-        $baseAttack = $this->player->getLeftHandMinDmg();
-        if ($this->player->playerEquip->handLeft instanceof Item) {
-            $baseAttack = $this->player->playerEquip->handLeft->itemInfo->min_attack;
+        $flat = 0;
+        $percent = 0;
+
+        foreach ($this->equippedItems() as $item) {
+            foreach ($item->itemInfo->effects as $effect) {
+                if ($effect->effect_type !== $type) {
+                    continue;
+                }
+
+                if ($effect->value_type === ItemEffectValueType::FLAT) {
+                    $flat += $effect->value;
+                }
+
+                if ($effect->value_type === ItemEffectValueType::PERCENT) {
+                    $percent += $effect->value;
+                }
+            }
         }
 
-        return $baseAttack;
+        return (int) ($flat + ($this->player->getArmor() * $percent / 100));
+    }
+
+    private function getWeaponDamage(?Item $weapon, ItemEffectType $type, int $baseDamage): int
+    {
+        if (!$weapon) {
+            return $baseDamage;
+        }
+
+        $damage = $weapon->itemInfo
+            ->effects
+            ->where('effect_type', $type)
+            ->sum('value');
+
+        return $damage;
+    }
+
+    public function getLeftHandMinDmg(): int
+    {
+//        $baseAttack = $this->player->getLeftHandMinDmg();
+//        if ($this->player->playerEquip->handLeft instanceof Item) {
+//            $baseAttack = $this->player->playerEquip->handLeft->itemInfo->min_attack;
+//        }
+//
+//        return $baseAttack;
+
+        return $this->getWeaponDamage(
+            weapon: $this->player->playerEquip->handLeft,
+            type: ItemEffectType::ATTACK_MIN,
+            baseDamage: $this->player->getLeftHandMinDmg()
+        );
     }
 
     public function getLeftHandMaxDmg(): int
     {
-        $baseAttack = $this->player->getLeftHandMaxDmg();
-        if ($this->player->playerEquip->handLeft instanceof Item) {
-            $baseAttack = $this->player->playerEquip->handLeft->itemInfo->max_attack;
-        }
+//        $baseAttack = $this->player->getLeftHandMaxDmg();
+//        if ($this->player->playerEquip->handLeft instanceof Item) {
+//            $baseAttack = $this->player->playerEquip->handLeft->itemInfo->max_attack;
+//        }
+//
+//        return $baseAttack;
 
-        return $baseAttack;
+        return $this->getWeaponDamage(
+            weapon: $this->player->playerEquip->handLeft,
+            type: ItemEffectType::ATTACK_MAX,
+            baseDamage: $this->player->getLeftHandMaxDmg()
+        );
     }
 
     public function getRightHandMinDmg(): int
     {
-        $baseAttack = $this->player->getRightHandMinDmg();
-        $rightHand = $this->player->playerEquip->handRight;
-        if ($rightHand instanceof Item && $rightHand->itemInfo->type === 'weapon') {
-            $baseAttack = $rightHand->itemInfo->min_attack;
-        }
+//        $baseAttack = $this->player->getRightHandMinDmg();
+//        $rightHand = $this->player->playerEquip->handRight;
+//        if ($rightHand instanceof Item && $rightHand->itemInfo->type === 'weapon') {
+//            $baseAttack = $rightHand->itemInfo->min_attack;
+//        }
+//
+//        return $baseAttack;
 
-        return $baseAttack;
+        return $this->getWeaponDamage(
+            weapon: $this->player->playerEquip->handRight,
+            type: ItemEffectType::ATTACK_MIN,
+            baseDamage: $this->player->getRightHandMinDmg()
+        );
     }
 
     public function getRightHandMaxDmg(): int
     {
-        $baseAttack = $this->player->getRightHandMaxDmg();
-        $rightHand = $this->player->playerEquip->handRight;
-        if ($rightHand instanceof Item && $rightHand->itemInfo->type === 'weapon') {
-            $baseAttack = $rightHand->itemInfo->max_attack;
-        }
+//        $baseAttack = $this->player->getRightHandMaxDmg();
+//        $rightHand = $this->player->playerEquip->handRight;
+//        if ($rightHand instanceof Item && $rightHand->itemInfo->type === 'weapon') {
+//            $baseAttack = $rightHand->itemInfo->max_attack;
+//        }
+//
+//        return $baseAttack;
 
-        return $baseAttack;
+        return $this->getWeaponDamage(
+            weapon: $this->player->playerEquip->handRight,
+            type: ItemEffectType::ATTACK_MAX,
+            baseDamage: $this->player->getRightHandMaxDmg()
+        );
     }
 
     public function getArmor(): int
     {
-        return $this->player->getArmor() + $this->getArmorFromEquipment();
+//        return $this->player->getArmor() + $this->getArmorFromEquipment();
+        return $this->player->getArmor() + $this->getEffectValue(ItemEffectType::ARMOR);
     }
 
     public function getStrength() {

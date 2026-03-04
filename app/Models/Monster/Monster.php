@@ -6,16 +6,22 @@ use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\Share\ShareItem;
 use App\Services\Combat\FightHitInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Monster extends Model implements FightHitInterface
 {
     use HasFactory;
 
     protected $fillable = [
-        'lvl', 'name', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression', 'exp', 'min_money', 'max_money'
+        'lvl', 'name', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression', 'exp', 'min_money', 'max_money', 'is_boss'
+    ];
+
+    protected $attributes = [
+        'is_boss' => false,
     ];
 
     public function locations(): BelongsToMany
@@ -34,6 +40,29 @@ class Monster extends Model implements FightHitInterface
         return $this->belongsToMany(Effect::class, 'monster_effects')
             ->withPivot('chance')
             ->withTimestamps();
+    }
+
+    public function mechanics(): HasMany
+    {
+        return $this->hasMany(BossMechanic::class);
+    }
+
+    public function phases(): HasMany
+    {
+        return $this->hasMany(BossPhase::class)->orderBy('phase_number');
+    }
+
+    public function getActiveMechanics(): Collection
+    {
+        return $this->mechanics()
+            ->where('is_active', true)
+            ->orderBy('priority')
+            ->get();
+    }
+
+    public function isBoss(): bool
+    {
+        return $this->is_boss;
     }
 
     public function getDodge(): int

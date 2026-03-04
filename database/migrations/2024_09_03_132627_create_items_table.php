@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
             $table->boolean('is_slot_usable')->default(false);
+            $table->boolean('is_weight')->default(true);
             $table->integer('price')->default(0);
             $table->integer('break_crystal')->default(0);
             $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'belt', 'bag'])->nullable();

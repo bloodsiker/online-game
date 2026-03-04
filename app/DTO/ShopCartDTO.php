@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use Illuminate\Database\Eloquent\Collection;
 
-class ShopCartDTO
+final class ShopCartDTO
 {
     public function __construct(
         protected readonly Collection $items,

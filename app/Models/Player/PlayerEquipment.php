@@ -72,4 +72,24 @@ class PlayerEquipment extends Model
     {
         return $this->belongsTo(Item::class, 'gloves')->with(['itemInfo']);
     }
+
+    public function beltFirstSlot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'belt_first')->with(['itemInfo']);
+    }
+
+    public function beltSecondSlot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'belt_second')->with(['itemInfo']);
+    }
+
+    public function bagFirstSlot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'bag_first')->with(['itemInfo']);
+    }
+
+    public function bagSecondSlot(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'bag_second')->with(['itemInfo']);
+    }
 }

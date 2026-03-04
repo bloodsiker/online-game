@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Enums\BattleStatus;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
@@ -31,19 +32,19 @@ class BattleRepository extends AbstractRepository
 
     public function findActiveBattleOnLocation(Location $location): ?Battle
     {
-        return $this->getQuery()->where(['location_id' => $location->id, 'status' => Battle::STATUS_ACTIVE])->first();
+        return $this->getQuery()->where(['location_id' => $location->id, 'status' => BattleStatus::ACTIVE])->first();
     }
 
     public function finishBattle(int $id): Battle
     {
-        return $this->update(['status' => Battle::STATUS_FINISH], $id);
+        return $this->update(['status' => BattleStatus::FINISH], $id);
     }
 
     public function createBattle(Location $location): Battle
     {
         return $this->create([
             'location_id' => $location->id,
-            'status' => Battle::STATUS_ACTIVE,
+            'status' => BattleStatus::ACTIVE,
             'rounds' => 1,
         ]);
     }
@@ -53,7 +54,6 @@ class BattleRepository extends AbstractRepository
         $battleDetails = new BattleDetail();
         $battleDetails->battle_id = $battle->id;
 
-        $battleDetails->status = BattleDetail::STATUS_LIFE;
         if ($user instanceof User) {
             $battleDetails->user_id = $user->id;
         }

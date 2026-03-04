@@ -45,6 +45,100 @@
         .color-purple {
             color: purple;
         }
+
+        .color-boss {
+            color: #ff4444;
+            font-weight: bold;
+        }
+
+        .color-shield {
+            color: #4da6ff;
+        }
+
+        .color-enrage {
+            color: #ff0000;
+        }
+
+        .color-skill {
+            color: #9b59b6;
+        }
+
+        .color-damage {
+            color: #e74c3c;
+            font-size: 1.1em;
+        }
+
+        .color-debuff {
+            color: #e67e22;
+        }
+
+        .color-life-drain {
+            color: #8b0000;
+            text-shadow: 0 0 5px rgba(139, 0, 0, 0.5);
+        }
+
+        .color-reflect {
+            color: #4169e1;
+            font-weight: bold;
+        }
+
+        .color-immunity {
+            color: #c2a402;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        }
+
+        .color-berserk {
+            color: #dc143c;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        .color-mirror {
+            color: #9370db;
+            font-style: italic;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .color-damage-to-heal {
+            color: #32cd32;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+            animation: heal-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heal-pulse {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+            }
+            50% {
+                opacity: 0.8;
+                text-shadow: 0 0 15px rgba(50, 205, 50, 0.9);
+            }
+        }
+
+        .color-damage-to-heal {
+            color: #32cd32;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+            animation: heal-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heal-pulse {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+            }
+            50% {
+                opacity: 0.8;
+                text-shadow: 0 0 15px rgba(50, 205, 50, 0.9);
+            }
+        }
+
         a.r:link, a.r:visited {
             color: red;
         }
@@ -229,7 +323,7 @@
     <tr valign="top">
         @if($battle)
             <td>
-                @if($battle->status === 1)
+                @if($battle->status->isActive())
                     <p><u><b>Раунд N {{ $battle->rounds++ }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" target="_blank">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
                     <table class="coll">
@@ -294,12 +388,12 @@
 
                 {!! $round->action !!}
 
-                @if($battle->status === 0)
+                @if($battle->status->isFinish())
                     <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
                 @endif
             </td>
 
-            @if($battle->status == 1)
+            @if($battle->status->isActive())
                 <td width="1%">
                     <table cellspacing="0" cellpadding="0" border="0" width="100%" height="100%" class="achieve_bg">
                         <tbody>
@@ -320,7 +414,7 @@
                                         <td align="right">
                                             <nobr>
                                                 @foreach($battle->detailsWithMonsters as $details)
-                                                    @if($details->status == 1)
+                                                    @if($details->status->isLife())
                                                         <small><a href="{{ route('info.monster', ['id' => $details->locationMonster->id]) }}" class="@if($randomAttackedMonster->locationMonster->id === $details->locationMonster->id) color-red @endif" target="_blank">{{ $details->locationMonster->monster->name }}</a> {{ $details->locationMonster->monster->lvl }} ({{ $details->locationMonster->hp_now }}/{{ $details->locationMonster->hp_max }})
                                                             {{ $details->updated_at->format('H:i:s') }}<br></small>
                                                     @endif

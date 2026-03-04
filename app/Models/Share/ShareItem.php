@@ -26,6 +26,8 @@ use App\Models\Monster\Monster;
  * @property bool $is_heal
  * @property bool $is_active
  * @property bool $is_sell
+ * @property bool $is_slot_usable
+ * @property bool $is_weight
  * @property int $price
  * @property int $break_crystal
  * @property string|null $slot
@@ -53,16 +55,18 @@ class ShareItem extends Model
 
     protected $attributes = [
         'count_use' => 0,
-        'is_heal' => 0,
-        'is_active' => 1,
-        'is_sell' => 1,
-        'is_slot_usable' => 0,
+        'is_heal' => false,
+        'is_active' => true,
+        'is_sell' => true,
+        'is_slot_usable' => false,
+        'is_weight' => true,
         'break_crystal' => 0,
         'price' => 0,
     ];
 
     protected $casts = [
         'is_slot_usable' => 'boolean',
+        'is_weight' => 'boolean',
         'is_sell' => 'boolean',
         'is_active' => 'boolean',
         'is_heal' => 'boolean',

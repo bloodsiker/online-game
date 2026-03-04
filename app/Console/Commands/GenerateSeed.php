@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\BossMechanicType;
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
@@ -13,6 +14,8 @@ use App\Models\Item\Item;
 use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\MagicSkill\MagicSkill;
+use App\Models\Monster\BossMechanic;
+use App\Models\Monster\BossPhase;
 use App\Models\Monster\Monster;
 use App\Models\Npc;
 use App\Models\Player\Player;
@@ -53,10 +56,16 @@ class GenerateSeed extends Command
 
     protected $location1 = null;
     protected $location2 = null;
+    protected $location3 = null;
     protected $defaultRace = null;
     protected $user1 = null;
     protected $monster1 = null;
     protected $monster2 = null;
+    protected $boss = null;
+    protected $boss2 = null;
+    protected $boss3 = null;
+    protected $boss4 = null;
+    protected $boss5 = null;
     protected $skill = null;
     protected $skill2 = null;
     protected $shopCategory1 = null;
@@ -73,6 +82,7 @@ class GenerateSeed extends Command
         $this->createRace();
         $this->createUser();
         $this->createMonster();
+        $this->createBoss();
         $this->createSkillAndEffects();
         $this->createLocationHasMonsters();
         $this->createSkills();
@@ -148,6 +158,7 @@ class GenerateSeed extends Command
 
         $this->location1 = Location::find(1);
         $this->location2 = Location::find(2);;
+        $this->location3 = Location::find(3);;
 
         $this->info('Create Locations success');
     }
@@ -495,11 +506,317 @@ class GenerateSeed extends Command
         $this->info('Create Monster success');
     }
 
+    protected function createBoss()
+    {
+        $boss = new Monster();
+        $boss->name = 'Древний дракон';
+        $boss->lvl = 30;
+        $boss->hp = 5000;
+        $boss->armor = 1;
+        $boss->dodge = 1;
+        $boss->critical = 1;
+        $boss->min_dmg = 1;
+        $boss->max_dmg = 1;
+        $boss->aggression = 0;
+        $boss->min_money = 400000;
+        $boss->max_money = 500000;
+        $boss->exp = 5000;
+        $boss->is_boss = true;
+        $boss->save();
+
+        $this->boss = $boss;
+
+        // Фаза 1 (100% - 70%)
+        BossPhase::create([
+            'monster_id' => $boss->id,
+            'phase_number' => 1,
+            'hp_threshold' => 100,
+            'description' => 'Древний дракон спокоен...',
+        ]);
+
+        // Фаза 2 (70% - 30%)
+        BossPhase::create([
+            'monster_id' => $boss->id,
+            'phase_number' => 2,
+            'hp_threshold' => 70,
+            'stats_modifiers' => ['attack' => 30],
+            'description' => 'Древний дракон разъярился! Его атака увеличена!',
+        ]);
+
+        // Фаза 3 (30% - 0%)
+        BossPhase::create([
+            'monster_id' => $boss->id,
+            'phase_number' => 3,
+            'hp_threshold' => 30,
+            'stats_modifiers' => ['attack' => 50, 'defence' => -50],
+            'description' => 'Древний дракон на грани смерти! Он становится еще опаснее!',
+        ]);
+
+        // Механіка: Лють при 50% HP
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::ENRAGE,
+            'trigger_hp_percent' => 50,
+            'config' => ['damage_increase_percent' => 50, 'one_time' => true],
+            'priority' => 100,
+        ]);
+
+        // Механіка: Регенерація кожні 5 ходів
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::REGENERATION,
+            'trigger_turn' => 5,
+            'config' => ['heal_percent' => 5, 'cooldown_turns' => 5],
+            'priority' => 50,
+        ]);
+
+        // Механіка: Масова атака при 40% HP
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::AOE_ATTACK,
+            'trigger_hp_percent' => 40,
+            'config' => ['damage_percent' => 40, 'cooldown_turns' => 10],
+            'priority' => 70,
+        ]);
+
+
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::SHIELD,
+            'trigger_turn' => 15,
+            'config' => [
+                'shield_hp' => 5000,
+                'duration_turns' => 3,
+                'cooldown_turns' => 15
+            ],
+            'priority' => 80,
+        ]);
+
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::DEATH_EXPLOSION,
+            'trigger_hp_percent' => 0, // При смерті
+            'config' => [
+                'damage_percent' => 30
+            ],
+            'priority' => 200,
+        ]);
+
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::LIFE_DRAIN,
+            'trigger_turn' => 5,
+            'config' => [
+                'drain_percent' => 25,
+                'cooldown_turns' => 5,
+            ],
+            'priority' => 80,
+        ]);
+
+        // Відбиття урону при 60% HP
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::REFLECT_DAMAGE,
+            'trigger_hp_percent' => 60,
+            'config' => [
+                'reflect_percent' => 40,
+                'duration_turns' => 4,
+            ],
+            'priority' => 70,
+        ]);
+
+        // Імунітет до магії при 40% HP
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::IMMUNITY,
+            'trigger_hp_percent' => 40,
+            'config' => [
+                'immunity_type' => 'magic',
+                'duration_turns' => 3,
+            ],
+            'priority' => 90,
+        ]);
+
+        // Берсерк при 20% HP (постійний)
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::BERSERK,
+            'trigger_hp_percent' => 20,
+            'config' => [
+                'attack_increase_percent' => 150,
+                'defense_decrease_percent' => 70,
+                'permanent' => true,
+            ],
+            'priority' => 100,
+        ]);
+
+        // Дзеркальні відображення при 50% HP
+        BossMechanic::create([
+            'monster_id' => $boss->id,
+            'mechanic_type' => BossMechanicType::MIRROR_IMAGE,
+            'trigger_hp_percent' => 50,
+            'config' => [
+                'image_count' => 3,
+                'image_hp_percent' => 30,
+                'image_damage_percent' => 40,
+            ],
+            'priority' => 85,
+        ]);
+
+        // Приклад 1: Лич - 100% конвертація урону в лікування
+        $lich = Monster::create([
+            'name' => 'Лич Некромант',
+            'type' => 'boss',
+            'lvl' => 35,
+            'hp' => 5000,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'armor' => 1,
+            'dodge' => 1,
+            'critical' => 1,
+            'aggression' => 1,
+            'exp' => 8000,
+            'min_money' => 500000,
+            'max_money' => 700000,
+            'is_boss' => true,
+        ]);
+
+        $this->boss2 = $lich;
+
+        BossMechanic::create([
+            'monster_id' => $lich->id,
+            'mechanic_type' => BossMechanicType::DAMAGE_TO_HEAL,
+            'trigger_hp_percent' => 50,
+            'config' => [
+                'conversion_percent' => 100, // Весь урон перетворюється
+                'duration_turns' => 3,
+                'max_heal_per_hit' => null, // Без обмеження
+            ],
+            'priority' => 95,
+        ]);
+
+        // Приклад 2: Вампір - 75% конвертація з обмеженням
+        $vampire = Monster::create([
+            'name' => 'Древний вампир',
+            'type' => 'boss',
+            'lvl' => 40,
+            'hp' => 7000,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'armor' => 1,
+            'dodge' => 1,
+            'critical' => 1,
+            'aggression' => 1,
+            'exp' => 10000,
+            'min_money' => 700000,
+            'max_money' => 900000,
+            'is_boss' => true,
+        ]);
+
+        $this->boss3 = $vampire;
+
+        BossMechanic::create([
+            'monster_id' => $vampire->id,
+            'mechanic_type' => BossMechanicType::DAMAGE_TO_HEAL,
+            'trigger_hp_percent' => 60,
+            'config' => [
+                'conversion_percent' => 75, // 75% урону перетворюється
+                'duration_turns' => 4,
+                'max_heal_per_hit' => 1500, // Максимум 1500 HP за хіт
+            ],
+            'priority' => 90,
+        ]);
+
+        // Приклад 3: Демон регенерації - 50% конвертація, довга тривалість
+        $demon = Monster::create([
+            'name' => 'Демон Регенерации',
+            'type' => 'boss',
+            'lvl' => 45,
+            'hp' => 9000,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'armor' => 1,
+            'dodge' => 1,
+            'critical' => 1,
+            'aggression' => 1,
+            'exp' => 12000,
+            'min_money' => 900000,
+            'max_money' => 1000000,
+            'is_boss' => true,
+        ]);
+
+        $this->boss4 = $demon;
+
+        BossMechanic::create([
+            'monster_id' => $demon->id,
+            'mechanic_type' => BossMechanicType::DAMAGE_TO_HEAL,
+            'trigger_hp_percent' => 30,
+            'config' => [
+                'conversion_percent' => 50, // Половина урону перетворюється
+                'duration_turns' => 6,
+                'max_heal_per_hit' => 1000,
+            ],
+            'priority' => 85,
+        ]);
+
+        // Комбо: конвертація + регенерація
+        BossMechanic::create([
+            'monster_id' => $demon->id,
+            'mechanic_type' => BossMechanicType::REGENERATION,
+            'trigger_turn' => 5,
+            'config' => [
+                'heal_percent' => 3,
+                'cooldown_turns' => 5,
+            ],
+            'priority' => 50,
+        ]);
+
+        // Приклад 4: Нежить з циклічною конвертацією
+        $undead = Monster::create([
+            'name' => 'Властелин Нежити',
+            'lvl' => 50,
+            'hp' => 10000,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'armor' => 1,
+            'dodge' => 1,
+            'critical' => 1,
+            'aggression' => 1,
+            'exp' => 15000,
+            'min_money' => 1100000,
+            'max_money' => 1400000,
+            'is_boss' => true,
+        ]);
+
+        $this->boss5 = $undead;
+
+        // Активується кожні 10 ходів
+        BossMechanic::create([
+            'monster_id' => $undead->id,
+            'mechanic_type' => BossMechanicType::DAMAGE_TO_HEAL,
+            'trigger_turn' => 10,
+            'config' => [
+                'conversion_percent' => 100,
+                'duration_turns' => 2,
+                'cooldown_turns' => 10,
+                'max_heal_per_hit' => 2000,
+            ],
+            'priority' => 100,
+        ]);
+
+        $this->info('Create Boss success');
+    }
+
     protected function createLocationHasMonsters()
     {
         $this->location1->monsters()->attach($this->monster1->id);
         $this->location2->monsters()->attach($this->monster1->id);
         $this->location2->monsters()->attach($this->monster2->id);
+        $this->location3->monsters()->attach($this->boss->id);
+        $this->location3->monsters()->attach($this->boss2->id);
+        $this->location3->monsters()->attach($this->boss3->id);
+        $this->location3->monsters()->attach($this->boss4->id);
+        $this->location3->monsters()->attach($this->boss5->id);
 
         $this->info('Create LocationHasMonsters success');
     }
@@ -558,6 +875,19 @@ class GenerateSeed extends Command
         $sItem2->image = 'https://skazanie.com/img-item/2c9f9879c612.jpg';
         $sItem2->save();
 
+        $sItem2->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ATTACK_MIN,
+                'value' => 1,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+            [
+                'effect_type' => ItemEffectType::ATTACK_MAX,
+                'value' => 3,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $sItem2->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem2->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -591,6 +921,7 @@ class GenerateSeed extends Command
         $sItem4->name = 'Изумрудный ключ';
         $sItem4->description = 'Это большой ключ с изумрудным украшением.';
         $sItem4->image = 'https://skazanie.com/img-item/0068928e7d98.jpg';
+        $sItem4->is_weight = false;
         $sItem4->save();
 
         $item4 = new Item();
@@ -613,6 +944,19 @@ class GenerateSeed extends Command
         $sItem5->image = 'https://skazanie.com/img-item/1b85918f3a69.jpg';
         $sItem5->save();
 
+        $sItem5->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ATTACK_MIN,
+                'value' => 2,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+            [
+                'effect_type' => ItemEffectType::ATTACK_MAX,
+                'value' => 4,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $sItem5->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem5->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -629,6 +973,19 @@ class GenerateSeed extends Command
         $sItem6->slot = 'hand';
         $sItem6->image = 'https://skazanie.com/img-item/032cd678c770.jpg';
         $sItem6->save();
+
+        $sItem6->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ATTACK_MIN,
+                'value' => 5,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+            [
+                'effect_type' => ItemEffectType::ATTACK_MAX,
+                'value' => 8,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
 
         $item3 = new Item();
         $item3->share_item_id = $sItem6->id;
@@ -649,6 +1006,14 @@ class GenerateSeed extends Command
         $sItem7->image = 'https://skazanie.com/img-item/c2d339381079.jpg';
         $sItem7->save();
 
+        $sItem7->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 14,
+                'value_type' => ItemEffectValueType::FLAT,
+            ]
+        ]);
+
         $sItem7->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem7->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -663,6 +1028,14 @@ class GenerateSeed extends Command
         $sItem8->image = 'https://skazanie.com/img-item/146b51607951.jpg';
         $sItem8->save();
 
+        $sItem8->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 8,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $sItem8->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem8->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -676,6 +1049,14 @@ class GenerateSeed extends Command
         $sItem9->slot = 'armor';
         $sItem9->image = 'https://skazanie.com/img-item/3e0269aaa042.jpg';
         $sItem9->save();
+
+        $sItem9->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 30,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
 
         $sItem9->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem9->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -692,6 +1073,14 @@ class GenerateSeed extends Command
         $sItem9->image = 'https://skazanie.com/img-item/eeeb183aea55.jpg';
         $sItem9->save();
 
+        $sItem9->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 1,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $sItem9->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem9->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -704,6 +1093,14 @@ class GenerateSeed extends Command
         $sItem10->slot = 'gloves';
         $sItem10->image = 'https://skazanie.com/img-item/d5ce732f8329.jpg';
         $sItem10->save();
+
+        $sItem10->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 2,
+                'value_type' => ItemEffectValueType::FLAT,
+            ]
+        ]);
 
         $sItem10->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem10->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -718,6 +1115,14 @@ class GenerateSeed extends Command
         $sItem11->image = 'https://skazanie.com/img-item/26130fc99330.jpg';
         $sItem11->save();
 
+        $sItem11->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 1,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
@@ -730,6 +1135,14 @@ class GenerateSeed extends Command
         $sItem11->slot = 'cloak';
         $sItem11->image = 'https://skazanie.com/img-item/13ed6f939925.jpg';
         $sItem11->save();
+
+        $sItem11->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ARMOR,
+                'value' => 1,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
 
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -756,6 +1169,7 @@ class GenerateSeed extends Command
         $sIte13->name = 'Сертификат «Новое имя»';
         $sIte13->description = 'Документ, подтверждающий ваше право воспользоваться услугой по смене игрового ника. Будьте внимательны! Новое имя должно быть уникально';
         $sIte13->image = '/img/resource/sert_rename.gif';
+        $sIte13->is_weight = false;
         $sIte13->save();
 
         $sIte14 = new ShareItem();
@@ -763,6 +1177,7 @@ class GenerateSeed extends Command
         $sIte14->name = 'Сертификат «Смена расы»';
         $sIte14->description = 'Позволяет один раз изменить расу.';
         $sIte14->image = '/img/resource/sert_obraz.gif';
+        $sIte14->is_weight = false;
         $sIte14->save();
 
         $sIte15 = new ShareItem();
@@ -815,6 +1230,14 @@ class GenerateSeed extends Command
         $sIte17->image = '/img/resource/bluebelt.gif';
         $sIte17->save();
 
+        $sIte17->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::BELT_SLOT,
+                'value' => 3,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
+
         $item17 = new Item();
         $item17->share_item_id = $sIte17->id;
         $item17->save();
@@ -828,6 +1251,14 @@ class GenerateSeed extends Command
         $sIte18->description = 'Кожаная сумка позволит вам взять с собой на 11 вещей больше';
         $sIte18->image = '/img/resource/bag2.gif';
         $sIte18->save();
+
+        $sIte18->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::BAG_SLOT,
+                'value' => 11,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
 
         $item18 = new Item();
         $item18->share_item_id = $sIte18->id;
@@ -855,6 +1286,19 @@ class GenerateSeed extends Command
         $sItem1->slot = 'hand';
         $sItem1->image = 'https://skazanie.com/img-item/8f5d6477954920.jpg';
         $sItem1->save();
+
+        $sItem1->effects()->createMany([
+            [
+                'effect_type' => ItemEffectType::ATTACK_MIN,
+                'value' => 35,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+            [
+                'effect_type' => ItemEffectType::ATTACK_MAX,
+                'value' => 80,
+                'value_type' => ItemEffectValueType::FLAT,
+            ],
+        ]);
 
         $item1 = new Item();
         $item1->share_item_id = $sItem1->id;
@@ -1118,18 +1562,19 @@ class GenerateSeed extends Command
         $premium->categories()->attach($this->shopCategory2->id);
         $premium->categories()->attach($this->shopCategory3->id);
 
-        $premium->shopItems()->create([
-            'share_item_id' => 15,
-            'share_structure_category_id' => $this->shopCategory3->id,
-            'diamond' => 100,
-            'sort_order' => 1,
-        ]);
-
-        $premium->shopItems()->create([
-            'share_item_id' => 16,
-            'share_structure_category_id' => $this->shopCategory3->id,
-            'diamond' => 100,
-            'sort_order' => 0,
+        $premium->shopItems()->createMany([
+            [
+                'share_item_id' => 15,
+                'share_structure_category_id' => $this->shopCategory3->id,
+                'diamond' => 100,
+                'sort_order' => 1,
+            ],
+            [
+                'share_item_id' => 16,
+                'share_structure_category_id' => $this->shopCategory3->id,
+                'diamond' => 100,
+                'sort_order' => 0,
+            ]
         ]);
     }
 
@@ -1194,6 +1639,7 @@ class GenerateSeed extends Command
         $sItem1->name = 'Монета древности';
         $sItem1->description = 'Монета древности';
         $sItem1->image = '/img/resource/ancient_coin.jpg';
+        $sItem1->is_weight = false;
         $sItem1->save();
 
         $sItem2 = new ShareItem();

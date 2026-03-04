@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use Illuminate\Database\Eloquent\Collection;
 
-class BackpackDTO
+final class BackpackDTO
 {
     public function __construct(
         protected readonly Collection $backpack,

@@ -3,6 +3,7 @@
 namespace App\Decorator\Player;
 
 use App\Services\Combat\FightHitInterface;
+use Illuminate\Support\Collection;
 
 abstract class PlayerDecorator implements PlayerInterface, FightHitInterface {
 
@@ -10,6 +11,27 @@ abstract class PlayerDecorator implements PlayerInterface, FightHitInterface {
 
     public function __construct(PlayerInterface $player) {
         $this->player = $player;
+    }
+
+    protected function equippedItems(): Collection
+    {
+        return collect([
+            $this->player->playerEquip->handLeft,
+            $this->player->playerEquip->handRight,
+            $this->player->playerEquip->helmetSlot,
+            $this->player->playerEquip->shoulderSlot,
+            $this->player->playerEquip->forearmSlot,
+            $this->player->playerEquip->armorSlot,
+            $this->player->playerEquip->leggingSlot,
+            $this->player->playerEquip->chainArmorSlot,
+            $this->player->playerEquip->cloakSlot,
+            $this->player->playerEquip->shoesSlot,
+            $this->player->playerEquip->glovesSlot,
+            $this->player->playerEquip->beltFirstSlot,
+            $this->player->playerEquip->beltSecondSlot,
+            $this->player->playerEquip->bagFirstSlot,
+            $this->player->playerEquip->bagSecondSlot,
+        ])->filter();
     }
 
     public function getLeftHandMinDmg():int
