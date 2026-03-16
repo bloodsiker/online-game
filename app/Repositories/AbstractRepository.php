@@ -2,38 +2,23 @@
 
 namespace App\Repositories;
 
-use Exception;
-use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
 abstract class AbstractRepository implements RepositoryInterface
 {
-    /**
-     * @var Model
-     */
     protected Model $model;
-
-    protected $auth;
 
     abstract public function getModelClass(): string;
 
-    public function setModel($modelPath): void
-    {
-        $this->model = app($modelPath);
-    }
-
     public function __construct()
     {
-        $this->setModel($this->getModelClass());
-        try {
-            $this->auth = app(Guard::class);
-        } catch (Exception $e) {
-
-        }
+        $this->model = app($this->getModelClass());
     }
 
-    public function getOneById($id): ?Model
+    public function getOneById(int|string $id): ?Model
     {
         return $this->model->find($id);
     }
@@ -48,47 +33,52 @@ abstract class AbstractRepository implements RepositoryInterface
         return $this->model->all();
     }
 
-    public function getQuery()
+    public function getQuery(): Builder
     {
         return $this->model->query();
     }
 
-    public function delete($id): void
+    public function getCount(): int
     {
-        $item = $this->model->find($id);
-        $item->delete();
+        return $this->model->count();
     }
 
-    public function copyByIds(array $ids): void
-    {
-        foreach ($ids as $id) {
-            $item = $this->model->find($id);
-            $newItem = $item->replicate();
-            $newItem->save();
-        }
-    }
-
-    public function deleteByIds(array $ids): void
-    {
-        foreach ($ids as $id) {
-            $this->delete($id);
-        }
-    }
-
-    public function create(array $data)
+    public function create(array $data): Model
     {
         return $this->model->create($data);
     }
 
-    public function update(array $data, $id)
+    /**
+     * @throws ModelNotFoundException
+     */
+    public function update(array $data, int|string $id): Model
     {
-        $model = $this->model->find($id);
+        $model = $this->model->findOrFail($id);
         $model->update($data);
+
         return $model;
     }
 
-    public function getCount()
+    /**
+     * @throws ModelNotFoundException
+     */
+    public function delete(int|string $id): void
     {
-        return $this->model->count();
+        $this->model->findOrFail($id)->delete();
+    }
+
+    public function deleteByIds(array $ids): void
+    {
+        $this->model->whereIn($this->model->getKeyName(), $ids)->delete();
+    }
+
+    /**
+     * @throws ModelNotFoundException
+     */
+    public function copyByIds(array $ids): void
+    {
+        foreach ($ids as $id) {
+            $this->model->findOrFail($id)->replicate()->save();
+        }
     }
 }

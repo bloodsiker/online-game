@@ -557,6 +557,8 @@
     let money = parseInt('{{ $player->user->money }}');
     let diamond = parseInt('{{ $player->user->diamond }}');
 
+    console.log(hp);
+
     function playerAction() {
         parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
     }

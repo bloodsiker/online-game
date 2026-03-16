@@ -23,11 +23,9 @@ class BattleRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery()
+    public function getQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = $this->model->query();
-
-        return $query->select(['battles.*']);
+        return $this->model->query()->select(['battles.*']);
     }
 
     public function findActiveBattleOnLocation(Location $location): ?Battle

@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
+ * @property int $critical
+ * @property int $dodge
  *
  * @property-read User $user
  * @property-read Race $race

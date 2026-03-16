@@ -19,11 +19,9 @@ class MonsterOnLocationRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery()
+    public function getQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = $this->model->query();
-
-        return $query->select(['monster_on_locations.*']);
+        return $this->model->query()->select(['monster_on_locations.*']);
     }
 
     public function getMonstersOnLocation(Location $location): Collection

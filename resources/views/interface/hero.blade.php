@@ -257,12 +257,6 @@
         // Скидання досвіду
         document.getElementById('expBar').style.width = '0%';
         document.getElementById('expPercentage').textContent = '0.0%';
-
-        // Відновлення HP та мани
-        document.getElementById('hpBar').style.width = '100%';
-        document.getElementById('hpText').textContent = '{{ $player->hp_now }} / {{ $player->hp_max }}';
-        document.getElementById('manaBar').style.width = '100%';
-        document.getElementById('manaText').textContent = '0 / 0';
     }
 
     // Поступове відновлення ресурсів

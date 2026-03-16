@@ -117,7 +117,7 @@ readonly class FightOrchestrator
             $player->save();
 
             if ($player->hp_now <= 0) {
-                return $this->playerDeathService->handle(
+                $fightDTO = $this->playerDeathService->handle(
                     $player,
                     $battle,
                     $battleRound,
@@ -125,6 +125,10 @@ readonly class FightOrchestrator
                     $attackedMonster,
                     $roundLog
                 );
+
+                $this->finishService->checkAndFinish($battle, $user->currentLocation);
+
+                return $fightDTO;
             }
 
             $user->save();
@@ -146,7 +150,7 @@ readonly class FightOrchestrator
                 ->setBattle($finishDTO->battle ?? $battle)
                 ->setBattleRound($battleRound)
                 ->setAttackedMonster($attackedMonster)
-                ->setPlayer($player);
+                ->setPlayer($player->refresh());
         });
     }
 

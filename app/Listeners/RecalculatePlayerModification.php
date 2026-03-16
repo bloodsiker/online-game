@@ -23,7 +23,9 @@ class RecalculatePlayerModification
         $player = $event->player;
 
         $player->hp_max = self::DEFAULT_HP + (self::HP_PER_STR * ($player->getStrength() - 1));
+        $player->hp_now = $player->hp_max;
         $player->mp_max = self::DEFAULT_MP + (self::MP_PER_MUD * ($player->getMud() - 1));
+        $player->mp_now = $player->mp_max;
         $player->critical = self::CRITICAL_PER_INT * ($player->getInt() - 1);
         $player->dodge = self::DODGE_PER_AGILITY * ($player->getAgility() - 1);
 

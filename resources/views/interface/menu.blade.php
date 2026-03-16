@@ -36,6 +36,7 @@
         <li><a href="#" onclick="window.top.toLocation('{{ route('clan.member') }}', true)">Состав клана</a></li>
         <li><a href="#" onclick="window.top.toLocation('{{ route('quests') }}', true)">Квесты</a></li>
         <li><a href="#" onclick="window.top.toLocation('{{ route('premium.shop') }}', true)">Премиум</a></li>
+        <li><a href="#" onclick="window.top.toLocation('{{ route('rating') }}', true)">Рейтинг</a></li>
         <li><a href="{{ route('logout') }}">Выход</a></li>
     </ul>
 </div>

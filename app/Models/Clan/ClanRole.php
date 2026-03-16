@@ -1,19 +1,31 @@
 <?php
 
-namespace app\Models\Clan;
+namespace App\Models\Clan;
 
-use App\Enums\QuestType;
-use App\Models\Npc;
-use App\Models\Quest\QuestObjective;
-use App\Models\Quest\QuestReward;
-use App\Models\User;
+use App\Enums\ClanPermission;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ClanRole extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['name', 'permissions', 'clan_id', 'is_leader', 'is_default'];
+
+    protected $casts = [
+        'is_leader'   => 'boolean',
+        'is_default'  => 'boolean',
+        'permissions' => 'integer',
+    ];
+
+    public function clan(): BelongsTo
+    {
+        return $this->belongsTo(Clan::class);
+    }
+
+    public function hasPermission(ClanPermission $permission): bool
+    {
+        return ($this->permissions & $permission->bit()) !== 0;
+    }
 }

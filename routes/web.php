@@ -22,6 +22,7 @@ use App\Http\Controllers\MonsterController;
 use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PremiumShopController;
 use App\Http\Controllers\QuestController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
@@ -122,7 +123,17 @@ Route::get('/info/u/{id}', [UserController::class, 'info'])->name('info.user');
 Route::get('/info/npc/{id}', [NpcController::class, 'info'])->name('info.npc');
 
 Route::get('/clan/member', [ClanController::class, 'member'])->name('clan.member');
+Route::post('/clan/member/save-roles', [ClanController::class, 'saveMemberRoles'])->name('clan.member.save-roles');
+Route::post('/clan/member/leave', [ClanController::class, 'leaveClan'])->name('clan.member.leave');
+Route::delete('/clan/member/{target}', [ClanController::class, 'kickMember'])->name('clan.member.kick');
+Route::get('/clan/role', [ClanController::class, 'role'])->name('clan.role');
+Route::post('/clan/role/add', [ClanController::class, 'addRole'])->name('clan.role.add');
+Route::post('/clan/role/save', [ClanController::class, 'saveRoles'])->name('clan.role.save');
+Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name('clan.role.delete');
+Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
+Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
+Route::post('/clan', [ClanController::class, 'store'])->name('clan.store');
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 
@@ -149,6 +160,8 @@ Route::get('/chat', [ChatController::class, 'index'])->name('chat');
 Route::get('/chat-text', [ChatController::class, 'chat'])->name('chat.text');
 Route::get('/chat-log', [ChatController::class, 'chatLog'])->name('chat.log');
 Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat.action');
+
+Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');

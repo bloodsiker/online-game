@@ -2,28 +2,29 @@
 
 namespace App\Repositories;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
-interface RepositoryInterface {
+interface RepositoryInterface
+{
+    public function getOneById(int|string $id): ?Model;
 
-  public function getModelClass(): string;
+    public function getByIds(array $ids): Collection;
 
-  public function getOneById($id): ?Model;
+    public function getAll(): Collection;
 
-  public function getByIds(array $ids): Collection;
+    public function getQuery(): Builder;
 
-  public function getAll(): Collection;
+    public function getCount(): int;
 
-  public function getQuery();
+    public function create(array $data): Model;
 
-  public function delete($id);
+    public function update(array $data, int|string $id): Model;
 
-  public function copyByIds(array $ids);
+    public function delete(int|string $id): void;
 
-  public function deleteByIds(array $ids);
+    public function deleteByIds(array $ids): void;
 
-  public function create(array $data);
-
-  public function update(array $data, $id);
+    public function copyByIds(array $ids): void;
 }

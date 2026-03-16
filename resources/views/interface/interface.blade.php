@@ -434,8 +434,43 @@
 {{--    </table>--}}
 {{--</div>--}}
 
+
+<div id="systemConfirm_close_div" class="error_div btn_sys_confirm_close" style="display:none; z-index: 1000;"></div>
+<div class="popup_global_container" id="systemConfirm_div" style="z-index: 10010; position: absolute; display: none; width: 435px; top:0px; left: 0px;">
+    <div class="popup-top-left">
+        <div class="popup-top-right">
+            <div class="popup-top-center">
+                <div class="popup_global_title" id="systemConfirm_title"></div>
+            </div>
+        </div>
+        <div class="popup_global_close_btn btn_sys_confirm_close"></div>
+    </div>
+
+    <div class="popup-left-center">
+        <div class="popup-right-center">
+            <div class="popup_global_content" style="padding: 20px;">
+                <div id="confirm_ms" style="text-align: center;">
+
+                </div>
+                <div style="text-align: center;">
+                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="ОТМЕНА" type="button" style="width:60px"></b></b>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup-left-bottom">
+        <div class="popup-right-bottom">
+            <div class="popup-bottom-center"></div>
+        </div>
+    </div>
+</div>
+
+
 <div id="error_div" class="error_div" style="display: none; z-index: 1000; width: 100%; height: 100vh;"></div>
 <iframe width="1" height="1" frameborder="0" id="error" name="error" src="" scrolling="no" style="display: none; position: absolute; left: 0px; top: 0px; z-index: 1001;" allowtransparency="true"></iframe>
+
+<script language="javaScript" src="{{ asset('js/common.js') }}"></script>
 
 <script>
     function showErrorIframe(message) {

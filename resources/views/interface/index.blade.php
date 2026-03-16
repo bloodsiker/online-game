@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн Игра</title>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html {
             height: 100%;
@@ -102,18 +103,6 @@
             height: 9px;
         }
 
-        .error_div {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            filter: "progid:DXImageTransform.Microsoft.Alpha(opacity=80)";
-            moz-opacity: .8;
-            opacity: .8;
-            background-image: url({{ asset('img/bg/error_bg.gif') }});
-            left: 0;
-            top: 0;
-        }
-
         .td-map {
             width: 300px;
             transition: width 0.3s ease, opacity 0.3s ease;
@@ -128,176 +117,6 @@
     </style>
 </head>
 <body class="bg">
-
-
-<style>
-    .hotbar-container {
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        /*background: linear-gradient(180deg, rgba(20, 20, 30, 0.95) 0%, rgba(15, 15, 25, 0.98) 100%);*/
-        background: linear-gradient(180deg, rgb(255 234 183) 0%, rgb(230 195 151) 100%);
-        padding: 5px;
-        border-radius: 10px;
-        /*box-shadow:*/
-        /*    0 8px 32px rgba(0, 0, 0, 0.6),*/
-        /*    inset 0 1px 0 rgba(255, 255, 255, 0.1),*/
-        /*    0 0 40px rgba(100, 150, 255, 0.3);*/
-        box-shadow: 0 0px 5px rgb(246 161 9 / 60%), inset 0 1px 0 rgb(230 201 91 / 10%), 0 0 24px rgb(233 230 113 / 30%);
-        border: 2px solid rgb(237 147 4 / 30%);
-        backdrop-filter: blur(10px);
-    }
-
-    .hotbar {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-    }
-
-    .slot {
-        width: 40px;
-        height: 40px;
-        /*background: linear-gradient(145deg, rgba(40, 40, 55, 0.9), rgba(25, 25, 35, 0.9));*/
-        background: linear-gradient(180deg, rgb(255 234 183) 0%, rgb(230 195 151) 100%);
-        border: 2px solid rgba(241, 170, 112, 0.6);
-        border-radius: 10px;
-        cursor: pointer;
-        position: relative;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-            inset 0 2px 4px rgba(231, 184, 134, 0.5),
-            0 2px 8px rgba(235, 196, 150, 0.3);
-    }
-
-    .slot:hover {
-        transform: translateY(-2px);
-        border-color: rgba(242, 176, 112, 0.8);
-        box-shadow:
-            inset 0 2px 4px rgba(231, 184, 134, 0.5),
-            0 2px 8px rgba(235, 196, 150, 0.3);
-        background: linear-gradient(145deg, rgba(242, 191, 151, 0.9), rgba(250, 236, 193, 0.9));
-    }
-
-    .slot:active {
-        transform: translateY(-2px) scale(0.95);
-    }
-
-    .slot.active {
-        border-color: #ffd700;
-        box-shadow:
-            inset 0 2px 4px rgba(0, 0, 0, 0.5),
-            0 0 20px rgba(255, 215, 0, 0.6),
-            0 4px 16px rgba(255, 215, 0, 0.4);
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            box-shadow:
-                inset 0 2px 4px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(255, 215, 0, 0.6);
-        }
-        50% {
-            box-shadow:
-                inset 0 2px 4px rgba(0, 0, 0, 0.5),
-                0 0 30px rgba(255, 215, 0, 0.8);
-        }
-    }
-
-    .slot .icon {
-        font-size: 28px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-    }
-
-    .slot .keybind {
-        position: absolute;
-        bottom: 2px;
-        right: 4px;
-        font-size: 10px;
-        font-weight: bold;
-        color: rgba(255, 255, 255, 0.6);
-        background: rgba(0, 0, 0, 0.4);
-        padding: 2px 4px;
-        border-radius: 3px;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-    }
-
-    .slot .cooldown {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 8px;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        font-weight: bold;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .slot.on-cooldown .cooldown {
-        display: flex;
-    }
-
-    .slot.on-cooldown {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .slot.on-cooldown:hover {
-        transform: none;
-    }
-
-    .slot.empty {
-        opacity: 0.4;
-    }
-
-    .slot.empty .icon {
-        font-size: 20px;
-        opacity: 0.3;
-    }
-
-    .tooltip {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(15, 15, 25, 0.95);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        white-space: nowrap;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.2s;
-        border: 1px solid rgba(100, 150, 255, 0.5);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .slot:hover .tooltip {
-        opacity: 1;
-    }
-
-    .tooltip .name {
-        font-weight: bold;
-        color: #ffd700;
-        margin-bottom: 4px;
-    }
-
-    .tooltip .desc {
-        color: rgba(255, 255, 255, 0.8);
-    }
-</style>
-
 
 <table cellpadding="0" cellspacing="0" width="100%" height="69%" border="0">
     <tbody>
@@ -388,128 +207,7 @@
                             </tbody>
                         </table>
                     </td>
-                    <style>
-                        .hotbar-drag-handle {
-                            position: absolute;
-                            left: -15px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            width: 12px;
-                            height: 40px;
-                            background: rgba(229, 181, 131, 1);
-                            border-radius: 6px 0 0 6px;
-                            cursor: move;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: rgba(255, 255, 255, 0.5);
-                            font-size: 15px;
-                            transition: all 0.2s;
-                        }
 
-                        .hotbar-drag-handle:hover {
-                            background: rgba(233, 169, 108, 0.9);
-                            color: rgba(255, 255, 255, 0.8);
-                            width: 15px;
-                        }
-
-                        /* Кнопка сворачивания */
-                        .hotbar-toggle {
-                            position: absolute;
-                            right: -15px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            width: 12px;
-                            height: 40px;
-                            background: rgba(229, 181, 131, 1);
-                            border-radius: 0 6px 6px 0;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: rgba(255, 255, 255, 0.6);
-                            font-size: 12px;
-                            transition: all 0.2s;
-                            user-select: none;
-                        }
-
-                        .hotbar-toggle:hover {
-                            background: rgba(233, 169, 108, 0.9);
-                            color: rgba(255, 255, 255, 0.8);
-                            width: 15px;
-                        }
-
-                        /* Свернутое состояние */
-                        .hotbar-container.collapsed .hotbar {
-                            display: none;
-                        }
-
-                        .hotbar-container.collapsed {
-                            width: auto;
-                            padding: 8px 12px;
-                        }
-
-                        .hotbar-container.collapsed .hotbar-toggle {
-                            position: relative;
-                            right: 0;
-                            transform: none;
-                            width: 25px;
-                            height: 25px;
-                            border-radius: 6px;
-                            font-size: 12px;
-                        }
-
-                        .hotbar-container.collapsed .hotbar-drag-handle {
-                            left: -12px;
-                        }
-
-                        .hotbar-collapsed-label {
-                            display: none;
-                            color: rgba(255, 255, 255, 0.7);
-                            font-size: 12px;
-                            white-space: nowrap;
-                            margin-right: 8px;
-                        }
-
-                        .hotbar-container.collapsed .hotbar-collapsed-label {
-                            display: block;
-                        }
-
-                        .hotbar-container.dragging {
-                            opacity: 0.8;
-                            cursor: move !important;
-                        }
-
-                        .hotbar-container.dragging * {
-                            cursor: move !important;
-                        }
-
-                        /* КРИТИЧНО: Блокируем iframe при перетаскивании */
-                        #game-frame.pointer-events-none {
-                            pointer-events: none;
-                        }
-
-                        /* Overlay для перехвата событий мыши */
-                        .drag-overlay {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            z-index: 9998;
-                            cursor: move;
-                            display: none;
-                        }
-
-                        .drag-overlay.active {
-                            display: block;
-                        }
-
-                        .hotbar-container {
-                            z-index: 999;
-                            /*transition: all 0.3s ease;*/
-                        }
-                    </style>
                     <td id="body_content" class="bgg" align="left" valign="top" width="100%" style="position: relative" height="100%">
 
                         <iframe width="100%" name="game" height="100%" frameborder="0" id="game-frame" src="{{ route('location') }}"></iframe>
@@ -1026,8 +724,138 @@
 {{--    </table>--}}
 {{--</div>--}}
 
+
+{{--<style>--}}
+{{--    #systemConfirm_div {--}}
+{{--        z-index: 1100;--}}
+{{--        position: fixed !important;--}}
+{{--        border-color: #660000;--}}
+{{--        position: absolute;--}}
+{{--    }--}}
+{{--    .popup_global_container {--}}
+{{--        box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, 0.2);--}}
+{{--        font-size: 11px;--}}
+{{--    }--}}
+{{--    .popup-top-left {--}}
+{{--        position: relative;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-top-left.png') }}) left top no-repeat;--}}
+{{--    }--}}
+{{--    .popup-top-right {--}}
+{{--        background: url({{ asset('img/bg/modal/popup-top-right.png') }}) right top no-repeat;--}}
+{{--    }--}}
+{{--    .popup-top-center {--}}
+{{--        margin: 0 36px 0 17px;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-top-center.png') }}) left top repeat-x;--}}
+{{--    }--}}
+{{--    .popup_global_title {--}}
+{{--        height: 24px;--}}
+{{--        padding-top: 10px;--}}
+{{--        color: #f5f4bf;--}}
+{{--        font-weight: 700;--}}
+{{--        text-align: center;--}}
+{{--    }--}}
+{{--    .popup_global_close_btn {--}}
+{{--        position: absolute;--}}
+{{--        right: -2px;--}}
+{{--        top: -2px;--}}
+{{--        width: 33px;--}}
+{{--        height: 35px;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-close.png') }}) right top no-repeat;--}}
+{{--        cursor: pointer;--}}
+{{--    }--}}
+{{--    .popup-left-center {--}}
+{{--        position: relative;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-left-center.png') }}) left top repeat-y;--}}
+{{--    }--}}
+{{--    .popup-right-center {--}}
+{{--        background: url({{ asset('img/bg/modal/popup-right-center.png') }}) right top repeat-y;--}}
+{{--    }--}}
+{{--    .popup_global_content {--}}
+{{--        overflow: hidden;--}}
+{{--        margin: 0 18px;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-main-bg.png') }}) center center;--}}
+{{--    }--}}
+{{--    .popup-left-bottom {--}}
+{{--        background: url({{ asset('img/bg/modal/popup-left-bottom.png') }}) left bottom no-repeat;--}}
+{{--    }--}}
+{{--    .popup-right-bottom {--}}
+{{--        background: url({{ asset('img/bg/modal/popup-right-bottom.png') }}) right bottom no-repeat;--}}
+{{--    }--}}
+{{--    .popup-bottom-center {--}}
+{{--        height: 17px;--}}
+{{--        margin: 0 18px;--}}
+{{--        background: url({{ asset('img/bg/modal/popup-bottom-center.png') }}) center bottom repeat-x;--}}
+{{--    }--}}
+{{--    b.butt1, b.butt1.disabled {--}}
+{{--        height: 38px;--}}
+{{--        font-size: 26px;--}}
+{{--        cursor: pointer;--}}
+{{--        background: url({{ asset('img/bg/btn/tbl-btn2_c-left.png') }}) left 4px no-repeat;--}}
+{{--        display: inline-block;--}}
+{{--    }--}}
+{{--    b.butt1 b, b.butt1.disabled b {--}}
+{{--        height: 38px;--}}
+{{--        font-size: 26px;--}}
+{{--        cursor: pointer;--}}
+{{--        background: url({{ asset('img/bg/btn/tbl-btn2_c-right.png') }}) right 4px no-repeat;--}}
+{{--        display: inline-block;--}}
+{{--    }--}}
+{{--    b.butt1 input, b.butt1 button.butt1, b.butt1.disabled input, b.butt1.disabled button {--}}
+{{--        height: 38px;--}}
+{{--        border: 0;--}}
+{{--        color: #f8dea4 !important;--}}
+{{--        cursor: pointer;--}}
+{{--        font-family: Tahoma;--}}
+{{--        font-size: 11px !important;--}}
+{{--        font-weight: 700;--}}
+{{--        text-decoration: none;--}}
+{{--        margin: 0 33px;--}}
+{{--        background: transparent url({{ asset('img/bg/btn/tbl-btn2_center.png') }}) center top repeat-x;--}}
+{{--        padding-bottom: 3px;--}}
+{{--        outline: none;--}}
+{{--    }--}}
+{{--    #confirm_ms {--}}
+{{--        color: #ba0000;--}}
+{{--    }--}}
+{{--</style>--}}
+
+
+<div id="systemConfirm_close_div" class="error_div btn_sys_confirm_close" style="display:none; z-index: 1000;"></div>
+<div class="popup_global_container" id="systemConfirm_div" style="z-index: 10010; position: absolute; display: none; width: 435px; top:0px; left: 0px;">
+    <div class="popup-top-left">
+        <div class="popup-top-right">
+            <div class="popup-top-center">
+                <div class="popup_global_title" id="systemConfirm_title"></div>
+            </div>
+        </div>
+        <div class="popup_global_close_btn btn_sys_confirm_close"></div>
+    </div>
+
+    <div class="popup-left-center">
+        <div class="popup-right-center">
+            <div class="popup_global_content" style="padding: 20px;">
+                <div id="confirm_ms" style="text-align: center;">
+
+                </div>
+                <div style="text-align: center;">
+                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="ОТМЕНА" type="button" style="width:60px"></b></b>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup-left-bottom">
+        <div class="popup-right-bottom">
+            <div class="popup-bottom-center"></div>
+        </div>
+    </div>
+</div>
+
+
 <div id="error_div" class="error_div" style="display: none; z-index: 1000; width: 100%; height: 100vh;"></div>
 <iframe width="1" height="1" frameborder="0" id="error" name="error" src="" scrolling="no" style="display: none; position: absolute; left: 0px; top: 0px; z-index: 1001;" allowtransparency="true"></iframe>
+
+<script language="javaScript" src="{{ asset('js/common.js') }}"></script>
 
 <script>
     function showErrorIframe(message) {

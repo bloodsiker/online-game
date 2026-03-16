@@ -24,8 +24,12 @@ return new class extends Migration
 
         Schema::create('clan_roles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('clan_id')->constrained('clans');
             $table->string('name'); // 'Лидер', 'Офицер', 'Член'
-            $table->json('permissions'); // ['invite', 'kick', 'withdraw', ...]
+//            $table->json('permissions'); // ['invite', 'kick', 'withdraw', ...]
+            $table->unsignedBigInteger('permissions')->default(0);
+            $table->boolean('is_leader')->default(false);
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
 
@@ -43,6 +47,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('clan_id')->constrained('clans');
             $table->foreignId('user_id')->constrained('users');
+            $table->string('status', 20);
             $table->text('message')->nullable();
             $table->timestamps();
 

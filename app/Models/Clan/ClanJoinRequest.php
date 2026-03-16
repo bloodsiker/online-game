@@ -2,23 +2,28 @@
 
 namespace App\Models\Clan;
 
+use App\Enums\ClanJoinRequestStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ClanJoinRequestStatus $status
  * @property string $message
  *
  * @property-read User $user
  * @property-read Clan $clan
- * @property-read ClanRole $role
  */
-class ClanMember extends Model
+class ClanJoinRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['role_id', 'clan_id', 'user_id'];
+    protected $fillable = ['clan_id', 'user_id', 'status', 'message'];
+
+    protected $casts = [
+        'status' => ClanJoinRequestStatus::class,
+    ];
 
     public function user(): BelongsTo
     {
@@ -28,10 +33,5 @@ class ClanMember extends Model
     public function clan(): BelongsTo
     {
         return $this->belongsTo(Clan::class);
-    }
-
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(ClanRole::class);
     }
 }

@@ -15,54 +15,42 @@ class UserRepository extends AbstractRepository
         return User::class;
     }
 
-    private function query()
+    public function getQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return $this->model->query();
+        return $this->model->query()->select(['users.*']);
     }
 
-    public function getQuery()
-    {
-        $query = $this->model->query();
-
-        return $query->select(['users.*']);
-    }
-
-    public function create(array $data)
+    public function create(array $data): \Illuminate\Database\Eloquent\Model
     {
         $data['password'] = Hash::make($data['password']);
 
         return parent::create($data);
     }
 
-    public function update(array $data, $id)
+    public function update(array $data, int|string $id): \Illuminate\Database\Eloquent\Model
     {
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
 
-        $model = $this->getOneById($id);
+        $model = $this->model->findOrFail($id);
         $model->update($data);
 
         return $model;
     }
 
-    public function delete($id): void
+    public function delete(int|string $id): void
     {
-        $item = $this->model->find($id);
+        $item = $this->model->findOrFail($id);
 
         $item->roles()->sync([]);
 
         $item->delete();
     }
 
-    public function findByBxID($bxID)
-    {
-        return $this->model->query()->where('bx_id', '=', $bxID)->first();
-    }
-
     public function search($term): void
     {
-        $this->query()->where(function ($query) use ($term) {
+        $this->getQuery()->where(function ($query) use ($term) {
             $query->where('name', 'like', '%'.$term.'%')
                 ->orWhere('phone', 'like', '%'.$term.'%');
         })->get();
@@ -74,7 +62,7 @@ class UserRepository extends AbstractRepository
         $page = $request->get('page') ?: 1;
         $perPage = $request->get('per_page') ?: 20;
 
-        $query = $this->query();
+        $query = $this->getQuery();
 
         return $query->where(function ($query) use ($term) {
             $query->where('name', 'like', '%'.$term.'%')
@@ -84,19 +72,19 @@ class UserRepository extends AbstractRepository
 
     public function list($request)
     {
-        $query = $this->query();
+        $query = $this->getQuery();
 
         return $query->limit(100)->get();
     }
 
     public function listTutors()
     {
-        return $this->query()->where('role_id', Role::ROLE_ADMIN)->get();
+        return $this->getQuery()->where('role_id', Role::ROLE_ADMIN)->get();
     }
 
     public function listForAdmin(Request $request)
     {
-        $query = $this->query();
+        $query = $this->getQuery();
 
         if ($request->get('fio')) {
             $query->where(function ($builder) use ($request) {
@@ -106,20 +94,12 @@ class UserRepository extends AbstractRepository
             });
         }
 
-        if ($request->get('phone')) {
-            $query->where('phone', 'LIKE', '%'.$request->get('phone').'%');
-        }
-
         if ($request->get('email')) {
             $query->where('email', 'LIKE', '%'.$request->get('email').'%');
         }
 
         if ($request->get('disable')) {
             $query->where('disable', '=', $request->get('disable') === 'on' ? 0 : 1);
-        }
-
-        if ($request->get('training_format')) {
-            $query->where('training_format', '=', $request->get('training_format'));
         }
 
         return $query->orderByDesc('id')->paginate(50);

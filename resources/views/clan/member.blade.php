@@ -16,6 +16,9 @@
             font-family: Tahoma;
             font-size: 11px;
         }
+        a, a:link, a:visited, a:active {
+            text-decoration: none;
+        }
         .p10h, .p10h td {
             padding-left: 10px;
             padding-right: 10px;
@@ -48,13 +51,54 @@
         .dbgl2 {
             background-color: #FFFBD6;
         }
+        .grnn {
+            color: #114d01 !important;
+        }
 
     </style>
 </head>
 <body class="regblk">
 
+<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+    <tbody>
+    @php
+        $group = 'main';
+        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
+        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
+        $btnRight1 = 'img/bg/btn/btn-right1.gif';
+
+        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
+        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
+        $btnRight2 = 'img/bg/btn/btn-right2.gif';
+    @endphp
+    <tr height="21">
+        <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
+        <td width="100" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_1" href="" title="Состав клана" class="btn_2">Состав клана</a>
+        </td>
+        <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
+
+        <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+        <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_2" href="{{ route('clan.role') }}" title="Звания" class="btn_1">Звания</a></td>
+        <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+        <td width="19"><img id="left_3" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+        <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_3" href="" title="Информация" class="btn_1">Информация</a></td>
+        <td width="19"><img id="right_3" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+        <td width="19"><img id="left_3" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+        <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_3" href="" title="Информация" class="btn_1">Управление</a></td>
+        <td width="19"><img id="right_3" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+
 <table class="coll" width="100%" height="100%" border="0">
-    
     <tbody>
     <tr>
         <td valign="top" width="100%">
@@ -69,7 +113,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Заявка на регистрацию клана</td>
+                                <td align="center" class="tbl-usi_label-center">Состав клана</td>
                                 <td width="27"
                                 ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -83,109 +127,177 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
 
+                        @php
+                            $memberCount = $rows->where('type', 'member')->count();
+                            $canPromote  = $membership->role->hasPermission(\App\Enums\ClanPermission::CHANGE_RANKS);
+                        @endphp
+
                         <table class="coll w100 p10h p2v brd2-all">
                             <tbody>
                             <tr class="bg_l">
-                                <td align="left" nowrap=""><b>Игроков в клане:</b>&nbsp;&nbsp;&nbsp;<b class="redd">
-                                        / </b>
-                                    <b>всего:&nbsp;
-                                        <b class="redd">1</b> из <b class="redd">40</b> / </b>
-                                    <b>online:&nbsp;
-                                        <b class="redd">1 / </b>
-                                    </b></td>
+                                <td align="left" nowrap=""><b>Игроков в клане:</b>&nbsp;&nbsp;&nbsp;
+                                    <b>всего:&nbsp;<b class="redd">{{ $memberCount }}</b> из <b class="redd">40</b> / </b>
+                                    <b>online:&nbsp;<b class="redd">{{ $onlineCount }}</b></b>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
 
-                        <form method="post" action="clan_management.php?f=1&amp;mode=management&amp;action=save_users"
-                              id="form_check_leader_change">
+                        <form id="form_kick_member" method="post" action="" style="display:none">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+
+                        <form method="post" action="{{ route('clan.member.save-roles') }}" id="form_check_leader_change">
+                            @csrf
                             <table class="coll w100 p10h p4v brd2" style="margin-top:12px;margin-bottom:12px">
                                 <tbody>
                                 <tr>
                                     <td class="b" align="center" title="Ник члена клана">Ник игрока</td>
                                     <td class="b" align="center" width="185" title="Звание игрока в вашем клане">Звание в клане</td>
                                     <td class="b" align="center" title="Местоположение игрока">Местоположение</td>
+                                    <td class="b" align="center" title="Состояние">Состояние</td>
                                     <td class="b" align="center" title="Дата и время последнего входа в игру">Последний вход</td>
                                     <td class="b" align="center" title="Статус игрока (Online/Offline)">Статус</td>
-                                    <td class="b" align="center" title="Доступные действия над членом клана">Действия
-                                    </td>
+                                    <td class="b" align="center" title="Доступные действия над членом клана">Действия</td>
                                 </tr>
 
-                                <tr class="bg_l">
-                                    <td width="10%" nowrap="">
-                                        <a href="#" onclick="userPrvTag('Tap0K');return false;" title="Приватное сообщение">
-                                            <img src="/images/users-arrow.gif" border="0" width="12" height="10" align="absmiddle">
-                                        </a>
-                                        &nbsp;
-                                        <a href="#" onclick="showClanInfo('20_1');return false;" title="Elders">
-                                            <img src="images/data/clans/6082736.gif" border="0" width="13" height="13" align="absmiddle">
-                                        </a>&nbsp;
-                                        <a>
-                                            <b onclick="userToTag('Tap0K');return false;" title="Персональное сообщение" style="cursor:hand">
-                                                <b class="kser0" title="">Tap0K&nbsp;[3]</b>
-                                            </b>
-                                        </a>
-                                        &nbsp;
-                                        <a href="#" onclick="showUserInfo('Tap0K', 'https://fun-dwar.com/');return false;" title="Информация о персонаже">
-                                            <img src="/images/player_info.gif" border="0" width="10" height="10" align="absmiddle"></a>
-                                    </td>
-                                    <td nowrap="" height="27" width="165">
-                                        <select name="form[mem][316][grade]" class="dbgl2 b small" style="width:165px" onchange="leader_change(this);">
-                                            <option value="118" selected="">Глава клана</option>
-                                            <option value="119">Офицер</option>
-                                            <option value="120">Рядовой</option>
-                                            <option value="121">Новичок</option>
-                                        </select>
-                                        <script type="text/javascript">
-                                            function leader_change(obj) {
-                                                if (obj.value != 118) {
-                                                    show_alert = 1;
-                                                } else {
-                                                    show_alert = 0;
-                                                }
-                                            }
-                                        </script>
-                                    </td>
-                                    <td width="26%" align="center"><b>Регистрационная палата</b></td>
-                                    <td width="16%" align="center"><b>7 июня 2025 01:07</b>
-                                    </td>
-                                    <td width="18%" align="center">
-                                        <b><span class="grnn">online</span></b>
-                                    </td>
-                                    <td align="right"></td>
-                                </tr>
+                                @foreach($rows as $row)
+                                    @if($row['type'] === 'member')
+                                        <tr class="{{ $loop->even ? 'bg_l' : '' }}">
+                                            <td width="10%" nowrap="">
+                                                <a href="#" title="Приватное сообщение">
+                                                    <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
+                                                </a>
+                                                <img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle">&nbsp;
+                                                <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
+                                                &nbsp;
+                                            </td>
+                                            <td nowrap="" height="27" width="165">
+                                                @if($canPromote)
+                                                    <select name="form[mem][{{ $row['user']->id }}][grade]" class="dbgl2 b small" style="width:165px" data-original="{{ $row['role']->id }}" onchange="leader_change(this);">
+                                                        @foreach($allRoles as $role)
+                                                            <option value="{{ $role->id }}" {{ $row['role']->id === $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @else
+                                                    <b>{{ $row['role']->name }}</b>
+                                                @endif
+                                            </td>
+                                            <td width="26%" align="center">
+                                                <b>{{ $row['user']->currentLocation?->name ?? '--' }}</b>
+                                            </td>
+                                            <td width="26%" align="center"><b>принят в клан</b></td>
+                                            <td width="16%" align="center">
+                                                <b>{{ $row['user']->last_online_at?->format('j M Y H:i') ?? '--' }}</b>
+                                            </td>
+                                            <td width="18%" align="center">
+                                                @if($row['is_online'])
+                                                    <b><span class="grnn">online</span></b>
+                                                @else
+                                                    <b>offline</b>
+                                                @endif
+                                            </td>
+                                            <td align="right" nowrap="">
+                                                @if($row['user']->id === auth()->id() && !$row['role']->is_leader)
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Выйти" type="button" style="width:60px"
+                                                               onclick="return top.systemConfirm('Вы действительно хотите покинуть клан?','Действие',false,function(){ document.getElementById('form_leave_clan').submit() });">
+                                                    </b></b>
+                                                @elseif($canKick && !$row['role']->is_leader && $row['user']->id !== auth()->id())
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Исключить" type="button" style="width:60px"
+                                                               onclick="return top.systemConfirm('Вы действительно хотите исключить игрока?','Действие',false,function(){ submitKickMember({{ $row['user']->id }}) });">
+                                                    </b></b>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @else
+                                        <tr class="bg_l">
+                                            <td width="10%" nowrap="">
+                                                <a href="#" title="Приватное сообщение">
+                                                    <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
+                                                </a>
+                                                <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
+                                                &nbsp;
+                                            </td>
+                                            <td nowrap="" height="27" width="165">
+                                                <b>--</b>
+                                            </td>
+                                            <td width="26%" align="center"><b>--</b></td>
+                                            <td width="26%" align="center"><b>{{ $row['status']->label() }}</b></td>
+                                            <td width="16%" align="center"><b>--</b></td>
+                                            <td width="18%" align="center"><b>--</b></td>
+                                            <td align="right">
+                                                <b class="butt2 pointer"><b>
+                                                    <input value="Удалить" type="button" style="width:100px"
+                                                           onclick="return top.systemConfirm('Вы действительно хотите отменить запрос на вступление?','Действие',false,function(){location.href='{{ route('clan.request.cancel', $row['id']) }}'});">
+                                                </b></b>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @endforeach
                                 </tbody>
                             </table>
 
-                            <script type="text/javascript">
-                                function check_leader_change() {
-                                    if (!show_alert) return true;
-                                    return top.systemConfirm('Сменить главу', '<span>При смене главы все взятые клановые квесты обнулятся.</span><br><br>Смена главы клана в период владения башней ведет к потере контроля над ней!', gebi('form_check_leader_change'));
-                                    //return true;
-                                }
-                            </script>
-                            <div align="center">
-                                <span class="butt1 pointer">
-                                    <span>
-                                        <input value="Сохранить изменения" type="submit"
-                                              onclick="if (!window.__cfRLUnblockHandlers) return false; return check_leader_change();"
-                                              class="grnn"
-                                              style="width:160px;">
+                            @if($canPromote)
+                                <script type="text/javascript">
+                                    var leaderRoleId = {{ $leaderRole?->id ?? 0 }};
+
+                                    function leader_change(obj) {}
+
+                                    function check_leader_change() {
+                                        if (!leaderRoleId) return true;
+
+                                        var selects = document.querySelectorAll('select.dbgl2');
+                                        var hasLeaderTransfer = false;
+                                        selects.forEach(function(s) {
+                                            if (parseInt(s.value) === leaderRoleId && parseInt(s.dataset.original) !== leaderRoleId) {
+                                                hasLeaderTransfer = true;
+                                            }
+                                        });
+
+                                        if (!hasLeaderTransfer) return true;
+
+                                        return top.systemConfirm(
+                                            'Передать руководство',
+                                            '<span>Вы уверены, что хотите передать руководство кланом?</span><br><br>После подтверждения вы потеряете права главы клана.',
+                                            document.getElementById('form_check_leader_change')
+                                        );
+                                    }
+                                </script>
+                                <div align="center">
+                                    <span class="butt1 pointer">
+                                        <span>
+                                            <input value="Сохранить изменения" type="submit"
+                                                   onclick="return check_leader_change();"
+                                                   class="grnn"
+                                                   style="width:160px;">
+                                        </span>
                                     </span>
-                                </span>
-                            </div>
+                                </div>
+                            @endif
                         </form>
 
 
-                        <form method="post" action="clan_management.php?f=1&amp;mode=management&amp;action=invite_user">
-                            <table cellspacing="0" cellpadding="5" border="0">
-                                <tbody><tr>
-                                    <td valign="middle">Ник игрока</td>
-                                    <td valign="middle" width="100"><input type="text" name="form[invite_nick]" value="" class="w100 dbgl2 brd b small"></td>
-                                    <td valign="middle"><b class="butt2 pointer"><b><input value="Пригласить в клан" type="submit" onclick="if (!window.__cfRLUnblockHandlers) return false; if(document._submit)return false;document._submit=true;" style="width:130px"></b></b></td>
-                                </tr><tr>
-                                </tr></tbody></table>
-                        </form>
+                        @if($canInvite)
+                            <form method="post" action="{{ route('clan.invite') }}">
+                                @csrf
+                                <table cellspacing="0" cellpadding="5" border="0">
+                                    <tbody><tr>
+                                        <td valign="middle">Ник игрока</td>
+                                        <td valign="middle" width="100"><input type="text" name="invite_nick" value="{{ old('invite_nick') }}" class="w100 dbgl2 brd b small"></td>
+                                        <td valign="middle"><b class="butt2 pointer"><b><input value="Пригласить в клан" type="submit" style="width:130px"></b></b></td>
+                                    </tr></tbody>
+                                </table>
+                            </form>
+                        @endif
+
+                        @if(!$membership->role->is_leader)
+                            <form method="post" action="{{ route('clan.member.leave') }}" id="form_leave_clan">
+                                @csrf
+                            </form>
+                        @endif
 
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -204,6 +316,12 @@
 </table>
 
 <script>
+    function submitKickMember(userId) {
+        var form = document.getElementById('form_kick_member');
+        form.action = '{{ url('clan/member') }}/' + userId;
+        form.submit();
+    }
+
     document.addEventListener('keydown', function(event) {
         switch (event.key.toLowerCase()) {
             case 'i':

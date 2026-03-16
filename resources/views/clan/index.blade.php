@@ -82,14 +82,11 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
                         <br>
-                        @if(1 == 1)
+                        @if(!$inClan)
                             <div align="center"><b class="redd">Форма регистрации</b></div>
                             <br>
-                            <form method="post" action="area.php?&amp;mode=register&amp;action=create_request"
-                                  enctype="multipart/form-data">
-                                <input type="hidden" name="MAX_FILE_SIZE" value="2048">
-                                <input type="hidden" name="form[request_id]" value="">
-
+                            <form method="post" action="{{ route('clan.store') }}" enctype="multipart/form-data">
+                                @csrf
                                 <table class="coll w100 p10h p4v brd2">
                                     <colgroup>
                                         <col width="380">
@@ -106,8 +103,7 @@
                                             названия, которые явно не подходят по тематике к игре, а также
                                             относящиеся к религии.
                                         </td>
-                                        <td><input name="form[title]" value="" maxlength="32"
-                                                   class="w100 dbgl2 brd b small"></td>
+                                        <td><input name="name" value="" maxlength="32" class="w100 dbgl2 brd b small"></td>
                                     </tr>
                                     <tr>
                                         <td><b>Значок клана:</b><br>
@@ -115,11 +111,17 @@
                                             прозрачный фон, разрешение 13x13 пикселей:<br>На значках запрещены
                                             кресты в любом виде, флаги государств, свастика.
                                         </td>
-                                        <td nowrap=""><input name="form[picture]" type="file"
-                                                             class="dbgl2 brd b small" style="width:300px"></td>
+                                        <td nowrap=""><input name="logo" type="file" class="dbgl2 brd b small" style="width:300px"></td>
                                     </tr>
                                     </tbody>
                                 </table>
+                                @if($errors->any())
+                                    <div align="center" style="color:red; margin-bottom:4px; margin-top: 10px;">
+                                        @foreach($errors->all() as $error)
+                                            <div>{{ $error }}</div>
+                                        @endforeach
+                                    </div>
+                                @endif
                                 <div align="center">
                                 <span class="butt1 pointer ">
                                     <span><input value="Подать заявку" type="submit" class="grnn" style="width:160px;"></span>

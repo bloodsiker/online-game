@@ -32,7 +32,7 @@ class DamageToHealMechanic extends BaseBossMechanic
         $battle->save();
 
         $conversionText = $conversionPercent === 100
-            ? 'весь урон'
+            ? 'Весь урон'
             : "{$conversionPercent}% урону";
 
         $context->addLog(sprintf(

@@ -16,10 +16,8 @@ class LocationRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery()
+    public function getQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = $this->model->query();
-
-        return $query->select(['locations.*']);
+        return $this->model->query()->select(['locations.*']);
     }
 }
