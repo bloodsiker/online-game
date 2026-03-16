@@ -146,9 +146,13 @@ class Player extends Model implements PlayerInterface, FightHitInterface
 
     public function getPercentExp()
     {
+        if ($this->exp_diff <= 0) {
+            return 0;
+        }
+
         $expGive = $this->exp - ($this->exp_up - $this->exp_diff);
 
-        return max(round($expGive * 100 / $this->exp_diff, 2), 100);
+        return min(max(round($expGive * 100 / $this->exp_diff, 2), 0), 100);
     }
 
     public function getPercentHp()
