@@ -269,6 +269,25 @@
                                                         </div>
                                                     @endif
 
+                                                    @if($structure->isClanWarehouse())
+                                                        <div class="structures" style="margin: 5px">
+                                                            <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ route('clan.warehouse', ['id' => $structure->id]) }}" type="submit">{{ $structure->name }}</button></span></span>
+                                                            @if($structure->actions->count())
+                                                                <ul>
+                                                                    @foreach($structure->actions as $action)
+                                                                        @if($action->alias === 'put_item')
+                                                                            <li><a href="{{ route('clan.warehouse', ['id' => $structure->id]) }}" class="actions"><img src="{{ asset('img/icon/users-arrow.gif') }}" alt="" align="absMiddle">{{ $action->name }}</a></li>
+                                                                        @endif
+
+                                                                        @if($action->alias === 'take_item')
+                                                                            <li><a href="{{ route('clan.warehouse.take', ['id' => $structure->id]) }}" class="actions"><img src="{{ asset('img/icon/users-arrow.gif') }}" alt="" align="absMiddle">{{ $action->name }}</a></li>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+
                                                     @if($structure->isAuction())
                                                         <div class="structures" style="margin: 5px">
                                                             <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ route('auction', ['id' => $structure->id]) }}" type="submit">{{ $structure->name }}</button></span></span>

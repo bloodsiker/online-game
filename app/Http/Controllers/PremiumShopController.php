@@ -9,6 +9,7 @@ use App\Models\Shop\ShopItem;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipRenderer;
+use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Services\ShopCartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,9 +42,7 @@ class PremiumShopController extends Controller
 
         $cart = $this->shopCartService->getCart($user, $shop->id);
 
-        foreach ($items as $item) {
-            $this->collector->addFromPremiumShop($item);
-        }
+        $this->collector->collectFrom(new PremiumShopItemTooltipStrategy($items));
 
         $itemTooltipScript = $this->renderer->render($this->collector->all());
 

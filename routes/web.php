@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BlacksmithController;
 use App\Http\Controllers\ClanController;
+use App\Http\Controllers\ClanWarehouseController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\HealthController;
@@ -132,8 +133,15 @@ Route::post('/clan/role/save', [ClanController::class, 'saveRoles'])->name('clan
 Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name('clan.role.delete');
 Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
 Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
+Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
+Route::post('/clan/information/description', [ClanController::class, 'saveDescription'])->name('clan.information.save-description');
+Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name('clan.information.save-news');
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
 Route::post('/clan', [ClanController::class, 'store'])->name('clan.store');
+
+Route::match(['get', 'post'], '/clan-warehouse/{id}', [ClanWarehouseController::class, 'put'])->name('clan.warehouse');
+Route::match(['get', 'post'], '/clan-warehouse/{id}/take', [ClanWarehouseController::class, 'take'])->name('clan.warehouse.take');
+Route::get('/clan-warehouse/{id}/logs', [ClanWarehouseController::class, 'logs'])->name('clan.warehouse.logs');
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 
@@ -162,6 +170,7 @@ Route::get('/chat-log', [ChatController::class, 'chatLog'])->name('chat.log');
 Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat.action');
 
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
+Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');

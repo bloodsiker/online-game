@@ -6,6 +6,7 @@ use App\Decorator\Player\EquipmentDecorator;
 use App\Services\BackpackService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipRenderer;
+use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -32,9 +33,7 @@ class BackpackController extends Controller
 
         $playerEquip = $user->player->playerEquip;
 
-        foreach ($data->getBackpack() as $item) {
-            $this->collector->addFromBackpack($item);
-        }
+        $this->collector->collectFrom(new BackpackItemTooltipStrategy($data->getBackpack()));
 
         $itemTooltipScript = $this->renderer->render($this->collector->all());
 

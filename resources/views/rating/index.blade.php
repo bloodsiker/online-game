@@ -245,6 +245,10 @@
         .user-rating th .user-rating-progress {
             background-position: 0 -67px;
         }
+        .bg_l3 {
+            background-image: url({{ asset('img/bg/bg_l3.gif') }});
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="regblk">
@@ -325,49 +329,59 @@
                                 <td>
                                     <table border="0" cellpadding="0" cellspacing="0" class="pg w100">
                                         <tbody>
+                                        @php
+                                            $cur      = $players->currentPage();
+                                            $last     = $players->lastPage();
+                                            $window   = 5;
+                                            $pgFrom   = max(1, $cur - $window);
+                                            $pgTo     = min($last, $cur + $window);
+                                        @endphp
                                         <tr>
                                             <td class="b" width="10">
                                                 <nobr>Страницы:&nbsp;</nobr>
                                             </td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=0"
-                                                    class="pg-inact_lnk">1</a></td>
-                                            <td class="pg-act"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=1"
-                                                    class="pg-act_lnk">2</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=2"
-                                                    class="pg-inact_lnk">3</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=3"
-                                                    class="pg-inact_lnk">4</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=4"
-                                                    class="pg-inact_lnk">5</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=5"
-                                                    class="pg-inact_lnk">6</a></td>
-                                            <td style="text-align: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Найти
-                                                    игрока:</strong>&nbsp;<input id="user_nick" value=""
-                                                                                 onkeydown="if(event.keyCode==13)search_user(this.value);"
-                                                                                 class="brd dbgl"
-                                                                                 style="width: 128px;">&nbsp;&nbsp;<b
-                                                    class="butt2 pointer "><b><input value="Поиск" type="button"
-                                                                                     onclick="return search_user(gebi('user_nick').value);"
-                                                                                     style="width:50px"></b></b>&nbsp;&nbsp;&nbsp;&nbsp;<b
-                                                    class="butt2 pointer "><b><input value="Найти себя"
-                                                                                     type="button"
-                                                                                     onclick="return search_me();"
-                                                                                     style="width:100px"></b></b>
+                                            @if($pgFrom > 1)
+                                                <td class="pg-inact"><a href="{{ $players->url(1) }}" class="pg-inact_lnk">1</a></td>
+                                                @if($pgFrom > 2)<td class="b" style="padding:0 2px">…</td>@endif
+                                            @endif
+                                            @for($p = $pgFrom; $p <= $pgTo; $p++)
+                                                <td class="{{ $p === $cur ? 'pg-act' : 'pg-inact' }}">
+                                                    <a href="{{ $players->url($p) }}" class="{{ $p === $cur ? 'pg-act_lnk' : 'pg-inact_lnk' }}">{{ $p }}</a>
+                                                </td>
+                                            @endfor
+                                            @if($pgTo < $last)
+                                                @if($pgTo < $last - 1)<td class="b" style="padding:0 2px">…</td>@endif
+                                                <td class="pg-inact"><a href="{{ $players->url($last) }}" class="pg-inact_lnk">{{ $last }}</a></td>
+                                            @endif
+                                            <td style="text-align: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Найти игрока:</strong>&nbsp;
+                                                <input id="user_nick" value="" onkeydown="if(event.keyCode==13)search_user(this.value);" class="brd dbgl" style="width: 128px;">&nbsp;&nbsp;
+                                                <b class="butt2 pointer ">
+                                                    <b>
+                                                        <input value="Поиск" type="button" onclick="return search_user(gebi('user_nick').value);" style="width:50px">
+                                                    </b>
+                                                </b>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                <b class="butt2 pointer ">
+                                                    <b>
+                                                        <input value="Найти себя" type="button" onclick="return search_me();" style="width:100px">
+                                                    </b>
+                                                </b>
                                             </td>
                                             <td width="1%" style="text-align:right" nowrap="">
-                                                <a href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=0">
-                                                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
-                                                </a>
+                                                @if($players->onFirstPage())
+                                                    <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                                @else
+                                                    <a href="{{ $players->previousPageUrl() }}">
+                                                        <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                                    </a>
+                                                @endif
                                                 <img src="{{ asset('img/bg/pg-act.gif') }}" border="0" width="17" height="17">
-                                                <a href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=2">
-                                                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
-                                                </a>
+                                                @if($players->hasMorePages())
+                                                    <a href="{{ $players->nextPageUrl() }}">
+                                                        <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                                    </a>
+                                                @else
+                                                    <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                                @endif
                                             </td>
                                         </tr>
                                         </tbody>
@@ -392,7 +406,9 @@
                             </tr></thead>
                             <tbody>
                             @foreach($players as $player)
-                                <tr class="{{ $loop->even ? 'bg_l' : '' }}">
+                                <tr class="{{ $loop->even ? 'bg_l' : '' }}"
+                                    id="pr-{{ $player->user->id }}"
+                                    data-name="{{ mb_strtolower($player->user->name) }}">
                                     <td class="rating-nowrap" align="center">
                                         <span class="user-rating-red">{{ $players->firstItem() + $loop->index }}</span>
                                     </td>
@@ -437,33 +453,36 @@
                                             <td class="b" width="10">
                                                 <nobr>Страницы:&nbsp;</nobr>
                                             </td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=0"
-                                                    class="pg-inact_lnk">1</a></td>
-                                            <td class="pg-act"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=1"
-                                                    class="pg-act_lnk">2</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=2"
-                                                    class="pg-inact_lnk">3</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=3"
-                                                    class="pg-inact_lnk">4</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=4"
-                                                    class="pg-inact_lnk">5</a></td>
-                                            <td class="pg-inact"><a
-                                                    href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=5"
-                                                    class="pg-inact_lnk">6</a></td>
+                                            @if($pgFrom > 1)
+                                                <td class="pg-inact"><a href="{{ $players->url(1) }}" class="pg-inact_lnk">1</a></td>
+                                                @if($pgFrom > 2)<td class="b" style="padding:0 2px">…</td>@endif
+                                            @endif
+                                            @for($p = $pgFrom; $p <= $pgTo; $p++)
+                                                <td class="{{ $p === $cur ? 'pg-act' : 'pg-inact' }}">
+                                                    <a href="{{ $players->url($p) }}" class="{{ $p === $cur ? 'pg-act_lnk' : 'pg-inact_lnk' }}">{{ $p }}</a>
+                                                </td>
+                                            @endfor
+                                            @if($pgTo < $last)
+                                                @if($pgTo < $last - 1)<td class="b" style="padding:0 2px">…</td>@endif
+                                                <td class="pg-inact"><a href="{{ $players->url($last) }}" class="pg-inact_lnk">{{ $last }}</a></td>
+                                            @endif
                                             <td style="text-align: left;"></td>
                                             <td width="1%" style="text-align:right" nowrap="">
-                                                <a href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=0">
-                                                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
-                                                </a>
+                                                @if($players->onFirstPage())
+                                                    <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                                @else
+                                                    <a href="{{ $players->previousPageUrl() }}">
+                                                        <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                                    </a>
+                                                @endif
                                                 <img src="{{ asset('img/bg/pg-act.gif') }}" border="0" width="17" height="17">
-                                                <a href="user_ratings.php?&amp;mode=global&amp;submode=rating&amp;page=2">
-                                                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
-                                                </a>
+                                                @if($players->hasMorePages())
+                                                    <a href="{{ $players->nextPageUrl() }}">
+                                                        <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                                    </a>
+                                                @else
+                                                    <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                                @endif
                                             </td>
                                         </tr>
                                         </tbody>
@@ -497,6 +516,76 @@
 
 
 <script>
+    var currentUserName = '{{ mb_strtolower($user->name) }}';
+    var searchUrl       = '{{ route('rating.search') }}';
+    var ratingType      = '{{ $type }}';
+
+    var currentPage = {{ $players->currentPage() }};
+
+    function gebi(id) { return document.getElementById(id); }
+
+    function highlightRow(row) {
+        var prev = document.querySelector('.bg_l3');
+        if (prev) prev.classList.remove('bg_l3');
+        row.classList.add('bg_l3');
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function findOnPage(nick) {
+        var rows = document.querySelectorAll('tr[data-name]');
+        var lc = nick.toLowerCase();
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].getAttribute('data-name') === lc) {
+                return rows[i];
+            }
+        }
+        return null;
+    }
+
+    function search_user(nick) {
+        nick = (nick || '').trim();
+        if (!nick) return false;
+
+        fetch(searchUrl + '?nick=' + encodeURIComponent(nick) + '&type=' + ratingType)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                if (data.page === currentPage) {
+                    // уже на нужной странице — просто скролл
+                    var row = findOnPage(nick);
+                    if (row) highlightRow(row);
+                } else {
+                    // переходим на нужную страницу
+                    window.location.href = '{{ route('rating') }}?type=' + ratingType
+                        + '&page=' + data.page
+                        + '&highlight=' + encodeURIComponent(nick);
+                }
+            });
+
+        return false;
+    }
+
+    function search_me() {
+        return search_user(currentUserName);
+    }
+
+    // авто-подсветка при загрузке
+    (function() {
+        var params    = new URLSearchParams(window.location.search);
+        var highlight = params.get('highlight');
+
+        // приоритет: highlight из URL, иначе — текущий игрок
+        var target = highlight ? highlight : currentUserName;
+
+        var row = findOnPage(target);
+        if (row) {
+            setTimeout(function() { highlightRow(row); }, 150);
+        }
+    })();
+
     document.addEventListener('keydown', function(event) {
         switch (event.key.toLowerCase()) {
             case 'i':

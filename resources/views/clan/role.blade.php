@@ -86,7 +86,7 @@
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="" title="Информация" class="btn_1">Информация</a></td>
+            <a href="{{ route('clan.information') }}" title="Информация" class="btn_1">Информация</a></td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
@@ -166,16 +166,20 @@
                                                 style="display: table-cell;">
                                                 @if($role->is_leader || !$canChangePerms)
                                                     @if($role->hasPermission($perm))
-                                                        <img src="{{ asset('img/icon/check_yes.gif') }}">
+                                                        <img src="{{ asset('img/icon/check_yes.gif') }}" style="width: 15px; height: 15px">
                                                     @else
                                                         &mdash;
                                                     @endif
                                                 @else
-                                                    <input type="checkbox"
-                                                           name="form[grades][{{ $role->id }}][flags][{{ $perm->value }}]"
-                                                           value="1"
-                                                           class="grade_checkbox"
-                                                           {{ $role->hasPermission($perm) ? 'checked' : '' }}>
+                                                    <label for="chk-{{ $role->id }}-{{ $perm->value }}">
+                                                        <input type="checkbox"
+                                                               id="chk-{{ $role->id }}-{{ $perm->value }}"
+                                                               name="form[grades][{{ $role->id }}][flags][{{ $perm->value }}]"
+                                                               value="1"
+                                                               class="input-custom grade_checkbox"
+                                                               {{ $role->hasPermission($perm) ? 'checked' : '' }}>
+                                                        <span class="custom-checkbox"></span>
+                                                    </label>
                                                 @endif
                                             </td>
                                         @endforeach

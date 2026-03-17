@@ -1523,6 +1523,15 @@ class GenerateSeed extends Command
         $shop4->actions()->attach(4);
         $shop4->actions()->attach(5);
 
+        $clanWarehouse = new Structure();
+        $clanWarehouse->type = Structure::TYPE_CLAN_WAREHOUSE;
+        $clanWarehouse->name = 'Клановое хранилище';
+        $clanWarehouse->location_id = $locationHeal->id;
+        $clanWarehouse->save();
+
+        $clanWarehouse->actions()->attach(4);
+        $clanWarehouse->actions()->attach(5);
+
         $locationHeal = Location::find(27);
         $shop5 = new Structure();
         $shop5->type = Structure::TYPE_BLACKSMITH;

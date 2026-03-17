@@ -240,4 +240,56 @@ class ClanController extends Controller
 
         return redirect()->route('clan.role');
     }
+
+    public function information()
+    {
+        /** @var \App\Models\User $user */
+        $user       = Auth::user();
+        $membership = $user->clanMembership;
+
+        if ($membership === null) {
+            session()->flash('message', 'Вы не состоите в клане.');
+            return redirect()->route('clan');
+        }
+
+        $clan           = $membership->clan;
+        $canChangeNews  = $membership->role->hasPermission(ClanPermission::CHANGE_NEWS);
+
+        return view('clan.information', compact('clan', 'membership', 'canChangeNews'));
+    }
+
+    public function saveDescription(Request $request): RedirectResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        try {
+            $this->clanService->saveDescription($user, $request->input('description', ''));
+            session()->flash('message', 'Описание клана сохранено.');
+        } catch (\RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
+        }
+
+        return redirect()->route('clan.information');
+    }
+
+    public function saveNews(Request $request): RedirectResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        try {
+            $this->clanService->saveNews(
+                $user,
+                $request->input('news_1', ''),
+                $request->input('news_2', ''),
+                $request->input('news_3', ''),
+            );
+            session()->flash('message', 'Новости клана сохранены.');
+        } catch (\RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
+        }
+
+        return redirect()->route('clan.information');
+    }
 }

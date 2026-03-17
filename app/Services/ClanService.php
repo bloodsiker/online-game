@@ -378,6 +378,47 @@ readonly class ClanService
         $role->delete();
     }
 
+    /**
+     * @throws \RuntimeException
+     */
+    public function saveDescription(User $user, string $description): void
+    {
+        $membership = $user->clanMembership;
+
+        if ($membership === null) {
+            throw new \RuntimeException('Вы не состоите в клане.');
+        }
+
+        if (!$membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
+            throw new \RuntimeException('У вас нет прав изменять описание клана.');
+        }
+
+        $membership->clan->update(['description' => $description]);
+
+        $this->log($membership->clan_id, $user->id, ClanLogAction::CLAN_CREATED, "Игрок {$user->name} обновил описание клана");
+    }
+
+    public function saveNews(User $user, string $news1, string $news2, string $news3): void
+    {
+        $membership = $user->clanMembership;
+
+        if ($membership === null) {
+            throw new \RuntimeException('Вы не состоите в клане.');
+        }
+
+        if (!$membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
+            throw new \RuntimeException('У вас нет прав изменять новости клана.');
+        }
+
+        $membership->clan->update([
+            'news_1' => $news1,
+            'news_2' => $news2,
+            'news_3' => $news3,
+        ]);
+
+        $this->log($membership->clan_id, $user->id, ClanLogAction::CLAN_CREATED, "Игрок {$user->name} обновил новости клана");
+    }
+
     private function log(int $clanId, ?int $userId, ClanLogAction $action, string $details): void
     {
         ClanLog::create([

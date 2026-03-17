@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('structures', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['shop', 'auction', 'heal', 'warehouse', 'bank', 'blacksmith', 'exchange'])->default('shop');
+            $table->enum('type', ['shop', 'auction', 'heal', 'warehouse', 'clan_warehouse', 'bank', 'blacksmith', 'exchange'])->default('shop');
             $table->string('name');
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->timestamps();

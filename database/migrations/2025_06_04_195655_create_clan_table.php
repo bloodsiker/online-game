@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('clans', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->text('news_1')->nullable();
+            $table->text('news_2')->nullable();
+            $table->text('news_3')->nullable();
             $table->text('description')->nullable();
             $table->integer('lvl')->default(1);
+            $table->unsignedInteger('warehouse_capacity')->default(50);
             $table->string('icon')->nullable();
-//            $table->unsignedBigInteger('owner_id');
             $table->foreignId('owner_id')->constrained('users');
             $table->timestamps();
         });
@@ -62,6 +65,27 @@ return new class extends Migration
             $table->text('details')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('clan_warehouses', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('structure_id')->constrained('structures');
+            $table->foreignId('clan_id')->constrained('clans')->cascadeOnDelete();
+            $table->foreignId('depositor_user_id')->constrained('users');
+            $table->foreignId('item_id')->constrained('items');
+            $table->unsignedInteger('count')->default(1);
+            $table->timestamps();
+        });
+
+        Schema::create('clan_warehouse_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('clan_id')->constrained('clans')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
+            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->enum('action', array_column(\App\Enums\ClanWarehouseAction::cases(), 'value'));
+            $table->unsignedInteger('count');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -69,6 +93,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('clan_warehouse_logs');
+        Schema::dropIfExists('clan_warehouses');
         Schema::dropIfExists('clan_logs');
         Schema::dropIfExists('clan_join_requests');
         Schema::dropIfExists('clan_members');

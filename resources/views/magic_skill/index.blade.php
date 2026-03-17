@@ -15,7 +15,7 @@
             margin: 0;
             color: #000;
             font-family: Tahoma;
-            font-size: 12px;
+            font-size: 11px;
         }
         a {
             color: #000000;

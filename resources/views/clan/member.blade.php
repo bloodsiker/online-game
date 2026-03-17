@@ -85,12 +85,12 @@
 
         <td width="19"><img id="left_3" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_3" href="" title="Информация" class="btn_1">Информация</a></td>
+            <a id="center_3" href="{{ route('clan.information') }}" title="Информация" class="btn_1">Информация</a></td>
         <td width="19"><img id="right_3" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
         <td width="19"><img id="left_3" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_3" href="" title="Информация" class="btn_1">Управление</a></td>
+            <a id="center_4" href="" title="Информация" class="btn_1">Управление</a></td>
         <td width="19"><img id="right_3" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
         <td></td>

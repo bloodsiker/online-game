@@ -13,10 +13,10 @@ enum ClanLogAction: string
     case DEMOTED       = 'demoted';
     case BANNED        = 'banned';
     case UNBANNED      = 'unbanned';
-    case CLAN_CREATED  = 'clan_created';
-    case CLAN_LVL_UP   = 'clan_lvl_up';
-    case CLAN_DELETED  = 'clan_deleted';
-    case CLAN_RENAMED  = 'clan_renamed';
+    case CLAN_CREATED    = 'clan_created';
+    case CLAN_LVL_UP     = 'clan_lvl_up';
+    case CLAN_DELETED    = 'clan_deleted';
+    case CLAN_RENAMED    = 'clan_renamed';
 
     public function label(): string
     {

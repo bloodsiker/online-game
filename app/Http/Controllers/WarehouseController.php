@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ShareItemType;
 use App\Models\Backpack;
-use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -11,115 +11,19 @@ use Illuminate\Support\Facades\Auth;
 
 class WarehouseController extends Controller
 {
-    public function index(Request $request, $id)
+    public function index(Request $request, int $id)
     {
-        $user = Auth::user();
-        $warehouse = Structure::find($id);
+        $user      = Auth::user();
+        $warehouse = Structure::findOrFail($id);
 
-        if (!$warehouse) {
-            abort(404);
-        }
-
-        $countInWarehouse = Warehouse::query()
-            ->where('user_id', $user->id)
+        $countInWarehouse = Warehouse::where('user_id', $user->id)
             ->where('structure_id', $warehouse->id)
             ->count();
 
         if ($request->isMethod('POST')) {
-            $checkedItems = $request->input('item');
-            $putItems = array_filter($checkedItems, function($product) {
-                return isset($product['selected']) && $product['selected'] == 1;
-            });
-
-            if (!$putItems || count($putItems) === 0) {
-                session()->flash('message', 'Не выбраны предметы для хранения]');
-                return redirect()->back();
-            }
-
-            $items = Backpack::select('backpacks.*')
-                ->with(['item', 'item.itemInfo'])
-                ->join('items', 'backpacks.item_id', '=', 'items.id')
-                ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-                ->where('backpacks.user_id', $user->id)
-                ->whereIn('item_id', array_keys($putItems))
-                ->where('equipped', 0)
-                ->get();
-
-            $data = [];
-            $successPutItems = [];
-            $isLimit = false;
-            $putTotalPrice = 0;
-            $countInWarehouseAndPut = $countInWarehouse;
-            foreach ($items as $item) {
-                if ($countInWarehouseAndPut >= $user->warehouse_count) {
-                    $isLimit = true;
-                    break;
-                }
-
-                $putTotalPrice += 10;
-
-                $countItem = $putItems[$item->item_id];
-                if ($countItem['count'] >= $item->count) {
-                    $putCount = $item->count;
-                    $successPutItems[] = $item->item_id;
-                } else {
-                    $putCount = $countItem['count'];
-                }
-
-                $data[] = [
-                    'user_id' => $user->id,
-                    'structure_id' => $warehouse->id,
-                    'item_id' => $item->item_id,
-                    'count' => $putCount,
-                    'share_item_id' => $item->item->share_item_id,
-                    'type' => $item->item->itemInfo->type,
-                    'item' => $item,
-                ];
-
-                $countInWarehouseAndPut++;
-            }
-
-            $countInWarehouse = $countInWarehouseAndPut;
-
-            if ($user->money < $putTotalPrice) {
-                session()->flash('message', sprintf('У вас не достаточно %s монет для хранения вещей', number_format($putTotalPrice, 0, ',', ' ')));
-                return redirect()->back();
-            }
-
-            foreach ($data as $key => &$itemPutToWarehouse) {
-                $hasInWarehouse = Warehouse::select('warehouses.*')->where(['items.share_item_id' => $itemPutToWarehouse['share_item_id']])
-                    ->join('items', 'warehouses.item_id', '=', 'items.id')
-                    ->first();
-
-                $itemInBackpack = $itemPutToWarehouse['item'];
-
-                if ($hasInWarehouse instanceof Warehouse && $itemPutToWarehouse['type'] === ShareItemType::RESOURCE) {
-                    $hasInWarehouse->count += $itemPutToWarehouse['count'];
-                    $hasInWarehouse->save();
-                    unset($data[$key]);
-                }
-
-                if ($itemInBackpack->count > $itemPutToWarehouse['count']) {
-                    $itemInBackpack->count -= $itemPutToWarehouse['count'];
-                    $itemInBackpack->save();
-                }
-
-                unset($itemPutToWarehouse['type'], $itemPutToWarehouse['share_item_id'], $itemPutToWarehouse['item']);
-            }
-
-            $user->money -= $putTotalPrice;
-            $user->save();
-
-            if (count($data)) {
-                Warehouse::insert($data);
-            }
-
-            if (count($successPutItems)) {
-                Backpack::query()->whereIn('item_id', $successPutItems)->delete();
-            }
-
-            if ($isLimit) {
-                session()->flash('message', 'У вас не достаточно свободных мест в хранилище');
+            $redirect = $this->handlePut($request, $user, $warehouse, $countInWarehouse);
+            if ($redirect) {
+                return $redirect;
             }
         }
 
@@ -129,78 +33,194 @@ class WarehouseController extends Controller
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('equipped', 0)
-            ->orderBy('share_items.type', 'desc')->get();
+            ->orderBy('share_items.type', 'desc')
+            ->get();
 
         return view('warehouse.put', compact('warehouse', 'user', 'putItems', 'countInWarehouse'));
     }
 
-    public function takeItem(Request $request, $id)
+    public function takeItem(Request $request, int $id)
     {
-        $user = Auth::user();
-        $warehouse = Structure::find($id);
-
-        if (!$warehouse) {
-            abort(404);
-        }
+        $user      = Auth::user();
+        $warehouse = Structure::findOrFail($id);
 
         if ($request->isMethod('POST')) {
-            $checkedItems = $request->input('item');
-            $takeItems = array_filter($checkedItems, function($product) {
-                return isset($product['selected']) && $product['selected'] == 1;
-            });
-
-            if (!$takeItems || count($takeItems) === 0) {
-                session()->flash('message', 'Не выбраны предметы которые хотите забрать');
-                return redirect()->back();
-            }
-
-            $items = Warehouse::query()
-                ->where('structure_id', $warehouse->id)
-                ->where('user_id', $user->id)
-                ->whereIn('item_id', array_keys($takeItems))
-                ->get();
-
-            foreach ($items as $takeItem) {
-                $countTake = $takeItems[$takeItem->item_id]['count'];
-                if ($countTake >= $takeItem->count) {
-                    $countTake = $takeItem->count;
-                    Warehouse::where(['item_id' => $takeItem->item_id, 'user_id' => $user->id, 'structure_id' => $warehouse->id])->delete();
-                } else {
-                    Warehouse::where(['item_id' => $takeItem->item_id, 'user_id' => $user->id, 'structure_id' => $warehouse->id])->update(['count' => $takeItem->count - $countTake]);
-                }
-
-                $hasBackpack = Backpack::select('backpacks.*')->where(['items.share_item_id' => $takeItem->item->share_item_id])
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->first();
-
-                if ($hasBackpack instanceof Backpack && $takeItem->item->itemInfo->type === ShareItemType::RESOURCE) {
-                    $hasBackpack->count += $countTake;
-                    $hasBackpack->save();
-                } else {
-                    $backpack = new Backpack();
-                    $backpack->user_id = $user->id;
-                    $backpack->item_id = $takeItem->item_id;
-                    $backpack->count = $countTake;
-                    $backpack->save();
-                }
+            $redirect = $this->handleTake($request, $user, $warehouse);
+            if ($redirect) {
+                return $redirect;
             }
         }
 
-
-        $itemsToTake = Warehouse::query()
-            ->with(['item', 'item.itemInfo'])
-            ->join('items', 'item_id', '=', 'items.id')
+        $itemsToTake = Warehouse::with(['item', 'item.itemInfo'])
+            ->join('items', 'warehouses.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('user_id', $user->id)
             ->where('structure_id', $warehouse->id)
             ->orderBy('share_items.type', 'desc')
+            ->select('warehouses.*')
             ->get();
 
-        $countInWarehouse = Warehouse::query()
-            ->where('user_id', $user->id)
+        $countInWarehouse = Warehouse::where('user_id', $user->id)
             ->where('structure_id', $warehouse->id)
             ->count();
 
         return view('warehouse.take', compact('warehouse', 'user', 'itemsToTake', 'countInWarehouse'));
     }
+
+    private function handlePut(Request $request, $user, Structure $warehouse, int $countInWarehouse)
+    {
+        $checkedItems = $request->input('item', []);
+        $putItems     = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
+
+        if (!$putItems) {
+            session()->flash('message', 'Не выбраны предметы для хранения.');
+            return redirect()->back();
+        }
+
+        $items = Backpack::select('backpacks.*')
+            ->with(['item', 'item.itemInfo'])
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->whereIn('backpacks.item_id', array_keys($putItems))
+            ->where('equipped', 0)
+            ->get();
+
+        $toInsert        = [];
+        $toStack         = [];  // ['warehouse' => Warehouse, 'add' => int]
+        $toSubtract      = [];  // ['item' => Backpack, 'count' => int]
+        $toDeleteItemIds = [];
+        $isLimit         = false;
+        $totalCost       = 0;
+        $newSlots        = 0;
+
+        // --- Pass 1: collect changes, no mutations ---
+        foreach ($items as $item) {
+            if ($countInWarehouse + $newSlots >= $user->warehouse_count) {
+                $isLimit = true;
+                break;
+            }
+
+            $wantCount   = (int) ($putItems[$item->item_id]['count'] ?? $item->count);
+            $actualCount = min($wantCount, $item->count);
+            $totalCost  += 10;
+
+            $stackTarget = null;
+            if ($item->item->itemInfo->type === ShareItemType::RESOURCE || $item->item->itemInfo->type === ShareItemType::POTION) {
+                $stackTarget = Warehouse::select('warehouses.*')
+                    ->join('items', 'warehouses.item_id', '=', 'items.id')
+                    ->where('items.share_item_id', $item->item->share_item_id)
+                    ->where('warehouses.user_id', $user->id)
+                    ->where('warehouses.structure_id', $warehouse->id)
+                    ->first();
+            }
+
+            if ($stackTarget) {
+                $toStack[] = ['warehouse' => $stackTarget, 'add' => $actualCount];
+            } else {
+                $toInsert[] = [
+                    'user_id'      => $user->id,
+                    'structure_id' => $warehouse->id,
+                    'item_id'      => $item->item_id,
+                    'count'        => $actualCount,
+                ];
+                $newSlots++;
+            }
+
+            if ($item->count <= $actualCount) {
+                $toDeleteItemIds[] = $item->item_id;
+            } else {
+                $toSubtract[] = ['item' => $item, 'count' => $actualCount];
+            }
+        }
+
+        // --- Check money before any mutations ---
+        if ($user->money < $totalCost) {
+            session()->flash('message', sprintf(
+                'У вас не достаточно %s монет для хранения вещей',
+                number_format($totalCost, 0, ',', ' ')
+            ));
+            return redirect()->back();
+        }
+
+        // --- Pass 2: apply mutations ---
+        foreach ($toStack as $stack) {
+            $stack['warehouse']->count += $stack['add'];
+            $stack['warehouse']->save();
+        }
+
+        if ($toInsert) {
+            Warehouse::insert($toInsert);
+        }
+
+        foreach ($toSubtract as $sub) {
+            $sub['item']->count -= $sub['count'];
+            $sub['item']->save();
+        }
+
+        if ($toDeleteItemIds) {
+            Backpack::whereIn('item_id', $toDeleteItemIds)->where('user_id', $user->id)->delete();
+        }
+
+        $user->money -= $totalCost;
+        $user->save();
+
+        if ($isLimit) {
+            session()->flash('message', 'У вас не достаточно свободных мест в хранилище.');
+        }
+
+        return null;
+    }
+
+    private function handleTake(Request $request, $user, Structure $warehouse)
+    {
+        $checkedItems = $request->input('item', []);
+        $takeItems    = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
+
+        if (!$takeItems) {
+            session()->flash('message', 'Не выбраны предметы которые хотите забрать.');
+            return redirect()->back();
+        }
+
+        $items = Warehouse::with(['item', 'item.itemInfo'])
+            ->where('structure_id', $warehouse->id)
+            ->where('user_id', $user->id)
+            ->whereIn('item_id', array_keys($takeItems))
+            ->get();
+
+        foreach ($items as $wItem) {
+            $wantCount   = (int) ($takeItems[$wItem->item_id]['count'] ?? $wItem->count);
+            $actualCount = min($wantCount, $wItem->count);
+
+            if ($wItem->count <= $actualCount) {
+                $wItem->delete();
+            } else {
+                $wItem->count -= $actualCount;
+                $wItem->save();
+            }
+
+            $existing = null;
+            if ($wItem->item->itemInfo->type === ShareItemType::RESOURCE || $wItem->item->itemInfo->type === ShareItemType::POTION) {
+                $existing = Backpack::select('backpacks.*')
+                    ->join('items', 'backpacks.item_id', '=', 'items.id')
+                    ->where('items.share_item_id', $wItem->item->share_item_id)
+                    ->where('backpacks.user_id', $user->id)
+                    ->first();
+            }
+
+            if ($existing) {
+                $existing->count += $actualCount;
+                $existing->save();
+            } else {
+                Backpack::create([
+                    'user_id' => $user->id,
+                    'item_id' => $wItem->item_id,
+                    'count'   => $actualCount,
+                ]);
+            }
+        }
+
+        return null;
+    }
+
 }

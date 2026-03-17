@@ -22,6 +22,7 @@ class Structure extends Model
     public const TYPE_AUCTION = 'auction';
     public const TYPE_HEAL = 'heal';
     public const TYPE_WAREHOUSE = 'warehouse';
+    public const TYPE_CLAN_WAREHOUSE = 'clan_warehouse';
     public const TYPE_BANK = 'bank';
     public const TYPE_BLACKSMITH = 'blacksmith';
     public const TYPE_EXCHANGE = 'exchange';
@@ -31,6 +32,7 @@ class Structure extends Model
         self::TYPE_AUCTION => 'Аукцион',
         self::TYPE_HEAL => 'Восстановление',
         self::TYPE_WAREHOUSE => 'Хранилище',
+        self::TYPE_CLAN_WAREHOUSE => 'Клановое хранилище',
         self::TYPE_BANK => 'Банк',
         self::TYPE_BLACKSMITH => 'Кузня',
         self::TYPE_EXCHANGE => 'Обмен',
@@ -118,6 +120,11 @@ class Structure extends Model
     public function isWarehouse(): bool
     {
         return $this->type === self::TYPE_WAREHOUSE;
+    }
+
+    public function isClanWarehouse(): bool
+    {
+        return $this->type === self::TYPE_CLAN_WAREHOUSE;
     }
 
     public function isBlacksmith(): bool
