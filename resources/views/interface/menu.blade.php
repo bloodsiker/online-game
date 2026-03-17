@@ -29,14 +29,14 @@
 
 <div class="game-area">
     <ul>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('location') }}')">Перемещение</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('character') }}', true)">Персонаж</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('backpack') }}', true)">Вещи</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('clan') }}', true)">Клан</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('clan.member') }}', true)">Состав клана</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('quests') }}', true)">Квесты</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('premium.shop') }}', true)">Премиум</a></li>
-        <li><a href="#" onclick="window.top.toLocation('{{ route('rating') }}', true)">Рейтинг</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('location') }}')">Перемещение</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('character') }}', true)">Персонаж</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('backpack') }}', true)">Вещи</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('clan') }}', true)">Клан</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('clan.member') }}', true)">Состав клана</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('quests') }}', true)">Квесты</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('premium.shop') }}', true)">Премиум</a></li>
+        <li><a href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('rating') }}', true)">Рейтинг</a></li>
         <li><a href="{{ route('logout') }}">Выход</a></li>
     </ul>
 </div>

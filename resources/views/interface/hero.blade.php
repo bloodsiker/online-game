@@ -37,9 +37,6 @@
 
 <table width="220" border="0" cellspacing="0" cellpadding="0">
     <tbody>
-    <tr height="10">
-        <td colspan="3"></td>
-    </tr>
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="center"></td>

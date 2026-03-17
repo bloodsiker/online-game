@@ -28,7 +28,7 @@ class PremiumShopController extends Controller
     {
         $user = Auth::user();
 
-        $premiumShopId = 7;
+        $premiumShopId = 8;
 
         $shop = Structure::with('shopItems.item', 'shopItems.requirements.item')->find($premiumShopId);
         $firstCategory = $shop->categories()->first();

@@ -1648,7 +1648,7 @@ class GenerateSeed extends Command
         $sItem1->price = 10;
         $sItem1->name = 'Монета древности';
         $sItem1->description = 'Монета древности';
-        $sItem1->image = '/img/resource/ancient_coin.jpg';
+        $sItem1->image = '/img/resource/ancient_coin.gif';
         $sItem1->is_weight = false;
         $sItem1->save();
 
@@ -1657,7 +1657,7 @@ class GenerateSeed extends Command
         $sItem2->price = 3;
         $sItem2->name = 'Синий Камень Печати';
         $sItem2->description = 'Синий Камень Печати';
-        $sItem2->image = '/img/resource/water_rune.jpg';
+        $sItem2->image = '/img/resource/water_rune.png';
         $sItem2->save();
 
         $sItem3 = new ShareItem();
@@ -1665,7 +1665,7 @@ class GenerateSeed extends Command
         $sItem3->price = 5;
         $sItem3->name = 'Зеленый Камень Печати';
         $sItem3->description = 'Зеленый Камень Печати';
-        $sItem3->image = '/img/resource/wind_rune.jpg';
+        $sItem3->image = '/img/resource/wind_rune.png';
         $sItem3->save();
 
         $sItem4 = new ShareItem();
@@ -1673,7 +1673,7 @@ class GenerateSeed extends Command
         $sItem4->price = 10;
         $sItem4->name = 'Красный Камень Печати';
         $sItem4->description = 'Красный Камень Печати';
-        $sItem4->image = '/img/resource/fire_rune.jpg';
+        $sItem4->image = '/img/resource/fire_rune.png';
         $sItem4->save();
 
         $exchange = new Exchange();

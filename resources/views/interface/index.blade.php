@@ -104,15 +104,60 @@
         }
 
         .td-map {
-            width: 300px;
-            transition: width 0.3s ease, opacity 0.3s ease;
+            padding: 0 !important;
             overflow: hidden;
-            opacity: 1;
         }
 
-        .td-map.hidden {
+        .map-wrapper {
+            width: 340px;
+            overflow: hidden;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+            height: 100%;
+        }
+
+        .map-wrapper.hidden {
             width: 0;
             opacity: 0;
+        }
+
+        .map-toggle-btn {
+            position: absolute;
+            top: 50%;
+            left: -3px;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 70px;
+            background: linear-gradient(to bottom, #e0b870, #b07030, #e0b870);
+            border: 1px solid #7a4010;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            box-shadow: -2px 0 6px rgba(0,0,0,0.35);
+            transition: background 0.15s, left 0.3s ease;
+            z-index: 10;
+        }
+        .map-toggle-btn:hover {
+            background: linear-gradient(to bottom, #f0cc88, #c88040, #f0cc88);
+        }
+        .map-toggle-btn:active {
+            background: linear-gradient(to bottom, #a06020, #d4a060, #a06020);
+        }
+        .map-toggle-arrow {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-right: 6px solid #4a1a00;
+            transition: transform 0.3s ease;
+        }
+        .map-toggle-arrow.open {
+            transform: rotate(180deg);
         }
     </style>
 </head>
@@ -477,6 +522,38 @@
                             });
                         </script>
 
+                        <script>
+                            let mapVisible = localStorage.getItem('map-visible') !== 'false';
+
+                            function applyMapState() {
+                                const mapWrapper = document.getElementById('map-wrapper');
+                                const mapArrow   = document.getElementById('map-toggle-arrow');
+                                const mapBtn     = document.querySelector('.map-toggle-btn');
+                                if (!mapWrapper || !mapArrow || !mapBtn) return;
+                                if (mapVisible) {
+                                    mapWrapper.classList.remove('hidden');
+                                    mapArrow.classList.add('open');
+                                    mapBtn.style.left = '-3px';
+                                } else {
+                                    mapWrapper.classList.add('hidden');
+                                    mapArrow.classList.remove('open');
+                                    mapBtn.style.left = '-14px';
+                                }
+                            }
+
+                            function toggleMap(show) {
+                                if (show === undefined) {
+                                    mapVisible = !mapVisible;
+                                } else {
+                                    mapVisible = !!show;
+                                }
+                                localStorage.setItem('map-visible', mapVisible);
+                                applyMapState();
+                            }
+
+                            document.addEventListener('DOMContentLoaded', applyMapState);
+                        </script>
+
                     </td>
                     <td valign="top" class="tbl-sts_right">
                         <table width="19" height="100%" border="0" cellspacing="0" cellpadding="0">
@@ -503,7 +580,11 @@
             </table>
         </td>
 
-        <td class="td-map" id="td-map">
+        <td class="td-map" id="td-map" style="position: relative; overflow: visible;">
+            <div class="map-toggle-btn" onclick="toggleMap()" title="Карта">
+                <span class="map-toggle-arrow open" id="map-toggle-arrow"></span>
+            </div>
+            <div id="map-wrapper" class="map-wrapper">
             <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
                 <tr height="33">
@@ -555,10 +636,11 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
         </td>
     </tr>
     <tr>
-        <td colspan="3" height="9">
+        <td colspan="4" height="9">
             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tbody>
                 <tr>
@@ -567,7 +649,7 @@
                     <td height="9" width="64" class="tbl-main_right-bottom-bg"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" height="3"></td>
+                    <td colspan="4" height="3"></td>
                 </tr>
                 </tbody>
             </table>
