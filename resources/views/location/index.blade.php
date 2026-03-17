@@ -406,19 +406,10 @@
 
 <script>
     function actionGoTo(button, direction) {
-        if (parent.isCooldown) {
-            console.log('⏳ Movement is blocked, cooldown is active...');
-            return;
-        }
-
-        // Блок кнопки, щоб не натискати повторно
-        // button.disabled = true;
-        // button.style.opacity = '0.5';
-
-        parent.goTo(direction);
-
-        // Запускаємо cooldown
-        parent.startCooldown();
+        parent.queueAction(() => {
+            parent.goTo(direction);
+            parent.startCooldown();
+        });
 
         // Після завершення cooldown — розблокувати кнопку
         // parent.window.addEventListener('cooldown:end', () => {

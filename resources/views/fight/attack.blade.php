@@ -502,13 +502,10 @@
 
 <script>
     function actionAttack(id, monsterId, action) {
-        if (parent.isCooldown) {
-            console.log('⏳ Attack is blocked, cooldown is active...');
-            return;
-        }
-
-        parent.attackMonster(id, monsterId, action);
-        parent.startCooldown();
+        parent.queueAction(() => {
+            parent.attackMonster(id, monsterId, action);
+            parent.startCooldown();
+        });
     }
 
     function buffOrDebuff() {

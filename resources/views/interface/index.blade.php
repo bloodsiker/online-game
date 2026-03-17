@@ -1072,6 +1072,16 @@
         parent.cooldownDuration = 1000;
     }
 
+    parent.pendingAction = null;
+
+    function queueAction(fn) {
+        if (!parent.isCooldown) {
+            fn();
+        } else {
+            parent.pendingAction = fn;
+        }
+    }
+
     function startCooldown() {
         const heroFrame = document.getElementById('character-frame');
         if (!heroFrame) return console.error('Iframe #character-frame не знайдено');
@@ -1099,6 +1109,12 @@
             setTimeout(() => {
                 parent.isCooldown = false;
                 parent.window.dispatchEvent(new CustomEvent('cooldown:end'));
+
+                if (parent.pendingAction) {
+                    const action = parent.pendingAction;
+                    parent.pendingAction = null;
+                    action();
+                }
             }, parent.cooldownDuration);
         }, 50);
 
