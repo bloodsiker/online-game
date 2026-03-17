@@ -93,6 +93,7 @@ class GenerateSeed extends Command
         $this->createShareShopCategory();
         $this->createStructures();
         $this->createNpcAndQuest();
+        $this->call('db:seed', ['--class' => 'ClanSkillSeeder']);
     }
 
     public function createExp()

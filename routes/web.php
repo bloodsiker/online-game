@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BlacksmithController;
 use App\Http\Controllers\ClanController;
+use App\Http\Controllers\ClanSkillController;
 use App\Http\Controllers\ClanWarehouseController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ExchangeController;
@@ -138,6 +139,8 @@ Route::post('/clan/information/description', [ClanController::class, 'saveDescri
 Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name('clan.information.save-news');
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
 Route::post('/clan', [ClanController::class, 'store'])->name('clan.store');
+Route::get('/clan/skills', [ClanSkillController::class, 'index'])->name('clan.skills');
+Route::post('/clan/skills/{id}/learn', [ClanSkillController::class, 'learn'])->name('clan.skills.learn');
 
 Route::match(['get', 'post'], '/clan-warehouse/{id}', [ClanWarehouseController::class, 'put'])->name('clan.warehouse');
 Route::match(['get', 'post'], '/clan-warehouse/{id}/take', [ClanWarehouseController::class, 'take'])->name('clan.warehouse.take');

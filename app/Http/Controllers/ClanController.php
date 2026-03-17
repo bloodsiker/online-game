@@ -8,6 +8,7 @@ use App\Models\Clan\ClanJoinRequest;
 use App\Models\Clan\ClanRole;
 use App\Models\User;
 use App\Services\ClanService;
+use App\Services\ClanSkillService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,10 @@ use Illuminate\Support\Facades\Auth;
 
 class ClanController extends Controller
 {
-    public function __construct(private readonly ClanService $clanService) {}
+    public function __construct(
+        private readonly ClanService $clanService,
+        private readonly ClanSkillService $clanSkillService,
+    ) {}
 
     public function index()
     {
@@ -99,7 +103,11 @@ class ClanController extends Controller
             return redirect()->route('clan');
         }
 
-        $this->clanService->create($user, $request->input('name'), $request->file('logo'));
+        $clan = $this->clanService->create($user, $request->input('name'), $request->file('logo'));
+
+        if ($user->player) {
+            $this->clanSkillService->applyAllSkillsToPlayer($user->player, $clan);
+        }
 
         session()->flash('message', 'Клан успешно создан!');
         return redirect()->route('clan.member');
@@ -152,7 +160,16 @@ class ClanController extends Controller
         $user = Auth::user();
 
         try {
+            $membership = $user->clanMembership;
+            $clan = $membership?->clan;
+            $player = $user->player;
+
             $this->clanService->leaveClan($user);
+
+            if ($clan && $player) {
+                $this->clanSkillService->removeAllSkillsFromPlayer($player, $clan);
+            }
+
             session()->flash('message', 'Вы покинули клан.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -167,7 +184,16 @@ class ClanController extends Controller
         $user = Auth::user();
 
         try {
+            $membership = $user->clanMembership;
+            $clan = $membership?->clan;
+            $targetPlayer = $target->player;
+
             $this->clanService->kickMember($user, $target);
+
+            if ($clan && $targetPlayer) {
+                $this->clanSkillService->removeAllSkillsFromPlayer($targetPlayer, $clan);
+            }
+
             session()->flash('message', 'Игрок исключён из клана.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());

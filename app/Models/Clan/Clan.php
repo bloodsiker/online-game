@@ -13,7 +13,7 @@ class Clan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'warehouse_capacity'];
+    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'warehouse_capacity', 'bonus_points'];
 
     protected $attributes = [
         'lvl' => 1,
@@ -34,5 +34,10 @@ class Clan extends Model
     public function roles(): HasMany
     {
         return $this->hasMany(ClanRole::class)->orderBy('id');
+    }
+
+    public function learnedSkills(): HasMany
+    {
+        return $this->hasMany(ClanLearnedSkill::class);
     }
 }

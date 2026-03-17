@@ -94,6 +94,11 @@
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a href="{{ route('clan.skills') }}" title="Навыки" class="btn_1">Навыки</a></td>
+        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
             <a href="" title="Управление" class="btn_1">Управление</a></td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
