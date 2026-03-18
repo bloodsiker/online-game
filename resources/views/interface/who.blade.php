@@ -25,9 +25,17 @@
         }
         .info {
             margin-bottom: 2px;
+            color: #554848 !important;
         }
-        small {
-            font-size: 13px;
+        .pnick {
+            font-family: Tahoma;
+            font-size: 11px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #674F3D !important;
+        }
+        .time {
+            font-size: 11px;
         }
         a {
             color: #000;
@@ -59,7 +67,22 @@
             width: 3px;
         }
         .user_offline {
-            color: #B09A8B;
+            color: #B09A8B!important;
+        }
+        .clan-icon {
+            width: 13px;
+            height: 13px;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+        .clan-tag {
+            font-size: 11px;
+            color: #5B4736;
+            margin-left: 2px;
+        }
+        .prv-btn {
+            cursor: pointer;
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -73,23 +96,30 @@
             <br>
 
             @foreach($onlineOnLocation as $user)
+                @php $clan = $user->clanMembership?->clan; @endphp
                 <div class="info">
                     @if($user->last_online_at?->timestamp > $tenMinutesAgo->timestamp)
-                        <a href="" class="n"><small>{{ $user->last_online_at->format('H:i') }}</small></a>
-                        »
-                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank">{{ $user->name }}</a>
-                        {{ $user->player->lvl }}
-                        @if(rand(1, 5) == 2)
-                            [<a href="https://skazanie.com/info/?cid=NzE=" target="_blank">Elders</a>]
+                        <a href="" class="n"><span class="time">{{ $user->last_online_at->format('H:i') }}</span></a>
+                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                        @if($clan)
+                            @if($clan->icon)
+                                <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}">
+                            @else
+                                <span class="clan-tag">[{{ $clan->name }}]</span>
+                            @endif
                         @endif
                     @else
-                        <span class="user_offline"><small>{{ $user->last_online_at->format('H:i') }}</small>
-                        »
-                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="user_offline">{{ $user->name }}</a>
-                        {{ $user->player->lvl }}
-                        @if(rand(1, 5) == 2)
-                                [<a href="https://skazanie.com/info/?cid=NzE=" target="_blank" class="user_offline">Elders</a>]
+                        <span class="user_offline"><span class="time">{{ $user->last_online_at->format('H:i') }}</span>
+                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick user_offline" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                        @if($clan)
+                            @if($clan->icon)
+                                <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}" style="opacity:.6">
+                            @else
+                                <span class="clan-tag">[{{ $clan->name }}]</span>
                             @endif
+                        @endif
                         </span>
                     @endif
                 </div>
@@ -100,13 +130,17 @@
             <center><b style="color:green">Онлайн: {{ $onlineInGame->count() }}</b></center>
 
             @foreach($onlineInGame as $user)
+                @php $clan = $user->clanMembership?->clan; @endphp
                 <div class="info">
                     <a href="" class="n"><small>{{ $user->last_online_at->format('H:i') }}</small></a>
-                    »
-                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank">{{ $user->name }}</a>
-                    {{ $user->player->lvl }}
-                    @if(rand(1, 5) == 2)
-                        [<a href="https://skazanie.com/info/?cid=NzE=" target="_blank">Elders</a>]
+                    <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                @if($clan)
+                        @if($clan->icon)
+                            <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}">
+                        @else
+                            <span class="clan-tag">[{{ $clan->name }}]</span>
+                        @endif
                     @endif
                 </div>
             @endforeach
@@ -123,20 +157,18 @@
     </tr>
     </tbody>
 </table>
-{{--<div class="info-area lgb">--}}
-{{--    <div class="info">--}}
-{{--        <a href="" class="n"><small>14:55</small></a>--}}
-{{--         »--}}
-{{--        <a href="https://skazanie.com/info/?uid=160786" target="_blank">BlooDlSikeR</a>--}}
-{{--        767--}}
-{{--        [<a href="https://skazanie.com/info/?cid=NzE=" target="_blank">Elders</a>]--}}
-{{--    </div>--}}
-{{--    <div class="info">--}}
-{{--        <a href="" class="n"><small>14:51</small></a>--}}
-{{--        »--}}
-{{--        <a href="https://skazanie.com/info/?uid=160786" target="_blank">КрокоДил</a>--}}
-{{--    </div>--}}
-{{--</div>--}}
 
+<script>
+    function sendPrivate(name) {
+        try {
+            var bottomFrame = window.parent.document.getElementById('bottom-frame');
+            if (bottomFrame && bottomFrame.contentWindow) {
+                bottomFrame.contentWindow.postMessage({ type: 'insertPrivate', name: name }, '*');
+            }
+        } catch (e) {
+            console.error('[who] error:', e);
+        }
+    }
+</script>
 </body>
 </html>

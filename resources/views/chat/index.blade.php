@@ -36,6 +36,11 @@
             text-decoration: none;
             color: #5B4736 !important;
         }
+        .tbl-main_chatchng-link {
+            font-weight: bold;
+            text-decoration: none;
+            color: #FFE4AA !important;
+        }
         .lgb {
             background-image: url({{ asset('img/bg/lgb.gif') }});
             background-repeat: repeat;
@@ -263,43 +268,50 @@
                                                     <ul id="channel_tabs" title="Каналы чата" class="ui-sortable">
                                                         <li class="moveable channel ui-sortable-handle selected"
                                                             data-channel="main" data-channel-code="1"
-                                                            channel-serialize="channel_main"><span
-                                                                class="ch settings"><span class="settings-color"
+                                                            channel-serialize="channel_main"
+                                                            onclick="chatChangePreset(1)"><span
+                                                                class="ch settings"
+                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
                                                                                           style="background-color: #5A0000;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Основной</span></li>
                                                         <li class="moveable channel ui-sortable-handle"
-                                                            data-channel="trade" data-channel-code="8"
-                                                            channel-serialize="channel_trade"><span
-                                                                class="ch settings"><span
-                                                                    class="settings-color"
-                                                                    style="background-color: #cc00ff;"></span><span
+                                                            data-channel="location" data-channel-code="2"
+                                                            channel-serialize="channel_location"
+                                                            onclick="chatChangePreset(2)"><span
+                                                                class="ch settings"
+                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                                          style="background-color: #0055cc"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Инфо</span></li>
-                                                        <li class="moveable channel hid ui-sortable-handle"
-                                                            data-channel="party" data-channel-code="16"
-                                                            channel-serialize="channel_party" style=""><span
-                                                                class="ch settings"><span class="settings-color"
-                                                                                          style="background-color: #0033ff;"></span><span
-                                                                    class="settings-cover"></span></span><span
-                                                                class="text">Группа</span></li>
+                                                                class="text">Местность</span></li>
                                                         <li class="moveable channel ui-sortable-handle"
-                                                            data-channel="ally" data-channel-code="64"
-                                                            channel-serialize="channel_ally"><span
-                                                                class="ch settings"><span class="settings-color"
-                                                                                          style="background-color: #009999;"></span><span
+                                                            data-channel="trade" data-channel-code="8"
+                                                            channel-serialize="channel_trade"
+                                                            onclick="chatChangePreset(8)"><span
+                                                                class="ch settings"
+                                                                onclick="event.stopPropagation(); return false;"><span
+                                                                    class="settings-color"
+                                                                    style="background-color: #cc6600;"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Альянс</span></li>
+                                                                class="text">Торговый</span></li>
                                                         <li class="moveable channel ui-sortable-handle"
                                                             data-channel="clan" data-channel-code="4"
-                                                            channel-serialize="channel_clan"><span
-                                                                class="ch settings"><span class="settings-color"
+                                                            channel-serialize="channel_clan"
+                                                            onclick="chatChangePreset(4)"><span
+                                                                class="ch settings"
+                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
                                                                                           style="background-color: #007a03;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Клан</span></li>
-                                                        <!-- div id="chtMarquee" class="chtip no-settings" style="display: none;"><span class="btn-left" style="position: absolute;width: 13px;height: 29px;"></span><span class="text" style="max-width: 330px;">
-<div style="width: 100%;" id="marqueeDiv"></div>
-</span></div -->
+                                                        <li class="moveable channel ui-sortable-handle"
+                                                            data-channel="private" data-channel-code="32"
+                                                            channel-serialize="channel_private"
+                                                            onclick="chatChangePreset(32)"><span
+                                                                class="ch settings"
+                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                                          style="background-color: #660066;"></span><span
+                                                                    class="settings-cover"></span></span><span
+                                                                class="text">Личные</span></li>
                                                     </ul>
 
                                                 </div>
@@ -337,8 +349,6 @@
                                                                 });
                                                             }
                                                         }).disableSelection();
-                                                        $channel_tabs.find('li.channel').on('click', chat_channel_click);
-                                                        $channel_tabs.find('li .ch.settings').on('click', chat_channel_settings_click);
                                                     };
 
                                                     function fixWidthHelper(e, ui) {
@@ -361,6 +371,62 @@
                                                         return false;
                                                     };
                                                     chat_channel_init();
+
+                                                    var channelCodeToSlug = {
+                                                        1:  'main',
+                                                        2:  'location',
+                                                        8:  'trade',
+                                                        4:  'clan',
+                                                        32: 'private',
+                                                    };
+
+                                                    var fightlogOpen = false;
+
+                                                    function chatToggleFightlog() {
+                                                        fightlogOpen = !fightlogOpen;
+
+                                                        var block  = document.getElementById('fightlog');
+                                                        var td     = document.getElementById('fightlog_but_TD');
+                                                        var link   = document.getElementById('fightlog_but_A');
+                                                        var imgL   = document.getElementById('fightlog_but_IMGL');
+                                                        var imgR   = document.getElementById('fightlog_but_IMGR');
+
+                                                        if (fightlogOpen) {
+                                                            block.style.display = '';
+                                                            td.className    = 'tbl-main_chatchng-act-c';
+                                                            link.className  = 'tbl-main_chatchng-link';
+                                                            if (imgL) imgL.src = '{{ asset('img/bg/chat/4_left_act.png') }}';
+                                                            if (imgR) imgR.src = '{{ asset('img/bg/chat/4_right_act.png') }}';
+                                                        } else {
+                                                            block.style.display = 'none';
+                                                            td.className    = 'tbl-main_chatchng-ina-c';
+                                                            link.className  = 'tbl-main_chatchng-link_inact';
+                                                            if (imgL) imgL.src = '{{ asset('img/bg/chat/4_left_inact.png') }}';
+                                                            if (imgR) imgR.src = '{{ asset('img/bg/chat/4_right_inact.png') }}';
+                                                        }
+                                                    }
+
+                                                    function chatChangePreset(channelCode) {
+                                                        document.querySelectorAll('#channel_tabs li.channel').forEach(function(el) {
+                                                            el.classList.remove('selected');
+                                                        });
+                                                        var li = document.querySelector('#channel_tabs li.channel[data-channel-code="' + channelCode + '"]');
+                                                        if (li) li.classList.add('selected');
+
+                                                        var slug = li ? li.getAttribute('data-channel') : 'main';
+
+                                                        // Tell the chat iframe to switch channel without reloading
+                                                        var chatFrame = document.getElementById('chat-frame');
+                                                        if (chatFrame && chatFrame.contentWindow) {
+                                                            chatFrame.contentWindow.postMessage({ type: 'changeChannel', channel: slug }, '*');
+                                                        }
+
+                                                        // Notify action iframe of channel change
+                                                        var bottomFrame = document.getElementById('bottom-frame');
+                                                        if (bottomFrame && bottomFrame.contentWindow) {
+                                                            bottomFrame.contentWindow.postMessage({ type: 'setChannel', channel: slug }, '*');
+                                                        }
+                                                    }
 
                                                     function chat_channel_settings_save(form, current_channel) {
                                                         _top().error_close();

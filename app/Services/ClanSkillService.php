@@ -36,7 +36,7 @@ class ClanSkillService
             return "Недостаточный уровень клана. Требуется: {$levelData->required_clan_level}.";
         }
 
-        if ($clan->bonus_points < $levelData->required_bonus_points) {
+        if ($clan->points < $levelData->required_bonus_points) {
             return "Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.";
         }
 
@@ -54,7 +54,7 @@ class ClanSkillService
 
         DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player) {
             // Consume bonus points
-            $clan->decrement('bonus_points', $levelData->required_bonus_points);
+            $clan->decrement('points', $levelData->required_bonus_points);
 
             // Consume stone from player's backpack
             if ($levelData->stone_share_item_id) {

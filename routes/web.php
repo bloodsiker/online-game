@@ -135,6 +135,7 @@ Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name(
 Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
 Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
 Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
+Route::get('/clan/logs', [ClanController::class, 'logs'])->name('clan.logs');
 Route::post('/clan/information/description', [ClanController::class, 'saveDescription'])->name('clan.information.save-description');
 Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name('clan.information.save-news');
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
@@ -171,6 +172,11 @@ Route::get('/chat', [ChatController::class, 'index'])->name('chat');
 Route::get('/chat-text', [ChatController::class, 'chat'])->name('chat.text');
 Route::get('/chat-log', [ChatController::class, 'chatLog'])->name('chat.log');
 Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat.action');
+Route::get('/chat/messages', [ChatController::class, 'messages'])->name('chat.messages');
+Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+Route::post('/chat/ignore', [ChatController::class, 'addIgnore'])->name('chat.ignore.add');
+Route::delete('/chat/ignore/{userId}', [ChatController::class, 'removeIgnore'])->name('chat.ignore.remove');
+Route::get('/chat/ignores', [ChatController::class, 'ignoreList'])->name('chat.ignores');
 
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');

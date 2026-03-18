@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property string $message
+ * @property int $id
+ * @property int $clan_id
+ * @property int $user_id
+ * @property int $role_id
+ * @property int $points
  *
  * @property-read User $user
  * @property-read Clan $clan
@@ -18,7 +22,7 @@ class ClanMember extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['role_id', 'clan_id', 'user_id'];
+    protected $fillable = ['role_id', 'clan_id', 'user_id', 'points'];
 
     public function user(): BelongsTo
     {

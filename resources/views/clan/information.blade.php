@@ -64,48 +64,7 @@
 </head>
 <body class="regblk">
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-    <tbody>
-    @php
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-    @endphp
-    <tr height="21">
-        <td width="19"><img id="left_1" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="100" id="tab_1" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="{{ route('clan.member') }}" title="Состав клана" class="btn_1">Состав клана</a>
-        </td>
-        <td width="19"><img id="right_1" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_2" href="{{ route('clan.role') }}" title="Звания" class="btn_1">Звания</a></td>
-        <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img id="left_3" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_3" href="{{ route('clan.information') }}" title="Информация" class="btn_2">Информация</a></td>
-        <td width="19"><img id="right_3" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.skills') }}" title="Навыки" class="btn_1">Навыки</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="" title="Управление" class="btn_1">Управление</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td></td>
-    </tr>
-    </tbody>
-</table>
+@include('clan.partials.tabs', ['activeTab' => 'clan.information'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top: 20px;">
     <tbody>

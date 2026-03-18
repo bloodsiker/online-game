@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ClanLogAction;
 use App\Enums\ClanPermission;
 use App\Http\Requests\Clan\CreateClanRequest;
 use App\Models\Clan\ClanJoinRequest;
+use App\Models\Clan\ClanLog;
 use App\Models\Clan\ClanRole;
 use App\Models\User;
 use App\Services\ClanService;
@@ -45,10 +47,11 @@ class ClanController extends Controller
         $onlineThreshold = Carbon::now()->subMinutes(10);
 
         $memberRows = $clan->members->map(fn ($m) => [
-            'type'     => 'member',
-            'user'     => $m->user,
-            'role'     => $m->role,
-            'is_online' => $m->user->last_online_at && $m->user->last_online_at > $onlineThreshold,
+            'type'       => 'member',
+            'user'       => $m->user,
+            'role'       => $m->role,
+            'membership' => $m,
+            'is_online'  => $m->user->last_online_at && $m->user->last_online_at > $onlineThreshold,
         ]);
 
         $requestRows = ClanJoinRequest::where('clan_id', $clan->id)
@@ -317,5 +320,37 @@ class ClanController extends Controller
         }
 
         return redirect()->route('clan.information');
+    }
+
+    public function logs(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user       = Auth::user();
+        $membership = $user->clanMembership;
+
+        if ($membership === null) {
+            session()->flash('message', 'Вы не состоите в клане.');
+            return redirect()->route('clan');
+        }
+
+        $query = ClanLog::where('clan_id', $membership->clan_id)
+            ->with('user')
+            ->orderByDesc('id');
+
+        $filterAction = $request->query('action');
+        $filterUser   = $request->query('player');
+
+        if ($filterAction && ClanLogAction::tryFrom($filterAction)) {
+            $query->where('action', $filterAction);
+        }
+
+        if ($filterUser) {
+            $query->whereHas('user', fn ($q) => $q->where('name', 'like', '%' . $filterUser . '%'));
+        }
+
+        $logs    = $query->paginate(50)->withQueryString();
+        $actions = ClanLogAction::cases();
+
+        return view('clan.logs', compact('logs', 'actions', 'membership', 'filterAction', 'filterUser'));
     }
 }

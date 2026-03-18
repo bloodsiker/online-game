@@ -419,6 +419,19 @@ readonly class ClanService
         $this->log($membership->clan_id, $user->id, ClanLogAction::CLAN_CREATED, "Игрок {$user->name} обновил новости клана");
     }
 
+    public function addBonusPoints(ClanMember $member, int $amount): void
+    {
+        $member->increment('points', $amount);
+        $member->refresh();
+
+        $this->log(
+            $member->clan_id,
+            $member->user_id,
+            ClanLogAction::BONUS_POINTS_EARNED,
+            "Заработано бонусных очков: +{$amount} (итого: {$member->points})"
+        );
+    }
+
     private function log(int $clanId, ?int $userId, ClanLogAction $action, string $details): void
     {
         ClanLog::create([

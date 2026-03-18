@@ -166,7 +166,7 @@
                             }
                             /* ── колонки ── */
                             .char-col { display: flex; flex-direction: column; gap: 8px; }
-                            .char-col-left  { width: 160px; flex-shrink: 0; }
+                            .char-col-left  { width: 200px; flex-shrink: 0; }
                             .char-col-mid   { flex: 1; min-width: 170px; }
                             .char-col-right { flex: 1; min-width: 170px; }
 

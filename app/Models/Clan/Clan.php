@@ -13,7 +13,7 @@ class Clan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'warehouse_capacity', 'bonus_points'];
+    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'warehouse_capacity', 'points'];
 
     protected $attributes = [
         'lvl' => 1,

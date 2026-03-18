@@ -39,45 +39,7 @@
 </head>
 <body class="regblk">
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-    <tbody>
-    @php
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-    @endphp
-    <tr height="21">
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.member') }}" class="btn_1">Состав клана</a>
-        </td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="60" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.role') }}" class="btn_1">Звания</a>
-        </td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.information') }}" class="btn_1">Информация</a>
-        </td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.skills') }}" class="btn_2">Навыки</a>
-        </td>
-        <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-        <td></td>
-    </tr>
-    </tbody>
-</table>
+@include('clan.partials.tabs', ['activeTab' => 'clan.skills'])
 
 <table class="coll" width="100%" height="100%" border="0">
     <tbody>
@@ -115,7 +77,7 @@
                                 </td>
                                 <td align="right" nowrap="" style="padding: 4px 0;">
                                     <b>Бонусные очки:</b>
-                                    <b class="redd">{{ number_format($clan->bonus_points) }}</b>
+                                    <b class="redd">{{ number_format($clan->points) }}</b>
                                 </td>
                             </tr>
                             </tbody>
@@ -145,7 +107,7 @@
 
                                 if ($nextLevelData && !$isMaxed) {
                                     $reqClanLvl = $clan->lvl >= $nextLevelData->required_clan_level;
-                                    $reqPoints  = $clan->bonus_points >= $nextLevelData->required_bonus_points;
+                                    $reqPoints  = $clan->points >= $nextLevelData->required_bonus_points;
                                     $reqStone   = !$nextLevelData->stone_share_item_id
                                         || $backpackShareItemIds->contains($nextLevelData->stone_share_item_id);
                                     $canLearnThis = $reqClanLvl && $reqPoints && $reqStone;
@@ -201,7 +163,7 @@
                                                     &nbsp;&nbsp;
                                                     Бонусные очки:
                                                     <span class="{{ $reqPoints ? 'req-ok' : 'req-fail' }}">
-                                                        {{ number_format($clan->bonus_points) }} / {{ number_format($nextLevelData->required_bonus_points) }}
+                                                        {{ number_format($clan->points) }} / {{ number_format($nextLevelData->required_bonus_points) }}
                                                     </span>
                                                     @if($nextLevelData->stoneItem)
                                                         &nbsp;&nbsp;

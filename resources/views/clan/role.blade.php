@@ -61,48 +61,7 @@
 </head>
 <body class="regblk">
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-    <tbody>
-    @php
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-    @endphp
-    <tr height="21">
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.member') }}" title="Состав клана" class="btn_1">Состав клана</a>
-        </td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="60" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.role') }}" title="Звания" class="btn_2">Звания</a></td>
-        <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.information') }}" title="Информация" class="btn_1">Информация</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.skills') }}" title="Навыки" class="btn_1">Навыки</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="" title="Управление" class="btn_1">Управление</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td></td>
-    </tr>
-    </tbody>
-</table>
+@include('clan.partials.tabs', ['activeTab' => 'clan.role'])
 
 <table class="coll" width="100%" height="100%" border="0">
     <tbody>
@@ -148,8 +107,7 @@
                                 <tr>
                                     @foreach($permissions as $perm)
                                         <td align="center" title="{{ $perm->label() }}"
-                                            class="b grade_general" style="display: table-cell;" width="20%"
-                                            nowrap="">{!! $perm->columnTitle() !!}
+                                            class="b grade_general" style="display: table-cell;" nowrap="">{!! $perm->columnTitle() !!}
                                         </td>
                                     @endforeach
                                 </tr>

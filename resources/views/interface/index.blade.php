@@ -1019,6 +1019,7 @@
         if (event.data.url) {
             toLocation(event.data.url);
         }
+
     });
 
     function sendDataToGame(url) {

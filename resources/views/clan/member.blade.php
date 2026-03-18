@@ -59,49 +59,7 @@
 </head>
 <body class="regblk">
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-    <tbody>
-    @php
-        $group = 'main';
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-    @endphp
-    <tr height="21">
-        <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="100" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="" title="Состав клана" class="btn_2">Состав клана</a>
-        </td>
-        <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_2" href="{{ route('clan.role') }}" title="Звания" class="btn_1">Звания</a></td>
-        <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img id="left_3" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" id="tab_3" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_3" href="{{ route('clan.information') }}" title="Информация" class="btn_1">Информация</a></td>
-        <td width="19"><img id="right_3" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('clan.skills') }}" title="Навыки" class="btn_1">Навыки</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="" title="Управление" class="btn_1">Управление</a></td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-        <td></td>
-    </tr>
-    </tbody>
-</table>
+@include('clan.partials.tabs', ['activeTab' => 'clan.member'])
 
 <table class="coll" width="100%" height="100%" border="0">
     <tbody>
@@ -164,6 +122,7 @@
                                     <td class="b" align="center" title="Состояние">Состояние</td>
                                     <td class="b" align="center" title="Дата и время последнего входа в игру">Последний вход</td>
                                     <td class="b" align="center" title="Статус игрока (Online/Offline)">Статус</td>
+                                    <td class="b" align="center" title="Бонусные очки, заработанные для клана">Бонусы</td>
                                     <td class="b" align="center" title="Доступные действия над членом клана">Действия</td>
                                 </tr>
 
@@ -203,6 +162,9 @@
                                                     <b>offline</b>
                                                 @endif
                                             </td>
+                                            <td align="center" nowrap="">
+                                                <b class="grnn">{{ $row['membership']->points }}</b>
+                                            </td>
                                             <td align="right" nowrap="">
                                                 @if($row['user']->id === auth()->id() && !$row['role']->is_leader)
                                                     <b class="butt2 pointer"><b>
@@ -233,6 +195,7 @@
                                             <td width="26%" align="center"><b>{{ $row['status']->label() }}</b></td>
                                             <td width="16%" align="center"><b>--</b></td>
                                             <td width="18%" align="center"><b>--</b></td>
+                                            <td align="center"><b>--</b></td>
                                             <td align="right">
                                                 <b class="butt2 pointer"><b>
                                                     <input value="Удалить" type="button" style="width:100px"

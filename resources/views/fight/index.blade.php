@@ -148,10 +148,10 @@
         .t0 {
             /*background-color: #ffffff;*/
             background: url({{ asset('img/bg/bg_l.gif') }});
-            {{--background-image: url({{ asset('img/bg/tbl-main_chat-top.gif') }});--}}
-            {{--background-repeat: repeat-x;--}}
-            {{--height: 35px;--}}
-        }
+        {{--background-image: url({{ asset('img/bg/tbl-main_chat-top.gif') }});--}}
+        {{--background-repeat: repeat-x;--}}
+        {{--height: 35px;--}}
+}
         .l0 {
             /*background-color: #a7a7a7;*/
             {{--background: url({{ asset('img/bg/bg_l.gif') }}) left top;--}}
@@ -161,8 +161,8 @@
             /*background-color: #db9f73;*/
         }
         .tbgr {
-{{--            background: url({{ asset('img/bg/bg_l.gif') }});--}}
-        }
+        {{--            background: url({{ asset('img/bg/bg_l.gif') }});--}}
+}
         .main-table {
             width: 100%;
             height: 100%;
@@ -314,6 +314,125 @@
             background-position: 100% 100%;
         }
 
+        /* Action panel */
+        .act-panel { padding: 8px 10px; min-width: 180px; }
+        .act-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #3a2500;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #c8a055;
+            margin-bottom: 8px;
+        }
+        .act-btn {
+            display: block;
+            width: 100%;
+            padding: 5px 10px;
+            margin-bottom: 4px;
+            background: linear-gradient(to bottom, #f5d890, #d4a843);
+            border: 1px solid #8b6914;
+            border-radius: 3px;
+            color: #2a1a00;
+            font-family: Tahoma;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .act-btn:hover { background: linear-gradient(to bottom, #ffeaa0, #e8bb55); border-color: #6b4a10; color: #1a0e00; }
+        .act-btn-attack { border-left: 3px solid #cc2200; }
+        .act-btn-spell  { border-left: 3px solid #6633cc; }
+        .act-btn-flee   {
+            background: linear-gradient(to bottom, #ddd8cc, #c4bdb0);
+            border: 1px solid #9a8878;
+            border-left: 3px solid #9a8878;
+            color: #5a4a3a;
+            font-weight: normal;
+        }
+        .act-btn-flee:hover { background: linear-gradient(to bottom, #ece8e0, #d4cec4); color: #3a2a1a; }
+        .act-spell-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #4a2a88;
+            margin: 6px 0 3px 2px;
+        }
+        .act-mana {
+            display: inline-block;
+            background: #3355aa;
+            color: #cce0ff;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            margin-right: 5px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        .act-stats {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #c8a055;
+        }
+        .act-stat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .act-stat-label { color: #5a3a10; font-size: 11px; width: 58px; flex-shrink: 0; }
+        .act-stat-bar { flex: 1; height: 6px; background: #3a2a1a; border-radius: 3px; overflow: hidden; }
+        .act-stat-hp { height: 100%; background: linear-gradient(to right, #aa1a00, #ff4422); border-radius: 3px; }
+        .act-stat-mp { height: 100%; background: linear-gradient(to right, #0044bb, #2277ee); border-radius: 3px; }
+        .act-stat-val { font-size: 10px; color: #777; white-space: nowrap; }
+
+        /* Battle side panel */
+        .bp-wrap { min-width: 140px; padding: 6px 8px; }
+        .bp-hdr {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 0 3px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #8b6914;
+            white-space: nowrap;
+        }
+        .bp-hdr-enemy { color: #cc2200; }
+        .bp-hdr-ally  { color: #1a6a1a; margin-top: 8px; }
+        .bp-unit {
+            font-size: 11px;
+            padding: 3px 0;
+            border-bottom: 1px dotted #c8a87040;
+            white-space: nowrap;
+        }
+        .bp-unit-target { background: rgba(180,0,0,0.07); border-radius: 2px; padding-left: 2px; }
+        .bp-target-arrow { color: #cc2200; font-size: 10px; margin-right: 1px; }
+        .bp-unit-name { font-size: 11px; }
+        .bp-unit-lvl { color: #777; font-size: 10px; margin-left: 3px; }
+        .bp-hp-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+        .bp-hp-row + .bp-hp-row { margin-top: 0px; }
+        .bp-hp-bar {
+            flex: 1;
+            height: 5px;
+            background: #3a2a1a;
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 50px;
+        }
+        .bp-hp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #b81a00, #ff4422);
+            border-radius: 3px;
+        }
+        .bp-hp-fill.hp-high { background: linear-gradient(to right, #c43000, #ff5533); }
+        .bp-hp-fill.hp-mid  { background: linear-gradient(to right, #cc6600, #ff9900); }
+        .bp-hp-fill.hp-low  { background: linear-gradient(to right, #660000, #cc0000); }
+        .bp-hp-fill.hp-ally { background: linear-gradient(to right, #1a6600, #33aa00); }
+        .bp-mp-fill { height: 100%; background: linear-gradient(to right, #1133aa, #2255dd); border-radius: 3px; }
+        .bp-hp-text { font-size: 8px; color: #888; white-space: nowrap; }
+        .bp-unit-time { font-size: 10px; color: #888; margin-left: 4px; }
+        .bp-footer {
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px dotted #8b6914;
+            font-size: 10px;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
@@ -336,42 +455,37 @@
                         <tr>
                             <td width="8" class="common-inset-2-l"></td>
                             <td class="common-inset-2-bg" valign="top">
-                                <table cellspacing="0" cellpadding="0" border="0" class="b">
-                                    <tbody>
-                                    <tr>
-                                        <td class="tbgr">
-                                            <table cellspacing="1" cellpadding="5" border="0" width="100%" class="B">
-                                                <tbody>
-                                                <tr class="t1">
-                                                    <td colspan="2">Выбeритe дeйствие для cлeдующeго paундa:</td>
-                                                </tr>
-                                                <tr valign="top" class="l0">
-                                                    <td>
-                                                        <li class="mb-5"><a href="#" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', 0)">Атакoвать oружием в рукaх</a>&nbsp;»</li>
-                                                        @if($player->hasEquippedMagicSkill())
-                                                            <li class="mb-5">Сотвopить заклинание:</li>
-                                                            <div style="margin:0px 0px 0px 20px;">
-                                                                @foreach($player->activeMagicSkills as $magicSkill)
-                                                                    <li class="mb-5"> [{{ $magicSkill->mana_cost }}] <a href="#" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', '{{ $magicSkill->id }}')" id="s{{ $loop->index }}">{{ $magicSkill->name }}</a>&nbsp;»</li>
-                                                                @endforeach
-                                                            </div>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <li><a href="{{ route('fight.run-away', ['id' => $battle->id]) }}">Убежать</a>&nbsp;»</li>
-                                                    </td>
-                                                </tr>
-                                                <tr class="t0">
-                                                    <td colspan="2">
-                                                        3дoрoвьe: <b>{{ $player->hp_now }}/{{ $player->hp_max }}</b>, Энергия: <b>{{ $player->mp_now }}/{{ $player->mp_max }}</b>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <div class="act-panel">
+                                    <div class="act-title">Выберите действие для следующего раунда:</div>
+
+                                    <a href="#" class="act-btn act-btn-attack" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', 0); return false;">Атаковать оружием в руках</a>
+
+                                    @if($player->hasEquippedMagicSkill())
+                                        <div class="act-spell-label">Сотворить заклинание:</div>
+                                        @foreach($player->activeMagicSkills as $magicSkill)
+                                            <a href="#" class="act-btn act-btn-spell" id="s{{ $loop->index }}" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', '{{ $magicSkill->id }}'); return false;"><span class="act-mana">{{ $magicSkill->mana_cost }}</span>{{ $magicSkill->name }}</a>
+                                        @endforeach
+                                    @endif
+
+                                    <a href="{{ route('fight.run-away', ['id' => $battle->id]) }}" class="act-btn act-btn-flee">Убежать</a>
+
+                                    @php
+                                        $hpPct = $player->hp_max > 0 ? round(($player->hp_now / $player->hp_max) * 100) : 0;
+                                        $mpPct = $player->mp_max > 0 ? round(($player->mp_now / $player->mp_max) * 100) : 0;
+                                    @endphp
+                                    <div class="act-stats">
+                                        <div class="act-stat-row">
+                                            <span class="act-stat-label">Здоровье:</span>
+                                            <div class="act-stat-bar"><div class="act-stat-hp" style="width:{{ $hpPct }}%"></div></div>
+                                            <span class="act-stat-val">{{ $player->hp_now }}/{{ $player->hp_max }}</span>
+                                        </div>
+                                        <div class="act-stat-row">
+                                            <span class="act-stat-label">Энергия:</span>
+                                            <div class="act-stat-bar"><div class="act-stat-mp" style="width:{{ $mpPct }}%"></div></div>
+                                            <span class="act-stat-val">{{ $player->mp_now }}/{{ $player->mp_max }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                             <td width="8" class="common-inset-2-r"></td>
                         </tr>
@@ -401,44 +515,61 @@
                         <tr>
                             <td class="achieve_bg_lr"></td>
                             <td style="vertical-align: top">
-                                <table cellspacing="0" cellpadding="2" border="0">
-                                    <tbody>
-                                    <tr>
-                                        <td><b>Противники</b> ({{ $battle->detailsWithMonsters->count() }}):</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right">
-                                            <nobr>
-                                                @foreach($battle->detailsWithMonsters as $details)
-                                                    @if($details->status->isLife())
-                                                        <small><a href="{{ route('info.monster', ['id' => $details->locationMonster->id]) }}" class="@if($randomAttackedMonster->locationMonster->id === $details->locationMonster->id) color-red @endif" target="_blank">{{ $details->locationMonster->monster->name }}</a> {{ $details->locationMonster->monster->lvl }} ({{ $details->locationMonster->hp_now }}/{{ $details->locationMonster->hp_max }})
-                                                            {{ $details->updated_at->format('H:i:s') }}<br></small>
-                                                    @endif
-                                                @endforeach
-                                            </nobr>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><br><b>Союзники</b> ({{ $battle->detailsWithUsers->count() }}):</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right">
-                                            <nobr>
-                                                <small>
-                                                    @foreach($battle->detailsWithUsers as $details)
-                                                        @if($details->user)
-                                                            <b><a href="{{ route('info.user', ['id' => $details->user->id]) }}" target="_blank">{{ $details->user->name }}</a> {{ $details->user->player->lvl }}</b> 15:40:39
-                                                            <br>
-                                                        @endif
-                                                    @endforeach
-                                                    <br>
-                                                    <p><a href="/battle/?bid=53132233" target="_blank">История сражения</a> »</p>
-                                                </small>
-                                            </nobr>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <div class="bp-wrap">
+
+                                    {{-- Enemies --}}
+                                    <div class="bp-hdr bp-hdr-enemy">Противники ({{ $battle->detailsWithMonsters->count() }})</div>
+                                    @foreach($battle->detailsWithMonsters as $details)
+                                        @if($details->status->isLife())
+                                            @php
+                                                $isTarget = $randomAttackedMonster->locationMonster->id === $details->locationMonster->id;
+                                                $hpPct    = $details->locationMonster->hp_max > 0
+                                                    ? round(($details->locationMonster->hp_now / $details->locationMonster->hp_max) * 100)
+                                                    : 0;
+                                                $hpClass  = $hpPct > 60 ? 'hp-high' : ($hpPct > 30 ? 'hp-mid' : 'hp-low');
+                                            @endphp
+                                            <div class="bp-unit{{ $isTarget ? ' bp-unit-target' : '' }}">
+                                                <div class="bp-unit-name">
+                                                    @if($isTarget)<span class="bp-target-arrow">&#9658;</span>@endif
+                                                    <a href="{{ route('info.monster', ['id' => $details->locationMonster->id]) }}" target="_blank" class="{{ $isTarget ? 'color-red' : '' }}">{{ $details->locationMonster->monster->name }}</a><span class="bp-unit-lvl">{{ $details->locationMonster->monster->lvl }}</span>
+                                                </div>
+                                                <div class="bp-hp-row">
+                                                    <div class="bp-hp-bar"><div class="bp-hp-fill {{ $hpClass }}" style="width:{{ $hpPct }}%"></div></div>
+                                                    <span class="bp-hp-text">{{ $details->locationMonster->hp_now }}/{{ $details->locationMonster->hp_max }}</span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Allies --}}
+                                    <div class="bp-hdr bp-hdr-ally">Союзники ({{ $battle->detailsWithUsers->count() }})</div>
+                                    @foreach($battle->detailsWithUsers as $details)
+                                        @if($details->user)
+                                            @php
+                                                $allyHpPct = $details->user->player->hp_max > 0 ? round(($details->user->player->hp_now / $details->user->player->hp_max) * 100) : 0;
+                                                $allyMpPct = $details->user->player->mp_max > 0 ? round(($details->user->player->mp_now / $details->user->player->mp_max) * 100) : 0;
+                                            @endphp
+                                            <div class="bp-unit">
+                                                <div class="bp-unit-name">
+                                                    <b><a href="{{ route('info.user', ['id' => $details->user->id]) }}" target="_blank">{{ $details->user->name }}</a></b><span class="bp-unit-lvl">[{{ $details->user->player->lvl }}]</span><span class="bp-unit-time">{{ $details->updated_at->format('H:i:s') }}</span>
+                                                </div>
+                                                <div class="bp-hp-row">
+                                                    <div class="bp-hp-bar"><div class="bp-hp-fill hp-ally" style="width:{{ $allyHpPct }}%"></div></div>
+                                                    <span class="bp-hp-text">{{ $details->user->player->hp_now }}/{{ $details->user->player->hp_max }}</span>
+                                                </div>
+                                                <div class="bp-hp-row">
+                                                    <div class="bp-hp-bar"><div class="bp-mp-fill" style="width:{{ $allyMpPct }}%"></div></div>
+                                                    <span class="bp-hp-text">{{ $details->user->player->mp_now }}/{{ $details->user->player->mp_max }}</span>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+
+                                    <div class="bp-footer">
+                                        <a href="/battle/?bid={{ $battle->id }}" target="_blank">История сражения &raquo;</a>
+                                    </div>
+
+                                </div>
                             </td>
                             <td class="achieve_bg_rr"></td>
                         </tr>
@@ -449,20 +580,6 @@
                         </tr>
                         </tbody>
                     </table>
-
-                    {{--            <script>--}}
-                    {{--                function p72(h) {--}}
-                    {{--                    if (h < 3648 * 0.25) {--}}
-                    {{--                        return "<font color=#AA0000>" + Math.floor(h) + "</font>";--}}
-                    {{--                    } else {--}}
-                    {{--                        return Math.floor(h);--}}
-                    {{--                    }--}}
-                    {{--                }--}}
-
-                    {{--                if (window.parent.hero) {--}}
-                    {{--                    window.parent.hero.i7(100, 100, p72(3648), "756");--}}
-                    {{--                    window.top.hero.spl5reset();--}}
-                    {{--                }</script>--}}
                 </td>
             @endif
         @else

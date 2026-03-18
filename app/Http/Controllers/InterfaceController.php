@@ -56,7 +56,7 @@ class InterfaceController extends Controller
 
         $tenMinutesAgo = Carbon::now()->subMinutes(10);
 
-        $onlineOnLocation = User::with(['player'])->where('location_id', $user->location_id)
+        $onlineOnLocation = User::with(['player', 'clanMembership.clan'])->where('location_id', $user->location_id)
             ->orderByDesc('last_online_at')
             ->get();
 
@@ -66,7 +66,7 @@ class InterfaceController extends Controller
 
         $countOnlineLocation = $onlineOnLocationFiltered->count();
 
-        $onlineInGame = User::with(['player'])->where('last_online_at', '>=', $tenMinutesAgo)
+        $onlineInGame = User::with(['player', 'clanMembership.clan'])->where('last_online_at', '>=', $tenMinutesAgo)
             ->orderByDesc('last_online_at')
             ->get();
 
