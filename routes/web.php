@@ -152,6 +152,7 @@ Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
 
 Route::get('/quest/{id}/take', [QuestController::class, 'take'])->name('quest.take');
+Route::get('/quest/{id}/complete', [QuestController::class, 'complete'])->name('quest.complete');
 Route::get('/quest/{id}', [QuestController::class, 'quest'])->name('quest');
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
 

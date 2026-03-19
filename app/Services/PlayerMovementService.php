@@ -3,20 +3,21 @@
 namespace App\Services;
 
 use App\DTO\MoveResultDTO;
+use App\Models\Location\Location;
+use App\Models\Player\PlayerLocationAccess;
 use App\Models\User;
 
 final readonly class PlayerMovementService
 {
     public function __construct(
         private BackpackService $backpackService,
-    ) {
-    }
+    ) {}
 
     public function move(User $user, string $direction): MoveResultDTO
     {
         $location = $user->currentLocation;
 
-        if (!$location->$direction) {
+        if (! $location->$direction) {
             return MoveResultDTO::blocked('Нельзя идти в этом направлении');
         }
 
@@ -24,6 +25,18 @@ final readonly class PlayerMovementService
 
         if ($backpackUsed > $user->getBagCount()) {
             return MoveResultDTO::blocked('У вас перегружен рюкзак. Нельзя перемещаться.');
+        }
+
+        // Check if destination location is locked
+        $destLocation = Location::find($location->$direction);
+        if ($destLocation && $destLocation->is_locked) {
+            $hasAccess = PlayerLocationAccess::where('player_id', $user->player->id)
+                ->where('location_id', $destLocation->id)
+                ->exists();
+
+            if (! $hasAccess) {
+                return MoveResultDTO::blocked('Проход закрыт. Для доступа необходимо выполнить квест.');
+            }
         }
 
         $capacity = $user->getBagCount();
@@ -52,7 +65,7 @@ final readonly class PlayerMovementService
             $ratio <= 1.0 => 1.0,
             $ratio <= 1.2 => 0.8,
             $ratio <= 1.5 => 0.5,
-            default       => 0.2,
+            default => 0.2,
         };
     }
 }

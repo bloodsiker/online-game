@@ -24,9 +24,9 @@ class DropService
             $money = mt_rand($monster->min_money, $monster->max_money);
             $user->money += $money;
             $user->save();
-            $result->log(sprintf("<p><span style='background:#F2B092;'>Вы уничтожили %s. Обыскав его, вы нашли <b>%s</b> монет</span></p>", $locationMonster->monster->name, $money));
+            $result->log(sprintf("<p style='margin:2px 0;'><span style='background:#fde8e8; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>⚔️ <b style='color:#7b1a1a;'>%s</b> уничтожен. Найдено <b>%s</b> монет</span></p>", $locationMonster->monster->name, $money));
         } else {
-            $result->log(sprintf("<p><span style='background:#F2B092;'>Вы уничтожили %s.</span></p>", $locationMonster->monster->name));
+            $result->log(sprintf("<p style='margin:2px 0;'><span style='background:#fde8e8; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>⚔️ <b style='color:#7b1a1a;'>%s</b> уничтожен</span></p>", $locationMonster->monster->name));
         }
 
         $locationMonster->is_drop_money = 1;

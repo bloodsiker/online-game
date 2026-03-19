@@ -3,6 +3,7 @@
 namespace App\Models\Monster;
 
 use App\Models\Location\Location;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $active
  * @property int $is_drop_money
  * @property int $current_phase
+ * @property Carbon|null $last_regen_at
  *
  * @property-read Location $location
  * @property-read Monster $monster
@@ -23,11 +25,51 @@ class MonsterOnLocation extends Model
 {
     use HasFactory;
 
+    const REGEN_INTERVAL  = 5;   // seconds between regen ticks
+    const FULL_REGEN_TIME = 600; // seconds for full HP recovery
+
     protected $table = 'monster_on_locations';
+
+    protected $casts = [
+        'last_regen_at' => 'datetime',
+    ];
 
     protected $attributes = [
         'is_drop_money' => 0,
     ];
+
+    public function regenerate(): void
+    {
+        if ($this->hp_now >= $this->hp_max) {
+            return;
+        }
+
+        $now = Carbon::now();
+
+        if (! $this->last_regen_at) {
+            $this->last_regen_at = $now;
+            $this->save();
+            return;
+        }
+
+        $seconds = (int) $this->last_regen_at->diffInSeconds($now);
+        $ticks   = intdiv($seconds, self::REGEN_INTERVAL);
+
+        if ($ticks <= 0) {
+            return;
+        }
+
+        $totalTicks = self::FULL_REGEN_TIME / self::REGEN_INTERVAL;
+        $hpPerTick  = $this->hp_max / $totalTicks;
+
+        $this->hp_now = min(
+            $this->hp_max,
+            (int) floor($this->hp_now + ($hpPerTick * $ticks))
+        );
+
+        $this->last_regen_at = $this->last_regen_at->addSeconds($ticks * self::REGEN_INTERVAL);
+        $this->save();
+    }
 
     public function location(): BelongsTo
     {

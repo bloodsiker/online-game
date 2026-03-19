@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Battle\Battle;
 use App\Models\Item\ItemOnLocation;
+use App\Models\Monster\Monster;
+use App\Models\Monster\MonsterOnLocation;
 use App\Repositories\LocationRepository;
 use App\Repositories\MonsterOnLocationRepository;
 use App\Services\Battle\BattleOrchestrator;
@@ -38,6 +40,9 @@ class LocationController extends Controller
 
         if ($battle instanceof Battle) {
             $randomAttackedMonster = $this->monsterSelector->getRandomActiveMonster($battle);
+            if ($randomAttackedMonster->locationMonster instanceof MonsterOnLocation) {
+                $randomAttackedMonster->locationMonster->regenerate();
+            }
 
             return view('fight.index', compact('battle', 'randomAttackedMonster', 'player'));
         }

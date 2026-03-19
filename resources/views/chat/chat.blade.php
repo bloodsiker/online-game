@@ -33,9 +33,14 @@
         .msg-system    { border-left: 2px solid #006600; padding-left: 3px; }
         .msg-mention   { border-left: 2px solid #cc9900; padding-left: 3px; }
 
-        .msg-system       { border-left: 2px solid #cc00ff; padding-left: 3px; color: #cc00ff; font-weight: bold; }
-        .msg-system small { color: #cc00ff; }
-        .msg-system-icon  { font-weight: bold; }
+        .msg-system            { border-left: 2px solid #cc00ff; padding-left: 3px; color: #cc00ff; font-weight: bold; }
+        .msg-system small      { color: #cc00ff; }
+        .msg-system-icon       { font-weight: bold; }
+        .msg-information       { border-left: 2px solid #df5d03; padding-left: 3px; color: #df5d03; font-weight: bold; }
+        .msg-information small { color: #df5d03; }
+        .msg-information-icon  { font-weight: bold; }
+        .msg-quest             { border-left: 2px solid #000000; padding-left: 3px; color: #000000; font-style: italic; }
+        .msg-quest small       { color: #000000; font-style: normal; }
         .prv-name         { color: #ff0000; font-weight: bold; }
         .msg-time-reply   { cursor: pointer; text-decoration: underline dotted #999; color: #ff0000; }
         .msg-time-reply:hover { opacity: 0.75; }
@@ -94,6 +99,12 @@
 
                         @if ($msg['type'] === 'system')
                             <span class="msg-system-icon">★</span> {!! $msg['content'] !!}
+
+                        @elseif ($msg['type'] === 'information')
+                            <span class="msg-information-icon">✔</span> {!! $msg['content'] !!}
+
+                        @elseif ($msg['type'] === 'quest')
+                            {!! $msg['content'] !!}
 
                         @elseif ($msg['type'] === 'private')
                             <span class="prv-name">{{ $msg['sender_name'] }}</span>
@@ -159,6 +170,10 @@
 
         if (msg.type === 'system') {
             html += '<span class="msg-system-icon">★</span> ' + msg.content;
+        } else if (msg.type === 'information') {
+            html += '<span class="msg-information-icon">✔</span> ' + msg.content;
+        } else if (msg.type === 'quest') {
+            html += msg.content;
         } else if (msg.type === 'private') {
             html += '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'
                   + ' » '

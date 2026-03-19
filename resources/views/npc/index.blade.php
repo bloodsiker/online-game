@@ -229,120 +229,86 @@
                                             @endforeach
                                         @endif
 
-                                        @if($quests->count())
-                                            @foreach($quests as $quest)
-                                                <tr class="bg_l" title=""
-                                                    onclick="location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}'" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                                    <td class="brd2-top brd2-bt" width="1%">
-                                                        <img src="{{ asset('img/icon/qst_main_start.gif') }}" width="46" height="28">
-                                                    </td>
-                                                    <td class="brd2-top brd2-bt">{{ $quest->title }}</td>
-                                                    <td class="brd2-top brd2-bt" align="right">
+                                        @foreach($quests as $quest)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">{{ $quest->title }}</td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Взять" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
+                                                    </b></b>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                        @foreach($questsOnCooldown as $cooldown)
+                                            <tr class="bg_l">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="opacity:0.45;">
+                                                </td>
+                                                <td class="brd2-top brd2-bt" style="color:#888;">
+                                                    {{ $cooldown->quest->title }}
+                                                    <br><small style="color:#999;">Повторный проход через: {{ $cooldown->diff }}</small>
+                                                </td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <span style="color:#aaa; font-size:10px;">Недоступен</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                        @foreach($questsInProgress as $questInProgress)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('quest', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'" style="cursor:pointer;">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset($questInProgress->canComplete ? 'img/icon/qst_start_m.gif' : 'img/icon/qst_start_ro.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">
+                                                    {{ $questInProgress->title }}
+                                                    @php
+                                                        $stage      = $questInProgress->currentStage;
+                                                        $objectives = $stage
+                                                            ? $questInProgress->objectives->filter(fn($o) => $o->stage_id === $stage->id)
+                                                            : $questInProgress->objectives;
+                                                    @endphp
+                                                    @if($stage)
+                                                        <br><small style="color:#461C0B; font-weight:bold;">Этап {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}</small>
+                                                    @endif
+                                                    @foreach($objectives as $obj)
+                                                        @php
+                                                            $po   = $questInProgress->questPlayer?->objectives->firstWhere('quest_objective_id', $obj->id);
+                                                            $done = $obj->type === 'deliver' ? $obj->required_amount : ($po?->amount ?? 0);
+                                                        @endphp
+                                                        <br><small style="color:#555;">{{ $obj->description }} — {{ $done }}/{{ $obj->required_amount }}</small>
+                                                    @endforeach
+                                                </td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    @if($questInProgress->canComplete)
                                                         <b class="butt2 pointer"><b>
-                                                        <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
+                                                            <input value="Сдать" type="button"
+                                                                   onclick="event.stopPropagation();if(document._submit)return false;document._submit=true;location.href='{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';"
+                                                                   style="width:60px">
                                                         </b></b>
-                                                    </td>
+                                                    @else
+                                                        <span style="color:#888; font-size:10px;">В процессе</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
 
-                                                </tr>
-                                            @endforeach
-                                        @endif
-                                        @if($questsInProgress->count())
-                                            @foreach($questsInProgress as $questInProgress)
-                                                <tr class="bg_l" title=""
-                                                    onclick="location.href='{{ route('quest', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}'" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                                    <td class="brd2-top brd2-bt" width="1%">
-                                                        <img src="{{ asset('img/icon/qst_start_ro.gif') }}" width="46" height="28">
-                                                    </td>
-                                                    <td class="brd2-top brd2-bt">{{ $questInProgress->title }}</td>
-                                                    <td class="brd2-top brd2-bt" align="right">
-                                                        <b class="butt2 pointer">
-                                                            <b>
-                                                                <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';" style="width:60px">
-                                                            </b>
-                                                        </b>
-                                                    </td>
-
-                                                </tr>
-                                            @endforeach
-                                        @endif
-                                        <tr class="bg_l" title=""
-                                            onclick="location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=914&amp;point_id=14278&amp;a158c08cb020189d4ab88d95cecaeb8d'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%">
-                                                <img src="{{ asset('img/icon/qst_main_start.gif') }}" width="46" height="28">
-                                            </td>
-                                            <td class="brd2-top brd2-bt">Начало пути</td>
-                                            <td class="brd2-top brd2-bt" align="right"><b
-                                                    class="butt2 pointer "><b><input value="Далее" type="button"
-                                                                                     onclick="if(document._submit)return false;document._submit=true;location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=914&amp;point_id=14278&amp;a158c08cb020189d4ab88d95cecaeb8d';"
-                                                                                     style="width:60px"></b></b></td>
-
-                                        </tr>
-                                        <tr class="bg_l" title=""
-                                            onclick="location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=993&amp;point_id=15093&amp;5f1f0e78b26e48e6fb129be95f01450c'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%">
-                                                <img src="{{ asset('img/icon/qst_start_m.gif') }}" width="46" height="28">
-                                            </td>
-                                            <td class="brd2-top brd2-bt">Полуденный дозор</td>
-                                            <td class="brd2-top brd2-bt" align="right"><b
-                                                    class="butt2 pointer "><b><input value="Далее" type="button"
-                                                                                     onclick="if(document._submit)return false;document._submit=true;location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=993&amp;point_id=15093&amp;5f1f0e78b26e48e6fb129be95f01450c';"
-                                                                                     style="width:60px"></b></b></td>
-
-                                        </tr>
-                                        <tr class="bg_l" title=""
-                                            onclick="location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%">
-                                                <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
-                                            </td>
-                                            <td class="brd2-top brd2-bt">Дар полуденных земель</td>
-                                            <td class="brd2-top brd2-bt" align="right"><b
-                                                    class="butt2 pointer "><b><input value="Далее" type="button"
-                                                                                     onclick="if(document._submit)return false;document._submit=true;location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385';"
-                                                                                     style="width:60px"></b></b></td>
-
-                                        </tr>
-                                        <tr class="bg_l" title=""
-                                            onclick="location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%">
-                                                <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
-                                            </td>
-                                            <td class="brd2-top brd2-bt">Несчастная любовь Сойгуры</td>
-                                            <td class="brd2-top brd2-bt" align="right"><b
-                                                    class="butt2 pointer "><b><input value="Далее" type="button"
-                                                                                     onclick="if(document._submit)return false;document._submit=true;location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385';"
-                                                                                     style="width:60px"></b></b></td>
-
-                                        </tr>
-                                        <tr class="bg_l" title=""
-                                            onclick="location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%">
-                                                <img src="{{ asset('img/icon/qst_store.gif') }}" width="46" height="28">
-                                            </td>
-                                            <td class="brd2-top brd2-bt">Оружейная мастерская</td>
-                                            <td class="brd2-top brd2-bt" align="right"><b
-                                                    class="butt2 pointer "><b><input value="Далее" type="button"
-                                                                                     onclick="if(document._submit)return false;document._submit=true;location.href='npc.php?f_id=4&amp;npc_id=422&amp;global_npc=0&amp;quest_id=931&amp;point_id=14364&amp;302cf3ffa8f8de90957903eba6332385';"
-                                                                                     style="width:60px"></b></b></td>
-
-                                        </tr>
-                                        <tr class="bg_l" title=""
+                                        <tr class="bg_l"
                                             onclick="location.href='{{ route('location') }}'"
                                             onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%" height="28">
-{{--                                                <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">--}}
-                                            </td>
+                                            <td class="brd2-top brd2-bt" width="1%" height="28"></td>
                                             <td class="brd2-top brd2-bt">« Завершить разговор</td>
                                             <td class="brd2-top brd2-bt" align="right"></td>
                                         </tr>
                                         </tbody>
                                     </table>
-
-                                    Нет доступных квестов!
                                 </td>
                                 <td class="tbl-shp-sides rs">&nbsp;</td>
                             </tr>

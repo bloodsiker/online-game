@@ -137,7 +137,8 @@ class ChatController extends Controller
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
-        $content    = $this->chatService->renderMessageContent($msg->message);
+        $trusted    = in_array($msg->type, [ChatMessageType::System, ChatMessageType::Information, ChatMessageType::Quest]);
+        $content    = $this->chatService->renderMessageContent($msg->message, $trusted);
         $isOwn      = $msg->user_id === $user->id;
 
         // For private: the name to pre-fill when clicking the timestamp (always the OTHER person)

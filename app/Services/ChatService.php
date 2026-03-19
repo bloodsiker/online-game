@@ -28,15 +28,15 @@ class ChatService
         // Private message: prv[NAME] - text  OR  prv[NAME] text
         if (preg_match('/^prv\[([^\]]+)\]\s*-?\s*(.*)/is', $raw, $matches)) {
             $targetName = trim($matches[1]);
-            $text       = trim($matches[2]);
-            $target     = User::where('name', $targetName)->first();
+            $text = trim($matches[2]);
+            $target = User::where('name', $targetName)->first();
 
             return ChatMessage::create([
-                'user_id'        => $sender->id,
-                'channel'        => ChatChannel::Private->value,
+                'user_id' => $sender->id,
+                'channel' => ChatChannel::Private->value,
                 'target_user_id' => $target?->id,
-                'message'        => $text ?: $raw,
-                'type'           => ChatMessageType::Private->value,
+                'message' => $text ?: $raw,
+                'type' => ChatMessageType::Private->value,
             ]);
         }
 
@@ -49,11 +49,11 @@ class ChatService
             'user_id' => $sender->id,
             'channel' => $defaultChannel->value,
             'message' => $raw,
-            'type'    => $type->value,
+            'type' => $type->value,
         ];
 
         if ($defaultChannel === ChatChannel::Location) {
-            $data['map_id']      = $sender->currentLocation?->map_id;
+            $data['map_id'] = $sender->currentLocation?->map_id;
         }
 
         if ($defaultChannel === ChatChannel::Clan) {
@@ -64,17 +64,47 @@ class ChatService
     }
 
     /**
+     * Send a personal system message visible only to the specified user.
+     * Appears in the Private channel tab, styled as a system message.
+     */
+    public function sendSystemToUser(User $user, string $message): ChatMessage
+    {
+        return ChatMessage::create([
+            'user_id'        => null,
+            'channel'        => ChatChannel::Main->value,
+            'target_user_id' => $user->id,
+            'message'        => $message,
+            'type'           => ChatMessageType::Information->value,
+        ]);
+    }
+
+    /**
+     * Send a personal quest notification visible only to the specified user.
+     * Displayed in italic black, same visibility rules as sendSystemToUser.
+     */
+    public function sendQuestToUser(User $user, string $message): ChatMessage
+    {
+        return ChatMessage::create([
+            'user_id'        => null,
+            'channel'        => ChatChannel::Main->value,
+            'target_user_id' => $user->id,
+            'message'        => $message,
+            'type'           => ChatMessageType::Quest->value,
+        ]);
+    }
+
+    /**
      * Create a system notification message.
      */
     public function sendSystem(string $message, ?int $mapId = null, ?int $clanId = null): ChatMessage
     {
         return ChatMessage::create([
-            'user_id'     => null,
-            'channel'     => ChatChannel::System->value,
-            'map_id'      => $mapId,
-            'clan_id'     => $clanId,
-            'message'     => $message,
-            'type'        => ChatMessageType::System->value,
+            'user_id' => null,
+            'channel' => ChatChannel::System->value,
+            'map_id' => $mapId,
+            'clan_id' => $clanId,
+            'message' => $message,
+            'type' => ChatMessageType::System->value,
         ]);
     }
 
@@ -120,7 +150,7 @@ class ChatService
 
     private function applyChannelFilter(\Illuminate\Database\Eloquent\Builder $query, User $user, ChatChannel $channel): void
     {
-        $ignoredIds    = $this->getIgnoredUserIds($user);
+        $ignoredIds = $this->getIgnoredUserIds($user);
         $tenMinutesAgo = Carbon::now()->subMinutes(10);
 
         $privateClause = function ($q) use ($user, $ignoredIds, $tenMinutesAgo) {
@@ -130,7 +160,11 @@ class ChatService
                     $q2->where('user_id', $user->id)
                         ->orWhere('target_user_id', $user->id);
                 });
-            if ($ignoredIds) $q->whereNotIn('user_id', $ignoredIds);
+            if ($ignoredIds) {
+                $q->where(function ($q2) use ($ignoredIds) {
+                    $q2->whereNull('user_id')->orWhereNotIn('user_id', $ignoredIds);
+                });
+            }
         };
 
         $privateFullClause = function ($q) use ($user, $ignoredIds) {
@@ -139,7 +173,11 @@ class ChatService
                     $q2->where('user_id', $user->id)
                         ->orWhere('target_user_id', $user->id);
                 });
-            if ($ignoredIds) $q->whereNotIn('user_id', $ignoredIds);
+            if ($ignoredIds) {
+                $q->where(function ($q2) use ($ignoredIds) {
+                    $q2->whereNull('user_id')->orWhereNotIn('user_id', $ignoredIds);
+                });
+            }
         };
 
         $systemClause = function ($q) {
@@ -148,10 +186,25 @@ class ChatService
 
         switch ($channel) {
             case ChatChannel::Main:
-                $query->where(function ($q) use ($ignoredIds, $privateClause, $systemClause) {
+                $query->where(function ($q) use ($user, $ignoredIds, $privateClause, $systemClause, $tenMinutesAgo) {
                     $q->where(function ($q2) use ($ignoredIds) {
-                        $q2->where('channel', ChatChannel::Main->value);
-                        if ($ignoredIds) $q2->whereNotIn('user_id', $ignoredIds);
+                        // Regular main channel messages (not targeted)
+                        $q2->where('channel', ChatChannel::Main->value)
+                            ->whereNull('target_user_id');
+                        if ($ignoredIds) {
+                            $q2->where(function ($q3) use ($ignoredIds) {
+                                $q3->whereNull('user_id')->orWhereNotIn('user_id', $ignoredIds);
+                            });
+                        }
+                    })->orWhere(function ($q2) use ($user, $tenMinutesAgo) {
+                        // Personal information/quest messages addressed to this user, visible for 10 min
+                        $q2->where('channel', ChatChannel::Main->value)
+                            ->where('target_user_id', $user->id)
+                            ->whereIn('type', [
+                                ChatMessageType::Information->value,
+                                ChatMessageType::Quest->value,
+                            ])
+                            ->where('created_at', '>=', $tenMinutesAgo);
                     })->orWhere($privateClause)->orWhere($systemClause);
                 });
                 break;
@@ -162,7 +215,9 @@ class ChatService
                     $q->where(function ($q2) use ($ignoredIds, $mapId) {
                         $q2->where('channel', ChatChannel::Location->value)
                             ->where('map_id', $mapId);
-                        if ($ignoredIds) $q2->whereNotIn('user_id', $ignoredIds);
+                        if ($ignoredIds) {
+                            $q2->whereNotIn('user_id', $ignoredIds);
+                        }
                     })->orWhere($privateClause)->orWhere($systemClause);
                 });
                 break;
@@ -171,7 +226,9 @@ class ChatService
                 $query->where(function ($q) use ($ignoredIds, $privateClause, $systemClause) {
                     $q->where(function ($q2) use ($ignoredIds) {
                         $q2->where('channel', ChatChannel::Trade->value);
-                        if ($ignoredIds) $q2->whereNotIn('user_id', $ignoredIds);
+                        if ($ignoredIds) {
+                            $q2->whereNotIn('user_id', $ignoredIds);
+                        }
                     })->orWhere($privateClause)->orWhere($systemClause);
                 });
                 break;
@@ -182,7 +239,9 @@ class ChatService
                     $q->where(function ($q2) use ($ignoredIds, $clanId) {
                         $q2->where('channel', ChatChannel::Clan->value)
                             ->where('clan_id', $clanId);
-                        if ($ignoredIds) $q2->whereNotIn('user_id', $ignoredIds);
+                        if ($ignoredIds) {
+                            $q2->whereNotIn('user_id', $ignoredIds);
+                        }
                     })->orWhere($privateClause)->orWhere($systemClause);
                 });
                 break;
@@ -205,10 +264,10 @@ class ChatService
      * [[item_ID]]  → styled item name span
      * to[NAME]     → styled mention prefix
      */
-    public function renderMessageContent(string $message): string
+    public function renderMessageContent(string $message, bool $trusted = false): string
     {
-        // Escape all HTML first
-        $escaped = e($message);
+        // Trusted messages (system/information/quest) contain safe server-generated HTML — skip escaping
+        $escaped = $trusted ? $message : e($message);
 
         // Replace [[item_ID]] shortcodes (brackets are not HTML-special, so untouched by e())
         $rendered = preg_replace_callback('/\[\[item_(\d+)\]\]/', function ($matches) {
@@ -221,7 +280,7 @@ class ChatService
             $name = e($item->getName());
             $desc = e($item->itemInfo->description ?? '');
 
-            return '<span class="chat-item" title="' . $desc . '">[' . $name . ']</span>';
+            return '<span class="chat-item" title="'.$desc.'">['.$name.']</span>';
         }, $escaped);
 
         // Highlight to[NAME] prefix
@@ -237,7 +296,7 @@ class ChatService
     public function addIgnore(User $user, int $targetUserId): void
     {
         ChatIgnore::firstOrCreate([
-            'user_id'         => $user->id,
+            'user_id' => $user->id,
             'ignored_user_id' => $targetUserId,
         ]);
     }

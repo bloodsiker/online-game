@@ -194,9 +194,13 @@
                                             onmouseover="this.className += ' bg_l2';"
                                             onmouseout="this.className = this.className.split(' bg_l2').join('');">
                                             <td width="1%">
-                                                <img src="{{ asset('img/icon/qst_main_start.gif') }}" width="46" height="28">
+                                                @if($inProgress && $canComplete)
+                                                    <img src="{{ asset('img/icon/qst_start_m.gif') }}" width="46" height="28">
+                                                @else
+                                                    <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
+                                                @endif
                                             </td>
-                                            <td class="redd2 b fs-13">Разговор о бое</td>
+                                            <td class="redd2 b fs-13">{{ $quest->title }}</td>
                                             <td align="right"></td>
                                         </tr>
                                         <tr class=" fs-12">
@@ -206,22 +210,79 @@
                                         </tr>
 
 
-                                        <tr class="bg_l brd2-all fs-12">
-                                            <td width="1%">
-                                                <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
-                                            </td>
-                                            <td class="b" colspan="2">
-                                                <span class="brown">Ваша цель:</span>
-                                                <span class="redd">{{ $quest->objective->description }}</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3" align="center">
-                                                <span class="butt1 pointer">
-                                                    <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
-                                                </span>
-                                            </td>
-                                        </tr>
+                                        @if($currentStage)
+                                            <tr class="fs-12">
+                                                <td colspan="3" style="padding: 4px 6px 2px; color: #461C0B; font-weight: bold;">
+                                                    Этап {{ $currentStage->order }}{{ $currentStage->title ? ': ' . $currentStage->title : '' }}
+                                                </td>
+                                            </tr>
+                                            @if($currentStage->description)
+                                                <tr class="fs-12">
+                                                    <td colspan="3" style="padding: 2px 6px 10px; color: #555;">
+                                                        {!! $currentStage->description !!}
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                        @endif
+                                        @foreach($visibleObjectives as $objective)
+                                            @php
+                                                $done  = $progressMap[$objective->id] ?? 0;
+                                                $need  = $objective->required_amount ?? 1;
+                                                $objComplete = $inProgress && $done >= $need;
+                                            @endphp
+                                            <tr class="bg_l brd2-all fs-12">
+                                                <td width="1%">
+                                                    <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
+                                                </td>
+                                                <td class="b" colspan="2">
+                                                    <span class="brown">{{ $loop->first ? 'Ваша цель:' : 'А также:' }}</span>
+                                                    <span class="{{ $objComplete ? 'greenn' : 'redd' }}">{{ $objective->description ?? '' }}</span>
+                                                    @if($inProgress)
+                                                        @if($need > 1)
+                                                            <span style="color:{{ $objComplete ? '#339900' : '#666' }}; font-weight:bold;">
+                                                                ({{ $done }}/{{ $need }})
+                                                            </span>
+                                                        @elseif($objComplete)
+                                                            <span style="color:#339900; font-weight:bold;">✓</span>
+                                                        @endif
+                                                    @else
+                                                        @if($need > 1)
+                                                            <span style="color:#666;">({{ $need }} шт.)</span>
+                                                        @endif
+                                                    @endif
+                                                    @if($objective->map_id && $objective->map)
+                                                        <span style="color:#666;">— {{ $objective->map->name }}</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
+                                        @if(!$inProgress)
+                                            <tr>
+                                                <td colspan="3" align="center">
+                                                    <span class="butt1 pointer">
+                                                        <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @elseif($canComplete)
+                                            <tr>
+                                                <td colspan="3" align="center">
+                                                    <span class="butt1 pointer">
+                                                        <span><input value="Сдать" type="submit" onclick="location.href='{{ route('quest.complete', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @else
+                                            {{-- In progress, stage not complete: "Далее" just returns to NPC --}}
+                                            <tr>
+                                                <td colspan="3" align="center">
+                                                    <span class="butt1 pointer">
+                                                        <span><input value="Далее" type="submit" onclick="location.href='{{ route('npc', ['id' => $npc->id]) }}'" class="grnn"></span>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endif
 
                                         </tbody>
                                     </table>

@@ -34,6 +34,7 @@ return new class extends Migration
             $table->unsignedBigInteger('monster_id');
             $table->unsignedBigInteger('location_id');
             $table->integer('hp_now');
+            $table->timestamp('last_regen_at')->nullable();
             $table->integer('hp_max');
             $table->tinyInteger('active')->default(1);
             $table->boolean('is_drop_money')->default(0);

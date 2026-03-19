@@ -29,6 +29,10 @@ readonly class AttackService
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle): AttackResultDTO
     {
         $result = new AttackResultDTO();
+
+        // Restore HP the monster would have regenerated since the last attack
+        $locMonster->regenerate();
+
         $strategy = $this->resolver->resolve($player, $locMonster->monster, $action);
 
         $isBoss = $locMonster->monster->isBoss();

@@ -10,17 +10,19 @@ class QuestPlayerObjective extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['quest_player_id', 'quest_objective_id', 'amount'];
+
     protected $attributes = [
         'amount' => 0,
     ];
 
     public function questPlayer(): BelongsTo
     {
-        return $this->belongsTo(QuestPlayer::class,'quest_player_id');
+        return $this->belongsTo(QuestPlayer::class, 'quest_player_id');
     }
 
     public function questObjective(): BelongsTo
     {
-        return $this->belongsTo(QuestObjective::class,'quest_objective_id');
+        return $this->belongsTo(QuestObjective::class, 'quest_objective_id');
     }
 }

@@ -25,33 +25,53 @@ class Quest extends Model
         'is_finish' => 0,
     ];
 
-    protected $with = ['objective'];
+    protected $fillable = [
+        'title', 'description', 'type', 'start_npc_id', 'complete_npc_id',
+        'parent_quest_id', 'after_quest_id', 'reset_period', 'is_active', 'is_finish',
+    ];
 
-    public QuestType $type;
+    protected $with = ['objectives'];
+
+    // public QuestType $type; — declared via $casts
 
     public function startNpc(): BelongsTo
     {
-        return $this->belongsTo(Npc::class,'start_npc_id');
+        return $this->belongsTo(Npc::class, 'start_npc_id');
     }
 
     public function completeNpc(): BelongsTo
     {
-        return $this->belongsTo(Npc::class,'complete_npc_id');
+        return $this->belongsTo(Npc::class, 'complete_npc_id');
     }
 
     public function parentQuest(): BelongsTo
     {
-        return $this->belongsTo(Quest::class,'parent_quest_id');
+        return $this->belongsTo(Quest::class, 'parent_quest_id');
     }
 
     public function afterQuest(): BelongsTo
     {
-        return $this->belongsTo(Quest::class,'after_quest_id');
+        return $this->belongsTo(Quest::class, 'after_quest_id');
     }
 
-    public function objective(): HasOne
+    public function stages(): HasMany
     {
-        return $this->hasOne(QuestObjective::class, 'quest_id');
+        return $this->hasMany(QuestStage::class, 'quest_id')->orderBy('order');
+    }
+
+    public function hasStages(): bool
+    {
+        return $this->stages()->exists();
+    }
+
+    public function firstStage(): ?QuestStage
+    {
+        return $this->stages()->first();
+    }
+
+    public function objectives(): HasMany
+    {
+        return $this->hasMany(QuestObjective::class, 'quest_id');
     }
 
     public function rewards(): HasMany
