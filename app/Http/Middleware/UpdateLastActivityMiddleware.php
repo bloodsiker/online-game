@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\PlayerStatService;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ class UpdateLastActivityMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    public function __construct(private PlayerStatService $statService) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
@@ -22,7 +25,8 @@ class UpdateLastActivityMiddleware
             $user->last_online_at = Carbon::now();
             $user->save();
 
-            $user->player->regenerate();
+            $sheet = $this->statService->resolve($user->player);
+            $user->player->regenerate($sheet->getHpMax(), $sheet->getMpMax());
         }
 
         return $next($request);

@@ -26,6 +26,7 @@ use App\Http\Controllers\PremiumShopController;
 use App\Http\Controllers\QuestController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\HotbarController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
@@ -80,6 +81,10 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
     Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
     Route::get('/slots', [SlotController::class, 'index'])->name('slots');
+
+    Route::get('/hotbar', [HotbarController::class, 'index'])->name('hotbar.index');
+    Route::post('/hotbar/set', [HotbarController::class, 'set'])->name('hotbar.set');
+    Route::delete('/hotbar/clear/{slot}', [HotbarController::class, 'clear'])->name('hotbar.clear');
 
     Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])->name('fight.run-away');
     Route::get('/fight/attack/monster/{id}', [FightController::class, 'attackMonster'])->name('fight.attack.monster');

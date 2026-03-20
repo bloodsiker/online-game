@@ -5,6 +5,7 @@ namespace App\Services\Combat\Strategies;
 use App\DTO\FightHitDTO;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
+use App\Models\Player\Player;
 use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
 
@@ -12,7 +13,8 @@ class MagicAttackStrategy implements AttackStrategyInterface
 {
     public function __construct(
         private HitCalculator       $hitCalc,
-        private FightHitInterface   $player,     // это декорированный Player (с EquipmentDecorator + BuffDecorator)
+        private FightHitInterface   $player,     // StatSheet с полными рассчитанными статами
+        private Player              $playerModel, // Player model для чтения/записи mp_now
         private Monster             $monster,
         private MagicSkill          $magicSkill,
     ) {}
@@ -35,7 +37,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-        if ($this->player->mp_now < $this->magicSkill->mana_cost) {
+        if ($this->playerModel->mp_now < $this->magicSkill->mana_cost) {
             return [
                 (new FightHitDTO())
                     ->setCantCast(true)
@@ -43,7 +45,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-        $this->player->mp_now -= $this->magicSkill->mana_cost;
+        $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
 
         // 1. Проверка уклонения — магию тоже можно увернуться (баланс настраивается в HitCalculator)
         $dodgeHit = $this->hitCalc->playerHit($this->player, $this->monster, 0, 0);

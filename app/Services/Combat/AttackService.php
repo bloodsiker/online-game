@@ -66,7 +66,7 @@ readonly class AttackService
                     // Урон було сконвертовано в лікування - пропускаємо далі
 
                     // Нараховуємо досвід за спробу атаки (опціонально)
-                    $exp = $this->calculateExperience($player, $locMonster->monster, 1);
+                    $exp = $this->calculateExperience($player, $locMonster->monster, 1, $locMonster->hp_max);
                     $player->exp += $exp;
 
                     continue;
@@ -85,7 +85,7 @@ readonly class AttackService
                 $this->reflectDamage($battle, $damage, $player, $result);
             }
 
-            $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage));
+            $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max);
 
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
             $player->exp += $exp;
@@ -320,15 +320,16 @@ readonly class AttackService
 
             event(new PlayerLeveledUp($player));
 
-            $result->log(sprintf("<p><b style='background:#cff44f;'>Вы получили новый уровень %s.</b></p>", $player->lvl));
+            $result->log(sprintf("<p class=\"msg-levelup\">&#9650; Вы получили новый уровень <b>%s</b>!</p>", $player->lvl));
         }
     }
 
-    private function calculateExperience(Player $player, Monster $monster, int $damage)
+    private function calculateExperience(Player $player, Monster $monster, int $damage, int $monsterMaxHp)
     {
-        $takeExp = ($damage * $monster->exp) / $monster->hp;
+        $takeExp = ($damage * $monster->exp) / $monsterMaxHp;
+
         $levelDifference = $player->lvl - $monster->lvl;
-        $experienceMultiplier = max(0.01, 1 - 0.05 * $levelDifference); // Experience reduced by 5% per level
+        $experienceMultiplier = max(0.01, 1 - 0.05 * $levelDifference);
 
         // Experience is calculated as base experience multiplied by damage and adjusted by level.
         return round(max(1, $takeExp * $experienceMultiplier));

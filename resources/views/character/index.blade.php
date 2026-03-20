@@ -399,9 +399,9 @@
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Здоровье:
                                             <b style="color:#8b2020">{{ $player->hp_now }}</b>
-                                            / <b style="color:#461c0b">{{ $player->hp_max }}</b>
+                                            / <b style="color:#461c0b">{{ $playerDecorator->getHpMax() }}</b>
                                         </div>
-                                        @php $hpPct = $player->hp_max > 0 ? min(round($player->hp_now * 100 / $player->hp_max), 100) : 0; @endphp
+                                        @php $hpPct = $playerDecorator->getHpMax() > 0 ? min(round($player->hp_now * 100 / $playerDecorator->getHpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
                                             <div class="char-bar-fill char-bar-hp" style="width:{{ $hpPct }}%"></div>
                                         </div>
@@ -427,9 +427,9 @@
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Мана:
                                             <b style="color:#2040a0">{{ $player->mp_now }}</b>
-                                            / <b style="color:#461c0b">{{ $player->mp_max }}</b>
+                                            / <b style="color:#461c0b">{{ $playerDecorator->getMpMax() }}</b>
                                         </div>
-                                        @php $mpPct = $player->mp_max > 0 ? min(round($player->mp_now * 100 / $player->mp_max), 100) : 0; @endphp
+                                        @php $mpPct = $playerDecorator->getMpMax() > 0 ? min(round($player->mp_now * 100 / $playerDecorator->getMpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
                                             <div class="char-bar-fill char-bar-mp" style="width:{{ $mpPct }}%"></div>
                                         </div>
@@ -557,11 +557,11 @@
 
     let hp = {
         current: parseInt('{{ $player->hp_now }}'),
-        max: parseInt('{{ $player->hp_max }}')
+        max: parseInt('{{ $playerDecorator->getHpMax() }}')
     };
     let mp = {
         current: parseInt('{{ $player->mp_now }}'),
-        max: parseInt('{{ $player->mp_max }}')
+        max: parseInt('{{ $playerDecorator->getMpMax() }}')
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');

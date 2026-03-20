@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\ClanLogAction;
 use App\Models\Clan\Clan;
 use App\Models\Clan\ClanLearnedSkill;
+use App\Models\Clan\ClanLog;
 use App\Models\Clan\ClanSkillDefinition;
 use App\Models\Clan\ClanSkillLevel;
 use App\Models\Backpack;
@@ -40,15 +42,17 @@ class ClanSkillService
             return "Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.";
         }
 
-        // Check stone in player's backpack
-        if ($levelData->stone_share_item_id) {
+        // Check item in player's backpack
+        if ($levelData->share_item_id) {
             $stone = Backpack::where('user_id', $player->user_id)
-                ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->stone_share_item_id))
+                ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->share_item_id))
                 ->first();
 
-            if (!$stone) {
-                $stoneName = $levelData->stoneItem?->name ?? 'Камень';
-                return "В рюкзаке нет необходимого предмета: {$stoneName}.";
+            $required = $levelData->share_item_count ?? 1;
+            $stoneName = $levelData->stoneItem?->name ?? 'Предмет';
+
+            if (!$stone || $stone->count < $required) {
+                return "В рюкзаке недостаточно предметов «{$stoneName}». Нужно: {$required}.";
             }
         }
 
@@ -56,16 +60,18 @@ class ClanSkillService
             // Consume bonus points
             $clan->decrement('points', $levelData->required_bonus_points);
 
-            // Consume stone from player's backpack
-            if ($levelData->stone_share_item_id) {
+            // Consume item from player's backpack
+            if ($levelData->share_item_id) {
                 $stone = Backpack::where('user_id', $player->user_id)
-                    ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->stone_share_item_id))
+                    ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->share_item_id))
                     ->first();
 
-                if ($stone->count <= 1) {
+                $required = $levelData->share_item_count ?? 1;
+
+                if ($stone->count <= $required) {
                     $stone->delete();
                 } else {
-                    $stone->decrement('count');
+                    $stone->decrement('count', $required);
                 }
             }
 
@@ -82,6 +88,16 @@ class ClanSkillService
 
             // Sync magic skills for all clan members
             $this->syncSkillForAllMembers($clan, $definition, $currentLevel, $nextLevel, $levelData);
+
+            $isNew = $currentLevel === 0;
+            ClanLog::create([
+                'clan_id' => $clan->id,
+                'user_id' => $player->user_id,
+                'action'  => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
+                'details' => $isNew
+                    ? "Изучен новый навык «{$definition->name}»"
+                    : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
+            ]);
         });
 
         return null;

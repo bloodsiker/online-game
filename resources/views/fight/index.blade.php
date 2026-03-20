@@ -470,19 +470,19 @@
                                     <a href="{{ route('fight.run-away', ['id' => $battle->id]) }}" class="act-btn act-btn-flee">Убежать</a>
 
                                     @php
-                                        $hpPct = $player->hp_max > 0 ? round(($player->hp_now / $player->hp_max) * 100) : 0;
-                                        $mpPct = $player->mp_max > 0 ? round(($player->mp_now / $player->mp_max) * 100) : 0;
+                                        $hpPct = $playerDecorator->getHpMax() > 0 ? round(($player->hp_now / $playerDecorator->getHpMax()) * 100) : 0;
+                                        $mpPct = $playerDecorator->getMpMax() > 0 ? round(($player->mp_now / $playerDecorator->getMpMax()) * 100) : 0;
                                     @endphp
                                     <div class="act-stats">
                                         <div class="act-stat-row">
                                             <span class="act-stat-label">Здоровье:</span>
                                             <div class="act-stat-bar"><div class="act-stat-hp" style="width:{{ $hpPct }}%"></div></div>
-                                            <span class="act-stat-val">{{ $player->hp_now }}/{{ $player->hp_max }}</span>
+                                            <span class="act-stat-val">{{ $player->hp_now }}/{{ $playerDecorator->getHpMax() }}</span>
                                         </div>
                                         <div class="act-stat-row">
                                             <span class="act-stat-label">Энергия:</span>
                                             <div class="act-stat-bar"><div class="act-stat-mp" style="width:{{ $mpPct }}%"></div></div>
-                                            <span class="act-stat-val">{{ $player->mp_now }}/{{ $player->mp_max }}</span>
+                                            <span class="act-stat-val">{{ $player->mp_now }}/{{ $playerDecorator->getMpMax() }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -617,11 +617,11 @@
 <script>
     let hp = {
         current: parseInt('{{ $player->hp_now }}'),
-        max: parseInt('{{ $player->hp_max }}')
+        max: parseInt('{{ $playerDecorator->getHpMax() }}')
     };
     let mp = {
         current: parseInt('{{ $player->mp_now }}'),
-        max: parseInt('{{ $player->mp_max }}')
+        max: parseInt('{{ $playerDecorator->getMpMax() }}')
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');

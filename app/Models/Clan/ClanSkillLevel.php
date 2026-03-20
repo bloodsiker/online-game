@@ -2,7 +2,6 @@
 
 namespace App\Models\Clan;
 
-use App\Enums\ClanSkillEffectType;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Share\ShareItem;
 use Illuminate\Database\Eloquent\Model;
@@ -15,15 +14,12 @@ class ClanSkillLevel extends Model
         'level',
         'required_clan_level',
         'required_bonus_points',
-        'stone_share_item_id',
-        'effect_type',
-        'effect_value',
+        'share_item_id',
+        'share_item_count',
         'magic_skill_id',
     ];
 
-    protected $casts = [
-        'effect_type' => ClanSkillEffectType::class,
-    ];
+    protected $casts = [];
 
     public function definition(): BelongsTo
     {
@@ -32,7 +28,7 @@ class ClanSkillLevel extends Model
 
     public function stoneItem(): BelongsTo
     {
-        return $this->belongsTo(ShareItem::class, 'stone_share_item_id');
+        return $this->belongsTo(ShareItem::class, 'share_item_id');
     }
 
     public function magicSkill(): BelongsTo

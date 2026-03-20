@@ -113,9 +113,8 @@ class ClanSkillSeeder extends Seeder
                     'level'                    => $lvl['level'],
                     'required_clan_level'      => $lvl['required_clan_level'],
                     'required_bonus_points'    => $lvl['required_bonus_points'],
-                    'stone_share_item_id'      => null, // set manually later
-                    'effect_type'              => $skillData['effect_type']->value,
-                    'effect_value'             => $lvl['effect_value'],
+                    'share_item_id'            => $lvl['share_item_id'] ?? null,
+                    'share_item_count'         => $lvl['share_item_count'] ?? null,
                     'magic_skill_id'           => $magicSkill->id,
                 ]);
             }

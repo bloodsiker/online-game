@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Structure;
+use App\Services\PlayerStatService;
 use App\Services\Recovery\RecoveryStrategyFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class HealthController extends Controller
 {
+    public function __construct(private PlayerStatService $statService) {}
+
     public function index($id)
     {
         $user = Auth::user();
@@ -23,12 +26,15 @@ class HealthController extends Controller
         $strategy = RecoveryStrategyFactory::make($structure);
         $resultDto = $strategy->recover($player, $structure);
 
+        $playerDecorator = $this->statService->resolve($resultDto->player);
+
         return view('health.heal', [
-            'structure' => $structure,
-            'player' => $resultDto->player,
-            'healHp' => $resultDto->hpHealed,
-            'healMp' => $resultDto->mpHealed,
-            'buffs' => $resultDto->buffs,
+            'structure'      => $structure,
+            'player'         => $resultDto->player,
+            'playerDecorator'=> $playerDecorator,
+            'healHp'         => $resultDto->hpHealed,
+            'healMp'         => $resultDto->mpHealed,
+            'buffs'          => $resultDto->buffs,
         ]);
     }
 

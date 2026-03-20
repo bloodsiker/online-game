@@ -6,12 +6,14 @@ use App\Enums\ClanPermission;
 use App\Models\Backpack;
 use App\Models\Clan\ClanSkillDefinition;
 use App\Services\ClanSkillService;
+use App\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class ClanSkillController extends Controller
 {
     public function __construct(
         protected readonly ClanSkillService $skillService,
+        protected readonly PlayerStatService $statService,
     ) {}
 
     public function index()
@@ -26,7 +28,7 @@ class ClanSkillController extends Controller
         $clan    = $membership->clan;
         $canLearn = $membership->role->hasPermission(ClanPermission::LEARN_SKILL);
 
-        $definitions = ClanSkillDefinition::with(['levels.stoneItem'])
+        $definitions = ClanSkillDefinition::with(['levels.stoneItem', 'levels.magicSkill'])
             ->orderBy('sort_order')
             ->get();
 
@@ -42,9 +44,11 @@ class ClanSkillController extends Controller
             ->unique()
             ->values();
 
+        $playerDecorator = $this->statService->resolve($player);
+
         return view('clan.skills', compact(
             'clan', 'membership', 'definitions', 'learnedMap',
-            'canLearn', 'backpackShareItemIds'
+            'canLearn', 'backpackShareItemIds', 'player', 'playerDecorator'
         ));
     }
 

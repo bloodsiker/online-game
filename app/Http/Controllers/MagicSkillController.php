@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Decorator\Player\BuffDecorator;
-use App\Decorator\Player\EquipmentDecorator;
 use App\Events\PlayerChangeStat;
+use App\Services\PlayerStatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MagicSkillController extends Controller
 {
+    public function __construct(private PlayerStatService $statService) {}
+
     public function index(Request $request)
     {
         $user = Auth::user();
         $player = $user->player;
-//        $playerDecorator = new EquipmentDecorator($player);
-//        $playerDecorator = new BuffDecorator($playerDecorator);
 
         $group = $request->get('group', 'magic_skill');
 //        dd($player->magicSkills);
@@ -32,16 +31,21 @@ class MagicSkillController extends Controller
         $user = Auth::user();
         $player = $user->player;
 
+        $oldSheet = $this->statService->resolve($player);
+
         $equippedIds = $request->input('skills', []);
         $player->magicSkills()->update(['is_equipped' => false]);
         if (count($equippedIds)) {
             $player->magicSkills()
                 ->whereIn('magic_skill_id', $equippedIds)
                 ->update(['is_equipped' => true]);
-
-            return response()->json(['status' => 'success', 'message' => 'Сохранено']);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'Сохранено. Не выбрано ни одного скилла']);
+        $player->refresh();
+        $newSheet = $this->statService->resolve($player);
+        $this->statService->scaleHp($player, $oldSheet->getHpMax(), $newSheet->getHpMax(), $oldSheet->getMpMax(), $newSheet->getMpMax());
+
+        $message = count($equippedIds) ? 'Сохранено' : 'Сохранено. Не выбрано ни одного скилла';
+        return response()->json(['status' => 'success', 'message' => $message]);
     }
 }

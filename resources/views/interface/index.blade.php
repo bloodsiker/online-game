@@ -263,82 +263,8 @@
 
                             <span class="hotbar-collapsed-label"></span>
 
-                            <div class="hotbar">
-                                <div class="slot" data-slot="1" data-cooldown="0">
-                                    <span class="icon">⚔️</span>
-                                    <span class="keybind">1</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Удар мечом</div>
-                                        <div class="desc">Базовая атака. Урон: 50</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot" data-slot="2" data-cooldown="0">
-                                    <span class="icon">🔥</span>
-                                    <span class="keybind">2</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Огненный шар</div>
-                                        <div class="desc">Магическая атака. Урон: 80, КД: 5с</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot" data-slot="3" data-cooldown="0">
-                                    <span class="icon">💚</span>
-                                    <span class="keybind">3</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Исцеление</div>
-                                        <div class="desc">Восстанавливает 100 HP, КД: 10с</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot" data-slot="4" data-cooldown="0">
-                                    <span class="icon">🛡️</span>
-                                    <span class="keybind">4</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Щит</div>
-                                        <div class="desc">Блокирует урон на 5 секунд</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot" data-slot="5" data-cooldown="0">
-                                    <span class="icon">⚡</span>
-                                    <span class="keybind">5</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Молния</div>
-                                        <div class="desc">Мгновенный урон: 120, КД: 8с</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot" data-slot="6" data-cooldown="0">
-                                    <span class="icon">🧪</span>
-                                    <span class="keybind">6</span>
-                                    <div class="cooldown"></div>
-                                    <div class="tooltip">
-                                        <div class="name">Зелье маны</div>
-                                        <div class="desc">Восстанавливает 50 маны</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot empty" data-slot="7">
-                                    <span class="icon"></span>
-                                    <span class="keybind">7</span>
-                                    <div class="tooltip">
-                                        <div class="name">Пустой слот</div>
-                                    </div>
-                                </div>
-
-                                <div class="slot empty" data-slot="8">
-                                    <span class="icon"></span>
-                                    <span class="keybind">8</span>
-                                    <div class="tooltip">
-                                        <div class="name">Пустой слот</div>
-                                    </div>
-                                </div>
+                            <div class="hotbar" id="hotbar-slots">
+                                {{-- Слоты рендерятся динамически через JS после загрузки /hotbar --}}
                             </div>
 
                             <div class="hotbar-toggle" id="hotbar-toggle">
@@ -347,8 +273,8 @@
                         </div>
 
                         <script>
-                            const slots = document.querySelectorAll('.slot');
                             const hotbar = document.getElementById('hotbar');
+                            const hotbarSlots = document.getElementById('hotbar-slots');
                             const dragHandle = document.querySelector('.hotbar-drag-handle');
                             const bodyContent = document.getElementById('body_content');
                             const gameFrame = document.getElementById('game-frame');
@@ -356,65 +282,95 @@
                             const toggleButton = document.getElementById('hotbar-toggle');
                             const toggleIcon = toggleButton.querySelector('.toggle-icon');
 
-                            const abilities = {
-                                1: { name: 'Удар мечом', cooldown: 0 },
-                                2: { name: 'Огненный шар', cooldown: 5 },
-                                3: { name: 'Исцеление', cooldown: 10 },
-                                4: { name: 'Щит', cooldown: 6 },
-                                5: { name: 'Молния', cooldown: 8 },
-                                6: { name: 'Зелье маны', cooldown: 3 }
-                            };
+                            // Данные слотов, загруженные с сервера
+                            let hotbarData = {};
+
+                            function buildSlotHtml(slot) {
+                                const empty = slot.empty;
+                                const cls = empty ? 'slot empty' : 'slot';
+                                const icon = slot.image
+                                    ? `<img src="${slot.image}" class="slot-img" alt="" style="width:40px;height:40px;object-fit:cover;display:block;border-radius:5px;">`
+                                    : `<span class="icon"></span>`;
+                                const name = slot.name ?? 'Пустой слот';
+                                const cooldown = slot.cooldown ?? 0;
+                                return `
+                                    <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
+                                        ${icon}
+                                        <span class="keybind">${slot.slot}</span>
+                                        <div class="cooldown"></div>
+                                        <div class="tooltip"><div class="name">${name}</div></div>
+                                    </div>`;
+                            }
+
+                            function renderHotbar(data) {
+                                hotbarData = {};
+                                hotbarSlots.innerHTML = data.slots.map(buildSlotHtml).join('');
+                                data.slots.forEach(s => {
+                                    if (!s.empty) hotbarData[s.slot] = s;
+                                });
+                                bindSlotEvents();
+                            }
+
+                            function bindSlotEvents() {
+                                hotbarSlots.querySelectorAll('.slot').forEach(slot => {
+                                    slot.addEventListener('click', () => {
+                                        useAbility(parseInt(slot.getAttribute('data-slot')));
+                                    });
+                                });
+                            }
 
                             function useAbility(slotNumber) {
-                                const slot = document.querySelector(`[data-slot="${slotNumber}"]`);
+                                const slot = hotbarSlots.querySelector(`[data-slot="${slotNumber}"]`);
+                                if (!slot || slot.classList.contains('empty')) return;
+                                if (slot.classList.contains('on-cooldown')) return;
 
-                                if (!slot || slot.classList.contains('empty')) {
-                                    return;
-                                }
-
-                                if (slot.classList.contains('on-cooldown')) {
-                                    return;
-                                }
-
-                                const ability = abilities[slotNumber];
-                                if (!ability) return;
+                                const cooldownSec = parseFloat(slot.dataset.cooldown) || 0;
 
                                 slot.classList.add('active');
+                                setTimeout(() => slot.classList.remove('active'), 300);
 
-                                setTimeout(() => {
-                                    slot.classList.remove('active');
-                                }, 300);
-
-                                if (ability.cooldown > 0) {
-                                    slot.classList.add('on-cooldown');
-                                    let timeLeft = ability.cooldown;
+                                if (cooldownSec > 0) {
                                     const cooldownEl = slot.querySelector('.cooldown');
+                                    slot.classList.add('on-cooldown');
+                                    let timeLeft = cooldownSec;
                                     cooldownEl.textContent = timeLeft;
 
                                     const interval = setInterval(() => {
                                         timeLeft--;
-                                        cooldownEl.textContent = timeLeft;
-
-                                        if (timeLeft <= 0) {
+                                        if (timeLeft > 0) {
+                                            cooldownEl.textContent = timeLeft;
+                                        } else {
                                             clearInterval(interval);
                                             slot.classList.remove('on-cooldown');
+                                            cooldownEl.textContent = '';
                                         }
                                     }, 1000);
                                 }
                             }
 
-                            slots.forEach(slot => {
-                                slot.addEventListener('click', () => {
-                                    const slotNumber = slot.getAttribute('data-slot');
-                                    useAbility(slotNumber);
-                                });
-                            });
+                            // Загрузка хотбара с сервера (также доступна дочерним фреймам)
+                            function refreshHotbar() {
+                                fetch('{{ route('hotbar.index') }}')
+                                    .then(r => r.json())
+                                    .then(renderHotbar);
+                            }
 
-                            document.addEventListener('keydown', (e) => {
-                                const key = e.key;
-                                if (key >= '1' && key <= '8') {
+                            refreshHotbar();
+
+                            function handleHotbarKey(e) {
+                                const key = parseInt(e.key);
+                                if (key >= 1 && key <= 9) {
                                     useAbility(key);
                                 }
+                            }
+
+                            document.addEventListener('keydown', handleHotbarKey);
+
+                            // Пробрасываем хоткеи из game-frame в хотбар
+                            gameFrame.addEventListener('load', () => {
+                                try {
+                                    gameFrame.contentDocument.addEventListener('keydown', handleHotbarKey);
+                                } catch (e) {}
                             });
 
                             // Сворачивание/разворачивание панели

@@ -70,14 +70,14 @@
                         <table class="coll w100 p10h brd2-all" border="0" style="margin-bottom: 10px;">
                             <tbody>
                             <tr class="bg_l">
-                                <td align="left" nowrap="" style="padding: 4px 0;">
+                                <td align="left" nowrap="" style="padding: 4px 10px;">
                                     <b>Клан:</b> {{ $clan->name }}
                                     &nbsp;&nbsp;
                                     <b>Уровень:</b> {{ $clan->lvl }}
                                 </td>
-                                <td align="right" nowrap="" style="padding: 4px 0;">
+                                <td align="right" nowrap="" style="padding: 4px 10px;">
                                     <b>Бонусные очки:</b>
-                                    <b class="redd">{{ number_format($clan->points) }}</b>
+                                    <b class="req-ok">{{ number_format($clan->points, 0, '.', ' ') }}</b>
                                 </td>
                             </tr>
                             </tbody>
@@ -108,8 +108,8 @@
                                 if ($nextLevelData && !$isMaxed) {
                                     $reqClanLvl = $clan->lvl >= $nextLevelData->required_clan_level;
                                     $reqPoints  = $clan->points >= $nextLevelData->required_bonus_points;
-                                    $reqStone   = !$nextLevelData->stone_share_item_id
-                                        || $backpackShareItemIds->contains($nextLevelData->stone_share_item_id);
+                                    $reqStone   = !$nextLevelData->share_item_id
+                                        || $backpackShareItemIds->contains($nextLevelData->share_item_id);
                                     $canLearnThis = $reqClanLvl && $reqPoints && $reqStone;
                                 }
 
@@ -137,12 +137,14 @@
                                                 Ур. {{ $currentLevel }} / {{ $def->max_level }}
                                             </span>
 
-                                            @if($currentLevelData)
-                                                &nbsp;—&nbsp;
-                                                <span class="effect-tag">
-                                                    +{{ $currentLevelData->effect_value }}
-                                                    {{ $currentLevelData->effect_type->label() }}
-                                                </span>
+                                            @if($currentLevelData && $currentLevelData->magicSkill)
+                                                @foreach($currentLevelData->magicSkill->effects ?? [] as $eff)
+                                                    &nbsp;—&nbsp;
+                                                    <span class="effect-tag">
+                                                        +{{ $eff['value'] }}{{ !empty($eff['is_percent']) ? '%' : '' }}
+                                                        {{ \App\Enums\ClanSkillEffectType::tryFrom($eff['type'])?->label() ?? $eff['type'] }}
+                                                    </span>
+                                                @endforeach
                                             @endif
 
                                             <div class="skill-desc">{{ $def->description }}</div>
@@ -152,8 +154,10 @@
                                             @elseif($nextLevelData)
                                                 <div class="req-row">
                                                     <b>Следующий уровень {{ $nextLevel }}:</b>
-                                                    +{{ $nextLevelData->effect_value }}
-                                                    {{ $nextLevelData->effect_type->label() }}
+                                                    @foreach($nextLevelData->magicSkill->effects ?? [] as $eff)
+                                                        +{{ $eff['value'] }}{{ !empty($eff['is_percent']) ? '%' : '' }}
+                                                        {{ \App\Enums\ClanSkillEffectType::tryFrom($eff['type'])?->label() ?? $eff['type'] }}
+                                                    @endforeach
                                                 </div>
                                                 <div class="req-row">
                                                     Уровень клана:
@@ -163,11 +167,15 @@
                                                     &nbsp;&nbsp;
                                                     Бонусные очки:
                                                     <span class="{{ $reqPoints ? 'req-ok' : 'req-fail' }}">
-                                                        {{ number_format($clan->points) }} / {{ number_format($nextLevelData->required_bonus_points) }}
+                                                        {{ number_format($clan->points, 0, '.', ' ') }} / {{ number_format($nextLevelData->required_bonus_points, 0, '.', ' ') }}
                                                     </span>
                                                     @if($nextLevelData->stoneItem)
                                                         &nbsp;&nbsp;
-                                                        Камень «{{ $nextLevelData->stoneItem->name }}»:
+                                                        Камень «{{ $nextLevelData->stoneItem->name }}»
+                                                        @if($nextLevelData->share_item_count > 1)
+                                                            ({{ $nextLevelData->share_item_count }} шт.)
+                                                        @endif
+                                                        :
                                                         <span class="{{ $reqStone ? 'req-ok' : 'req-fail' }}">
                                                             {{ $reqStone ? 'есть' : 'нет' }}
                                                         </span>
@@ -229,6 +237,20 @@
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
+    @endif
+
+    @if (session()->has('success'))
+        let hp = {
+            current: parseInt('{{ $player->hp_now }}'),
+            max: parseInt('{{ $playerDecorator->getHpMax() }}')
+        };
+        let mp = {
+            current: parseInt('{{ $player->mp_now }}'),
+            max: parseInt('{{ $playerDecorator->getMpMax() }}')
+        };
+        let experience = parseFloat('{{ $player->getPercentExp() }}');
+        let lvl = parseInt('{{ $player->lvl }}');
+        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
     @endif
 </script>
 

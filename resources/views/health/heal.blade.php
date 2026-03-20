@@ -128,11 +128,11 @@
 <script>
     let hp = {
         current: parseInt('{{ $player->hp_now }}'),
-        max: parseInt('{{ $player->hp_max }}')
+        max: parseInt('{{ $playerDecorator->getHpMax() }}')
     };
     let mp = {
         current: parseInt('{{ $player->mp_now }}'),
-        max: parseInt('{{ $player->mp_max }}')
+        max: parseInt('{{ $playerDecorator->getMpMax() }}')
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');

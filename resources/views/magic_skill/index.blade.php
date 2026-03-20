@@ -64,7 +64,7 @@
             width: 185px;
             border: 1px solid #db9f73;
             border-radius: 3px;
-            background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
+            background-image: url({{ asset('img/bg/common-bg.png') }});
             background-repeat: repeat;
             position: relative;
             overflow: hidden;
@@ -88,7 +88,7 @@
         }
         .mana-badge {
             background: #4a6fa5;
-            color: #cce0ff;
+            color: #ffffff;
             font-size: 10px;
             font-weight: bold;
             padding: 1px 5px;
@@ -144,7 +144,7 @@
         .passive-card {
             border: 1px solid #db9f73;
             border-radius: 3px;
-            background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
+            background-image: url({{ asset('img/bg/common-bg.png') }});
             background-repeat: repeat;
             padding: 5px 8px;
             display: flex;

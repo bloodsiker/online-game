@@ -9,6 +9,7 @@ use App\Models\Battle\BattleRound;
 use App\Services\Battle\BattleOrchestrator;
 use App\Services\BattleService;
 use App\Services\Combat\FightOrchestrator;
+use App\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class FightController extends Controller
@@ -17,6 +18,7 @@ class FightController extends Controller
         readonly protected BattleOrchestrator $battleOrchestrator,
         readonly protected BattleService $battleService,
         readonly protected FightOrchestrator $fightOrchestrator,
+        readonly protected PlayerStatService $statService,
     ) {
     }
 
@@ -37,7 +39,8 @@ class FightController extends Controller
             ->inRandomOrder()
             ->first();
 
-        return view('fight.index', compact('battle', 'randomAttackedMonster', 'player'));
+        $playerDecorator = $this->statService->resolve($player);
+        return view('fight.index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
     }
 
     public function attack(int $id, int $monsterId, int $action)
@@ -46,11 +49,12 @@ class FightController extends Controller
         $battle = $fightDTO->getBattle();
         $round = $fightDTO->getBattleRound();
         $player = $fightDTO->getPlayer();
+        $playerDecorator = $this->statService->resolve($player);
 
         if ($fightDTO->isPlayerDead()) {
             $attackedMonster = $fightDTO->getAttackedMonster();
 
-            return view('fight.death', compact('battle', 'player',  'round', 'attackedMonster', 'fightDTO'));
+            return view('fight.death', compact('battle', 'player', 'playerDecorator', 'round', 'attackedMonster', 'fightDTO'));
         }
 
         $randomAttackedMonster = BattleDetail::with(['locationMonster'])
@@ -59,7 +63,7 @@ class FightController extends Controller
             ->inRandomOrder()
             ->first();
 
-        return view('fight.attack', compact('battle', 'round',  'randomAttackedMonster', 'player', 'fightDTO'));
+        return view('fight.attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO'));
     }
 
     public function attackMonster($id)
@@ -75,7 +79,8 @@ class FightController extends Controller
             ->where('status', 1)
             ->first();
 
-        return view('fight.index', compact('battle', 'randomAttackedMonster', 'player'));
+        $playerDecorator = $this->statService->resolve($player);
+        return view('fight.index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
     }
 
     public function runAway($id)
@@ -134,7 +139,8 @@ class FightController extends Controller
                     ->setBattleRound($round)
                     ->setPlayer($player);
 
-                return view('fight.attack', compact('battle', 'round',  'randomAttackedMonster', 'player', 'fightDTO'));
+                $playerDecorator = $this->statService->resolve($player);
+                return view('fight.attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO'));
             }
         }
 

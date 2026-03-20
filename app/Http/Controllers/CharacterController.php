@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Decorator\Player\BuffDecorator;
-use App\Decorator\Player\EquipmentDecorator;
 use App\Events\PlayerChangeStat;
+use App\Services\PlayerStatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CharacterController extends Controller
 {
+    public function __construct(private PlayerStatService $statService) {}
+
     public function index(Request $request)
     {
         $user = Auth::user();
         $player = $user->player;
-        $playerDecorator = new EquipmentDecorator($player);
-        $playerDecorator = new BuffDecorator($playerDecorator);
+        $playerDecorator = $this->statService->resolve($player);
 
         $group = $request->get('group', 'character');
 
@@ -26,8 +26,7 @@ class CharacterController extends Controller
     {
         $user = Auth::user();
         $player = $user->player;
-        $playerDecorator = new EquipmentDecorator($player);
-        $playerDecorator = new BuffDecorator($playerDecorator);
+        $playerDecorator = $this->statService->resolve($player);
 
         return view('character.points', compact('user', 'player', 'playerDecorator'));
     }

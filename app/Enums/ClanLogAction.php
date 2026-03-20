@@ -18,6 +18,8 @@ enum ClanLogAction: string
     case CLAN_DELETED    = 'clan_deleted';
     case CLAN_RENAMED        = 'clan_renamed';
     case BONUS_POINTS_EARNED = 'bonus_points_earned';
+    case SKILL_LEARNED       = 'skill_learned';
+    case SKILL_UPGRADED      = 'skill_upgraded';
 
     public function label(): string
     {
@@ -36,6 +38,8 @@ enum ClanLogAction: string
             self::CLAN_DELETED         => 'Клан удалён',
             self::CLAN_RENAMED         => 'Клан переименован',
             self::BONUS_POINTS_EARNED  => 'Заработаны бонусные очки',
+            self::SKILL_LEARNED        => 'Изучен новый навык',
+            self::SKILL_UPGRADED       => 'Изучен уровень навыка',
         };
     }
 }

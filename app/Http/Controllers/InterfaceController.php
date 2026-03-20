@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Map;
+use App\Services\PlayerStatService;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class InterfaceController extends Controller
 {
+    public function __construct(private PlayerStatService $statService) {}
+
     public function index()
     {
         return view('interface.index');
@@ -77,7 +80,8 @@ class InterfaceController extends Controller
     {
         $user = Auth::user();
         $player = $user->player;
+        $playerDecorator = $this->statService->resolve($player);
 
-        return view('interface.hero', compact('player'));
+        return view('interface.hero', compact('player', 'playerDecorator'));
     }
 }

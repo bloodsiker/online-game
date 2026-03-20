@@ -2,8 +2,6 @@
 
 namespace App\Services\Combat;
 
-use App\Decorator\Player\BuffDecorator;
-use App\Decorator\Player\EquipmentDecorator;
 use App\Enums\ShareItemType;
 use App\Models\Item\Item;
 use App\Models\Monster\Monster;
@@ -14,21 +12,22 @@ use App\Services\Combat\Strategies\DualWieldStrategy;
 use App\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Services\PlayerMagicSkillService;
+use App\Services\PlayerStatService;
 
 readonly class AttackStrategyResolver
 {
     public function __construct(
         private HitCalculator $hitCalc,
         private PlayerMagicSkillService $playerMagicSkillService,
+        private PlayerStatService $statService,
     ) {}
 
     public function resolve(Player $player, Monster $monster, int $action): AttackStrategyInterface
     {
-        $playerDecorator = new EquipmentDecorator($player);
-        $playerDecorator = new BuffDecorator($playerDecorator);
+        $sheet = $this->statService->resolve($player);
 
         $equip = $player->playerEquip;
-        $left = $equip->handLeft;
+        $left  = $equip->handLeft;
         $right = $equip->handRight;
 
         if ($action > 0) {
@@ -36,7 +35,8 @@ readonly class AttackStrategyResolver
 
             return new MagicAttackStrategy(
                 hitCalc: $this->hitCalc,
-                player: $player,
+                player: $sheet,
+                playerModel: $player,
                 monster: $monster,
                 magicSkill: $playerSkill
             );
@@ -63,7 +63,7 @@ readonly class AttackStrategyResolver
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
-                player: $playerDecorator,
+                player: $sheet,
                 monster: $monster,
                 equip: $player->playerEquip
             );
@@ -76,7 +76,7 @@ readonly class AttackStrategyResolver
         ) {
             return new DualWieldStrategy(
                 hitCalc: $this->hitCalc,
-                player: $playerDecorator,
+                player: $sheet,
                 monster: $monster,
                 leftWeapon: $left->itemInfo,
                 rightWeapon: $right->itemInfo
@@ -90,7 +90,7 @@ readonly class AttackStrategyResolver
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
-                player: $playerDecorator,
+                player: $sheet,
                 monster: $monster,
                 equip: $player->playerEquip
             );
@@ -103,13 +103,13 @@ readonly class AttackStrategyResolver
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
-                player: $playerDecorator,
+                player: $sheet,
                 monster: $monster,
                 equip: $player->playerEquip
             );
         }
 
-        // Any other case (e.g., shield + something that is not a weapon) — fist
+        // Any other case — fist
         return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
     }
 }

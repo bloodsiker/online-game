@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Decorator\Player\EquipmentDecorator;
 use App\Services\BackpackService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipRenderer;

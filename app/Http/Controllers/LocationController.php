@@ -12,6 +12,7 @@ use App\Services\Battle\BattleOrchestrator;
 use App\Services\Battle\MonsterSelector;
 use App\Services\BattleService;
 use App\Services\PlayerMovementService;
+use App\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class LocationController extends Controller
@@ -23,12 +24,14 @@ class LocationController extends Controller
         readonly protected MonsterOnLocationRepository $monsterOnLocationRepository,
         readonly protected LocationRepository $locationRepository,
         readonly protected PlayerMovementService $playerMovementService,
+        readonly protected PlayerStatService $statService,
     ) {}
 
     public function index()
     {
         $user = Auth::user();
         $player = $user->player;
+        $playerDecorator = $this->statService->resolve($player);
         $location = $user->currentLocation;
 
         if (!$location) {
@@ -44,12 +47,12 @@ class LocationController extends Controller
                 $randomAttackedMonster->locationMonster->regenerate();
             }
 
-            return view('fight.index', compact('battle', 'randomAttackedMonster', 'player'));
+            return view('fight.index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
         }
 
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
-        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player'));
+        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator'));
     }
 
     public function moveTo($direction)
@@ -70,11 +73,12 @@ class LocationController extends Controller
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
         return view('location.index', [
-            'location' => $location,
-            'battle' => $battle,
+            'location'        => $location,
+            'battle'          => $battle,
             'monsterOnLocation' => $monsterOnLocation,
-            'player' => $user->player,
-            'speedModifier' => $result->speedModifier,
+            'player'          => $user->player,
+            'playerDecorator' => $this->statService->resolve($user->player),
+            'speedModifier'   => $result->speedModifier,
         ]);
     }
 

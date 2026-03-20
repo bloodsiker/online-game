@@ -54,11 +54,11 @@
                     <div class="stats-bars">
                         <div class="stat-bar">
                             <div class="stat-fill hp-fill" id="hpBar" style="width: {{ $player->getPercentHp() }}%"></div>
-                            <div class="stat-text" id="hpText">{{ $player->hp_now }} / {{ $player->hp_max }}</div>
+                            <div class="stat-text" id="hpText">{{ $player->hp_now }} / {{ $playerDecorator->getHpMax() }}</div>
                         </div>
                         <div class="stat-bar">
                             <div class="stat-fill mana-fill" id="manaBar" style="width: {{ $player->getPercentMp() }}%"></div>
-                            <div class="stat-text" id="manaText">{{ $player->mp_now }} / {{ $player->mp_max }}</div>
+                            <div class="stat-text" id="manaText">{{ $player->mp_now }} / {{ $playerDecorator->getMpMax() }}</div>
                         </div>
                     </div>
                 </div>

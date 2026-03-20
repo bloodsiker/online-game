@@ -331,6 +331,9 @@
             font-weight: bold !important;
             margin: 2px !important;
             text-align: center !important;
+            position: absolute;
+            bottom: 1px;
+            left: 0px;
         }
     </style>
 
@@ -392,39 +395,25 @@
                             <tbody>
                             <tr>
                                 <td valign="top" id="user-effects-sets" class="instapockets-set">
-                                    <div class="user-effects-set bg_l&gt;" data-id="24">
-                                        <ul class="lscroll backpack_list connected-sortable clearfix">
-                                            <li id="AA_502829" aid="art_502829" sn="0" ord="0" data-id="502829"
-                                                data-artikul-id="7188" data-dateti="502829" data-quality="2"
-                                                data-kind="34" data-ttl="-1768069414" data-title="Волшебная палочка"
-                                                data-noweight="0" data-cnt="0" num="1" class="item" style="opacity: 1;">
-
-
-                                                <table class="item pctntr " data-id="502829" width="60" height="60"
-                                                       cellpadding="0" cellspacing="0" border="0"
-                                                       style="float: left; margin: 1px"
-                                                       background="https://feo-dwar.com/images/data/artifacts/volpal_1504.gif">
-                                                    <tbody>
-                                                    <tr>
-                                                        <td act1="8" act2="0" act3="0" rune_h="0"
-                                                            style="position: relative; background-image: url(&quot;images/d.gif&quot;); cursor: pointer;"
-                                                            aid="502829" art_id="" cnt="0" div_id="AA_502829"
-                                                            onmouseover="showItemInfo(this,event,2)"
-                                                            onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                            &nbsp;
-
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </li>
-
-                                            <li class="user-effects-set__add"></li>
-
-                                            <li class="user-effects-set__add"></li>
-
+                                    <div class="user-effects-set" data-id="hotbar">
+                                        <ul class="lscroll backpack_list connected-sortable clearfix" id="hotbar-slot-list">
+                                            @foreach($hotbarData['slots'] as $slot)
+                                                @if($slot['empty'])
+                                                    <li class="user-effects-set__add" data-slot="{{ $slot['slot'] }}"></li>
+                                                @else
+                                                    <li class="item hotbar-filled-slot" data-slot="{{ $slot['slot'] }}" data-title="{{ $slot['name'] }}" style="position:relative; opacity:1;">
+                                                        <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                               style="float:left; margin:1px;"
+                                                               @if($slot['image']) background="{{ asset($slot['image']) }}" @endif>
+                                                            <tbody><tr><td style="position:relative;" valign="bottom">&nbsp;</td></tr></tbody>
+                                                        </table>
+                                                        <span class="hotbar-slot-remove" data-slot="{{ $slot['slot'] }}" title="Убрать из панели"
+                                                              style="position:absolute;top:0;right:0;background:#8b0000;color:#fff;font-size:10px;cursor:pointer;padding:1px 3px;line-height:1;z-index:10;">×</span>
+                                                        <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.5);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{ $slot['slot'] }}</div>
+                                                    </li>
+                                                @endif
+                                            @endforeach
                                         </ul>
-
                                     </div>
                                 </td>
                             </tr>
@@ -446,109 +435,6 @@
                                             <div class="popup-right-center">
 
                                                 <div class="popup_global_content" style="padding: 0 15px 15px;">
-                                                    <script>
-                                                        if (!window.jQuery) document.write('<scr' + 'ipt src="js/jquery.js"></scr' + 'ipt>');
-                                                    </script>
-                                                    <script src="js/jquery.js"></script>
-                                                    <script src="js/jquery.itemsfilter.js?c=1322"></script>
-                                                    <script type="text/javascript" src="js/json2.js?c=1322"></script>
-                                                    <script src="js/jstorages.js?c=1322"></script>
-                                                    <script>
-                                                        $(function () {
-                                                            itemsFilterInit();
-                                                            $('#items-filter-search').on('click', function (e) {
-                                                                my_menu_search(this, e);
-                                                            });
-                                                            var filter = $('.backpack_list').itemsFilter('filter_get');
-                                                            my_menu_search(gebi('items-filter-search'), null, (filter.filterValue ? {show: true} : {hide: true}));
-                                                        });
-
-                                                        function itemsFilterInit(context) {
-                                                            $('.backpack_list', context || document).itemsFilter({
-                                                                storageKey: ('itemsFilterStore_instapockets_' + _top().myId),
-                                                                itemSelector: 'li.item',
-                                                                sortField: 'ord',
-                                                                sortOrder: 'asc',
-                                                                filterElement: '#item_list_filter',
-                                                                fields: {
-                                                                    'data-kind': {attr: 'data-kind', type: 'i'},
-                                                                    'data-title': {attr: 'data-title', type: 's'},
-                                                                    'data-quality': {attr: 'data-quality', type: 's'},
-                                                                    'data-ttl': {
-                                                                        attr: 'data-ttl',
-                                                                        type: 'i',
-                                                                        zero: true
-                                                                    },
-                                                                    'data-noweight': {attr: 'data-noweight', type: 'i'},
-                                                                    'ord': {attr: 'ord', type: 'i'}
-                                                                }
-                                                            });
-                                                        }
-
-                                                        function itemsFilterSync() {
-                                                            $('.backpack_list').itemsFilter('sort');
-                                                            $('.backpack_list').itemsFilter('filter');
-                                                            var filter = $('.backpack_list').itemsFilter('filter_get');
-                                                            my_menu_search(gebi('items-filter-search'), null, (filter.filterValue ? {show: true} : {hide: true}));
-                                                        }
-                                                    </script>
-                                                    <script type="text/javascript" src="js/gmnu.js?c=1322"></script>
-                                                    <script>
-                                                        function my_menu_search(obj, e, params) {
-                                                            params = params || {};
-                                                            var menu = [
-                                                                {
-                                                                    head: true,
-                                                                    txt: 'Поиск по названию',
-                                                                    nosort: true
-                                                                },
-                                                                {
-                                                                    input: true,
-                                                                    txt: 'Введите название предмета',
-                                                                    name: 'filterField',
-                                                                    value: '',
-                                                                    keyup: function () {
-                                                                        $('.backpack_list').itemsFilter('filter', {
-                                                                            filterField: 'data-title',
-                                                                            filterValue: this.value
-                                                                        });
-                                                                    },
-                                                                    clear: function () {
-                                                                        $('.backpack_list').itemsFilter('filter', {
-                                                                            filterField: 'data-title',
-                                                                            filterValue: ''
-                                                                        });
-                                                                    }
-                                                                }
-                                                            ];
-
-                                                            var filter = $('.backpack_list').itemsFilter('filter_get');
-                                                            menu[1].value = filter.filterValue || '';
-
-                                                        }
-
-                                                        var currentBagGroupId = '0';
-
-                                                        function showBagSettings() {
-                                                            var elm = document.getElementById("bag_settings_" + currentBagGroupId);
-                                                            if (!elm) {
-                                                                return;
-                                                            }
-                                                            adjustBagSettings(elm);
-                                                            (elm.style.display == 'none') ? elm.style.display = "block" : elm.style.display = "none";
-                                                        }
-
-                                                        function adjustBagSettings(elm) {
-                                                            var elm2 = document.getElementById('items-filter-' + currentBagGroupId);
-                                                            if (elm && elm2) {
-                                                                elm.style.top = (elm2.offsetHeight || 24) + 6 + 'px';
-                                                            }
-                                                        }
-
-                                                        $(window).on('resize', function () {
-                                                            adjustBagSettings(document.getElementById("bag_settings_" + currentBagGroupId));
-                                                        });
-                                                    </script>
 
                                                     <form id="item_list_filter">
                                                         <div style="padding: 0 0 10px; text-align: center;">
@@ -596,178 +482,31 @@
 
 
                                                     <ul id="item_list" data-caller="0" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
-                                                        <li id="AA_502809" aid="art_502809" sn="0" ord="0"
-                                                            data-id="502809" data-artikul-id="14015"
-                                                            data-dateti="502809" data-quality="2" data-kind="103"
-                                                            data-ttl="-1768069414" data-title="Ветер странствий"
-                                                            data-noweight="0" data-cnt="0" num="3" class="item"
-                                                            style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="502809" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://feo-dwar.com/images/data/artifacts/battlerageelixir.gif">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative;" aid="502809"
-                                                                        art_id="" cnt="0" div_id="AA_502809"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
+                                                        @forelse($usableItems as $backpack)
+                                                        <li data-id="{{ $backpack->item_id }}"
+                                                            data-title="{{ $backpack->item->itemInfo->name }}"
+                                                            data-cnt="{{ $backpack->count }}"
+                                                            class="item hotbar-pickable"
+                                                            style="opacity: 1; cursor: pointer;"
+                                                            title="{{ $backpack->item->itemInfo->name }}">
+                                                            <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                   style="float:left; margin:1px;"
+                                                                   @if($backpack->item->itemInfo->image) background="{{ asset($backpack->item->itemInfo->image) }}" @endif>
+                                                                <tbody><tr>
+                                                                    <td style="position:relative;" valign="bottom">
+                                                                        @if($backpack->count > 1)
+                                                                            <div class="bpdig">{{ $backpack->count }}</div>
+                                                                        @endif
                                                                         &nbsp;
-
                                                                     </td>
-                                                                </tr>
-                                                                </tbody>
+                                                                </tr></tbody>
                                                             </table>
                                                         </li>
-                                                        <li id="AA_502828" aid="art_502828" sn="0" ord="0"
-                                                            data-id="502828" data-artikul-id="1146" data-dateti="502828"
-                                                            data-quality="1" data-kind="108" data-ttl="-1768069414"
-                                                            data-title="Амулет Крионского Зорба" data-noweight="0"
-                                                            data-cnt="0" num="3" class="item" style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="502828" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://game.elders.com.ua/img/resource/ancient_coin.jpg">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative; background-image: url(&quot;images/d.gif&quot;); cursor: pointer;"
-                                                                        aid="502828" art_id="" cnt="0"
-                                                                        div_id="AA_502828"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
-                                                                        &nbsp;
-
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
+                                                        @empty
+                                                        <li style="padding:10px; color:#666; list-style:none; float:none; width:auto; height:auto;">
+                                                            Нет подходящих предметов
                                                         </li>
-                                                        <li id="AA_502829" aid="art_502829" sn="0" ord="0"
-                                                            data-id="502829" data-artikul-id="7188" data-dateti="502829"
-                                                            data-quality="2" data-kind="34" data-ttl="-1768069414"
-                                                            data-title="Волшебная палочка" data-noweight="0"
-                                                            data-cnt="0" num="3" class="item unavailable"
-                                                            style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="502829" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://feo-dwar.com/images/data/artifacts/NastroenieVBanke.png">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative; background-image: url(&quot;images/d.gif&quot;); cursor: pointer;"
-                                                                        aid="502829" art_id="" cnt="0"
-                                                                        div_id="AA_502829"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
-                                                                        &nbsp;
-
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </li>
-                                                        <li id="AA_502830" aid="art_502830" sn="0" ord="0"
-                                                            data-id="502830" data-artikul-id="7704" data-dateti="502830"
-                                                            data-quality="2" data-kind="34" data-ttl="-1768069414"
-                                                            data-title="Дракончик Урчи" data-noweight="0" data-cnt="0"
-                                                            num="3" class="item" style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="502830" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://feo-dwar.com/images/data/artifacts/lab_panacea_vio2.gif">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative; background-image: url(&quot;images/d.gif&quot;); cursor: pointer;"
-                                                                        aid="502830" art_id="" cnt="0"
-                                                                        div_id="AA_502830"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
-                                                                        &nbsp;
-
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </li>
-
-                                                        <li id="AA_513733" aid="art_513733" sn="3" ord="3"
-                                                            data-id="513733" data-artikul-id="17156"
-                                                            data-dateti="513733" data-quality="3" data-kind="72"
-                                                            data-ttl="-1768069414"
-                                                            data-title="Драгоценный аппарат обнуления" data-noweight="0"
-                                                            data-cnt="12" num="3" class="item" style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="513733" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://feo-dwar.com/images/data/artifacts/q16_baf_nagrada.gif">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative; background-image: url(&quot;images/d.gif&quot;); cursor: pointer;"
-                                                                        aid="513733" art_id="" cnt="12"
-                                                                        div_id="AA_513733"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
-                                                                        <div class="bpdig">
-                                                                            12
-                                                                        </div>
-
-
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </li>
-                                                        <li id="AA_662355" aid="art_662355" sn="5" ord="5"
-                                                            data-id="662355" data-artikul-id="19563"
-                                                            data-dateti="662355" data-quality="0" data-kind="66"
-                                                            data-ttl="1807379" data-title="Пустая радужная сфера"
-                                                            data-noweight="0" data-cnt="14" num="3" class="item"
-                                                            style="opacity: 1;">
-
-
-                                                            <table class="item pctntr " data-id="662355" width="60"
-                                                                   height="60" cellpadding="0" cellspacing="0"
-                                                                   border="0" style="float: left; margin: 1px"
-                                                                   background="https://feo-dwar.com/images/data/artifacts/gtm_device_restored.gif">
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td act1="5" act2="0" act3="0" rune_h="0"
-                                                                        style="position: relative;" aid="662355"
-                                                                        art_id="" cnt="14" div_id="AA_662355"
-                                                                        onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)"
-                                                                        valign="bottom">
-                                                                        <div class="bpdig">
-                                                                            14
-                                                                        </div>
-
-
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </li>
-
+                                                        @endforelse
                                                     </ul>
 
                                                 </div>
@@ -828,38 +567,6 @@
         event.preventDefault();
     });
 
-    function saveCombos() {
-        const params = {
-            skills: []
-        };
-
-        const combos = document.querySelectorAll(".combo-in-fight");
-
-        combos.forEach(el => {
-            if (el.checked) {
-                params.skills.push(el.value);
-            }
-        });
-
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        fetch('{{ route('magic_skill.update') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
-            },
-            body: JSON.stringify(params)
-        })
-            .then(response => response.json())
-            .then(data => {
-                window.parent.showErrorIframe(data.message || 'Сохранено');
-            })
-            .catch(() => {
-                window.parent.showErrorIframe('Ошибка при сохранении');
-            });
-    }
-
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
@@ -906,32 +613,101 @@
 </script>
 
 <script>
+    const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    let activeSlotNumber = null;
+
     function hideArtifacts() {
         document.querySelectorAll('.user-effects-set__add')
             .forEach(el => el.classList.remove('user-effects-set-active'));
-
         const popup = document.getElementById('artifactsPopup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
+        if (popup) popup.style.display = 'none';
+        activeSlotNumber = null;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const addButtons = document.querySelectorAll('.user-effects-set__add');
         const popup = document.getElementById('artifactsPopup');
 
-        addButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                addButtons.forEach(b =>
-                    b.classList.remove('user-effects-set-active')
-                );
-                btn.classList.add('user-effects-set-active');
-                if (popup) {
-                    popup.style.display = 'block';
-                }
-            });
+        // Открытие попапа при клике на пустой слот
+        document.getElementById('hotbar-slot-list').addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.user-effects-set__add');
+            if (addBtn) {
+                document.querySelectorAll('.user-effects-set__add')
+                    .forEach(b => b.classList.remove('user-effects-set-active'));
+                addBtn.classList.add('user-effects-set-active');
+                activeSlotNumber = parseInt(addBtn.dataset.slot);
+                if (popup) popup.style.display = 'block';
+                return;
+            }
+
+            // Удаление из слота по кнопке ×
+            const removeBtn = e.target.closest('.hotbar-slot-remove');
+            if (removeBtn) {
+                const slot = parseInt(removeBtn.dataset.slot);
+                removeFromSlot(slot, removeBtn.closest('li'));
+            }
+        });
+
+        // Выбор предмета из попапа
+        document.getElementById('item_list').addEventListener('click', (e) => {
+            const li = e.target.closest('.hotbar-pickable');
+            if (!li || activeSlotNumber === null) return;
+
+            const itemId = parseInt(li.dataset.id);
+            assignToSlot(activeSlotNumber, 'item', itemId, li);
         });
     });
+
+    function assignToSlot(slotNumber, entityType, entityId, sourceLi) {
+        fetch('{{ route('hotbar.set') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({ slot: slotNumber, entity_type: entityType, entity_id: entityId }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status !== 'success') {
+                window.parent?.showErrorIframe(data.message || 'Ошибка');
+                return;
+            }
+            // Обновляем слот в DOM
+            const slotEl = document.querySelector(`#hotbar-slot-list [data-slot="${slotNumber}"]`);
+            if (!slotEl) return;
+
+            const bg = sourceLi.querySelector('table')?.getAttribute('background') || '';
+            const name = sourceLi.dataset.title || '';
+
+            slotEl.className = 'item hotbar-filled-slot';
+            slotEl.dataset.title = name;
+            slotEl.innerHTML = `
+                <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                       style="float:left;margin:1px;" ${bg ? `background="${bg}"` : ''}>
+                    <tbody><tr><td style="position:relative;" valign="bottom">&nbsp;</td></tr></tbody>
+                </table>
+                <span class="hotbar-slot-remove" data-slot="${slotNumber}" title="Убрать из панели"
+                      style="position:absolute;top:0;right:0;background:#8b0000;color:#fff;font-size:10px;cursor:pointer;padding:1px 3px;line-height:1;z-index:10;">×</span>
+                <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.5);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${slotNumber}</div>
+            `;
+            hideArtifacts();
+            window.parent?.refreshHotbar?.();
+        });
+    }
+
+    function removeFromSlot(slotNumber, slotEl) {
+        fetch(`{{ url('/hotbar/clear') }}/${slotNumber}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': csrf },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status !== 'success') return;
+            slotEl.className = 'user-effects-set__add';
+            slotEl.innerHTML = '';
+            window.parent?.refreshHotbar?.();
+        });
+    }
 </script>
 
 </body>

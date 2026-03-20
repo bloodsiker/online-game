@@ -24,8 +24,7 @@ class HomeController extends Controller
         dd($diff / 60);
 //        $user = User::find(1);
 //        $player = $user->player;
-//        $player = new EquipmentDecorator($player);
-//        $player = new BuffDecorator($player);
+//        $player = app(\App\Services\PlayerStatService::class)->resolve($player);
 //
 //        echo "Min Left dmg: " . $player->getLeftHandMinDmg() . PHP_EOL . "\n";
 //        echo "Max Left dmg: " . $player->getLeftHandMaxDmg() . PHP_EOL . PHP_EOL;

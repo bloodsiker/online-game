@@ -365,7 +365,13 @@ class GenerateSeed extends Command
         $skill3->cooldown = 0;
         $skill3->target_type = 'self';
         $skill3->is_passive = true;
-        $skill3->effects = null;
+        $skill3->effects = [
+                        [
+                            'type'       => 'attack',
+                            'value'      => 2,
+                            'is_percent' => true,
+                        ]
+                    ];
         $skill3->save();
 
         $effect = new Effect();

@@ -2,7 +2,6 @@
 
 namespace App\Models\Player;
 
-use App\Decorator\Player\PlayerInterface;
 use App\Enums\QuestPlayerStatus;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Quest\QuestPlayer;
@@ -32,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Collection|MagicSkill[] $magicSkills
  * @property-read Collection|QuestPlayer[] $quests
  */
-class Player extends Model implements PlayerInterface, FightHitInterface
+class Player extends Model implements FightHitInterface
 {
     use HasFactory;
 
@@ -79,6 +78,11 @@ class Player extends Model implements PlayerInterface, FightHitInterface
         return $this->hasMany(QuestPlayer::class, 'player_id')->with('quest');
     }
 
+    public function hotbarSlots(): HasMany
+    {
+        return $this->hasMany(PlayerSlot::class, 'player_id')->orderBy('slot_number');
+    }
+
     public function questsInProgress(): HasMany
     {
         return $this->hasMany(QuestPlayer::class, 'player_id')->where(['status' => QuestPlayerStatus::IN_PROGRESS])->with('quest');
@@ -107,6 +111,16 @@ class Player extends Model implements PlayerInterface, FightHitInterface
     public function getArmor(): int
     {
         return 0;
+    }
+
+    public function getHpMax(): int
+    {
+        return $this->hp_max;
+    }
+
+    public function getMpMax(): int
+    {
+        return $this->mp_max;
     }
 
     public function getStrength() {
@@ -177,8 +191,11 @@ class Player extends Model implements PlayerInterface, FightHitInterface
             ->exists();
     }
 
-    public function regenerate(): void
+    public function regenerate(int $hpMax = null, int $mpMax = null): void
     {
+        $hpMax = $hpMax ?? $this->hp_max;
+        $mpMax = $mpMax ?? $this->mp_max;
+
         $now = Carbon::now();
 
         if (!$this->last_regen_at) {
@@ -194,21 +211,18 @@ class Player extends Model implements PlayerInterface, FightHitInterface
             return;
         }
 
-        // сколько тиков нужно для полного восстановления
         $totalTicks = self::FULL_REGEN_TIME / self::REGEN_INTERVAL;
 
-        // процент / количество за 1 тик
-        $multiplier = 1;
-        $hpPerTick = ($this->hp_max / $totalTicks) * $multiplier;
-        $mpPerTick = ($this->mp_max / $totalTicks) * $multiplier;
+        $hpPerTick = ($hpMax / $totalTicks);
+        $mpPerTick = ($mpMax / $totalTicks);
 
         $this->hp_now = min(
-            $this->hp_max,
+            $hpMax,
             (int) floor($this->hp_now + ($hpPerTick * $ticks))
         );
 
         $this->mp_now = min(
-            $this->mp_max,
+            $mpMax,
             (int) floor($this->mp_now + ($mpPerTick * $ticks))
         );
 
