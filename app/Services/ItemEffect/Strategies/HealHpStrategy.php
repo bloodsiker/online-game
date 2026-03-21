@@ -3,16 +3,18 @@
 namespace App\Services\ItemEffect\Strategies;
 
 use App\Models\Player\Player;
-use App\ItemEffect\ValueObjects\ItemEffectValue;
+use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
 class HealHpStrategy implements ItemEffectStrategyInterface
 {
-    public function apply(Player $player, ItemEffectValue $effect): void
+    public function apply(Player $player, ItemEffectValue $effect, int $hpMax = null, int $mpMax = null): void
     {
+        $cap = $hpMax ?? $player->hp_max;
+
         $amount = $effect->isPercent()
-            ? (int)($player->max_hp * $effect->value / 100)
+            ? (int)($cap * $effect->value / 100)
             : $effect->value;
 
-        $player->changeHp($amount);
+        $player->changeHp($amount, $cap);
     }
 }

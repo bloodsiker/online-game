@@ -58,6 +58,9 @@ class CharacterController extends Controller
         );
 
         if ($sumChange > $player->getFreeStats()) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'У вас нет столько свободных характеристик'], 422);
+            }
             session()->flash('message', 'У вас нет столько свободных характеристик');
             return redirect()->back();
         }
@@ -72,11 +75,28 @@ class CharacterController extends Controller
 
         $sumChangeNow = array_sum(array_map('intval', $filteredNow));
         if ($sumChangeNow == $player->getSumStats()) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'ok', 'message' => 'Основные характеристики остались прежними.']);
+            }
             session()->flash('message', 'Основные характеристики остались прежними.');
             return redirect()->back();
         }
 
         event(new PlayerChangeStat($player));
+
+        if ($request->expectsJson()) {
+            $player->refresh();
+            return response()->json([
+                'status'     => 'ok',
+                'message'    => 'Характеристики изменены.',
+                'free_stats' => $player->free_stats,
+                'str'        => $player->getStrength(),
+                'int'        => $player->getInt(),
+                'agil'       => $player->getAgility(),
+                'intel'      => $player->getIntelligence(),
+                'mud'        => $player->getMud(),
+            ]);
+        }
 
         session()->flash('message', 'Характеристики изменены.');
         return redirect()->route('character');

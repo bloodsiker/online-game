@@ -3,11 +3,11 @@
 namespace App\Services\ItemEffect\Strategies;
 
 use App\Models\Player\Player;
-use App\ItemEffect\ValueObjects\ItemEffectValue;
+use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
 class BuffAttackStrategy implements ItemEffectStrategyInterface
 {
-    public function apply(Player $player, ItemEffectValue $effect): void
+    public function apply(Player $player, ItemEffectValue $effect, int $hpMax = null, int $mpMax = null): void
     {
         // Implementation for buffing attack goes here
     }

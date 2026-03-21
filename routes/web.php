@@ -84,6 +84,7 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
     Route::get('/hotbar', [HotbarController::class, 'index'])->name('hotbar.index');
     Route::post('/hotbar/set', [HotbarController::class, 'set'])->name('hotbar.set');
+    Route::post('/hotbar/use', [HotbarController::class, 'use'])->name('hotbar.use');
     Route::delete('/hotbar/clear/{slot}', [HotbarController::class, 'clear'])->name('hotbar.clear');
 
     Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])->name('fight.run-away');

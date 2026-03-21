@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ItemEffect\ValueObjects;
+namespace App\Services\ItemEffect\ValueObjects;
 
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;

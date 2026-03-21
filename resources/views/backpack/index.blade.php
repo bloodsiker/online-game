@@ -1920,7 +1920,34 @@
 </script>
 
 <script>
+    window.addEventListener('message', function(e) {
+        if (!e.data || !e.data.backpack_update) return;
 
+        const { item_id, count, removed } = e.data.backpack_update;
+
+        // Ищем td с data-id совпадающим с item_id
+        const td = document.querySelector('td[data-id="' + item_id + '"]');
+        if (!td) return;
+
+        if (removed) {
+            // Удаляем родительский <li>
+            const li = td.closest('li.item');
+            if (li) li.remove();
+        } else {
+            // Обновляем или скрываем .bpdig
+            let bpdig = td.querySelector('.bpdig');
+            if (count > 1) {
+                if (!bpdig) {
+                    bpdig = document.createElement('div');
+                    bpdig.className = 'bpdig';
+                    td.appendChild(bpdig);
+                }
+                bpdig.textContent = count;
+            } else if (bpdig) {
+                bpdig.remove();
+            }
+        }
+    });
 </script>
 
 </body>

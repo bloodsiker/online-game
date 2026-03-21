@@ -6,7 +6,7 @@ use App\Enums\ItemEffectType;
 use App\Services\ItemEffect\Strategies\BuffAttackStrategy;
 use App\Services\ItemEffect\Strategies\HealHpStrategy;
 use App\Services\ItemEffect\Strategies\HealMpStrategy;
-use app\Services\ItemEffect\Strategies\ItemEffectStrategyInterface;
+use App\Services\ItemEffect\Strategies\ItemEffectStrategyInterface;
 
 class ItemEffectStrategyFactory
 {

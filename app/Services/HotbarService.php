@@ -138,12 +138,19 @@ class HotbarService
         $image    = null;
         $cooldown = 0;
 
+        $count = null;
+
         if ($slot->entity_type === 'item') {
             $item = Item::with('itemInfo')->find($slot->entity_id);
             if ($item) {
                 $name     = $item->itemInfo->name;
                 $image    = $item->itemInfo->image;
                 $cooldown = 1; // TODO: получать из атрибутов предмета
+
+                $backpack = Backpack::where('user_id', $player->user_id)
+                    ->where('item_id', $slot->entity_id)
+                    ->first();
+                $count = $backpack?->count ?? 0;
             }
         } elseif ($slot->entity_type === 'skill') {
             $skill = $player->magicSkills()->where('magic_skill_id', $slot->entity_id)->first()
@@ -162,6 +169,7 @@ class HotbarService
             'name'        => $name,
             'image'       => $image,
             'cooldown'    => $cooldown,
+            'count'       => $count,
         ];
     }
 }

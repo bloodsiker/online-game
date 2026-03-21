@@ -549,7 +549,7 @@
                                                 $allyHpPct = $details->user->player->hp_max > 0 ? round(($details->user->player->hp_now / $details->user->player->hp_max) * 100) : 0;
                                                 $allyMpPct = $details->user->player->mp_max > 0 ? round(($details->user->player->mp_now / $details->user->player->mp_max) * 100) : 0;
                                             @endphp
-                                            <div class="bp-unit">
+                                            <div class="bp-unit" @if($details->user->id === auth()->id()) id="bp-unit-me" @endif>
                                                 <div class="bp-unit-name">
                                                     <b><a href="{{ route('info.user', ['id' => $details->user->id]) }}" target="_blank">{{ $details->user->name }}</a></b><span class="bp-unit-lvl">[{{ $details->user->player->lvl }}]</span><span class="bp-unit-time">{{ $details->updated_at->format('H:i:s') }}</span>
                                                 </div>
@@ -629,16 +629,40 @@
     let diamond = parseInt('{{ $player->user->diamond }}');
 
     function playerAction() {
-        // Пример изменения состояния игрока
-        // health = Math.max(0, health - 10);
-        // mp = Math.max(0, mp - 3);
-
-        // Отправка данных в родительский iframe
-        // window.parent.postMessage({ health, mp, experience, lvl }, '*');
         parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
     }
     playerAction();
-    // setInterval(playerAction, 5000);
+
+    window.addEventListener('message', function(e) {
+        if (!e.data || !e.data.hp || !e.data.mp) return;
+
+        hp.current = e.data.hp.current;
+        hp.max     = e.data.hp.max;
+        mp.current = e.data.mp.current;
+        mp.max     = e.data.mp.max;
+
+        const hpPct = hp.max > 0 ? Math.round(hp.current / hp.max * 100) : 0;
+        const mpPct = mp.max > 0 ? Math.round(mp.current / mp.max * 100) : 0;
+
+        // Основной блок статов персонажа
+        document.querySelector('.act-stat-hp').style.width = hpPct + '%';
+        document.querySelector('.act-stat-mp').style.width = mpPct + '%';
+
+        const vals = document.querySelectorAll('.act-stat-val');
+        if (vals[0]) vals[0].textContent = hp.current + '/' + hp.max;
+        if (vals[1]) vals[1].textContent = mp.current + '/' + mp.max;
+
+        // Блок союзника (текущий игрок)
+        const meUnit = document.getElementById('bp-unit-me');
+        if (meUnit) {
+            const fills = meUnit.querySelectorAll('.bp-hp-fill, .bp-mp-fill');
+            const texts = meUnit.querySelectorAll('.bp-hp-text');
+            if (fills[0]) fills[0].style.width = hpPct + '%';
+            if (fills[1]) fills[1].style.width = mpPct + '%';
+            if (texts[0]) texts[0].textContent = hp.current + '/' + hp.max;
+            if (texts[1]) texts[1].textContent = mp.current + '/' + mp.max;
+        }
+    });
 </script>
 
 <script>

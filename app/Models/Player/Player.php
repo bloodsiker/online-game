@@ -231,22 +231,20 @@ class Player extends Model implements FightHitInterface
         $this->save();
     }
 
-    public function changeHp(int $amount): void
+    public function changeHp(int $amount, int $hpMax = null): void
     {
-        $this->hp_now = max(
-            0,
-            min($this->max_hp, $this->hp_now + $amount)
-        );
+        $cap = $hpMax ?? $this->hp_max;
+
+        $this->hp_now = max(0, min($cap, $this->hp_now + $amount));
 
         $this->save();
     }
 
-    public function changeMp(int $amount): void
+    public function changeMp(int $amount, int $mpMax = null): void
     {
-        $this->mp_now = max(
-            0,
-            min($this->max_hp, $this->mp_now + $amount)
-        );
+        $cap = $mpMax ?? $this->mp_max;
+
+        $this->mp_now = max(0, min($cap, $this->mp_now + $amount));
 
         $this->save();
     }

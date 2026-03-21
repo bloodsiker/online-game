@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\DTOs\StatModifier;
-use App\DTOs\StatSheet;
+use App\DTO\StatModifier;
+use App\DTO\StatSheet;
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
 use App\Models\Item\Item;

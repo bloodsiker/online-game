@@ -4,7 +4,7 @@ namespace App\Models\Share;
 
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
-use App\ItemEffect\ValueObjects\ItemEffectValue;
+use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

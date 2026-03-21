@@ -385,8 +385,8 @@
                                         @endforeach
                                         @if($player->free_stats)
                                             <div class="char-freepoints">
-                                                Свободных очков: <b>{{ $player->free_stats }}</b>
-                                                &nbsp;<a href="{{ route('character.point') }}">Распределить »</a>
+                                                Свободных очков: <b id="pts-free-count">{{ $player->free_stats }}</b>
+                                                &nbsp;<a href="#" id="pts-open-modal" onclick="openPtsModal();return false;">Распределить »</a>
                                             </div>
                                         @endif
                                     </div>
@@ -411,11 +411,11 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Крит</span>
-                                            <span class="char-stat-val">1317</span>
+                                            <span class="char-stat-val">{{ $playerDecorator->getCritical() }}</span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Уворот</span>
-                                            <span class="char-stat-val">920</span>
+                                            <span class="char-stat-val">{{ $playerDecorator->getDodge() }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -543,9 +543,6 @@
             case 'i':
                 window.parent.sendDataToGame('{{ route('backpack') }}');
                 break;
-            case 'c':
-                window.parent.sendDataToGame('{{ route('character') }}');
-                break;
             case ' ':
                 window.parent.sendDataToGame('{{ route('location') }}');
                 break;
@@ -574,6 +571,36 @@
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
+
+    const _ptsMsg = sessionStorage.getItem('pts-message');
+    if (_ptsMsg) {
+        sessionStorage.removeItem('pts-message');
+        window.parent.showErrorIframe(_ptsMsg);
+    }
+</script>
+
+<script>
+    function openPtsModal() {
+        parent.openPtsModal({
+            free:  {{ $player->getFreeStats() }},
+            bases: {
+                str:   {{ $player->getStrength() }},
+                int:   {{ $player->getInt() }},
+                agil:  {{ $player->getAgility() }},
+                intel: {{ $player->getIntelligence() }},
+                mud:   {{ $player->getMud() }},
+            },
+            full: {
+                str:   {{ $playerDecorator->getStrength() }},
+                int:   {{ $playerDecorator->getInt() }},
+                agil:  {{ $playerDecorator->getAgility() }},
+                intel: {{ $playerDecorator->getIntelligence() }},
+                mud:   {{ $playerDecorator->getMud() }},
+            },
+            saveUrl: '{{ route('character.point_save') }}',
+            csrf:    '{{ csrf_token() }}',
+        });
+    }
 </script>
 
 </body>

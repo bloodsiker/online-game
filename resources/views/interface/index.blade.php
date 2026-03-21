@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Онлайн Игра</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
@@ -293,12 +294,18 @@
                                     : `<span class="icon"></span>`;
                                 const name = slot.name ?? 'Пустой слот';
                                 const cooldown = slot.cooldown ?? 0;
+                                const countLine = (!empty && slot.entity_type === 'item' && slot.count != null)
+                                    ? `<div class="tooltip-count">Количество: <span class="count-val">${slot.count}</span></div>`
+                                    : '';
                                 return `
                                     <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
                                         ${icon}
                                         <span class="keybind">${slot.slot}</span>
                                         <div class="cooldown"></div>
-                                        <div class="tooltip"><div class="name">${name}</div></div>
+                                        <div class="tooltip">
+                                            <div class="name">${name}</div>
+                                            ${countLine}
+                                        </div>
                                     </div>`;
                             }
 
@@ -319,15 +326,51 @@
                                 });
                             }
 
+                            const hotbarCsrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
                             function useAbility(slotNumber) {
                                 const slot = hotbarSlots.querySelector(`[data-slot="${slotNumber}"]`);
                                 if (!slot || slot.classList.contains('empty')) return;
                                 if (slot.classList.contains('on-cooldown')) return;
 
+                                const entityType  = slot.dataset.entityType;
                                 const cooldownSec = parseFloat(slot.dataset.cooldown) || 0;
 
                                 slot.classList.add('active');
                                 setTimeout(() => slot.classList.remove('active'), 300);
+
+                                if (entityType === 'item') {
+                                    fetch('{{ route('hotbar.use') }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': hotbarCsrf,
+                                        },
+                                        body: JSON.stringify({ slot: slotNumber }),
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.slot_cleared) {
+                                            refreshHotbar();
+                                        } else if (data.status === 'success') {
+                                            const countEl = slot.querySelector('.count-val');
+                                            if (countEl) countEl.textContent = data.count;
+                                        }
+                                        if (data.status === 'success') {
+                                            const hpMp = {
+                                                hp: { current: data.hp_now, max: data.hp_max },
+                                                mp: { current: data.mp_now, max: data.mp_max },
+                                                backpack_update: {
+                                                    item_id: parseInt(slot.dataset.entityId),
+                                                    count:   data.count,
+                                                    removed: !!data.slot_cleared,
+                                                },
+                                            };
+                                            sendToFrame('character-frame', hpMp);
+                                            gameFrame.contentWindow?.postMessage(hpMp, '*');
+                                        }
+                                    });
+                                }
 
                                 if (cooldownSec > 0) {
                                     const cooldownEl = slot.querySelector('.cooldown');
@@ -1135,6 +1178,131 @@
     sendToFrame('map-frame', { currentLocationId });
 </script>
 
+{{-- Модальное окно распределения очков (открывается из character-frame) --}}
+<div id="pts-overlay" class="error_div" style="display:none;z-index:1002;"></div>
+<div id="pts-modal" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:360px;">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title">Распределение очков</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closePtsModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:10px 18px 4px;">
+                    <div style="text-align:center;margin-bottom:8px;font-size:11px;color:#2a1a0e;">
+                        Свободно очков: <b id="pts-modal-free" style="color:#8b2000;"></b>
+                    </div>
+                    <div id="pts-rows"></div>
+                    <div id="pts-msg" style="display:none;margin-top:8px;padding:5px 8px;background:#FEEFB6;border:1px solid #e0d080;border-radius:4px;font-size:11px;color:#5a4a00;"></div>
+                    <div style="display:flex;gap:8px;margin:12px 0 6px;justify-content:center;">
+                        <b class="butt1 pointer" onclick="ptsSave()"><b><input value="Сохранить" type="button"></b></b>
+                        <b class="butt1 pointer" onclick="closePtsModal()"><b><input value="Отмена" type="button"></b></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let _ptsData = {};
+
+    function openPtsModal(data) {
+        _ptsData = data;
+
+        document.getElementById('pts-modal-free').textContent = data.free;
+        document.getElementById('pts-msg').style.display = 'none';
+
+        const labels = { str: 'Сила', int: 'Интуиция', agil: 'Ловкость', intel: 'Интеллект', mud: 'Мудрость' };
+        const rows   = document.getElementById('pts-rows');
+        const btnStyle = 'width:24px;height:24px;border:1px solid #a07040;background:url(/img/bg/table-header.jpg) repeat-x top left #c8924a;color:#461c0b;font-weight:bold;font-size:15px;cursor:pointer;border-radius:3px;padding:0;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);';
+        const inpStyle = 'width:34px;text-align:center;border:1px solid #CEBBAA;border-radius:3px;padding:3px 0;font-family:Tahoma;font-size:12px;color:#461c0b;font-weight:bold;background:#fffaf3;';
+
+        rows.innerHTML = Object.keys(labels).map((k) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #e8d4c0;">
+                <span style="width:82px;flex-shrink:0;font-weight:bold;color:#2a1a0e;">${labels[k]}</span>
+                <span style="width:42px;flex-shrink:0;font-weight:bold;color:#8b2000;font-size:12px;" id="ptsr-${k}">${data.full[k]}</span>
+                <div style="display:flex;align-items:center;gap:5px;">
+                    <button type="button" onclick="ptsDec('${k}')" style="${btnStyle}">−</button>
+                    <input type="text" id="ptsi-${k}" value="0" style="${inpStyle}" readonly>
+                    <button type="button" onclick="ptsInc('${k}')" style="${btnStyle}">+</button>
+                </div>
+            </div>`).join('');
+
+        document.getElementById('pts-overlay').style.display = 'block';
+        document.getElementById('pts-modal').style.display   = 'block';
+    }
+
+    function closePtsModal() {
+        document.getElementById('pts-overlay').style.display = 'none';
+        document.getElementById('pts-modal').style.display   = 'none';
+    }
+
+    function _ptsAdded() {
+        return ['str','int','agil','intel','mud'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
+    }
+
+    function ptsInc(key) {
+        if (_ptsData.free - _ptsAdded() <= 0) return;
+        const inp = document.getElementById('ptsi-' + key);
+        inp.value = parseInt(inp.value) + 1;
+        document.getElementById('ptsr-' + key).textContent = _ptsData.full[key] + parseInt(inp.value);
+        document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
+    }
+
+    function ptsDec(key) {
+        const inp = document.getElementById('ptsi-' + key);
+        if (parseInt(inp.value) <= 0) return;
+        inp.value = parseInt(inp.value) - 1;
+        document.getElementById('ptsr-' + key).textContent = _ptsData.full[key] + parseInt(inp.value);
+        document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
+    }
+
+    function ptsSave() {
+        const body = {
+            str:   parseInt(document.getElementById('ptsi-str').value)   || 0,
+            int:   parseInt(document.getElementById('ptsi-int').value)   || 0,
+            agil:  parseInt(document.getElementById('ptsi-agil').value)  || 0,
+            intel: parseInt(document.getElementById('ptsi-intel').value) || 0,
+            mud:   parseInt(document.getElementById('ptsi-mud').value)   || 0,
+            ostr:   _ptsData.bases.str,
+            oint:   _ptsData.bases.int,
+            oagil:  _ptsData.bases.agil,
+            ointel: _ptsData.bases.intel,
+            omud:   _ptsData.bases.mud,
+        };
+
+        fetch(_ptsData.saveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _ptsData.csrf, 'Accept': 'application/json' },
+            body: JSON.stringify(body),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'error') {
+                const msg = document.getElementById('pts-msg');
+                msg.textContent = data.message;
+                msg.style.display = 'block';
+                return;
+            }
+            closePtsModal();
+            showErrorIframe(data.message);
+            document.getElementById('game-frame').contentWindow.location.reload();
+            document.getElementById('character-frame').contentWindow.location.reload();
+        });
+    }
+
+    document.getElementById('pts-overlay').addEventListener('click', closePtsModal);
+</script>
 
 </body>
 </html>
