@@ -95,6 +95,8 @@ class GenerateSeed extends Command
         $this->createNpcAndQuest();
         $this->call('db:seed', ['--class' => 'ClanSkillSeeder']);
         $this->call('db:seed', ['--class' => 'QuestSeeder']);
+        $this->call('db:seed', ['--class' => 'ClanQuestSeeder']);
+        $this->call('db:seed', ['--class' => 'ReputationSeeder']);
     }
 
     public function createExp()
@@ -1602,6 +1604,7 @@ class GenerateSeed extends Command
         $npc->name = 'Глава города';
         $npc->description = 'Глава города';
         $npc->location_id = $locationNpc->id;
+        $npc->image = '/img/npc/stareyshina.jpg';
         $npc->save();
 
         $quest1 = new Quest();
@@ -1613,7 +1616,7 @@ class GenerateSeed extends Command
                                                 здесь недавно? <br> В таком случае раскрываю свои объятия и говорю:
                                                 добро пожаловать, друг! Я здешний наставник, управляю этим местом. <br>
                                                 Если хочешь внести свою лепту в общее дело, покажи свою силу в битве с
-                                                ужасными <span><b class="blue">Неферто [3]</b> </span>, добыв
+                                                ужасными <span><b class="blue">Неферто</b> </span>, добыв
                                                 при этом – их Соцветие!
                                                 А теперь ступай и постарайтесь не обмануть мои ожидания!';
         $quest1->type = QuestType::MAIN;
@@ -1709,5 +1712,19 @@ class GenerateSeed extends Command
         $exchange->to_amount = 10;
         $exchange->sort_order = 3;
         $exchange->save();
+
+
+        $locationNpc = Location::find(4);
+        $npc = new Npc();
+        $npc->name = 'Мудрый Финко';
+        $npc->description = 'Наемник братства «Крадущиеся в ночи». Один из старожил некогда могущественной организации, он высоко ценит и чтит законы братства, считая, что наемники не должны вмешиваться во внешние конфликты и быть их участниками.';
+        $npc->location_id = $locationNpc->id;
+        $npc->image = '/img/npc/naemnik-noch.jpg';
+        $npc->save();
+
+        $npc2 = Npc::firstOrCreate(
+            ['name' => 'Воевода Гидвер'],
+            ['location_id' => 4, 'description' => 'Дока военного искусства, тактик и стратег, он посвятил свою жизнь развитию военного дела и обучению молодых солдат его премудростям.', 'image' => '/img/npc/voevoda.jpg']
+        );
     }
 }

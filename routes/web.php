@@ -3,21 +3,22 @@
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BackpackController;
 use App\Http\Controllers\BlacksmithController;
+use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\ClanSkillController;
 use App\Http\Controllers\ClanWarehouseController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ExchangeController;
+use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HotbarController;
+use App\Http\Controllers\InterfaceController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
-use App\Http\Controllers\BackpackController;
-use App\Http\Controllers\FightController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\CharacterController;
-use App\Http\Controllers\InterfaceController;
 use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MonsterController;
@@ -25,8 +26,8 @@ use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PremiumShopController;
 use App\Http\Controllers\QuestController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\HotbarController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
@@ -34,40 +35,37 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/dd', [HomeController::class, 'gebug'])->name('gebug');
+Route::get('/map', [HomeController::class, 'map'])->name('map');
+Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
+Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
+Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
+Route::get('/login/{id}', [HomeController::class, 'login'])->name('login');
+Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
-Route::get('/dd',   [HomeController::class, 'gebug'])->name('gebug');
-Route::get('/map',   [HomeController::class, 'map'])->name('map');
-Route::get('/map2',   [HomeController::class, 'map2'])->name('map2');
-Route::get('/map3',   [HomeController::class, 'map3'])->name('map3');
-Route::get('/clear',   [HomeController::class, 'clear'])->name('clear');
-Route::get('/login/{id}',   [HomeController::class, 'login'])->name('login');
-Route::get('/logout',   [UserController::class, 'logout'])->name('logout');
-
-Route::post('/login',   [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);;
-Route::get('/register',   [RegisterController::class, 'index'])->name('register');
-Route::post('/register', [RegisterController::class, 'register'])->name('register')->withoutMiddleware([VerifyCsrfToken::class]);;
+Route::post('/login', [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);
+Route::get('/register', [RegisterController::class, 'index'])->name('register');
+Route::post('/register', [RegisterController::class, 'register'])->name('register')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::post('/register/check', [RegisterController::class, 'registerCheck'])->name('register.check');
 
-//// ======== Ручная настройка верификации ======== //
+// // ======== Ручная настройка верификации ======== //
 //
-//// Показ уведомления о необходимости подтвердить email
-//Route::get('/email/verify', function () {
+// // Показ уведомления о необходимости подтвердить email
+// Route::get('/email/verify', function () {
 //    return view('auth.verify');
-//})->middleware('auth')->name('verification.notice');
+// })->middleware('auth')->name('verification.notice');
 //
-//// Обработка подтверждения email по ссылке
-//Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+// // Обработка подтверждения email по ссылке
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
 //    $request->fulfill();
 //    return redirect('/home')->with('success', 'Email успешно подтвержден!');
-//})->middleware(['auth', 'signed'])->name('verification.verify');
+// })->middleware(['auth', 'signed'])->name('verification.verify');
 //
-//// Повторная отправка письма с подтверждением
-//Route::post('/email/verification-notification', function (Request $request) {
+// // Повторная отправка письма с подтверждением
+// Route::post('/email/verification-notification', function (Request $request) {
 //    $request->user()->sendEmailVerificationNotification();
 //    return back()->with('resent', true);
-//})->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
-
-
+// })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
 
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
 
@@ -98,7 +96,7 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/backpack', [BackpackController::class, 'index'])->name('backpack');
 
     Route::get('/auction/{id}/buyItem/{itemId}', [AuctionController::class, 'buyItem'])->name('auction.buy_item');
-    Route::match(['GET', 'POST'],'/auction/{id}/my-lot/edit/{slotId}', [AuctionController::class, 'myLotEdit'])->name('auction.my_lot.edit');
+    Route::match(['GET', 'POST'], '/auction/{id}/my-lot/edit/{slotId}', [AuctionController::class, 'myLotEdit'])->name('auction.my_lot.edit');
     Route::get('/auction/{id}/my-lot/cancel/{slotId}', [AuctionController::class, 'myLotCancel'])->name('auction.my_lot.cancel');
     Route::get('/auction/{id}/my-lot', [AuctionController::class, 'myLot'])->name('auction.my_lot');
     Route::post('/auction/{id}/new-lot/save', [AuctionController::class, 'newLotSave'])->name('auction.new_lot.save');
@@ -164,6 +162,12 @@ Route::post('/quest/clan/{id}/cancel', [QuestController::class, 'cancelClanQuest
 Route::get('/quest/{id}', [QuestController::class, 'quest'])->name('quest');
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
 
+Route::get('/reputations', [ReputationController::class, 'list'])->name('reputation.list');
+Route::get('/reputation/{id}', [ReputationController::class, 'index'])->name('reputation.index');
+Route::post('/reputation/{id}/take', [ReputationController::class, 'take'])->name('reputation.take');
+Route::get('/reputation/{id}/shop', [ReputationController::class, 'shop'])->name('reputation.shop');
+Route::post('/reputation/{id}/shop/{itemId}/buy', [ReputationController::class, 'buy'])->name('reputation.buy');
+
 Route::get('/items/info/{id}', [ItemController::class, 'info'])->name('items.info');
 Route::get('/items/put-on/{id}', [ItemController::class, 'putOn'])->name('items.put_on');
 Route::get('/items/put-off/{id}', [ItemController::class, 'putOff'])->name('items.put_off');
@@ -192,9 +196,9 @@ Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
-Route::get('/who',  [InterfaceController::class, 'who'])->name('who');
+Route::get('/who', [InterfaceController::class, 'who'])->name('who');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/interface', [InterfaceController::class, 'interface'])->name('interface');
-Route::get('/',     [MainController::class, 'index'])->name('index');
+Route::get('/', [MainController::class, 'index'])->name('index');

@@ -8,14 +8,16 @@ enum QuestType: string
     case REPEATABLE = 'repeatable';
     case MAIN = 'main';
     case CLAN = 'clan';
+    case REPUTATION = 'reputation';
 
     public function label(): string
     {
         return match($this) {
-            self::ONE_TIME => 'Одноразовый',
+            self::ONE_TIME   => 'Одноразовый',
             self::REPEATABLE => 'Повторяемый',
-            self::MAIN => 'Главный',
-            self::CLAN => 'Клановый',
+            self::MAIN       => 'Главный',
+            self::CLAN       => 'Клановый',
+            self::REPUTATION => 'Репутационный',
         };
     }
 
@@ -37,5 +39,10 @@ enum QuestType: string
     public function isClan(): bool
     {
         return $this === self::CLAN;
+    }
+
+    public function isReputation(): bool
+    {
+        return $this === self::REPUTATION;
     }
 }

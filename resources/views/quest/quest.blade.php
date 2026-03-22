@@ -288,12 +288,13 @@
                                             @foreach($quest->rewards as $reward)
                                                 @php
                                                     $rewardText = match($reward->type->value) {
-                                                        'exp'             => '+' . $reward->amount . ' опыта',
-                                                        'money'           => '+' . $reward->amount . ' монет',
-                                                        'item'            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
-                                                        'location_access' => 'доступ к «' . ($reward->location?->name ?? 'локации') . '»',
-                                                        'clan_points'     => '+' . $reward->amount . ' клановых очков',
-                                                        default           => '',
+                                                        'exp'               => '+' . $reward->amount . ' опыта',
+                                                        'money'             => '+' . $reward->amount . ' монет',
+                                                        'item'              => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        'location_access'   => 'доступ к «' . ($reward->location?->name ?? 'локации') . '»',
+                                                        'clan_points'       => '+' . $reward->amount . ' клановых очков',
+                                                        'reputation_points' => '+' . $reward->amount . ' репутации «' . ($reward->reputation?->name ?? 'репутация') . '»',
+                                                        default             => '',
                                                     };
                                                 @endphp
                                                 <tr class="bg_l brd2-all fs-12">

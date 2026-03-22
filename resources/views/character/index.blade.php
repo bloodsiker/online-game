@@ -116,38 +116,7 @@
                     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
                     <td class="tbl-shp-sml tt" valign="top" align="left">
 
-                        <table border="0" cellspacing="0" cellpadding="0" style="position: relative; top: -2px;">
-                            <tbody>
-                            @php
-                                $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-                                $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-                                $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-                                $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-                                $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-                                $btnRight2 = 'img/bg/btn/btn-right2.gif';
-                            @endphp
-                            <tr height="21">
-                                <td width="19"><img id="left_1" src="{{ asset($group === 'character' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_1" align="center" style="background: url({{ asset($group === 'character' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
-                                    <a id="center_1" href="{{ route('character', ['group' => 'character']) }}" title="Персонаж" class="{{ $group === 'character' ? 'btn_2' : 'btn_1' }}">Персонаж</a>
-                                </td>
-                                <td width="19"><img id="right_1" src="{{ asset($group === 'character' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
-
-                                <td width="19"><img id="left_2" src="{{ asset($group === 'magic_skill' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($group === 'magic_skill' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
-                                    <a id="center_2" href="{{ route('magic_skill', ['group' => 'magic_skill']) }}" title="Книга заклинаний" class="{{ $group === 'magic_skill' ? 'btn_2' : 'btn_1' }}">Книга заклинаний</a>
-                                </td>
-                                <td width="19"><img id="right_2" src="{{ asset($group === 'magic_skill' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
-
-                                <td width="19"><img id="left_2" src="{{ asset($group === 'slots' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($group === 'slots' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
-                                    <a id="center_2" href="{{ route('slots', ['group' => 'slots']) }}" title="Слоты" class="{{ $group === 'slots' ? 'btn_2' : 'btn_1' }}">Слоты</a>
-                                </td>
-                                <td width="19"><img id="right_2" src="{{ asset($group === 'slots' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        @include('character.partials.tabs')
 
                     </td>
                     <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>

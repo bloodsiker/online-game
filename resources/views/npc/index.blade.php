@@ -392,6 +392,18 @@
     {{--    }--}}
     {{--    event.preventDefault();--}}
     {{--});--}}
+
+    @if($messageType === 'success' && $message)
+        try {
+            let experience = parseFloat('{{ $player->getPercentExp() }}');
+            let lvl = parseInt('{{ $player->lvl }}');
+            let hp = parseFloat('{{ $player->getPercentHp() }}');
+            let mp = parseFloat('{{ $player->getPercentMp() }}');
+            let money = parseInt('{{ $player->user->money }}');
+            let diamond = parseInt('{{ $player->user->diamond }}');
+            parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
+        } catch (e) {}
+    @endif
 </script>
 
 </body>

@@ -9,4 +9,5 @@ enum QuestRewardType: string
     case ITEM = 'item';
     case LOCATION_ACCESS = 'location_access';
     case CLAN_POINTS = 'clan_points';
+    case REPUTATION_POINTS = 'reputation_points';
 }

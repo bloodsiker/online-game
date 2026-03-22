@@ -83,6 +83,11 @@ class Quest extends Model
         return $this->hasMany(QuestClanProgress::class, 'quest_id');
     }
 
+    public function reputationTierQuests(): HasMany
+    {
+        return $this->hasMany(\App\Models\Reputation\ReputationTierQuest::class, 'quest_id');
+    }
+
     public function getTypeLabel(): string
     {
         return $this->type->label();

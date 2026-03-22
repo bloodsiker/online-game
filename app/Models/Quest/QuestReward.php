@@ -4,6 +4,7 @@ namespace App\Models\Quest;
 
 use App\Enums\QuestRewardType;
 use App\Models\Location\Location;
+use App\Models\Reputation\Reputation;
 use App\Models\Share\ShareItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ class QuestReward extends Model
 
     protected $casts = ['type' => QuestRewardType::class];
 
-    protected $fillable = ['quest_id', 'type', 'amount', 'share_item_id', 'location_id'];
+    protected $fillable = ['quest_id', 'type', 'amount', 'share_item_id', 'location_id', 'reputation_id'];
 
     public function quest(): BelongsTo
     {
@@ -30,5 +31,10 @@ class QuestReward extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function reputation(): BelongsTo
+    {
+        return $this->belongsTo(Reputation::class, 'reputation_id');
     }
 }
