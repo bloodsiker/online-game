@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\DTO\AttackResultDTO;
+use App\Enums\QuestPlayerStatus;
+use App\Enums\QuestType;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\Player;
+use App\Models\Quest\QuestClanProgress;
 
 class QuestProgressService
 {
@@ -12,6 +15,7 @@ class QuestProgressService
 
     public function progressKillAndCollect(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
+        // Personal quest progress
         foreach ($player->questsInProgress()->with('objectives.questObjective')->get() as $questPlayer) {
             foreach ($questPlayer->objectives as $playerObj) {
                 $qo = $playerObj->questObjective;
@@ -86,6 +90,91 @@ class QuestProgressService
 
                 $result->log($msg);
             }
+        }
+
+        // Clan quest progress (only for the member who accepted it)
+        $clanMembership = $player->user->clanMembership;
+        if (! $clanMembership) {
+            return;
+        }
+
+        $clanProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
+            ->where('user_id', $player->user_id)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->with('objectives.questObjective')
+            ->first();
+
+        if (! $clanProgress) {
+            return;
+        }
+
+        foreach ($clanProgress->objectives as $clanObj) {
+            $qo = $clanObj->questObjective;
+
+            if (! in_array($qo->type, ['kill', 'collect'])) {
+                continue;
+            }
+
+            if ($clanProgress->current_stage_id !== null && $qo->stage_id !== $clanProgress->current_stage_id) {
+                continue;
+            }
+
+            if ((int) $qo->target_id !== (int) $locationMonster->monster_id) {
+                continue;
+            }
+
+            if ($qo->map_id && (int) $qo->map_id !== (int) $locationMonster->location->map_id) {
+                continue;
+            }
+
+            if ($clanObj->amount >= $qo->required_amount) {
+                continue;
+            }
+
+            if ($qo->type === 'collect' && $qo->drop_chance !== null) {
+                $roll = mt_rand(0, 10000) / 100;
+                if ($roll > $qo->drop_chance) {
+                    continue;
+                }
+            }
+
+            $clanObj->increment('amount');
+            $clanObj->refresh();
+
+            if ($qo->type === 'collect' && $qo->share_item_id) {
+                $shareItem = $qo->collectItem;
+                if ($shareItem) {
+                    $this->backpackService->addItemByShareItem($player->user, $shareItem, 1);
+                }
+            }
+
+            $remaining = $qo->required_amount - $clanObj->amount;
+
+            if ($qo->type === 'collect') {
+                $itemName = $qo->collectItem?->name ?? $qo->description ?? 'предмет';
+                $msg = $remaining > 0
+                    ? sprintf(
+                        "<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>[Клан] <b style='color:#5a3e00;'>%s</b> получен! Осталось: <b>%s</b></span></p>",
+                        $itemName, $remaining
+                    )
+                    : sprintf(
+                        "<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>✅ [Клан] <b style='color:#5a3e00;'>%s</b> — все собраны!</span></p>",
+                        $itemName
+                    );
+            } else {
+                $monsterName = $locationMonster->monster->name;
+                $msg = $remaining > 0
+                    ? sprintf(
+                        "<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>[Клан] ⚔️ <b style='color:#5a3e00;'>%s</b> уничтожен! Осталось: <b>%s</b></span></p>",
+                        $monsterName, $remaining
+                    )
+                    : sprintf(
+                        "<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>✅ 🏰 [Клан] <b style='color:#5a3e00;'>%s</b> — все уничтожены!</span></p>",
+                        $monsterName
+                    );
+            }
+
+            $result->log($msg);
         }
     }
 }

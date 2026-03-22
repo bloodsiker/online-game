@@ -175,9 +175,7 @@
                                                 <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                             </td>
                                             <td align="center" class="tbl-usi_label-center">Этап квеста</td>
-                                            <td width="27"
-                                            ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
-                                            </td>
+                                            <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                                         </tr>
                                         </tbody>
                                     </table>
@@ -200,9 +198,26 @@
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
                                                 @endif
                                             </td>
-                                            <td class="redd2 b fs-13">{{ $quest->title }}</td>
+                                            <td class="redd2 b fs-13">
+                                                @if($quest->isClan()) [Клановый] @endif
+                                                {{ $quest->title }}
+                                            </td>
                                             <td align="right"></td>
                                         </tr>
+                                        @if($quest->isClan() && $inProgress)
+                                            <tr class="bg_l brd2-all fs-12">
+                                                <td width="1%">
+                                                    <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
+                                                </td>
+                                                <td class="b" colspan="2">
+                                                    <span class="brown">Квест принял:</span>
+                                                    <span class="greenn">{{ $clanProgress->user->name }}</span>
+                                                    @if(!(isset($isAcceptor) && $isAcceptor))
+                                                        <span style="color:#666; font-weight:normal;">— только он может его сдать</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endif
                                         <tr class=" fs-12">
                                             <td class="ajustify" colspan="3">
                                                 {!! $quest->description !!}
@@ -260,12 +275,37 @@
                                         @if(!$inProgress)
                                             <tr>
                                                 <td colspan="3" align="center">
-                                                    <span class="butt1 pointer">
-                                                        <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
-                                                    </span>
+                                                    @if($quest->isClan() && !($canAccept ?? true))
+                                                        <span style="color:#888; font-style:italic;">У вас уже есть активный клановый квест</span>
+                                                    @else
+                                                        <span class="butt1 pointer">
+                                                            <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                        </span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @elseif($canComplete)
+                                            @foreach($quest->rewards as $reward)
+                                                @php
+                                                    $rewardText = match($reward->type->value) {
+                                                        'exp'             => '+' . $reward->amount . ' опыта',
+                                                        'money'           => '+' . $reward->amount . ' монет',
+                                                        'item'            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        'location_access' => 'доступ к «' . ($reward->location?->name ?? 'локации') . '»',
+                                                        'clan_points'     => '+' . $reward->amount . ' клановых очков',
+                                                        default           => '',
+                                                    };
+                                                @endphp
+                                                <tr class="bg_l brd2-all fs-12">
+                                                    <td width="1%">
+                                                        <img src="{{ asset('img/icon/reward_icon_orange.png') }}" alt="">
+                                                    </td>
+                                                    <td class="b" colspan="2">
+                                                        <span class="brown">{{ $loop->first ? 'Награда:' : 'А также:' }}</span>
+                                                        <span class="greenn">{{ $rewardText }}</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                             <tr>
                                                 <td colspan="3" align="center">
                                                     <span class="butt1 pointer">
@@ -274,7 +314,6 @@
                                                 </td>
                                             </tr>
                                         @else
-                                            {{-- In progress, stage not complete: "Далее" just returns to NPC --}}
                                             <tr>
                                                 <td colspan="3" align="center">
                                                     <span class="butt1 pointer">

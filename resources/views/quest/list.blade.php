@@ -161,6 +161,7 @@
         'started'    => 'Взятые',
         'repeatable' => 'Повторяющиеся',
         'completed'  => 'Завершенные',
+        'clan'       => 'Клановые',
     ];
 @endphp
 
@@ -233,6 +234,137 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" align="left" style="padding: 6px 4px 6px 4px">
+                                    @php
+                                        function renderQuestReward($reward): string {
+                                            return match($reward->type) {
+                                                \App\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' опыта',
+                                                \App\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
+                                                \App\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                \App\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
+                                                \App\Enums\QuestRewardType::CLAN_POINTS     => '+' . $reward->amount . ' клановых очков',
+                                            };
+                                        }
+                                    @endphp
+
+                                    @if($tab === 'clan')
+                                        {{-- CLAN QUEST LIST --}}
+                                        <table class="coll w100 p6h p2v brd2-all">
+                                            <tbody>
+                                            @forelse($clanQuests as $cp)
+                                                <tr class="bg_l" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                    <td class="brd2-top" width="1">
+                                                        <img id="image_open_quest_{{ $cp->id }}" onclick="quest_folding.toggle({{ $cp->id }});"
+                                                             src="{{ asset('img/icon/qst_minus.gif') }}" width="9" height="9" border="0">
+                                                    </td>
+                                                    <td class="brd2-top b" onclick="quest_folding.toggle({{ $cp->id }});">
+                                                        {{ $cp->quest->title }}
+                                                        <span style="color:#777; font-weight:normal;">— взял: {{ $cp->user->name }}</span>
+                                                    </td>
+                                                    <td class="brd2-top" align="right">
+                                                        @if($cp->status === \App\Enums\QuestPlayerStatus::IN_PROGRESS)
+                                                            @if(auth()->id() === (int)$cp->clan->owner_id)
+                                                                <form id="clan-cancel-{{ $cp->id }}" method="POST" action="{{ route('quest.clan.cancel', $cp->id) }}" style="display:inline;">
+                                                                    @csrf
+                                                                    <b class="butt2 pointer">
+                                                                        <b><input value="Отменить" type="button" onclick="return top.systemConfirm('Вы действительно хотите отменить клановый квест?','Действие',false,function(){document.getElementById('clan-cancel-{{ $cp->id }}').submit();})"></b>
+                                                                    </b>
+                                                                </form>
+                                                            @else
+                                                                <span style="color:#c8990a;">В процессе</span>
+                                                            @endif
+                                                        @elseif($cp->status === \App\Enums\QuestPlayerStatus::COMPLETED)
+                                                            @if($cp->reset_at && now()->lt($cp->reset_at))
+                                                                <span style="color:#888;">Доступен через {{ $cp->reset_at->locale('ru')->diffForHumans(now(), true, false, 2) }}</span>
+                                                            @else
+                                                                <span style="color:#4a7a1e;">Выполнен</span>
+                                                            @endif
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                <tr class="bg_l" id="quest_{{ $cp->id }}">
+                                                    <td></td>
+                                                    <td colspan="2">
+                                                        <div class="ajustify b">{!! $cp->quest->description !!}</div>
+                                                        @php
+                                                            $stages = $cp->quest->stages;
+                                                            $hasStages = $stages->isNotEmpty();
+                                                            $isCompleted = $cp->status === \App\Enums\QuestPlayerStatus::COMPLETED;
+                                                        @endphp
+                                                        @if($hasStages)
+                                                            @foreach($stages as $stage)
+                                                                @php
+                                                                    $isDone    = $isCompleted || ($cp->current_stage_id !== null && $stage->order < $cp->currentStage?->order);
+                                                                    $isCurrent = !$isCompleted && $stage->id === $cp->current_stage_id;
+                                                                @endphp
+                                                                @if(!$isDone && !$isCurrent) @continue @endif
+                                                                <div style="margin-top:4px; {{ $isDone ? 'color:#999!important;' : 'color:#461C0B;' }} font-weight:bold;">
+                                                                    @if($isDone) ✓ @endif
+                                                                    Этап {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}
+                                                                </div>
+                                                                @php $stageObjs = $cp->objectives->filter(fn($o) => $o->questObjective->stage_id === $stage->id); @endphp
+                                                                @foreach($stageObjs as $obj)
+                                                                    @php $done = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
+                                                                    <div class="b" style="{{ $isDone ? 'color:#999;' : 'color:#8B0000;' }} margin-left:10px;">
+                                                                        {{ $obj->questObjective->description }} ({{ $done }}/{{ $obj->questObjective->required_amount }})
+                                                                    </div>
+                                                                @endforeach
+                                                            @endforeach
+                                                        @else
+                                                            @php $stageObjectives = $cp->currentStageObjectives(); @endphp
+                                                            @foreach($stageObjectives as $obj)
+                                                                @php $done = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
+                                                                <div class="redd b">
+                                                                    {{ $obj->questObjective->description }} ({{ $done }}/{{ $obj->questObjective->required_amount }})
+                                                                </div>
+                                                            @endforeach
+                                                        @endif
+                                                        @if($isCompleted && $cp->quest->rewards->isNotEmpty())
+                                                            <table class="coll" style="margin-top:3px;">
+                                                                <tbody>
+                                                                @foreach($cp->quest->rewards as $reward)
+                                                                    <tr class="b" style="color:#339900!important;">
+                                                                        <td nowrap style="color:#339900!important;">{!! $loop->first ? 'Награда:' : '&nbsp;' !!}</td>
+                                                                        <td style="color:#339900!important;">{{ renderQuestReward($reward) }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="3" style="padding:8px; text-align:center; color:#888;">
+                                                        Нет клановых квестов
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+
+                                        @if($clanQuests instanceof \Illuminate\Pagination\LengthAwarePaginator && $clanQuests->hasPages())
+                                            <div class="pagination-wrap">
+                                                @if($clanQuests->onFirstPage())
+                                                    <span class="disabled">&laquo;</span>
+                                                @else
+                                                    <a href="{{ $clanQuests->previousPageUrl() }}">&laquo;</a>
+                                                @endif
+                                                @foreach($clanQuests->getUrlRange(1, $clanQuests->lastPage()) as $page => $url)
+                                                    @if($page == $clanQuests->currentPage())
+                                                        <span class="current">{{ $page }}</span>
+                                                    @else
+                                                        <a href="{{ $url }}">{{ $page }}</a>
+                                                    @endif
+                                                @endforeach
+                                                @if($clanQuests->hasMorePages())
+                                                    <a href="{{ $clanQuests->nextPageUrl() }}">&raquo;</a>
+                                                @else
+                                                    <span class="disabled">&raquo;</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @else
+                                    {{-- PERSONAL QUEST LIST --}}
                                     <table class="coll w100 p6h p2v brd2-all">
                                         <tbody>
                                         @forelse($quests as $quest)
@@ -322,16 +454,7 @@
                                                             @foreach($quest->quest->rewards as $reward)
                                                                 <tr class="b" style="color: #339900 !important;">
                                                                     <td nowrap="" style="color: #339900 !important;">{!! $loop->first ? 'Награда:' : '&nbsp;' !!}</td>
-                                                                    <td style="color: #339900 !important;">
-                                                                        @php
-                                                                            echo match($reward->type) {
-                                                                                \App\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' опыта',
-                                                                                \App\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
-                                                                                \App\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
-                                                                                \App\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
-                                                                            };
-                                                                        @endphp
-                                                                    </td>
+                                                                    <td style="color: #339900 !important;">{{ renderQuestReward($reward) }}</td>
                                                                 </tr>
                                                             @endforeach
                                                             </tbody>
@@ -350,7 +473,7 @@
                                         </tbody>
                                     </table>
 
-                                    @if($quests->hasPages())
+                                    @if($quests instanceof \Illuminate\Pagination\LengthAwarePaginator && $quests->hasPages())
                                         <div class="pagination-wrap">
                                             @if($quests->onFirstPage())
                                                 <span class="disabled">&laquo;</span>
@@ -372,6 +495,7 @@
                                                 <span class="disabled">&raquo;</span>
                                             @endif
                                         </div>
+                                    @endif
                                     @endif
                                 </td>
                                 <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -396,6 +520,16 @@
 <script type="text/javascript" src="{{ asset('js/folding.js') }}" ></script>
 
 <script>
+    @if($tab === 'clan')
+    var clanQuestIds = [{{ $clanQuests instanceof \Illuminate\Pagination\AbstractPaginator ? $clanQuests->pluck('id')->implode(',') : '' }}];
+    var quest_folding = new ListFolding({
+        id_btn:             'image_open_quest_',
+        id_expanded:        'quest_',
+        cookie_save_state:  'clan_quests_',
+        init_state:         'expanded',
+        id_list:            clanQuestIds
+    });
+    @else
     var quest_folding = new ListFolding({
         id_btn:             'image_open_quest_',
         id_expanded:        'quest_',
@@ -403,6 +537,7 @@
         init_state:			'expanded',
         id_list:            [{{ $questIds }}]
     });
+    @endif
     quest_folding.refresh();
 </script>
 

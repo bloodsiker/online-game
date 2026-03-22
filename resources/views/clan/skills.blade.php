@@ -6,7 +6,7 @@
     <title>Навыки клана</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        * { font-family: Tahoma; font-size: 11px; }
+        * { font-family: Tahoma; font-size: 12px; }
         html { height: 100%; }
         body { height: 100%; margin: 0; color: #000; }
         a, a:link, a:visited, a:active { text-decoration: none; }

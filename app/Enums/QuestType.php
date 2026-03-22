@@ -7,6 +7,7 @@ enum QuestType: string
     case ONE_TIME = 'one_time';
     case REPEATABLE = 'repeatable';
     case MAIN = 'main';
+    case CLAN = 'clan';
 
     public function label(): string
     {
@@ -14,6 +15,7 @@ enum QuestType: string
             self::ONE_TIME => 'Одноразовый',
             self::REPEATABLE => 'Повторяемый',
             self::MAIN => 'Главный',
+            self::CLAN => 'Клановый',
         };
     }
 
@@ -30,5 +32,10 @@ enum QuestType: string
     public function isOneTime(): bool
     {
         return $this === self::ONE_TIME;
+    }
+
+    public function isClan(): bool
+    {
+        return $this === self::CLAN;
     }
 }

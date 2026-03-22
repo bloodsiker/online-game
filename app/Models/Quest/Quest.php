@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Quest extends Model
 {
@@ -79,6 +78,11 @@ class Quest extends Model
         return $this->hasMany(QuestReward::class, 'quest_id');
     }
 
+    public function clanProgress(): HasMany
+    {
+        return $this->hasMany(QuestClanProgress::class, 'quest_id');
+    }
+
     public function getTypeLabel(): string
     {
         return $this->type->label();
@@ -97,6 +101,11 @@ class Quest extends Model
     public function isMain(): bool
     {
         return $this->type->isMain();
+    }
+
+    public function isClan(): bool
+    {
+        return $this->type->isClan();
     }
 
     public function scopeIsActive($query)

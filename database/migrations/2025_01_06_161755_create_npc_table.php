@@ -28,7 +28,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->enum('type', ['one_time', 'repeatable', 'main']);
+            $table->enum('type', ['one_time', 'repeatable', 'main', 'clan']);
             $table->foreignId('start_npc_id')->constrained('npcs');
             $table->foreignId('complete_npc_id')->constrained('npcs');
             $table->foreignId('parent_quest_id')->nullable()->constrained('quests');
@@ -54,7 +54,7 @@ return new class extends Migration
         Schema::create('quest_rewards', function (Blueprint $table) {
             $table->id();
             $table->foreignId('quest_id')->constrained('quests')->cascadeOnDelete();
-            $table->enum('type', ['item', 'money', 'exp', 'reputation', 'location_access']);
+            $table->enum('type', ['item', 'money', 'exp', 'reputation', 'location_access', 'clan_points']);
             $table->integer('amount');
             $table->foreignId('share_item_id')->nullable()->constrained('share_items');
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();

@@ -14,7 +14,7 @@
             margin: 0;
             color: #000;
             font-family: Tahoma;
-            font-size: 11px;
+            font-size: 12px;
         }
         a, a:link, a:visited, a:active {
             text-decoration: none;

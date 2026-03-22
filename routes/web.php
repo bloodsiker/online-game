@@ -142,6 +142,7 @@ Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invit
 Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
 Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
 Route::get('/clan/logs', [ClanController::class, 'logs'])->name('clan.logs');
+Route::get('/clan/quests', [ClanController::class, 'quests'])->name('clan.quests');
 Route::post('/clan/information/description', [ClanController::class, 'saveDescription'])->name('clan.information.save-description');
 Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name('clan.information.save-news');
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
@@ -159,6 +160,7 @@ Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
 
 Route::get('/quest/{id}/take', [QuestController::class, 'take'])->name('quest.take');
 Route::get('/quest/{id}/complete', [QuestController::class, 'complete'])->name('quest.complete');
+Route::post('/quest/clan/{id}/cancel', [QuestController::class, 'cancelClanQuest'])->name('quest.clan.cancel');
 Route::get('/quest/{id}', [QuestController::class, 'quest'])->name('quest');
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
 

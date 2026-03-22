@@ -236,7 +236,7 @@
                                                 <td class="brd2-top brd2-bt" width="1%">
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
                                                 </td>
-                                                <td class="brd2-top brd2-bt">{{ $quest->title }}</td>
+                                                <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif{{ $quest->title }}</td>
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     <b class="butt2 pointer"><b>
                                                         <input value="Взять" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
@@ -251,7 +251,7 @@
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="opacity:0.45;">
                                                 </td>
                                                 <td class="brd2-top brd2-bt" style="color:#888;">
-                                                    {{ $cooldown->quest->title }}
+                                                    @if($cooldown->quest->isClan())[Клан] @endif{{ $cooldown->quest->title }}
                                                     <br><small style="color:#999;">Повторный проход через: {{ $cooldown->diff }}</small>
                                                 </td>
                                                 <td class="brd2-top brd2-bt" align="right">
@@ -268,7 +268,7 @@
                                                     <img src="{{ asset($questInProgress->canComplete ? 'img/icon/qst_start_m.gif' : 'img/icon/qst_start_ro.gif') }}" width="46" height="28">
                                                 </td>
                                                 <td class="brd2-top brd2-bt">
-                                                    {{ $questInProgress->title }}
+                                                    @if($questInProgress->isClan())[Клан] @endif{{ $questInProgress->title }}
                                                     @php
                                                         $stage      = $questInProgress->currentStage;
                                                         $objectives = $stage
@@ -290,7 +290,7 @@
                                                     @if($questInProgress->canComplete)
                                                         <b class="butt2 pointer"><b>
                                                             <input value="Сдать" type="button"
-                                                                   onclick="event.stopPropagation();if(document._submit)return false;document._submit=true;location.href='{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';"
+                                                                   onclick="event.stopPropagation();location.href='{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';"
                                                                    style="width:60px">
                                                         </b></b>
                                                     @else

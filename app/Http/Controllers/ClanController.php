@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\ClanLogAction;
 use App\Enums\ClanPermission;
+use App\Enums\QuestPlayerStatus;
 use App\Http\Requests\Clan\CreateClanRequest;
 use App\Models\Clan\ClanJoinRequest;
 use App\Models\Clan\ClanLog;
 use App\Models\Clan\ClanRole;
+use App\Models\Quest\Quest;
+use App\Models\Quest\QuestClanProgress;
 use App\Models\User;
 use App\Services\ClanService;
 use App\Services\ClanSkillService;
@@ -25,9 +28,18 @@ class ClanController extends Controller
 
     public function index()
     {
-        $inClan = Auth::user()->clanMembership !== null;
+        $user           = Auth::user();
+        $inClan         = $user->clanMembership !== null;
+        $activeQuests   = collect();
+        $isLeader       = false;
 
-        return view('clan.index', compact('inClan'));
+        if ($inClan) {
+            $clan         = $user->clanMembership->clan;
+            $activeQuests = $clan->activeQuestProgress;
+            $isLeader     = (int) $clan->owner_id === $user->id;
+        }
+
+        return view('clan.index', compact('inClan', 'activeQuests', 'isLeader'));
     }
 
     public function member()
@@ -320,6 +332,42 @@ class ClanController extends Controller
         }
 
         return redirect()->route('clan.information');
+    }
+
+    public function quests(Request $request)
+    {
+        $user       = Auth::user();
+        $membership = $user->clanMembership;
+
+        if ($membership === null) {
+            session()->flash('message', 'Вы не состоите в клане.');
+            return redirect()->route('clan');
+        }
+
+        $clan     = $membership->clan;
+        $isLeader = (int) $clan->owner_id === $user->id;
+
+        // All active quests with full progress
+        $activeQuests = QuestClanProgress::where('clan_id', $clan->id)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->with('objectives.questObjective', 'quest.rewards', 'user')
+            ->get();
+
+        // All available clan quests (to show what can be taken)
+        $availableQuests = Quest::where('type', 'clan')
+            ->where('is_active', true)
+            ->with('objectives', 'rewards')
+            ->get();
+
+        // Recent history (last 20 completed/cancelled)
+        $history = QuestClanProgress::where('clan_id', $clan->id)
+            ->where('status', QuestPlayerStatus::COMPLETED)
+            ->with('quest', 'user')
+            ->orderByDesc('completed_at')
+            ->limit(20)
+            ->get();
+
+        return view('clan.quests', compact('clan', 'isLeader', 'activeQuests', 'availableQuests', 'history', 'membership'));
     }
 
     public function logs(Request $request)

@@ -6,6 +6,7 @@ use App\Enums\QuestPlayerStatus;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Npc;
 use App\Models\Quest\Quest;
+use App\Models\Quest\QuestClanProgress;
 use App\Models\Quest\QuestPlayer;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,11 +53,65 @@ class NpcController extends Controller
                 'diff'     => $qp->reset_at->locale('ru')->diffForHumans(now(), true, false, 2),
             ]);
 
+        // Clan quest exclusions and cooldowns
+        $clanMembership      = $user->clanMembership;
+        $clanQuestExcludeIds = [];
+        $clanQuestsInProgress = collect();
+
+        if ($clanMembership) {
+            // Quests starting at this NPC: used for exclusion from available list and cooldown display
+            $clanProgressAtNpc = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
+                ->whereHas('quest', fn ($q) => $q->where('start_npc_id', $npc->id)->isActive())
+                ->with('quest')
+                ->get();
+
+            foreach ($clanProgressAtNpc as $cp) {
+                if ($cp->status === QuestPlayerStatus::IN_PROGRESS) {
+                    $clanQuestExcludeIds[] = $cp->quest_id;
+                } elseif ($cp->status === QuestPlayerStatus::COMPLETED
+                    && $cp->reset_at
+                    && now()->lt($cp->reset_at)
+                ) {
+                    $clanQuestExcludeIds[] = $cp->quest_id;
+                    $questsOnCooldown->push((object) [
+                        'quest'    => $cp->quest,
+                        'reset_at' => $cp->reset_at,
+                        'diff'     => $cp->reset_at->locale('ru')->diffForHumans(now(), true, false, 2),
+                    ]);
+                }
+            }
+
+            // In-progress clan quests accepted by this user, completable at this NPC
+            $clanQuestsInProgress = QuestClanProgress::where('user_id', $user->id)
+                ->where('clan_id', $clanMembership->clan_id)
+                ->where('status', QuestPlayerStatus::IN_PROGRESS)
+                ->with('quest', 'currentStage.objectives')
+                ->get()
+                ->filter(function (QuestClanProgress $cp) use ($npc) {
+                    if ($cp->current_stage_id !== null && $cp->currentStage) {
+                        return (int) $cp->currentStage->complete_npc_id === (int) $npc->id;
+                    }
+
+                    return (int) $cp->quest->complete_npc_id === (int) $npc->id;
+                })
+                ->map(function (QuestClanProgress $cp) {
+                    $cp->quest->questPlayer  = $cp;
+                    $cp->quest->canComplete  = $cp->isCurrentStageComplete();
+                    $cp->quest->currentStage = $cp->currentStage;
+
+                    return $cp->quest;
+                })
+                ->values();
+        }
+
         // Available quests at this NPC (started here)
-        $excludeIds = array_diff(
-            array_merge($completedQuestIds, $inProgressQuestIds),
-            $repeatableReadyIds
-        );
+        $excludeIds = array_unique(array_merge(
+            array_diff(
+                array_merge($completedQuestIds, $inProgressQuestIds),
+                $repeatableReadyIds
+            ),
+            $clanQuestExcludeIds
+        ));
 
         $quests = Quest::whereNotIn('id', $excludeIds)
             ->isActive()
@@ -65,6 +120,7 @@ class NpcController extends Controller
                 $query->whereNull('after_quest_id')
                     ->orWhereIn('after_quest_id', $completedQuestIds);
             })
+            ->when(! $clanMembership, fn ($q) => $q->where('type', '!=', 'clan'))
             ->get();
 
         // In-progress quests completable at this NPC (non-staged OR current stage belongs to this NPC)
@@ -76,12 +132,10 @@ class NpcController extends Controller
 
         $questsInProgress = $inProgressQuestPlayers
             ->filter(function (QuestPlayer $qp) use ($npc) {
-                // Staged quest: check if current stage belongs to this NPC
                 if ($qp->current_stage_id !== null && $qp->currentStage) {
                     return (int) $qp->currentStage->complete_npc_id === (int) $npc->id;
                 }
 
-                // Non-staged quest: use quest's complete_npc_id
                 return (int) $qp->quest->complete_npc_id === (int) $npc->id;
             })
             ->map(function (QuestPlayer $qp) {
@@ -91,7 +145,8 @@ class NpcController extends Controller
 
                 return $qp->quest;
             })
-            ->values();
+            ->values()
+            ->merge($clanQuestsInProgress);
 
         $message     = session('quest_error') ?? session('quest_success');
         $messageType = session()->has('quest_success') ? 'success' : 'error';

@@ -8,4 +8,5 @@ enum QuestRewardType: string
     case MONEY = 'money';
     case ITEM = 'item';
     case LOCATION_ACCESS = 'location_access';
+    case CLAN_POINTS = 'clan_points';
 }

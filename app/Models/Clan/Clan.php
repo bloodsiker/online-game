@@ -2,12 +2,13 @@
 
 namespace App\Models\Clan;
 
+use App\Enums\QuestPlayerStatus;
+use App\Models\Quest\QuestClanProgress;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Clan extends Model
 {
@@ -39,5 +40,12 @@ class Clan extends Model
     public function learnedSkills(): HasMany
     {
         return $this->hasMany(ClanLearnedSkill::class);
+    }
+
+    public function activeQuestProgress(): HasMany
+    {
+        return $this->hasMany(QuestClanProgress::class)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->with('objectives.questObjective', 'quest', 'user');
     }
 }
