@@ -158,6 +158,7 @@ Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
 
 Route::get('/quest/{id}/take', [QuestController::class, 'take'])->name('quest.take');
 Route::get('/quest/{id}/complete', [QuestController::class, 'complete'])->name('quest.complete');
+Route::post('/quest/{id}/cancel', [QuestController::class, 'cancelQuest'])->name('quest.cancel');
 Route::post('/quest/clan/{id}/cancel', [QuestController::class, 'cancelClanQuest'])->name('quest.clan.cancel');
 Route::get('/quest/{id}', [QuestController::class, 'quest'])->name('quest');
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
@@ -165,6 +166,7 @@ Route::get('/quests', [QuestController::class, 'list'])->name('quests');
 Route::get('/reputations', [ReputationController::class, 'list'])->name('reputation.list');
 Route::get('/reputation/{id}', [ReputationController::class, 'index'])->name('reputation.index');
 Route::post('/reputation/{id}/take', [ReputationController::class, 'take'])->name('reputation.take');
+Route::post('/reputation/{id}/decline', [ReputationController::class, 'decline'])->name('reputation.decline');
 Route::get('/reputation/{id}/shop', [ReputationController::class, 'shop'])->name('reputation.shop');
 Route::post('/reputation/{id}/shop/{itemId}/buy', [ReputationController::class, 'buy'])->name('reputation.buy');
 

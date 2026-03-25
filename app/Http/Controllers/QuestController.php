@@ -19,7 +19,9 @@ use App\Models\Quest\QuestStage;
 use App\Models\Share\ShareItem;
 use App\Services\BackpackService;
 use App\Services\ChatService;
+use App\Models\Reputation\ReputationTierQuest;
 use App\Services\ReputationService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +278,46 @@ class QuestController extends Controller
         $this->chatService->sendQuestToUser($user, "Для вашего клана начался квест <b>«{$quest->title}»</b>. Удачи!");
 
         return redirect()->route('npc', ['id' => $npcId]);
+    }
+
+    public function cancelQuest(int $id): RedirectResponse
+    {
+        $player = Auth::user()->player;
+
+        $questPlayer = QuestPlayer::where('player_id', $player->id)
+            ->where('id', $id)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->with('quest.objectives')
+            ->firstOrFail();
+
+        DB::transaction(function () use ($questPlayer, $player) {
+            foreach ($questPlayer->quest->objectives->where('type', 'deliver') as $objective) {
+                $shareItem = ShareItem::find($objective->target_id);
+                if ($shareItem) {
+                    $this->backpackService->removeItemByShareItem($player->user, $shareItem, $objective->required_amount);
+                }
+            }
+
+            $questPlayer->objectives()->delete();
+            $questPlayer->delete();
+        });
+
+        if ($questPlayer->quest->type === QuestType::REPUTATION) {
+            $tierQuest = ReputationTierQuest::where('quest_id', $questPlayer->quest->id)
+                ->with('tier')
+                ->first();
+
+            if ($tierQuest) {
+                $reputation = $tierQuest->tier->reputation;
+                if ($reputation) {
+                    $pr = $this->reputationService->getOrCreate($player, $reputation);
+                    $pr->update(['last_completed_at' => now()]);
+                    session()->forget('rep_offer_' . $player->id . '_' . $reputation->id);
+                }
+            }
+        }
+
+        return redirect()->route('quests')->with('quest_success', 'Квест отменён.');
     }
 
     public function cancelClanQuest($id, Request $request)

@@ -180,8 +180,10 @@ class ChatService
             }
         };
 
-        $systemClause = function ($q) {
-            $q->where('channel', ChatChannel::System->value);
+        $thirtyMinutesAgo = Carbon::now()->subMinutes(30);
+        $systemClause = function ($q) use ($thirtyMinutesAgo) {
+            $q->where('channel', ChatChannel::System->value)
+              ->where('created_at', '>=', $thirtyMinutesAgo);
         };
 
         switch ($channel) {

@@ -96,8 +96,24 @@ class ReputationController extends Controller
                 ->with('rep_error', 'Нет доступных заданий для вашего уровня репутации.');
         }
 
+        session()->forget('rep_offer_' . $player->id . '_' . $id);
+
         return redirect()->route('reputation.index', $id)
             ->with('rep_success', 'Задание получено!');
+    }
+
+    public function decline(int $id, Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        $player = $user->player;
+
+        $reputation = Reputation::findOrFail($id);
+        $pr = $this->reputationService->getOrCreate($player, $reputation);
+        $pr->update(['last_completed_at' => now()]);
+
+        session()->forget('rep_offer_' . $player->id . '_' . $id);
+
+        return redirect()->route('npc', $request->integer('npc'));
     }
 
     public function shop(int $id): View|RedirectResponse

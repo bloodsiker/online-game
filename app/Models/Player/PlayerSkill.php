@@ -11,15 +11,13 @@ class PlayerSkill extends Model
 {
     use HasFactory;
 
-    public const BASE_EXPERIENCE = 1000;
-    public const GROW_FACTOR = 1.5;
-
     protected $table = 'player_skills';
 
     protected $attributes = [
-        'lvl' => 1,
-        'exp' => 0,
-        'exp_up' => self::BASE_EXPERIENCE,
+        'lvl'      => 1,
+        'exp'      => 0,
+        'exp_up'   => 1000,
+        'exp_diff' => 1000,
     ];
 
     public function player(): BelongsTo

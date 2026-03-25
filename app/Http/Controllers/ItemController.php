@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
+use App\Services\HotbarService;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;
 use App\Models\Item\ItemOnLocation;
@@ -15,6 +17,10 @@ use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller
 {
+    public function __construct(
+        private readonly HotbarService $hotbarService,
+    ) {}
+
     public function pickUp(int $id)
     {
         $user = Auth::user();
@@ -52,27 +58,34 @@ class ItemController extends Controller
         return view('item.pickup_items', compact('location', 'message', 'itemsOnLocation'));
     }
 
-    public function dropItem(Request $request, int $id)
+    public function dropItem(Request $request, int $id): \Illuminate\Http\RedirectResponse
     {
-        $user = Auth::user();
+        if ($request->integer('c') !== 1) {
+            return redirect()->route('backpack');
+        }
+
+        $user     = Auth::user();
+        $item     = Item::find($id);
         $location = $user->currentLocation;
 
-        $item = Item::find($id);
-        $droppedItem = false;
-
-        if ($item instanceof Item && $request->has('c') && $request->integer('c') === 1) {
-            $request->query->remove('c');
+        if ($item instanceof Item) {
             $backpackItem = Backpack::where(['user_id' => $user->id, 'item_id' => $item->id])->first();
 
             if ($backpackItem instanceof Backpack) {
-                $backpackItem->delete();
-                $location->itemsOnLocation()->attach($item->id, ['count' => $backpackItem->count]);
+                $qty = max(1, min($request->integer('qty', $backpackItem->count), $backpackItem->count));
 
-                $droppedItem = true;
+                if ($qty >= $backpackItem->count) {
+                    $backpackItem->delete();
+                } else {
+                    $backpackItem->count -= $qty;
+                    $backpackItem->save();
+                }
+
+                $location->itemsOnLocation()->attach($item->id, ['count' => $qty]);
             }
         }
 
-        return view('item.drop', compact('item', 'droppedItem'));
+        return redirect()->route('backpack');
     }
 
     public function handOver(int $id)
@@ -140,56 +153,95 @@ class ItemController extends Controller
     /**
      * Одеть вещь
      */
-    public function putOn(Request $request, int $id)
+    public function putOn(Request $request, int $id): \Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
-        $itemInventory = Backpack::where('item_id', $id)->first();
-        if ($itemInventory->equipped === 0) {
-            $playerEquip = $user->player->playerEquip;
+        $itemInventory = Backpack::where('item_id', $id)->where('user_id', $user->id)->first();
 
-            $typeItem = $itemInventory->item->itemInfo->type;
-            $slot = $itemInventory->item->itemInfo->slot;
+        if (!$itemInventory || $itemInventory->equipped === 1) {
+            return redirect()->back();
+        }
 
-            if ($slot === 'hand') {
-                if ($typeItem === 'weapon' && $playerEquip->hand_left && $playerEquip->hand_right) {
-                    session()->flash('message', 'Слот занят');
-                    return redirect()->back();
-                }
+        $playerEquip = $user->player->playerEquip;
+        $typeItem    = $itemInventory->item->itemInfo->type; // ShareItemType enum
+        $slot        = $itemInventory->item->itemInfo->slot; // string
+        $itemId      = $itemInventory->item->id;
 
-                if ($typeItem === 'shield' && $playerEquip->hand_right) {
-                    session()->flash('message', 'Слот занят');
-                    return redirect()->back();
-                }
-
-                if (!$playerEquip->hand_left && $typeItem === 'weapon') {
-                    $playerEquip->hand_left = $itemInventory->item->id;
-                    $playerEquip->save();
-
-                    $itemInventory->equipped = 1;
-                    $itemInventory->save();
-                }
-
-                if (!$playerEquip->hand_right && $playerEquip->hand_left !== $id && in_array($typeItem, ['weapon', 'shield'])) {
-                    $playerEquip->hand_right = $itemInventory->item->id;
-                    $playerEquip->save();
-
-                    $itemInventory->equipped = 1;
-                    $itemInventory->save();
-                }
+        if ($slot === ShareItemSlot::HAND) {
+            if ($typeItem === ShareItemType::WEAPON && $playerEquip->hand_left && $playerEquip->hand_right) {
+                session()->flash('message', 'Слот занят');
+                return redirect()->back();
             }
 
-            if (in_array($slot, ['helmet', 'armor', 'chain_armor', 'gloves', 'shoes', 'cloak'], true)) {
-                if ($typeItem === 'armor' && $playerEquip->$slot) {
-                    session()->flash('message', 'Слот занят');
-                    return redirect()->back();
-                }
+            if ($typeItem === ShareItemType::SHIELD && $playerEquip->hand_right) {
+                session()->flash('message', 'Слот занят');
+                return redirect()->back();
+            }
 
-                $playerEquip->$slot = $itemInventory->item->id;
+            if (!$playerEquip->hand_left && $typeItem === ShareItemType::WEAPON) {
+                $playerEquip->hand_left = $itemId;
                 $playerEquip->save();
-
+                $itemInventory->equipped = 1;
+                $itemInventory->save();
+            } elseif (!$playerEquip->hand_right && $playerEquip->hand_left !== $itemId
+                && in_array($typeItem, [ShareItemType::WEAPON, ShareItemType::SHIELD], true)) {
+                $playerEquip->hand_right = $itemId;
+                $playerEquip->save();
                 $itemInventory->equipped = 1;
                 $itemInventory->save();
             }
+
+            return redirect()->back();
+        }
+
+        if (in_array($slot, ShareItemSlot::armorSlots(), true)) {
+            $slotName = $slot->value;
+            if ($playerEquip->$slotName) {
+                session()->flash('message', 'Слот занят');
+                return redirect()->back();
+            }
+
+            $playerEquip->$slotName = $itemId;
+            $playerEquip->save();
+            $itemInventory->equipped = 1;
+            $itemInventory->save();
+
+            return redirect()->back();
+        }
+
+        if ($slot === ShareItemSlot::BELT && $typeItem === ShareItemType::BELT) {
+            if (!$playerEquip->belt_first) {
+                $playerEquip->belt_first = $itemId;
+            } elseif (!$playerEquip->belt_second) {
+                $playerEquip->belt_second = $itemId;
+            } else {
+                session()->flash('message', 'Слоты для пояса заняты');
+                return redirect()->back();
+            }
+
+            $playerEquip->save();
+            $itemInventory->equipped = 1;
+            $itemInventory->save();
+
+            session()->flash('hotbar_refresh', true);
+            return redirect()->back();
+        }
+
+        if ($slot === ShareItemSlot::BAG && $typeItem === ShareItemType::BAG) {
+            if (!$playerEquip->bag_first) {
+                $playerEquip->bag_first = $itemId;
+            } elseif (!$playerEquip->bag_second) {
+                $playerEquip->bag_second = $itemId;
+            } else {
+                session()->flash('message', 'Слоты для сумки заняты');
+                return redirect()->back();
+            }
+
+            $playerEquip->save();
+            $itemInventory->equipped = 1;
+            $itemInventory->save();
+
+            return redirect()->back();
         }
 
         return redirect()->back();
@@ -198,41 +250,75 @@ class ItemController extends Controller
     /**
      * Снять вещь
      */
-    public function putOff(Request $request, int $id)
+    public function putOff(Request $request, int $id): \Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
-        $itemInventory = Backpack::where('item_id', $id)->first();
-        if ($itemInventory->equipped === 1) {
-            $playerEquip = $user->player->playerEquip;
-            $slot = $itemInventory->item->itemInfo->slot;
+        $itemInventory = Backpack::where('item_id', $id)->where('user_id', $user->id)->first();
 
-            if ($slot === 'hand') {
-                if ($playerEquip->hand_left === $id) {
-                    $playerEquip->hand_left = null;
-                    $playerEquip->save();
+        if (!$itemInventory || $itemInventory->equipped === 0) {
+            return redirect()->back();
+        }
 
-                    $itemInventory->equipped = 0;
-                    $itemInventory->save();
-                }
+        $playerEquip = $user->player->playerEquip;
+        $slot        = $itemInventory->item->itemInfo->slot;
+        $itemId      = $itemInventory->item->id;
 
-                if ($playerEquip->hand_right === $id) {
-                    $playerEquip->hand_right = null;
-                    $playerEquip->save();
-
-                    $itemInventory->equipped = 0;
-                    $itemInventory->save();
-                }
+        if ($slot === ShareItemSlot::HAND) {
+            if ($playerEquip->hand_left === $itemId) {
+                $playerEquip->hand_left = null;
+                $playerEquip->save();
+                $itemInventory->equipped = 0;
+                $itemInventory->save();
+            } elseif ($playerEquip->hand_right === $itemId) {
+                $playerEquip->hand_right = null;
+                $playerEquip->save();
+                $itemInventory->equipped = 0;
+                $itemInventory->save();
             }
 
-            if (in_array($slot, ['helmet', 'armor', 'chain_armor', 'gloves', 'shoes', 'cloak'], true)) {
-                if ($playerEquip->$slot === $id) {
-                    $playerEquip->$slot = null;
-                    $playerEquip->save();
+            return redirect()->back();
+        }
 
-                    $itemInventory->equipped = 0;
-                    $itemInventory->save();
-                }
+        if (in_array($slot, ShareItemSlot::armorSlots(), true)) {
+            $slotName = $slot->value;
+            if ($playerEquip->$slotName === $itemId) {
+                $playerEquip->$slotName = null;
+                $playerEquip->save();
+                $itemInventory->equipped = 0;
+                $itemInventory->save();
             }
+
+            return redirect()->back();
+        }
+
+        if ($slot === ShareItemSlot::BELT) {
+            if ($playerEquip->belt_first === $itemId) {
+                $playerEquip->belt_first = null;
+            } elseif ($playerEquip->belt_second === $itemId) {
+                $playerEquip->belt_second = null;
+            }
+            $playerEquip->save();
+            $itemInventory->equipped = 0;
+            $itemInventory->save();
+
+            // Удаляем слоты хотбара, которые вышли за новый лимит
+            $this->hotbarService->trimExcessSlots($user->player);
+
+            session()->flash('hotbar_refresh', true);
+            return redirect()->back();
+        }
+
+        if ($slot === ShareItemSlot::BAG) {
+            if ($playerEquip->bag_first === $itemId) {
+                $playerEquip->bag_first = null;
+            } elseif ($playerEquip->bag_second === $itemId) {
+                $playerEquip->bag_second = null;
+            }
+            $playerEquip->save();
+            $itemInventory->equipped = 0;
+            $itemInventory->save();
+
+            return redirect()->back();
         }
 
         return redirect()->back();

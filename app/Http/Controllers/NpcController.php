@@ -146,9 +146,9 @@ class NpcController extends Controller
             if (! $this->reputationService->canTakeQuest($player, $reputation)) {
                 $cooldownDiff = $this->reputationService->getCooldownDiff($player, $reputation);
                 if ($cooldownDiff) {
-                    $repQuest = $tier->quests->first()->quest;
                     $questsOnCooldown->push((object) [
-                        'quest' => $repQuest,
+                        'quest' => null,
+                        'label' => $reputation->name,
                         'reset_at' => null,
                         'diff' => $cooldownDiff,
                     ]);
@@ -157,7 +157,20 @@ class NpcController extends Controller
                 continue;
             }
 
-            $randomQuest = $tier->quests->pluck('quest')->filter()->random();
+            $sessionKey = 'rep_offer_' . $player->id . '_' . $reputation->id;
+            $questCollection = $tier->quests->pluck('quest')->filter();
+
+            $offeredQuestId = session($sessionKey);
+            $randomQuest = $offeredQuestId
+                ? $questCollection->firstWhere('id', $offeredQuestId)
+                : null;
+
+            if (! $randomQuest) {
+                $randomQuest = $questCollection->random();
+                session([$sessionKey => $randomQuest->id]);
+            }
+
+            $randomQuest->reputation_id = $reputation->id;
             $quests->push($randomQuest);
         }
 

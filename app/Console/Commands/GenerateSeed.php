@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\BossMechanicType;
 use App\Enums\ItemEffectType;
+use App\Enums\ShareItemSlot;
 use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
 use App\Enums\ShareItemType;
@@ -877,12 +878,12 @@ class GenerateSeed extends Command
         $sItem2->skill_id = $this->skill2->id;
         $sItem2->skill_lvl = 0;
         $sItem2->price = 10;
-        $sItem2->name = 'Нож';
-        $sItem2->description = 'Нож';
+        $sItem2->name = 'Кинжал «Ночной бури»';
+        $sItem2->description = 'Кинжал «Ночной бури»';
         $sItem2->min_attack = 1;
         $sItem2->max_attack = 3;
-        $sItem2->slot = 'hand';
-        $sItem2->image = 'https://skazanie.com/img-item/2c9f9879c612.jpg';
+        $sItem2->slot = ShareItemSlot::HAND;
+        $sItem2->image = '/img/resource/sword_1.jpg';
         $sItem2->save();
 
         $sItem2->effects()->createMany([
@@ -946,12 +947,12 @@ class GenerateSeed extends Command
         $sItem5->skill_id = $this->skill2->id;
         $sItem5->skill_lvl = 5;
         $sItem5->price = 300;
-        $sItem5->name = 'Короткий меч';
-        $sItem5->description = 'Короткий меч';
+        $sItem5->name = 'Вакидзаси';
+        $sItem5->description = 'Вакидзаси';
         $sItem5->min_attack = 2;
         $sItem5->max_attack = 4;
-        $sItem5->slot = 'hand';
-        $sItem5->image = 'https://skazanie.com/img-item/1b85918f3a69.jpg';
+        $sItem5->slot = ShareItemSlot::HAND;
+        $sItem5->image = '/img/resource/sword_3.gif';
         $sItem5->save();
 
         $sItem5->effects()->createMany([
@@ -980,7 +981,7 @@ class GenerateSeed extends Command
         $sItem6->description = 'Копеш';
         $sItem6->min_attack = 5;
         $sItem6->max_attack = 8;
-        $sItem6->slot = 'hand';
+        $sItem6->slot = ShareItemSlot::HAND;
         $sItem6->image = 'https://skazanie.com/img-item/032cd678c770.jpg';
         $sItem6->save();
 
@@ -1009,11 +1010,11 @@ class GenerateSeed extends Command
         $sItem7 = new ShareItem();
         $sItem7->type = 'shield';
         $sItem7->price = 100;
-        $sItem7->name = 'Малый круглый деревянный щит';
-        $sItem7->description = 'Малый круглый деревянный щит';
+        $sItem7->name = 'Щит «Заступник небес»';
+        $sItem7->description = 'Щит «Заступник небес»';
         $sItem7->armor = 14;
-        $sItem7->slot = 'hand';
-        $sItem7->image = 'https://skazanie.com/img-item/c2d339381079.jpg';
+        $sItem7->slot = ShareItemSlot::HAND;
+        $sItem7->image = '/img/resource/sheild_1.jpg';
         $sItem7->save();
 
         $sItem7->effects()->createMany([
@@ -1031,11 +1032,11 @@ class GenerateSeed extends Command
         $sItem8->type = 'armor';
         $sItem8->price = 2000;
         $sItem8->break_crystal = 2;
-        $sItem8->name = 'Сбитые доспехи';
-        $sItem8->description = 'Сбитые доспехи';
+        $sItem8->name = 'Кольчуга «Ночной бури»';
+        $sItem8->description = 'Кольчуга «Ночной бури»';
         $sItem8->armor = 8;
-        $sItem8->slot = 'chain_armor';
-        $sItem8->image = 'https://skazanie.com/img-item/146b51607951.jpg';
+        $sItem8->slot = ShareItemSlot::CHAIN_ARMOR;
+        $sItem8->image = '/img/resource/chain_armor_1.jpg';
         $sItem8->save();
 
         $sItem8->effects()->createMany([
@@ -1053,11 +1054,11 @@ class GenerateSeed extends Command
         $sItem9->type = 'armor';
         $sItem9->price = 24000;
         $sItem9->break_crystal = 24;
-        $sItem9->name = 'Бронзовые латы';
-        $sItem9->description = 'Бронзовые латы';
+        $sItem9->name = 'Нагрудник «Ночной бури»';
+        $sItem9->description = 'Нагрудник «Ночной бури»';
         $sItem9->armor = 30;
-        $sItem9->slot = 'armor';
-        $sItem9->image = 'https://skazanie.com/img-item/3e0269aaa042.jpg';
+        $sItem9->slot = ShareItemSlot::ARMOR;
+        $sItem9->image = '/img/resource/armor_1.jpg';
         $sItem9->save();
 
         $sItem9->effects()->createMany([
@@ -1076,11 +1077,11 @@ class GenerateSeed extends Command
         $sItem9 = new ShareItem();
         $sItem9->type = 'armor';
         $sItem9->price = 100;
-        $sItem9->name = 'Легкий шлем';
-        $sItem9->description = 'Легкий шлем';
+        $sItem9->name = 'Шлем «Ночной бури»';
+        $sItem9->description = 'Шлем «Ночной бури»';
         $sItem9->armor = 1;
-        $sItem9->slot = 'helmet';
-        $sItem9->image = 'https://skazanie.com/img-item/eeeb183aea55.jpg';
+        $sItem9->slot = ShareItemSlot::HELMET;
+        $sItem9->image = '/img/resource/helm_1.jpg';
         $sItem9->save();
 
         $sItem9->effects()->createMany([
@@ -1097,11 +1098,11 @@ class GenerateSeed extends Command
         $sItem10 = new ShareItem();
         $sItem10->type = 'armor';
         $sItem10->price = 90;
-        $sItem10->name = 'Рукавицы';
-        $sItem10->description = 'Рукавицы';
+        $sItem10->name = 'Наручи «Ночной бури»';
+        $sItem10->description = 'Наручи «Ночной бури»';
         $sItem10->armor = 2;
-        $sItem10->slot = 'gloves';
-        $sItem10->image = 'https://skazanie.com/img-item/d5ce732f8329.jpg';
+        $sItem10->slot = ShareItemSlot::GLOVES;
+        $sItem10->image = '/img/resource/gloves_1.jpg';
         $sItem10->save();
 
         $sItem10->effects()->createMany([
@@ -1118,11 +1119,11 @@ class GenerateSeed extends Command
         $sItem11 = new ShareItem();
         $sItem11->type = 'armor';
         $sItem11->price = 110;
-        $sItem11->name = 'Сандалии';
-        $sItem11->description = 'Сандалии';
+        $sItem11->name = 'Сапоги «Ночной бури»';
+        $sItem11->description = 'Сапоги «Ночной бури»';
         $sItem11->armor = 1;
-        $sItem11->slot = 'shoes';
-        $sItem11->image = 'https://skazanie.com/img-item/26130fc99330.jpg';
+        $sItem11->slot = ShareItemSlot::SHOES;
+        $sItem11->image = '/img/resource/shoes.jpg';
         $sItem11->save();
 
         $sItem11->effects()->createMany([
@@ -1142,7 +1143,7 @@ class GenerateSeed extends Command
         $sItem11->name = 'Легкий плащ';
         $sItem11->description = 'Легкий плащ';
         $sItem11->armor = 1;
-        $sItem11->slot = 'cloak';
+        $sItem11->slot = ShareItemSlot::CLOAK;
         $sItem11->image = 'https://skazanie.com/img-item/13ed6f939925.jpg';
         $sItem11->save();
 
@@ -1236,6 +1237,7 @@ class GenerateSeed extends Command
         $sIte17->type = ShareItemType::BELT;
         $sIte17->price = 20000;
         $sIte17->name = 'Пояс титана';
+        $sIte17->slot = ShareItemSlot::BELT;
         $sIte17->description = 'Пояс добавляет три слота для эликсиров, свитков и прочих вспомогательных эффектов';
         $sIte17->image = '/img/resource/bluebelt.gif';
         $sIte17->save();
@@ -1258,6 +1260,7 @@ class GenerateSeed extends Command
         $sIte18->type = ShareItemType::BAG;
         $sIte18->price = 30000;
         $sIte18->name = 'Рюкзак путешественника';
+        $sIte18->slot = ShareItemSlot::BAG;
         $sIte18->description = 'Кожаная сумка позволит вам взять с собой на 11 вещей больше';
         $sIte18->image = '/img/resource/bag2.gif';
         $sIte18->save();
@@ -1293,7 +1296,7 @@ class GenerateSeed extends Command
         $sItem1->description = 'Кнут Архангела';
         $sItem1->min_attack = 35;
         $sItem1->max_attack = 80;
-        $sItem1->slot = 'hand';
+        $sItem1->slot = ShareItemSlot::HAND;
         $sItem1->image = 'https://skazanie.com/img-item/8f5d6477954920.jpg';
         $sItem1->save();
 
@@ -1602,7 +1605,7 @@ class GenerateSeed extends Command
         $locationNpc = Location::find(3);
         $npc = new Npc();
         $npc->name = 'Глава города';
-        $npc->description = 'Глава города';
+        $npc->description = 'Старейшина, угрюмый лысый старик, ворчун и зануда, но большой патриот своего народа и мира. В прошлом хороший полководец, сейчас он делится опытом с воинами, обучает их всему, что знает сам.';
         $npc->location_id = $locationNpc->id;
         $npc->image = '/img/npc/stareyshina.jpg';
         $npc->save();

@@ -2,6 +2,7 @@
 
 namespace App\Models\Share;
 
+use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
 use App\Models\Skill;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,7 +31,7 @@ use App\Models\Monster\Monster;
  * @property bool $is_weight
  * @property int $price
  * @property int $break_crystal
- * @property string|null $slot
+ * @property ShareItemSlot|null $slot
  * @property int|null $skill_id
  * @property int|null $skill_lvl
  * @property int|null $skill_exp
@@ -40,8 +41,6 @@ use App\Models\Monster\Monster;
  */
 class ShareItem extends Model
 {
-    public const SLOT_HAND = 'hand';
-
     public function scopeByGroup($query, string $group)
     {
         return $query->whereIn('type',
@@ -71,6 +70,7 @@ class ShareItem extends Model
         'is_active' => 'boolean',
         'is_heal' => 'boolean',
         'type' => ShareItemType::class,
+        'slot' => ShareItemSlot::class,
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

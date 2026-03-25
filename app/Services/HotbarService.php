@@ -111,6 +111,21 @@ class HotbarService
     }
 
     /**
+     * Deletes all player slots exceeding the current max (called after belt is unequipped).
+     */
+    public function trimExcessSlots(Player $player): void
+    {
+        // Сбрасываем кэш relation, чтобы maxSlots пересчитал с актуальным экипом из БД
+        $player->unsetRelation('playerEquip');
+
+        $max = $this->maxSlots($player);
+
+        PlayerSlot::where('player_id', $player->id)
+            ->where('slot_number', '>', $max)
+            ->delete();
+    }
+
+    /**
      * Removes an entity from a hotbar slot.
      */
     public function clearSlot(Player $player, int $slotNumber): void

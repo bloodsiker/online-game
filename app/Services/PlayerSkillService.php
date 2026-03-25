@@ -1,43 +1,59 @@
 <?php
 
-namespace app\Services;
+declare(strict_types=1);
+
+namespace App\Services;
 
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSkill;
 use App\Models\Share\ShareItem;
 use App\Models\Skill;
+use App\Models\Skill\SkillLevelRequirement;
 
 class PlayerSkillService
 {
     public function gainExperienceSkill(Player $player, ?Skill $skill = null, ?ShareItem $shareItem = null): void
     {
-        if ($skill) {
-            $playerSkill = PlayerSkill::where(['player_id' => $player->id, 'skill_id' => $skill->id])->first();
-            if ($playerSkill) {
-                $expPerHit = $shareItem && $shareItem->skill_exp ? $shareItem->skill_exp : 1;
-                $playerSkill->exp += $expPerHit;
+        if (! $skill) {
+            return;
+        }
 
-                if ($playerSkill->exp >= $playerSkill->exp_up) {
-                    $playerSkill->lvl += 1;
-                    $playerSkill->exp = 0;
-                    $playerSkill->exp_up = $this->calculateRequiredExperience($playerSkill->lvl);
-                }
+        $playerSkill = PlayerSkill::where(['player_id' => $player->id, 'skill_id' => $skill->id])->first();
 
-                $playerSkill->save();
-            } else {
-                $playerSkill = new PlayerSkill();
-                $playerSkill->player_id = $player->id;
-                $playerSkill->skill_id = $skill->id;
-                $playerSkill->save();
+        if (! $playerSkill) {
+            $req = $this->getRequirement($skill->id, 1);
+
+            $playerSkill = new PlayerSkill();
+            $playerSkill->player_id = $player->id;
+            $playerSkill->skill_id  = $skill->id;
+            $playerSkill->exp       = 0;
+            $playerSkill->exp_up    = $req?->exp_required ?? 1000;
+            $playerSkill->exp_diff  = $req?->exp_diff ?? 1000;
+            $playerSkill->save();
+
+            return;
+        }
+
+        $expPerHit = ($shareItem && $shareItem->skill_exp) ? $shareItem->skill_exp : 1;
+        $playerSkill->exp += $expPerHit;
+
+        if ($playerSkill->exp >= $playerSkill->exp_up) {
+            $playerSkill->lvl += 1;
+
+            $req = $this->getRequirement($skill->id, $playerSkill->lvl);
+            if ($req) {
+                $playerSkill->exp_up   = $req->exp_required;
+                $playerSkill->exp_diff = $req->exp_diff;
             }
         }
+
+        $playerSkill->save();
     }
 
-    protected function calculateRequiredExperience($level) :int
+    private function getRequirement(int $skillId, int $level): ?object
     {
-        // Уровни делятся на группы по 10, каждая группа имеет свой базовый опыт
-        $levelGroup = intdiv($level - 1, 10); // Количество завершенных групп по 10 уровней
-
-        return PlayerSkill::BASE_EXPERIENCE * pow(PlayerSkill::GROW_FACTOR, $levelGroup);
+        return SkillLevelRequirement::where('skill_id', $skillId)
+            ->where('lvl', $level)
+            ->first(['exp_required', 'exp_diff']);
     }
 }

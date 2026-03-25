@@ -64,10 +64,10 @@ class PlayerStatService
             'armor'         => 0.0,
             'hp_max'        => (float) $player->hp_max,
             'mp_max'        => (float) $player->mp_max,
-            'left_min_dmg'  => $equip?->handLeft  instanceof Item ? 0.0 : (float) $player->min_dmg,
-            'left_max_dmg'  => $equip?->handLeft  instanceof Item ? 0.0 : (float) $player->max_dmg,
-            'right_min_dmg' => $equip?->handRight instanceof Item ? 0.0 : (float) $player->min_dmg,
-            'right_max_dmg' => $equip?->handRight instanceof Item ? 0.0 : (float) $player->max_dmg,
+            'left_min_dmg'  => (float) $player->min_dmg,
+            'left_max_dmg'  => (float) $player->max_dmg,
+            'right_min_dmg' => (float) $player->min_dmg,
+            'right_max_dmg' => (float) $player->max_dmg,
         ];
 
         // Accumulate flat and percent per stat

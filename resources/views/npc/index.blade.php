@@ -237,10 +237,19 @@
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
                                                 </td>
                                                 <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif{{ $quest->title }}</td>
-                                                <td class="brd2-top brd2-bt" align="right">
+                                                <td class="brd2-top brd2-bt" align="right" onclick="event.stopPropagation()">
                                                     <b class="butt2 pointer"><b>
                                                         <input value="Взять" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
                                                     </b></b>
+                                                    @if($quest->type->isReputation() && isset($quest->reputation_id))
+                                                        <form method="POST" action="{{ route('reputation.decline', $quest->reputation_id) }}" style="display:inline">
+                                                            @csrf
+                                                            <input type="hidden" name="npc" value="{{ $npc->id }}">
+                                                            <b class="butt2 pointer"><b>
+                                                                <input value="Отказ" type="submit" style="width:60px">
+                                                            </b></b>
+                                                        </form>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -251,7 +260,7 @@
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="opacity:0.45;">
                                                 </td>
                                                 <td class="brd2-top brd2-bt" style="color:#888;">
-                                                    @if($cooldown->quest->isClan())[Клан] @endif{{ $cooldown->quest->title }}
+                                                    {{ $cooldown->label ?? ($cooldown->quest->isClan() ? '[Клан] ' : '') . $cooldown->quest->title }}
                                                     <br><small style="color:#999;">Повторный проход через: {{ $cooldown->diff }}</small>
                                                 </td>
                                                 <td class="brd2-top brd2-bt" align="right">
@@ -348,12 +357,10 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                                    <img src="{{ asset('img/npc/stareyshina.jpg') }}" alt="Эрдинг" width="190"
+                                    <img src="{{ asset($npc->image) }}" alt="Эрдинг" width="190"
                                          height="171"><br>
-                                    <div class="p2v">Глубокий шрам, навсегда изменивший лицо молодого воина, придает его
-                                        облику еще больше суровости. Немногословный и категоричный в принятии решений
-                                        Эрдинг не ведает, что такое страх, являясь неизменным защитником своего народа и
-                                        Руменгильда.
+                                    <div class="p2v">
+                                        {!! $npc->description !!}
                                     </div>
                                 </td>
                                 <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -376,29 +383,12 @@
 </table>
 
 <script>
-    {{--document.addEventListener('keydown', function(event) {--}}
-    {{--    switch (event.key.toLowerCase()) {--}}
-    {{--        case 'i':--}}
-    {{--            window.parent.sendDataToGame('{{ route('backpack') }}');--}}
-    {{--            break;--}}
-    {{--        case 'c':--}}
-    {{--            window.parent.sendDataToGame('{{ route('character') }}');--}}
-    {{--            break;--}}
-    {{--        case ' ':--}}
-    {{--            window.parent.sendDataToGame('{{ route('location') }}');--}}
-    {{--            break;--}}
-    {{--        default:--}}
-    {{--            return;--}}
-    {{--    }--}}
-    {{--    event.preventDefault();--}}
-    {{--});--}}
-
     @if($messageType === 'success' && $message)
         try {
             let experience = parseFloat('{{ $player->getPercentExp() }}');
             let lvl = parseInt('{{ $player->lvl }}');
-            let hp = parseFloat('{{ $player->getPercentHp() }}');
-            let mp = parseFloat('{{ $player->getPercentMp() }}');
+            let hp = { current: parseInt('{{ $player->hp_now }}'), max: parseInt('{{ $player->hp_max }}') };
+            let mp = { current: parseInt('{{ $player->mp_now }}'), max: parseInt('{{ $player->mp_max }}') };
             let money = parseInt('{{ $player->user->money }}');
             let diamond = parseInt('{{ $player->user->diamond }}');
             parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });

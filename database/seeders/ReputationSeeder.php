@@ -276,7 +276,7 @@ class ReputationSeeder extends Seeder
             [
                 'description' => 'Докажите своё мастерство охотника, выполняя задания Вестника и уничтожая опасных существ.',
                 'npc_id'      => $npc->id,
-                'icon'        => 'img/reputation/okhota.png',
+                'icon'        => '/img/reputation/okhota.png',
             ]
         );
 

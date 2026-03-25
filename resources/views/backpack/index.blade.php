@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Игра</title>
     <style>
+        *{
+            font-size: 11px;
+        }
         html {
             height: 100%;
         }
@@ -151,6 +154,7 @@
     {!! $itemTooltipScript !!}
 
     <script src="{{ asset('js/item_tooltip.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 </head>
 <body class="regcolor">
 
@@ -256,10 +260,42 @@
                 <tbody>
                 <tr>
                     <td align="center" width="30"></td>
-                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+
+                    <td class="item-hero" align="center">
+                        @if($playerEquip->belt_first)
+                            <img src="{{ $playerEquip->beltFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltFirstSlot->id]) }}" class="item-put-off">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
+                        @endif
+                    </td>
+
+                    <td class="item-hero" align="center">
+                        @if($playerEquip->belt_second)
+                            <img src="{{ $playerEquip->beltSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltSecondSlot->id]) }}" class="item-put-off">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
+                        @endif
+                    </td>
+
+                    <td class="item-hero" align="center">
+                        @if($playerEquip->bag_first)
+                            <img src="{{ $playerEquip->bagFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagFirstSlot->id]) }}" class="item-put-off">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
+                        @endif
+                     </td>
+
+                    <td class="item-hero" align="center">
+                        @if($playerEquip->bag_second)
+                            <img src="{{ $playerEquip->bagSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagSecondSlot->id]) }}" class="item-put-off">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
+                        @endif
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -367,8 +403,8 @@
                             }
                             .backpack_list li {
                                 list-style: none;
-                                height: 60px;
-                                width: 60px;
+                                height: 50px;
+                                width: 50px;
                                 margin: 1px;
                                 float: left;
                                 position: relative;
@@ -551,7 +587,7 @@
                                     </script>
                                     <form id="cart_amount_form">
                                         <div id="cart_amount_div"
-                                             style="display: none; position: absolute; z-index: 9999;">
+                                             style="display: none; position: fixed; z-index: 9999;">
                                             <div class="popup_global_container">
                                                 <div class="popup-top-left">
                                                     <div class="popup-top-right">
@@ -562,7 +598,7 @@
 
                                                         </div>
                                                     </div>
-                                                    <div class="popup_global_close_btn" onclick="ask_amount();"></div>
+                                                    <div class="popup_global_close_btn" onclick="closeDropPopup();"></div>
                                                 </div>
 
                                                 <div class="popup-left-center">
@@ -593,7 +629,7 @@
                                                                 </div>
                                                             </div>
 
-                                                            <div style="padding: 0 11px;">
+                                                            <div id="drop-qty-row" style="padding: 0 11px;">
                                                                 <div class="cart-amount-sell-price"
                                                                      style="text-align: left;">
                                                                     <div>
@@ -628,7 +664,7 @@
                                                                     <span id="ask_confirm_ok_container"></span>
                                                                     <b class="butt1 pointer"><b><input value="Отмена"
                                                                                                        type="button"
-                                                                                                       onclick="ask_amount();"
+                                                                                                       onclick="closeDropPopup();"
                                                                                                        style="width: 100px;"
                                                                                                        class="redd"></b></b>
                                                                 </div>
@@ -834,17 +870,8 @@
                                                 "price_block": "Цена продажи",
                                                 "title_popup": "Продажа предмета"
                                             },
-                                            "repair": {
-                                                "title": "ПОЧИНИТЬ",
-                                                "price_block": "Цена ремонта",
-                                                "title_popup": "Починка предмета"
-                                            },
                                             "perp": {
                                                 "title": "ОСТАВИТЬ у себя НАВСЕГДА",
-                                                "price_block": "Стоимость"
-                                            },
-                                            "perp_clan": {
-                                                "title": "ОСТАВИТЬ у клана <a title=\"\" href=\"#\" onClick=\"showClanInfo(''); return false;\"><img src=\"/images/data/clans/\" border=0 width=13 height=13 align=\"absmiddle\"></a> <b></b> НАВСЕГДА",
                                                 "price_block": "Стоимость"
                                             }
                                         };
@@ -1059,11 +1086,11 @@
                                                 <table class="coll w100 p10h p2v brd2-all">
                                                     <tbody>
                                                     <tr class="bg_l">
-                                                        <td nowrap=""><b>Вместимость:</b> &nbsp;&nbsp;&nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
+                                                        <td nowrap=""><b>Вместимость:</b> &nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
                                                         <td align="right" nowrap="">
                                                             <b>Монет:</b>
                                                             &nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                                                            &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                                                            &nbsp;&nbsp;&nbsp<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                                                         </td>
                                                     </tr>
                                                     </tbody>
@@ -1102,10 +1129,10 @@
                                                                                 class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1131,18 +1158,14 @@
 
                                                                     @if($data->hasShield())
                                                                         @foreach($data->getShield() as $item)
-                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                                data-id="23867698" data-dateti="23867698"
-                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                                class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1188,18 +1211,13 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getArmor() as $item)
-                                                                        <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                            data-id="23867698" data-dateti="23867698"
-                                                                            data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                            data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                            class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1245,17 +1263,12 @@
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @if($data->hasBag())
                                                                         @foreach($data->getBag() as $item)
-                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                                data-id="23867698" data-dateti="23867698"
-                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                                class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1281,18 +1294,13 @@
 
                                                                     @if($data->hasBelt())
                                                                         @foreach($data->getBelt() as $item)
-                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                                data-id="23867698" data-dateti="23867698"
-                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                                class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1338,18 +1346,13 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getPotion() as $item)
-                                                                        <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                            data-id="23867698" data-dateti="23867698"
-                                                                            data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                            data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                            class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1379,8 +1382,7 @@
                                                         @if($data->hasResource())
                                                             <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
                                                                 <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
+                                                                    <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
@@ -1394,18 +1396,14 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getResource() as $item)
-                                                                        <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                            data-id="23867698" data-dateti="23867698"
-                                                                            data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                            data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                            class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td act1="1" act2="3" act3="0" data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1414,9 +1412,6 @@
                                                                                         @endif
                                                                                         <span
                                                                                             style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
                                                                                             onmouseover="showItemInfo(this,event,2)"
                                                                                             onmouseout="showItemInfo(this,event,0)"
                                                                                             valign="bottom">
@@ -1451,18 +1446,14 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getScroll() as $item)
-                                                                        <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                            data-id="23867698" data-dateti="23867698"
-                                                                            data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                            data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                            class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1507,18 +1498,14 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getRecipe() as $item)
-                                                                        <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                            data-id="23867698" data-dateti="23867698"
-                                                                            data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                            data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                            class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
 
 
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1549,18 +1536,13 @@
                                                     @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift')
                                                         <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                             @foreach($data->getBackpack() as $item)
-                                                                <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                    data-id="23867698" data-dateti="23867698"
-                                                                    data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                    data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                    class="item ui-sortable-handle" style="opacity: 1;">
+                                                                <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
-                                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                            style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                         <tbody>
                                                                         <tr>
-                                                                            <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                            <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                 &nbsp;
                                                                                 @if($item->count > 1)
                                                                                     <div class="bpdig">
@@ -1881,17 +1863,7 @@
                 </tr>
                 </tbody>
             </table>
-
-
-            <p>
-                <a href="#">История передачи предметов</a> »
-            </p>
-            <p>
-                Примечание:
-                <br>
-                Некоторые вещи использовать из вещевого мешка нельзя. Перед использованием их надо взять в руки либо
-                надеть.
-            </p></td>
+        </td>
     </tr>
     </tbody>
 </table>
@@ -1900,15 +1872,12 @@
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
+    @if (session()->has('hotbar_refresh'))
+        try { window.parent.refreshHotbar(); } catch(e) {}
+    @endif
 
     document.addEventListener('keydown', function(event) {
         switch (event.key.toLowerCase()) {
-            case 'i':
-                window.parent.sendDataToGame('{{ route('backpack') }}');
-                break;
-            case 'c':
-                window.parent.sendDataToGame('{{ route('character') }}');
-                break;
             case ' ':
                 window.parent.sendDataToGame('{{ route('location') }}');
                 break;
@@ -1947,6 +1916,131 @@
                 bpdig.remove();
             }
         }
+    });
+</script>
+
+<!-- Context Menu -->
+<div id="drop-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:9990;"></div>
+
+<div id="item-ctx-menu" style="display:none; position:fixed; z-index:9999; background:#f5e9d0; border:2px solid #CEBBAA; border-radius:4px; box-shadow:2px 2px 6px rgba(0,0,0,0.35); min-width:130px; font-family:Tahoma; font-size:11px; overflow:hidden;">
+    <div class="ctx-item" id="ctx-info"    onclick="ctxAction('info')">Информация</div>
+    <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">Надеть</div>
+    <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">Снять</div>
+    <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">Использовать</div>
+    <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">Выкинуть</div>
+</div>
+<style>
+    .ctx-item { padding: 6px 14px; cursor: pointer; color: #461c0b; border-bottom: 1px solid #e0ccb0; }
+    .ctx-item:last-child { border-bottom: none; }
+    .ctx-item:hover { background: #e8c06a; }
+    .ctx-danger { color: #a00; }
+    .ctx-danger:hover { background: #f5c0b0; }
+</style>
+<script>
+    var frame_content_hider = {
+        show: function() { gebi('drop-overlay').style.display = 'block'; },
+        hide: function() { gebi('drop-overlay').style.display = 'none'; }
+    };
+
+    function closeDropPopup() {
+        gebi('cart_amount_div').style.display = 'none';
+        frame_content_hider.hide();
+    }
+
+    var _ctxItemId    = null;
+    var _ctxItemCount = 1;
+    var _ctxItemName  = '';
+    var _ctxItemImage = '';
+
+    function showCtxMenu(el, event) {
+        event.stopPropagation();
+        // скрываем тултип и блокируем mousemove пока меню открыто
+        try { showItemInfo(el, event, 0); } catch(e) {}
+        document.onmousemove = function(){};
+        _ctxItemId    = el.getAttribute('data-id');
+        _ctxItemCount = parseInt(el.getAttribute('data-count')) || 1;
+        _ctxItemName  = el.getAttribute('data-name') || '';
+        _ctxItemImage = el.getAttribute('data-image') || '';
+        var type     = el.getAttribute('data-type');
+        var equipped = el.getAttribute('data-equipped') === '1';
+
+        var equippable = ['weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
+        var usable     = ['potion','eat','scroll','artifact','chest','gift','key'].indexOf(type) !== -1;
+
+        document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
+        document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
+        document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
+
+        var menu = document.getElementById('item-ctx-menu');
+        menu.style.display = 'block';
+
+        var x = event.clientX, y = event.clientY;
+        menu.style.left = x + 'px';
+        menu.style.top  = y + 'px';
+
+        // keep inside viewport
+        var rect = menu.getBoundingClientRect();
+        if (rect.right  > window.innerWidth)  menu.style.left = (x - rect.width)  + 'px';
+        if (rect.bottom > window.innerHeight) menu.style.top  = (y - rect.height) + 'px';
+    }
+
+    function ctxAction(action) {
+        var id = _ctxItemId;
+        document.getElementById('item-ctx-menu').style.display = 'none';
+        var base = '{{ url("/items") }}';
+        switch (action) {
+            case 'info':    showArtifactInfo(id, null, null, null); break;
+            case 'equip':   location.href = base + '/put-on/'     + id; break;
+            case 'unequip': location.href = base + '/put-off/'    + id; break;
+            case 'use':     location.href = base + '/open-chest/' + id; break;
+            case 'drop':
+                showDropDialog(id, _ctxItemCount);
+                break;
+        }
+    }
+
+    function showDropDialog(itemId, count) {
+        var base = '{{ url("/items") }}';
+        gebi('action_title_amount').innerHTML = 'Выброс предмета';
+        gebi('ask_amount_title').innerHTML    = 'Вы уверены, что хотите выбросить предмет?';
+        gebi('art_amount').innerHTML          = _ctxItemImage ? '<img src="' + _ctxItemImage + '" style="width:50px;height:50px;">' : '';
+        gebi('ask_confirm_title_amount').innerHTML = _ctxItemName;
+
+        var qtyRow = gebi('drop-qty-row');
+        if (count > 1) {
+            qtyRow.style.display = '';
+            var input = gebi('cart_amount');
+            input.value = 1;
+            input.dataset.minValue = 1;
+            input.dataset.maxValue = count;
+            gebi('cart_amount_cnt').textContent = count;
+            gebi('cart_amount_all').onclick = function () {
+                gebi('cart_amount').value = count;
+            };
+            gebi('ask_confirm_ok_container').innerHTML =
+                '<b class="butt1 pointer"><b><input value="Выбросить" type="button" onclick="doDropItem(' + itemId + ', \'' + base + '\')" style="width: 100px;" class="redd"></b></b>';
+        } else {
+            qtyRow.style.display = 'none';
+            gebi('ask_confirm_ok_container').innerHTML =
+                '<b class="butt1 pointer"><b><input value="Выбросить" type="button" onclick="location.href=\'' + base + '/drop/' + itemId + '?c=1\'" style="width: 100px;" class="redd"></b></b>';
+        }
+
+        var div = gebi('cart_amount_div');
+        div.style.display = 'block';
+        div.style.top  = Math.max(0, (window.innerHeight - div.offsetHeight) / 2) + 'px';
+        div.style.left = Math.max(0, (window.innerWidth  - div.offsetWidth)  / 2) + 'px';
+        frame_content_hider.show();
+    }
+
+    function doDropItem(itemId, base) {
+        var qty = parseInt(gebi('cart_amount').value) || 1;
+        gebi('cart_amount_div').style.display = 'none';
+        try { frame_content_hider.hide(); } catch(e) {}
+        location.href = base + '/drop/' + itemId + '?c=1&qty=' + qty;
+    }
+
+    document.addEventListener('click', function () {
+        document.getElementById('item-ctx-menu').style.display = 'none';
     });
 </script>
 

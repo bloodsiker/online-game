@@ -26,6 +26,18 @@ return new class extends Migration
             $table->boolean('is_two_hand')->default(0)->after('image');
         });
 
+        Schema::create('skill_level_requirements', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('skill_id');
+            $table->unsignedInteger('lvl');
+            $table->unsignedInteger('exp_required');
+            $table->unsignedInteger('exp_diff')->default(0);
+
+            $table->foreign('skill_id')->references('id')->on('skills')->onDelete('cascade');
+            $table->unique(['skill_id', 'lvl']);
+            $table->index('skill_id');
+        });
+
         Schema::create('player_skills', function (Blueprint $table) {
             $table->id();
             $table->foreignId('player_id')->nullable()->constrained('players')->cascadeOnDelete();
@@ -33,6 +45,7 @@ return new class extends Migration
             $table->integer('lvl')->default(1);
             $table->integer('exp')->default(0);
             $table->integer('exp_up')->default(1000);
+            $table->unsignedInteger('exp_diff')->default(0);
             $table->timestamps();
         });
     }
@@ -42,11 +55,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('player_skills');
+        Schema::dropIfExists('skill_level_requirements');
+        Schema::dropIfExists('skills');
+
         Schema::table('share_items', function (Blueprint $table) {
             $table->dropForeign(['skill_id']);
             $table->dropColumn('skill_lvl');
         });
-
-        Schema::dropIfExists('skills');
     }
 };

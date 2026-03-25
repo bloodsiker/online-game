@@ -56,15 +56,14 @@
         .bg_l2 { background-image: url(/img/bg/info/bg_l2.gif); cursor: pointer; }
         .brd2-bt { border-bottom: 1px solid #DB9F73; }
         .brd2-top { border-top: 1px solid #DB9F73; }
-        .progress-wrap {
-            background: #c9a87c;
-            border: 1px solid #8b5e30;
-            height: 10px;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 3px 0;
-        }
-        .progress-bar { background: #e8c04a; height: 100%; border-radius: 3px; }
+        .progress-bar { position: relative; width: 100%; height: 17px; margin: 4px 0; }
+        .progress-bar__bg { position: absolute; right: 3px; left: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -51px repeat-x; }
+        .progress-bar__red { position: absolute; right: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -68px repeat-x; }
+        .progress-bar__cover { position: absolute; left: 20px; right: 20px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 0 repeat-x; }
+        .progress-bar__left { position: absolute; left: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -17px no-repeat; }
+        .progress-bar__right { position: absolute; right: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -34px no-repeat; }
+        .progress-bar__marker { position: absolute; top: 0; width: 5px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -85px no-repeat; }
+        .progress-bar__txt { position: absolute; left: 3px; right: 3px; top: 3px; color: #fff; font-size: 10px; text-align: center; text-shadow: -1px 0 2px #444444, 0 1px 2px #444444, 1px 0 2px #444444, 0 -1px 2px #444444, -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303; }
         .medal-earned {
             display: inline-block;
             background: #f5e4a0;
@@ -145,17 +144,22 @@
                                             $tierMin  = $currentTier->min_points;
                                             $tierMax  = $nextTierItem ? $nextTierItem->min_points : ($currentTier->max_points ?? $pr->points);
                                             $range    = $tierMax - $tierMin;
-                                            $progress = $range > 0 ? min(100, (($pr->points - $tierMin) / $range) * 100) : 100;
+                                            $pct      = $range > 0 ? min(100, round((($pr->points - $tierMin) / $range) * 100)) : 100;
                                         @endphp
-                                        <div class="progress-wrap">
-                                            <div class="progress-bar" style="width: {{ round($progress) }}%"></div>
+                                        <div class="progress-bar">
+                                            <div class="progress-bar__bg"></div>
+                                            <div class="progress-bar__red" style="width: {{ 100 - $pct }}%;"></div>
+                                            <div class="progress-bar__cover"></div>
+                                            <div class="progress-bar__left"></div>
+                                            <div class="progress-bar__right"></div>
+                                            <div class="progress-bar__marker" style="right: {{ 100 - $pct }}%;"></div>
+                                            <div class="progress-bar__txt" title="{{ $currentTier->medal_name ?? 'Без звания' }}">{{ $currentTier->medal_name ?? 'Без звания' }}: <span>{{ $pr->points - $tierMin }}/{{ $range > 0 ? $range : '∞' }}</span></div>
                                         </div>
                                         <small style="color:#555;">
-                                            {{ $pr->points - $tierMin }} / {{ $range > 0 ? $range : '∞' }}
                                             @if($nextTierItem)
-                                                &nbsp;(до «{{ $nextTierItem->medal_name ?? 'следующего уровня' }}»: {{ $nextTierItem->min_points - $pr->points }})
+                                                до «{{ $nextTierItem->medal_name ?? 'следующего уровня' }}»: {{ $nextTierItem->min_points - $pr->points }}
                                             @else
-                                                &nbsp;(максимальный уровень)
+                                                (максимальный уровень)
                                             @endif
                                         </small>
                                     @else
@@ -188,10 +192,10 @@
                             {{-- Active Quest (read-only, no take button) --}}
                             @if($activeQuest)
                                 <tr class="bg_l">
-                                    <td class="brd2-top brd2-bt" width="1%">
+                                    <td class="brd2-top brd2-bt" width="1%" style="padding: 4px 8px;">
                                         <img src="{{ asset('img/icon/qst_start_ro.gif') }}" width="46" height="28">
                                     </td>
-                                    <td class="brd2-top brd2-bt">
+                                    <td class="brd2-top brd2-bt" style="padding: 4px 8px;">
                                         <b>{{ $activeQuest->quest->title }}</b>
                                         @foreach($activeQuest->quest->objectives as $obj)
                                             @php
@@ -203,20 +207,20 @@
                                             </small>
                                         @endforeach
                                     </td>
-                                    <td class="brd2-top brd2-bt" align="right">
+                                    <td class="brd2-top brd2-bt" align="right" style="padding: 4px 8px;">
                                         <span style="color:#888; font-size:10px;">В процессе</span>
                                     </td>
                                 </tr>
                             @elseif($cooldownDiff)
                                 <tr class="bg_l">
-                                    <td class="brd2-top brd2-bt" width="1%">
+                                    <td class="brd2-top brd2-bt" width="1%" style="padding: 4px 8px;">
                                         <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="opacity:0.45;">
                                     </td>
-                                    <td class="brd2-top brd2-bt" style="color:#888;">
+                                    <td class="brd2-top brd2-bt" style="color:#888; padding: 4px 8px;">
                                         Задание на перезарядке
                                         <br><small style="color:#999;">Доступно через: {{ $cooldownDiff }}</small>
                                     </td>
-                                    <td class="brd2-top brd2-bt" align="right">
+                                    <td class="brd2-top brd2-bt" align="right" style="padding: 4px 8px;">
                                         <span style="color:#aaa; font-size:10px;">Перезарядка</span>
                                     </td>
                                 </tr>
@@ -254,8 +258,8 @@
         try {
             let experience = parseFloat('{{ $player->getPercentExp() }}');
             let lvl = parseInt('{{ $player->lvl }}');
-            let hp = parseFloat('{{ $player->getPercentHp() }}');
-            let mp = parseFloat('{{ $player->getPercentMp() }}');
+            let hp = { current: parseInt('{{ $player->hp_now }}'), max: parseInt('{{ $player->hp_max }}') };
+            let mp = { current: parseInt('{{ $player->mp_now }}'), max: parseInt('{{ $player->mp_max }}') };
             let money = parseInt('{{ $player->user->money }}');
             let diamond = parseInt('{{ $player->user->diamond }}');
             parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });

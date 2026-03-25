@@ -70,32 +70,7 @@
             align-items: center;
             gap: 12px;
         }
-        .rep-progress-wrap { flex: 1; }
-        .rep-points {
-            font-size: 11px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 3px;
-            color: #461c0b;
-        }
-        .rep-bar-outer {
-            background: #c9a87c;
-            border: 1px solid #8b5e30;
-            height: 10px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .rep-bar-inner {
-            background: #e8c04a;
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.3s;
-        }
-        .rep-tier {
-            font-size: 10px;
-            color: #888;
-            margin-top: 3px;
-        }
+        .rep-card-body .progress-bar { flex: 1; }
         .rep-medal {
             font-size: 10px;
             color: #8b3a1a;
@@ -144,21 +119,86 @@
                                         @endif
                                     </div>
                                     <div class="rep-card-body">
-                                        <div class="rep-progress-wrap">
-                                            <div class="rep-points">
-                                                <span>{{ $pr->points }} очков</span>
-                                                @if($nextTier)
-                                                    <span style="color:#888;">до «{{ $nextTier->medal_name ?? 'след. ранга' }}»: {{ $nextTier->min_points }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="rep-bar-outer">
-                                                <div class="rep-bar-inner" style="width:{{ $pct }}%"></div>
-                                            </div>
-                                            <div class="rep-tier">
-                                                Текущий ранг:
-                                                <b style="color:#461c0b">{{ $currentTier?->medal_name ?? 'Нейтральный' }}</b>
-                                            </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-bar__bg"></div>
+                                            <div class="progress-bar__red" style="width: {{ 100 - $pct }}%;"></div>
+                                            <div class="progress-bar__cover"></div>
+                                            <div class="progress-bar__left"></div>
+                                            <div class="progress-bar__right"></div>
+                                            <div class="progress-bar__marker" style="right: {{ 100 - $pct }}%;"></div>
+                                            <div class="progress-bar__txt" title="{{ $currentTier?->medal_name ?? 'Нейтральный' }}">{{ $currentTier?->medal_name ?? 'Нейтральный' }}: <span>{{ $pr->points }}/{{ $maxPoints ?? '∞' }}</span></div>
                                         </div>
+
+                                        <style>
+                                            .progress-bar {
+                                                position: relative;
+                                                width: 100%;
+                                                height: 17px;
+                                            }
+                                            .progress-bar__bg {
+                                                position: absolute;
+                                                right: 3px;
+                                                left: 3px;
+                                                top: 0;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 -51px repeat-x;
+                                            }
+                                            .progress-bar__red {
+                                                position: absolute;
+                                                right: 3px;
+                                                top: 0;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 -68px repeat-x;
+                                            }
+                                            .progress-bar__cover {
+                                                position: absolute;
+                                                left: 20px;
+                                                right: 20px;
+                                                top: 0;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 0 repeat-x;
+                                            }
+                                            .progress-bar__left {
+                                                position: absolute;
+                                                left: 0;
+                                                top: 0;
+                                                width: 20px;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 -17px no-repeat;
+                                            }
+                                            .progress-bar__right {
+                                                position: absolute;
+                                                right: 0;
+                                                top: 0;
+                                                width: 20px;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 -34px no-repeat;
+                                            }
+                                            .progress-bar__marker {
+                                                position: absolute;
+                                                top: 0;
+                                                width: 5px;
+                                                height: 17px;
+                                                background: url(/img/bg/progress-bar.png) 0 -85px no-repeat;
+                                            }
+                                            .progress-bar__txt {
+                                                position: absolute;
+                                                left: 3px;
+                                                right: 3px;
+                                                top: 3px;
+                                                color: #fff;
+                                                font-size: 10px;
+                                                text-align: center;
+                                                text-shadow: -1px 0 2px #444444, 0 1px 2px #444444, 1px 0 2px #444444, 0 -1px 2px #444444, -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303;
+                                            }
+                                            .user-pets-detail-exp .progress-bar .progress-bar__txt span {
+                                                font-weight: normal;
+                                                color: #fff;
+                                                font-size: 10px;
+                                            }
+                                        </style>
+
+
                                         <div class="rep-btn">
                                             <b class="butt2 pointer"><b>
                                                 <input value="Подробнее" type="button"

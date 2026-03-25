@@ -241,7 +241,8 @@
                                                 \App\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
                                                 \App\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
                                                 \App\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
-                                                \App\Enums\QuestRewardType::CLAN_POINTS     => '+' . $reward->amount . ' клановых очков',
+                                                \App\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' клановых очков',
+                                                \App\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' очков репутации',
                                             };
                                         }
                                     @endphp
@@ -376,9 +377,10 @@
                                                 <td class="brd2-top b" onclick="quest_folding.toggle({{ $quest->id }});">{{ $quest->quest->title }}</td>
                                                 <td class="brd2-top" align="right">
                                                     @if($quest->status->isProgress())
+                                                        <form id="cancel-quest-{{ $quest->id }}" method="POST" action="{{ route('quest.cancel', $quest->id) }}" style="display:none">@csrf</form>
                                                         <b class="butt2 pointer ">
                                                             <b>
-                                                                <input value="Отказаться" type="button" onclick="return top.systemConfirm('Вы действительно хотите отказаться от квеста?','Действие',false,function(){location.href='{{ route('quests') }}?action=cancel&ref={{ $quest->id }}'});">
+                                                                <input value="Отказаться" type="button" onclick="return top.systemConfirm('Вы действительно хотите отказаться от квеста?','Действие',false,function(){document.getElementById('cancel-quest-{{ $quest->id }}').submit();});">
                                                             </b>
                                                         </b>
                                                     @elseif($quest->status->isCompleted())
