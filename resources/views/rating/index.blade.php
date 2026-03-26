@@ -279,7 +279,12 @@
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
                         <table class="w100 ach_menu" cellpadding="0" cellspacing="0">
                             <tbody>
+                                @php $firstSkillSeen = false; @endphp
                                 @foreach($menu as $key => $menuItem)
+                                    @if(!$firstSkillSeen && str_starts_with($key, 'skill_'))
+                                        @php $firstSkillSeen = true; @endphp
+                                        <tr><td height="6"></td></tr>
+                                    @endif
                                     <tr>
                                         <td height="10" class="@if($key === $type) c-s-n-fon ach_menu_act @else ach_menu_pas @endif">
                                             <a href="{{ route('rating', ['type' => $key]) }}">
@@ -405,10 +410,16 @@
                             </tr><tr>
                             </tr></thead>
                             <tbody>
-                            @foreach($players as $player)
+                            @foreach($players as $item)
+                                @php
+                                    $rowPlayer = $isSkillRating ? $item->player : $item;
+                                    $rowValue  = $isSkillRating
+                                        ? $item->lvl
+                                        : data_get($item, $menu[$type]['column']);
+                                @endphp
                                 <tr class="{{ $loop->even ? 'bg_l' : '' }}"
-                                    id="pr-{{ $player->user->id }}"
-                                    data-name="{{ mb_strtolower($player->user->name) }}">
+                                    id="pr-{{ $rowPlayer->user->id }}"
+                                    data-name="{{ mb_strtolower($rowPlayer->user->name) }}">
                                     <td class="rating-nowrap" align="center">
                                         <span class="user-rating-red">{{ $players->firstItem() + $loop->index }}</span>
                                     </td>
@@ -417,14 +428,14 @@
                                             <a href="#" onclick="userPrvTag('хаирман');return false;" title="Приватное сообщение">
                                                 <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
                                             </a>
-                                            @if($player->user->clanMembership)
+                                            @if($rowPlayer->user->clanMembership)
                                                 <a href="#" onclick="showClanInfo('2_1');return false;" title="Alliance">
                                                     <img src="{{ asset('img/resource/tmp_clan.gif') }}" border="0" width="13" height="13" align="absmiddle">
                                                 </a>
                                             @endif
                                             <a>
                                                 <b onclick="userToTag('хаирман');return false;" title="Персональное сообщение" style="cursor:hand">
-                                                    <b class="kser0" title="">{{ $player->user->name }}&nbsp;[{{ $player->lvl }}]</b>
+                                                    <b class="kser0" title="">{{ $rowPlayer->user->name }}&nbsp;[{{ $rowPlayer->lvl }}]</b>
                                                 </b>
                                             </a>
                                             <a href="#" onclick="showUserInfo('%D1%85%D0%B0%D0%B8%D1%80%D0%BC%D0%B0%D0%BD', 'https://feo-dwar.com/');return false;" title="Информация о персонаже">
@@ -432,7 +443,7 @@
                                             </a>
                                         </span>
                                     </td>
-                                    <td align="center"><span class="">{{ data_get($player, $menu[$type]['column']) }}</span></td>
+                                    <td align="center"><span class="">{{ $rowValue }}</span></td>
                                 </tr>
                             @endforeach
                             </tbody>

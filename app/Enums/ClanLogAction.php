@@ -20,9 +20,11 @@ enum ClanLogAction: string
     case BONUS_POINTS_EARNED = 'bonus_points_earned';
     case SKILL_LEARNED       = 'skill_learned';
     case SKILL_UPGRADED      = 'skill_upgraded';
-    case QUEST_STARTED       = 'quest_started';
-    case QUEST_COMPLETED     = 'quest_completed';
-    case QUEST_CANCELLED     = 'quest_cancelled';
+    case QUEST_STARTED        = 'quest_started';
+    case QUEST_COMPLETED      = 'quest_completed';
+    case QUEST_CANCELLED      = 'quest_cancelled';
+    case TREASURY_DEPOSIT     = 'treasury_deposit';
+    case TREASURY_WITHDRAW    = 'treasury_withdraw';
 
     public function label(): string
     {
@@ -46,6 +48,8 @@ enum ClanLogAction: string
             self::QUEST_STARTED        => 'Клановый квест начат',
             self::QUEST_COMPLETED      => 'Клановый квест завершён',
             self::QUEST_CANCELLED      => 'Клановый квест отменён',
+            self::TREASURY_DEPOSIT     => 'Пополнение казны',
+            self::TREASURY_WITHDRAW    => 'Снятие из казны',
         };
     }
 }

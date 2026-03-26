@@ -36,6 +36,7 @@ enum ShareItemType: string
             self::ARTIFACT  => 'Артефакт',
             self::RECIPE    => 'Рецепт',
             self::CHEST     => 'Сундук',
+            self::EAT       => 'Еда',
             self::GIFT      => 'Подарок',
         };
     }

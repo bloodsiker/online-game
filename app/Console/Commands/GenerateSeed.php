@@ -931,7 +931,7 @@ class GenerateSeed extends Command
         $sItem4->price = 0;
         $sItem4->name = 'Изумрудный ключ';
         $sItem4->description = 'Это большой ключ с изумрудным украшением.';
-        $sItem4->image = 'https://skazanie.com/img-item/0068928e7d98.jpg';
+        $sItem4->image = '/img/resource/key.gif';
         $sItem4->is_weight = false;
         $sItem4->save();
 
@@ -1544,6 +1544,21 @@ class GenerateSeed extends Command
 
         $clanWarehouse->actions()->attach(4);
         $clanWarehouse->actions()->attach(5);
+
+
+        $locationBank = Location::find(46);
+        $bank = new Structure();
+        $bank->type = Structure::TYPE_BANK;
+        $bank->name = 'Банк';
+        $bank->location_id = $locationBank->id;
+        $bank->save();
+
+        $locationBank = Location::find(46);
+        $bank = new Structure();
+        $bank->type = Structure::TYPE_CLAN_BANK;
+        $bank->name = 'Клановая казна';
+        $bank->location_id = $locationBank->id;
+        $bank->save();
 
         $locationHeal = Location::find(27);
         $shop5 = new Structure();

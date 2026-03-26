@@ -164,6 +164,13 @@
 </head>
 <body class="bg">
 
+<div class="tbl-main_top-right-bg" style="position: absolute;width: 60px;height: 90px;top: 0;left: 0;">
+    <img src="{{ asset('img/bg/main_corner_left.png') }}" width="65" height="66" border="0">
+</div>
+<div class="tbl-main_top-right-bg" style="position: absolute;width: 60px;height: 90px;top: 0;right: 5px;">
+    <img src="{{ asset('img/bg/main_corner_right.png') }}" width="65" height="66" border="0">
+</div>
+
 <table cellpadding="0" cellspacing="0" width="100%" height="69%" border="0">
     <tbody>
     <tr class="tbl-main_top-bg" style="height: 73px">
@@ -536,7 +543,7 @@
                                 } else {
                                     mapWrapper.classList.add('hidden');
                                     mapArrow.classList.remove('open');
-                                    mapBtn.style.left = '-14px';
+                                    mapBtn.style.left = '-16px';
                                 }
                             }
 
@@ -660,7 +667,7 @@
     <tbody>
     <tr>
         <td>
-            <iframe id="chat-frame" height="100%" width="100%" frameborder="0" src="{{ route('chat') }}"></iframe>
+            <iframe id="chat-frame" height="100%" width="100%" frameborder="0" scrolling="no" src="{{ route('chat') }}"></iframe>
         </td>
     </tr>
     </tbody>

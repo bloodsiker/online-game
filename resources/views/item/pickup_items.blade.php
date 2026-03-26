@@ -3,107 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>Предметы на локации</title>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        html {
-            height: 100%;
-        }
+        * { font-size: 11px; }
+        html { height: 100%; }
         body {
             height: 100%;
             margin: 0;
             color: #000;
             font-family: Tahoma;
-            font-size: 14px;
         }
-        a {
-            color: #000000;
+        a { color: #000000; }
+        a:hover { color: #353434; }
+
+        .tbl-shp-sides.ls { background-position: left top; background-repeat: repeat-y; }
+        .tbl-shp-sides.rs { background-position: right top; background-repeat: repeat-y; }
+        .tbl-shp-sml.rt { background-position: 0 -25px; height: 22px; }
+        .tbl-shp-sml.tt { background-position: center -50px; background-repeat: repeat-x; height: 22px; }
+        .tbl-shp-sml.lt { background-position: 0 0; height: 22px; }
+        .tbl-shp-sml.lb { background-position: 0 -75px; }
+        .tbl-shp-sml.bb { background-position: center -125px; background-repeat: repeat-x; height: 18px; }
+        .tbl-shp-sml.rb { background-position: 0 -100px; }
+        .tbl-shp-sml {
+            background: url({{ asset('img/bg/tbl-shp-sml.png') }}) no-repeat;
+            font-size: 0;
         }
-        a:hover{
-            color: #353434
+        .tbl-shp-sides {
+            background: url({{ asset('img/bg/tbl-shp-sides.png') }}) no-repeat;
+            font-size: 0;
         }
-        .b {
-            background-color: #CEBBAA;
-        }
-        .tbgr {
-            background-color: #FADCC2;
-        }
-        .l0 {
-            background-color: #FFF8EA;
-        }
-        .l1 {
-            background-color: #FFFBF5;
-        }
-        .t0 {
-            background: url({{ asset('img/bg/table-header2.jpg') }}) repeat-x top left;
-            background-color: #EDD5C3;
+        .tbl-usi_bg {
+            background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
+            background-repeat: repeat;
         }
         .t1 {
-            background: url({{ asset('img/bg/table-header.jpg') }}) repeat-x top left;
-            background-color: #DFBBA3;
+            background: linear-gradient(to bottom, #f2c398, #fff0c1);
         }
-        td.itm {
-            padding: 0px 10px 0px 0px;
-            white-space: nowrap;
-        }
+        .l0 { background-color: #FFF8EA; }
+        .l1 { background-color: #FFFBF5; }
+        .border { background-color: #CEBBAA; }
+        .btn_1 { color: #461c0b !important; text-decoration: none; font-weight: 700; font-size: 11px; }
+
         img.itm {
             width: 50px;
             height: 50px;
-            border: 0px;
-            margin: 0px 10px 0px 0px;
-            padding: 0px;
+            border: 0;
             vertical-align: middle;
             border-right: 1px solid #CEBBAA;
+            margin-right: 8px;
+        }
+        .item-name {
+            font-weight: bold;
+            color: #3a1c0a;
+        }
+        .item-count {
+            color: #7a5030;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .empty-msg {
+            padding: 12px 10px;
+            color: #888;
+            font-style: italic;
+        }
+        .footer-row td {
+            padding: 4px 8px;
+        }
+        .msg {
+            padding: 5px 10px;
+            background: #fff8ea;
+            border-bottom: 1px solid #CEBBAA;
+            color: #461c0b;
         }
     </style>
 </head>
 <body>
 
-@if($message)
-    <p>{!! $message !!}</p>
-@endif
+<table cellspacing="0" cellpadding="10" width="100%" height="100%">
+    <tbody>
+    <tr valign="top">
+        <td>
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                <tr height="22">
+                    <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+                    <td class="tbl-shp-sml tt" valign="top" align="left"></td>
+                    <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
+                </tr>
+                <tr>
+                    <td class="tbl-shp-sides ls">&nbsp;</td>
+                    <td class="tbl-usi_bg" valign="top" style="padding: 4px 0;">
 
-@if($itemsOnLocation->count())
-    <table cellspacing="1" cellpadding="1" border="0" class="b">
-        <tbody>
-            <tr>
-                <td class="tbgr">
-                    <table cellspacing="1" cellpadding="5" border="0" width="100%" class="b">
-                        <tbody>
-                        @foreach($itemsOnLocation as $item)
-                            <tr class="l0">
-                                <td class="itm">
-                                    <img src="{{ $item->item->itemInfo->image }}" class="itm">{{ $item->item->getName() }}
-                                </td>
-                                <td width="30" align="center">
-                                    x{{ $item->count }}
-                                </td>
-                                <td>
-                                    @if($item->item->itemInfo->type === \App\Enums\ShareItemType::CHEST)
-                                        @if($item->item->is_open)
-                                            <a href="{{ route('items.view_chest', ['id' => $item->item->id]) }}">заглянуть</a>&nbsp;»
+                        <table border="0" cellspacing="1" cellpadding="0" class="border" style="white-space: nowrap;">
+                            <tbody>
+
+                            {{-- Header --}}
+                            <tr class="t1">
+                                <td colspan="3" style="padding: 4px 10px;">
+                                    <b style="color:#461c0b;">
+                                        @if($itemsOnLocation->count())
+                                            Предметы на локации ({{ $itemsOnLocation->count() }})
                                         @else
-                                            <a href="{{ route('items.open_chest', ['id' => $item->item->id]) }}">открыть</a>&nbsp;»
+                                            Предметы на локации
                                         @endif
-                                    @else
-                                        <a href="{{ route('items.pick_up', ['id' => $item->item->id]) }}">поднять</a>&nbsp;»
-                                    @endif
+                                    </b>
                                 </td>
                             </tr>
-                        @endforeach
-                        <tr class="t0">
-                            <td colspan="3"><b>Bceгo: {{ $itemsOnLocation->count() }}</b></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-@endif
 
-<p><a href="{{ route('backpack') }}">Список ваших вещей</a>  »</p>
+                            {{-- Message --}}
+                            @if($message)
+                                <tr>
+                                    <td colspan="3" class="msg">{!! $message !!}</td>
+                                </tr>
+                            @endif
 
-<p>« <a href="{{ route('location') }}" target="game">Описание местности</a></p>
+                            @forelse($itemsOnLocation as $i => $item)
+                                <tr class="{{ $i % 2 === 0 ? 'l0' : 'l1' }}">
+                                    <td style="white-space: nowrap;">
+                                        <img src="{{ $item->item->itemInfo->image }}" class="itm">
+                                        <span class="item-name">{{ $item->item->getName() }}</span>
+                                    </td>
+                                    <td style="padding: 3px 8px;" align="center">
+                                        <span class="item-count">x{{ $item->count }}</span>
+                                    </td>
+                                    <td style="padding: 3px 8px;" align="right">
+                                        @if($item->item->itemInfo->type === \App\Enums\ShareItemType::CHEST)
+                                            @if($item->item->is_open)
+                                                <b class="butt2 pointer"><b>
+                                                    <input value="Заглянуть" type="button"
+                                                           onclick="location.href='{{ route('items.view_chest', ['id' => $item->item->id]) }}'">
+                                                </b></b>
+                                            @else
+                                                <b class="butt2 pointer"><b>
+                                                    <input value="Открыть" type="button"
+                                                           onclick="location.href='{{ route('items.open_chest', ['id' => $item->item->id]) }}'">
+                                                </b></b>
+                                            @endif
+                                        @else
+                                            <b class="butt2 pointer">
+                                                <b>
+                                                    <input value="Поднять" type="button" onclick="location.href='{{ route('items.pick_up', ['id' => $item->item->id]) }}'">
+                                                </b>
+                                            </b>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="empty-msg">Больше ничего нет...</td>
+                                </tr>
+                            @endforelse
+
+                            {{-- Footer --}}
+                            <tr class="footer-row t1">
+                                <td colspan="3">
+                                    <b class="butt2 pointer">
+                                        <b>
+                                            <input value="« Описание местности" type="button" onclick="window.parent.sendDataToGame('{{ route('location') }}')">
+                                        </b>
+                                    </b>
+                                    &nbsp;
+                                    <b class="butt2 pointer">
+                                        <b>
+                                            <input value="Рюкзак" type="button" onclick="window.parent.sendDataToGame('{{ route('backpack') }}')">
+                                        </b>
+                                    </b>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
+                    </td>
+                    <td class="tbl-shp-sides rs">&nbsp;</td>
+                </tr>
+                <tr height="18">
+                    <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+                    <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+                    <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
 <script>
     document.addEventListener('keydown', function(event) {

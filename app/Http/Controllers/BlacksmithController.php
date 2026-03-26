@@ -7,12 +7,21 @@ use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
+use App\Services\ItemTooltip\ItemTooltipCollector;
+use App\Services\ItemTooltip\ItemTooltipRenderer;
+use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
+use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class BlacksmithController extends Controller
 {
+    public function __construct(
+        private readonly ItemTooltipCollector $collector,
+        private readonly ItemTooltipRenderer $renderer,
+    ) {}
+
     public function index(Request $request, $id)
     {
         $user = Auth::user();
@@ -45,7 +54,15 @@ class BlacksmithController extends Controller
                 ];
             })->toArray();
 
-        return view('blacksmith.kraft', compact('blacksmith', 'user', 'recipes', 'resources'));
+        $ingredientItems = $recipes->flatMap(fn($r) => $r->item->itemInfo->recipe?->items ?? collect());
+
+        $this->collector
+            ->collectFrom(new BackpackItemTooltipStrategy($recipes))
+            ->collectFrom(new ShareItemTooltipStrategy($ingredientItems));
+
+        $itemTooltipScript = $this->renderer->render($this->collector->all());
+
+        return view('blacksmith.kraft', compact('blacksmith', 'user', 'recipes', 'resources', 'itemTooltipScript'));
     }
 
     public function kraftItem(Request $request, $id)

@@ -34,45 +34,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-                <tbody>
-                @php
-                    $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-                    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-                    $btnRight1 = 'img/bg/btn/btn-right1.gif';
-                    $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-                    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-                    $btnRight2 = 'img/bg/btn/btn-right2.gif';
-                @endphp
-                <tr height="21">
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('clan.warehouse', ['id' => $clanWarehouse->id]) }}" class="btn_1">Положить</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-                    <td width="2%" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('clan.warehouse.take', ['id' => $clanWarehouse->id]) }}" class="btn_2">Забрать</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('clan.warehouse.logs', ['id' => $clanWarehouse->id]) }}" class="btn_1">Журнал</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('clan.member') }}" class="btn_1">Клан</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-                </tr>
-                </tbody>
-            </table>
+            @include('clan.warehouse._tabs', ['activeTab' => 'take'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>

@@ -24,6 +24,7 @@ class Structure extends Model
     public const TYPE_WAREHOUSE = 'warehouse';
     public const TYPE_CLAN_WAREHOUSE = 'clan_warehouse';
     public const TYPE_BANK = 'bank';
+    public const TYPE_CLAN_BANK = 'clan_bank';
     public const TYPE_BLACKSMITH = 'blacksmith';
     public const TYPE_EXCHANGE = 'exchange';
 
@@ -34,6 +35,7 @@ class Structure extends Model
         self::TYPE_WAREHOUSE => 'Хранилище',
         self::TYPE_CLAN_WAREHOUSE => 'Клановое хранилище',
         self::TYPE_BANK => 'Банк',
+        self::TYPE_CLAN_BANK => 'Клановая казна',
         self::TYPE_BLACKSMITH => 'Кузня',
         self::TYPE_EXCHANGE => 'Обмен',
     ];
@@ -130,5 +132,15 @@ class Structure extends Model
     public function isBlacksmith(): bool
     {
         return $this->type === self::TYPE_BLACKSMITH;
+    }
+
+    public function isBank(): bool
+    {
+        return $this->type === self::TYPE_BANK;
+    }
+
+    public function isClanBank(): bool
+    {
+        return $this->type === self::TYPE_CLAN_BANK;
     }
 }

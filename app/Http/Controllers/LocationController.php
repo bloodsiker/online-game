@@ -52,7 +52,7 @@ class LocationController extends Controller
 
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
-        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator'));
+        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator', 'user'));
     }
 
     public function moveTo($direction)
@@ -76,9 +76,10 @@ class LocationController extends Controller
             'location'        => $location,
             'battle'          => $battle,
             'monsterOnLocation' => $monsterOnLocation,
+            'user'            => $user,
             'player'          => $user->player,
             'playerDecorator' => $this->statService->resolve($user->player),
-            'speedModifier'   => $result->speedModifier,
+            'speedModifier'    => $result->speedModifier,
         ]);
     }
 

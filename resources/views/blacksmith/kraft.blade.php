@@ -268,7 +268,10 @@
                                                     <td>
                                                     <span class="collection-slot">
                                                         <span class="collection-slot__img">
-                                                            <a href="{{ $recipe->item->id }}" class="collection-resource redd">
+                                                            <a href="{{ $recipe->item->id }}" class="collection-resource redd"
+                                                               data-id="{{ $recipe->item->id }}"
+                                                               onmouseover="showItemInfo(this,event,2)"
+                                                               onmouseout="showItemInfo(this,event,0)">
                                                                 <img src="{{ $recipe->item->itemInfo->image }}" class="collection-resource-img" alt="">
                                                             </a>
                                                         </span>
@@ -292,7 +295,10 @@
                                                             @endphp
                                                             <span class="collection-slot @if($active)active @endif" style="cursor:pointer;">
                                                                 <span class="collection-slot__img @if(!$active)grayscale @endif">
-                                                                    <a href="">
+                                                                    <a href=""
+                                                                       data-id="{{ $item->id }}"
+                                                                       onmouseover="showItemInfo(this,event,2)"
+                                                                       onmouseout="showItemInfo(this,event,0)">
                                                                         <img src="{{ $item->image }}" class="collection-resource-img" alt="">
                                                                     </a>
                                                                 </span>
@@ -395,6 +401,10 @@
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
 </script>
+
+{!! $itemTooltipScript !!}
+
+<script src="{{ asset('js/item_tooltip.js') }}"></script>
 
 </body>
 </html>

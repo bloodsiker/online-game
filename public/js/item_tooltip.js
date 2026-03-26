@@ -42,6 +42,52 @@ let showItemInfo = (obj, evnt, show) => {
         document.onmousemove = function(){}
         return;
     }
+}
+
+let showItemInfoOld = (obj, evnt, show) => {
+    // Сортировка в рюкзаке
+    if (typeof(iam_sorting_now) !== 'undefined' && iam_sorting_now) {
+        show = 0;
+    }
+    var itemId = obj.dataset.id;
+    if (!itemId) itemId = 'AA_' + obj.getAttribute('artifact_id');
+    var itemInfo = getTopWindow().gebi('artifact_alt');
+
+    if (!itemInfo) return;
+
+    var act1 = obj.getAttribute('act1');
+    var act2 = obj.getAttribute('act2');
+    var act3 = obj.getAttribute('act3');
+    if (act3 == 0 || act3 === null) act3 = ''
+    if (act1 == null) act1 = 0;
+
+    if (show === 2) {
+        document.onmousemove = function(e) {showItemInfo(obj, e||event, 1);}
+
+        if (itemTooltip !== undefined && itemTooltip[itemId] !== undefined) {
+            if (!itemInfo.dataset.id || obj.dataset.id != itemInfo.dataset.id) {
+                if (itemTooltip[itemId] && itemTooltip[itemId] !== undefined) {
+                    itemInfo.innerHTML = renderItemInfo(itemId);
+                }
+                itemInfo.setAttribute('data-id', obj.dataset.id);
+            }
+            itemInfo.style.display = 'block';
+        } else {
+            itemInfo.style.display = 'none';
+        }
+
+        if (act1 || act2 || act3) {
+            _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
+        }
+    }
+    if (!show) {
+        if (act1 || act2 || act3) {
+            _background(obj, '/img/icon/d.gif');
+        }
+        itemInfo.style.display = 'none';
+        document.onmousemove = function(){}
+        return;
+    }
 
     var coor = getIframeShift();
     var ex = evnt.clientX+coor.left;

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ShareItemType;
 use App\Models\Auction\Auction;
+use App\Models\Auction\AuctionClaim;
 use App\Models\Auction\AuctionHistory;
+use App\Models\Auction\AuctionOrder;
 use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -313,6 +317,306 @@ class AuctionController extends Controller
             ->get();
 
         return view('shop.sell', compact('shop', 'user', 'itemsToSell'));
+    }
+
+    public function exchange(Request $request, int $id): mixed
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $query = AuctionOrder::where('structure_id', $auction->id)
+            ->where('user_id', '!=', $user->id)
+            ->with(['shareItem', 'user']);
+
+        $matchingOnly = $request->input('filter.matching', '1') === '1';
+        if ($matchingOnly) {
+            $userShareItemIds = Backpack::select('items.share_item_id')
+                ->join('items', 'backpacks.item_id', '=', 'items.id')
+                ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+                ->where('backpacks.user_id', $user->id)
+                ->where('backpacks.equipped', 0)
+                ->where('share_items.is_sell', 1)
+                ->pluck('items.share_item_id');
+
+            $query->whereIn('share_item_id', $userShareItemIds);
+        }
+
+        if ($request->filled('filter.name')) {
+            $query->whereHas('shareItem', fn ($q) => $q->where('name', 'like', '%' . $request->input('filter.name') . '%'));
+        }
+
+        if ($request->filled('filter.type')) {
+            $query->whereHas('shareItem', fn ($q) => $q->where('type', $request->input('filter.type')));
+        }
+
+        if ($request->filled('filter.count_min')) {
+            $query->where('count', '>=', (int) $request->input('filter.count_min'));
+        }
+
+        if ($request->filled('filter.count_max')) {
+            $query->where('count', '<=', (int) $request->input('filter.count_max'));
+        }
+
+        $orders = $query->orderByDesc('price')->get();
+        $filter = $request->input('filter', []);
+
+        return view('auction.exchange', compact('auction', 'user', 'orders', 'filter'));
+    }
+
+    public function myOrders(int $id): mixed
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $orders = AuctionOrder::where(['structure_id' => $auction->id, 'user_id' => $user->id])
+            ->with('shareItem')
+            ->get();
+
+        return view('auction.my_orders', compact('auction', 'user', 'orders'));
+    }
+
+    public function newOrder(Request $request, int $id): mixed
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $selectedItem = null;
+        if ($request->has('siid')) {
+            $selectedItem = ShareItem::where('id', $request->get('siid'))->where('is_sell', 1)->first();
+        }
+
+        $shareItems = ShareItem::where('is_sell', 1)->orderBy('name')->get();
+
+        return view('auction.new_order', compact('auction', 'user', 'shareItems', 'selectedItem'));
+    }
+
+    public function newOrderSave(Request $request, int $id): RedirectResponse
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $shareItemId = (int) $request->input('form.share_item_id');
+        $count = max(1, (int) $request->input('form.count', 1));
+        $price = max(1, (int) $request->input('form.price', 1));
+
+        $shareItem = ShareItem::where('id', $shareItemId)->where('is_sell', 1)->first();
+        if (!$shareItem) {
+            return $this->redirectWithMessage('Предмет не найден.');
+        }
+
+        $totalCost = 100 + ($count * $price);
+        if ($user->money < $totalCost) {
+            return $this->redirectWithMessage(sprintf('Недостаточно монет. Нужно %d (100 комиссия + %d эскроу).', $totalCost, $count * $price));
+        }
+
+        DB::transaction(function () use ($user, $auction, $shareItem, $count, $price, $request) {
+            $user->decrement('money', 100 + ($count * $price));
+
+            AuctionOrder::create([
+                'user_id'       => $user->id,
+                'structure_id'  => $auction->id,
+                'share_item_id' => $shareItem->id,
+                'count'         => $count,
+                'price'         => $price,
+                'is_anonymous'  => $request->input('form.is_anonymous') ? 1 : 0,
+            ]);
+
+            session()->flash('message', sprintf('Заявка на покупку «%s» (%d шт. по %d) создана', $shareItem->name, $count, $price));
+        });
+
+        return redirect()->route('auction.my_orders', ['id' => $auction->id]);
+    }
+
+    public function cancelOrder(int $id, int $orderId): RedirectResponse
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $order = AuctionOrder::where(['id' => $orderId, 'user_id' => $user->id])->first();
+        if (!$order instanceof AuctionOrder) {
+            return $this->redirectWithMessage('Заявка не найдена.');
+        }
+
+        DB::transaction(function () use ($user, $order) {
+            $refund = $order->count * $order->price;
+            $user->increment('money', $refund);
+            session()->flash('message', sprintf('Заявка отменена. Возвращено %d монет', $refund));
+            $order->delete();
+        });
+
+        return redirect()->route('auction.my_orders', ['id' => $auction->id]);
+    }
+
+    public function fulfillOrder(Request $request, int $id, int $orderId): RedirectResponse
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $order = AuctionOrder::where(['id' => $orderId, 'structure_id' => $id])
+            ->lockForUpdate()
+            ->first();
+
+        if (!$order instanceof AuctionOrder) {
+            return $this->redirectWithMessage('Заявка не найдена или уже выполнена.');
+        }
+
+        if ($order->user_id === $user->id) {
+            return $this->redirectWithMessage('Нельзя выполнить собственную заявку.');
+        }
+
+        $sellCount = max(1, (int) $request->get('count', 1));
+        $sellCount = min($sellCount, $order->count);
+
+        $slotItem = Backpack::select('backpacks.*')
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('items.share_item_id', $order->share_item_id)
+            ->where('backpacks.equipped', 0)
+            ->with('item')
+            ->first();
+
+        if (!$slotItem instanceof Backpack) {
+            return $this->redirectWithMessage('У вас нет этого предмета в сумке.');
+        }
+
+        $sellCount = min($sellCount, $slotItem->count);
+        $totalPayment = $sellCount * $order->price;
+        $fee = $this->recalculate($totalPayment);
+
+        if ($user->money < $fee) {
+            return $this->redirectWithMessage(sprintf('Недостаточно монет для оплаты налога (%d монет).', $fee));
+        }
+
+        DB::transaction(function () use ($user, $order, $slotItem, $sellCount, $totalPayment, $fee, $auction) {
+            // Снимаем предметы с продавца
+            if ($slotItem->count === $sellCount) {
+                Backpack::where(['user_id' => $user->id, 'item_id' => $slotItem->item_id])->delete();
+            } else {
+                $slotItem->decrement('count', $sellCount);
+            }
+
+            // Продавец получает деньги, платит налог
+            $user->increment('money', $totalPayment);
+            $user->decrement('money', $fee);
+
+            // Резервируем предметы для покупателя (claim — он заберёт сам)
+            $shareItem = $order->shareItem;
+
+            if ($slotItem->count === $sellCount) {
+                // Полный перенос — используем существующий item_id
+                $claimItemId = $slotItem->item_id;
+            } else {
+                // Частичный — создаём новый Item-запись для покупателя
+                $newItem = Item::create(['share_item_id' => $order->share_item_id]);
+                $claimItemId = $newItem->id;
+            }
+
+            AuctionClaim::create([
+                'user_id'      => $order->user_id,
+                'structure_id' => $auction->id,
+                'item_id'      => $claimItemId,
+                'count'        => $sellCount,
+            ]);
+
+            // Обновляем или удаляем заявку
+            $order->count -= $sellCount;
+            if ($order->count <= 0) {
+                $order->delete();
+            } else {
+                $order->save();
+            }
+
+            AuctionHistory::create([
+                'buy_user_id'  => $order->user_id,
+                'sell_user_id' => $user->id,
+                'structure_id' => $auction->id,
+                'item_id'      => $slotItem->item_id,
+                'count'        => $sellCount,
+                'price'        => $totalPayment,
+            ]);
+
+            session()->flash('message', sprintf(
+                'Продано «%s» %d шт. Получено %d монет (налог %d)',
+                $shareItem->name, $sellCount, $totalPayment - $fee, $fee
+            ));
+        });
+
+        return redirect()->route('auction.exchange', ['id' => $auction->id]);
+    }
+
+    public function claims(int $id): mixed
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $claims = AuctionClaim::where(['user_id' => $user->id, 'structure_id' => $auction->id])
+            ->with('item')
+            ->get();
+
+        return view('auction.claims', compact('auction', 'user', 'claims'));
+    }
+
+    public function claimTake(int $id, int $claimId): RedirectResponse
+    {
+        $user = Auth::user();
+        $auction = Structure::find($id);
+
+        if (!$auction) {
+            return $this->redirectWithMessage('Построение не найдено.');
+        }
+
+        $claim = AuctionClaim::where(['id' => $claimId, 'user_id' => $user->id])->first();
+        if (!$claim instanceof AuctionClaim) {
+            return $this->redirectWithMessage('Предмет не найден.');
+        }
+
+        DB::transaction(function () use ($user, $claim) {
+            $shareItem = $claim->item->itemInfo;
+
+            $existingSlot = Backpack::select('backpacks.*')
+                ->join('items', 'backpacks.item_id', '=', 'items.id')
+                ->where('backpacks.user_id', $user->id)
+                ->where('items.share_item_id', $shareItem->id)
+                ->first();
+
+            if ($existingSlot instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
+                $existingSlot->increment('count', $claim->count);
+            } else {
+                $user->backpack()->attach($claim->item_id, ['equipped' => 0, 'count' => $claim->count]);
+            }
+
+            $claim->delete();
+        });
+
+        return redirect()->route('auction.claims', ['id' => $auction->id]);
     }
 
     private function redirectWithMessage(string $message): RedirectResponse

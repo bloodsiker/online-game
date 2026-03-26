@@ -49,6 +49,7 @@
         }
         .rep-card-header {
             background: url({{ asset('img/bg/table-header.jpg') }}) repeat-x top left #DFBBA3;
+            border-bottom: 1px solid #ccc;
             padding: 5px 10px;
             display: flex;
             justify-content: space-between;

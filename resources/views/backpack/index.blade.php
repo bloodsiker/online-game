@@ -586,8 +586,7 @@
                                         }
                                     </script>
                                     <form id="cart_amount_form">
-                                        <div id="cart_amount_div"
-                                             style="display: none; position: fixed; z-index: 9999;">
+                                        <div id="cart_amount_div" style="display: none; position: fixed; z-index: 9999;">
                                             <div class="popup_global_container">
                                                 <div class="popup-top-left">
                                                     <div class="popup-top-right">
@@ -658,16 +657,14 @@
                                                                                                            id="cart_amount_all"></b></b>
                                                                     </div>
                                                                 </div>
-
-                                                                <div
-                                                                    style="clear: both; margin-top: 10px; text-align: center;">
-                                                                    <span id="ask_confirm_ok_container"></span>
-                                                                    <b class="butt1 pointer"><b><input value="Отмена"
-                                                                                                       type="button"
-                                                                                                       onclick="closeDropPopup();"
-                                                                                                       style="width: 100px;"
-                                                                                                       class="redd"></b></b>
-                                                                </div>
+                                                            </div>
+                                                            <div style="clear: both; margin-top: 10px; text-align: center; padding: 0 11px;">
+                                                                <span id="ask_confirm_ok_container"></span>
+                                                                <b class="butt1 pointer"><b><input value="Отмена"
+                                                                                                   type="button"
+                                                                                                   onclick="closeDropPopup();"
+                                                                                                   style="width: 100px;"
+                                                                                                   class="redd"></b></b>
                                                             </div>
                                                         </div>
 
@@ -688,60 +685,55 @@
                                         var ask_amount_sell_title = null;
 
                                         var counter_controller = {
-                                            left: function (e) {
-                                                var left = $(e);
-                                                if (left.hasClass('left-disabled')) return false;
-                                                var input = left.parent().find('input');
-                                                var value = input.val();
-                                                value--;
-                                                if (value >= 1) input.val(value);
+                                            _input: function (el) {
+                                                return el.parentNode.querySelector('input');
+                                            },
+                                            _inner: function (el) {
+                                                // el may be arrow span or input — climb to .b-input__inner
+                                                var node = el.parentNode;
+                                                while (node && !node.classList.contains('b-input__inner')) node = node.parentNode;
+                                                return node;
+                                            },
+                                            left: function (el) {
+                                                if (el.classList.contains('left-disabled')) return false;
+                                                var input = counter_controller._input(el);
+                                                var value = parseInt(input.value) - 1;
+                                                if (value >= 1) input.value = value;
                                                 counter_controller.change(input);
                                                 return false;
                                             },
-                                            right: function (e) {
-                                                var right = $(e);
-                                                if (right.hasClass('right-disabled')) return false;
-                                                var input = right.parent().find('input');
-                                                var value = input.val();
-                                                value++;
-                                                if (value <= input.data('max-value')) input.val(value);
+                                            right: function (el) {
+                                                if (el.classList.contains('right-disabled')) return false;
+                                                var input = counter_controller._input(el);
+                                                var max   = parseInt(input.getAttribute('data-max-value')) || 1;
+                                                var value = parseInt(input.value) + 1;
+                                                if (value <= max) input.value = value;
                                                 counter_controller.change(input);
                                                 return false;
                                             },
                                             keypress: function (e) {
-                                                var key = e.keyCode || e.which,
-                                                    el = $(this);
-                                                if (key == 38) { // up
-                                                    counter_controller.right(el.parent().parent().find('.arrow.right'));
-                                                } else if (key == 40) { // down
-                                                    counter_controller.left(el.parent().parent().find('.arrow.left'));
+                                                var key = e.keyCode || e.which;
+                                                if (key === 38) {
+                                                    counter_controller.right(this.parentNode.querySelector('.arrow.right'));
+                                                } else if (key === 40) {
+                                                    counter_controller.left(this.parentNode.querySelector('.arrow.left'));
                                                 } else {
-                                                    counter_controller.change(el);
+                                                    counter_controller.change(this);
                                                 }
                                                 return false;
                                             },
-                                            change: function (e) {
-                                                var input = $(e).parent().find('input'),
-                                                    value = input.val(),
-                                                    min = input.data('min-value') || 0;
-                                                max = input.data('max-value') || 1;
-                                                if (!parseInt(value)) value = 1;
-                                                if (value >= max) {
-                                                    value = max;
-                                                    $(e).parent().parent().find('.arrow.right').addClass('right-disabled')
-                                                }
-                                                if (value <= min) {
-                                                    value = min;
-                                                    $(e).parent().parent().find('.arrow.left').addClass('left-disabled')
-                                                }
-                                                if (value > min) {
-                                                    $(e).parent().parent().find('.arrow.left').removeClass('left-disabled')
-                                                }
-                                                if (value < max) {
-                                                    $(e).parent().parent().find('.arrow.right').removeClass('right-disabled')
-                                                }
-                                                input.val(value);
-                                                input.trigger('update_value', input);
+                                            change: function (el) {
+                                                var inner = counter_controller._inner(el);
+                                                if (!inner) return false;
+                                                var input = inner.querySelector('input');
+                                                var min   = parseInt(input.getAttribute('data-min-value')) || 0;
+                                                var max   = parseInt(input.getAttribute('data-max-value')) || 1;
+                                                var value = parseInt(input.value) || 1;
+                                                if (value >= max) { value = max; inner.querySelector('.arrow.right').classList.add('right-disabled'); }
+                                                if (value <= min) { value = min; inner.querySelector('.arrow.left').classList.add('left-disabled'); }
+                                                if (value > min)  { inner.querySelector('.arrow.left').classList.remove('left-disabled'); }
+                                                if (value < max)  { inner.querySelector('.arrow.right').classList.remove('right-disabled'); }
+                                                input.value = value;
                                                 return false;
                                             }
                                         }
@@ -1122,12 +1114,7 @@
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @if($data->hasWeapon())
                                                                         @foreach($data->getWeapon() as $item)
-                                                                            <li id="AA_23867698" aid="art_23867698" sn="0" ord="0"
-                                                                                data-id="23867698" data-dateti="23867698"
-                                                                                data-quality="2" data-kind="" data-ttl="-1767624247"
-                                                                                data-title="Эликсир исцеления травм" data-noweight="0"
-                                                                                class="item ui-sortable-handle" style="opacity: 1;">
-
+                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
 
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
@@ -1160,7 +1147,6 @@
                                                                         @foreach($data->getShield() as $item)
                                                                             <li class="item ui-sortable-handle" style="opacity: 1;">
 
-
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
@@ -1174,9 +1160,6 @@
                                                                                             @endif
                                                                                             <span
                                                                                                 style="position: absolute;right: -1px;top: 41px;"
-                                                                                                act1="5" act2="5" act3="0" rune_h="0"
-                                                                                                aid="23867698" art_id="" cnt="1"
-                                                                                                div_id="AA_23867698" psell="16"
                                                                                                 onmouseover="showItemInfo(this,event,2)"
                                                                                                 onmouseout="showItemInfo(this,event,0)"
                                                                                                 valign="bottom">
@@ -2011,8 +1994,10 @@
             qtyRow.style.display = '';
             var input = gebi('cart_amount');
             input.value = 1;
-            input.dataset.minValue = 1;
-            input.dataset.maxValue = count;
+            input.setAttribute('data-min-value', 1);
+            input.setAttribute('data-max-value', count);
+            input.parentNode.querySelector('.arrow.left').classList.add('left-disabled');
+            input.parentNode.querySelector('.arrow.right').classList.remove('right-disabled');
             gebi('cart_amount_cnt').textContent = count;
             gebi('cart_amount_all').onclick = function () {
                 gebi('cart_amount').value = count;

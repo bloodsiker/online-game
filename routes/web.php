@@ -9,6 +9,8 @@ use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\ClanSkillController;
+use App\Http\Controllers\BankController;
+use App\Http\Controllers\ClanTreasuryController;
 use App\Http\Controllers\ClanWarehouseController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ExchangeController;
@@ -101,6 +103,14 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/auction/{id}/my-lot', [AuctionController::class, 'myLot'])->name('auction.my_lot');
     Route::post('/auction/{id}/new-lot/save', [AuctionController::class, 'newLotSave'])->name('auction.new_lot.save');
     Route::get('/auction/{id}/new-lot', [AuctionController::class, 'newLot'])->name('auction.new_lot');
+    Route::get('/auction/{id}/exchange', [AuctionController::class, 'exchange'])->name('auction.exchange');
+    Route::get('/auction/{id}/my-orders', [AuctionController::class, 'myOrders'])->name('auction.my_orders');
+    Route::post('/auction/{id}/new-order/save', [AuctionController::class, 'newOrderSave'])->name('auction.new_order.save');
+    Route::get('/auction/{id}/new-order', [AuctionController::class, 'newOrder'])->name('auction.new_order');
+    Route::get('/auction/{id}/order/cancel/{orderId}', [AuctionController::class, 'cancelOrder'])->name('auction.order.cancel');
+    Route::get('/auction/{id}/order/fulfill/{orderId}', [AuctionController::class, 'fulfillOrder'])->name('auction.order.fulfill');
+    Route::get('/auction/{id}/claims', [AuctionController::class, 'claims'])->name('auction.claims');
+    Route::get('/auction/{id}/claim/take/{claimId}', [AuctionController::class, 'claimTake'])->name('auction.claim.take');
     Route::get('/auction/{id}', [AuctionController::class, 'index'])->name('auction');
 
     Route::get('/shop/{id}/buy-item/{itemId}', [ShopController::class, 'buyItem'])->name('shop.buy_item');
@@ -151,6 +161,10 @@ Route::post('/clan/skills/{id}/learn', [ClanSkillController::class, 'learn'])->n
 Route::match(['get', 'post'], '/clan-warehouse/{id}', [ClanWarehouseController::class, 'put'])->name('clan.warehouse');
 Route::match(['get', 'post'], '/clan-warehouse/{id}/take', [ClanWarehouseController::class, 'take'])->name('clan.warehouse.take');
 Route::get('/clan-warehouse/{id}/logs', [ClanWarehouseController::class, 'logs'])->name('clan.warehouse.logs');
+Route::match(['get', 'post'], '/clan-warehouse/{id}/treasury', [ClanTreasuryController::class, 'index'])->name('clan.treasury');
+
+Route::match(['get', 'post'], '/bank', [BankController::class, 'index'])->name('bank');
+Route::get('/bank/lookup', [BankController::class, 'lookup'])->name('bank.lookup');
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 

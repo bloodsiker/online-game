@@ -269,7 +269,7 @@
                                                         </div>
                                                     @endif
 
-                                                    @if($structure->isClanWarehouse())
+                                                    @if($structure->isClanWarehouse() && $user->clanMembership)
                                                         <div class="structures" style="margin: 5px">
                                                             <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ route('clan.warehouse', ['id' => $structure->id]) }}" type="submit">{{ $structure->name }}</button></span></span>
                                                             @if($structure->actions->count())
@@ -285,6 +285,18 @@
                                                                     @endforeach
                                                                 </ul>
                                                             @endif
+                                                        </div>
+                                                    @endif
+
+                                                    @if($structure->isBank())
+                                                        <div class="structures" style="margin: 5px">
+                                                            <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ route('bank', ['id' => $structure->id]) }}" type="submit">{{ $structure->name }}</button></span></span>
+                                                        </div>
+                                                    @endif
+
+                                                    @if($structure->isClanBank() && $user->clanMembership)
+                                                        <div class="structures" style="margin: 5px">
+                                                            <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ route('clan.treasury', ['id' => $structure->id]) }}" type="submit">{{ $structure->name }}</button></span></span>
                                                         </div>
                                                     @endif
 

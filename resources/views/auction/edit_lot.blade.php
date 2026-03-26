@@ -182,6 +182,26 @@
                         <a id="center_3" href="{{ route('auction.new_lot', ['id' => $auction->id]) }}" title="Новый лот" class="btn_1">Новый лот</a></td>
                     <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="60" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('auction.exchange', ['id' => $auction->id]) }}" title="Биржа" class="btn_1">Биржа</a></td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="85" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('auction.my_orders', ['id' => $auction->id]) }}" title="Мои заявки" class="btn_1">Мои заявки</a></td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="90" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('auction.new_order', ['id' => $auction->id]) }}" title="Новая заявка" class="btn_1">Новая заявка</a></td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('auction.claims', ['id' => $auction->id]) }}" title="Получить товары" class="btn_1">Получить</a></td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
                     <td></td>
 
                     <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>

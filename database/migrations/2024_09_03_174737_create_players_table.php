@@ -59,6 +59,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('player_id')->nullable()->after('id');
             $table->integer('money')->default(0);
+            $table->unsignedBigInteger('bank_balance')->default(0);
+            $table->string('bank_account', 12)->nullable()->unique();
             $table->integer('diamond')->default(0);
             $table->integer('warehouse_count')->default(50);
             $table->integer('bag_count')->default(25);

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('lvl')->default(1);
             $table->unsignedInteger('points')->default(0);
+            $table->unsignedBigInteger('treasury')->default(0);
             $table->unsignedInteger('warehouse_capacity')->default(50);
             $table->string('icon')->nullable();
             $table->foreignId('owner_id')->constrained('users');
@@ -88,6 +89,17 @@ return new class extends Migration
             $table->unsignedInteger('count');
             $table->timestamps();
         });
+
+        Schema::create('clan_treasury_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('clan_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('structure_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('action'); // deposit / withdraw
+            $table->unsignedBigInteger('amount');
+            $table->unsignedBigInteger('balance_after');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -95,6 +107,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('clan_treasury_logs');
         Schema::dropIfExists('clan_warehouse_logs');
         Schema::dropIfExists('clan_warehouses');
         Schema::dropIfExists('clan_logs');

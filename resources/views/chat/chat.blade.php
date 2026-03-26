@@ -4,13 +4,21 @@
     <meta charset="UTF-8">
     <title>Чат</title>
     <style>
+        html {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        html::-webkit-scrollbar { display: none; }
         body {
             margin: 0;
             background-color: #ffe4aa;
             color: #000;
             font-family: Tahoma;
             font-size: 12px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
+        body::-webkit-scrollbar { display: none; }
         .chat-area {
             width: 100%;
             min-height: 100vh;
