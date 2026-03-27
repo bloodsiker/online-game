@@ -10,28 +10,25 @@ use App\Models\Clan\ClanWarehouse;
 use App\Models\Clan\ClanWarehouseLog;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\ItemTooltipRenderer;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\ClanWarehouseItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\WarehouseLogItemTooltipStrategy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ClanWarehouseController extends Controller
 {
     public function __construct(
         protected readonly ItemTooltipCollector $collector,
-        protected readonly ItemTooltipRenderer $renderer,
-    ) {
-    }
+    ) {}
+
     public function put(Request $request, int $id)
     {
         /** @var \App\Models\User $user */
-        $user       = Auth::user();
+        $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
-        if (!$clanWarehouse->isClanWarehouse()) {
+        if (! $clanWarehouse->isClanWarehouse()) {
             abort(404);
         }
 
@@ -39,25 +36,28 @@ class ClanWarehouseController extends Controller
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::DEPOSIT)) {
+        if (! $membership->role->hasPermission(ClanPermission::DEPOSIT)) {
             session()->flash('message', 'У вас нет прав класть предметы в хранилище клана.');
+
             return redirect()->route('location');
         }
 
-        $clan             = $membership->clan;
+        $clan = $membership->clan;
         $countInWarehouse = ClanWarehouse::where('clan_id', $clan->id)
             ->where('structure_id', $clanWarehouse->id)
             ->count();
 
         if ($request->isMethod('POST')) {
             $checkedItems = $request->input('item', []);
-            $putItems     = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
+            $putItems = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
 
-            if (!$putItems) {
+            if (! $putItems) {
                 session()->flash('message', 'Не выбраны предметы для хранения.');
+
                 return redirect()->back();
             }
 
@@ -71,7 +71,7 @@ class ClanWarehouseController extends Controller
                 ->get();
 
             $countLeft = $clan->warehouse_capacity - $countInWarehouse;
-            $logData   = [];
+            $logData = [];
 
             foreach ($items as $item) {
                 if ($countLeft <= 0) {
@@ -79,8 +79,8 @@ class ClanWarehouseController extends Controller
                     break;
                 }
 
-                $putCount    = $putItems[$item->item_id];
-                $wantCount   = (int) ($putCount['count'] ?? $item->count);
+                $putCount = $putItems[$item->item_id];
+                $wantCount = (int) ($putCount['count'] ?? $item->count);
                 $actualCount = min($wantCount, $item->count);
 
                 $existing = null;
@@ -96,11 +96,11 @@ class ClanWarehouseController extends Controller
                     $existing->save();
                 } else {
                     ClanWarehouse::create([
-                        'clan_id'           => $clan->id,
-                        'structure_id'      => $clanWarehouse->id,
+                        'clan_id' => $clan->id,
+                        'structure_id' => $clanWarehouse->id,
                         'depositor_user_id' => $user->id,
-                        'item_id'           => $item->item_id,
-                        'count'             => $actualCount,
+                        'item_id' => $item->item_id,
+                        'count' => $actualCount,
                     ]);
                     $countLeft--;
                     $countInWarehouse++;
@@ -114,14 +114,14 @@ class ClanWarehouseController extends Controller
                 }
 
                 $logData[] = [
-                    'clan_id'      => $clan->id,
-                    'user_id'      => $user->id,
+                    'clan_id' => $clan->id,
+                    'user_id' => $user->id,
                     'structure_id' => $clanWarehouse->id,
-                    'item_id'      => $item->item_id,
-                    'action'       => ClanWarehouseAction::PUT,
-                    'count'        => $actualCount,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+                    'item_id' => $item->item_id,
+                    'action' => ClanWarehouseAction::PUT,
+                    'count' => $actualCount,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
 
@@ -141,7 +141,7 @@ class ClanWarehouseController extends Controller
 
         $this->collector->collectFrom(new BackpackItemTooltipStrategy($backpackItems));
 
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+        $itemTooltipScript = $this->collector->renderScript();
 
         return view('clan.warehouse.put', compact('clanWarehouse', 'clan', 'membership', 'backpackItems', 'countInWarehouse', 'itemTooltipScript'));
     }
@@ -149,10 +149,10 @@ class ClanWarehouseController extends Controller
     public function take(Request $request, int $id)
     {
         /** @var \App\Models\User $user */
-        $user          = Auth::user();
+        $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
-        if (!$clanWarehouse->isClanWarehouse()) {
+        if (! $clanWarehouse->isClanWarehouse()) {
             abort(404);
         }
 
@@ -160,25 +160,28 @@ class ClanWarehouseController extends Controller
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::WITHDRAW_ITEMS)) {
+        if (! $membership->role->hasPermission(ClanPermission::WITHDRAW_ITEMS)) {
             session()->flash('message', 'У вас нет прав забирать предметы из хранилища клана.');
+
             return redirect()->route('location');
         }
 
-        $clan             = $membership->clan;
+        $clan = $membership->clan;
         $countInWarehouse = ClanWarehouse::where('clan_id', $clan->id)
             ->where('structure_id', $clanWarehouse->id)
             ->count();
 
         if ($request->isMethod('POST')) {
             $checkedItems = $request->input('item', []);
-            $takeItems    = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
+            $takeItems = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
 
-            if (!$takeItems) {
+            if (! $takeItems) {
                 session()->flash('message', 'Не выбраны предметы для получения.');
+
                 return redirect()->back();
             }
 
@@ -191,7 +194,7 @@ class ClanWarehouseController extends Controller
             $logData = [];
 
             foreach ($items as $wItem) {
-                $wantCount   = (int) ($takeItems[$wItem->id]['count'] ?? $wItem->count);
+                $wantCount = (int) ($takeItems[$wItem->id]['count'] ?? $wItem->count);
                 $actualCount = min($wantCount, $wItem->count);
 
                 $existing = null;
@@ -210,7 +213,7 @@ class ClanWarehouseController extends Controller
                     Backpack::create([
                         'user_id' => $user->id,
                         'item_id' => $wItem->item_id,
-                        'count'   => $actualCount,
+                        'count' => $actualCount,
                     ]);
                 }
 
@@ -222,14 +225,14 @@ class ClanWarehouseController extends Controller
                 }
 
                 $logData[] = [
-                    'clan_id'      => $clan->id,
-                    'user_id'      => $user->id,
+                    'clan_id' => $clan->id,
+                    'user_id' => $user->id,
                     'structure_id' => $clanWarehouse->id,
-                    'item_id'      => $wItem->item_id,
-                    'action'       => ClanWarehouseAction::TAKE,
-                    'count'        => $actualCount,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+                    'item_id' => $wItem->item_id,
+                    'action' => ClanWarehouseAction::TAKE,
+                    'count' => $actualCount,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
 
@@ -249,7 +252,7 @@ class ClanWarehouseController extends Controller
 
         $this->collector->collectFrom(new ClanWarehouseItemTooltipStrategy($warehouseItems));
 
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+        $itemTooltipScript = $this->collector->renderScript();
 
         return view('clan.warehouse.take', compact('clanWarehouse', 'clan', 'membership', 'warehouseItems', 'countInWarehouse', 'itemTooltipScript'));
     }
@@ -257,10 +260,10 @@ class ClanWarehouseController extends Controller
     public function logs(int $id)
     {
         /** @var \App\Models\User $user */
-        $user          = Auth::user();
+        $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
-        if (!$clanWarehouse->isClanWarehouse()) {
+        if (! $clanWarehouse->isClanWarehouse()) {
             abort(404);
         }
 
@@ -268,6 +271,7 @@ class ClanWarehouseController extends Controller
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
@@ -281,7 +285,7 @@ class ClanWarehouseController extends Controller
 
         $this->collector->collectFrom(new WarehouseLogItemTooltipStrategy($logs));
 
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+        $itemTooltipScript = $this->collector->renderScript();
 
         return view('clan.warehouse.logs', compact('clanWarehouse', 'clan', 'membership', 'logs', 'itemTooltipScript'));
     }

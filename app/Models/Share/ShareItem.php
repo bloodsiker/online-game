@@ -4,6 +4,8 @@ namespace App\Models\Share;
 
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
+use App\Enums\UpgradeScrollType;
+use App\Models\Monster\Monster;
 use App\Models\Skill;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\Monster\Monster;
 
 /**
  * @property int $id
@@ -31,11 +32,11 @@ use App\Models\Monster\Monster;
  * @property bool $is_weight
  * @property int $price
  * @property int $break_crystal
+ * @property UpgradeScrollType|null $upgrade_scroll_type
  * @property ShareItemSlot|null $slot
  * @property int|null $skill_id
  * @property int|null $skill_lvl
  * @property int|null $skill_exp
- *
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
  */
@@ -50,7 +51,7 @@ class ShareItem extends Model
         );
     }
 
-//    protected $with = ['recipe'];
+    //    protected $with = ['recipe'];
 
     protected $attributes = [
         'count_use' => 0,
@@ -71,6 +72,7 @@ class ShareItem extends Model
         'is_heal' => 'boolean',
         'type' => ShareItemType::class,
         'slot' => ShareItemSlot::class,
+        'upgrade_scroll_type' => UpgradeScrollType::class,
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

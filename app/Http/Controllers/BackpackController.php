@@ -4,20 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Services\BackpackService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\ItemTooltipRenderer;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BackpackController extends Controller
 {
-
     public function __construct(
         protected readonly BackpackService $backpackService,
         protected readonly ItemTooltipCollector $collector,
-        protected readonly ItemTooltipRenderer $renderer,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -34,10 +30,10 @@ class BackpackController extends Controller
 
         $this->collector->collectFrom(new BackpackItemTooltipStrategy($data->getBackpack()));
 
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+        $itemTooltipScript = $this->collector->renderScript();
 
-//        $playerDecorator = new EquipmentDecorator($user->player);
-//        dd($playerDecorator->getArmor());
+        //        $playerDecorator = new EquipmentDecorator($user->player);
+        //        dd($playerDecorator->getArmor());
 
         return view('backpack.index', compact('data', 'user', 'playerEquip', 'itemTooltipScript'));
     }

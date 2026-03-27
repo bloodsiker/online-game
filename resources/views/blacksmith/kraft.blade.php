@@ -210,6 +210,12 @@
                         <a id="center_2" href="{{ route('blacksmith.break', ['id' => $blacksmith->id]) }}" title="Продать" class="btn_1">Разбыть предмет</a></td>
                     <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('blacksmith.upgrade', ['id' => $blacksmith->id]) }}" class="btn_1">Заточка</a>
+                    </td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+
                     <td></td>
 
                     <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>

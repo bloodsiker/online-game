@@ -8,6 +8,7 @@ use App\Enums\ShareItemSlot;
 use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
 use App\Enums\ShareItemType;
+use App\Enums\UpgradeScrollType;
 use App\Models\Auction\Auction;
 use App\Models\Exchange;
 use App\Models\Experience;
@@ -1278,6 +1279,36 @@ class GenerateSeed extends Command
         $item18->save();
 
         $this->user1->backpack()->attach($item18->id, ['equipped' => 0, 'count' => 1]);
+
+        $sItem19 = new ShareItem();
+        $sItem19->type = ShareItemType::SCROLL;
+        $sItem19->price = 1000;
+        $sItem19->name = 'Свиток заточки';
+        $sItem19->description = 'Необходим для заточки предмета';
+        $sItem19->image = '/img/resource/scroll_enchant.gif';
+        $sItem19->upgrade_scroll_type = UpgradeScrollType::BASE;
+        $sItem19->save();
+
+        $item19 = new Item();
+        $item19->share_item_id = $sItem19->id;
+        $item19->save();
+
+        $this->user1->backpack()->attach($item19->id, ['equipped' => 0, 'count' => 100]);
+
+        $sItem19 = new ShareItem();
+        $sItem19->type = ShareItemType::SCROLL;
+        $sItem19->price = 5000;
+        $sItem19->name = 'Свиток стабилизации';
+        $sItem19->description = 'Предотвращает понижение уровня заточки при неудаче';
+        $sItem19->image = '/img/resource/scroll_stabilizer.gif';
+        $sItem19->upgrade_scroll_type = UpgradeScrollType::STABILIZER;
+        $sItem19->save();
+
+        $item19 = new Item();
+        $item19->share_item_id = $sItem19->id;
+        $item19->save();
+
+        $this->user1->backpack()->attach($item19->id, ['equipped' => 0, 'count' => 100]);
 
         $this->info('Create Items success');
     }

@@ -14,9 +14,14 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
         foreach ($this->items as $backpack) {
             $item     = $backpack->item;
             $itemInfo = $item->itemInfo;
+            $upgradeLvl = $item->upgrade_lvl ?? 0;
+            $title = $upgradeLvl > 0
+                ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
+                : $itemInfo->name;
+
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
-                title: $itemInfo->name,
+                title: $title,
                 color: '#000000',
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),

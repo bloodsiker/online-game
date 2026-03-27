@@ -8,9 +8,10 @@ use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\ItemTooltipRenderer;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Services\PlayerStatService;
+use App\Services\UpgradeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,8 @@ class BlacksmithController extends Controller
 {
     public function __construct(
         private readonly ItemTooltipCollector $collector,
-        private readonly ItemTooltipRenderer $renderer,
+        private readonly UpgradeService $upgradeService,
+        private readonly PlayerStatService $statService,
     ) {}
 
     public function index(Request $request, $id)
@@ -27,7 +29,7 @@ class BlacksmithController extends Controller
         $user = Auth::user();
         $blacksmith = Structure::find($id);
 
-        if (!$blacksmith) {
+        if (! $blacksmith) {
             abort(404);
         }
 
@@ -54,13 +56,12 @@ class BlacksmithController extends Controller
                 ];
             })->toArray();
 
-        $ingredientItems = $recipes->flatMap(fn($r) => $r->item->itemInfo->recipe?->items ?? collect());
+        $ingredientItems = $recipes->flatMap(fn ($r) => $r->item->itemInfo->recipe?->items ?? collect());
 
-        $this->collector
+        $itemTooltipScript = $this->collector
             ->collectFrom(new BackpackItemTooltipStrategy($recipes))
-            ->collectFrom(new ShareItemTooltipStrategy($ingredientItems));
-
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+            ->collectFrom(new ShareItemTooltipStrategy($ingredientItems))
+            ->renderScript();
 
         return view('blacksmith.kraft', compact('blacksmith', 'user', 'recipes', 'resources', 'itemTooltipScript'));
     }
@@ -77,7 +78,7 @@ class BlacksmithController extends Controller
             ->where('backpacks.item_id', $id)
             ->first();
 
-        if (!$recipeItem instanceof Backpack) {
+        if (! $recipeItem instanceof Backpack) {
             abort(404);
         }
 
@@ -114,7 +115,7 @@ class BlacksmithController extends Controller
             $percentKraft = mt_rand(0, 100);
             if ($percentKraft <= $recipe->percent) {
 
-                $successKraftItem = new Item();
+                $successKraftItem = new Item;
                 $successKraftItem->share_item_id = $recipe->kraftItem->id;
                 $successKraftItem->save();
 
@@ -154,7 +155,7 @@ class BlacksmithController extends Controller
         $user = Auth::user();
         $blacksmith = Structure::find($id);
 
-        if (!$blacksmith) {
+        if (! $blacksmith) {
             abort(404);
         }
 
@@ -163,8 +164,9 @@ class BlacksmithController extends Controller
         if ($request->has('iid')) {
             $itemId = $request->get('iid');
             $item = Backpack::with(['item', 'item.itemInfo'])->where(['item_id' => $itemId])->first();
-            if (!$item instanceof Backpack) {
+            if (! $item instanceof Backpack) {
                 session()->flash('message', 'Не найден предмет для кристализации');
+
                 return redirect()->back();
             }
 
@@ -180,11 +182,11 @@ class BlacksmithController extends Controller
 
                 $item->delete();
             } else {
-                $newItem = new Item();
+                $newItem = new Item;
                 $newItem->share_item_id = $crystal->id;
                 $newItem->save();
 
-                $backpack = new Backpack();
+                $backpack = new Backpack;
                 $backpack->user_id = $user->id;
                 $backpack->item_id = $newItem->id;
                 $backpack->count = $countCrystal;
@@ -195,6 +197,7 @@ class BlacksmithController extends Controller
             $item->item->delete();
 
             session()->flash('message', sprintf('Вы получили кристаллов в количестве %s шт', $countCrystal));
+
             return redirect()->back();
         }
 
@@ -208,5 +211,132 @@ class BlacksmithController extends Controller
             ->get();
 
         return view('blacksmith.break', compact('blacksmith', 'user', 'items', 'crystal'));
+    }
+
+    public function upgrade(Request $request, int $id): \Illuminate\Contracts\View\View
+    {
+        $user = Auth::user();
+        $blacksmith = Structure::findOrFail($id);
+
+        $upgradeableTypes = [
+            ShareItemType::WEAPON->value,
+            ShareItemType::SHIELD->value,
+            ShareItemType::ARMOR->value,
+            ShareItemType::BELT->value,
+        ];
+
+        $items = Backpack::select('backpacks.*')
+            ->with(['item'])
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.equipped', 0)
+            ->whereIn('share_items.type', $upgradeableTypes)
+            ->get();
+
+        $baseScrolls = Backpack::select('backpacks.*')
+            ->with(['item'])
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.equipped', 0)
+            ->where('share_items.type', ShareItemType::SCROLL->value)
+            ->where('share_items.upgrade_scroll_type', \App\Enums\UpgradeScrollType::BASE->value)
+            ->get();
+
+        $bonusScrolls = Backpack::select('backpacks.*')
+            ->with(['item'])
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.equipped', 0)
+            ->where('share_items.type', ShareItemType::SCROLL->value)
+            ->whereIn('share_items.upgrade_scroll_type', [
+                \App\Enums\UpgradeScrollType::PROTECTION->value,
+                \App\Enums\UpgradeScrollType::STABILIZER->value,
+                \App\Enums\UpgradeScrollType::LUCKY->value,
+            ])
+            ->get();
+
+        $itemTooltipScript = $this->collector
+            ->collectFrom(new BackpackItemTooltipStrategy($items))
+            ->collectFrom(new BackpackItemTooltipStrategy($baseScrolls))
+            ->collectFrom(new BackpackItemTooltipStrategy($bonusScrolls))
+            ->renderScript();
+
+        $player = $user->player;
+        $playerDecorator = $this->statService->resolve($player);
+
+        return view('blacksmith.upgrade', compact('blacksmith', 'user', 'player', 'playerDecorator', 'items', 'baseScrolls', 'bonusScrolls', 'itemTooltipScript'));
+    }
+
+    public function upgradeProcess(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'item_id' => 'required|integer',
+            'base_scroll_id' => 'required|integer',
+            'bonus_scroll_id' => 'nullable|integer',
+        ]);
+
+        $itemSlot = Backpack::select('backpacks.*')
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.item_id', $request->integer('item_id'))
+            ->whereIn('share_items.type', [
+                ShareItemType::WEAPON->value,
+                ShareItemType::SHIELD->value,
+                ShareItemType::ARMOR->value,
+                ShareItemType::BELT->value,
+            ])
+            ->first();
+
+        if (! $itemSlot instanceof Backpack) {
+            session()->flash('message', 'Предмет не найден.');
+
+            return redirect()->back();
+        }
+
+        $baseScrollSlot = Backpack::select('backpacks.*')
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.item_id', $request->integer('base_scroll_id'))
+            ->where('share_items.upgrade_scroll_type', \App\Enums\UpgradeScrollType::BASE->value)
+            ->first();
+
+        if (! $baseScrollSlot instanceof Backpack) {
+            session()->flash('message', 'Свиток заточки не найден. Для заточки необходим свиток заточки.');
+
+            return redirect()->back();
+        }
+
+        $bonusScrollSlot = null;
+        if ($request->filled('bonus_scroll_id')) {
+            $bonusScrollSlot = Backpack::select('backpacks.*')
+                ->join('items', 'backpacks.item_id', '=', 'items.id')
+                ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+                ->where('backpacks.user_id', $user->id)
+                ->where('backpacks.item_id', $request->integer('bonus_scroll_id'))
+                ->where('share_items.type', ShareItemType::SCROLL->value)
+                ->whereIn('share_items.upgrade_scroll_type', [
+                    \App\Enums\UpgradeScrollType::PROTECTION->value,
+                    \App\Enums\UpgradeScrollType::STABILIZER->value,
+                    \App\Enums\UpgradeScrollType::LUCKY->value,
+                ])
+                ->first();
+        }
+
+        DB::transaction(function () use ($user, $itemSlot, $baseScrollSlot, $bonusScrollSlot, &$result) {
+            $result = $this->upgradeService->upgrade($user, $itemSlot, $baseScrollSlot, $bonusScrollSlot);
+        });
+
+        session()->flash('message', $result['message']);
+        session()->flash('upgrade_success', $result['success']);
+        session()->flash('upgrade_destroyed', $result['destroyed'] ?? false);
+
+        return redirect()->route('blacksmith.upgrade', ['id' => $id]);
     }
 }

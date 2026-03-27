@@ -6,6 +6,7 @@ use App\DTO\StatModifier;
 use App\DTO\StatSheet;
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
+use App\Enums\ShareItemSlot;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
 
@@ -54,28 +55,28 @@ class PlayerStatService
         // Base values. Weapon slots: if a weapon is equipped the base is 0
         // (weapon damage comes entirely from the item's ATTACK_MIN/MAX effects).
         $base = [
-            'strength'      => (float) floor($player->str),
-            'int'           => (float) floor($player->int),
-            'agility'       => (float) floor($player->agil),
-            'mud'           => (float) floor($player->mud),
-            'intelligence'  => (float) floor($player->intel),
-            'dodge'         => (float) $player->dodge,
-            'critical'      => (float) $player->critical,
-            'armor'         => 0.0,
-            'hp_max'        => (float) $player->hp_max,
-            'mp_max'        => (float) $player->mp_max,
-            'left_min_dmg'  => (float) $player->min_dmg,
-            'left_max_dmg'  => (float) $player->max_dmg,
+            'strength' => (float) floor($player->str),
+            'int' => (float) floor($player->int),
+            'agility' => (float) floor($player->agil),
+            'mud' => (float) floor($player->mud),
+            'intelligence' => (float) floor($player->intel),
+            'dodge' => (float) $player->dodge,
+            'critical' => (float) $player->critical,
+            'armor' => 0.0,
+            'hp_max' => (float) $player->hp_max,
+            'mp_max' => (float) $player->mp_max,
+            'left_min_dmg' => (float) $player->min_dmg,
+            'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
         ];
 
         // Accumulate flat and percent per stat
-        $flat    = array_fill_keys(array_keys($base), 0.0);
+        $flat = array_fill_keys(array_keys($base), 0.0);
         $percent = array_fill_keys(array_keys($base), 0.0);
 
         foreach ($modifiers as $m) {
-            if (!array_key_exists($m->stat, $base)) {
+            if (! array_key_exists($m->stat, $base)) {
                 continue;
             }
             if ($m->isPercent) {
@@ -93,23 +94,23 @@ class PlayerStatService
             );
         }
 
-        $sheet = new StatSheet();
-        $sheet->modifiers    = $modifiers;
-        $sheet->freeStats    = $player->free_stats;
-        $sheet->strength     = $computed['strength'];
-        $sheet->int          = $computed['int'];
-        $sheet->agility      = $computed['agility'];
-        $sheet->mud          = $computed['mud'];
+        $sheet = new StatSheet;
+        $sheet->modifiers = $modifiers;
+        $sheet->freeStats = $player->free_stats;
+        $sheet->strength = $computed['strength'];
+        $sheet->int = $computed['int'];
+        $sheet->agility = $computed['agility'];
+        $sheet->mud = $computed['mud'];
         $sheet->intelligence = $computed['intelligence'];
-        $sheet->dodge        = $computed['dodge'];
-        $sheet->critical     = $computed['critical'];
-        $sheet->armor        = $computed['armor'];
-        $sheet->hpMax        = $computed['hp_max'];
-        $sheet->mpMax        = $computed['mp_max'];
-        $sheet->leftMinDmg   = $computed['left_min_dmg'];
-        $sheet->leftMaxDmg   = $computed['left_max_dmg'];
-        $sheet->rightMinDmg  = $computed['right_min_dmg'];
-        $sheet->rightMaxDmg  = $computed['right_max_dmg'];
+        $sheet->dodge = $computed['dodge'];
+        $sheet->critical = $computed['critical'];
+        $sheet->armor = $computed['armor'];
+        $sheet->hpMax = $computed['hp_max'];
+        $sheet->mpMax = $computed['mp_max'];
+        $sheet->leftMinDmg = $computed['left_min_dmg'];
+        $sheet->leftMaxDmg = $computed['left_max_dmg'];
+        $sheet->rightMinDmg = $computed['right_min_dmg'];
+        $sheet->rightMaxDmg = $computed['right_max_dmg'];
 
         return $sheet;
     }
@@ -124,7 +125,7 @@ class PlayerStatService
         $modifiers = [];
         $equip = $player->playerEquip;
 
-        if (!$equip) {
+        if (! $equip) {
             return $modifiers;
         }
 
@@ -138,8 +139,10 @@ class PlayerStatService
             $equip->bagFirstSlot, $equip->bagSecondSlot,
         ]);
 
+        $armorSlots = ShareItemSlot::armorSlots();
+
         foreach ($allSlots as $item) {
-            $source = 'equipment:' . $item->itemInfo->name;
+            $source = 'equipment:'.$item->itemInfo->name;
 
             foreach ($item->itemInfo->effects as $effect) {
                 if ($effect->effect_type === ItemEffectType::ARMOR) {
@@ -151,11 +154,22 @@ class PlayerStatService
                     );
                 }
             }
+
+            // Upgrade bonus: each +1 on an armor slot adds 5% to armor
+            $upgradeLvl = $item->upgrade_lvl ?? 0;
+            if ($upgradeLvl > 0 && in_array($item->itemInfo->slot, $armorSlots, true)) {
+                $modifiers[] = new StatModifier(
+                    stat: 'armor',
+                    value: (float) ($upgradeLvl * 5),
+                    isPercent: true,
+                    source: sprintf('upgrade:+%d %s', $upgradeLvl, $item->itemInfo->name),
+                );
+            }
         }
 
         // Weapon damage — flat modifiers that replace the zero base
         if ($equip->handLeft instanceof Item) {
-            $source = 'equipment:' . $equip->handLeft->itemInfo->name;
+            $source = 'equipment:'.$equip->handLeft->itemInfo->name;
             foreach ($equip->handLeft->itemInfo->effects as $effect) {
                 match ($effect->effect_type) {
                     ItemEffectType::ATTACK_MIN => $modifiers[] = new StatModifier('left_min_dmg', $effect->value, false, $source),
@@ -163,16 +177,34 @@ class PlayerStatService
                     default => null,
                 };
             }
+
+            // Upgrade bonus: each +1 on weapon adds 5% to damage
+            $upgradeLvl = $equip->handLeft->upgrade_lvl ?? 0;
+            if ($upgradeLvl > 0) {
+                $upgradePct = (float) ($upgradeLvl * 5);
+                $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handLeft->itemInfo->name);
+                $modifiers[] = new StatModifier('left_min_dmg', $upgradePct, true, $upgradeSource);
+                $modifiers[] = new StatModifier('left_max_dmg', $upgradePct, true, $upgradeSource);
+            }
         }
 
         if ($equip->handRight instanceof Item) {
-            $source = 'equipment:' . $equip->handRight->itemInfo->name;
+            $source = 'equipment:'.$equip->handRight->itemInfo->name;
             foreach ($equip->handRight->itemInfo->effects as $effect) {
                 match ($effect->effect_type) {
                     ItemEffectType::ATTACK_MIN => $modifiers[] = new StatModifier('right_min_dmg', $effect->value, false, $source),
                     ItemEffectType::ATTACK_MAX => $modifiers[] = new StatModifier('right_max_dmg', $effect->value, false, $source),
                     default => null,
                 };
+            }
+
+            // Upgrade bonus: each +1 on weapon adds 5% to damage
+            $upgradeLvl = $equip->handRight->upgrade_lvl ?? 0;
+            if ($upgradeLvl > 0) {
+                $upgradePct = (float) ($upgradeLvl * 5);
+                $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handRight->itemInfo->name);
+                $modifiers[] = new StatModifier('right_min_dmg', $upgradePct, true, $upgradeSource);
+                $modifiers[] = new StatModifier('right_max_dmg', $upgradePct, true, $upgradeSource);
             }
         }
 
@@ -191,18 +223,22 @@ class PlayerStatService
             ->get();
 
         foreach ($passiveSkills as $skill) {
-            $source = 'passive:' . $skill->name;
+            $source = 'passive:'.$skill->name;
 
             // Source 1: magic_skills.effects (JSON array of stat modifier objects)
             foreach ($skill->effects ?? [] as $entry) {
-                if (!is_array($entry)) continue;
+                if (! is_array($entry)) {
+                    continue;
+                }
                 array_push($modifiers, ...$this->modifiersFromEntry($entry, $source));
             }
 
             // Source 2: related Effect records via magic_skill_effects
             foreach ($skill->skillEffects as $effect) {
                 foreach ($effect->stat_modifiers ?? [] as $entry) {
-                    if (!is_array($entry)) continue;
+                    if (! is_array($entry)) {
+                        continue;
+                    }
                     array_push($modifiers, ...$this->modifiersFromEntry($entry, $source));
                 }
             }
@@ -230,18 +266,18 @@ class PlayerStatService
      */
     private function modifiersFromEntry(array $entry, string $source): array
     {
-        $type   = $entry['type']       ?? null;
-        $value  = (float) ($entry['value']      ?? 0);
-        $isPct  = (bool)  ($entry['is_percent'] ?? false);
+        $type = $entry['type'] ?? null;
+        $value = (float) ($entry['value'] ?? 0);
+        $isPct = (bool) ($entry['is_percent'] ?? false);
 
-        if (!$type) {
+        if (! $type) {
             return [];
         }
 
         if ($type === 'attack') {
             return [
-                new StatModifier('left_min_dmg',  $value, $isPct, $source),
-                new StatModifier('left_max_dmg',  $value, $isPct, $source),
+                new StatModifier('left_min_dmg', $value, $isPct, $source),
+                new StatModifier('left_max_dmg', $value, $isPct, $source),
                 new StatModifier('right_min_dmg', $value, $isPct, $source),
                 new StatModifier('right_max_dmg', $value, $isPct, $source),
             ];

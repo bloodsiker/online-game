@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\Share\ShareItem;
 use App\Models\Shop\ShopItem;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\ItemTooltipRenderer;
 use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Services\ShopCartService;
 use Illuminate\Http\Request;
@@ -20,9 +18,7 @@ class PremiumShopController extends Controller
     public function __construct(
         protected readonly ShopCartService $shopCartService,
         protected readonly ItemTooltipCollector $collector,
-        protected readonly ItemTooltipRenderer $renderer,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -44,7 +40,7 @@ class PremiumShopController extends Controller
 
         $this->collector->collectFrom(new PremiumShopItemTooltipStrategy($items));
 
-        $itemTooltipScript = $this->renderer->render($this->collector->all());
+        $itemTooltipScript = $this->collector->renderScript();
 
         return view('premium_shop.buy', compact('user', 'shop', 'activeCategoryId', 'items', 'cart', 'itemTooltipScript'));
     }
@@ -82,14 +78,14 @@ class PremiumShopController extends Controller
                     $hasBackpack->save();
                 } else {
                     for ($i = 1; $i <= $itemInCart->quantity; $i++) {
-                        $item = new Item();
+                        $item = new Item;
                         $item->share_item_id = $shareItem->id;
                         $item->count_use = $shareItem->count_use;
                         $item->save();
 
                         $user->backpack()->attach($item->id, [
                             'equipped' => 0,
-                            'count' => 1
+                            'count' => 1,
                         ]);
                     }
                 }

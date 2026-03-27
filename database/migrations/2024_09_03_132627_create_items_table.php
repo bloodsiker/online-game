@@ -28,6 +28,7 @@ return new class extends Migration
             $table->boolean('is_weight')->default(true);
             $table->integer('price')->default(0);
             $table->integer('break_crystal')->default(0);
+            $table->enum('upgrade_scroll_type', ['base', 'protection', 'stabilizer', 'lucky'])->nullable();
             $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'belt', 'bag'])->nullable();
             $table->timestamps();
         });
@@ -62,6 +63,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('share_item_id')->constrained('share_items')->cascadeOnDelete();
             $table->integer('upgrade_lvl')->default(0);
+            $table->unsignedSmallInteger('upgrade_pity')->default(0);
+            $table->unsignedSmallInteger('upgrade_fail_streak')->default(0);
             $table->integer('additional_attack')->default(0);
             $table->integer('count_use')->default(0);
             $table->boolean('is_open')->default(false);

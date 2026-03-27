@@ -11,12 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property int $upgrade_lvl
+ * @property int $upgrade_pity
+ * @property int $upgrade_fail_streak
  * @property int $share_item_id
  * @property int $additional_attack
  * @property int $count_use
  * @property bool $is_open
  * @property int $count
- *
  * @property-read ShareItem $itemInfo
  * @property-read Collection|Item[] $itemsInChest
  */
@@ -30,6 +31,8 @@ class Item extends Model
 
     protected $attributes = [
         'upgrade_lvl' => 0,
+        'upgrade_pity' => 0,
+        'upgrade_fail_streak' => 0,
         'additional_attack' => 0,
         'count_use' => 0,
         'is_open' => 0,
