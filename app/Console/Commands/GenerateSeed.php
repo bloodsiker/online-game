@@ -1310,6 +1310,21 @@ class GenerateSeed extends Command
 
         $this->user1->backpack()->attach($item19->id, ['equipped' => 0, 'count' => 100]);
 
+        $sItem20 = new ShareItem();
+        $sItem20->type = ShareItemType::SCROLL;
+        $sItem20->price = 10000;
+        $sItem20->name = 'Свиток защиты';
+        $sItem20->description = 'Предотвращает уничтожение предмета при неудаче';
+        $sItem20->image = '/img/resource/scroll_defense.gif';
+        $sItem20->upgrade_scroll_type = UpgradeScrollType::PROTECTION;
+        $sItem20->save();
+
+        $item20 = new Item();
+        $item20->share_item_id = $sItem20->id;
+        $item20->save();
+
+        $this->user1->backpack()->attach($item20->id, ['equipped' => 0, 'count' => 100]);
+
         $this->info('Create Items success');
     }
 

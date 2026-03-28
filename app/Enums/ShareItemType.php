@@ -19,6 +19,10 @@ enum ShareItemType: string
     case CHEST     = 'chest';
     case SCROLL    = 'scroll';
     case GIFT      = 'gift';
+    case GEM        = 'gem';
+    case SOCKET_KIT = 'socket_kit';
+    case RUNE       = 'rune';
+    case RUNE_KEY   = 'rune_key';
 
     public function label(): string
     {
@@ -38,6 +42,10 @@ enum ShareItemType: string
             self::CHEST     => 'Сундук',
             self::EAT       => 'Еда',
             self::GIFT      => 'Подарок',
+            self::GEM        => 'Камень',
+            self::SOCKET_KIT => 'Набор для сокета',
+            self::RUNE       => 'Руна',
+            self::RUNE_KEY   => 'Рунный ключ',
         };
     }
 

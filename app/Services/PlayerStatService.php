@@ -165,6 +165,27 @@ class PlayerStatService
                     source: sprintf('upgrade:+%d %s', $upgradeLvl, $item->itemInfo->name),
                 );
             }
+
+            // Gem bonuses from socketed gems
+            foreach ($item->gems as $itemGem) {
+                $gemStats = $itemGem->gemInfo->gem_stats ?? [];
+                foreach ($gemStats as $entry) {
+                    if (! is_array($entry)) {
+                        continue;
+                    }
+                    array_push($modifiers, ...$this->modifiersFromEntry($entry, 'gem:'.$itemGem->gemInfo->name));
+                }
+            }
+
+            // Rune bonuses from imbued runes
+            foreach ($item->runes as $itemRune) {
+                foreach ($itemRune->stats as $entry) {
+                    if (! is_array($entry)) {
+                        continue;
+                    }
+                    array_push($modifiers, ...$this->modifiersFromEntry($entry, 'rune:'.$itemRune->runeInfo->name));
+                }
+            }
         }
 
         // Weapon damage — flat modifiers that replace the zero base

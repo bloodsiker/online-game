@@ -2,6 +2,7 @@
 
 namespace App\Models\Share;
 
+use App\Enums\RuneRarity;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
 use App\Enums\UpgradeScrollType;
@@ -33,6 +34,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $price
  * @property int $break_crystal
  * @property UpgradeScrollType|null $upgrade_scroll_type
+ * @property array|null $gem_stats
+ * @property RuneRarity|null $rune_rarity
+ * @property array|null $rune_stat_pool
  * @property ShareItemSlot|null $slot
  * @property int|null $skill_id
  * @property int|null $skill_lvl
@@ -73,6 +77,9 @@ class ShareItem extends Model
         'type' => ShareItemType::class,
         'slot' => ShareItemSlot::class,
         'upgrade_scroll_type' => UpgradeScrollType::class,
+        'gem_stats'      => 'array',
+        'rune_rarity'    => RuneRarity::class,
+        'rune_stat_pool' => 'array',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

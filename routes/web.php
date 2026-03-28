@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BackpackController;
 use App\Http\Controllers\BlacksmithController;
+use App\Http\Controllers\GemController;
+use App\Http\Controllers\RuneController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClanController;
@@ -128,6 +130,17 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::post('/premium/add-cart', [PremiumShopController::class, 'addCart'])->name('premium.add_cart');
     Route::get('/premium/delete-cart/{id}', [PremiumShopController::class, 'deleteCart'])->name('premium.delete_cart');
     Route::get('/premium/clear-cart', [PremiumShopController::class, 'clearCart'])->name('premium.clear_cart');
+
+    Route::get('/blacksmith/{id}/gems', [GemController::class, 'index'])->name('blacksmith.gems');
+    Route::post('/blacksmith/{id}/gems/insert', [GemController::class, 'insertGem'])->name('blacksmith.gems.insert');
+    Route::post('/blacksmith/{id}/gems/remove', [GemController::class, 'removeGem'])->name('blacksmith.gems.remove');
+    Route::post('/blacksmith/{id}/gems/open-socket', [GemController::class, 'openSocket'])->name('blacksmith.gems.open_socket');
+
+    Route::get('/blacksmith/{id}/runes', [RuneController::class, 'index'])->name('blacksmith.runes');
+    Route::post('/blacksmith/{id}/runes/imbue', [RuneController::class, 'imbue'])->name('blacksmith.runes.imbue');
+    Route::post('/blacksmith/{id}/runes/remove', [RuneController::class, 'removeRune'])->name('blacksmith.runes.remove');
+    Route::post('/blacksmith/{id}/runes/reroll', [RuneController::class, 'reroll'])->name('blacksmith.runes.reroll');
+    Route::post('/blacksmith/{id}/runes/open-slot', [RuneController::class, 'openSlot'])->name('blacksmith.runes.open_slot');
 
     Route::get('/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])->name('blacksmith.kraft');
     Route::get('/blacksmith/{id}/break', [BlacksmithController::class, 'breakItem'])->name('blacksmith.break');

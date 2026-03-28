@@ -103,9 +103,6 @@
             padding-right: 6px;
         }
 
-        .pointer, .pointer input {
-            cursor: pointer;
-        }
 
         .btn_1 {
             color: #461c0b !important;

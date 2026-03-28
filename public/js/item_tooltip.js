@@ -42,6 +42,88 @@ let showItemInfo = (obj, evnt, show) => {
         document.onmousemove = function(){}
         return;
     }
+
+    var coor = getIframeShift();
+    var ex = evnt.clientX+coor.left;
+    var ey = evnt.clientY+coor.top;
+
+    if (_top().noIframeAlt) {
+        ex = evnt.clientX + _top().document.body.scrollLeft;
+        ey = evnt.clientY + _top().document.body.scrollTop;
+    }
+
+    if (act1 || act2 || act3) {
+        obj.style.cursor = 'pointer'
+        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){showArtifactInfo(itemId, null, null, e||event)});
+        _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
+
+        var coord = getCoords(obj);
+        var cont = gebi("item_list");
+
+        var scroll_x = window.scrollX || window.document.body.scrollLeft;
+        var scroll_y = window.scrollY || window.document.body.scrollTop;
+        if(cont.scrollTop > 0) scroll_y = cont.scrollTop;
+        var rel_x = (ex + scroll_x - coord.l - coor.left);
+        var rel_y = (ey + scroll_y - coord.t - coor.top);
+
+        /*
+        console.log('rel_x' + ': ' + rel_x);
+        console.log('rel_y' + ': ' + rel_y);
+        console.log('scroll_x' + ': ' + scroll_x);
+        console.log('scroll_y' + ': ' + scroll_y);
+         */
+
+        if (evnt.altKey && evnt.shiftKey && evnt.ctrlKey) {
+            obj.onclick = function(e){showCommonHelpAdminArtifact(obj.getAttribute('aid'), obj.getAttribute('art_id'), e||event)};
+        } else {
+            if (rel_x >= 40) {
+                if (rel_y < 20) {
+                    if (obj.getAttribute('gift_id')) { // РґР»СЏ РїРѕРґР°СЂРєРѕРІ
+                        obj.onclick = function(e){showArtifactInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
+                    } else if (obj.getAttribute('store')) { // РІ РјР°РіР°Р·РёРЅРµ РїСЂРё РєР»РёРєРµ РЅР° info РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РІРѕРґРёС‚СЊ С‚РѕРІР°СЂ РїРѕ Р°СЂС‚РёРєСѓР»Сѓ
+                        obj.onclick = function(e){showArtifactInfo(false, obj.getAttribute('art_id'), null, e||event)};
+                    } else {
+                        obj.onclick = function(e){showArtifactInfo(itemId, null, null, e||event)}
+                    }
+
+                    _background(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
+                    try{obj.style.cursor = 'hand'} catch(e){}
+                    try{obj.style.cursor = 'pointer'} catch(e){}
+                }
+                if (act2 != 0 && rel_y >= 40) {
+                    obj.onclick = function(e){try{showItemInfo(obj, act2, e||event)}catch(e){ console.trace(e); }}
+                    _background(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
+                    try{obj.style.cursor = 'hand'} catch(e){}
+                    try{obj.style.cursor = 'pointer'} catch(e){}
+                }
+            }
+            if (act3 > 0 && rel_x < 20) {
+                if (rel_y < 20) {
+                    obj.onclick = function(e){try{showItemInfo(obj, act3, e||event)}catch(e){ console.trace(e); }};
+                    _background(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
+                    try {obj.style.cursor = 'hand'} catch(e){}
+                    try {obj.style.cursor = 'pointer'} catch(e){}
+                }
+            }
+        }
+    }
+
+    var x = ex + itemInfo.offsetWidth > _top().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
+    var y = ey + itemInfo.offsetHeight - _top().document.body.scrollTop > _top().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
+
+    if (x < 0 ) {
+        x = ex - itemInfo.offsetWidth / 2;
+    }
+    if (x < 7 ) {
+        x = 7;
+    }
+    if (x > _top().document.body.clientWidth - itemInfo.offsetWidth - 20) {
+        x = _top().document.body.clientWidth - itemInfo.offsetWidth - 20;
+    }
+
+    itemInfo.style.left = x + 'px';
+    itemInfo.style.top  = y + 'px';
+
 }
 
 let showItemInfoOld = (obj, evnt, show) => {

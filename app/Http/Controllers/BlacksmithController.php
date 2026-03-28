@@ -159,7 +159,7 @@ class BlacksmithController extends Controller
             abort(404);
         }
 
-        $crystal = ShareItem::find(17);
+        $crystal = ShareItem::find(23);
 
         if ($request->has('iid')) {
             $itemId = $request->get('iid');
@@ -210,7 +210,11 @@ class BlacksmithController extends Controller
             ->whereIn('share_items.type', [ShareItemType::WEAPON->value, ShareItemType::SHIELD->value, ShareItemType::ARMOR->value])
             ->get();
 
-        return view('blacksmith.break', compact('blacksmith', 'user', 'items', 'crystal'));
+        $itemTooltipScript = $this->collector
+            ->collectFrom(new BackpackItemTooltipStrategy($items))
+            ->renderScript();
+
+        return view('blacksmith.break', compact('blacksmith', 'user', 'items', 'crystal', 'itemTooltipScript'));
     }
 
     public function upgrade(Request $request, int $id): \Illuminate\Contracts\View\View
