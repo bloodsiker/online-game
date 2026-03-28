@@ -80,54 +80,7 @@
 <tr height="22">
     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
     <td class="tbl-shp-sml tt" valign="top" align="left">
-        @php
-            $btnLeft1   = 'img/bg/btn/btn-left1.gif';
-            $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-            $btnRight1  = 'img/bg/btn/btn-right1.gif';
-            $btnLeft2   = 'img/bg/btn/btn-left2.gif';
-            $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-            $btnRight2  = 'img/bg/btn/btn-right2.gif';
-        @endphp
-        <table border="0" cellspacing="0" cellpadding="0" width="100%">
-        <tbody><tr height="21">
-            <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
-            <td width="90" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('blacksmith', ['id' => $blacksmith->id]) }}" class="btn_1">Крафтить</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"></td>
-
-            <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
-            <td width="120" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('blacksmith.break', ['id' => $blacksmith->id]) }}" class="btn_1">Разбить предмет</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"></td>
-
-            <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
-            <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('blacksmith.upgrade', ['id' => $blacksmith->id]) }}" class="btn_1">Заточка</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"></td>
-
-            <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
-            <td width="80" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('blacksmith.gems', ['id' => $blacksmith->id]) }}" class="btn_1">Камни</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"></td>
-
-            <td width="19"><img src="{{ asset($btnLeft2) }}" width="19" height="21"></td>
-            <td width="80" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('blacksmith.runes', ['id' => $blacksmith->id]) }}" class="btn_2">Руны</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"></td>
-
-            <td></td>
-            <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
-            <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ route('location') }}" class="btn_1">Выход</a>
-            </td>
-            <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"></td>
-        </tr></tbody>
-        </table>
+        @include('blacksmith._tabs', ['activeTab' => 'runes'])
     </td>
     <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
 </tr>
@@ -142,12 +95,9 @@
 
         <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
         <tbody><tr class="bg_l">
-            <td align="left" nowrap="">
-                <b>Монет:</b>&nbsp;&nbsp;&nbsp;
-                <b class="redd">
-                    <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
-                    {{ format_money($user->money) }}
-                </b>
+            <td align="left" width="33%" nowrap=""><b>Монет:</b>
+                &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
             </td>
         </tr></tbody>
         </table>
@@ -279,7 +229,6 @@
                     </tbody>
                 </table>
 
-                @if(count($keysData) > 0)
                 <table class="coll brd2-all" width="100%" border="0">
                     <thead><tr class="bg_l" height="17">
                         <td class="p6h brd2" colspan="2" align="center"><b>Рунные ключи</b></td>
@@ -288,7 +237,7 @@
                     <tr class="rune-row selected" id="key-none-row" onclick="selectKey(null, this)">
                         <td colspan="2" style="color:#888;">— без ключа —</td>
                     </tr>
-                    @foreach($runeKeys as $slot)
+                    @forelse($runeKeys as $slot)
                         <tr class="rune-row" data-key-id="{{ $slot->item->id }}" onclick="selectKey({{ $slot->item->id }}, this)">
                             <td width="44">
                                 <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
@@ -302,10 +251,11 @@
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет ключей</td></tr>
+                    @endforelse
                     </tbody>
                 </table>
-                @endif
             </td>
 
         </tr>

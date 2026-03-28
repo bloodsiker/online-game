@@ -184,44 +184,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-                <tbody>
-                @php
-                    $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-                    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-                    $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-                    $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-                    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-                    $btnRight2 = 'img/bg/btn/btn-right2.gif';
-                @endphp
-                <tr height="21">
-                    <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-                    <td width="90" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_1" href="{{ route('blacksmith', ['id' => $blacksmith->id]) }}" title="Купить" class="btn_2">Крафтить</a>
-                    </td>
-                    <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="120" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_2" href="{{ route('blacksmith.break', ['id' => $blacksmith->id]) }}" title="Продать" class="btn_1">Разбыть предмет</a></td>
-                    <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('blacksmith.upgrade', ['id' => $blacksmith->id]) }}" class="btn_1">Заточка</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td></td>
-
-                    <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
-                    <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-                </tr>
-                </tbody>
-            </table>
+            @include('blacksmith._tabs', ['activeTab' => 'kraft'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -241,7 +204,7 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
                     &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                 </tr>
