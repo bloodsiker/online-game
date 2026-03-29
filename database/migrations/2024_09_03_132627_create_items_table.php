@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('share_items', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'belt', 'bag', 'potion', 'eat', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone'])->default('resource');
+            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'belt', 'bag', 'potion', 'eat', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone', 'gem','socket_kit','rune','rune_key'])->default('resource');
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
@@ -29,6 +29,7 @@ return new class extends Migration
             $table->integer('price')->default(0);
             $table->integer('break_crystal')->default(0);
             $table->enum('upgrade_scroll_type', ['base', 'protection', 'stabilizer', 'lucky'])->nullable();
+            $table->json('gem_stats')->nullable(); // Параметры камня на share_items (заполняется только для type=gem)
             $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'belt', 'bag'])->nullable();
             $table->timestamps();
         });
@@ -68,7 +69,19 @@ return new class extends Migration
             $table->integer('additional_attack')->default(0);
             $table->integer('count_use')->default(0);
             $table->boolean('is_open')->default(false);
+            $table->unsignedTinyInteger('socket_count')->default(0);  // Сокеты на конкретном предмете (0–3)
             $table->timestamps();
+        });
+
+        // Вставленные камни в предмет
+        Schema::create('item_gems', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->unsignedTinyInteger('socket_index'); // 0, 1, 2
+            $table->foreignId('share_item_id')->constrained('share_items')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['item_id', 'socket_index']);
         });
 
         Schema::create('item_on_locations', function (Blueprint $table) {
@@ -95,6 +108,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('item_in_chest');
         Schema::dropIfExists('item_on_locations');
+        Schema::dropIfExists('item_gems');
         Schema::dropIfExists('items');
         Schema::dropIfExists('share_recipe_has_items');
         Schema::dropIfExists('share_recipes');

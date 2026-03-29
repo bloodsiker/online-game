@@ -7,53 +7,35 @@
 @section('body')
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-5">
             <section class="card">
                 <div class="card-body">
                     <form action="{{ route('admin.skill.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="row form-group pb-3">
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="name">Название</label>
-                                    <input type="text" class="form-control" name="name" id="name" value="" placeholder="">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-form-label" for="type">Тип навыка</label>
-                                    <select class="form-control" name="type" id="type">
-                                        <option value="combat">Боевой навык</option>
-                                        <option value="magic">Магический навык</option>
-                                        <option value="peaceful">Мирный навык</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-form-label" for="description">Описание</label>
-                                    <textarea class="form-control" name="description" rows="7" id="description"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-
-                            </div>
-
-                            <div class="col-lg-3">
-
-                            </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Название</label>
+                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
                         </div>
-
-
-                        <div class="row justify-content-start">
-                            <div class="col-sm-12">
-                                <button class="btn btn-primary">Сохранить</button>
-                                <a href="{{ route('admin.skills') }}" class="btn btn-success">Назад</a>
-                            </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Тип навыка</label>
+                            <select class="form-control" name="type" data-plugin-selectTwo>
+                                <option value="combat"  @selected(old('type') === 'combat')>Боевой</option>
+                                <option value="magic"   @selected(old('type') === 'magic')>Магический</option>
+                                <option value="peaceful" @selected(old('type') === 'peaceful')>Мирный</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Описание</label>
+                            <textarea class="form-control" name="description" rows="5">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary">Создать</button>
+                            <a href="{{ route('admin.skills') }}" class="btn btn-success">Назад</a>
                         </div>
                     </form>
                 </div>
             </section>
         </div>
     </div>
+
 @endsection
-
-

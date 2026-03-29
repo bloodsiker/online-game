@@ -1,582 +1,116 @@
 @extends('admin.layout.base')
 
 @section('title')
-    Dashboard
+    Дашборд
 @endsection
 
 @section('body')
-    <!-- start: page -->
-    <div class="row">
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Basic</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Striped</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
 
-                    <h2 class="panel-title">Bordered</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            </tbody>
-                        </table>
+        {{-- Последние онлайн игроки --}}
+        <div class="col-lg-6">
+            <section class="card card-featured card-featured-primary">
+                <header class="card-header">
+                    <div class="card-actions">
+                        <i class="bx bx-user" style="font-size:20px;color:#0088cc"></i>
                     </div>
+                    <h2 class="card-title">Последние онлайн игроки</h2>
+                    <p class="card-subtitle">10 игроков по времени последнего входа</p>
+                </header>
+                <div class="card-body" style="padding:0">
+                    <table class="table table-hover mb-none">
+                        <thead>
+                        <tr>
+                            <th>Игрок</th>
+                            <th>Раса</th>
+                            <th width="50">Ур.</th>
+                            <th>Последний онлайн</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @forelse($recentPlayers as $user)
+                            @php $isOnline = $user->last_online_at && $user->last_online_at->diffInMinutes(now()) <= 5; @endphp
+                            <tr>
+                                <td>
+                                    @if($isOnline)
+                                        <span style="color:#46a546;font-size:10px;margin-right:4px">●</span>
+                                    @else
+                                        <span style="color:#aaa;font-size:10px;margin-right:4px">●</span>
+                                    @endif
+                                    @if($user->player)
+                                        <a href="{{ route('admin.player.info', $user->player->id) }}">{{ $user->name }}</a>
+                                    @else
+                                        {{ $user->name }}
+                                    @endif
+                                </td>
+                                <td>{{ $user->player?->race?->name ?? '—' }}</td>
+                                <td>{{ $user->player?->lvl ?? '—' }}</td>
+                                <td>
+                                    <span class="text-muted small" title="{{ $user->last_online_at }}">
+                                        {{ $user->last_online_at?->diffForHumans() ?? '—' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="text-center text-muted py-3">Нет данных</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
 
-                    <h2 class="panel-title">Hover Rows</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            </tbody>
-                        </table>
+        {{-- Последние завершённые бои --}}
+        <div class="col-lg-6">
+            <section class="card card-featured card-featured-danger">
+                <header class="card-header">
+                    <div class="card-actions">
+                        <i class="bx bx-shield-quarter" style="font-size:20px;color:#c00"></i>
                     </div>
+                    <h2 class="card-title">Последние завершённые бои</h2>
+                    <p class="card-subtitle">10 последних боёв со статусом «завершён»</p>
+                </header>
+                <div class="card-body" style="padding:0">
+                    <table class="table table-hover mb-none">
+                        <thead>
+                        <tr>
+                            <th width="50">ID</th>
+                            <th>Локация</th>
+                            <th>Участники</th>
+                            <th width="60">Рнд.</th>
+                            <th>Завершён</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @forelse($recentBattles as $battle)
+                            <tr>
+                                <td>{{ $battle->id }}</td>
+                                <td>{{ $battle->location?->name ?? '—' }}</td>
+                                <td>
+                                    @foreach($battle->detailsWithUsers as $detail)
+                                        <span class="badge badge-primary">{{ $detail->user?->name ?? '?' }}</span>
+                                    @endforeach
+                                    @foreach($battle->detailsWithMonsters as $detail)
+                                        <span class="badge badge-danger">{{ $detail->locationMonster?->monster?->name ?? '?' }}</span>
+                                    @endforeach
+                                </td>
+                                <td>{{ $battle->rounds }}</td>
+                                <td>
+                                    <span class="text-muted small" title="{{ $battle->updated_at }}">
+                                        {{ $battle->updated_at?->diffForHumans() ?? '—' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-center text-muted py-3">Нет завершённых боёв</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>
+
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Contextual</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Class</th>
-                                <th>Text</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr class="active">
-                                <td>1</td>
-                                <td>active</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="primary">
-                                <td>2</td>
-                                <td>primary</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="success">
-                                <td>3</td>
-                                <td>success</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="warning">
-                                <td>4</td>
-                                <td>warning</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="danger">
-                                <td>5</td>
-                                <td>danger</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="info">
-                                <td>6</td>
-                                <td>info</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            <tr class="dark">
-                                <td>7</td>
-                                <td>dark</td>
-                                <td>Lorem ipsum dolor sit amet</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Condensed</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-condensed mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <td>8</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Actions</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td class="actions">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                                <td class="actions">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                                <td class="actions">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Actions Hover</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td class="actions-hover">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                                <td class="actions-hover">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                                <td class="actions-hover">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Actions Hover with fade</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-        <div class="col-md-6">
-            <section class="panel">
-                <header class="panel-heading">
-                    <div class="panel-actions">
-                        <a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-                        <a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-                    </div>
-
-                    <h2 class="panel-title">Hover Rows + Actions Hover with Fade</h2>
-                </header>
-                <div class="panel-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-none">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Username</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>@twitter</td>
-                                <td class="actions-hover actions-fade">
-                                    <a href=""><i class="fa fa-pencil"></i></a>
-                                    <a href="" class="delete-row"><i class="fa fa-trash-o"></i></a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
 @endsection
-
-

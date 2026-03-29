@@ -1,68 +1,67 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Location\Location;
 use App\Models\Map;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class MapController extends Controller
 {
-    public function list()
+    public function list(): View
     {
-        $list = Map::query()->orderByDesc('id')->get();
+        $listMaps = Map::with('parent')->orderByDesc('id')->get();
 
-        return view('admin.map.list', compact('list'));
+        return view('admin.map.list', compact('listMaps'));
     }
 
-    public function info(Request $request, Map $map)
+    public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $data = $request->toArray();
+            $map = Map::create([
+                'name'      => $request->input('name'),
+                'slug'      => $request->input('slug'),
+                'folder'    => $request->input('folder'),
+                'parent_id' => $request->input('parent_id') ?: null,
+            ]);
 
-            $map->fill($data);
+            return redirect()->route('admin.map.info', $map->id)->with('success', 'Карта создана.');
+        }
+
+        $allMaps = Map::orderBy('name')->get();
+
+        return view('admin.map.create', compact('allMaps'));
+    }
+
+    public function info(Request $request, Map $map): mixed
+    {
+        if ($request->isMethod('POST')) {
+            $map->name      = $request->input('name');
+            $map->slug      = $request->input('slug');
+            $map->folder    = $request->input('folder');
+            $map->parent_id = $request->input('parent_id') ?: null;
             $map->save();
 
-            return redirect()->route('admin.maps');
+            return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $maps = Map::query()->orderByDesc('id')->get();
+        $allMaps   = Map::where('id', '!=', $map->id)->orderBy('name')->get();
+        $locations = Location::where('map_id', $map->id)->orderByDesc('id')->get();
 
-        return view('admin.map.info', compact('map', 'maps'));
+        return view('admin.map.info', compact('map', 'allMaps', 'locations'));
     }
 
-    public function create(Request $request)
+    public function location(Request $request, Map $map): RedirectResponse
     {
-        if ($request->isMethod('POST')) {
+        $location         = Location::findOrFail((int) $request->input('location_id'));
+        $location->map_id = $map->id;
+        $location->save();
 
-            $data = $request->toArray();
-
-            $npc = new Map();
-            $npc->fill($data);
-            $npc->save();
-
-            return redirect()->route('admin.maps');
-        }
-
-        $maps = Map::query()->orderByDesc('id')->get();
-
-        return view('admin.map.create', compact('maps'));
-    }
-
-    public function location(Request $request, Map $map)
-    {
-        if ($request->isMethod('POST')) {
-            $data = $request->toArray();
-
-            $map->fill($data);
-            $map->save();
-
-            return redirect()->route('admin.maps');
-        }
-
-        $locations = Location::where(['map_id' => $map->id])->orderByDesc('id')->get();
-
-        return view('admin.map.location', compact('map', 'locations'));
+        return redirect()->back()->with('success', 'Локация добавлена на карту.');
     }
 }

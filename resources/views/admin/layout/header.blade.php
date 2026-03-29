@@ -1,6 +1,6 @@
 <header class="header">
     <div class="logo-container">
-        <a href="../4.0.0" class="logo">
+        <a href="#" class="logo">
             <img src="img/logo.png" width="75" height="35" alt="Porto Admin" />
         </a>
 

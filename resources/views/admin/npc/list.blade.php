@@ -1,7 +1,7 @@
 @extends('admin.layout.base')
 
 @section('title')
-    NPC
+    НПС
 @endsection
 
 @section('body')
@@ -10,31 +10,38 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
-                    <a href="{{ route('admin.npc.create') }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Добавить НПС</a>
-                </div>
-            </section>
-
-            <section class="card">
-                <div class="card-body">
+                    <div class="mb-3">
+                        <a href="{{ route('admin.npc.create') }}" class="btn btn-primary btn-sm">Добавить НПС</a>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-none">
+                        <table class="table table-hover table-bordered mb-none">
                             <thead>
                             <tr>
                                 <th width="50">ID</th>
+                                <th width="45"></th>
                                 <th>Имя</th>
                                 <th>Локация</th>
                                 <th width="70"></th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($list as $npc)
-                                <tr style="vertical-align: baseline">
+                            @forelse($list as $npc)
+                                <tr style="vertical-align: middle">
                                     <td>{{ $npc->id }}</td>
-                                    <td><a href="{{ route('admin.npc.info', ['npc' => $npc->id]) }}">{{ $npc->name }}</a></td>
-                                    <td>{{ $npc->location?->name }} @if($npc->location) [{{ $npc->location_id }}]@endif</td>
-                                    <td><a href="{{ route('admin.npc.info', ['npc' => $npc->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-primary">Детали</a></td>
+                                    <td>
+                                        @if($npc->image)
+                                            <img src="{{ Storage::url($npc->image) }}" style="width:36px;height:36px;object-fit:contain;" alt="">
+                                        @endif
+                                    </td>
+                                    <td><a href="{{ route('admin.npc.info', $npc->id) }}">{{ $npc->name }}</a></td>
+                                    <td>{{ $npc->location ? '[' . $npc->location_id . '] ' . $npc->location->name : '—' }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.npc.info', $npc->id) }}" class="btn btn-xs btn-primary">Изменить</a>
+                                    </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr><td colspan="5" class="text-center text-muted">Нет НПС</td></tr>
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -42,6 +49,5 @@
             </section>
         </div>
     </div>
+
 @endsection
-
-

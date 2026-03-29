@@ -1,82 +1,80 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location\Location;
-use App\Models\Npc;
+use App\Models\Shop\ShopItem;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class StructureController extends Controller
 {
     public function list()
     {
-        $listStructures = Structure::query()->orderByDesc('id')->get();
+        $listStructures = Structure::with(['location', 'npc'])
+            ->withCount(['shopItems', 'actions'])
+            ->orderByDesc('id')
+            ->get();
 
         return view('admin.structures.list', compact('listStructures'));
     }
 
-    public function info(Request $request, Structure $structure)
+    public function info(Request $request, Structure $structure): mixed
     {
         if ($request->isMethod('POST')) {
-            $data = $request->toArray();
-
-            $structure->fill($data);
+            $structure->name        = $request->input('name');
+            $structure->type        = $request->input('type');
+            $structure->location_id = $request->input('location_id') ?: null;
+            $structure->npc_id      = $request->input('npc_id') ?: null;
             $structure->save();
 
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $locations = Location::query()->orderByDesc('id')->get();
-        $npcs = Npc::query()->orderByDesc('id')->get();
+        $structure->load(['location', 'npc', 'shopItems.item', 'actions']);
+        $allActions = ShareAction::orderBy('name')->get();
 
-        return view('admin.structures.info', compact('structure', 'locations', 'npcs'));
+        return view('admin.structures.info', compact('structure', 'allActions'));
     }
 
-    public function infoShop(Request $request, Structure $structure)
+    public function infoShop(Request $request, Structure $structure): RedirectResponse
     {
-        if ($request->isMethod('POST')) {
-            $data = $request->toArray();
+        ShopItem::create([
+            'structure_id'   => $structure->id,
+            'share_item_id'  => (int) $request->input('share_item_id'),
+            'price'          => (int) $request->input('price', 0),
+            'diamond'        => (int) $request->input('diamond', 0),
+            'sort_order'     => (int) $request->input('sort_order', 0),
+        ]);
 
-            $structure->shopItems()->attach($data['share_item_id']);
-
-            return redirect()->back();
-        }
-
-         $allItems = ShareItem::all();
-
-        return view('admin.structures.info_shop', compact('structure', 'allItems'));
+        return redirect()->back()->with('success', 'Предмет добавлен.');
     }
 
-    public function infoShopDeleteItem(Structure $structure, ShareItem $item)
+    public function infoShopDeleteItem(Structure $structure, ShareItem $item): RedirectResponse
     {
-        $structure->shopItems()->detach($item->id);
+        ShopItem::where('structure_id', $structure->id)
+            ->where('share_item_id', $item->id)
+            ->delete();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Предмет удалён.');
     }
 
-    public function infoAction(Request $request, Structure $structure)
+    public function infoAction(Request $request, Structure $structure): RedirectResponse
     {
-        if ($request->isMethod('POST')) {
-            $data = $request->toArray();
+        $structure->actions()->syncWithoutDetaching([(int) $request->input('share_action_id')]);
 
-            $structure->actions()->attach($data['share_action_id']);
-
-            return redirect()->back();
-        }
-
-        $allActions = ShareAction::all();
-
-        return view('admin.structures.info_action', compact('structure', 'allActions'));
+        return redirect()->back()->with('success', 'Действие добавлено.');
     }
 
-    public function infoActionDelete(Structure $structure, ShareAction $action)
+    public function infoActionDelete(Structure $structure, ShareAction $action): RedirectResponse
     {
         $structure->actions()->detach($action->id);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Действие удалено.');
     }
 }

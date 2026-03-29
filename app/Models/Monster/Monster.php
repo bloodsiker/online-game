@@ -17,7 +17,7 @@ class Monster extends Model implements FightHitInterface
     use HasFactory;
 
     protected $fillable = [
-        'lvl', 'name', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression', 'exp', 'min_money', 'max_money', 'is_boss'
+        'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression', 'exp', 'min_money', 'max_money', 'is_boss',
     ];
 
     protected $attributes = [

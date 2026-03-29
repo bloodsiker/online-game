@@ -14,55 +14,79 @@
             <nav id="menu" class="nav-main" role="navigation">
 
                 <ul class="nav nav-main">
-                    <li>
-                        <a class="nav-link" href="layouts-default.html">
+                    <li class="{{ request()->routeIs('admin.dashboard') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
                             <i class="bx bx-home-alt" aria-hidden="true"></i>
-                            <span>Dashboard</span>
+                            <span>Дашборд</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.race', 'admin.race.info') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.race') }}">
                             <i class="bx bx-cube" aria-hidden="true"></i>
                             <span>Расы</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.maps', 'admin.map.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.maps') }}">
                             <i class="bx bx-map" aria-hidden="true"></i>
                             <span>Карты</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.npc', 'admin.npc.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.npc') }}">
                             <i class="bx bx-map" aria-hidden="true"></i>
                             <span>НПС</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.skills', 'admin.skill.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.skills') }}">
                             <i class="bx bx-loader-circle" aria-hidden="true"></i>
                             <span>Навыки</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.items', 'admin.item.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.items') }}">
-                            <i class="bx bx-home-alt" aria-hidden="true"></i>
+                            <i class="bx bx-package" aria-hidden="true"></i>
                             <span>Предметы</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.players', 'admin.player.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.players') }}">
+                            <i class="bx bx-user" aria-hidden="true"></i>
+                            <span>Игроки</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.clans', 'admin.clan.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.clans') }}">
+                            <i class="bx bx-group" aria-hidden="true"></i>
+                            <span>Кланы</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.reputations', 'admin.reputation.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.reputations') }}">
+                            <i class="bx bx-medal" aria-hidden="true"></i>
+                            <span>Репутации</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.quests', 'admin.quest.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.quests') }}">
+                            <i class="bx bx-task" aria-hidden="true"></i>
+                            <span>Квесты</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.monsters', 'admin.monster.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.monsters') }}">
-                            <i class="bx bx-home-alt" aria-hidden="true"></i>
+                            <i class="bx bx-ghost" aria-hidden="true"></i>
                             <span>Монстры</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.structures', 'admin.structure.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.structures') }}">
                             <i class="bx bx-layout" aria-hidden="true"></i>
                             <span>Построение</span>
                         </a>
                     </li>
-                    <li>
+                    <li class="{{ request()->routeIs('admin.action', 'admin.action.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.action') }}">
                             <i class="bx bx-loader-circle" aria-hidden="true"></i>
                             <span>Действия на локации</span>

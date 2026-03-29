@@ -38,9 +38,9 @@
         <section role="main" class="content-body">
             <header class="page-header">
                 <h2>@yield('title')</h2>
-                <div class="pull-right" style="padding: 12px 10px;margin-right: 20px;">
-                    <a href="" class="btn btn-primary btn-xs">Add</a>
-                </div>
+{{--                <div class="pull-right" style="padding: 12px 10px;margin-right: 20px;">--}}
+{{--                    <a href="" class="btn btn-primary btn-xs">Add</a>--}}
+{{--                </div>--}}
             </header>
 
             @yield('body')
@@ -67,6 +67,21 @@
 <script src="{{ asset('admin/js/modals.js') }}"></script>
 
 @stack('footer_scripts')
+
+@if(session('success'))
+<script>
+    $(function() {
+        new PNotify({ title: 'Успешно', text: @json(session('success')), type: 'success', styling: 'bootstrap3', buttons: { closer: true, sticker: false } });
+    });
+</script>
+@endif
+@if(session('error'))
+<script>
+    $(function() {
+        new PNotify({ title: 'Ошибка', text: @json(session('error')), type: 'error', styling: 'bootstrap3', buttons: { closer: true, sticker: false } });
+    });
+</script>
+@endif
 
 </body>
 </html>

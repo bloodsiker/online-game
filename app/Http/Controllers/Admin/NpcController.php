@@ -1,69 +1,59 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location\Location;
 use App\Models\Npc;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class NpcController extends Controller
 {
     public function list()
     {
-        $list = Npc::query()->orderByDesc('id')->get();
+        $list = Npc::with('location')->orderByDesc('id')->get();
 
         return view('admin.npc.list', compact('list'));
     }
 
-    public function create(Request $request)
+    public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-
-            $request->validate([
-                'image' => 'image|mimes:jpeg,png,jpg,gif,webp',
-            ]);
-
-            $data = $request->toArray();
-
-            if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('npc', 'public');
-            }
-
             $npc = new Npc();
-            $npc->fill($data);
+            $this->fillNpc($npc, $request);
             $npc->save();
 
-            return redirect()->route('admin.npc');
+            return redirect()->route('admin.npc.info', $npc->id)
+                ->with('success', 'НПС создан.');
         }
 
-        $locations = Location::query()->orderByDesc('id')->get();
-
-        return view('admin.npc.create', compact('locations'));
+        return view('admin.npc.create');
     }
 
-    public function info(Request $request, Npc $npc)
+    public function info(Request $request, Npc $npc): mixed
     {
         if ($request->isMethod('POST')) {
-
-            $request->validate([
-                'image' => 'image|mimes:jpeg,png,jpg,gif,webp',
-            ]);
-
-            $data = $request->toArray();
-
-            if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('npc', 'public');
-            }
-
-            $npc->fill($data);
+            $this->fillNpc($npc, $request);
             $npc->save();
 
-            return redirect()->route('admin.npc');
+            return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $locations = Location::query()->orderByDesc('id')->get();
+        return view('admin.npc.info', compact('npc'));
+    }
 
-        return view('admin.npc.info', compact('npc', 'locations'));
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private function fillNpc(Npc $npc, Request $request): void
+    {
+        $npc->name        = $request->input('name');
+        $npc->description = $request->input('description');
+        $npc->location_id = $request->input('location_id') ?: null;
+
+        if ($request->hasFile('image')) {
+            $npc->image = $request->file('image')->store('npc', 'public');
+        }
     }
 }

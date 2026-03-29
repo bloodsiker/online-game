@@ -10,25 +10,32 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
+                    <div class="mb-3">
+                        <a href="{{ route('admin.action.create') }}" class="btn btn-sm btn-primary">Создать действие</a>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-none">
+                        <table class="table table-hover table-bordered mb-none">
                             <thead>
                             <tr>
                                 <th width="50">ID</th>
-                                <th>Alias</th>
-                                <th>название</th>
+                                <th width="200">Alias</th>
+                                <th>Название</th>
                                 <th width="70"></th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($listActions as $action)
-                                <tr style="vertical-align: baseline">
+                            @forelse($listActions as $action)
+                                <tr style="vertical-align: middle">
                                     <td>{{ $action->id }}</td>
-                                    <td>{{ $action->alias }}</td>
+                                    <td><code>{{ $action->alias }}</code></td>
                                     <td>{{ $action->name }}</td>
-                                    <td><a href="{{ route('admin.action.info', ['action' => $action->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-primary">Детали</a></td>
+                                    <td>
+                                        <a href="{{ route('admin.action.info', $action->id) }}" class="btn btn-xs btn-primary">Изменить</a>
+                                    </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr><td colspan="4" class="text-center text-muted">Нет действий</td></tr>
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -36,6 +43,5 @@
             </section>
         </div>
     </div>
+
 @endsection
-
-

@@ -10,95 +10,109 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <form action="{{ route('admin.monster.create') }}" method="post">
-                                {{ csrf_field() }}
-                                <div class="row form-group pb-3">
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="name">Название</label>
-                                            <input type="text" class="form-control" name="name" id="name" value="" placeholder="">
-                                        </div>
+                    <form action="{{ route('admin.monster.create') }}" method="post" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="row pb-3 pt-2">
 
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="lvl">LVL</label>
-                                            <input type="text" class="form-control" name="lvl" id="lvl" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="description">Описание</label>
-                                            <textarea class="form-control" name="description" rows="7" id="description"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="hp">HP</label>
-                                            <input type="text" class="form-control" name="hp" id="hp" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="armor">Защита</label>
-                                            <input type="text" class="form-control" name="armor" id="armor" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="dodge">Уворот</label>
-                                            <input type="text" class="form-control" name="dodge" id="dodge" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="critical">Крит</label>
-                                            <input type="text" class="form-control" name="critical" id="critical" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="min_dmg">Мин атака</label>
-                                            <input type="text" class="form-control" name="min_dmg" id="min_dmg" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="max_dmg">Макс атака</label>
-                                            <input type="text" class="form-control" name="max_dmg" id="max_dmg" value="" placeholder="">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="aggression">Агресивность %</label>
-                                            <input type="text" class="form-control" id="aggression" name="aggression" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="exp">Опыт</label>
-                                            <input type="text" class="form-control" id="exp" name="exp" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="min_money">Мин монет</label>
-                                            <input type="text" class="form-control" id="min_money" name="min_money" value="" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="max_money">Макс монет</label>
-                                            <input type="text" class="form-control" id="max_money" name="max_money" value="" placeholder="">
-                                        </div>
-                                    </div>
+                            <div class="col-lg-4">
+                                <h6 class="text-muted mb-3">Основное</h6>
+                                <div class="form-group">
+                                    <label class="col-form-label">Название</label>
+                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}">
                                 </div>
-
-
-                                <div class="row justify-content-start">
-                                    <div class="col-sm-12">
-                                        <button class="btn btn-primary">Сохранить</button>
-                                        <a href="{{ route('admin.monsters') }}" class="btn btn-success">Назад</a>
-                                    </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Уровень</label>
+                                    <input type="number" class="form-control" name="lvl" value="{{ old('lvl', 1) }}">
                                 </div>
-                            </form>
+                                <div class="form-group">
+                                    <label class="col-form-label">Описание</label>
+                                    <textarea class="form-control" name="description" rows="4">{{ old('description') }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Изображение</label>
+                                    <div class="mb-1">
+                                        <img id="monster-preview" src="" alt="" style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                    </div>
+                                    <input type="file" class="form-control" name="image" id="monster-image" accept="image/*">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Босс</label>
+                                    <select class="form-control" name="is_boss">
+                                        <option value="0" @selected(old('is_boss', '0') === '0')>Нет</option>
+                                        <option value="1" @selected(old('is_boss') === '1')>Да</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <h6 class="text-muted mb-3">Боевые характеристики</h6>
+                                <div class="form-group">
+                                    <label class="col-form-label">HP</label>
+                                    <input type="number" class="form-control" name="hp" value="{{ old('hp', 100) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Защита</label>
+                                    <input type="number" class="form-control" name="armor" value="{{ old('armor', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Уворот (%)</label>
+                                    <input type="number" class="form-control" name="dodge" value="{{ old('dodge', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Крит (%)</label>
+                                    <input type="number" class="form-control" name="critical" value="{{ old('critical', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Мин. атака</label>
+                                    <input type="number" step="0.01" class="form-control" name="min_dmg" value="{{ old('min_dmg', 1) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Макс. атака</label>
+                                    <input type="number" step="0.01" class="form-control" name="max_dmg" value="{{ old('max_dmg', 1) }}">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <h6 class="text-muted mb-3">Награда</h6>
+                                <div class="form-group">
+                                    <label class="col-form-label">Агрессивность (%)</label>
+                                    <input type="number" class="form-control" name="aggression" value="{{ old('aggression', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Опыт</label>
+                                    <input type="number" class="form-control" name="exp" value="{{ old('exp', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Мин. монет</label>
+                                    <input type="number" class="form-control" name="min_money" value="{{ old('min_money', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Макс. монет</label>
+                                    <input type="number" class="form-control" name="max_money" value="{{ old('max_money', 0) }}">
+                                </div>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="row mb-3">
+                            <div class="col-sm-12">
+                                <button class="btn btn-primary">Создать</button>
+                                <a href="{{ route('admin.monsters') }}" class="btn btn-success">Назад</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </section>
         </div>
     </div>
+
+    <script>
+        document.getElementById('monster-image').addEventListener('change', function () {
+            const preview = document.getElementById('monster-preview');
+            if (this.files[0]) {
+                preview.src = URL.createObjectURL(this.files[0]);
+                preview.style.display = 'block';
+            }
+        });
+    </script>
+
 @endsection
-
-

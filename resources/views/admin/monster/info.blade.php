@@ -10,103 +10,712 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
-                    <a href="{{ route('admin.monster.info', ['monster' => $monster->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Основная информация</a>
-                    <a href="{{ route('admin.monster.info.location', ['monster' => $monster->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Локации</a>
-                    <a href="{{ route('admin.monster.info.drop', ['monster' => $monster->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Дроп</a>
-                </div>
-            </section>
+                    <div class="tabs">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item active">
+                                <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-drop" href="#tab-drop" data-bs-toggle="tab">
+                                    Дроп <span class="badge badge-primary">{{ $monster->items->count() }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-locations" href="#tab-locations" data-bs-toggle="tab">
+                                    Локации <span class="badge badge-primary">{{ $monster->locations->count() }}</span>
+                                </a>
+                            </li>
+                            @if($monster->is_boss)
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-phases" href="#tab-phases" data-bs-toggle="tab">
+                                    Фазы боя <span class="badge badge-warning">{{ $monster->phases?->count() ?? 0 }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-mechanics" href="#tab-mechanics" data-bs-toggle="tab">
+                                    Механики <span class="badge badge-danger">{{ $monster->mechanics?->count() ?? 0 }}</span>
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
 
-            <section class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <form action="{{ route('admin.monster.info', ['monster' => $monster->id]) }}" method="post">
-                                {{ csrf_field() }}
-                                <div class="row form-group pb-3">
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="name">Название</label>
-                                            <input type="text" class="form-control" name="name" id="name" value="{{ $monster->name }}" placeholder="">
+                        <div class="tab-content">
+
+                            {{-- ОСНОВНАЯ --}}
+                            <div id="tab-main" class="tab-pane active">
+                                <form action="{{ route('admin.monster.info', $monster->id) }}" method="post" enctype="multipart/form-data">
+                                    {{ csrf_field() }}
+                                    <div class="row pb-3 pt-3">
+
+                                        <div class="col-lg-4">
+                                            <h6 class="text-muted mb-3">Основное</h6>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Название</label>
+                                                <input type="text" class="form-control" name="name" value="{{ $monster->name }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Уровень</label>
+                                                <input type="number" class="form-control" name="lvl" value="{{ $monster->lvl }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Описание</label>
+                                                <textarea class="form-control" name="description" rows="4">{{ $monster->description }}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Изображение</label>
+                                                @if($monster->image)
+                                                    <div class="mb-1">
+                                                        <img id="monster-preview" src="{{ $monster->image }}" alt=""
+                                                             style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
+                                                        <small class="text-muted d-block">{{ $monster->image }}</small>
+                                                    </div>
+                                                @else
+                                                    <img id="monster-preview" src="" alt=""
+                                                         style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                                @endif
+                                                <input type="file" class="form-control mt-1" name="image" id="monster-image" accept="image/*">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Босс</label>
+                                                <select class="form-control" name="is_boss">
+                                                    <option value="0" @selected(!$monster->is_boss)>Нет</option>
+                                                    <option value="1" @selected($monster->is_boss)>Да</option>
+                                                </select>
+                                            </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="lvl">LVL</label>
-                                            <input type="text" class="form-control" name="lvl" id="lvl" value="{{ $monster->lvl }}" placeholder="">
+                                        <div class="col-lg-4">
+                                            <h6 class="text-muted mb-3">Боевые характеристики</h6>
+                                            <div class="form-group">
+                                                <label class="col-form-label">HP</label>
+                                                <input type="number" class="form-control" name="hp" value="{{ $monster->hp }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Защита</label>
+                                                <input type="number" class="form-control" name="armor" value="{{ $monster->armor }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Уворот (%)</label>
+                                                <input type="number" class="form-control" name="dodge" value="{{ $monster->dodge }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Крит (%)</label>
+                                                <input type="number" class="form-control" name="critical" value="{{ $monster->critical }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Мин. атака</label>
+                                                <input type="number" step="0.01" class="form-control" name="min_dmg" value="{{ $monster->min_dmg }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Макс. атака</label>
+                                                <input type="number" step="0.01" class="form-control" name="max_dmg" value="{{ $monster->max_dmg }}">
+                                            </div>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="description">Описание</label>
-                                            <textarea class="form-control" name="description" rows="7" id="description"></textarea>
+                                        <div class="col-lg-4">
+                                            <h6 class="text-muted mb-3">Награда</h6>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Агрессивность (%)</label>
+                                                <input type="number" class="form-control" name="aggression" value="{{ $monster->aggression }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Опыт</label>
+                                                <input type="number" class="form-control" name="exp" value="{{ $monster->exp }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Мин. монет</label>
+                                                <input type="number" class="form-control" name="min_money" value="{{ $monster->min_money }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Макс. монет</label>
+                                                <input type="number" class="form-control" name="max_money" value="{{ $monster->max_money }}">
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="hp">HP</label>
-                                            <input type="text" class="form-control" name="hp" id="hp" value="{{ $monster->hp }}" placeholder="">
-                                        </div>
 
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="armor">Защита</label>
-                                            <input type="text" class="form-control" name="armor" id="armor" value="{{ $monster->armor }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="dodge">Уворот</label>
-                                            <input type="text" class="form-control" name="dodge" id="dodge" value="{{ $monster->dodge }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="critical">Крит</label>
-                                            <input type="text" class="form-control" name="critical" id="critical" value="{{ $monster->critical }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="min_dmg">Мин атака</label>
-                                            <input type="text" class="form-control" name="min_dmg" id="min_dmg" value="{{ $monster->min_dmg }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="max_dmg">Макс атака</label>
-                                            <input type="text" class="form-control" name="max_dmg" id="max_dmg" value="{{ $monster->max_dmg }}" placeholder="">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <button class="btn btn-primary">Сохранить</button>
+                                            <a href="{{ route('admin.monsters') }}" class="btn btn-success">Назад</a>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="aggression">Агресивность %</label>
-                                            <input type="text" class="form-control" id="aggression" name="aggression" value="{{ $monster->aggression }}" placeholder="">
-                                        </div>
+                                </form>
+                            </div>
 
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="exp">Опыт</label>
-                                            <input type="text" class="form-control" id="exp" name="exp" value="{{ $monster->exp }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="min_money">Мин монет</label>
-                                            <input type="text" class="form-control" id="min_money" name="min_money" value="{{ $monster->min_money }}" placeholder="">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-form-label" for="max_money">Макс монет</label>
-                                            <input type="text" class="form-control" id="max_money" name="max_money" value="{{ $monster->max_money }}" placeholder="">
-                                        </div>
+                            {{-- ДРОП --}}
+                            <div id="tab-drop" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalDrop">Добавить предмет</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="50">ID</th>
+                                                <th width="45"></th>
+                                                <th>Название</th>
+                                                <th width="100">Шанс (%)</th>
+                                                <th width="110">Кол-во</th>
+                                                <th width="100">Цена</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->items as $item)
+                                                <tr style="vertical-align: middle">
+                                                    <td>{{ $item->id }}</td>
+                                                    <td><img src="{{ $item->image }}" width="36" alt=""></td>
+                                                    <td><a href="{{ route('admin.item.info', $item->id) }}" target="_blank">{{ $item->name }}</a></td>
+                                                    <td>{{ $item->pivot->drop_chance }}</td>
+                                                    <td>{{ $item->pivot->min_count }} – {{ $item->pivot->max_count }}</td>
+                                                    <td>{{ number_format($item->price, 0, '', ' ') }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.monster.info.drop.delete_item', [$monster->id, $item->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="7" class="text-center text-muted">Нет предметов</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+                            </div>
 
-
-                                <div class="row justify-content-start">
-                                    <div class="col-sm-12">
-                                        <button class="btn btn-primary">Сохранить</button>
-                                        <a href="{{ route('admin.monsters') }}" class="btn btn-success">Назад</a>
+                            {{-- ЛОКАЦИИ --}}
+                            <div id="tab-locations" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalLocation">Добавить локацию</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="50">ID</th>
+                                                <th>Локация</th>
+                                                <th>Карта</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->locations as $location)
+                                                <tr style="vertical-align: middle">
+                                                    <td>{{ $location->id }}</td>
+                                                    <td>[{{ $location->id }}] {{ $location->name }}</td>
+                                                    <td>{{ $location->map?->name ?? '—' }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.monster.info.delete_location', [$monster->id, $location->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="4" class="text-center text-muted">Нет локаций</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
+
+                            @if($monster->is_boss)
+
+                            {{-- ФАЗЫ БОЯ --}}
+                            <div id="tab-phases" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddPhase">Добавить фазу</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="70">Фаза №</th>
+                                                <th width="120">HP порог (%)</th>
+                                                <th>Описание</th>
+                                                <th width="120">Мод. статов</th>
+                                                <th width="100">Новые скилы</th>
+                                                <th width="100">Убраны</th>
+                                                <th width="120"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->phases ?? [] as $phase)
+                                                <tr style="vertical-align: middle"
+                                                    data-phase-id="{{ $phase->id }}"
+                                                    data-phase-number="{{ $phase->phase_number }}"
+                                                    data-hp-threshold="{{ $phase->hp_threshold }}"
+                                                    data-description="{{ $phase->description }}"
+                                                    data-stats-modifiers="{{ json_encode($phase->stats_modifiers) }}"
+                                                    data-new-skills="{{ json_encode($phase->new_skills) }}"
+                                                    data-removed-skills="{{ json_encode($phase->removed_skills) }}">
+                                                    <td><strong>{{ $phase->phase_number }}</strong></td>
+                                                    <td>
+                                                        <span class="badge badge-{{ $phase->hp_threshold <= 25 ? 'danger' : ($phase->hp_threshold <= 50 ? 'warning' : 'info') }}">
+                                                            ≤ {{ $phase->hp_threshold }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ $phase->description }}</td>
+                                                    <td>
+                                                        @if($phase->stats_modifiers)
+                                                            <code class="text-muted small">{{ count($phase->stats_modifiers) }} статов</code>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($phase->new_skills)
+                                                            <span class="badge badge-success">{{ count($phase->new_skills) }}</span>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($phase->removed_skills)
+                                                            <span class="badge badge-secondary">{{ count($phase->removed_skills) }}</span>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-xs btn-info btn-edit-phase">Изменить</button>
+                                                        <a href="{{ route('admin.monster.boss.phase.delete', [$monster->id, $phase->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить фазу?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="7" class="text-center text-muted">Нет фаз. Добавьте хотя бы одну.</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- МЕХАНИКИ --}}
+                            <div id="tab-mechanics" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddMechanic">Добавить механику</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th>Тип</th>
+                                                <th width="130">Триггер HP (%)</th>
+                                                <th width="110">Триггер ход</th>
+                                                <th width="80">Приор.</th>
+                                                <th width="90">Статус</th>
+                                                <th width="150"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->mechanics ?? [] as $mechanic)
+                                                <tr style="vertical-align: middle"
+                                                    data-mechanic-id="{{ $mechanic->id }}"
+                                                    data-mechanic-type="{{ $mechanic->mechanic_type?->value }}"
+                                                    data-trigger-hp="{{ $mechanic->trigger_hp_percent }}"
+                                                    data-trigger-turn="{{ $mechanic->trigger_turn }}"
+                                                    data-priority="{{ $mechanic->priority }}"
+                                                    data-is-active="{{ $mechanic->is_active ? '1' : '0' }}"
+                                                    data-config="{{ json_encode($mechanic->config) }}">
+                                                    <td>
+                                                        {{ $mechanic->getIcon() }}
+                                                        <strong>{{ $mechanic->getLabel() }}</strong>
+                                                        <br><small class="text-muted">{{ $mechanic->mechanic_type?->value }}</small>
+                                                    </td>
+                                                    <td>
+                                                        @if($mechanic->trigger_hp_percent !== null)
+                                                            <span class="badge badge-warning">≤ {{ $mechanic->trigger_hp_percent }}%</span>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($mechanic->trigger_turn !== null)
+                                                            <span class="badge badge-info">Ход {{ $mechanic->trigger_turn }}</span>
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $mechanic->priority }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.monster.boss.mechanic.toggle', [$monster->id, $mechanic->id]) }}"
+                                                           class="badge badge-{{ $mechanic->is_active ? 'success' : 'secondary' }}"
+                                                           style="cursor:pointer;text-decoration:none">
+                                                            {{ $mechanic->is_active ? 'Активна' : 'Выкл' }}
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-xs btn-info btn-edit-mechanic">Изменить</button>
+                                                        <a href="{{ route('admin.monster.boss.mechanic.delete', [$monster->id, $mechanic->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить механику?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="6" class="text-center text-muted">Нет механик. Босс сражается как обычный монстр.</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @endif
+
                         </div>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+
+    {{-- Модалка: добавить дроп --}}
+    <div id="modalDrop" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.monster.info.drop', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить предмет в дроп</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Предмет</label>
+                        <select id="item-ajax-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Шанс (%)</label>
+                        <input type="number" step="0.01" class="form-control" name="drop_chance" value="10">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Мин. кол-во</label>
+                                <input type="number" class="form-control" name="min_count" value="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Макс. кол-во</label>
+                                <input type="number" class="form-control" name="max_count" value="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить локацию --}}
+    <div id="modalLocation" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.monster.info.location', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить локацию</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Локация</label>
+                        <select id="location-ajax-select" name="location_id" class="form-control"></select>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить фазу --}}
+    <div id="modalAddPhase" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form id="form-add-phase" action="{{ route('admin.monster.boss.phase.add', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title" id="phase-modal-title">Добавить фазу</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">Фаза №</label>
+                                <input type="number" class="form-control" name="phase_number" id="phase_number" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">HP порог (%)</label>
+                                <input type="number" class="form-control" name="hp_threshold" id="hp_threshold" value="50" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-form-label">Описание</label>
+                                <input type="text" class="form-control" name="description" id="phase_description">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-form-label">Модификаторы статов (JSON)</label>
+                                <small class="text-muted d-block">Напр.: <code>[{"stat":"hp","value":50}]</code></small>
+                                <textarea class="form-control font-monospace" name="stats_modifiers" id="stats_modifiers" rows="4" placeholder="[]"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-form-label">Новые скилы (JSON)</label>
+                                <small class="text-muted d-block">Напр.: <code>["fireball","shield"]</code></small>
+                                <textarea class="form-control font-monospace" name="new_skills" id="new_skills" rows="4" placeholder="[]"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-form-label">Убираемые скилы (JSON)</label>
+                                <textarea class="form-control font-monospace" name="removed_skills" id="removed_skills" rows="4" placeholder="[]"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary" id="phase-submit-btn">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить / редактировать механику --}}
+    <div id="modalAddMechanic" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form id="form-mechanic" action="{{ route('admin.monster.boss.mechanic.add', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title" id="mechanic-modal-title">Добавить механику</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-form-label">Тип механики</label>
+                                <select class="form-control" name="mechanic_type" id="mechanic_type">
+                                    @foreach($mechanicTypes as $type)
+                                        <option value="{{ $type->value }}">{{ $type->getIcon() }} {{ $type->getLabel() }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">Триггер HP (%)</label>
+                                <small class="text-muted d-block">Пусто = не триггерить по HP</small>
+                                <input type="number" class="form-control" name="trigger_hp_percent" id="trigger_hp_percent" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">Триггер ход №</label>
+                                <small class="text-muted d-block">Пусто = не триггерить по ходу</small>
+                                <input type="number" class="form-control" name="trigger_turn" id="trigger_turn" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">Приоритет</label>
+                                <input type="number" class="form-control" name="priority" id="mechanic_priority" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-form-label">Активна</label>
+                                <select class="form-control" name="is_active" id="mechanic_is_active">
+                                    <option value="1">Да</option>
+                                    <option value="0">Нет</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-form-label">Конфигурация (JSON)</label>
+                                <small class="text-muted d-block">Зависит от типа механики. Напр.: <code>{"multiplier":2}</code></small>
+                                <textarea class="form-control font-monospace" name="config" id="mechanic_config" rows="3" placeholder="{}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary" id="mechanic-submit-btn">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+@push('footer_scripts')
+<script>
+    // Image preview
+    document.getElementById('monster-image').addEventListener('change', function () {
+        const preview = document.getElementById('monster-preview');
+        if (this.files[0]) {
+            preview.src = URL.createObjectURL(this.files[0]);
+            preview.style.display = 'block';
+        }
+    });
+
+    @if($monster->is_boss)
+    // ── Фазы: редактирование ──────────────────────────────────────────────────
+    const addPhaseUrl    = '{{ route('admin.monster.boss.phase.add', $monster->id) }}';
+    const updatePhaseBase = '{{ url('admin/monster/' . $monster->id . '/phase') }}';
+
+    document.querySelectorAll('.btn-edit-phase').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const row = this.closest('tr');
+            const phaseId = row.dataset.phaseId;
+
+            document.getElementById('phase-modal-title').textContent = 'Редактировать фазу #' + row.dataset.phaseNumber;
+            document.getElementById('form-add-phase').action = updatePhaseBase + '/' + phaseId;
+            document.getElementById('phase-submit-btn').textContent = 'Сохранить';
+            document.getElementById('phase_number').value    = row.dataset.phaseNumber;
+            document.getElementById('hp_threshold').value    = row.dataset.hpThreshold;
+            document.getElementById('phase_description').value = row.dataset.description || '';
+
+            const mods = row.dataset.statsModifiers;
+            document.getElementById('stats_modifiers').value = mods && mods !== 'null' ? JSON.stringify(JSON.parse(mods), null, 2) : '';
+
+            const ns = row.dataset.newSkills;
+            document.getElementById('new_skills').value = ns && ns !== 'null' ? JSON.stringify(JSON.parse(ns), null, 2) : '';
+
+            const rs = row.dataset.removedSkills;
+            document.getElementById('removed_skills').value = rs && rs !== 'null' ? JSON.stringify(JSON.parse(rs), null, 2) : '';
+
+            $.magnificPopup.open({ items: { src: '#modalAddPhase', type: 'inline' }, removalDelay: 300, mainClass: 'mfp-zoom-in' });
+        });
+    });
+
+    document.querySelector('[href="#modalAddPhase"]').addEventListener('click', function () {
+        document.getElementById('phase-modal-title').textContent = 'Добавить фазу';
+        document.getElementById('form-add-phase').action = addPhaseUrl;
+        document.getElementById('phase-submit-btn').textContent = 'Добавить';
+        document.getElementById('phase_number').value = '';
+        document.getElementById('hp_threshold').value = '50';
+        document.getElementById('phase_description').value = '';
+        document.getElementById('stats_modifiers').value = '';
+        document.getElementById('new_skills').value = '';
+        document.getElementById('removed_skills').value = '';
+    });
+
+    // ── Механики: редактирование ──────────────────────────────────────────────
+    const addMechanicUrl    = '{{ route('admin.monster.boss.mechanic.add', $monster->id) }}';
+    const updateMechanicBase = '{{ url('admin/monster/' . $monster->id . '/mechanic') }}';
+
+    document.querySelectorAll('.btn-edit-mechanic').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const row = this.closest('tr');
+            const mechId = row.dataset.mechanicId;
+
+            document.getElementById('mechanic-modal-title').textContent = 'Редактировать механику';
+            document.getElementById('form-mechanic').action = updateMechanicBase + '/' + mechId;
+            document.getElementById('mechanic-submit-btn').textContent = 'Сохранить';
+            document.getElementById('mechanic_type').value = row.dataset.mechanicType || '';
+            document.getElementById('trigger_hp_percent').value = row.dataset.triggerHp || '';
+            document.getElementById('trigger_turn').value = row.dataset.triggerTurn || '';
+            document.getElementById('mechanic_priority').value = row.dataset.priority || 0;
+            document.getElementById('mechanic_is_active').value = row.dataset.isActive || '1';
+
+            const cfg = row.dataset.config;
+            document.getElementById('mechanic_config').value = cfg && cfg !== 'null' ? JSON.stringify(JSON.parse(cfg), null, 2) : '';
+
+            $.magnificPopup.open({ items: { src: '#modalAddMechanic', type: 'inline' }, removalDelay: 300, mainClass: 'mfp-zoom-in' });
+        });
+    });
+
+    document.querySelector('[href="#modalAddMechanic"]').addEventListener('click', function () {
+        document.getElementById('mechanic-modal-title').textContent = 'Добавить механику';
+        document.getElementById('form-mechanic').action = addMechanicUrl;
+        document.getElementById('mechanic-submit-btn').textContent = 'Добавить';
+        document.getElementById('mechanic_type').value = '';
+        document.getElementById('trigger_hp_percent').value = '';
+        document.getElementById('trigger_turn').value = '';
+        document.getElementById('mechanic_priority').value = '0';
+        document.getElementById('mechanic_is_active').value = '1';
+        document.getElementById('mechanic_config').value = '';
+    });
+    @endif
+
+    function formatItem(item) {
+        if (!item.id) return item.text;
+        var img = item.image
+            ? '<img src="' + item.image + '" style="width:24px;height:24px;object-fit:contain;margin-right:6px;vertical-align:middle;">'
+            : '<span style="display:inline-block;width:24px;height:24px;margin-right:6px;"></span>';
+        return $('<span>' + img + item.text + '</span>');
+    }
+
+    $('#item-ajax-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalDrop'),
+        placeholder: 'Выберите предмет',
+        allowClear: true,
+        templateResult: formatItem,
+        templateSelection: formatItem,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { q: params.term, page: params.page || 1 };
+            },
+            processResults: function (data, params) {
+                params.page = params.page || 1;
+                return {
+                    results: data.results,
+                    pagination: { more: data.pagination.more }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    $('#location-ajax-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalLocation'),
+        placeholder: 'Выберите локацию',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.locations') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { q: params.term, page: params.page || 1 };
+            },
+            processResults: function (data, params) {
+                params.page = params.page || 1;
+                return {
+                    results: data.results,
+                    pagination: { more: data.pagination.more }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+</script>
+@endpush
+
 @endsection
-
-

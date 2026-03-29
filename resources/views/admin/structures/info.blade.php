@@ -10,71 +10,302 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
-                    <a href="{{ route('admin.structure.info', ['structure' => $structure->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Основная информация</a>
-                    <a href="{{ route('admin.structure.info.shop', ['structure' => $structure->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Магазин</a>
-                    <a href="{{ route('admin.structure.info.action', ['structure' => $structure->id]) }}" class="mb-1 mt-1 me-1 btn btn-primary btn-sm btn-block">Действия</a>
-                </div>
-            </section>
+                    <div class="tabs">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item active">
+                                <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-shop" href="#tab-shop" data-bs-toggle="tab">
+                                    Магазин <span class="badge badge-primary">{{ $structure->shopItems->count() }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-actions" href="#tab-actions" data-bs-toggle="tab">
+                                    Действия <span class="badge badge-primary">{{ $structure->actions->count() }}</span>
+                                </a>
+                            </li>
+                        </ul>
 
-            <section class="card">
-                <div class="card-body">
-                    <form action="{{ route('admin.structure.info', ['structure' => $structure->id]) }}" method="post">
-                        {{ csrf_field() }}
-                        <div class="row form-group pb-3">
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="name">Название</label>
-                                    <input type="text" class="form-control" name="name" id="name" value="{{ $structure->name }}" placeholder="">
-                                </div>
+                        <div class="tab-content">
 
-                                <div class="form-group">
-                                    <label class="col-form-label" for="type">Тип</label>
-                                    <select class="form-control" name="type" id="type" required>
-                                        @foreach(App\Models\Structure::TYPES as $key => $type)
-                                            <option value="{{ $key }}" @if($structure->type === $key) selected @endif>{{ $type }}</option>
-                                        @endforeach
-                                    </select>
+                            {{-- ОСНОВНАЯ --}}
+                            <div id="tab-main" class="tab-pane active">
+                                <form action="{{ route('admin.structure.info', $structure->id) }}" method="post">
+                                    {{ csrf_field() }}
+                                    <div class="row pt-3 pb-3">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="col-form-label">Название</label>
+                                                <input type="text" class="form-control" name="name" value="{{ $structure->name }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Тип</label>
+                                                <select class="form-control" name="type" data-plugin-selectTwo>
+                                                    @foreach(App\Models\Structure::TYPES as $key => $label)
+                                                        <option value="{{ $key }}" @selected($structure->type === $key)>{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="col-form-label">Локация</label>
+                                                <select id="sel-location" name="location_id" class="form-control">
+                                                    @if($structure->location)
+                                                        <option value="{{ $structure->location->id }}" selected>[{{ $structure->location->id }}] {{ $structure->location->name }}</option>
+                                                    @endif
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">НПС</label>
+                                                <select id="sel-npc" name="npc_id" class="form-control">
+                                                    @if($structure->npc)
+                                                        <option value="{{ $structure->npc->id }}" selected>[{{ $structure->npc->id }}] {{ $structure->npc->name }}</option>
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <button class="btn btn-primary">Сохранить</button>
+                                            <a href="{{ route('admin.structures') }}" class="btn btn-success">Назад</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {{-- МАГАЗИН --}}
+                            <div id="tab-shop" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalShop">Добавить предмет</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="45"></th>
+                                                <th>Название</th>
+                                                <th width="120">Цена (монеты)</th>
+                                                <th width="120">Цена (алмазы)</th>
+                                                <th width="100">Сортировка</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($structure->shopItems as $shopItem)
+                                                <tr style="vertical-align: middle">
+                                                    <td>
+                                                        @if($shopItem->item?->image)
+                                                            <img src="{{ $shopItem->item->image }}" width="36" alt="">
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('admin.item.info', $shopItem->item->id) }}" target="_blank">
+                                                            {{ $shopItem->item?->name ?? '—' }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ number_format($shopItem->price, 0, '', ' ') }}</td>
+                                                    <td>{{ number_format($shopItem->diamond, 0, '', ' ') }}</td>
+                                                    <td>{{ $shopItem->sort_order }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.structure.info.shop_delete_item', [$structure->id, $shopItem->share_item_id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="6" class="text-center text-muted">Нет предметов</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="location_id">Локация</label>
-                                    <select class="form-control" name="location_id" id="location_id">
-                                        <option value=""></option>
-                                        @foreach($locations as $location)
-                                            <option value="{{ $location->id }}" @if($structure->location_id === $location->id) selected @endif>{{ $location->name }} [{{$location->id}}]</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <div class="form-group">
-                                    <label class="col-form-label" for="location_id">Локация</label>
-                                    <select class="form-control" name="location_id" id="location_id">
-                                        <option value=""></option>
-                                        @foreach($npcs as $npc)
-                                            <option value="{{ $npc->id }}" @if($structure->npc_id === $npc->id) selected @endif>{{ $npc->name }} @if($npc->location_id)[{{$npc->location_id}}] @endif</option>
-                                        @endforeach
-                                    </select>
+                            {{-- ДЕЙСТВИЯ --}}
+                            <div id="tab-actions" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAction">Добавить действие</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="50">ID</th>
+                                                <th width="160">Alias</th>
+                                                <th>Название</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($structure->actions as $action)
+                                                <tr style="vertical-align: middle">
+                                                    <td>{{ $action->id }}</td>
+                                                    <td><code>{{ $action->alias }}</code></td>
+                                                    <td>{{ $action->name }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.structure.info.action_delete', [$structure->id, $action->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="4" class="text-center text-muted">Нет действий</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="col-lg-4">
-
-                            </div>
                         </div>
-
-
-                        <div class="row justify-content-start">
-                            <div class="col-sm-12">
-                                <button class="btn btn-primary">Сохранить</button>
-                                <a href="{{ route('admin.items') }}" class="btn btn-success">Назад</a>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </section>
         </div>
     </div>
+
+    {{-- Модалка: добавить предмет в магазин --}}
+    <div id="modalShop" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.structure.info.shop', $structure->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить предмет в магазин</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Предмет</label>
+                        <select id="shop-item-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Цена (монеты)</label>
+                                <input type="number" class="form-control" name="price" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Цена (алмазы)</label>
+                                <input type="number" class="form-control" name="diamond" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Сортировка</label>
+                                <input type="number" class="form-control" name="sort_order" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить действие --}}
+    <div id="modalAction" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.structure.info.action', $structure->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить действие</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Действие</label>
+                        <select name="share_action_id" class="form-control" data-plugin-selectTwo
+                                data-plugin-options='{ "placeholder": "Выберите действие", "allowClear": true }'>
+                            <option value=""></option>
+                            @foreach($allActions as $action)
+                                <option value="{{ $action->id }}">[{{ $action->alias }}] {{ $action->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+@push('footer_scripts')
+<script>
+    function formatItemOption(item) {
+        if (!item.id) return item.text;
+        var img = item.image
+            ? '<img src="' + item.image + '" style="width:22px;height:22px;object-fit:contain;margin-right:6px;vertical-align:middle;">'
+            : '';
+        return $('<span>' + img + item.text + '</span>');
+    }
+
+    $('#sel-location').select2({
+        theme: 'bootstrap',
+        placeholder: 'Выберите локацию',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.locations') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    $('#sel-npc').select2({
+        theme: 'bootstrap',
+        placeholder: 'Выберите НПС',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.npcs') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    $('#shop-item-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalShop'),
+        placeholder: 'Выберите предмет',
+        allowClear: true,
+        templateResult: formatItemOption,
+        templateSelection: formatItemOption,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+</script>
+@endpush
+
 @endsection
-
-
