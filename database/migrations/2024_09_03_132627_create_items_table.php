@@ -28,6 +28,7 @@ return new class extends Migration
             $table->enum('upgrade_scroll_type', ['base', 'protection', 'stabilizer', 'lucky'])->nullable();
             $table->json('gem_stats')->nullable(); // Параметры камня на share_items (заполняется только для type=gem)
             $table->enum('slot', ['hand', 'helmet', 'shoulder', 'forearm', 'armor', 'legging', 'chain_armor', 'cloak', 'shoes', 'gloves', 'belt', 'bag'])->nullable();
+            $table->enum('rarity', ['common', 'uncommon', 'rare', 'epic', 'legendary'])->default('common');
             $table->timestamps();
         });
 

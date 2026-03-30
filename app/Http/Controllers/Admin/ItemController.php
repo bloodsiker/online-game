@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ItemEffectType;
+use App\Enums\ItemRarity;
 use App\Enums\ItemEffectValueType;
 use App\Enums\RuneRarity;
 use App\Enums\ShareItemSlot;
@@ -70,8 +71,9 @@ class ItemController extends Controller
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = \App\Enums\ShareItemRequirementType::cases();
         $playerStatKeys = \App\Enums\PlayerStatKey::cases();
+        $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys'));
+        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
@@ -156,6 +158,7 @@ class ItemController extends Controller
         } elseif ($request->filled('image')) {
             $item->image = $request->input('image');
         }
+        $item->rarity = ItemRarity::from($request->input('rarity', ItemRarity::COMMON->value));
         $item->slot = $request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null;
         $item->price = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);

@@ -53,6 +53,18 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Редкость</label>
+                                                <select class="form-control" name="rarity">
+                                                    @foreach($rarities as $rarity)
+                                                        <option value="{{ $rarity->value }}"
+                                                                style="color:{{ $rarity->color() }}"
+                                                                @selected($item->rarity === $rarity)>
+                                                            {{ $rarity->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Слот</label>
                                                 <select class="form-control" name="slot" data-plugin-selectTwo>
                                                     <option value=""></option>

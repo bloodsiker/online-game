@@ -19,7 +19,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
                 title: $itemInfo->name,
-                color: '#000000',
+                color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),
                 price: sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $itemInfo->price),

@@ -19,7 +19,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
             $collector->add(new ItemTooltipDto(
                 id: $shareItem->id,
                 title: $shareItem->name,
-                color: '#000000',
+                color: $shareItem->rarity->color(),
                 image: $shareItem->image,
                 kind: $shareItem->getTypeName(),
                 price: $shareItem->price

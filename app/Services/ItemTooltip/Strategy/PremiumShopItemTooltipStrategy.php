@@ -18,7 +18,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
             $collector->add(new ItemTooltipDto(
                 id: $itemInfo->id,
                 title: $itemInfo->name,
-                color: '#000000',
+                color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),
                 price: $itemInfo->price
