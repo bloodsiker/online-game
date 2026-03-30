@@ -92,18 +92,6 @@
                                                 <input type="number" class="form-control" name="count_use" value="{{ $item->count_use }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Мин атака</label>
-                                                <input type="number" class="form-control" name="min_attack" value="{{ $item->min_attack }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Макс атака</label>
-                                                <input type="number" class="form-control" name="max_attack" value="{{ $item->max_attack }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Защита</label>
-                                                <input type="number" class="form-control" name="armor" value="{{ $item->armor }}">
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="col-form-label">Одна/Две руки</label>
                                                 <select class="form-control" name="is_two_hand">
                                                     <option value="0" @selected(!$item->is_two_hand)>Одна рука</option>
@@ -277,6 +265,150 @@
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {{-- ПАССИВНЫЕ СТАТЫ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Пассивные статы</h2>
+                    <p class="card-subtitle text-muted">Постоянные характеристики экипировки: атака, броня, слоты</p>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form action="{{ route('admin.item.stat.add', $item->id) }}" method="post">
+                                {{ csrf_field() }}
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип стата</label>
+                                    <select name="stat_type" class="form-control" data-plugin-selectTwo>
+                                        @foreach($statTypes as $type)
+                                            <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Значение</label>
+                                    <input type="number" class="form-control" name="value" value="0">
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип значения</label>
+                                    <select name="value_type" class="form-control" data-plugin-selectTwo>
+                                        <option value="flat">Фиксированное</option>
+                                        <option value="percent">Процент</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Добавить стат</button>
+                            </form>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-hover table-bordered mb-none">
+                                <thead>
+                                <tr>
+                                    <th>Стат</th>
+                                    <th width="100">Значение</th>
+                                    <th width="100">Тип</th>
+                                    <th width="70"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($item->stats as $stat)
+                                    <tr style="vertical-align: middle">
+                                        <td>{{ $stat->stat_type->label() }}</td>
+                                        <td>{{ $stat->value }}</td>
+                                        <td>{{ $stat->value_type === \App\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.item.stat.delete', ['item' => $item->id, 'stat' => $stat->id]) }}"
+                                               class="btn btn-xs btn-danger"
+                                               onclick="return confirm('Удалить?')">Удалить</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center text-muted">Нет статов</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {{-- АКТИВНЫЕ ЭФФЕКТЫ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Активные эффекты</h2>
+                    <p class="card-subtitle text-muted">Баффы, лечение, урон — применяются при использовании предмета</p>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form action="{{ route('admin.item.effect.add', $item->id) }}" method="post">
+                                {{ csrf_field() }}
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип эффекта</label>
+                                    <select name="effect_type" class="form-control" data-plugin-selectTwo>
+                                        @foreach($effectTypes as $type)
+                                            <option value="{{ $type->value }}">{{ $type->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Значение</label>
+                                    <input type="number" class="form-control" name="value" value="0">
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип значения</label>
+                                    <select name="value_type" class="form-control" data-plugin-selectTwo>
+                                        <option value="flat">Фиксированное</option>
+                                        <option value="percent">Процент</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Длительность (сек.), для баффов</label>
+                                    <input type="number" class="form-control" name="duration_seconds" placeholder="Пусто = мгновенно">
+                                </div>
+                                <button class="btn btn-primary btn-sm">Добавить эффект</button>
+                            </form>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-hover table-bordered mb-none">
+                                <thead>
+                                <tr>
+                                    <th>Эффект</th>
+                                    <th width="100">Значение</th>
+                                    <th width="100">Тип</th>
+                                    <th width="120">Длительность</th>
+                                    <th width="70"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($item->effects as $effect)
+                                    <tr style="vertical-align: middle">
+                                        <td>{{ $effect->effect_type->label() }}</td>
+                                        <td>{{ $effect->value }}</td>
+                                        <td>{{ $effect->value_type === \App\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
+                                        <td>{{ $effect->duration_seconds ? $effect->duration_seconds . ' сек.' : '—' }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.item.effect.delete', ['item' => $item->id, 'effect' => $effect->id]) }}"
+                                               class="btn btn-xs btn-danger"
+                                               onclick="return confirm('Удалить?')">Удалить</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5" class="text-center text-muted">Нет эффектов</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>

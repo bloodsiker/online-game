@@ -7,6 +7,7 @@ use App\Enums\ItemEffectType;
 use App\Enums\ShareItemSlot;
 use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
+use App\Enums\ShareItemStatType;
 use App\Enums\ShareItemType;
 use App\Enums\UpgradeScrollType;
 use App\Models\Auction\Auction;
@@ -881,23 +882,13 @@ class GenerateSeed extends Command
         $sItem2->price = 10;
         $sItem2->name = 'Кинжал «Ночной бури»';
         $sItem2->description = 'Кинжал «Ночной бури»';
-        $sItem2->min_attack = 1;
-        $sItem2->max_attack = 3;
         $sItem2->slot = ShareItemSlot::HAND;
         $sItem2->image = '/img/resource/sword_1.jpg';
         $sItem2->save();
 
-        $sItem2->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ATTACK_MIN,
-                'value' => 1,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
-            [
-                'effect_type' => ItemEffectType::ATTACK_MAX,
-                'value' => 3,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem2->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ATTACK_MIN, 'value' => 1, 'value_type' => ItemEffectValueType::FLAT],
+            ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 3, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem2->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -950,23 +941,13 @@ class GenerateSeed extends Command
         $sItem5->price = 300;
         $sItem5->name = 'Вакидзаси';
         $sItem5->description = 'Вакидзаси';
-        $sItem5->min_attack = 2;
-        $sItem5->max_attack = 4;
         $sItem5->slot = ShareItemSlot::HAND;
         $sItem5->image = '/img/resource/sword_3.gif';
         $sItem5->save();
 
-        $sItem5->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ATTACK_MIN,
-                'value' => 2,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
-            [
-                'effect_type' => ItemEffectType::ATTACK_MAX,
-                'value' => 4,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem5->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ATTACK_MIN, 'value' => 2, 'value_type' => ItemEffectValueType::FLAT],
+            ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 4, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem5->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -980,23 +961,13 @@ class GenerateSeed extends Command
         $sItem6->break_crystal = 1;
         $sItem6->name = 'Копеш';
         $sItem6->description = 'Копеш';
-        $sItem6->min_attack = 5;
-        $sItem6->max_attack = 8;
         $sItem6->slot = ShareItemSlot::HAND;
         $sItem6->image = 'https://skazanie.com/img-item/032cd678c770.jpg';
         $sItem6->save();
 
-        $sItem6->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ATTACK_MIN,
-                'value' => 5,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
-            [
-                'effect_type' => ItemEffectType::ATTACK_MAX,
-                'value' => 8,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem6->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ATTACK_MIN, 'value' => 5, 'value_type' => ItemEffectValueType::FLAT],
+            ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 8, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $item3 = new Item();
@@ -1013,17 +984,12 @@ class GenerateSeed extends Command
         $sItem7->price = 100;
         $sItem7->name = 'Щит «Заступник небес»';
         $sItem7->description = 'Щит «Заступник небес»';
-        $sItem7->armor = 14;
         $sItem7->slot = ShareItemSlot::HAND;
         $sItem7->image = '/img/resource/sheild_1.jpg';
         $sItem7->save();
 
-        $sItem7->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 14,
-                'value_type' => ItemEffectValueType::FLAT,
-            ]
+        $sItem7->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 14, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem7->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1035,17 +1001,12 @@ class GenerateSeed extends Command
         $sItem8->break_crystal = 2;
         $sItem8->name = 'Кольчуга «Ночной бури»';
         $sItem8->description = 'Кольчуга «Ночной бури»';
-        $sItem8->armor = 8;
         $sItem8->slot = ShareItemSlot::CHAIN_ARMOR;
         $sItem8->image = '/img/resource/chain_armor_1.jpg';
         $sItem8->save();
 
-        $sItem8->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 8,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem8->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 8, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem8->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1057,17 +1018,12 @@ class GenerateSeed extends Command
         $sItem9->break_crystal = 24;
         $sItem9->name = 'Нагрудник «Ночной бури»';
         $sItem9->description = 'Нагрудник «Ночной бури»';
-        $sItem9->armor = 30;
         $sItem9->slot = ShareItemSlot::ARMOR;
         $sItem9->image = '/img/resource/armor_1.jpg';
         $sItem9->save();
 
-        $sItem9->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 30,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem9->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 30, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem9->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1080,17 +1036,12 @@ class GenerateSeed extends Command
         $sItem9->price = 100;
         $sItem9->name = 'Шлем «Ночной бури»';
         $sItem9->description = 'Шлем «Ночной бури»';
-        $sItem9->armor = 1;
         $sItem9->slot = ShareItemSlot::HELMET;
         $sItem9->image = '/img/resource/helm_1.jpg';
         $sItem9->save();
 
-        $sItem9->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 1,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem9->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 1, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem9->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1101,17 +1052,12 @@ class GenerateSeed extends Command
         $sItem10->price = 90;
         $sItem10->name = 'Наручи «Ночной бури»';
         $sItem10->description = 'Наручи «Ночной бури»';
-        $sItem10->armor = 2;
         $sItem10->slot = ShareItemSlot::GLOVES;
         $sItem10->image = '/img/resource/gloves_1.jpg';
         $sItem10->save();
 
-        $sItem10->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 2,
-                'value_type' => ItemEffectValueType::FLAT,
-            ]
+        $sItem10->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 2, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem10->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1122,17 +1068,12 @@ class GenerateSeed extends Command
         $sItem11->price = 110;
         $sItem11->name = 'Сапоги «Ночной бури»';
         $sItem11->description = 'Сапоги «Ночной бури»';
-        $sItem11->armor = 1;
         $sItem11->slot = ShareItemSlot::SHOES;
         $sItem11->image = '/img/resource/shoes.jpg';
         $sItem11->save();
 
-        $sItem11->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 1,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem11->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 1, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1143,17 +1084,12 @@ class GenerateSeed extends Command
         $sItem11->price = 105;
         $sItem11->name = 'Легкий плащ';
         $sItem11->description = 'Легкий плащ';
-        $sItem11->armor = 1;
         $sItem11->slot = ShareItemSlot::CLOAK;
         $sItem11->image = 'https://skazanie.com/img-item/13ed6f939925.jpg';
         $sItem11->save();
 
-        $sItem11->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ARMOR,
-                'value' => 1,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem11->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ARMOR, 'value' => 1, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
@@ -1243,9 +1179,9 @@ class GenerateSeed extends Command
         $sIte17->image = '/img/resource/bluebelt.gif';
         $sIte17->save();
 
-        $sIte17->effects()->createMany([
+        $sIte17->stats()->createMany([
             [
-                'effect_type' => ItemEffectType::BELT_SLOT,
+                'effect_type' => ShareItemStatType::BELT_SLOT,
                 'value' => 3,
                 'value_type' => ItemEffectValueType::FLAT,
             ],
@@ -1266,9 +1202,9 @@ class GenerateSeed extends Command
         $sIte18->image = '/img/resource/bag2.gif';
         $sIte18->save();
 
-        $sIte18->effects()->createMany([
+        $sIte18->stats()->createMany([
             [
-                'effect_type' => ItemEffectType::BAG_SLOT,
+                'effect_type' => ShareItemStatType::BAG_SLOT,
                 'value' => 11,
                 'value_type' => ItemEffectValueType::FLAT,
             ],
@@ -1340,23 +1276,13 @@ class GenerateSeed extends Command
         $sItem1->break_crystal = 70000;
         $sItem1->name = 'Кнут Архангела';
         $sItem1->description = 'Кнут Архангела';
-        $sItem1->min_attack = 35;
-        $sItem1->max_attack = 80;
         $sItem1->slot = ShareItemSlot::HAND;
         $sItem1->image = 'https://skazanie.com/img-item/8f5d6477954920.jpg';
         $sItem1->save();
 
-        $sItem1->effects()->createMany([
-            [
-                'effect_type' => ItemEffectType::ATTACK_MIN,
-                'value' => 35,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
-            [
-                'effect_type' => ItemEffectType::ATTACK_MAX,
-                'value' => 80,
-                'value_type' => ItemEffectValueType::FLAT,
-            ],
+        $sItem1->stats()->createMany([
+            ['stat_type' => ShareItemStatType::ATTACK_MIN, 'value' => 35, 'value_type' => ItemEffectValueType::FLAT],
+            ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 80, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
         $item1 = new Item();

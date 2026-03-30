@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Enums\ItemEffectType;
+use App\Enums\ShareItemStatType;
 use App\Models\Clan\ClanMember;
 use App\Models\Player\Player;
 use App\Models\Location\Location;
@@ -125,8 +125,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $extraSlots = $bags->sum(function ($bag) {
             return $bag->itemInfo
-                ->effects
-                ->where('effect_type', ItemEffectType::BAG_SLOT)
+                ->stats
+                ->where('stat_type', ShareItemStatType::BAG_SLOT)
                 ->sum('value');
         });
 

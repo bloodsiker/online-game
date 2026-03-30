@@ -42,8 +42,6 @@ return new class extends Migration
             $table->integer('mp_max')->default(0);
             $table->double('min_dmg');
             $table->double('max_dmg');
-            $table->integer('dodge');
-            $table->integer('critical');
             $table->integer('free_stats');
             $table->integer('victory')->default(0);
             $table->integer('death')->default(0);

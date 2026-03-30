@@ -22,9 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $description
  * @property string|null $image
  * @property int $is_two_hand
- * @property int $min_attack
- * @property int $max_attack
- * @property int $armor
  * @property int $count_use
  * @property bool $is_heal
  * @property bool $is_active
@@ -43,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int|null $skill_exp
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
+ * @property-read Collection|ShareItemStat[] $stats
  */
 class ShareItem extends Model
 {
@@ -97,6 +95,11 @@ class ShareItem extends Model
     public function effects(): HasMany
     {
         return $this->hasMany(ShareItemEffect::class);
+    }
+
+    public function stats(): HasMany
+    {
+        return $this->hasMany(ShareItemStat::class);
     }
 
     public function monsters()

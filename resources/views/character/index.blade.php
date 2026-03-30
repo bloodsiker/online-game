@@ -271,6 +271,15 @@
                                             &nbsp;·&nbsp;
                                             <b>{{ $player->race->name }}</b>
                                         </div>
+                                        @php $combatClass = $playerDecorator->getCombatClass(); @endphp
+                                        <div style="margin-top:5px;">
+                                            <span style="font-size:11px; color:#5a3a2a;">Класс: </span>
+                                            <span style="display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:bold;
+                                                background:{{ match($combatClass->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }};
+                                                color:#fff;">
+                                                {{ $combatClass->getLabel() }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -373,6 +382,12 @@
                                         @php $hpPct = $playerDecorator->getHpMax() > 0 ? min(round($player->hp_now * 100 / $playerDecorator->getHpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
                                             <div class="char-bar-fill char-bar-hp" style="width:{{ $hpPct }}%"></div>
+                                        </div>
+                                        <div class="char-stat-row">
+                                            <span class="char-stat-label">Класс</span>
+                                            <span class="char-stat-val" style="color:{{ match($playerDecorator->getCombatClass()->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }}">
+                                                {{ $playerDecorator->getCombatClass()->getLabel() }}
+                                            </span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Броня</span>

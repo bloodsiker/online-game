@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enums\CombatClass;
 use App\Services\Combat\FightHitInterface;
 
 class StatSheet implements FightHitInterface
@@ -20,15 +21,19 @@ class StatSheet implements FightHitInterface
     public int $leftMaxDmg   = 0;
     public int $rightMinDmg  = 0;
     public int $rightMaxDmg  = 0;
+    public int $magicAttack  = 0;
     public int $freeStats    = 0;
+
+    public CombatClass $combatClass = CombatClass::TANK;
 
     /** @var StatModifier[] */
     public array $modifiers = [];
 
     // FightHitInterface
-    public function getArmor(): int    { return $this->armor; }
-    public function getDodge(): int    { return $this->dodge; }
-    public function getCritical(): int { return $this->critical; }
+    public function getArmor(): int        { return $this->armor; }
+    public function getDodge(): int        { return $this->dodge; }
+    public function getCritical(): int     { return $this->critical; }
+    public function getCombatClass(): CombatClass { return $this->combatClass; }
 
     // Stat getters (used in views and combat strategies)
     public function getStrength(): int     { return $this->strength; }

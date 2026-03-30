@@ -81,6 +81,7 @@
     <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('quests') }}', true); return false;">Квесты</a>
     <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('premium.shop') }}', true); return false;">Премиум</a>
     <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('rating') }}', true); return false;">Рейтинг</a>
+    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('friends') }}', true); return false;">Друзья</a>
     <div class="menu-sep"></div>
     <a class="menu-btn logout" href="{{ route('logout') }}">Выход</a>
 </div>

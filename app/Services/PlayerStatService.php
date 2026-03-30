@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\DTO\StatModifier;
 use App\DTO\StatSheet;
-use App\Enums\ItemEffectType;
+use App\Enums\CombatClass;
 use App\Enums\ItemEffectValueType;
 use App\Enums\ShareItemSlot;
+use App\Enums\ShareItemStatType;
+use App\Listeners\RecalculatePlayerModification;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
+use App\Models\Player\PlayerItemBuff;
 
 class PlayerStatService
 {
@@ -60,15 +63,16 @@ class PlayerStatService
             'agility' => (float) floor($player->agil),
             'mud' => (float) floor($player->mud),
             'intelligence' => (float) floor($player->intel),
-            'dodge' => (float) $player->dodge,
-            'critical' => (float) $player->critical,
-            'armor' => 0.0,
+            'dodge'    => (float) max(0, ($player->agil - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
+            'critical' => (float) max(0, ($player->int - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
+            'armor'    => (float) max(0, ($player->str - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
             'hp_max' => (float) $player->hp_max,
             'mp_max' => (float) $player->mp_max,
             'left_min_dmg' => (float) $player->min_dmg,
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
+            'magic_attack'  => (float) $player->intel,
         ];
 
         // Accumulate flat and percent per stat
@@ -95,22 +99,24 @@ class PlayerStatService
         }
 
         $sheet = new StatSheet;
-        $sheet->modifiers = $modifiers;
-        $sheet->freeStats = $player->free_stats;
-        $sheet->strength = $computed['strength'];
-        $sheet->int = $computed['int'];
-        $sheet->agility = $computed['agility'];
-        $sheet->mud = $computed['mud'];
+        $sheet->modifiers   = $modifiers;
+        $sheet->freeStats   = $player->free_stats;
+        $sheet->strength    = $computed['strength'];
+        $sheet->int         = $computed['int'];
+        $sheet->agility     = $computed['agility'];
+        $sheet->mud         = $computed['mud'];
         $sheet->intelligence = $computed['intelligence'];
-        $sheet->dodge = $computed['dodge'];
-        $sheet->critical = $computed['critical'];
-        $sheet->armor = $computed['armor'];
-        $sheet->hpMax = $computed['hp_max'];
-        $sheet->mpMax = $computed['mp_max'];
-        $sheet->leftMinDmg = $computed['left_min_dmg'];
-        $sheet->leftMaxDmg = $computed['left_max_dmg'];
-        $sheet->rightMinDmg = $computed['right_min_dmg'];
-        $sheet->rightMaxDmg = $computed['right_max_dmg'];
+        $sheet->dodge       = $computed['dodge'];
+        $sheet->critical    = $computed['critical'];
+        $sheet->armor       = $computed['armor'];
+        $sheet->hpMax       = $computed['hp_max'];
+        $sheet->mpMax       = $computed['mp_max'];
+        $sheet->leftMinDmg  = $computed['left_min_dmg'];
+        $sheet->leftMaxDmg  = $computed['left_max_dmg'];
+        $sheet->rightMinDmg  = $computed['right_min_dmg'];
+        $sheet->rightMaxDmg  = $computed['right_max_dmg'];
+        $sheet->magicAttack  = $computed['magic_attack'];
+        $sheet->combatClass  = $this->determineCombatClass($player);
 
         return $sheet;
     }
@@ -144,12 +150,25 @@ class PlayerStatService
         foreach ($allSlots as $item) {
             $source = 'equipment:'.$item->itemInfo->name;
 
-            foreach ($item->itemInfo->effects as $effect) {
-                if ($effect->effect_type === ItemEffectType::ARMOR) {
+            foreach ($item->itemInfo->stats as $stat) {
+                $mappedStat = match ($stat->stat_type) {
+                    ShareItemStatType::ARMOR        => 'armor',
+                    ShareItemStatType::HP_MAX        => 'hp_max',
+                    ShareItemStatType::AGILITY       => 'agility',
+                    ShareItemStatType::INTUITION     => 'int',
+                    ShareItemStatType::WISDOM        => 'mud',
+                    ShareItemStatType::INTELLIGENCE  => 'intelligence',
+                    ShareItemStatType::DODGE         => 'dodge',
+                    ShareItemStatType::CRITICAL      => 'critical',
+                    ShareItemStatType::MAGIC_ATTACK  => 'magic_attack',
+                    default                          => null,
+                };
+
+                if ($mappedStat !== null) {
                     $modifiers[] = new StatModifier(
-                        stat: 'armor',
-                        value: $effect->value,
-                        isPercent: $effect->value_type === ItemEffectValueType::PERCENT,
+                        stat: $mappedStat,
+                        value: $stat->value,
+                        isPercent: $stat->value_type === ItemEffectValueType::PERCENT,
                         source: $source,
                     );
                 }
@@ -191,10 +210,10 @@ class PlayerStatService
         // Weapon damage — flat modifiers that replace the zero base
         if ($equip->handLeft instanceof Item) {
             $source = 'equipment:'.$equip->handLeft->itemInfo->name;
-            foreach ($equip->handLeft->itemInfo->effects as $effect) {
-                match ($effect->effect_type) {
-                    ItemEffectType::ATTACK_MIN => $modifiers[] = new StatModifier('left_min_dmg', $effect->value, false, $source),
-                    ItemEffectType::ATTACK_MAX => $modifiers[] = new StatModifier('left_max_dmg', $effect->value, false, $source),
+            foreach ($equip->handLeft->itemInfo->stats as $stat) {
+                match ($stat->stat_type) {
+                    ShareItemStatType::ATTACK_MIN => $modifiers[] = new StatModifier('left_min_dmg', $stat->value, false, $source),
+                    ShareItemStatType::ATTACK_MAX => $modifiers[] = new StatModifier('left_max_dmg', $stat->value, false, $source),
                     default => null,
                 };
             }
@@ -211,10 +230,10 @@ class PlayerStatService
 
         if ($equip->handRight instanceof Item) {
             $source = 'equipment:'.$equip->handRight->itemInfo->name;
-            foreach ($equip->handRight->itemInfo->effects as $effect) {
-                match ($effect->effect_type) {
-                    ItemEffectType::ATTACK_MIN => $modifiers[] = new StatModifier('right_min_dmg', $effect->value, false, $source),
-                    ItemEffectType::ATTACK_MAX => $modifiers[] = new StatModifier('right_max_dmg', $effect->value, false, $source),
+            foreach ($equip->handRight->itemInfo->stats as $stat) {
+                match ($stat->stat_type) {
+                    ShareItemStatType::ATTACK_MIN => $modifiers[] = new StatModifier('right_min_dmg', $stat->value, false, $source),
+                    ShareItemStatType::ATTACK_MAX => $modifiers[] = new StatModifier('right_max_dmg', $stat->value, false, $source),
                     default => null,
                 };
             }
@@ -271,8 +290,39 @@ class PlayerStatService
     /** @return StatModifier[] */
     private function fromBuffs(Player $player): array
     {
-        // TODO: apply active PlayerEffect stat_modifiers when buff system is ready
-        return [];
+        $modifiers = [];
+
+        $buffs = PlayerItemBuff::where('player_id', $player->id)
+            ->where('expires_at', '>', now())
+            ->get();
+
+        foreach ($buffs as $buff) {
+            $stat = match($buff->effect_type) {
+                ItemEffectType::BUFF_ATTACK  => 'attack', // расширяется на все 4 dmg стата
+                ItemEffectType::BUFF_DEFENSE => 'armor',
+                default                      => null,
+            };
+
+            if ($stat === null) {
+                continue;
+            }
+
+            $isPercent = $buff->value_type === ItemEffectValueType::PERCENT;
+            $source    = 'buff:' . $buff->effect_type->value;
+
+            if ($stat === 'attack') {
+                array_push($modifiers,
+                    new StatModifier('left_min_dmg',  (float) $buff->value, $isPercent, $source),
+                    new StatModifier('left_max_dmg',  (float) $buff->value, $isPercent, $source),
+                    new StatModifier('right_min_dmg', (float) $buff->value, $isPercent, $source),
+                    new StatModifier('right_max_dmg', (float) $buff->value, $isPercent, $source),
+                );
+            } else {
+                $modifiers[] = new StatModifier($stat, (float) $buff->value, $isPercent, $source);
+            }
+        }
+
+        return $modifiers;
     }
 
     // -------------------------------------------------------------------------
@@ -305,5 +355,22 @@ class PlayerStatService
         }
 
         return [new StatModifier($type, $value, $isPct, $source)];
+    }
+
+    /**
+     * Класс определяется доминирующей базовой характеристикой:
+     * str → Танк, agil → Уворот, int (интуиция) → Крит.
+     */
+    private function determineCombatClass(Player $player): CombatClass
+    {
+        $str  = (float) $player->str;
+        $agil = (float) $player->agil;
+        $int  = (float) $player->int;
+
+        return match(true) {
+            $str >= $agil && $str >= $int => CombatClass::TANK,
+            $agil >= $int                 => CombatClass::DODGE,
+            default                       => CombatClass::CRIT,
+        };
     }
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('effect_type', ['heal_hp', 'heal_mp', 'buff_attack', 'buff_armor', 'damage_hp', 'attack_min', 'attack_max', 'armor', 'bag_slot', 'belt_slot']);
             $table->integer('value');
             $table->enum('value_type', ['flat', 'percent']);
+            $table->unsignedInteger('duration_seconds')->nullable()->comment('Длительность бафа в секундах. NULL = мгновенный эффект.');
             $table->timestamps();
         });
     }

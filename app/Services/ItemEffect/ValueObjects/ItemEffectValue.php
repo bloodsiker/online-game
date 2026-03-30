@@ -8,9 +8,10 @@ use App\Enums\ItemEffectValueType;
 final readonly class ItemEffectValue
 {
     public function __construct(
-        public ItemEffectType $type,
+        public ItemEffectType      $type,
         public ItemEffectValueType $valueType,
-        public int $value,
+        public int                 $value,
+        public ?int                $durationSeconds = null,
     ) {}
 
     public function isPercent(): bool

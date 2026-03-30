@@ -8,7 +8,7 @@ use App\Models\Player\Player;
 use App\Models\Player\PlayerItemBuff;
 use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
-class BuffAttackStrategy implements ItemEffectStrategyInterface
+class BuffDefenseStrategy implements ItemEffectStrategyInterface
 {
     private const DEFAULT_DURATION = 300; // 5 минут
 

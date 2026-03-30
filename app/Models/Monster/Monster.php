@@ -2,6 +2,7 @@
 
 namespace App\Models\Monster;
 
+use App\Enums\CombatClass;
 use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\Share\ShareItem;
@@ -78,5 +79,22 @@ class Monster extends Model implements FightHitInterface
     public function getArmor(): int
     {
         return $this->armor;
+    }
+
+    /**
+     * Класс монстра определяется доминирующей характеристикой.
+     * Нормализуем через базовые значения, т.к. у монстров нет первичных стат.
+     */
+    public function getCombatClass(): CombatClass
+    {
+        $armorScore = $this->armor    / 50;
+        $dodgeScore = $this->dodge    / 20;
+        $critScore  = $this->critical / 20;
+
+        return match(true) {
+            $armorScore >= $dodgeScore && $armorScore >= $critScore => CombatClass::TANK,
+            $dodgeScore >= $critScore                               => CombatClass::DODGE,
+            default                                                 => CombatClass::CRIT,
+        };
     }
 }

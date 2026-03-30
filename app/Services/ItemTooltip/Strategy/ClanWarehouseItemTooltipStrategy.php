@@ -4,6 +4,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -14,6 +15,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
         foreach ($this->items as $warehouseItem) {
             $item     = $warehouseItem->item;
             $itemInfo = $item->itemInfo;
+
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
                 title: $itemInfo->name,
@@ -26,9 +28,10 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description,
                 store: false,
-                nogive: true,
-                noweight: true,
-                nosell: true,
+                nogive: !$itemInfo->is_sell,
+                noweight: !$itemInfo->is_weight,
+                nosell: !$itemInfo->is_sell,
+                stats: ItemTooltipStatsBuilder::build($itemInfo),
             ));
         }
     }

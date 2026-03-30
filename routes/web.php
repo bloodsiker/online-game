@@ -34,6 +34,7 @@ use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -224,6 +225,16 @@ Route::get('/chat/ignores', [ChatController::class, 'ignoreList'])->name('chat.i
 
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');
+
+Route::get('/friends', [FriendController::class, 'index'])->name('friends');
+Route::post('/friends/add', [FriendController::class, 'addFriend'])->name('friends.add');
+Route::post('/friends/{relationship}/accept', [FriendController::class, 'acceptFriend'])->name('friends.accept');
+Route::post('/friends/{relationship}/decline', [FriendController::class, 'declineFriend'])->name('friends.decline');
+Route::delete('/friends/{relationship}', [FriendController::class, 'removeFriend'])->name('friends.remove');
+Route::post('/enemies/add', [FriendController::class, 'addEnemy'])->name('enemies.add');
+Route::delete('/enemies/{relationship}', [FriendController::class, 'removeEnemy'])->name('enemies.remove');
+Route::post('/ignores/add', [FriendController::class, 'addIgnore'])->name('ignores.add');
+Route::delete('/ignores/{relationship}', [FriendController::class, 'removeIgnore'])->name('ignores.remove');
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');

@@ -34,6 +34,10 @@ Route::match(['GET', 'POST'], '/item/{item}', [ItemController::class, 'info'])->
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');
 Route::post('/item/recipe/{recipe}', [ItemController::class, 'addItemToRecipe'])->name('item.recipe.add_item');
 Route::get('/item/recipe/{recipe}/delete/{item}', [ItemController::class, 'deleteItemInRecipe'])->name('item.recipe.delete_item');
+Route::post('/item/{item}/stat', [ItemController::class, 'addStat'])->name('item.stat.add');
+Route::get('/item/{item}/stat/{stat}/delete', [ItemController::class, 'deleteStat'])->name('item.stat.delete');
+Route::post('/item/{item}/effect', [ItemController::class, 'addEffect'])->name('item.effect.add');
+Route::get('/item/{item}/effect/{effect}/delete', [ItemController::class, 'deleteEffect'])->name('item.effect.delete');
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');

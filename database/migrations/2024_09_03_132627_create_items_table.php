@@ -17,9 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->integer('min_attack')->default(0);
-            $table->integer('max_attack')->default(0);
-            $table->integer('armor')->default(0);
             $table->integer('count_use')->default(0);
             $table->boolean('is_heal')->default(false);
             $table->boolean('is_active')->default(true);

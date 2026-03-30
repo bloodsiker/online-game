@@ -37,8 +37,6 @@ class PlayerController extends Controller
             $player->intel      = (float) $request->input('intel');
             $player->min_dmg    = (float) $request->input('min_dmg');
             $player->max_dmg    = (float) $request->input('max_dmg');
-            $player->dodge      = (int) $request->input('dodge');
-            $player->critical   = (int) $request->input('critical');
             $player->free_stats = (int) $request->input('free_stats');
             $player->save();
 

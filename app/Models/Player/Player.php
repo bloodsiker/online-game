@@ -21,8 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
- * @property int $critical
- * @property int $dodge
  *
  * @property-read User $user
  * @property-read Race $race
@@ -145,12 +143,25 @@ class Player extends Model implements FightHitInterface
 
     public function getDodge(): int
     {
-        return $this->dodge;
+        return 0; // computed on-the-fly via PlayerStatService
     }
 
     public function getCritical(): int
     {
-        return $this->critical;
+        return 0; // computed on-the-fly via PlayerStatService
+    }
+
+    public function getCombatClass(): \App\Enums\CombatClass
+    {
+        $str  = (float) $this->str;
+        $agil = (float) $this->agil;
+        $int  = (float) $this->int;
+
+        return match(true) {
+            $str >= $agil && $str >= $int => \App\Enums\CombatClass::TANK,
+            $agil >= $int                 => \App\Enums\CombatClass::DODGE,
+            default                       => \App\Enums\CombatClass::CRIT,
+        };
     }
 
     public function getFreeStats(): int

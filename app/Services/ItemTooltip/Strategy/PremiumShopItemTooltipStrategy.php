@@ -4,6 +4,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -13,6 +14,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
     {
         foreach ($this->items as $shopItem) {
             $itemInfo = $shopItem->item;
+
             $collector->add(new ItemTooltipDto(
                 id: $itemInfo->id,
                 title: $itemInfo->name,
@@ -29,9 +31,10 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description,
                 store: true,
-                nogive: true,
-                noweight: true,
-                nosell: true,
+                nogive: !$itemInfo->is_sell,
+                noweight: !$itemInfo->is_weight,
+                nosell: !$itemInfo->is_sell,
+                stats: ItemTooltipStatsBuilder::build($itemInfo),
             ));
         }
     }

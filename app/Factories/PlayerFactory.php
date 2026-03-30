@@ -31,8 +31,6 @@ class PlayerFactory
             'mp_max' => 0,
             'min_dmg' => 1,
             'max_dmg' => 2,
-            'dodge' => 0,
-            'critical' => 0,
             'free_stats' => 5,
             'victory' => 0,
             'death' => 0,

@@ -324,6 +324,12 @@ let renderItemInfo = (id) => {
     }
     content += '</td></tr></table>';
     content += '<table class="aa-table-t" width="100%" cellpadding="0" cellspacing="0" border="0">';
+    if (a.stats && a.stats.length > 0) {
+        for (i in a.stats) {
+            content += '<tr class="skill_list b ' + (bg ? 'list_dark' : '') + '"><td>' + a.stats[i].title + '</td><td class="grnn b" align="right" style="color: #BA0000">' + a.stats[i].value + '</td></tr>';
+            bg = !bg;
+        }
+    }
     if (a.exp && a.exp != undefined) {
         content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td>' + a.exp.title + '</td><td class="grnn b" align="right">' + a.exp.value + '</td></tr>';
         bg = !bg;

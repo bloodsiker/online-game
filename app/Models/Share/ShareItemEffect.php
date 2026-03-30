@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ItemEffectType $effect_type
  * @property int $value
  * @property ItemEffectValueType $value_type
+ * @property int|null $duration_seconds
  *
  * @property-read ShareItem $itemInfo
  */
@@ -23,6 +24,7 @@ class ShareItemEffect extends Model
         'effect_type',
         'value',
         'value_type',
+        'duration_seconds',
     ];
 
     protected $casts = [
@@ -36,6 +38,7 @@ class ShareItemEffect extends Model
             $this->effect_type,
             $this->value_type,
             $this->value,
+            $this->duration_seconds,
         );
     }
 

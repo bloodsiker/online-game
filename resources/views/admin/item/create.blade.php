@@ -104,19 +104,6 @@
 
                                         <div class="col-lg-3">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="min_attack">Мин атака</label>
-                                                <input type="text" class="form-control" id="min_attack" name="min_attack" value="{{ old('min_attack', 0) }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="max_attack">Макс атака</label>
-                                                <input type="text" class="form-control" id="max_attack" name="max_attack" value="{{ old('max_attack', 0) }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="armor">Защита</label>
-                                                <input type="text" class="form-control" id="armor" name="armor" value="{{ old('armor', 0) }}">
-                                            </div>
-
-                                            <div class="form-group">
                                                 <label class="col-form-label" for="skill_id">Навык</label>
                                                 <select id="skill_id" name="skill_id" data-plugin-selectTwo class="form-control populate placeholder" data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
                                                     <option value=""></option>

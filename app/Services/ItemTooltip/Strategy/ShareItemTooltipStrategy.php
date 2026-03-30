@@ -6,6 +6,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -28,9 +29,10 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $shareItem->description ?? '',
                 store: false,
-                nogive: true,
-                noweight: true,
-                nosell: true,
+                nogive: !$shareItem->is_sell,
+                noweight: !$shareItem->is_weight,
+                nosell: !$shareItem->is_sell,
+                stats: ItemTooltipStatsBuilder::build($shareItem),
             ));
         }
     }

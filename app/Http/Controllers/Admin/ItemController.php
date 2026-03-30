@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ItemEffectType;
+use App\Enums\ItemEffectValueType;
 use App\Enums\RuneRarity;
 use App\Enums\ShareItemSlot;
+use App\Enums\ShareItemStatType;
 use App\Enums\ShareItemType;
 use App\Enums\UpgradeScrollType;
 use App\Http\Controllers\Controller;
 use App\Models\Share\ShareItem;
+use App\Models\Share\ShareItemEffect;
+use App\Models\Share\ShareItemStat;
 use App\Models\Share\ShareRecipe;
 use App\Models\Skill;
 use Illuminate\Http\RedirectResponse;
@@ -58,11 +63,52 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects']);
 
-        $skills = Skill::orderBy('name')->get();
+        $skills      = Skill::orderBy('name')->get();
+        $statTypes   = ShareItemStatType::cases();
+        $effectTypes = ItemEffectType::cases();
 
-        return view('admin.item.info', compact('item', 'skills'));
+        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes'));
+    }
+
+    public function addStat(Request $request, ShareItem $item): RedirectResponse
+    {
+        ShareItemStat::create([
+            'share_item_id' => $item->id,
+            'stat_type'     => ShareItemStatType::from($request->input('stat_type')),
+            'value'         => (int) $request->input('value', 0),
+            'value_type'    => ItemEffectValueType::from($request->input('value_type', 'flat')),
+        ]);
+
+        return redirect()->back()->with('success', 'Стат добавлен.');
+    }
+
+    public function deleteStat(ShareItem $item, ShareItemStat $stat): RedirectResponse
+    {
+        $stat->delete();
+
+        return redirect()->back()->with('success', 'Стат удалён.');
+    }
+
+    public function addEffect(Request $request, ShareItem $item): RedirectResponse
+    {
+        ShareItemEffect::create([
+            'share_item_id'    => $item->id,
+            'effect_type'      => ItemEffectType::from($request->input('effect_type')),
+            'value'            => (int) $request->input('value', 0),
+            'value_type'       => ItemEffectValueType::from($request->input('value_type', 'flat')),
+            'duration_seconds' => $request->filled('duration_seconds') ? (int) $request->input('duration_seconds') : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Эффект добавлен.');
+    }
+
+    public function deleteEffect(ShareItem $item, ShareItemEffect $effect): RedirectResponse
+    {
+        $effect->delete();
+
+        return redirect()->back()->with('success', 'Эффект удалён.');
     }
 
     public function updateRecipe(Request $request, ShareRecipe $recipe): RedirectResponse
@@ -112,9 +158,6 @@ class ItemController extends Controller
         $item->price         = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);
         $item->count_use     = (int) $request->input('count_use', 0);
-        $item->min_attack    = (int) $request->input('min_attack', 0);
-        $item->max_attack    = (int) $request->input('max_attack', 0);
-        $item->armor         = (int) $request->input('armor', 0);
         $item->is_two_hand   = (bool) $request->input('is_two_hand', false);
         $item->is_active     = (bool) $request->input('is_active', true);
         $item->is_heal       = (bool) $request->input('is_heal', false);

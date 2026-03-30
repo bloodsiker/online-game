@@ -98,30 +98,24 @@
             @foreach($onlineOnLocation as $user)
                 @php $clan = $user->clanMembership?->clan; @endphp
                 <div class="info">
-                    @if($user->last_online_at?->timestamp > $tenMinutesAgo->timestamp)
-                        <a href="" class="n"><span class="time">{{ $user->last_online_at->format('H:i') }}</span></a>
-                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
-                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                    @php $isOnline = $user->last_online_at?->timestamp > $tenMinutesAgo->timestamp; @endphp
+                    <span class="{{ $isOnline ? '' : 'user_offline' }}">
+                        <span class="time">{{ $user->last_online_at->format('H:i') }}</span>
+                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
+                             onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
+                           class="pnick {{ $isOnline ? '' : 'user_offline' }}"
+                           title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
                         @if($clan)
                             @if($clan->icon)
-                                <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}">
+                                <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}"
+                                     title="{{ $clan->name }}" alt="{{ $clan->name }}"
+                                     style="{{ $isOnline ? '' : 'opacity:.6' }}">
                             @else
                                 <span class="clan-tag">[{{ $clan->name }}]</span>
                             @endif
                         @endif
-                    @else
-                        <span class="user_offline"><span class="time">{{ $user->last_online_at->format('H:i') }}</span>
-                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
-                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick user_offline" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
-                        @if($clan)
-                            @if($clan->icon)
-                                <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}" style="opacity:.6">
-                            @else
-                                <span class="clan-tag">[{{ $clan->name }}]</span>
-                            @endif
-                        @endif
-                        </span>
-                    @endif
+                    </span>
                 </div>
             @endforeach
 
@@ -132,10 +126,12 @@
             @foreach($onlineInGame as $user)
                 @php $clan = $user->clanMembership?->clan; @endphp
                 <div class="info">
-                    <a href="" class="n"><small>{{ $user->last_online_at->format('H:i') }}</small></a>
-                    <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват" onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
-                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank" class="pnick" onclick="sendPrivate('{{ addslashes($user->name) }}')"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
-                @if($clan)
+                    <span class="time">{{ $user->last_online_at->format('H:i') }}</span>
+                    <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
+                         onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
+                       class="pnick" title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                    @if($clan)
                         @if($clan->icon)
                             <img class="clan-icon" src="{{ Storage::disk('public')->url($clan->icon) }}" title="{{ $clan->name }}" alt="{{ $clan->name }}">
                         @else
