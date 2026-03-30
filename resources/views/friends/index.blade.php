@@ -360,7 +360,9 @@ var btnR2 = '{{ asset('img/bg/btn/btn-right2.gif') }}';
 
 function sendPrivate(name) {
     try {
-        var bottomFrame = window.parent.document.getElementById('bottom-frame');
+        var chatFrame = window.parent.document.getElementById('chat-frame');
+        if (!chatFrame) return;
+        var bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
         if (bottomFrame && bottomFrame.contentWindow) {
             bottomFrame.contentWindow.postMessage({ type: 'insertPrivate', name: name }, '*');
         }

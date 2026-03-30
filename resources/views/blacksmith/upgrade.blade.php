@@ -461,7 +461,8 @@
     @endif
 </script>
 
-{!! $itemTooltipScript !!}
+{!! $playerStatsScript !!}
+    {!! $itemTooltipScript !!}
 <script src="{{ asset('js/item_tooltip.js') }}"></script>
 
 </body>

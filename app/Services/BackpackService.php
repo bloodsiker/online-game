@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Collection;
 
 class BackpackService
 {
+    public function __construct(
+        private readonly ItemRequirementService $requirementService,
+    ) {}
+
     public function getBaseQuery(User $user)
     {
         return Backpack::select('backpacks.*')
@@ -26,7 +30,7 @@ class BackpackService
     {
         $query = $this->getBaseQuery($user);
 
-        if (!empty($filters['sid'])) {
+        if (! empty($filters['sid'])) {
             $query->where('items.share_item_id', $filters['sid']);
         }
 
@@ -77,12 +81,12 @@ class BackpackService
         return $count >= $quantity;
     }
 
-//    public function getItem(User $user, ShareItem $shareItem): ?Backpack
-//    {
-//        $query = $this->getBaseQuery($user);
-//
-//        return $query->where(['items.share_item_id' => $shareItem->id])->first();
-//    }
+    //    public function getItem(User $user, ShareItem $shareItem): ?Backpack
+    //    {
+    //        $query = $this->getBaseQuery($user);
+    //
+    //        return $query->where(['items.share_item_id' => $shareItem->id])->first();
+    //    }
 
     public function getItem(User $user, ShareItem $shareItem): ?Backpack
     {
@@ -120,6 +124,7 @@ class BackpackService
 
         if ($backpackItem) {
             $backpackItem->increment('count', $quantity);
+
             return $backpackItem->fresh();
         }
 
@@ -129,7 +134,7 @@ class BackpackService
 
         $user->backpack()->attach($item->id, [
             'equipped' => 0,
-            'count' => $quantity
+            'count' => $quantity,
         ]);
 
         return $this->getItemById($user, $item->id);
@@ -141,6 +146,7 @@ class BackpackService
 
         if ($existingItem) {
             $existingItem->increment('count', $quantity);
+
             return $existingItem->fresh();
         }
 
@@ -156,7 +162,7 @@ class BackpackService
     {
         $backpackItem = $this->getItem($user, $shareItem);
 
-        if (!$backpackItem || $backpackItem->count < $quantity) {
+        if (! $backpackItem || $backpackItem->count < $quantity) {
             return false;
         }
 
@@ -167,7 +173,7 @@ class BackpackService
     {
         $backpackItem = $this->getItemById($user, $itemId);
 
-        if (!$backpackItem || $backpackItem->count < $quantity) {
+        if (! $backpackItem || $backpackItem->count < $quantity) {
             return false;
         }
 
@@ -182,7 +188,7 @@ class BackpackService
                 $backpackItem->delete();
 
                 $hasOtherReferences = Backpack::where('item_id', $item->id)->exists();
-                if (!$hasOtherReferences) {
+                if (! $hasOtherReferences) {
                     $item->delete();
                 }
             } else {
@@ -201,7 +207,12 @@ class BackpackService
             ->where('equipped', 0)
             ->first();
 
-        if (!$backpackItem || $backpackItem->quantity < 1) {
+        if (! $backpackItem || $backpackItem->quantity < 1) {
+            return false;
+        }
+
+        $error = $this->requirementService->check($user->player, $backpackItem->item->itemInfo);
+        if ($error) {
             return false;
         }
 

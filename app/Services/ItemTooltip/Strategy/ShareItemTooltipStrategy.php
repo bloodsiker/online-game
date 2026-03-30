@@ -15,6 +15,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
     public function collect(ItemTooltipCollector $collector): void
     {
         foreach ($this->items as $shareItem) {
+            $shareItem->loadMissing('requirements.skill');
             $collector->add(new ItemTooltipDto(
                 id: $shareItem->id,
                 title: $shareItem->name,
@@ -33,6 +34,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 noweight: !$shareItem->is_weight,
                 nosell: !$shareItem->is_sell,
                 stats: ItemTooltipStatsBuilder::build($shareItem),
+                requirements: ItemTooltipStatsBuilder::buildRequirements($shareItem),
             ));
         }
     }

@@ -72,4 +72,24 @@ final class ItemTooltipStatsBuilder
 
         return $stats;
     }
+
+    /**
+     * @return array<int, array{title: string, value: string}>
+     */
+    public static function buildRequirements(ShareItem $item): array
+    {
+        $reqs = [];
+
+        foreach ($item->requirements as $req) {
+            $reqs[] = [
+                'title'    => $req->label(),
+                'type'     => $req->type->value,
+                'stat_key' => $req->stat_key,
+                'skill_id' => $req->skill_id,
+                'min_value' => $req->min_value,
+            ];
+        }
+
+        return $reqs;
+    }
 }

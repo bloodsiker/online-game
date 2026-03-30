@@ -46,7 +46,7 @@ class ItemController extends Controller
         if ($item->type === ShareItemType::RECIPE) {
             ShareRecipe::firstOrCreate(['share_item_id' => $item->id], [
                 'kraft_item_id' => null,
-                'percent'       => 100,
+                'percent' => 100,
             ]);
         }
 
@@ -63,22 +63,24 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill']);
 
-        $skills      = Skill::orderBy('name')->get();
-        $statTypes   = ShareItemStatType::cases();
+        $skills = Skill::orderBy('name')->get();
+        $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
+        $requirementTypes = \App\Enums\ShareItemRequirementType::cases();
+        $playerStatKeys = \App\Enums\PlayerStatKey::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes'));
+        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys'));
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
     {
         ShareItemStat::create([
             'share_item_id' => $item->id,
-            'stat_type'     => ShareItemStatType::from($request->input('stat_type')),
-            'value'         => (int) $request->input('value', 0),
-            'value_type'    => ItemEffectValueType::from($request->input('value_type', 'flat')),
+            'stat_type' => ShareItemStatType::from($request->input('stat_type')),
+            'value' => (int) $request->input('value', 0),
+            'value_type' => ItemEffectValueType::from($request->input('value_type', 'flat')),
         ]);
 
         return redirect()->back()->with('success', 'Стат добавлен.');
@@ -94,10 +96,10 @@ class ItemController extends Controller
     public function addEffect(Request $request, ShareItem $item): RedirectResponse
     {
         ShareItemEffect::create([
-            'share_item_id'    => $item->id,
-            'effect_type'      => ItemEffectType::from($request->input('effect_type')),
-            'value'            => (int) $request->input('value', 0),
-            'value_type'       => ItemEffectValueType::from($request->input('value_type', 'flat')),
+            'share_item_id' => $item->id,
+            'effect_type' => ItemEffectType::from($request->input('effect_type')),
+            'value' => (int) $request->input('value', 0),
+            'value_type' => ItemEffectValueType::from($request->input('value_type', 'flat')),
             'duration_seconds' => $request->filled('duration_seconds') ? (int) $request->input('duration_seconds') : null,
         ]);
 
@@ -114,7 +116,7 @@ class ItemController extends Controller
     public function updateRecipe(Request $request, ShareRecipe $recipe): RedirectResponse
     {
         $recipe->kraft_item_id = $request->filled('kraft_item_id') ? (int) $request->input('kraft_item_id') : null;
-        $recipe->percent       = (int) $request->input('percent', 100);
+        $recipe->percent = (int) $request->input('percent', 100);
         $recipe->save();
 
         return redirect()->back()->with('success', 'Рецепт обновлён.');
@@ -143,30 +145,30 @@ class ItemController extends Controller
     {
         $type = ShareItemType::from($request->input('type'));
 
-        $item->name          = $request->input('name');
-        $item->type          = $type;
-        $item->description   = $request->input('description');
+        $item->name = $request->input('name');
+        $item->type = $type;
+        $item->description = $request->input('description');
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $file->move(public_path('img/resource'), $filename);
-            $item->image = 'img/resource/' . $filename;
+            $item->image = 'img/resource/'.$filename;
         } elseif ($request->filled('image')) {
             $item->image = $request->input('image');
         }
-        $item->slot          = $request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null;
-        $item->price         = (int) $request->input('price', 0);
+        $item->slot = $request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null;
+        $item->price = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);
-        $item->count_use     = (int) $request->input('count_use', 0);
-        $item->is_two_hand   = (bool) $request->input('is_two_hand', false);
-        $item->is_active     = (bool) $request->input('is_active', true);
-        $item->is_heal       = (bool) $request->input('is_heal', false);
-        $item->is_sell       = (bool) $request->input('is_sell', true);
-        $item->is_weight     = (bool) $request->input('is_weight', true);
-        $item->is_slot_usable= (bool) $request->input('is_slot_usable', false);
-        $item->skill_id      = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
-        $item->skill_lvl     = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
-        $item->skill_exp     = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
+        $item->count_use = (int) $request->input('count_use', 0);
+        $item->is_two_hand = (bool) $request->input('is_two_hand', false);
+        $item->is_active = (bool) $request->input('is_active', true);
+        $item->is_heal = (bool) $request->input('is_heal', false);
+        $item->is_sell = (bool) $request->input('is_sell', true);
+        $item->is_weight = (bool) $request->input('is_weight', true);
+        $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
+        $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
+        $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
+        $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
 
         // Свиток заточки
         $item->upgrade_scroll_type = $request->filled('upgrade_scroll_type')
@@ -183,8 +185,32 @@ class ItemController extends Controller
         if ($type === ShareItemType::RUNE) {
             $raw = $request->input('rune_rarity');
             $item->rune_rarity = $raw ? RuneRarity::from($raw) : null;
-            $pool                 = $request->input('rune_stat_pool', []);
+            $pool = $request->input('rune_stat_pool', []);
             $item->rune_stat_pool = count($pool) > 0 ? $pool : null;
         }
+    }
+
+    public function addRequirement(Request $request, ShareItem $item): RedirectResponse
+    {
+        $type = \App\Enums\ShareItemRequirementType::from($request->input('type'));
+        $statKey = $type === \App\Enums\ShareItemRequirementType::STAT ? $request->input('stat_key') : null;
+        $skillId = $type === \App\Enums\ShareItemRequirementType::SKILL ? (int) $request->input('skill_id') : null;
+
+        \App\Models\Share\ShareItemRequirement::create([
+            'share_item_id' => $item->id,
+            'type' => $type,
+            'stat_key' => $statKey,
+            'skill_id' => $skillId,
+            'min_value' => (int) $request->input('min_value', 1),
+        ]);
+
+        return redirect()->back()->with('success', 'Требование добавлено.');
+    }
+
+    public function deleteRequirement(ShareItem $item, \App\Models\Share\ShareItemRequirement $requirement): RedirectResponse
+    {
+        $requirement->delete();
+
+        return redirect()->back()->with('success', 'Требование удалено.');
     }
 }

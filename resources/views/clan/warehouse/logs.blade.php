@@ -27,6 +27,7 @@
         .pg-inact_lnk { color: #C50000 !important; font-size: 9px; font-weight: bold; }
     </style>
 
+    {!! $playerStatsScript !!}
     {!! $itemTooltipScript !!}
 
     <script src="{{ asset('js/item_tooltip.js') }}"></script>

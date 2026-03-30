@@ -38,6 +38,8 @@ Route::post('/item/{item}/stat', [ItemController::class, 'addStat'])->name('item
 Route::get('/item/{item}/stat/{stat}/delete', [ItemController::class, 'deleteStat'])->name('item.stat.delete');
 Route::post('/item/{item}/effect', [ItemController::class, 'addEffect'])->name('item.effect.add');
 Route::get('/item/{item}/effect/{effect}/delete', [ItemController::class, 'deleteEffect'])->name('item.effect.delete');
+Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'])->name('item.requirement.add');
+Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::class, 'deleteRequirement'])->name('item.requirement.delete');
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');

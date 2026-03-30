@@ -330,6 +330,17 @@ let renderItemInfo = (id) => {
             bg = !bg;
         }
     }
+    if (a.requirements && a.requirements.length > 0) {
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#8b4a00;">Требования:</b></td></tr>';
+        bg = !bg;
+        for (i in a.requirements) {
+            var req = a.requirements[i];
+            var met = _checkRequirement(req);
+            var reqColor = met ? '#8b4a00' : '#ff0000';
+            content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td style="color:' + reqColor + ';">' + req.title + '</td><td align="right" style="color:' + reqColor + ';font-weight:bold;">' + req.min_value + '</td></tr>';
+            bg = !bg;
+        }
+    }
     if (a.exp && a.exp != undefined) {
         content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td>' + a.exp.title + '</td><td class="grnn b" align="right">' + a.exp.value + '</td></tr>';
         bg = !bg;
@@ -517,6 +528,17 @@ let getTopWindow = () => {
 let gebi = (id) => {
     return document.getElementById(id)
 }
+
+let _checkRequirement = (req) => {
+    var ps = window.playerStats;
+    if (!ps) return true;
+    var type = req.type;
+    var min  = req.min_value;
+    if (type === 'level') return ps.lvl >= min;
+    if (type === 'stat')  return (ps[req.stat_key] || 0) >= min;
+    if (type === 'skill') return (ps.skills && ps.skills[req.skill_id] || 0) >= min;
+    return true;
+};
 
 let getIframeShift = () => {
     var currentWindow = window,

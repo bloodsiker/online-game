@@ -415,6 +415,92 @@
         </div>
     </div>
 
+    {{-- ТРЕБОВАНИЯ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Требования для надевания / использования</h2>
+                    <p class="card-subtitle text-muted">Минимальные характеристики персонажа для экипировки или использования предмета</p>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form action="{{ route('admin.item.requirement.add', $item->id) }}" method="post" id="req-form">
+                                {{ csrf_field() }}
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип требования</label>
+                                    <select name="type" class="form-control" id="req-type" onchange="updateReqFields()">
+                                        @foreach($requirementTypes as $rType)
+                                            <option value="{{ $rType->value }}">{{ $rType->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2" id="req-stat-field" style="display:none">
+                                    <label class="col-form-label">Характеристика</label>
+                                    <select name="stat_key" class="form-control">
+                                        @foreach($playerStatKeys as $key)
+                                            <option value="{{ $key->value }}">{{ $key->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2" id="req-skill-field" style="display:none">
+                                    <label class="col-form-label">Навык</label>
+                                    <select name="skill_id" class="form-control" data-plugin-selectTwo>
+                                        @foreach($skills as $skill)
+                                            <option value="{{ $skill->id }}">{{ $skill->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Минимальное значение</label>
+                                    <input type="number" class="form-control" name="min_value" value="1" min="1">
+                                </div>
+                                <button class="btn btn-primary btn-sm">Добавить требование</button>
+                            </form>
+                            <script>
+                                function updateReqFields() {
+                                    var type = document.getElementById('req-type').value;
+                                    document.getElementById('req-stat-field').style.display  = type === 'stat'  ? '' : 'none';
+                                    document.getElementById('req-skill-field').style.display = type === 'skill' ? '' : 'none';
+                                }
+                                updateReqFields();
+                            </script>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-hover table-bordered mb-none">
+                                <thead>
+                                <tr>
+                                    <th>Тип</th>
+                                    <th>Условие</th>
+                                    <th width="100">Мин. значение</th>
+                                    <th width="70"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($item->requirements as $req)
+                                    <tr style="vertical-align: middle">
+                                        <td>{{ $req->type->label() }}</td>
+                                        <td>{{ $req->label() }}</td>
+                                        <td>{{ $req->min_value }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.item.requirement.delete', ['item' => $item->id, 'requirement' => $req->id]) }}"
+                                               class="btn btn-xs btn-danger"
+                                               onclick="return confirm('Удалить?')">Удалить</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center text-muted">Нет требований</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
     {{-- РЕЦЕПТ (только для типа RECIPE) --}}
     @if($item->type === \App\Enums\ShareItemType::RECIPE && $item->recipe)
         <div class="row">

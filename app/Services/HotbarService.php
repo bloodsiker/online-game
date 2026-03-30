@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\ItemEffectType;
+use App\Enums\ShareItemStatType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
@@ -31,9 +31,9 @@ class HotbarService
                 continue;
             }
 
-            $beltItem->itemInfo->loadMissing('effects');
-            $extra += $beltItem->itemInfo->effects
-                ->filter(fn($e) => $e->effect_type === ItemEffectType::BELT_SLOT)
+            $beltItem->itemInfo->loadMissing('stats');
+            $extra += $beltItem->itemInfo->stats
+                ->filter(fn($s) => $s->stat_type === ShareItemStatType::BELT_SLOT)
                 ->sum('value');
         }
 

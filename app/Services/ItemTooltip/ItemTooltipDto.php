@@ -18,7 +18,8 @@ final class ItemTooltipDto {
         public bool   $nogive,
         public bool   $noweight,
         public bool   $nosell,
-        public array  $stats = [],   // характеристики предмета: [{title, value}]
+        public array  $stats = [],        // характеристики предмета: [{title, value}]
+        public array  $requirements = [], // требования для надевания: [{title, value}]
     ) {}
 
     public function toArray(): array
@@ -37,8 +38,9 @@ final class ItemTooltipDto {
             'store'    => $this->store,
             'nogive'   => $this->nogive   ? 'Предмет нельзя передать!' : '',
             'noweight' => $this->noweight ? 'Предмет не занимает места в рюкзаке' : '',
-            'nosell'   => $this->nosell   ? 'Предмет нельзя сдать в скупку' : '',
-            'desc'     => $this->desc,
+            'nosell'       => $this->nosell   ? 'Предмет нельзя сдать в скупку' : '',
+            'desc'         => $this->desc,
+            'requirements' => $this->requirements,
         ];
     }
 }

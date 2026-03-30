@@ -18,6 +18,7 @@ class ItemService
     public function __construct(
         private readonly BackpackService $backpackService,
         private readonly HotbarService $hotbarService,
+        private readonly ItemRequirementService $requirementService,
     ) {}
 
     /**
@@ -33,10 +34,11 @@ class ItemService
 
             if (! $slot) {
                 $name = Item::find($itemId)?->itemInfo->name ?? 'предмет';
+
                 return sprintf('Кто-то уже поднял предмет <b>"%s"</b>...', $name);
             }
 
-            $item  = $slot->item;
+            $item = $slot->item;
             $count = $slot->count;
             $slot->delete();
 
@@ -98,7 +100,7 @@ class ItemService
         Backpack::create([
             'item_id' => $item->id,
             'user_id' => $toUser->id,
-            'count'   => 1,
+            'count' => 1,
         ]);
 
         return null;
@@ -167,10 +169,16 @@ class ItemService
             return null;
         }
 
+        $shareItem = $backpackItem->item->itemInfo;
+        $error = $this->requirementService->check($user->player, $shareItem);
+        if ($error) {
+            return $error;
+        }
+
         $playerEquip = $user->player->playerEquip;
-        $typeItem    = $backpackItem->item->itemInfo->type;
-        $slot        = $backpackItem->item->itemInfo->slot;
-        $itemId      = $backpackItem->item->id;
+        $typeItem = $shareItem->type;
+        $slot = $shareItem->slot;
+        $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
             if ($typeItem === ShareItemType::WEAPON && $playerEquip->hand_left && $playerEquip->hand_right) {
@@ -192,6 +200,7 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 1;
             $backpackItem->save();
+
             return null;
         }
 
@@ -204,6 +213,7 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 1;
             $backpackItem->save();
+
             return null;
         }
 
@@ -218,6 +228,7 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 1;
             $backpackItem->save();
+
             return null;
         }
 
@@ -232,6 +243,7 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 1;
             $backpackItem->save();
+
             return null;
         }
 
@@ -252,8 +264,8 @@ class ItemService
         }
 
         $playerEquip = $user->player->playerEquip;
-        $slot        = $backpackItem->item->itemInfo->slot;
-        $itemId      = $backpackItem->item->id;
+        $slot = $backpackItem->item->itemInfo->slot;
+        $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
             if ($playerEquip->hand_left === $itemId) {
@@ -264,17 +276,19 @@ class ItemService
             $playerEquip->save();
             $backpackItem->equipped = 0;
             $backpackItem->save();
+
             return;
         }
 
         if (in_array($slot, ShareItemSlot::armorSlots(), true)) {
             $slotName = $slot->value;
-            if ($playerEquip->$slotName === $itemId) {
+            if ($itemId === $playerEquip->$slotName) {
                 $playerEquip->$slotName = null;
                 $playerEquip->save();
                 $backpackItem->equipped = 0;
                 $backpackItem->save();
             }
+
             return;
         }
 
@@ -288,6 +302,7 @@ class ItemService
             $backpackItem->equipped = 0;
             $backpackItem->save();
             $this->hotbarService->trimExcessSlots($user->player);
+
             return;
         }
 
@@ -316,6 +331,7 @@ class ItemService
                 if ($existing->item_id !== $item->id) {
                     $item->delete();
                 }
+
                 return;
             }
         }
@@ -323,7 +339,7 @@ class ItemService
         Backpack::create([
             'user_id' => $user->id,
             'item_id' => $item->id,
-            'count'   => $count,
+            'count' => $count,
         ]);
     }
 }

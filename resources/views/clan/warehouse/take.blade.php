@@ -23,6 +23,7 @@
         .depositor-label { font-size: 12px; color: #888; margin-top: 2px; }
     </style>
 
+    {!! $playerStatsScript !!}
     {!! $itemTooltipScript !!}
 
     <script src="{{ asset('js/item_tooltip.js') }}"></script>

@@ -22,6 +22,7 @@
         .btn_2 { color: #ffe9ba !important; text-decoration: none; font-weight: 700; font-size: 11px; }
     </style>
 
+    {!! $playerStatsScript !!}
     {!! $itemTooltipScript !!}
 
     <script src="{{ asset('js/item_tooltip.js') }}"></script>

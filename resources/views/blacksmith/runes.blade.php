@@ -300,7 +300,8 @@
 </tbody>
 </table>
 
-{!! $itemTooltipScript !!}
+{!! $playerStatsScript !!}
+    {!! $itemTooltipScript !!}
 <script src="{{ asset('js/item_tooltip.js') }}"></script>
 
 <script>

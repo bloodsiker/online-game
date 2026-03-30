@@ -13,8 +13,9 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
     public function collect(ItemTooltipCollector $collector): void
     {
         foreach ($this->items as $backpack) {
-            $item       = $backpack->item;
-            $itemInfo   = $item->itemInfo;
+            $item     = $backpack->item;
+            $itemInfo = $item->itemInfo;
+            $itemInfo->loadMissing('requirements.skill');
             $upgradeLvl = $item->upgrade_lvl ?? 0;
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
@@ -36,6 +37,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 noweight: !$itemInfo->is_weight,
                 nosell: !$itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo),
+                requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
             ));
         }
     }

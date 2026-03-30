@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
  * @property-read Collection|ShareItemStat[] $stats
+ * @property-read Collection|ShareItemRequirement[] $requirements
  */
 class ShareItem extends Model
 {
@@ -75,8 +76,8 @@ class ShareItem extends Model
         'type' => ShareItemType::class,
         'slot' => ShareItemSlot::class,
         'upgrade_scroll_type' => UpgradeScrollType::class,
-        'gem_stats'      => 'array',
-        'rune_rarity'    => RuneRarity::class,
+        'gem_stats' => 'array',
+        'rune_rarity' => RuneRarity::class,
         'rune_stat_pool' => 'array',
     ];
 
@@ -100,6 +101,11 @@ class ShareItem extends Model
     public function stats(): HasMany
     {
         return $this->hasMany(ShareItemStat::class);
+    }
+
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(ShareItemRequirement::class)->with('skill');
     }
 
     public function monsters()
