@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ReferralRewardType;
 use App\Http\Controllers\Controller;
-use App\Models\Referral;
-use App\Models\ReferralRewardStage;
+use App\Models\Referral\Referral;
+use App\Models\Referral\ReferralRewardStage;
 use App\Models\Share\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

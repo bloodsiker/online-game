@@ -13,6 +13,19 @@ use Illuminate\View\View;
 
 class FriendController extends Controller
 {
+    public function friendsFrame(): View
+    {
+        $player = auth()->user()->player;
+
+        $friends = PlayerRelationship::where('player_id', $player->id)
+            ->where('type', PlayerRelationshipType::FRIEND)
+            ->where('status', 'accepted')
+            ->with(['target.user.clanMembership.clan'])
+            ->get();
+
+        return view('interface.friends_frame', compact('friends'));
+    }
+
     public function index(): View
     {
         $player = auth()->user()->player;

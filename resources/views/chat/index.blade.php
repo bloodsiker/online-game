@@ -358,27 +358,7 @@
                                                         return ui;
                                                     }
 
-                                                    function chat_channel_click(e) {
-                                                        var channel = parseInt($(this).data('channel-code'));
-                                                        return chatChangePreset(channel);
-                                                    };
-
-                                                    function chat_channel_settings_click(e) {
-                                                        var $el = $(this);
-                                                        var $parent = $el.parent('.channel');
-                                                        var code = $parent.data('channel-code');
-                                                        showMsg2('/chat_channel_settings.php?channel=' + code, '', 365, 580);
-                                                        return false;
-                                                    };
                                                     chat_channel_init();
-
-                                                    var channelCodeToSlug = {
-                                                        1:  'main',
-                                                        2:  'location',
-                                                        8:  'trade',
-                                                        4:  'clan',
-                                                        32: 'private',
-                                                    };
 
                                                     var fightlogOpen = false;
 
@@ -415,198 +395,38 @@
 
                                                         var slug = li ? li.getAttribute('data-channel') : 'main';
 
-                                                        // Tell the chat iframe to switch channel without reloading
                                                         var chatFrame = document.getElementById('chat-frame');
                                                         if (chatFrame && chatFrame.contentWindow) {
                                                             chatFrame.contentWindow.postMessage({ type: 'changeChannel', channel: slug }, '*');
                                                         }
 
-                                                        // Notify action iframe of channel change
                                                         var bottomFrame = document.getElementById('bottom-frame');
                                                         if (bottomFrame && bottomFrame.contentWindow) {
                                                             bottomFrame.contentWindow.postMessage({ type: 'setChannel', channel: slug }, '*');
                                                         }
                                                     }
 
-                                                    function chat_channel_settings_save(form, current_channel) {
-                                                        _top().error_close();
-                                                        $.ajax({
-                                                            url: '/pub/cht_data_save.php',
-                                                            cache: false,
-                                                            type: 'POST',
-                                                            data: $(form).serialize()
-                                                        }).done(function (json) {
-                                                            if (!json) return;
-                                                            eval('chat_data = ' + json);
-                                                            console.log(json);
-                                                            var channel_save = parseInt(chat_data['channel']);
-                                                            if (chat_data['channel_data'][channel_save]['msg_size']) {
-                                                                cht_set_size(chat_data['channel_data'][channel_save]['msg_size']);
-                                                            }
-                                                            if (chat_data['channel_data'][channel_save]['msg_color_id'] != undefined && chat_data['channel_data'][channel_save]['msg_color_id'] >= 0) {
-                                                                _top().chat.$('.channel[data-channel=' + channels_info[channel_save]['channel'] + '] span:first span:first').css('background-color', msg_color_ids[chat_data['channel_data'][channel_save]['msg_color_id']]['color']);
-                                                                _top().chat.chat_text.$('.tcChs' + channel_save).removeClass().addClass('tcChs' + channel_save + ' cml_a' + chat_data['channel_data'][channel_save]['msg_color_id']);
-                                                            }
-                                                        });
-                                                        return false;
-                                                    };
-
                                                     function chatFrameSelect(type) {
-                                                        var url = '';
-                                                        var iframe = gebi('user_list');
-                                                        if (!iframe) return;
-                                                        switch (type) {
-                                                            case 'area':
-                                                                url = '/cht_iframe.php?mode=user';
-                                                                break;
-                                                            case 'party':
-                                                                url = '/party_iframe.php?mode=members';
-                                                                break;
-                                                            case 'clan':
-                                                                url = '/cht_iframe.php?mode=clan';
-                                                                break;
-                                                            case 'friends':
-                                                                url = '/cht_iframe.php?mode=friends';
-                                                                break;
-                                                            case 'referals':
-                                                                url = '/cht_iframe.php?mode=referals';
-                                                                break;
+                                                        var whoFrame = document.getElementById('who-frame');
+                                                        if (!whoFrame) return;
+                                                        if (type === 'online') {
+                                                            whoFrame.src = '{{ route('who') }}';
+                                                        } else if (type === 'friends') {
+                                                            whoFrame.src = '{{ route('who.friends') }}';
+                                                        } else if (type === 'clan') {
+                                                            whoFrame.src = '{{ route('who.clan') }}';
+                                                        } else if (type === 'referrals') {
+                                                            whoFrame.src = '{{ route('who.referrals') }}';
                                                         }
-                                                        if (url != '') iframe.src = url;
-                                                        switch (type) {
-                                                            default:
-                                                                cht_btn_select('');
-                                                                cht_btn_select2(type);
-                                                                break;
-                                                            case 'party':
-                                                                cht_btn_select('party_members');
-                                                                cht_btn_select2(type);
-                                                                break;
+                                                        var tabs = document.querySelectorAll('#chat_user_list li');
+                                                        for (var i = 0; i < tabs.length; i++) {
+                                                            tabs[i].classList.toggle('selected', tabs[i].getAttribute('data-type') === type);
                                                         }
-                                                        switch (type) {
-                                                            case 'area':
-                                                                setTimeout('chatRefreshUsers(true)', 200);
-                                                                break;
-                                                        }
-                                                    }
-
-                                                    function chatActivateParty(settings, if_opened) {
-                                                        var url = 'party_iframe.php?mode=members';
-                                                        if (settings) {
-                                                            url = 'party_iframe.php?mode=settings';
-                                                        }
-                                                        var iframe = gebi('user_list');
-                                                        if (!iframe) return;
-                                                        if (if_opened && iframe.src.indexOf(url) === -1) {
-                                                            return;
-                                                        }
-                                                        $('#chat_user_list').find('> li').removeClass('selected').filter('.party').addClass('selected');
-                                                        iframe.src = url;
-                                                        if (settings) {
-                                                            cht_btn_select('party_settings');
-                                                        } else {
-                                                            cht_btn_select('party_members');
-                                                        }
-                                                    }
-
-                                                    function chatActivateNonparty() {
-                                                        var iframe = gebi('user_list');
-                                                        if (!iframe) return;
-                                                        var url = 'cht_iframe.php?mode=user';
-                                                        if (iframe.src.search(url) !== -1) {
-                                                            chatRefreshUsers();
-                                                        } else {
-                                                            iframe.src = url;
-                                                        }
-                                                        cht_btn_select('area');
-                                                    }
-
-                                                    /*function chatActivateParty(if_opened) {
-                                                        var url = 'party_iframe.php?mode=settings';
-                                                        var iframe = gebi('user_list');
-                                                        if (!iframe) return;
-                                                        if (if_opened && iframe.src.indexOf(url) === -1) {
-                                                            return;
-                                                        }
-                                                        $('#chat_user_list').find('> li').removeClass('selected').filter('.party').addClass('selected');
-                                                        iframe.src = url;
-                                                        cht_btn_select2('');
-                                                        cht_btn_select('party_members');
-                                                    }*/
-
-                                                    function cht_btn_select(btn) {
-                                                        $('.cht_buttons_state').removeClass('selected');
-                                                        if (btn != '') $('#cht_' + btn + '_btn').addClass('selected');
-                                                    }
-
-                                                    function cht_btn_select2(btn) {
-                                                        $('#chat_user_list li').removeClass('selected');
-                                                        if (btn != '') $('#chat_user_list .' + btn).addClass('selected');
-                                                    }
-
-                                                    function chatActivateNonparty() {
-                                                        var iframe = gebi('user_list');
-                                                        if (!iframe) return;
-                                                        var url = 'cht_iframe.php?mode=user';
-                                                        if (iframe.src.search(url) !== -1) {
-                                                            chatRefreshUsers();
-                                                        } else {
-                                                            iframe.src = url;
-                                                        }
-                                                        cht_btn_select('');
                                                     }
                                                 </script>
 
                                             </td>
 
-{{--                                            <td align="right" valign="bottom">--}}
-{{--                                                <table cellpadding="0" cellspacing="0" width="50" height="21"--}}
-{{--                                                       style="">--}}
-{{--                                                    <tbody>--}}
-{{--                                                    <tr>--}}
-{{--                                                        <td width="50" height="26"><img--}}
-{{--                                                                src="images/cht-resize-up.png"--}}
-{{--                                                                width="25" height="26"--}}
-{{--                                                                border="0"--}}
-{{--                                                                title="Увеличить размер чата"--}}
-{{--                                                                onclick="top.cht_resize(1); return false;"--}}
-{{--                                                                style="cursor:pointer;"><img--}}
-{{--                                                                src="images/cht-resize-down.png" width="25"--}}
-{{--                                                                height="26"--}}
-{{--                                                                border="0" title="Уменьшить размер чата"--}}
-{{--                                                                onclick="top.cht_resize(-1); return false;"--}}
-{{--                                                                style="cursor:pointer;"></td>--}}
-{{--                                                    </tr>--}}
-{{--                                                    <tr>--}}
-{{--                                                        <td width="35" height="3" class="cht_ud cht_ud-cb"></td>--}}
-{{--                                                    </tr>--}}
-{{--                                                    </tbody>--}}
-{{--                                                </table>--}}
-{{--                                            </td>--}}
-
-                                            <script>
-                                                function close_instance() {
-                                                    chatToggleChBtnStyle('inst_die_but', true);
-                                                    $.ajax({
-                                                        url: '/instance.php?action2=close_instance',
-                                                        cache: false,
-                                                        type: 'POST',
-                                                    }).done(function (json) {
-                                                        chatToggleChBtnStyle('inst_die_but', false);
-                                                    });
-                                                }
-
-                                                function trigger_cron() {
-                                                    chatToggleChBtnStyle('trigger_cron_but', true);
-                                                    $.ajax({
-                                                        url: '/1data.php',
-                                                        cache: false,
-                                                        type: 'POST',
-                                                    }).done(function (json) {
-                                                        chatToggleChBtnStyle('trigger_cron_but', false);
-                                                    });
-                                                }
-                                            </script>
                                             <td>&nbsp;
                                             </td>
                                             <td width="60" id="fightexlog" style="display: none;">
@@ -652,15 +472,26 @@
                             <tr height="35">
                                 <td colspan="3" class="tbl-main_chat-top-right">
                                     <ul id="chat_user_list">
-                                        <li class="area selected" data-type="area" title="Список персонажей на локации"
-                                            onclick="chatFrameSelect('area');">
+                                        <li class="online selected" data-type="online" title="Список персонажей на локации" onclick="chatFrameSelect('online');">
                                             <span class="icon"><img src="{{ asset('img/bg/chat/cht-area-icon.png') }}" alt="Локация"></span>
                                             <span class="title">Локация</span>
                                         </li>
-                                        <li id="chat_users_party" class="party hid" data-type="party"
-                                            title="Список участников группы" onclick="chatFrameSelect('party');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Группа"></span>
-                                            <span class="title">Группа</span>
+                                        <li class="friends" data-type="friends"
+                                            title="Список друзей" onclick="chatFrameSelect('friends');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-friends-icon.png') }}" alt="Друзья"></span>
+                                            <span class="title">Друзья</span>
+                                        </li>
+                                        @if(auth()->user()->clanMembership)
+                                        <li class="clan" data-type="clan"
+                                            title="Участники клана" onclick="chatFrameSelect('clan');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Клан"></span>
+                                            <span class="title">Клан</span>
+                                        </li>
+                                        @endif
+                                        <li class="referrals" data-type="referrals"
+                                            title="Приглашённые игроки" onclick="chatFrameSelect('referrals');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-referals-icon.png') }}" alt="Рефералы"></span>
+                                            <span class="title">Рефералы</span>
                                         </li>
                                     </ul>
                                 </td>

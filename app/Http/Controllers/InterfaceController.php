@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Map;
+use App\Models\Referral\Referral;
 use App\Services\PlayerStatService;
 use App\Models\User;
 use Carbon\Carbon;
@@ -74,6 +75,17 @@ class InterfaceController extends Controller
             ->get();
 
         return view('interface.who', compact('onlineOnLocation', 'onlineInGame', 'countOnlineLocation', 'tenMinutesAgo'));
+    }
+
+    public function referralsFrame(): \Illuminate\View\View
+    {
+        $user = Auth::user();
+
+        $referrals = Referral::where('referrer_user_id', $user->id)
+            ->with(['referred.player', 'claims'])
+            ->get();
+
+        return view('interface.referrals_frame', compact('referrals'));
     }
 
     public function hero()

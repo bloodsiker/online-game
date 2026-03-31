@@ -6,6 +6,7 @@ use App\Enums\ClanLogAction;
 use App\Enums\ClanPermission;
 use App\Enums\QuestPlayerStatus;
 use App\Http\Requests\Clan\CreateClanRequest;
+use App\Models\Clan\ClanMember;
 use App\Models\Clan\ClanJoinRequest;
 use App\Models\Clan\ClanLog;
 use App\Models\Clan\ClanRole;
@@ -25,6 +26,25 @@ class ClanController extends Controller
         private readonly ClanService $clanService,
         private readonly ClanSkillService $clanSkillService,
     ) {}
+
+    public function membersFrame(): \Illuminate\View\View
+    {
+        $user = Auth::user();
+        $membership = $user->clanMembership;
+
+        if (!$membership) {
+            return view('interface.clan_frame', ['members' => collect(), 'clan' => null]);
+        }
+
+        $tenMinutesAgo = Carbon::now()->subMinutes(10);
+
+        $members = ClanMember::where('clan_id', $membership->clan_id)
+            ->with(['user.player', 'role'])
+            ->get()
+            ->sortByDesc(fn($m) => $m->user->last_online_at);
+
+        return view('interface.clan_frame', compact('members', 'tenMinutesAgo') + ['clan' => $membership->clan]);
+    }
 
     public function index()
     {

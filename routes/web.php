@@ -242,6 +242,9 @@ Route::delete('/ignores/{relationship}', [FriendController::class, 'removeIgnore
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
 Route::get('/who', [InterfaceController::class, 'who'])->name('who');
+Route::get('/who/friends', [FriendController::class, 'friendsFrame'])->name('who.friends');
+Route::get('/who/clan', [ClanController::class, 'membersFrame'])->name('who.clan');
+Route::get('/who/referrals', [InterfaceController::class, 'referralsFrame'])->name('who.referrals');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');

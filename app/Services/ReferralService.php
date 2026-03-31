@@ -7,9 +7,9 @@ namespace App\Services;
 use App\Enums\ReferralRewardType;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
-use App\Models\Referral;
-use App\Models\ReferralRewardClaim;
-use App\Models\ReferralRewardStage;
+use App\Models\Referral\Referral;
+use App\Models\Referral\ReferralRewardClaim;
+use App\Models\Referral\ReferralRewardStage;
 use App\Models\User;
 
 class ReferralService

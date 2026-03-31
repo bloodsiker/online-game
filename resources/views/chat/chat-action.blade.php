@@ -55,36 +55,30 @@
         <tr valign="top">
             <td width="106" id="chat_clock_container"
                 style="background-image: url({{ asset('img/bg/chat/tbl-main_chat-clock-bg.gif') }})">
-                <img src="{{ asset('img/bg/chat/tbl-main_chat-clock-btn.gif') }}"
-                     style="cursor: pointer; position: relative; top: 12px;">
+                <img src="{{ asset('img/bg/chat/tbl-main_chat-clock-btn.gif') }}" style="cursor: pointer; position: relative; top: 12px;">
                 <span class="game-time" id="chat_clock">00:00:00</span>
             </td>
             <td>
                 <form id="chat-form" onsubmit="chatSend(); return false;">
                     <input type="hidden" id="channel" name="channel" value="{{ $channel->value }}">
                     <input type="image" src="{{ asset('img/icon/d.gif') }}" width="1" height="1"><br>
-                    <input type="text" name="message" id="message" maxlength="500" autocomplete="off"
-                           style="width:100%; color:#FFFFCC; background: transparent; border: 0px solid red; cursor:text;"
-                           placeholder="Введите сообщение..."><br>
+                    <input type="text" name="message" id="message" maxlength="500" autocomplete="off" style="width:100%; color:#FFFFCC; background: transparent; border: 0px solid red; cursor:text;" placeholder="Введите сообщение..."><br>
                 </form>
             </td>
             <td width="30"><img src="{{ asset('img/bg/chat/tbl-main_chat-bg-left.gif') }}" width="30" height="43"></td>
             <td width="52" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatSend(); return false;">
-                    <img id="send_btn" src="{{ asset('img/bg/chat/send-reg.gif') }}" width="52" height="34"
-                         border="0" title="Отправить сообщение в чат">
+                    <img id="send_btn" src="{{ asset('img/bg/chat/send-reg.gif') }}" width="52" height="34" border="0" title="Отправить сообщение в чат">
                 </a>
             </td>
             <td width="67" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatClearText(); return false;">
-                    <img id="clear_btn" src="{{ asset('img/bg/chat/clear-reg.gif') }}" width="67" height="34"
-                         border="0" title="Очистить окно чата">
+                    <img id="clear_btn" src="{{ asset('img/bg/chat/clear-reg.gif') }}" width="67" height="34" border="0" title="Очистить окно чата">
                 </a>
             </td>
             <td width="68" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatShowSmiles(this); return false;">
-                    <img id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34"
-                         border="0" title="Смайлики">
+                    <img id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34" border="0" title="Смайлики">
                 </a>
             </td>
             <td width="68" class="tbl-main_chat-btn">
@@ -98,8 +92,7 @@
             </td>
             <td width="74" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatRefreshUsers(); return false;">
-                    <img id="refresh_btn" src="{{ asset('img/bg/chat/refresh-reg.gif') }}" width="74" height="34"
-                         border="0" title="Обновить список игроков в этой локации">
+                    <img id="refresh_btn" src="{{ asset('img/bg/chat/refresh-reg.gif') }}" width="74" height="34" border="0" title="Обновить список игроков в этой локации">
                 </a>
             </td>
             <td width="15">
@@ -225,6 +218,15 @@
             input.value = prefix;
             input.focus();
             input.setSelectionRange(prefix.length, prefix.length);
+        }
+
+        if (event.data.type === 'insertItem') {
+            var input = gebi('message');
+            var code  = event.data.code;
+            var pos   = input.selectionStart;
+            input.value = input.value.slice(0, pos) + code + input.value.slice(pos);
+            input.focus();
+            input.setSelectionRange(pos + code.length, pos + code.length);
         }
 
         // Click on timestamp of private message → prv[NAME]

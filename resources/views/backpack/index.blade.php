@@ -1911,6 +1911,7 @@
     <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">Надеть</div>
     <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">Снять</div>
     <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">Использовать</div>
+    <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">Отправить в чат</div>
     <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">Выкинуть</div>
 </div>
 <style>
@@ -1979,6 +1980,13 @@
             case 'use':     location.href = base + '/open-chest/' + id; break;
             case 'drop':
                 showDropDialog(id, _ctxItemCount);
+                break;
+            case 'chat':
+                try {
+                    var chatFrame   = window.parent.document.getElementById('chat-frame');
+                    var bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
+                    bottomFrame.contentWindow.postMessage({ type: 'insertItem', code: '[[item_' + id + ']] ' }, '*');
+                } catch(e) {}
                 break;
         }
     }
