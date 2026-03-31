@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChatChannel;
 use App\Enums\ChatMessageType;
-use App\Models\Chat\ChatIgnore;
+use App\Enums\PlayerRelationshipType;
 use App\Models\Chat\ChatMessage;
+use App\Models\Player\PlayerRelationship;
 use App\Models\User;
 use App\Services\ChatService;
 use Carbon\Carbon;
@@ -79,8 +80,9 @@ class ChatController extends Controller
                 return response()->json(['ok' => false, 'error' => "Игрок {$target->name} не в сети."]);
             }
 
-            $isIgnored = ChatIgnore::where('user_id', $target->id)
-                ->where('ignored_user_id', auth()->id())
+            $isIgnored = PlayerRelationship::where('player_id', $target->player_id)
+                ->where('target_id', auth()->user()->player_id)
+                ->where('type', PlayerRelationshipType::IGNORE)
                 ->exists();
 
             if ($isIgnored) {

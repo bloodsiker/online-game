@@ -15,11 +15,17 @@ use App\Http\Controllers\Admin\RaceController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\PlayerController;
+use App\Http\Controllers\Admin\ReferralController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/referral/stages', [ReferralController::class, 'stages'])->name('referral.stages');
+Route::post('/referral/stages', [ReferralController::class, 'storeStage'])->name('referral.stage.store');
+Route::get('/referral/stages/{stage}/delete', [ReferralController::class, 'deleteStage'])->name('referral.stage.delete');
+Route::get('/referral/stats', [ReferralController::class, 'stats'])->name('referral.stats');
 
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');

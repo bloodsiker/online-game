@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Enums\ChatChannel;
 use App\Enums\ChatMessageType;
-use App\Models\Chat\ChatIgnore;
+use App\Enums\PlayerRelationshipType;
 use App\Models\Chat\ChatMessage;
 use App\Models\Item\Item;
+use App\Models\Player\PlayerRelationship;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -297,28 +298,45 @@ class ChatService
 
     public function addIgnore(User $user, int $targetUserId): void
     {
-        ChatIgnore::firstOrCreate([
-            'user_id' => $user->id,
-            'ignored_user_id' => $targetUserId,
+        $targetUser = User::find($targetUserId);
+        if (!$targetUser?->player_id) {
+            return;
+        }
+
+        PlayerRelationship::firstOrCreate([
+            'player_id' => $user->player_id,
+            'target_id' => $targetUser->player_id,
+            'type'      => PlayerRelationshipType::IGNORE,
         ]);
     }
 
     public function removeIgnore(User $user, int $targetUserId): void
     {
-        ChatIgnore::where('user_id', $user->id)
-            ->where('ignored_user_id', $targetUserId)
+        $targetUser = User::find($targetUserId);
+        if (!$targetUser?->player_id) {
+            return;
+        }
+
+        PlayerRelationship::where('player_id', $user->player_id)
+            ->where('target_id', $targetUser->player_id)
+            ->where('type', PlayerRelationshipType::IGNORE)
             ->delete();
     }
 
     public function getIgnores(User $user): Collection
     {
-        return ChatIgnore::where('user_id', $user->id)->with('ignoredUser')->get();
+        return PlayerRelationship::where('player_id', $user->player_id)
+            ->where('type', PlayerRelationshipType::IGNORE)
+            ->with('target.user')
+            ->get();
     }
 
     private function getIgnoredUserIds(User $user): array
     {
-        return ChatIgnore::where('user_id', $user->id)
-            ->pluck('ignored_user_id')
+        return PlayerRelationship::where('player_relationships.player_id', $user->player_id)
+            ->where('player_relationships.type', PlayerRelationshipType::IGNORE)
+            ->join('users', 'player_relationships.target_id', '=', 'users.player_id')
+            ->pluck('users.id')
             ->all();
     }
 }

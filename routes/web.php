@@ -35,6 +35,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -225,6 +226,8 @@ Route::get('/chat/ignores', [ChatController::class, 'ignoreList'])->name('chat.i
 
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');
+
+Route::get('/referral', [ReferralController::class, 'index'])->name('referral');
 
 Route::get('/friends', [FriendController::class, 'index'])->name('friends');
 Route::post('/friends/add', [FriendController::class, 'addFriend'])->name('friends.add');

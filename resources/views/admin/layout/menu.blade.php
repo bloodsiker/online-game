@@ -92,6 +92,20 @@
                             <span>Действия на локации</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.referral.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-share-alt" aria-hidden="true"></i>
+                            <span>Рефералы</span>
+                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.referral.stages') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.referral.stages') }}">Этапы наград</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.referral.stats') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.referral.stats') }}">Статистика</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-parent">
                         <a class="nav-link" href="#">
                             <i class="bx bx-cart-alt" aria-hidden="true"></i>

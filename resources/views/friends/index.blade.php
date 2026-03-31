@@ -7,9 +7,6 @@
     <style>
         html, body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 11px; }
         a, a:link, a:visited, a:active { text-decoration: none; }
-        table.coll { border-collapse: collapse; border-spacing: 0; }
-        .brd2, .brd2 td { border: 1px solid #DB9F73; }
-        .brd2-all { border: 1px solid #DB9F73; }
         .bg_l { background-image: url(/img/bg/info/bg_l.gif); }
         .p10h, .p10h td { padding-left: 10px; padding-right: 10px; }
         .p4v, .p4v td { padding-top: 4px; padding-bottom: 4px; }
@@ -33,12 +30,31 @@
         .msg-err { background: #fde8e8; border: 1px solid #c06060; color: #7a1010; padding: 4px 10px; margin: 4px 8px; }
 
         td.pending-status { color: #8b6a00; font-style: italic; }
-        .b-input input {font-size: 11px;padding-top: 4px;}
+        .b-input input { font-size: 11px; padding-top: 4px; }
         .pnick { font-family: Tahoma; font-size: 11px; font-weight: bold; text-decoration: none; color: #674F3D !important; }
         .user_offline { color: #B09A8B !important; }
         .clan-icon { width: 13px; height: 13px; vertical-align: middle; margin-left: 2px; }
         .clan-tag { font-size: 11px; color: #5B4736; margin-left: 2px; }
         .prv-btn { cursor: pointer; vertical-align: middle; }
+
+        table.fr {
+            border-top: #db9f73 1px solid;
+            border-left: #db9f73 1px solid;
+            border-collapse: separate !important;
+            width: 100%;
+        }
+        .fr td, .fr th {
+            height: 15px;
+            padding: 4px 8px;
+            color: #631c0b;
+            border-right: #db9f73 1px solid;
+            border-bottom: #db9f73 1px solid;
+        }
+        .fr th { color: #955c4a; font-weight: bold; }
+
+        .online-dot  { display:inline-block; width:7px; height:7px; border-radius:50%; background:#2a9a00; margin-right:3px; vertical-align:middle; }
+        .offline-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#bbb; margin-right:3px; vertical-align:middle; }
+        .last-online { color: #999; font-size: 10px; }
     </style>
 </head>
 <body class="regblk">
@@ -70,7 +86,6 @@
             <div class="msg-err">{{ session('error') }}</div>
         @endif
 
-        {{-- Вкладки --}}
         @php
             $btnL1 = asset('img/bg/btn/btn-left1.gif');
             $btnC1 = asset('img/bg/btn/btn-cent1.gif');
@@ -84,6 +99,7 @@
                 ['id' => 'enemies', 'label' => 'Враги (' . $enemies->count() . ')', 'active' => false],
                 ['id' => 'ignores', 'label' => 'Игнор-лист (' . $ignores->count() . ')', 'active' => false],
             ];
+            $onlineThreshold = \Carbon\Carbon::now()->subMinutes(10);
         @endphp
         <table border="0" cellspacing="0" cellpadding="0" style="margin: 6px 8px 0;">
             <tbody>
@@ -100,10 +116,6 @@
             </tbody>
         </table>
 
-        @php
-            $onlineThreshold = \Carbon\Carbon::now()->subMinutes(10);
-        @endphp
-
         {{-- ДРУЗЬЯ --}}
         <div id="tab-friends" class="tab-pane active">
             <div class="add-row">
@@ -118,14 +130,17 @@
                     </b></b>
                 </form>
             </div>
-
-            <table class="coll brd2-all p10h p4v" width="100%" style="margin-top:4px">
-                <tbody>
-                <tr class="bg_l">
-                    <td><b>Персонаж</b></td>
-                    <td width="120" align="center"><b>Статус</b></td>
-                    <td width="70" align="center"><b>Действия</b></td>
+            <table class="fr" cellspacing="0" style="margin-top:4px">
+                <thead>
+                <tr>
+                    <th>Персонаж</th>
+                    <th width="70" align="center">Онлайн</th>
+                    <th width="120" align="center">Последний раз</th>
+                    <th width="100" align="center">Статус</th>
+                    <th width="70" align="center">Действия</th>
                 </tr>
+                </thead>
+                <tbody>
                 @foreach($friends as $rel)
                     @php $u = $rel->target->user; $clan = $u->clanMembership?->clan; $isOnline = $u->last_online_at && $u->last_online_at > $onlineThreshold; @endphp
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
@@ -141,6 +156,13 @@
                                     @endif
                                 @endif
                             </span>
+                        </td>
+                        <td align="center" class="b">
+                            @if($isOnline) <span class="online-dot"></span><span class="grnn">Да</span>
+                            @else <span class="offline-dot"></span>Нет @endif
+                        </td>
+                        <td align="center" class="last-online b">
+                            {{ $u->last_online_at ? $u->last_online_at->diffForHumans() : '—' }}
                         </td>
                         <td align="center" class="grnn"><b>друг</b></td>
                         <td align="center">
@@ -169,6 +191,13 @@
                                 @endif
                             </span>
                         </td>
+                        <td align="center">
+                            @if($isOnline) <span class="online-dot"></span><span class="grnn">Да</span>
+                            @else <span class="offline-dot"></span>Нет @endif
+                        </td>
+                        <td align="center" class="last-online">
+                            {{ $u->last_online_at ? $u->last_online_at->diffForHumans() : '—' }}
+                        </td>
                         <td align="center" class="pending-status">ожидает ответа…</td>
                         <td align="center">
                             <form method="post" action="{{ route('friends.remove', $rel->id) }}" style="display:inline">
@@ -181,7 +210,7 @@
                     </tr>
                 @endforeach
                 @if($friends->isEmpty() && $outgoing->isEmpty())
-                    <tr><td colspan="3" align="center" style="color:#999;padding:8px">Список друзей пуст</td></tr>
+                    <tr><td colspan="5" align="center" style="color:#999;padding:8px">Список друзей пуст</td></tr>
                 @endif
                 </tbody>
             </table>
@@ -189,12 +218,16 @@
 
         {{-- ДРУЖАТ СО МНОЙ --}}
         <div id="tab-incoming" class="tab-pane">
-            <table class="coll brd2-all p10h p4v" width="100%" style="margin-top:8px">
-                <tbody>
-                <tr class="bg_l">
-                    <td><b>Персонаж</b></td>
-                    <td width="180" align="center"><b>Действия</b></td>
+            <table class="fr" cellspacing="0" style="margin-top:8px">
+                <thead>
+                <tr>
+                    <th>Персонаж</th>
+                    <th width="70" align="center">Онлайн</th>
+                    <th width="120" align="center">Последний раз</th>
+                    <th width="180" align="center">Действия</th>
                 </tr>
+                </thead>
+                <tbody>
                 @forelse($incoming as $rel)
                     @php $u = $rel->player->user; $clan = $u->clanMembership?->clan; $isOnline = $u->last_online_at && $u->last_online_at > $onlineThreshold; @endphp
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
@@ -210,6 +243,13 @@
                                     @endif
                                 @endif
                             </span>
+                        </td>
+                        <td align="center">
+                            @if($isOnline) <span class="online-dot"></span><span class="grnn">Да</span>
+                            @else <span class="offline-dot"></span>Нет @endif
+                        </td>
+                        <td align="center" class="last-online">
+                            {{ $u->last_online_at ? $u->last_online_at->diffForHumans() : '—' }}
                         </td>
                         <td align="center">
                             <form method="post" action="{{ route('friends.accept', $rel->id) }}" style="display:inline">
@@ -228,7 +268,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="2" align="center" style="color:#999;padding:8px">Нет входящих запросов</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Нет входящих запросов</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -248,12 +288,16 @@
                     </b></b>
                 </form>
             </div>
-            <table class="coll brd2-all p10h p4v" width="100%" style="margin-top:4px">
-                <tbody>
-                <tr class="bg_l">
-                    <td><b>Персонаж</b></td>
-                    <td width="70" align="center"><b>Действия</b></td>
+            <table class="fr" cellspacing="0" style="margin-top:4px">
+                <thead>
+                <tr>
+                    <th>Персонаж</th>
+                    <th width="70" align="center">Онлайн</th>
+                    <th width="120" align="center">Последний раз</th>
+                    <th width="70" align="center">Действия</th>
                 </tr>
+                </thead>
+                <tbody>
                 @forelse($enemies as $rel)
                     @php $u = $rel->target->user; $clan = $u->clanMembership?->clan; $isOnline = $u->last_online_at && $u->last_online_at > $onlineThreshold; @endphp
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
@@ -271,6 +315,13 @@
                             </span>
                         </td>
                         <td align="center">
+                            @if($isOnline) <span class="online-dot"></span><span class="grnn">Да</span>
+                            @else <span class="offline-dot"></span>Нет @endif
+                        </td>
+                        <td align="center" class="last-online">
+                            {{ $u->last_online_at ? $u->last_online_at->diffForHumans() : '—' }}
+                        </td>
+                        <td align="center">
                             <form method="post" action="{{ route('enemies.remove', $rel->id) }}" style="display:inline">
                                 @csrf @method('DELETE')
                                 <b class="butt2 pointer"><b>
@@ -280,7 +331,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="2" align="center" style="color:#999;padding:8px">Список врагов пуст</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Список врагов пуст</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -300,12 +351,16 @@
                     </b></b>
                 </form>
             </div>
-            <table class="coll brd2-all p10h p4v" width="100%" style="margin-top:4px">
-                <tbody>
-                <tr class="bg_l">
-                    <td><b>Персонаж</b></td>
-                    <td width="70" align="center"><b>Действия</b></td>
+            <table class="fr" cellspacing="0" style="margin-top:4px">
+                <thead>
+                <tr>
+                    <th>Персонаж</th>
+                    <th width="70" align="center">Онлайн</th>
+                    <th width="120" align="center">Последний раз</th>
+                    <th width="70" align="center">Действия</th>
                 </tr>
+                </thead>
+                <tbody>
                 @forelse($ignores as $rel)
                     @php $u = $rel->target->user; $clan = $u->clanMembership?->clan; $isOnline = $u->last_online_at && $u->last_online_at > $onlineThreshold; @endphp
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
@@ -323,6 +378,13 @@
                             </span>
                         </td>
                         <td align="center">
+                            @if($isOnline) <span class="online-dot"></span><span class="grnn">Да</span>
+                            @else <span class="offline-dot"></span>Нет @endif
+                        </td>
+                        <td align="center" class="last-online">
+                            {{ $u->last_online_at ? $u->last_online_at->diffForHumans() : '—' }}
+                        </td>
+                        <td align="center">
                             <form method="post" action="{{ route('ignores.remove', $rel->id) }}" style="display:inline">
                                 @csrf @method('DELETE')
                                 <b class="butt2 pointer"><b>
@@ -332,7 +394,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="2" align="center" style="color:#999;padding:8px">Игнор-лист пуст</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Игнор-лист пуст</td></tr>
                 @endforelse
                 </tbody>
             </table>

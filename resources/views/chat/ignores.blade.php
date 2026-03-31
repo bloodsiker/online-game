@@ -25,12 +25,13 @@
             </thead>
             <tbody>
                 @foreach ($ignores as $ignore)
-                    <tr id="ignore-row-{{ $ignore->ignored_user_id }}">
-                        <td>{{ $ignore->ignoredUser?->name ?? '—' }}</td>
+                    @php $targetUser = $ignore->target?->user; @endphp
+                    <tr id="ignore-row-{{ $targetUser?->id }}">
+                        <td>{{ $targetUser?->name ?? '—' }}</td>
                         <td>
                             <a class="btn-remove"
                                href="#"
-                               onclick="removeIgnore({{ $ignore->ignored_user_id }}); return false;">
+                               onclick="removeIgnore({{ $targetUser?->id }}); return false;">
                                 удалить
                             </a>
                         </td>

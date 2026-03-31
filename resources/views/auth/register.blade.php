@@ -194,6 +194,7 @@
                                 <div class="b-common-block__bgr clearfix">
                                     <form id="reg_form" action="{{ route('register') }}" method="post">
                                         <input type="hidden" name="referrer" value=""/>
+                                        <input type="hidden" name="ref_code" value="{{ $refCode ?? '' }}"/>
                                         @csrf
                                         <center>
                                             <div class="b-common-wrapper">
