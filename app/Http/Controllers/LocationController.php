@@ -6,6 +6,7 @@ use App\Models\Battle\Battle;
 use App\Models\Item\ItemOnLocation;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
+use App\Models\User;
 use App\Repositories\LocationRepository;
 use App\Repositories\MonsterOnLocationRepository;
 use App\Services\Battle\BattleOrchestrator;
@@ -13,7 +14,9 @@ use App\Services\Battle\MonsterSelector;
 use App\Services\BattleService;
 use App\Services\PlayerMovementService;
 use App\Services\PlayerStatService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class LocationController extends Controller
 {
@@ -52,7 +55,9 @@ class LocationController extends Controller
 
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
-        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator', 'user'));
+        $locationUsersJson = $this->getLocationUsersJson($location->id);
+
+        return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator', 'user', 'locationUsersJson'));
     }
 
     public function moveTo($direction)
@@ -73,14 +78,40 @@ class LocationController extends Controller
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
         return view('location.index', [
-            'location'        => $location,
-            'battle'          => $battle,
+            'location'          => $location,
+            'battle'            => $battle,
             'monsterOnLocation' => $monsterOnLocation,
-            'user'            => $user,
-            'player'          => $user->player,
-            'playerDecorator' => $this->statService->resolve($user->player),
-            'speedModifier'    => $result->speedModifier,
+            'user'              => $user,
+            'player'            => $user->player,
+            'playerDecorator'   => $this->statService->resolve($user->player),
+            'speedModifier'     => $result->speedModifier,
+            'locationUsersJson' => $this->getLocationUsersJson($location->id),
         ]);
+    }
+
+    private function getLocationUsersJson(int $locationId): string
+    {
+        $tenMinutesAgo = Carbon::now()->subMinutes(10);
+
+        $users = User::with(['player', 'clanMembership.clan'])
+            ->where('location_id', $locationId)
+            ->orderByDesc('last_online_at')
+            ->get()
+            ->map(function (User $u) use ($tenMinutesAgo): array {
+                $clan = $u->clanMembership?->clan;
+                return [
+                    'id'        => $u->id,
+                    'name'      => $u->name,
+                    'lvl'       => $u->player->lvl,
+                    'time'      => $u->last_online_at?->format('H:i') ?? '',
+                    'is_online' => ($u->last_online_at?->timestamp ?? 0) > $tenMinutesAgo->timestamp,
+                    'info_url'  => route('info.user', ['id' => $u->id]),
+                    'clan_name' => $clan?->name,
+                    'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
+                ];
+            });
+
+        return json_encode($users->values(), JSON_UNESCAPED_UNICODE);
     }
 
     public function takeItems()

@@ -92,9 +92,10 @@
     <tr class="lgb" width="100%" height="100%" style="vertical-align: top">
         <td width="1%" class="lgb-left" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
         <td>
-            <center><b style="color:green">На локации: {{ $countOnlineLocation }}</b></center>
+            <center><b style="color:green">На локации: <span id="location-count">{{ $countOnlineLocation }}</span></b></center>
             <br>
 
+            <div id="location-users">
             @foreach($onlineOnLocation as $user)
                 @php $clan = $user->clanMembership?->clan; @endphp
                 <div class="info">
@@ -118,6 +119,7 @@
                     </span>
                 </div>
             @endforeach
+            </div>
 
             <br>
             <hr>
@@ -165,6 +167,48 @@
             console.error('[who] error:', e);
         }
     }
+
+    var prvArrowSrc = '{{ asset('img/icon/users-arrow.gif') }}';
+    var infoUrlBase = '{{ url('/info/user') }}/';
+
+    function renderLocationUsers(users) {
+        var container = document.getElementById('location-users');
+        var countEl   = document.getElementById('location-count');
+        if (!container) return;
+
+        var online = users.filter(function (u) { return u.is_online; });
+        if (countEl) countEl.textContent = online.length;
+
+        var html = '';
+        users.forEach(function (u) {
+            var offCls = u.is_online ? '' : ' user_offline';
+            var opacity = u.is_online ? '' : 'opacity:.6;';
+
+            var clan = '';
+            if (u.clan_icon) {
+                clan = '<img class="clan-icon" src="' + u.clan_icon + '" title="' + u.clan_name + '" alt="' + u.clan_name + '" style="' + opacity + '">';
+            } else if (u.clan_name) {
+                clan = '<span class="clan-tag">[' + u.clan_name + ']</span>';
+            }
+
+            html += '<div class="info">'
+                +   '<span class="' + offCls.trim() + '">'
+                +     '<span class="time">' + u.time + '</span> '
+                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(\'' + u.name.replace(/'/g, "\\'") + '\')" alt="Приват"> '
+                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
+                +     clan
+                +   '</span>'
+                + '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    window.addEventListener('message', function (e) {
+        if (e.data && e.data.type === 'locationUsers') {
+            renderLocationUsers(e.data.users);
+        }
+    });
 </script>
 </body>
 </html>

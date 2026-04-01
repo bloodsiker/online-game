@@ -414,6 +414,17 @@
     function sendDataToGame(url) {
         window.parent.postMessage({ url: url }, '*');
     }
+
+    (function () {
+        var users = {!! $locationUsersJson ?? '[]' !!};
+        try {
+            var chatFrame = window.parent.document.getElementById('chat-frame');
+            if (!chatFrame) return;
+            var whoFrame = chatFrame.contentDocument.getElementById('who-frame');
+            if (!whoFrame) return;
+            whoFrame.contentWindow.postMessage({ type: 'locationUsers', users: users }, '*');
+        } catch (e) {}
+    })();
 </script>
 
 <script>
