@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
             $table->boolean('equipped');
             $table->integer('count')->default(1);
+            $table->unsignedSmallInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }
