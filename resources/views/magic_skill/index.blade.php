@@ -197,6 +197,35 @@
             text-align: center;
         }
 
+        .skill-effect-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+        .skill-effect-name {
+            color: #3a6e1a;
+            font-weight: bold;
+            flex: 1;
+        }
+        .skill-effect-duration {
+            color: #888;
+            white-space: nowrap;
+        }
+        .skill-effect-chance {
+            background: #e8c49a;
+            color: #5a2a0a;
+            border-radius: 6px;
+            padding: 0 4px;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        .skill-cooldown-info {
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
         .skill-use-row {
             border-top: 1px solid #e8c49a;
             padding-top: 5px;
@@ -224,6 +253,14 @@
             text-decoration: none;
         }
         .btn-use:hover { background: linear-gradient(to bottom, #7ac040, #5a9a2e); }
+        .btn-use.on-cooldown {
+            background: linear-gradient(to bottom, #888, #666);
+            border-color: #555;
+            cursor: not-allowed;
+            pointer-events: none;
+            min-width: 52px;
+            text-align: center;
+        }
         .skill-type-badge {
             font-size: 9px;
             padding: 1px 4px;
@@ -356,6 +393,22 @@
                                                 </div>
                                             @endif
                                             <div class="skill-desc">{{ $skill->description ?: '—' }}</div>
+                                            @foreach($skill->skillEffects as $effect)
+                                                <div class="skill-effect-row">
+                                                    <span class="skill-effect-name">{{ $effect->name }}</span>
+                                                    @if($effect->duration > 0)
+                                                        <span class="skill-effect-duration">{{ format_cooldown($effect->duration) }}</span>
+                                                    @endif
+                                                    @if($effect->pivot->chance < 100)
+                                                        <span class="skill-effect-chance">{{ $effect->pivot->chance }}%</span>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                            @if($skill->cooldown > 0)
+                                                <div class="skill-cooldown-info">
+                                                    ⏱ Кулдаун: {{ format_cooldown($skill->cooldown) }}
+                                                </div>
+                                            @endif
                                             <div class="skill-use-row">
                                                 @if($allyTargets->isNotEmpty() && $skill->target_type === 'all')
                                                     <select id="target_{{ $skill->id }}">
@@ -365,7 +418,15 @@
                                                         @endforeach
                                                     </select>
                                                 @endif
-                                                <a class="btn-use" onclick="useSkill({{ $skill->id }}, '{{ route('magic_skill.use', $skill->id) }}')">Применить</a>
+                                                @php
+                                                    $cooldownEnd = $skill->pivot->cooldown_end_at
+                                                        ? \Carbon\Carbon::parse($skill->pivot->cooldown_end_at)->getTimestamp()
+                                                        : 0;
+                                                @endphp
+                                                <a id="btn-skill-{{ $skill->id }}"
+                                                   class="btn-use"
+                                                   data-cooldown-end="{{ $cooldownEnd }}"
+                                                   onclick="useSkill({{ $skill->id }}, '{{ route('magic_skill.use', $skill->id) }}')">Применить</a>
                                             </div>
                                         </div>
                                     </div>
@@ -444,7 +505,35 @@
         event.preventDefault();
     });
 
+    var _cdTimers = {};
+
+    function startCooldown(skillId, untilTimestamp) {
+        var btn = document.getElementById('btn-skill-' + skillId);
+        if (!btn || !untilTimestamp) return;
+
+        if (_cdTimers[skillId]) clearInterval(_cdTimers[skillId]);
+
+        function tick() {
+            var remaining = Math.ceil(untilTimestamp - Date.now() / 1000);
+            if (remaining <= 0) {
+                clearInterval(_cdTimers[skillId]);
+                delete _cdTimers[skillId];
+                btn.classList.remove('on-cooldown');
+                btn.textContent = 'Применить';
+                return;
+            }
+            btn.classList.add('on-cooldown');
+            btn.textContent = remaining + 'с';
+        }
+
+        tick();
+        _cdTimers[skillId] = setInterval(tick, 1000);
+    }
+
     function useSkill(skillId, url) {
+        var btn = document.getElementById('btn-skill-' + skillId);
+        if (btn && btn.classList.contains('on-cooldown')) return;
+
         const targetEl = document.getElementById('target_' + skillId);
         const targetPlayerId = targetEl ? targetEl.value : '';
 
@@ -459,9 +548,30 @@
         .then(r => r.json())
         .then(data => {
             window.parent.showErrorIframe(data.message || 'Применено');
+            if (data.hp && data.mp) {
+                window.parent.sendToFrame('character-frame', { hp: data.hp, mp: data.mp });
+            }
+            if (data.cooldown_until) {
+                startCooldown(skillId, data.cooldown_until);
+            }
+            if (data.blessings && data.blessings.length) {
+                data.blessings.forEach(function (blessing) {
+                    window.parent.sendToFrame('character-frame', { blessing });
+                });
+            }
         })
         .catch(() => window.parent.showErrorIframe('Ошибка при применении'));
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-cooldown-end]').forEach(function (btn) {
+            var until = parseInt(btn.getAttribute('data-cooldown-end'));
+            if (until > 0) {
+                var skillId = btn.id.replace('btn-skill-', '');
+                startCooldown(skillId, until);
+            }
+        });
+    });
 
     function saveCombos() {
         const params = { skills: [] };

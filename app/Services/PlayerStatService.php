@@ -155,7 +155,7 @@ class PlayerStatService
 
             foreach ($item->itemInfo->stats as $stat) {
                 $mappedStat = match ($stat->stat_type) {
-                    ShareItemStatType::ARMOR        => 'armor',
+                    ShareItemStatType::ARMOR         => 'armor',
                     ShareItemStatType::HP_MAX        => 'hp_max',
                     ShareItemStatType::AGILITY       => 'agility',
                     ShareItemStatType::INTUITION     => 'int',
@@ -366,15 +366,7 @@ class PlayerStatService
      */
     private function determineCombatClass(Player $player): CombatClass
     {
-        $str  = (float) $player->str;
-        $agil = (float) $player->agil;
-        $int  = (float) $player->int;
-
-        return match(true) {
-            $str >= $agil && $str >= $int => CombatClass::TANK,
-            $agil >= $int                 => CombatClass::DODGE,
-            default                       => CombatClass::CRIT,
-        };
+        return $player->getCombatClass();
     }
 
     /** @return StatModifier[] */

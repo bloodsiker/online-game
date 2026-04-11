@@ -94,10 +94,35 @@ class InterfaceController extends Controller
 
     public function hero()
     {
-        $user = Auth::user();
+        $user   = Auth::user();
         $player = $user->player;
         $playerDecorator = $this->statService->resolve($player);
 
-        return view('interface.hero', compact('player', 'playerDecorator'));
+        $activeEffects = \App\Models\Player\PlayerActiveEffect::where('player_id', $player->id)
+            ->whereNull('battle_id')
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->with('effect')
+            ->get()
+            ->map(function ($activeEffect) {
+                $name = $activeEffect->effect?->name
+                    ?? ($activeEffect->type ? ucfirst($activeEffect->type->value) : 'Эффект');
+
+                $remainingSeconds = $activeEffect->expires_at
+                    ? (int) now()->diffInSeconds($activeEffect->expires_at, false)
+                    : 0;
+
+                // Определяем тип: blessing или curse
+                $isCurse = $activeEffect->type?->isDoT() || $activeEffect->type?->isStun()
+                    || ($activeEffect->effect && in_array($activeEffect->effect->type, ['debuff']));
+
+                return [
+                    'id'       => $activeEffect->effect?->slug . '_' . $activeEffect->id,
+                    'name'     => $name,
+                    'duration' => max(0, $remainingSeconds),
+                    'is_curse' => $isCurse,
+                ];
+            });
+
+        return view('interface.hero', compact('player', 'playerDecorator', 'activeEffects'));
     }
 }

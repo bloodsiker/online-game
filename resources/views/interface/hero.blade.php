@@ -297,17 +297,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('cooldownBar').style.width = '100%';
 
-        // Додаємо тестові ефекти для демонстрації
-        // setTimeout(() => {
-        //     addBlessing('strength', 'Сила', 15);
-        //     addBlessing('speed', 'Швидкість', 20);
-        //     addBlessing('shield', 'Захист', 10);
-        // }, 500);
-        //
-        // setTimeout(() => {
-        //     addCurse('poison', 'Отрута', 18);
-        //     addCurse('weakness', 'Слабкість', 13);
-        // }, 1000);
+        @foreach($activeEffects as $effect)
+        @if($effect['duration'] > 0)
+        {{ $effect['is_curse'] ? 'addCurse' : 'addBlessing' }}(
+            '{{ $effect['id'] }}',
+            '{{ addslashes($effect['name']) }}',
+            {{ $effect['duration'] }}
+        );
+        @endif
+        @endforeach
     });
 
     // Оновити видимість секцій

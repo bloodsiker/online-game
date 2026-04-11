@@ -36,13 +36,15 @@ readonly class HitCalculator
             $damage *= 2;
         }
 
-        // Крит > Танк: критический удар пробивает 50% брони Танка
+        // Крит > Танк: пробитие брони до 50%, масштабируется по доминированию атакующего
+        // Чистый CRIT (dominance≈0.9) → -45% брони; гибрид (dominance≈0.35) → -17% брони
         $effectiveArmor = $defender->getArmor();
         if ($isCrit
             && $attackerClass === CombatClass::CRIT
             && $defenderClass === CombatClass::TANK
         ) {
-            $effectiveArmor = (int) ($effectiveArmor * 0.5);
+            $pierce         = 0.5 * $attacker->getClassDominance();
+            $effectiveArmor = (int) ($effectiveArmor * (1 - $pierce));
         }
 
         $final = $damage * (100 / (100 + $effectiveArmor));
@@ -58,9 +60,11 @@ readonly class HitCalculator
     ): bool {
         $chance = max(0, min(100, 5 + ($defender->getDodge() - $attacker->getDodge()) * 0.3));
 
-        // Танк > Уворот: масса и напор танка снижают шанс уворота на 40%
+        // Танк > Уворот: снижение шанса уворота до 40%, масштабируется по доминированию атакующего
+        // Чистый TANK (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
         if ($attackerClass === CombatClass::TANK && $defenderClass === CombatClass::DODGE) {
-            $chance *= 0.6;
+            $reduction = 0.4 * $attacker->getClassDominance();
+            $chance   *= (1 - $reduction);
         }
 
         return mt_rand(0, 100) < $chance;
@@ -74,9 +78,11 @@ readonly class HitCalculator
     ): bool {
         $chance = max(0, min(100, 5 + ($attacker->getCritical() - $defender->getCritical()) * 0.3));
 
-        // Уворот > Крит: уклонист сбивает прицел — шанс крита снижен на 40%
+        // Уворот > Крит: снижение шанса крита до 40%, масштабируется по доминированию защитника
+        // Чистый DODGE защитник (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
         if ($attackerClass === CombatClass::CRIT && $defenderClass === CombatClass::DODGE) {
-            $chance *= 0.6;
+            $reduction = 0.4 * $defender->getClassDominance();
+            $chance   *= (1 - $reduction);
         }
 
         return mt_rand(0, 100) < $chance;

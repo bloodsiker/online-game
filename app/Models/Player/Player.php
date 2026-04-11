@@ -2,6 +2,7 @@
 
 namespace App\Models\Player;
 
+use App\Enums\CombatClass;
 use App\Enums\QuestPlayerStatus;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Quest\QuestPlayer;
@@ -152,16 +153,30 @@ class Player extends Model implements FightHitInterface
         return 0; // computed on-the-fly via PlayerStatService
     }
 
-    public function getCombatClass(): \App\Enums\CombatClass
+    public function getCombatClass(): CombatClass
     {
         $str  = (float) $this->str;
         $agil = (float) $this->agil;
         $int  = (float) $this->int;
 
         return match(true) {
-            $str >= $agil && $str >= $int => \App\Enums\CombatClass::TANK,
-            $agil >= $int                 => \App\Enums\CombatClass::DODGE,
-            default                       => \App\Enums\CombatClass::CRIT,
+            $str >= $agil && $str >= $int => CombatClass::TANK,
+            $agil >= $int                 => CombatClass::DODGE,
+            default                       => CombatClass::CRIT,
+        };
+    }
+
+    public function getClassDominance(): float
+    {
+        $str   = (float) $this->str;
+        $agil  = (float) $this->agil;
+        $int   = (float) $this->int;
+        $total = max(1.0, $str + $agil + $int);
+
+        return match($this->getCombatClass()) {
+            CombatClass::TANK  => $str  / $total,
+            CombatClass::DODGE => $agil / $total,
+            CombatClass::CRIT  => $int  / $total,
         };
     }
 

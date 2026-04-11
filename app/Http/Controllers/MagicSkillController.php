@@ -33,7 +33,7 @@ class MagicSkillController extends Controller
         $allyTargets = Player::whereHas('user', fn ($q) => $q
                 ->where('location_id', $user->location_id)
                 ->where('id', '!=', $user->id)
-                ->where('last_online_at', '>=', now()->subMinutes(5))
+                ->where('last_online_at', '>=', now()->subMinutes(10))
             )
             ->with('user:id,name')
             ->get(['id', 'user_id']);
@@ -98,6 +98,13 @@ class MagicSkillController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Это заклинание нельзя использовать вне боя'], 422);
         }
 
+        // Проверяем кулдаун
+        $pivot = $caster->magicSkills()->where('magic_skill_id', $skill->id)->first()?->pivot;
+        if ($pivot?->cooldown_end_at && now()->lt($pivot->cooldown_end_at)) {
+            $remaining = (int) now()->diffInSeconds($pivot->cooldown_end_at, false);
+            return response()->json(['status' => 'error', 'message' => sprintf('Заклинание на перезарядке ещё %d сек.', $remaining)], 422);
+        }
+
         if ($caster->mp_now < $skill->mana_cost) {
             return response()->json(['status' => 'error', 'message' => sprintf('Недостаточно маны. Нужно: %d MP', $skill->mana_cost)], 422);
         }
@@ -110,6 +117,9 @@ class MagicSkillController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Цель не найдена'], 404);
         }
 
+        $casterSheet = $this->statService->resolve($caster);
+        $targetSheet = $target->id === $caster->id ? $casterSheet : $this->statService->resolve($target);
+
         // Снимаем ману с кастера
         $caster->mp_now -= $skill->mana_cost;
 
@@ -118,15 +128,23 @@ class MagicSkillController extends Controller
         // Лечение
         if ($skill->base_healing > 0) {
             $heal = $skill->base_healing;
-            $target->hp_now = min($target->hp_max, $target->hp_now + $heal);
+            $target->hp_now = min($targetSheet->getHpMax(), $target->hp_now + $heal);
             $log->log(sprintf('Заклинание восстановило <b>%d HP</b> игроку %s', $heal, $target->user->name));
         }
 
         // Эффекты из skillEffects (с проверкой шанса)
         $skill->load('skillEffects');
+        $appliedBlessings = [];
         foreach ($skill->skillEffects as $effect) {
             if (random_int(1, 100) <= $effect->pivot->chance) {
                 $this->effectService->applyEffectToPlayer($effect, $target, null, $log);
+                if ($target->id === $caster->id) {
+                    $appliedBlessings[] = [
+                        'id'       => $effect->slug . '_' . time(),
+                        'name'     => $effect->name,
+                        'duration' => (int) $effect->duration,
+                    ];
+                }
             }
         }
 
@@ -135,10 +153,20 @@ class MagicSkillController extends Controller
             $target->save();
         }
 
+        // Сохраняем кулдаун в pivot
+        $cooldownEndsAt = $skill->cooldown > 0 ? now()->addSeconds($skill->cooldown) : null;
+        $caster->magicSkills()->updateExistingPivot($skill->id, ['cooldown_end_at' => $cooldownEndsAt]);
+
+        // После применения эффектов пересчитываем кастера (баффы могли измениться)
+        $freshSheet = $this->statService->resolve($caster->fresh());
+
         return response()->json([
-            'status'  => 'success',
-            'message' => $log->getLog() ?: sprintf('Применено: «%s»', $skill->name),
-            'mp_now'  => $caster->mp_now,
+            'status'         => 'success',
+            'message'        => $log->getLog() ?: sprintf('Применено: «%s»', $skill->name),
+            'hp'             => ['current' => $caster->hp_now, 'max' => $freshSheet->getHpMax()],
+            'mp'             => ['current' => $caster->mp_now, 'max' => $freshSheet->getMpMax()],
+            'cooldown_until' => $cooldownEndsAt?->getTimestamp(),
+            'blessings'      => $appliedBlessings,
         ]);
     }
 }
