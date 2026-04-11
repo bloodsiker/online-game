@@ -17,7 +17,7 @@ class Backpack extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['item_id', 'user_id', 'count'];
+    protected $fillable = ['item_id', 'user_id', 'count', 'sort_order'];
 
     protected $attributes = [
         'equipped' => 0,

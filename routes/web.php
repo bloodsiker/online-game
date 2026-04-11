@@ -104,6 +104,7 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/location', [LocationController::class, 'index'])->name('location');
 
     Route::get('/backpack', [BackpackController::class, 'index'])->name('backpack');
+    Route::post('/backpack/order', [BackpackController::class, 'updateOrder'])->name('backpack.order');
 
     Route::get('/auction/{id}/buyItem/{itemId}', [AuctionController::class, 'buyItem'])->name('auction.buy_item');
     Route::match(['GET', 'POST'], '/auction/{id}/my-lot/edit/{slotId}', [AuctionController::class, 'myLotEdit'])->name('auction.my_lot.edit');

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Игра</title>
     <style>
         *{
@@ -155,6 +156,7 @@
     {!! $itemTooltipScript !!}
 
     <script src="{{ asset('js/item_tooltip.js') }}"></script>
+    <script src="{{ asset('js/lib/Sortable.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 </head>
 <body class="regcolor">
@@ -1115,7 +1117,7 @@
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @if($data->hasWeapon())
                                                                         @foreach($data->getWeapon() as $item)
-                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
@@ -1146,7 +1148,7 @@
 
                                                                     @if($data->hasShield())
                                                                         @foreach($data->getShield() as $item)
-                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
@@ -1195,7 +1197,7 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getArmor() as $item)
-                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                             <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
@@ -1247,7 +1249,7 @@
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @if($data->hasBag())
                                                                         @foreach($data->getBag() as $item)
-                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
@@ -1278,7 +1280,7 @@
 
                                                                     @if($data->hasBelt())
                                                                         @foreach($data->getBelt() as $item)
-                                                                            <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                                 <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
@@ -1330,7 +1332,7 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getPotion() as $item)
-                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                             <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
@@ -1380,7 +1382,7 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getResource() as $item)
-                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
                                                                             <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
@@ -1430,7 +1432,7 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getScroll() as $item)
-                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
                                                                             <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
@@ -1482,7 +1484,7 @@
                                                                 <br>
                                                                 <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                                     @foreach($data->getRecipe() as $item)
-                                                                        <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
                                                                             <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
@@ -1520,7 +1522,7 @@
                                                     @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift')
                                                         <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                             @foreach($data->getBackpack() as $item)
-                                                                <li class="item ui-sortable-handle" style="opacity: 1;">
+                                                                <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
                                                                     <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
                                                                            style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
@@ -2035,6 +2037,30 @@
 
     document.addEventListener('click', function () {
         document.getElementById('item-ctx-menu').style.display = 'none';
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.backpack_list').forEach(function (list) {
+            Sortable.create(list, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    var ids = Array.from(list.querySelectorAll('[data-backpack-id]'))
+                        .map(function (el) { return el.getAttribute('data-backpack-id'); });
+
+                    fetch('{{ route('backpack.order') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({ ids: ids })
+                    });
+                }
+            });
+        });
     });
 </script>
 

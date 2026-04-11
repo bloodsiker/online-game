@@ -39,7 +39,7 @@ class BackpackService
             $q->byGroup($group);
         });
 
-        return $query->orderBy('items.share_item_id', 'desc')->get();
+        return $query->orderBy('backpacks.sort_order')->orderBy('backpacks.id')->get();
     }
 
     public function getCountableItemsCount(User $user): int
