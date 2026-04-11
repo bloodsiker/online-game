@@ -14,22 +14,30 @@ readonly class MonsterSpawner
         private AggressionChecker $aggressionChecker,
     ) {}
 
-    public function spawnAndGetAggressive(Location $location): Collection
+    public function spawnAndGetAggressive(Location $location, ?int $dungeonSessionId = null): Collection
     {
         if (!$this->canRespawn($location)) {
             return collect();
         }
 
-        $existing = MonsterOnLocation::with(['monster'])
-            ->where(['location_id' => $location->id, 'active' => 1])
-            ->get();
+        $query = MonsterOnLocation::with(['monster'])
+            ->where('location_id', $location->id)
+            ->where('active', 1);
+
+        if ($dungeonSessionId !== null) {
+            $query->where('dungeon_session_id', $dungeonSessionId);
+        } else {
+            $query->whereNull('dungeon_session_id');
+        }
+
+        $existing   = $query->get();
         $aggressive = $this->aggressionChecker->getAggressive($existing);
 
         if ($aggressive->isNotEmpty()) {
             return $aggressive;
         }
 
-        return $this->spawnNewAndGetAggressive($location);
+        return $this->spawnNewAndGetAggressive($location, $dungeonSessionId);
     }
 
     private function canRespawn(Location $location): bool
@@ -42,25 +50,28 @@ readonly class MonsterSpawner
         return $location->time_not_attack > 0 && $secondsSinceRespawn > $location->time_not_attack;
     }
 
-    private function spawnNewAndGetAggressive(Location $location): Collection
+    private function spawnNewAndGetAggressive(Location $location, ?int $dungeonSessionId = null): Collection
     {
         if (!$this->shouldSpawn($location)) {
             return collect();
         }
 
-        $currentCount = $location->monstersOnLocation()->count();
+        $currentCount = $dungeonSessionId !== null
+            ? $location->monstersOnLocation()->where('dungeon_session_id', $dungeonSessionId)->count()
+            : $location->monstersOnLocation()->whereNull('dungeon_session_id')->count();
+
         $maxAdd = $location->count_monster - $currentCount;
         if ($maxAdd <= 0) {
             return collect();
         }
 
-        $toAdd = mt_rand(1, $maxAdd);
+        $toAdd     = mt_rand(1, $maxAdd);
         $available = $location->monsters;
 
         $spawned = collect();
         for ($i = 0; $i < $toAdd; $i++) {
-            $monster = $available->random();
-            $locMonster = $this->monsterRepo->createMonsterOnLocation($monster, $location);
+            $monster    = $available->random();
+            $locMonster = $this->monsterRepo->createMonsterOnLocation($monster, $location, $dungeonSessionId, $monster->pivot->aggression ?? null);
             $spawned->push($locMonster);
         }
 

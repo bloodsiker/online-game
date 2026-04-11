@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
+use App\Models\Dungeon\DungeonSession;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;
 use App\Models\Item\ItemOnLocation;
@@ -27,10 +28,20 @@ class ItemService
     public function pickUpFromLocation(User $user, int $itemId): string
     {
         return DB::transaction(function () use ($user, $itemId) {
-            $slot = ItemOnLocation::where('location_id', $user->currentLocation->id)
-                ->where('item_id', $itemId)
-                ->lockForUpdate()
-                ->first();
+            $location = $user->currentLocation;
+            $query    = ItemOnLocation::where('location_id', $location->id)->where('item_id', $itemId);
+
+            if ($location->dungeon_id !== null) {
+                $session          = DungeonSession::where('user_id', $user->id)->first();
+                $dungeonSessionId = $session?->monsterSessionId();
+                $dungeonSessionId !== null
+                    ? $query->where('dungeon_session_id', $dungeonSessionId)
+                    : $query->whereNull('dungeon_session_id');
+            } else {
+                $query->whereNull('dungeon_session_id');
+            }
+
+            $slot = $query->lockForUpdate()->first();
 
             if (! $slot) {
                 $name = Item::find($itemId)?->itemInfo->name ?? 'предмет';

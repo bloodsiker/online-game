@@ -24,6 +24,7 @@ readonly class FightOrchestrator
         private BossMechanicsService $bossMechanicsService,
         private BossPhaseService $bossPhaseService,
         private BossShieldService $shieldService,
+        private BattleEffectService $effectService,
     ) {}
 
     public function attack(int $id, int $monsterId, int $action): FightDTO
@@ -59,12 +60,26 @@ readonly class FightOrchestrator
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
 
+            $effectLog = new AttackResultDTO();
+
             if ($isBoss) {
-                $roundLog = new AttackResultDTO();
-                $this->shieldService->updateShieldDuration($battle, $roundLog);
+                $this->shieldService->updateShieldDuration($battle, $effectLog);
             }
 
-            $roundLog = $this->attackService->execute($player, $locationMonster, $action, $battle);
+            // Process active effects on player (DoT tick, stun check)
+            $playerIsStunned = $this->effectService->processPlayerEffects($player, $battle, $effectLog);
+
+            // Process active effects on monster (DoT tick, stun check)
+            $monsterIsStunned = $this->effectService->processMonsterEffects($locationMonster, $battle, $effectLog);
+
+            $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
+
+            if (!$playerIsStunned) {
+                $roundLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
+                $effectLog->merge($roundLog);
+            }
+
+            $roundLog = $effectLog;
 
             // BOSS: Перевірка фаз ПЕРЕД атакою боса
             if ($isBoss && $locationMonster->hp_now > 0) {
@@ -85,8 +100,8 @@ readonly class FightOrchestrator
                 );
             }
 
-            // Атака монстра/боса
-            if ($locationMonster->hp_now > 0) {
+            // Атака монстра/боса (пропускаем если монстр оглушён)
+            if ($locationMonster->hp_now > 0 && !$monsterIsStunned) {
                 // BOSS: Використовуємо спеціальну атаку для боса
                 if ($isBoss) {
                     $this->monsterAttackService->executeBossAttack(

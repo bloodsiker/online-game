@@ -68,4 +68,9 @@ class MagicSkill extends Model
     {
         return $this->type === 'attack' && !$this->is_passive;
     }
+
+    public function isBuffSkill(): bool
+    {
+        return in_array($this->type, ['buff', 'heal'], true) && !$this->is_passive;
+    }
 }

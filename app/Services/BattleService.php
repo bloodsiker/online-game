@@ -2,13 +2,16 @@
 
 namespace App\Services;
 
+use App\Enums\DungeonType;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
+use App\Models\Dungeon\DungeonSession;
 use App\Models\Location\Location;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
 use App\Repositories\BattleRepository;
 use App\Repositories\MonsterOnLocationRepository;
+use App\Services\DungeonService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,12 +20,28 @@ class BattleService
     public function __construct(
         readonly private BattleRepository $battleRepository,
         readonly private MonsterOnLocationRepository $monsterOnLocationRepository,
+        readonly private DungeonService $dungeonService,
     ) {}
 
     public function battleOnLocation(Location $location): ?Battle
     {
-        $user = Auth::user();
-        $now = Carbon::now();
+        $user    = Auth::user();
+        $now     = Carbon::now();
+        $battle  = null;
+
+        // Определяем изоляцию данжа: если локация принадлежит данжу — фильтруем по сессии
+        $dungeonSessionId = null;
+        $session          = null;
+        if ($location->dungeon_id !== null) {
+            $session = DungeonSession::where('user_id', $user->id)->first();
+            if ($session === null) {
+                return null; // игрок в данже-локации без сессии — монстров нет
+            }
+            $dungeonSessionId = $session->monsterSessionId();
+
+            // Survival: если все монстры волны мертвы — спавним следующую волну
+            $this->handleSurvivalWave($session, $location);
+        }
 
         $battle = $this->battleRepository->findActiveBattleOnLocation($location);
         if ($battle instanceof Battle) {
@@ -34,12 +53,19 @@ class BattleService
                 $this->battleRepository->createBattleRound($battle, $action, $user);
             }
         } else {
-            $monsterOnLocation = MonsterOnLocation::with(['monster'])
-                ->where(['location_id' => $location->id, 'active' => 1])
-                ->get()
-                ->filter(function ($monster) {
-                    return mt_rand(0, 100) < $monster->monster->aggression;
-                });
+            $monsterQuery = MonsterOnLocation::with(['monster'])
+                ->where('location_id', $location->id)
+                ->where('active', 1);
+
+            if ($dungeonSessionId !== null) {
+                $monsterQuery->where('dungeon_session_id', $dungeonSessionId);
+            } else {
+                $monsterQuery->whereNull('dungeon_session_id');
+            }
+
+            $monsterOnLocation = $monsterQuery->get()->filter(function ($monster) {
+                return mt_rand(0, 100) < $monster->getAggression();
+            });
 
             $checkTimeRespawnMonster = $location->time_not_attack > 0
                 && ($now->timestamp - $location->time_not_attack) > $location->last_respawn_monster_at?->timestamp;
@@ -57,18 +83,20 @@ class BattleService
                 $action = "<p><span class='text-red'><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>";
                 $this->battleRepository->createBattleRound($battle, $action, $user);
             } else {
-                if ($checkTimeRespawnMonster && $location->percent_respawn_monster > 0 && mt_rand(0, 100) < $location->percent_respawn_monster) {
-                    // Определяем текущее количество монстров на локации
-                    $currentMonsterCount = $location->monstersOnLocation()->count();
+                // Респавн: для данжа проверяем настройку monster_respawn
+                $canRespawn = $dungeonSessionId === null
+                    || ($location->dungeon?->monster_respawn ?? false);
 
-                    // Вычисляем, сколько монстров можно добавить
+                if ($canRespawn && $checkTimeRespawnMonster && $location->percent_respawn_monster > 0 && mt_rand(0, 100) < $location->percent_respawn_monster) {
+                    $currentMonsterCount = $dungeonSessionId !== null
+                        ? MonsterOnLocation::where('location_id', $location->id)->where('dungeon_session_id', $dungeonSessionId)->count()
+                        : $location->monstersOnLocation()->count();
+
                     $maxAddableMonsters = $location->count_monster - $currentMonsterCount;
-                    // Если есть место для добавления новых монстров
+
                     if ($maxAddableMonsters > 0) {
-                        // Выбираем случайное количество монстров для добавления (но не больше максимума)
                         $numberToAdd = mt_rand(1, $maxAddableMonsters);
 
-                        // Получаем случайные монстры из доступных для данной локации
                         $availableMonsterOnLocations = $location->monsters;
                         $monstersToAdd = collect();
                         for ($i = 1; $i <= $numberToAdd; $i++) {
@@ -78,7 +106,11 @@ class BattleService
                         $aggressionToUser = collect();
                         foreach ($monstersToAdd as $agrMonster) {
                             if ($agrMonster instanceof Monster) {
-                                $monsterOnLocation = $this->monsterOnLocationRepository->createMonsterOnLocation($agrMonster, $location);
+                                $monsterOnLocation = $this->monsterOnLocationRepository->createMonsterOnLocation(
+                                    $agrMonster,
+                                    $location,
+                                    $dungeonSessionId,
+                                );
                                 if (mt_rand(0, 100) < $agrMonster->aggression) {
                                     $aggressionToUser->add($monsterOnLocation);
                                 }
@@ -103,6 +135,16 @@ class BattleService
         }
 
         return $battle;
+    }
+
+    /**
+     * Survival: проверяет, нужно ли спавнить следующую волну.
+     * Вызывается при каждом входе на локацию данжа.
+     * Если активных монстров нет и волны ещё остались — спавним следующую.
+     */
+    private function handleSurvivalWave(DungeonSession $session, Location $location): void
+    {
+        $this->dungeonService->tryAdvanceSurvivalWave($session, $location);
     }
 
     public function attackMonster(Location $location, int $id): ?Battle

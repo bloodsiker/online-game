@@ -33,7 +33,7 @@ class DropService
         $locationMonster->save();
     }
 
-    public function dropItemsFromMonsters(Battle $battle, Location $location): void
+    public function dropItemsFromMonsters(Battle $battle, Location $location, ?int $dungeonSessionId = null): void
     {
         if ($battle->status->isFinish()) {
             $detailsWithMonsters = BattleDetail::with('locationMonster.monster.items')
@@ -45,10 +45,10 @@ class DropService
                 if ($monster->locationMonster->monster instanceof Monster) {
                     $monsterItems = $monster->locationMonster->monster->items;
                     foreach ($monsterItems as $item) {
-                        $randomChance = mt_rand(0, 100000) / 1000;  // деление на 1000 для преобразования в проценты с тремя десятичными
+                        $randomChance = mt_rand(0, 100000) / 1000;
                         if ($randomChance <= $item->pivot->drop_chance) {
                             $droppedItems[] = [
-                                'item' => $item,
+                                'item'  => $item,
                                 'count' => mt_rand($item->pivot->min_count, $item->pivot->max_count),
                             ];
                         }
@@ -59,10 +59,15 @@ class DropService
             foreach ($droppedItems as $dropItem) {
                 $item = new Item();
                 $item->share_item_id = $dropItem['item']->id;
-                $item->count_use = $dropItem['item']->count_use;
+                $item->count_use     = $dropItem['item']->count_use;
                 $item->save();
 
-                $location->itemsOnLocation()->attach($item->id, ['count' => $dropItem['count']]);
+                $pivotData = ['count' => $dropItem['count']];
+                if ($dungeonSessionId !== null) {
+                    $pivotData['dungeon_session_id'] = $dungeonSessionId;
+                }
+
+                $location->itemsOnLocation()->attach($item->id, $pivotData);
             }
         }
     }

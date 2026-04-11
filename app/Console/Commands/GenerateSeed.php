@@ -36,6 +36,7 @@ use App\Models\Skill;
 use App\Models\Structure;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\BuffSkillSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -100,6 +101,8 @@ class GenerateSeed extends Command
         $this->call('db:seed', ['--class' => 'QuestSeeder']);
         $this->call('db:seed', ['--class' => 'ClanQuestSeeder']);
         $this->call('db:seed', ['--class' => 'ReputationSeeder']);
+        $this->call('db:seed', ['--class' => 'DungeonSeeder']);
+        $this->call('db:seed', ['--class' => 'BuffSkillSeeder']);
     }
 
     public function createExp()

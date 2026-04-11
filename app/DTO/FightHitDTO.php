@@ -22,10 +22,12 @@ final class FightHitDTO
     protected ?MagicSkill $magicSkill = null;
 
     protected Collection $appliedEffects;
+    protected Collection $selfAppliedEffects;
 
     public function __construct()
     {
-        $this->appliedEffects = collect();
+        $this->appliedEffects     = collect();
+        $this->selfAppliedEffects = collect();
     }
 
     public function getDamage(): int
@@ -146,5 +148,17 @@ final class FightHitDTO
     public function getAppliedEffects(): Collection
     {
         return $this->appliedEffects;
+    }
+
+    public function addSelfAppliedEffect(Effect $effect): self
+    {
+        $this->selfAppliedEffects->push($effect);
+
+        return $this;
+    }
+
+    public function getSelfAppliedEffects(): Collection
+    {
+        return $this->selfAppliedEffects;
     }
 }

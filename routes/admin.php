@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActionController;
+use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\ClanController;
 use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\ReputationController;
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
+Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
 
 Route::get('/referral/stages', [ReferralController::class, 'stages'])->name('referral.stages');
 Route::post('/referral/stages', [ReferralController::class, 'storeStage'])->name('referral.stage.store');
@@ -51,6 +55,7 @@ Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'cre
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
 Route::get('/monster/{monster}/drop/delete/{item}', [MonsterController::class, 'infoDropDeleteItem'])->name('monster.info.drop.delete_item');
 Route::post('/monster/{monster}/location', [MonsterController::class, 'location'])->name('monster.info.location');
+Route::post('/monster/{monster}/location/{location}/aggression', [MonsterController::class, 'updateLocation'])->name('monster.info.location.aggression');
 Route::get('/monster/{monster}/delete/{location}', [MonsterController::class, 'deleteLocation'])->name('monster.info.delete_location');
 Route::post('/monster/{monster}/phase', [MonsterController::class, 'addPhase'])->name('monster.boss.phase.add');
 Route::post('/monster/{monster}/phase/{phase}', [MonsterController::class, 'updatePhase'])->name('monster.boss.phase.update');

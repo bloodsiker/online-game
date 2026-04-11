@@ -3,8 +3,10 @@
 namespace App\Services\Combat;
 
 use App\DTO\AttackResultDTO;
+use App\Enums\ActiveEffectType;
 use App\Models\Battle\Battle;
 use App\Models\Monster\MonsterOnLocation;
+use App\Models\Player\Player;
 use App\Services\Combat\Boss\BossPhaseService;
 
 readonly class MonsterAttackService
@@ -12,6 +14,7 @@ readonly class MonsterAttackService
     public function __construct(
         private HitCalculator $hitCalc,
         private BossPhaseService $bossPhaseService,
+        private BattleEffectService $effectService,
     ) {}
 
     public function execute(FightHitInterface $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -36,7 +39,7 @@ readonly class MonsterAttackService
      * Атака боса з урахуванням фаз, модифікаторів і спеціальних скілів
      */
     public function executeBossAttack(
-        FightHitInterface $player,
+        Player $player,
         MonsterOnLocation $locationMonster,
         Battle $battle,
         AttackResultDTO $result
@@ -75,6 +78,7 @@ readonly class MonsterAttackService
             $this->executeBossSpecialSkill(
                 $player,
                 $locationMonster,
+                $battle,
                 $availableSkills,
                 $minDmg,
                 $maxDmg,
@@ -137,8 +141,9 @@ readonly class MonsterAttackService
     }
 
     private function executeBossSpecialSkill(
-        FightHitInterface $player,
+        Player $player,
         MonsterOnLocation $locationMonster,
+        Battle $battle,
         array $availableSkills,
         int $minDmg,
         int $maxDmg,
@@ -204,7 +209,7 @@ readonly class MonsterAttackService
         $result->log($msg);
 
         if (isset($skill->parameters['effects'])) {
-            $this->applySkillEffects($player, $skill->parameters['effects'], $monster->name, $result);
+            $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);
         }
     }
 
@@ -228,48 +233,30 @@ readonly class MonsterAttackService
     }
 
     private function applySkillEffects(
-        FightHitInterface $player,
+        Player $player,
+        Battle $battle,
         array $effects,
         string $monsterName,
         AttackResultDTO $result
     ): void {
         foreach ($effects as $effect) {
-            $effectType = $effect['type'] ?? '';
+            $type   = ActiveEffectType::tryFrom($effect['type'] ?? '');
             $chance = $effect['chance'] ?? 100;
+            $stacks = (int) ($effect['duration'] ?? $effect['stacks'] ?? 2);
+            $value  = (float) ($effect['value'] ?? 0);
 
-            if (random_int(1, 100) > $chance) {
+            if ($type === null || random_int(1, 100) > $chance) {
                 continue;
             }
 
-            switch ($effectType) {
-                case 'stun':
-                    $result->log(sprintf(
-                        '<p class="color-debuff">💫 Вы оглушены атакой <b>%s</b>!</p>',
-                        $monsterName
-                    ));
-                    break;
-
-                case 'poison':
-                    $result->log(sprintf(
-                        '<p class="color-debuff">☠️ Вы отравлены атакой <b>%s</b>!</p>',
-                        $monsterName
-                    ));
-                    break;
-
-                case 'bleed':
-                    $result->log(sprintf(
-                        '<p class="color-debuff">🩸 Вы истекаете кровью после атаки <b>%s</b>!</p>',
-                        $monsterName
-                    ));
-                    break;
-
-                case 'burn':
-                    $result->log(sprintf(
-                        '<p class="color-debuff">🔥 Вы горите после атаки <b>%s</b>!</p>',
-                        $monsterName
-                    ));
-                    break;
-            }
+            $this->effectService->applyCustomEffectToPlayer(
+                $type,
+                $value,
+                $stacks,
+                $player,
+                $battle,
+                $result
+            );
         }
     }
 }

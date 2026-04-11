@@ -3,8 +3,12 @@
 namespace App\Services;
 
 use App\DTO\MoveResultDTO;
+use App\Models\Dungeon\DungeonGate;
+use App\Models\Dungeon\DungeonSession;
 use App\Models\Location\Location;
+use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\PlayerLocationAccess;
+use App\Models\Share\ShareItem;
 use App\Models\User;
 
 final readonly class PlayerMovementService
@@ -27,8 +31,9 @@ final readonly class PlayerMovementService
             return MoveResultDTO::blocked('У вас перегружен рюкзак. Нельзя перемещаться.');
         }
 
-        // Check if destination location is locked
         $destLocation = Location::find($location->$direction);
+
+        // Check if destination location is locked (quest lock)
         if ($destLocation && $destLocation->is_locked) {
             $hasAccess = PlayerLocationAccess::where('player_id', $user->player->id)
                 ->where('location_id', $destLocation->id)
@@ -39,21 +44,80 @@ final readonly class PlayerMovementService
             }
         }
 
-        $capacity = $user->getBagCount();
+        // Check dungeon gates
+        if ($destLocation) {
+            $gate = DungeonGate::where('from_location_id', $location->id)
+                ->where('to_location_id', $destLocation->id)
+                ->first();
 
+            if ($gate !== null) {
+                $blocked = $this->checkGate($gate, $user);
+                if ($blocked !== null) {
+                    return MoveResultDTO::blocked($blocked);
+                }
+            }
+        }
+
+        $capacity      = $user->getBagCount();
         $speedModifier = $this->getSpeedModifier($backpackUsed, $capacity);
 
         $this->applyMove($user, $location->$direction);
 
-        return MoveResultDTO::success(
-            speedModifier: $speedModifier
-        );
+        return MoveResultDTO::success(speedModifier: $speedModifier);
+    }
+
+    private function checkGate(DungeonGate $gate, User $user): ?string
+    {
+        return match ($gate->unlock_type) {
+            'area_cleared' => $this->checkAreaCleared($gate, $user),
+            'boss_item'    => $this->checkBossItem($gate, $user),
+            default        => null,
+        };
+    }
+
+    private function checkAreaCleared(DungeonGate $gate, User $user): ?string
+    {
+        $session = DungeonSession::where('user_id', $user->id)->first();
+
+        $query = MonsterOnLocation::where('location_id', $gate->from_location_id)
+            ->where('active', 1);
+
+        if ($session !== null) {
+            $query->where('dungeon_session_id', $session->monsterSessionId());
+        } else {
+            $query->whereNull('dungeon_session_id');
+        }
+
+        if ($query->count() > 0) {
+            return 'Проход заблокирован. Уничтожьте всех монстров в этой зоне.';
+        }
+
+        return null;
+    }
+
+    private function checkBossItem(DungeonGate $gate, User $user): ?string
+    {
+        if ($gate->boss_share_item_id === null) {
+            return null;
+        }
+
+        $shareItem = ShareItem::find($gate->boss_share_item_id);
+        if ($shareItem === null) {
+            return null;
+        }
+
+        $hasItem = $this->backpackService->getItem($user, $shareItem) !== null;
+        if (! $hasItem) {
+            return 'Проход заблокирован. Нужен ключ от босса.';
+        }
+
+        return null;
     }
 
     private function applyMove(User $user, int $newLocationId): void
     {
         $user->prev_location_id = $user->location_id;
-        $user->location_id = $newLocationId;
+        $user->location_id      = $newLocationId;
         $user->save();
     }
 
@@ -65,7 +129,7 @@ final readonly class PlayerMovementService
             $ratio <= 1.0 => 1.0,
             $ratio <= 1.2 => 0.8,
             $ratio <= 1.5 => 0.5,
-            default => 0.2,
+            default       => 0.2,
         };
     }
 }

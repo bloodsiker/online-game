@@ -34,7 +34,9 @@ use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -81,6 +83,8 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/character', [CharacterController::class, 'index'])->name('character');
 
     Route::post('/magic-skill/update', [MagicSkillController::class, 'updateSkill'])->name('magic_skill.update');
+    Route::post('/magic-skill/order', [MagicSkillController::class, 'updateOrder'])->name('magic_skill.order');
+    Route::post('/magic-skill/{skill}/use', [MagicSkillController::class, 'useSkill'])->name('magic_skill.use');
     Route::get('/magic-skill', [MagicSkillController::class, 'index'])->name('magic_skill');
 
     Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
@@ -238,6 +242,19 @@ Route::post('/enemies/add', [FriendController::class, 'addEnemy'])->name('enemie
 Route::delete('/enemies/{relationship}', [FriendController::class, 'removeEnemy'])->name('enemies.remove');
 Route::post('/ignores/add', [FriendController::class, 'addIgnore'])->name('ignores.add');
 Route::delete('/ignores/{relationship}', [FriendController::class, 'removeIgnore'])->name('ignores.remove');
+
+// Dungeon routes
+Route::get('/dungeons', [DungeonController::class, 'index'])->name('dungeon.index');
+Route::get('/dungeon/{id}', [DungeonController::class, 'show'])->name('dungeon.show');
+Route::post('/dungeon/{id}/enter', [DungeonController::class, 'enter'])->name('dungeon.enter');
+Route::post('/dungeon/exit', [DungeonController::class, 'exit'])->name('dungeon.exit');
+
+// Party routes
+Route::get('/party', [PartyController::class, 'show'])->name('party.show');
+Route::post('/party/create', [PartyController::class, 'create'])->name('party.create');
+Route::post('/party/invite', [PartyController::class, 'invite'])->name('party.invite');
+Route::post('/party/{partyId}/leave', [PartyController::class, 'leave'])->name('party.leave');
+Route::delete('/party/{partyId}', [PartyController::class, 'disband'])->name('party.disband');
 
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');

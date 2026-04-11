@@ -6,6 +6,7 @@
     <title>Книга заклинаний</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    <script src="{{ asset('js/lib/Sortable.min.js') }}"></script>
     <style>
         html { height: 100%; }
         body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 11px; }
@@ -195,6 +196,57 @@
             padding: 6px 10px 10px;
             text-align: center;
         }
+
+        .skill-use-row {
+            border-top: 1px solid #e8c49a;
+            padding-top: 5px;
+            margin-top: 4px;
+        }
+        .skill-use-row select {
+            width: 100%;
+            font-size: 10px;
+            border: 1px solid #db9f73;
+            background: #fdf5e8;
+            padding: 1px 3px;
+            margin-bottom: 3px;
+            border-radius: 2px;
+        }
+        .btn-use {
+            display: inline-block;
+            background: linear-gradient(to bottom, #6aaa3a, #4e8a25);
+            color: #fff !important;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            border: 1px solid #3a6a18;
+            text-decoration: none;
+        }
+        .btn-use:hover { background: linear-gradient(to bottom, #7ac040, #5a9a2e); }
+        .skill-type-badge {
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 6px;
+            margin-left: 3px;
+            font-weight: bold;
+        }
+        .badge-buff { background: #2a6e1a; color: #d4f5c8; }
+        .badge-heal { background: #1a5e6e; color: #c8f0f5; }
+        .badge-attack { background: #6e1a1a; color: #f5c8c8; }
+
+        .drag-handle {
+            cursor: grab;
+            color: #b08060;
+            font-size: 13px;
+            padding: 0 3px;
+            flex-shrink: 0;
+            line-height: 1;
+            user-select: none;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .skill-card.sortable-ghost { opacity: 0.4; }
+        .skill-card.sortable-chosen { box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
     </style>
 </head>
 <body>
@@ -216,23 +268,30 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0;">
 
-                        {{-- Active skills --}}
+                        @php
+                            $combatSkills = $activeSkills->filter(fn($s) => !$s->isBuffSkill());
+                            $buffSkills   = $activeSkills->filter(fn($s) => $s->isBuffSkill());
+                        @endphp
+
+                        {{-- Combat skills --}}
                         <div class="section-header">
-                            <span>Активные заклинания</span>
-                            <span class="section-count">{{ $activeSkills->count() }}</span>
+                            <span>Боевые заклинания</span>
+                            <span class="section-count">{{ $combatSkills->count() }}</span>
                         </div>
 
-                        @if($activeSkills->isEmpty())
-                            <div class="empty-state">Нет активных заклинаний</div>
+                        @if($combatSkills->isEmpty())
+                            <div class="empty-state">Нет боевых заклинаний</div>
                         @else
-                            <div class="skill-grid">
-                                @foreach($activeSkills as $skill)
-                                    <div class="skill-card">
+                            <div class="skill-grid" id="combat-grid">
+                                @foreach($combatSkills as $skill)
+                                    <div class="skill-card" data-id="{{ $skill->id }}">
                                         <div class="skill-card-header">
+                                            <span class="drag-handle" title="Перетащить">⠿</span>
                                             <span class="skill-card-name" title="{{ $skill->name }}">{{ $skill->name }}</span>
                                             @if($skill->mana_cost > 0)
                                                 <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
                                             @endif
+                                            <span class="skill-type-badge badge-attack">Атака</span>
                                         </div>
                                         <div class="skill-card-body">
                                             @if($skill->min_damage > 0 || $skill->max_damage > 0)
@@ -264,6 +323,53 @@
                                 <span class="butt1 pointer">
                                     <span><input value="Сохранить" type="button" onclick="saveCombos();"></span>
                                 </span>
+                            </div>
+                        @endif
+
+                        {{-- Buff / Heal skills --}}
+                        <div class="section-header" style="margin-top: 4px;">
+                            <span>Баффы и исцеление</span>
+                            <span class="section-count">{{ $buffSkills->count() }}</span>
+                        </div>
+
+                        @if($buffSkills->isEmpty())
+                            <div class="empty-state">Нет баффов</div>
+                        @else
+                            <div class="skill-grid" id="buff-grid">
+                                @foreach($buffSkills as $skill)
+                                    <div class="skill-card" data-id="{{ $skill->id }}">
+                                        <div class="skill-card-header">
+                                            <span class="drag-handle" title="Перетащить">⠿</span>
+                                            <span class="skill-card-name" title="{{ $skill->name }}">{{ $skill->name }}</span>
+                                            @if($skill->mana_cost > 0)
+                                                <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
+                                            @endif
+                                            <span class="skill-type-badge {{ $skill->type === 'heal' ? 'badge-heal' : 'badge-buff' }}">
+                                                {{ $skill->type === 'heal' ? 'Лечение' : 'Бафф' }}
+                                            </span>
+                                        </div>
+                                        <div class="skill-card-body">
+                                            @if($skill->base_healing > 0)
+                                                <div class="skill-dmg">
+                                                    <span class="skill-dmg-label">Лечение:</span>
+                                                    <span class="skill-dmg-value" style="color:#1a6e1a">+{{ $skill->base_healing }} HP</span>
+                                                </div>
+                                            @endif
+                                            <div class="skill-desc">{{ $skill->description ?: '—' }}</div>
+                                            <div class="skill-use-row">
+                                                @if($allyTargets->isNotEmpty() && $skill->target_type === 'all')
+                                                    <select id="target_{{ $skill->id }}">
+                                                        <option value="">— Себе —</option>
+                                                        @foreach($allyTargets as $ally)
+                                                            <option value="{{ $ally->id }}">{{ $ally->user->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @endif
+                                                <a class="btn-use" onclick="useSkill({{ $skill->id }}, '{{ route('magic_skill.use', $skill->id) }}')">Применить</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @endif
 
@@ -338,6 +444,25 @@
         event.preventDefault();
     });
 
+    function useSkill(skillId, url) {
+        const targetEl = document.getElementById('target_' + skillId);
+        const targetPlayerId = targetEl ? targetEl.value : '';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ target_player_id: targetPlayerId || null })
+        })
+        .then(r => r.json())
+        .then(data => {
+            window.parent.showErrorIframe(data.message || 'Применено');
+        })
+        .catch(() => window.parent.showErrorIframe('Ошибка при применении'));
+    }
+
     function saveCombos() {
         const params = { skills: [] };
         document.querySelectorAll('.combo-in-fight').forEach(el => {
@@ -360,6 +485,35 @@
     @if(session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
+
+    function saveSkillOrder(gridId) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        const ids = Array.from(grid.querySelectorAll('.skill-card')).map(el => el.dataset.id);
+
+        fetch('{{ route('magic_skill.order') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ ids })
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        ['combat-grid', 'buff-grid'].forEach(function (gridId) {
+            const el = document.getElementById(gridId);
+            if (!el) return;
+            Sortable.create(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: function () { saveSkillOrder(gridId); }
+            });
+        });
+    });
 </script>
 
 </body>

@@ -8,6 +8,7 @@ use App\Services\PlayerStatService;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Request;
 
 class InterfaceController extends Controller
@@ -31,7 +32,6 @@ class InterfaceController extends Controller
 
     public function interface(Request $request)
     {
-//        dd($request);
         return view('interface.interface');
     }
 
@@ -39,11 +39,15 @@ class InterfaceController extends Controller
     {
         if ($request->get('s')) {
             $map = Map::where('slug', $request->get('s'))->first();
-            $view = sprintf('maps.%s.frame', $map->folder);
+            $view = $map ? sprintf('maps.%s.frame', $map->folder) : 'maps.city.frame';
         } else {
             $user = Auth::user();
             $location = $user->currentLocation;
             $view = sprintf('maps.%s.frame', $location->map->folder);
+        }
+
+        if (!View::exists($view)) {
+            $view = 'maps.city.frame';
         }
 
         return view($view);

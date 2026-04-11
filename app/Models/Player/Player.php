@@ -63,7 +63,8 @@ class Player extends Model implements FightHitInterface
     public function magicSkills()
     {
         return $this->belongsToMany(MagicSkill::class, 'player_magic_skills')->with('skillEffects')
-            ->withPivot(['cooldown_end_at', 'is_equipped']);
+            ->withPivot(['cooldown_end_at', 'is_equipped', 'sort_order'])
+            ->orderByPivot('sort_order');
     }
 
     public function activeMagicSkills()

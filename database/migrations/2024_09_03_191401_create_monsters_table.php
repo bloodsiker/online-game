@@ -32,11 +32,12 @@ return new class extends Migration
         Schema::create('monster_on_locations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('monster_id');
-            $table->unsignedBigInteger('location_id');
+            $table->unsignedBigInteger('location_id')->nullable();
             $table->integer('hp_now');
             $table->timestamp('last_regen_at')->nullable();
             $table->integer('hp_max');
             $table->tinyInteger('active')->default(1);
+            $table->unsignedTinyInteger('aggression')->nullable();
             $table->boolean('is_drop_money')->default(0);
             $table->integer('current_phase')->default(1);
             $table->timestamps();
@@ -49,6 +50,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('location_id');
             $table->unsignedBigInteger('monster_id');
+            $table->unsignedTinyInteger('aggression')->nullable();
 
             $table->foreign('monster_id')->references('id')->on('monsters');
             $table->foreign('location_id')->references('id')->on('locations');

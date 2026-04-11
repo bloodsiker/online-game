@@ -9,6 +9,7 @@ use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
 use App\Models\Player\Player;
+use App\Models\Player\PlayerActiveEffect;
 
 readonly class PlayerDeathService
 {
@@ -21,6 +22,8 @@ readonly class PlayerDeathService
         AttackResultDTO $result
     ): FightDTO {
         event(new PlayerDied($player));
+
+        PlayerActiveEffect::where('player_id', $player->id)->delete();
 
         $result->log('<p>Вы <font color="red"><b>проиграли</b></font>! Опыт -10%.</p>');
 

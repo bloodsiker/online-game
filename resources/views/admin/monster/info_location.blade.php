@@ -29,17 +29,28 @@
                                     <tr>
                                         <th width="50">ID</th>
                                         <th>Название</th>
+                                        <th width="160">Агрессия (override)</th>
                                         <th width="70"></th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     @foreach($monster->locations as $location)
-                                        <tr style="vertical-align: baseline">
+                                        <tr style="vertical-align: middle">
                                             <td class="text-center">{{ $location->id }}</td>
                                             <td>
                                                 <a href="">[{{ $location->map->name }}]</a>
                                                 &nbsp;
                                                 <a href="" target="_blank">{{ $location->name }} [{{ $location->id }}]</a>
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('admin.monster.info.location.aggression', ['monster' => $monster->id, 'location' => $location->id]) }}" method="post" class="d-flex gap-1">
+                                                    @csrf
+                                                    <input type="number" name="aggression" min="0" max="100"
+                                                           value="{{ $location->pivot->aggression ?? '' }}"
+                                                           placeholder="из монстра"
+                                                           class="form-control form-control-sm" style="width:100px">
+                                                    <button class="btn btn-xs btn-secondary">✓</button>
+                                                </form>
                                             </td>
                                             <td><a href="{{ route('admin.monster.info.delete_location', ['monster' => $monster->id, 'location' => $location->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a></td>
                                         </tr>
@@ -65,12 +76,18 @@
                     <div class="row">
                         <div class="col-md-12 mb-2">
                             <div class="form-group">
-                                <label class="control-label text-lg-end" for="location_id"> Локация</label>
+                                <label class="control-label text-lg-end" for="location_id">Локация</label>
                                 <select id="location_id" name="location_id" data-plugin-selectTwo class="form-control populate placeholder" data-plugin-options='{ "placeholder": "Выберите локацию", "allowClear": true }'>
                                     @foreach($locations as $location)
                                         <option value="{{ $location->id }}">{{ $location->name }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-2">
+                            <div class="form-group">
+                                <label class="control-label text-lg-end" for="aggression">Агрессия (0–100, пусто = из монстра)</label>
+                                <input type="number" id="aggression" name="aggression" min="0" max="100" class="form-control" placeholder="По умолчанию из монстра">
                             </div>
                         </div>
                     </div>

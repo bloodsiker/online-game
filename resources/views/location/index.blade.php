@@ -136,6 +136,56 @@
                 {{ $location->description }}
             </div>
 
+            @if(!empty($dungeonSession))
+                <div style="background:#ffe8b0; border:1px solid #c90; padding:4px 6px; margin-bottom:6px; font-size:11px;">
+                    <b>Данж:</b> {{ $dungeonSession->dungeon->name }}
+                    @if($dungeonSession->dungeon->isSurvival() && $dungeonSession->dungeon->wave_count)
+                        @php
+                            $wavesDone = $dungeonSession->current_wave - 1;
+                            $wavesTotal = $dungeonSession->dungeon->wave_count;
+                            $allCleared = $wavesDone >= $wavesTotal;
+                        @endphp
+                        &nbsp;|&nbsp;
+                        @if($allCleared)
+                            <b style="color:#2a8a2a;">Все волны пройдены! ✓</b>
+                        @else
+                            Волна <b>{{ $dungeonSession->current_wave }}</b> / {{ $wavesTotal }}
+                        @endif
+                    @endif
+                    @if($dungeonSession->expires_at)
+                        — осталось <b id="dungeon-timer-loc"></b>
+                        <script>
+                            (function() {
+                                const exp = {{ $dungeonSession->expires_at->timestamp }};
+                                function tick() {
+                                    const left = exp - Math.floor(Date.now()/1000);
+                                    const el = document.getElementById('dungeon-timer-loc');
+                                    if (!el) return;
+                                    if (left <= 0) { el.textContent = '00:00'; window.location.reload(); return; }
+                                    const m = String(Math.floor(left/60)).padStart(2,'0');
+                                    const s = String(left%60).padStart(2,'0');
+                                    el.textContent = m+':'+s;
+                                }
+                                tick(); setInterval(tick, 1000);
+                            })();
+                        </script>
+                    @endif
+                    @php
+                        $canExit = $dungeonSession->dungeon->exit_location_id === $location->id
+                            || ($dungeonSession->dungeon->isSurvival()
+                                && $dungeonSession->dungeon->wave_count
+                                && $dungeonSession->current_wave > $dungeonSession->dungeon->wave_count);
+                    @endphp
+                    @if($canExit)
+                        &nbsp;
+                        <form method="POST" action="{{ route('dungeon.exit') }}" style="display:inline;">
+                            @csrf
+                            <button type="submit" style="background:#a33; color:#fff; border:none; padding:2px 8px; cursor:pointer; font-size:11px;">Выйти из данжа</button>
+                        </form>
+                    @endif
+                </div>
+            @endif
+
             @if($battle)
                 <div class="battle-description">
                     <p><span class="color-red"><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>
@@ -213,7 +263,7 @@
                                         <td></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="3" style="padding:7px 0px 4px 0px"><a href="{{ route('take_items') }}" id="take-item" target="game">Искать здесь @if($location->itemsOnLocation()->count())({{ $location->itemsOnLocation()->count() }}) @endif</a> »</td>
+                                        <td colspan="3" style="padding:7px 0px 4px 0px"><a href="{{ route('take_items') }}" id="take-item" target="game">Искать здесь @if($itemsOnLocationCount)({{ $itemsOnLocationCount }}) @endif</a> »</td>
                                     </tr>
                                     </tbody>
                                 </table>

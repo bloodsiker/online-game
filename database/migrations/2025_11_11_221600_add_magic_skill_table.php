@@ -67,6 +67,7 @@ return new class extends Migration
             $table->foreignId('magic_skill_id')->constrained('magic_skills')->onDelete('cascade');
             $table->timestamp('cooldown_end_at')->nullable(); // Когда закончится кулдаун
             $table->boolean('is_equipped')->default(false);
+            $table->unsignedSmallInteger('sort_order')->default(0);
 
             $table->unique(['player_id', 'magic_skill_id']);
         });

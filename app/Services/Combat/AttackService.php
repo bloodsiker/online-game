@@ -11,6 +11,7 @@ use App\Models\Battle\BattleDetail;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\Player;
+use App\Models\Monster\MonsterActiveEffect;
 use App\Services\Combat\Boss\BossShieldService;
 use app\Services\PlayerSkillService;
 use App\Services\QuestProgressService;
@@ -24,9 +25,10 @@ readonly class AttackService
         private PlayerSkillService     $playerSkillService,
         private DropService            $dropService,
         private BossShieldService      $shieldService,
+        private BattleEffectService    $effectService,
     ) {}
 
-    public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle): AttackResultDTO
+    public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
     {
         $result = new AttackResultDTO();
 
@@ -49,6 +51,22 @@ readonly class AttackService
                 continue;
             }
 
+            // Бафф-хит (damage=0): применяем эффекты на себя и выходим
+            if ($hit->getDamage() === 0) {
+                if ($hit->getMessage()) {
+                    $result->log(sprintf('<p class="color-buff">%s</p>', $hit->getMessage()));
+                }
+                foreach ($hit->getSelfAppliedEffects() as $effect) {
+                    $this->effectService->applyEffectToPlayer($effect, $player, $battle, $result);
+                    $result->log(sprintf(
+                        '<p>Заклинание %s наложило на вас: <b class="color-purple">%s</b></p>',
+                        $hit->getMagicSkill()->name,
+                        $effect->name
+                    ));
+                }
+                continue;
+            }
+
             $damage = $hit->getDamage();
 
             if ($isBoss && $battle) {
@@ -66,7 +84,7 @@ readonly class AttackService
                     // Урон було сконвертовано в лікування - пропускаємо далі
 
                     // Нараховуємо досвід за спробу атаки (опціонально)
-                    $exp = $this->calculateExperience($player, $locMonster->monster, 1, $locMonster->hp_max);
+                    $exp = $this->calculateExperience($player, $locMonster->monster, 1, $locMonster->hp_max, $xpMultiplier);
                     $player->exp += $exp;
 
                     continue;
@@ -85,7 +103,7 @@ readonly class AttackService
                 $this->reflectDamage($battle, $damage, $player, $result);
             }
 
-            $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max);
+            $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
 
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
             $player->exp += $exp;
@@ -109,13 +127,7 @@ readonly class AttackService
 
             if (!$hit->getAppliedEffects()->isEmpty()) {
                 foreach ($hit->getAppliedEffects() as $effect) {
-//                    if ($effect->isHeal()) {
-//                        $locMonster->hp_now = min($locMonster->monster->hp, $locMonster->hp_now + $effect->power);
-//                    }
-//
-//                    if ($effect) {
-//
-//                    }
+                    $this->effectService->applyEffectToMonster($effect, $locMonster, $battle, $result);
 
                     $result->log(sprintf(
                         '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',
@@ -125,6 +137,7 @@ readonly class AttackService
                     ));
                 }
             }
+
         }
 
         return $result;
@@ -308,6 +321,8 @@ readonly class AttackService
         $attackedMonster->status = 0;
         $attackedMonster->save();
 
+        MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
+
         $this->dropService->dropMoney($player->user, $locationMonster, $result);
         $this->questService->progressKillAndCollect($player, $locationMonster, $result);
     }
@@ -324,14 +339,13 @@ readonly class AttackService
         }
     }
 
-    private function calculateExperience(Player $player, Monster $monster, int $damage, int $monsterMaxHp)
+    private function calculateExperience(Player $player, Monster $monster, int $damage, int $monsterMaxHp, float $xpMultiplier = 1.0): int
     {
         $takeExp = ($damage * $monster->exp) / $monsterMaxHp;
 
         $levelDifference = $player->lvl - $monster->lvl;
-        $experienceMultiplier = max(0.01, 1 - 0.05 * $levelDifference);
+        $levelMultiplier = min(2.0, max(0.01, 1 - 0.05 * $levelDifference));
 
-        // Experience is calculated as base experience multiplied by damage and adjusted by level.
-        return round(max(1, $takeExp * $experienceMultiplier));
+        return (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier));
     }
 }

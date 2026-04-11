@@ -18,7 +18,8 @@ class Monster extends Model implements FightHitInterface
     use HasFactory;
 
     protected $fillable = [
-        'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression', 'exp', 'min_money', 'max_money', 'is_boss',
+        'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
+        'exp', 'min_money', 'max_money', 'is_boss',
     ];
 
     protected $attributes = [
@@ -27,7 +28,7 @@ class Monster extends Model implements FightHitInterface
 
     public function locations(): BelongsToMany
     {
-        return $this->belongsToMany(Location::class, 'location_has_monsters', 'monster_id', 'location_id');
+        return $this->belongsToMany(Location::class, 'location_has_monsters', 'monster_id', 'location_id')->withPivot('aggression');
     }
 
     public function items(): BelongsToMany

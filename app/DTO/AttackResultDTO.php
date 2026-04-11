@@ -16,4 +16,13 @@ final class AttackResultDTO
     {
         return implode('', $this->logs);
     }
+
+    public function merge(AttackResultDTO $other): self
+    {
+        foreach ($other->logs as $entry) {
+            $this->logs[] = $entry;
+        }
+
+        return $this;
+    }
 }

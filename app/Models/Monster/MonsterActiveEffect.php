@@ -2,6 +2,8 @@
 
 namespace App\Models\Monster;
 
+use App\Enums\ActiveEffectType;
+use App\Models\Battle\Battle;
 use App\Models\MagicSkill\Effect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,20 +13,27 @@ class MonsterActiveEffect extends Model
 {
     use HasFactory;
 
-    protected $table = 'monaster_active_effects';
+    protected $table = 'monster_active_effects';
 
     protected $fillable = [
-        'monster_id', 'effect_id', 'applied_at', 'expires_at', 'stacks', 'current_value',
+        'location_monster_id', 'effect_id', 'battle_id', 'type',
+        'applied_at', 'expires_at', 'stacks', 'current_value',
     ];
 
     protected $casts = [
         'applied_at' => 'datetime',
         'expires_at' => 'datetime',
+        'type'       => ActiveEffectType::class,
     ];
 
-    public function monster(): BelongsTo
+    public function locationMonster(): BelongsTo
     {
-        return $this->belongsTo(Monster::class);
+        return $this->belongsTo(MonsterOnLocation::class, 'location_monster_id');
+    }
+
+    public function battle(): BelongsTo
+    {
+        return $this->belongsTo(Battle::class);
     }
 
     public function effect(): BelongsTo
@@ -32,28 +41,13 @@ class MonsterActiveEffect extends Model
         return $this->belongsTo(Effect::class);
     }
 
-    // Удобные методы
-    public function isExpired(): bool
+    public function isStun(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return $this->type?->isStun() ?? false;
     }
 
-    public function isPermanent(): bool
+    public function isDoT(): bool
     {
-        return is_null($this->expires_at);
-    }
-
-    public function canStack(): bool
-    {
-        return $this->effect->is_stackable && $this->stacks < $this->effect->max_stacks;
-    }
-
-    public function timeRemaining(): ?int
-    {
-        if (!$this->expires_at || $this->expires_at->isPast()) {
-            return 0;
-        }
-
-        return now()->diffInSeconds($this->expires_at);
+        return $this->type?->isDoT() ?? false;
     }
 }

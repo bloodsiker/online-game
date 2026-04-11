@@ -9,6 +9,7 @@ use App\Models\Battle\BattleRound;
 use App\Services\Battle\BattleOrchestrator;
 use App\Services\BattleService;
 use App\Services\Combat\FightOrchestrator;
+use App\Services\DungeonService;
 use App\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,6 +20,7 @@ class FightController extends Controller
         readonly protected BattleService $battleService,
         readonly protected FightOrchestrator $fightOrchestrator,
         readonly protected PlayerStatService $statService,
+        readonly protected DungeonService $dungeonService,
     ) {
     }
 
@@ -45,6 +47,12 @@ class FightController extends Controller
 
     public function attack(int $id, int $monsterId, int $action)
     {
+        $user = Auth::user();
+        if ($this->dungeonService->expireSessionIfNeeded($user)) {
+            session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
+            return redirect()->route('location');
+        }
+
         $fightDTO = $this->fightOrchestrator->attack($id, $monsterId, $action);
         $battle = $fightDTO->getBattle();
         $round = $fightDTO->getBattleRound();

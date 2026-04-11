@@ -76,9 +76,24 @@ class MonsterController extends Controller
 
     public function location(Request $request, Monster $monster): RedirectResponse
     {
-        $monster->locations()->attach($request->input('location_id'));
+        $aggression = $request->input('aggression');
+
+        $monster->locations()->attach($request->input('location_id'), [
+            'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
+        ]);
 
         return redirect()->back()->with('success', 'Локация добавлена.');
+    }
+
+    public function updateLocation(Request $request, Monster $monster, Location $location): RedirectResponse
+    {
+        $aggression = $request->input('aggression');
+
+        $monster->locations()->updateExistingPivot($location->id, [
+            'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Агрессия обновлена.');
     }
 
     public function deleteLocation(Monster $monster, Location $location): RedirectResponse

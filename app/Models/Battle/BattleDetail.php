@@ -21,6 +21,10 @@ class BattleDetail extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'battle_id', 'user_id', 'location_monster_id',
+    ];
+
     protected $casts = [
         'status' => BattleDetailStatus::class,
     ];

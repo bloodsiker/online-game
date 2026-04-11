@@ -5,12 +5,14 @@ namespace App\Services;
 use App\DTO\StatModifier;
 use App\DTO\StatSheet;
 use App\Enums\CombatClass;
+use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemStatType;
 use App\Listeners\RecalculatePlayerModification;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
+use App\Models\Player\PlayerActiveEffect;
 use App\Models\Player\PlayerItemBuff;
 
 class PlayerStatService
@@ -42,6 +44,7 @@ class PlayerStatService
             ...$this->fromEquipment($player),
             ...$this->fromPassiveSkills($player),
             ...$this->fromBuffs($player),
+            ...$this->fromActiveEffects($player),
         ];
 
         return $this->buildSheet($player, $modifiers);
@@ -372,5 +375,36 @@ class PlayerStatService
             $agil >= $int                 => CombatClass::DODGE,
             default                       => CombatClass::CRIT,
         };
+    }
+
+    /** @return StatModifier[] */
+    private function fromActiveEffects(Player $player): array
+    {
+        $modifiers = [];
+
+        $activeEffects = PlayerActiveEffect::where('player_id', $player->id)
+            ->whereNotNull('effect_id')
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->with('effect')
+            ->get();
+
+        foreach ($activeEffects as $playerEffect) {
+            $effect = $playerEffect->effect;
+
+            if (!$effect || empty($effect->stat_modifiers)) {
+                continue;
+            }
+
+            $source = 'active_effect:' . $effect->slug;
+
+            foreach ($effect->stat_modifiers as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+                array_push($modifiers, ...$this->modifiersFromEntry($entry, $source));
+            }
+        }
+
+        return $modifiers;
     }
 }

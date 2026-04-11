@@ -2,6 +2,7 @@
 
 namespace App\Models\Location;
 
+use App\Models\Dungeon\Dungeon;
 use App\Models\Map;
 use App\Models\Npc;
 use App\Models\Structure;
@@ -57,7 +58,7 @@ class Location extends Model
 
     public function itemsOnLocation(): BelongsToMany
     {
-        return $this->belongsToMany(Item::class, 'item_on_locations', 'location_id', 'item_id')->with('itemInfo')->withPivot(['count']);
+        return $this->belongsToMany(Item::class, 'item_on_locations', 'location_id', 'item_id')->with('itemInfo')->withPivot(['count', 'dungeon_session_id']);
     }
 
     public function map(): BelongsTo
@@ -67,7 +68,7 @@ class Location extends Model
 
     public function monsters(): BelongsToMany
     {
-        return $this->belongsToMany(Monster::class, 'location_has_monsters', 'location_id', 'monster_id');
+        return $this->belongsToMany(Monster::class, 'location_has_monsters', 'location_id', 'monster_id')->withPivot('aggression');
     }
 
     public function monstersOnLocation(): BelongsToMany
@@ -89,5 +90,10 @@ class Location extends Model
     public function npcs(): HasMany
     {
         return $this->hasMany(Npc::class, 'location_id');
+    }
+
+    public function dungeon(): BelongsTo
+    {
+        return $this->belongsTo(Dungeon::class, 'dungeon_id');
     }
 }

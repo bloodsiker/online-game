@@ -13,7 +13,7 @@ readonly class BattleFinishService
 {
     public function __construct(
         private BattleRepository $battleRepository,
-        private DropService $dropService
+        private DropService $dropService,
     ) {
     }
 
@@ -32,7 +32,8 @@ readonly class BattleFinishService
 
         $battle = $this->battleRepository->finishBattle($battle->id);
 
-        $this->dropService->dropItemsFromMonsters($battle, $location);
+        $dungeonSessionId = $battle->detailsWithMonsters->first()?->locationMonster?->dungeon_session_id;
+        $this->dropService->dropItemsFromMonsters($battle, $location, $dungeonSessionId);
 
         $location->last_respawn_monster_at = Carbon::now();
         $location->save();

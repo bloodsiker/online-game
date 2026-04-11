@@ -8,7 +8,7 @@ class AggressionChecker {
     public function getAggressive(Collection $monsters): Collection
     {
         return $monsters->filter(function ($locMonster) {
-            return mt_rand(0, 100) < $locMonster->monster->aggression;
+            return mt_rand(0, 100) < $locMonster->getAggression();
         });
     }
 }

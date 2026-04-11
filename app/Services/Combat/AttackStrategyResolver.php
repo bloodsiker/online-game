@@ -4,12 +4,14 @@ namespace App\Services\Combat;
 
 use App\Enums\ShareItemType;
 use App\Models\Item\Item;
+use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
 use App\Models\Player\Player;
 use App\Services\Combat\Strategies\AttackStrategyInterface;
 use App\Services\Combat\Strategies\FistAttackStrategy;
 use App\Services\Combat\Strategies\DualWieldStrategy;
 use App\Services\Combat\Strategies\MagicAttackStrategy;
+use App\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Services\PlayerMagicSkillService;
 use App\Services\PlayerStatService;
@@ -32,6 +34,13 @@ readonly class AttackStrategyResolver
 
         if ($action > 0) {
             $playerSkill = $this->playerMagicSkillService->getActiveSkillForBattle($player, $action);
+
+            if ($playerSkill instanceof MagicSkill && $playerSkill->isBuffSkill()) {
+                return new MagicBuffStrategy(
+                    playerModel: $player,
+                    magicSkill: $playerSkill,
+                );
+            }
 
             return new MagicAttackStrategy(
                 hitCalc: $this->hitCalc,

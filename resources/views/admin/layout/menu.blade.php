@@ -92,6 +92,20 @@
                             <span>Действия на локации</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.docs.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-book-open" aria-hidden="true"></i>
+                            <span>Документация</span>
+                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.docs.dungeon') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.docs.dungeon') }}">Данжи</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.docs.clan') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.docs.clan') }}">Кланы</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="{{ request()->routeIs('admin.referral.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
                         <a class="nav-link" href="#">
                             <i class="bx bx-share-alt" aria-hidden="true"></i>
