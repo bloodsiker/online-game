@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('races', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->float('str', 2);
-            $table->float('agil', 2);
-            $table->float('int', 2);
-            $table->float('mud', 2);
-            $table->float('intel', 2);
+            $table->float('strength', 2);
+            $table->float('agility', 2);
+            $table->float('intuition', 2);
+            $table->float('wisdom', 2);
+            $table->float('intelligence', 2);
             $table->integer('free_stats');
             $table->timestamps();
         });
@@ -31,11 +31,11 @@ return new class extends Migration
             $table->integer('exp')->default(0);
             $table->integer('exp_up');
             $table->integer('exp_diff');
-            $table->float('str', 2);
-            $table->float('agil', 2);
-            $table->float('int', 2);
-            $table->float('mud', 2);
-            $table->float('intel', 2);
+            $table->float('strength', 2);
+            $table->float('agility', 2);
+            $table->float('intuition', 2);
+            $table->float('wisdom', 2);
+            $table->float('intelligence', 2);
             $table->integer('hp_now');
             $table->integer('hp_max');
             $table->integer('mp_now')->default(0);

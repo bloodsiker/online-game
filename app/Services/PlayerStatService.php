@@ -61,14 +61,14 @@ class PlayerStatService
         // Base values. Weapon slots: if a weapon is equipped the base is 0
         // (weapon damage comes entirely from the item's ATTACK_MIN/MAX effects).
         $base = [
-            'strength' => (float) floor($player->str),
-            'int' => (float) floor($player->int),
-            'agility' => (float) floor($player->agil),
-            'mud' => (float) floor($player->mud),
-            'intelligence' => (float) floor($player->intel),
-            'dodge'    => (float) max(0, ($player->agil - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
-            'critical' => (float) max(0, ($player->int - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
-            'armor'    => (float) max(0, ($player->str - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
+            'strength' => (float) floor($player->strength),
+            'intuition' => (float) floor($player->intuition),
+            'agility' => (float) floor($player->agility),
+            'wisdom' => (float) floor($player->wisdom),
+            'intelligence' => (float) floor($player->intelligence),
+            'dodge'    => (float) max(0, ($player->agility - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
+            'critical' => (float) max(0, ($player->intuition - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
+            'armor'    => (float) max(0, ($player->strength - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
             'hp_max' => (float) $player->hp_max,
             'mp_max' => (float) $player->mp_max,
             'left_min_dmg' => (float) $player->min_dmg,
@@ -105,9 +105,9 @@ class PlayerStatService
         $sheet->modifiers   = $modifiers;
         $sheet->freeStats   = $player->free_stats;
         $sheet->strength    = $computed['strength'];
-        $sheet->int         = $computed['int'];
+        $sheet->intuition   = $computed['intuition'];
         $sheet->agility     = $computed['agility'];
-        $sheet->mud         = $computed['mud'];
+        $sheet->wisdom      = $computed['wisdom'];
         $sheet->intelligence = $computed['intelligence'];
         $sheet->dodge       = $computed['dodge'];
         $sheet->critical    = $computed['critical'];

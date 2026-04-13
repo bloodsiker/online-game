@@ -49,11 +49,11 @@ class AppServiceProvider extends ServiceProvider
                 '<script>window.playerStats=%s;</script>',
                 json_encode([
                     'lvl'    => $player->lvl,
-                    'str'    => (int) floor($player->str),
-                    'agil'   => (int) floor($player->agil),
-                    'int'    => (int) floor($player->int),
-                    'mud'    => (int) floor($player->mud),
-                    'intel'  => (int) floor($player->intel),
+                    'strength'     => (int) floor($player->strength),
+                    'agility'      => (int) floor($player->agility),
+                    'intuition'    => (int) floor($player->intuition),
+                    'wisdom'       => (int) floor($player->wisdom),
+                    'intelligence' => (int) floor($player->intelligence),
                     'skills' => $player->skills->pluck('lvl', 'skill_id'),
                 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG)
             ));

@@ -8,9 +8,9 @@ use App\Services\Combat\FightHitInterface;
 class StatSheet implements FightHitInterface
 {
     public int $strength     = 0;
-    public int $int          = 0;
+    public int $intuition    = 0;
     public int $agility      = 0;
-    public int $mud          = 0;
+    public int $wisdom       = 0;
     public int $intelligence = 0;
     public int $dodge        = 0;
     public int $critical     = 0;
@@ -35,11 +35,25 @@ class StatSheet implements FightHitInterface
     public function getCritical(): int     { return $this->critical; }
     public function getCombatClass(): CombatClass { return $this->combatClass; }
 
+    public function getClassDominance(): float
+    {
+        $str   = (float) $this->strength;
+        $agil  = (float) $this->agility;
+        $int   = (float) $this->intuition;
+        $total = max(1.0, $str + $agil + $int);
+
+        return match($this->combatClass) {
+            CombatClass::TANK  => $str  / $total,
+            CombatClass::DODGE => $agil / $total,
+            CombatClass::CRIT  => $int  / $total,
+        };
+    }
+
     // Stat getters (used in views and combat strategies)
     public function getStrength(): int     { return $this->strength; }
-    public function getInt(): int          { return $this->int; }
+    public function getInt(): int          { return $this->intuition; }
     public function getAgility(): int      { return $this->agility; }
-    public function getMud(): int          { return $this->mud; }
+    public function getMud(): int          { return $this->wisdom; }
     public function getIntelligence(): int { return $this->intelligence; }
     public function getHpMax(): int        { return $this->hpMax; }
     public function getMpMax(): int        { return $this->mpMax; }

@@ -37,7 +37,7 @@ class CharacterController extends Controller
         $user = Auth::user();
         $player = $user->player;
 
-        $changeToSum = ['str', 'int', 'agil', 'intel', 'mud'];
+        $changeToSum = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom'];
         $filtered = array_filter(
             $data,
             function($value, $key) use ($changeToSum) {
@@ -48,7 +48,7 @@ class CharacterController extends Controller
 
         $sumChange = array_sum(array_map('intval', $filtered));
 
-        $nowToSum = ['ostr', 'oint', 'oagil', 'ointel', 'omud'];
+        $nowToSum = ['ostrength', 'ointuition', 'oagility', 'ointelligence', 'owisdom'];
         $filteredNow = array_filter(
             $data,
             function($value, $key) use ($nowToSum) {
@@ -65,11 +65,11 @@ class CharacterController extends Controller
             return redirect()->back();
         }
 
-        $player->str += $data['str'];
-        $player->int += $data['int'];
-        $player->agil += $data['agil'];
-        $player->intel += $data['intel'];
-        $player->mud += $data['mud'];
+        $player->strength     += $data['strength'];
+        $player->intuition    += $data['intuition'];
+        $player->agility      += $data['agility'];
+        $player->intelligence += $data['intelligence'];
+        $player->wisdom       += $data['wisdom'];
         $player->free_stats -= $sumChange;
         $player->save();
 
@@ -90,11 +90,11 @@ class CharacterController extends Controller
                 'status'     => 'ok',
                 'message'    => 'Характеристики изменены.',
                 'free_stats' => $player->free_stats,
-                'str'        => $player->getStrength(),
-                'int'        => $player->getInt(),
-                'agil'       => $player->getAgility(),
-                'intel'      => $player->getIntelligence(),
-                'mud'        => $player->getMud(),
+                'strength'     => $player->getStrength(),
+                'intuition'    => $player->getInt(),
+                'agility'      => $player->getAgility(),
+                'intelligence' => $player->getIntelligence(),
+                'wisdom'       => $player->getMud(),
             ]);
         }
 

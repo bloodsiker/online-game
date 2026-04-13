@@ -376,124 +376,70 @@
 
 /******* EFFECTS*******/
 
-/* Список ефектів */
+.effects-container {
+    padding: 4px 6px 2px;
+}
+
 .effects-list {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 2px;
-    background: rgba(255, 255, 255, 0.4);
-    max-height: 1000px;
-    overflow: visible;
-    transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease;
-    opacity: 1;
+    flex-wrap: wrap;
+    gap: 3px;
 }
 
-.effects-list.collapsed {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    opacity: 0;
-    overflow: hidden;
-}
-
-/* Елементи ефектів */
 .effect-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 4px 4px 8px;
-    border-radius: 8px;
-    border: 2px solid rgba(76, 175, 80, 0.3);
-    animation: effectAppear 0.3s ease-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    gap: 3px;
+    padding: 2px 6px 2px 5px;
+    border-radius: 10px;
+    background: rgba(42, 110, 26, 0.15);
+    border: 1px solid rgba(42, 110, 26, 0.35);
+    animation: effectAppear 0.2s ease-out;
+    white-space: nowrap;
 }
 
 .curses .effect-item {
-    border-color: rgba(244, 67, 54, 0.3);
-}
-
-@keyframes effectAppear {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    background: rgba(140, 20, 20, 0.15);
+    border-color: rgba(140, 20, 20, 0.35);
 }
 
 .effect-item.removing {
-    animation: effectRemove 0.3s ease-out forwards;
+    animation: effectRemove 0.25s ease-out forwards;
+}
+
+@keyframes effectAppear {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes effectRemove {
-    0% {
-        opacity: 1;
-        max-height: 100px;
-        margin-bottom: 6px;
-    }
-    100% {
-        opacity: 0;
-        max-height: 0;
-        margin-bottom: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-        border-width: 0;
-    }
-}
-
-.effect-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
+    to { opacity: 0; transform: scale(0.85); }
 }
 
 .effect-name {
     font-size: 10px;
-    font-weight: 600;
-    color: #2d5016;
+    font-weight: bold;
+    color: #2a5c10;
 }
 
 .curses .effect-name {
-    color: #8b0000;
+    color: #7a1010;
 }
 
 .effect-timer {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: bold;
-    color: #666;
-    background: rgba(0, 0, 0, 0.05);
-    padding: 2px 2px;
-    border-radius: 6px;
-    min-width: 40px;
-    justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #888;
 }
 
 .effect-timer.warning {
-    color: #ff4757;
-    background: rgba(255, 71, 87, 0.15);
-    border-color: #ff4757;
+    color: #c0392b;
     animation: timerPulse 1s infinite;
 }
 
 @keyframes timerPulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.7;
-        transform: scale(0.95);
-    }
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
 }
 
 /*******  END EFFECTS*******/

@@ -198,6 +198,7 @@
                                                 <th width="50">ID</th>
                                                 <th>Локация</th>
                                                 <th>Карта</th>
+                                                <th width="170">Агрессия (%)</th>
                                                 <th width="70"></th>
                                             </tr>
                                             </thead>
@@ -208,13 +209,24 @@
                                                     <td>[{{ $location->id }}] {{ $location->name }}</td>
                                                     <td>{{ $location->map?->name ?? '—' }}</td>
                                                     <td>
+                                                        <div class="d-flex gap-1 align-items-center">
+                                                            <input type="number" min="0" max="100"
+                                                                   value="{{ $location->pivot->aggression ?? '' }}"
+                                                                   placeholder="из монстра"
+                                                                   class="form-control form-control-sm aggression-input" style="width:90px"
+                                                                   data-url="{{ route('admin.monster.info.location.aggression', [$monster->id, $location->id]) }}">
+                                                            <button class="btn btn-xs btn-secondary aggression-save">✓</button>
+                                                            <span class="aggression-status ms-1" style="font-size:12px"></span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
                                                         <a href="{{ route('admin.monster.info.delete_location', [$monster->id, $location->id]) }}"
                                                            class="btn btn-xs btn-danger"
                                                            onclick="return confirm('Удалить?')">Удалить</a>
                                                     </td>
                                                 </tr>
                                             @empty
-                                                <tr><td colspan="4" class="text-center text-muted">Нет локаций</td></tr>
+                                                <tr><td colspan="5" class="text-center text-muted">Нет локаций</td></tr>
                                             @endforelse
                                             </tbody>
                                         </table>
@@ -420,13 +432,17 @@
     {{-- Модалка: добавить локацию --}}
     <div id="modalLocation" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
-            <form action="{{ route('admin.monster.info.location', $monster->id) }}" method="post">
+            <form action="{{ route('admin.monster.info.location.save', $monster->id) }}" method="post">
                 <header class="card-header"><h2 class="card-title">Добавить локацию</h2></header>
                 <div class="card-body">
                     {{ csrf_field() }}
                     <div class="form-group mb-2">
                         <label>Локация</label>
                         <select id="location-ajax-select" name="location_id" class="form-control"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Агрессия (0–100, пусто = базовая из монстра)</label>
+                        <input type="number" name="aggression" min="0" max="100" class="form-control" placeholder="По умолчанию из монстра">
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -690,6 +706,38 @@
             cache: true
         },
         minimumInputLength: 0
+    });
+
+    // AJAX сохранение агрессии
+    $(document).on('click', '.aggression-save', function () {
+        var $btn    = $(this);
+        var $wrap   = $btn.closest('.d-flex');
+        var $input  = $wrap.find('.aggression-input');
+        var $status = $wrap.find('.aggression-status');
+        var url     = $input.data('url');
+        var value   = $input.val();
+
+        $btn.prop('disabled', true);
+        $status.text('').css('color', '');
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                aggression: value !== '' ? value : null,
+            },
+            success: function () {
+                $status.text('✓').css('color', 'green');
+                setTimeout(function () { $status.text(''); }, 2000);
+            },
+            error: function () {
+                $status.text('✗').css('color', 'red');
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+            }
+        });
     });
 
     $('#location-ajax-select').select2({

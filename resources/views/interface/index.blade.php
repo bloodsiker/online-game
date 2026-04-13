@@ -1188,7 +1188,7 @@
 {{-- Модальное окно распределения очков (открывается из character-frame) --}}
 <div id="pts-overlay" class="error_div" style="display:none;z-index:1002;"></div>
 <div id="pts-modal" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">
-    <div class="popup_global_container" style="width:360px;">
+    <div class="popup_global_container" style="width:400px;">
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
@@ -1229,21 +1229,31 @@
         document.getElementById('pts-modal-free').textContent = data.free;
         document.getElementById('pts-msg').style.display = 'none';
 
-        const labels = { str: 'Сила', int: 'Интуиция', agil: 'Ловкость', intel: 'Интеллект', mud: 'Мудрость' };
+        const labels = { strength: 'Сила', intuition: 'Интуиция', agility: 'Ловкость', intelligence: 'Интеллект', wisdom: 'Мудрость' };
         const rows   = document.getElementById('pts-rows');
         const btnStyle = 'width:24px;height:24px;border:1px solid #a07040;background:url(/img/bg/table-header.jpg) repeat-x top left #c8924a;color:#461c0b;font-weight:bold;font-size:15px;cursor:pointer;border-radius:3px;padding:0;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);';
         const inpStyle = 'width:34px;text-align:center;border:1px solid #CEBBAA;border-radius:3px;padding:3px 0;font-family:Tahoma;font-size:12px;color:#461c0b;font-weight:bold;background:#fffaf3;';
 
-        rows.innerHTML = Object.keys(labels).map((k) => `
+        rows.innerHTML = Object.keys(labels).map((k) => {
+            const base  = data.bases[k];
+            const bonus = data.full[k] - base;
+            const bonusHtml = bonus > 0
+                ? `<span style="color:#2a7a2a;font-size:11px">(+${bonus})</span>`
+                : (bonus < 0 ? `<span style="color:#8b2020;font-size:11px">(${bonus})</span>` : '');
+            return `
             <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #e8d4c0;">
                 <span style="width:82px;flex-shrink:0;font-weight:bold;color:#2a1a0e;">${labels[k]}</span>
-                <span style="width:42px;flex-shrink:0;font-weight:bold;color:#8b2000;font-size:12px;" id="ptsr-${k}">${data.full[k]}</span>
+                <span style="width:56px;flex-shrink:0;font-size:12px;">
+                    <b style="color:#8b2000;" id="ptsr-${k}">${base}</b> ${bonusHtml}
+                </span>
                 <div style="display:flex;align-items:center;gap:5px;">
                     <button type="button" onclick="ptsDec('${k}')" style="${btnStyle}">−</button>
                     <input type="text" id="ptsi-${k}" value="0" style="${inpStyle}" readonly>
                     <button type="button" onclick="ptsInc('${k}')" style="${btnStyle}">+</button>
                 </div>
-            </div>`).join('');
+                <span style="margin-left:4px;font-size:12px;color:#555;">= <b id="ptsf-${k}" style="color:#2a1a0e;">${data.full[k]}</b></span>
+            </div>`;
+        }).join('');
 
         document.getElementById('pts-overlay').style.display = 'block';
         document.getElementById('pts-modal').style.display   = 'block';
@@ -1255,37 +1265,41 @@
     }
 
     function _ptsAdded() {
-        return ['str','int','agil','intel','mud'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
+        return ['strength','intuition','agility','intelligence','wisdom'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
     }
 
     function ptsInc(key) {
         if (_ptsData.free - _ptsAdded() <= 0) return;
-        const inp = document.getElementById('ptsi-' + key);
-        inp.value = parseInt(inp.value) + 1;
-        document.getElementById('ptsr-' + key).textContent = _ptsData.full[key] + parseInt(inp.value);
+        const inp   = document.getElementById('ptsi-' + key);
+        inp.value   = parseInt(inp.value) + 1;
+        const added = parseInt(inp.value);
+        document.getElementById('ptsr-' + key).textContent = _ptsData.bases[key] + added;
+        document.getElementById('ptsf-' + key).textContent = _ptsData.full[key]  + added;
         document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
     }
 
     function ptsDec(key) {
         const inp = document.getElementById('ptsi-' + key);
         if (parseInt(inp.value) <= 0) return;
-        inp.value = parseInt(inp.value) - 1;
-        document.getElementById('ptsr-' + key).textContent = _ptsData.full[key] + parseInt(inp.value);
+        inp.value   = parseInt(inp.value) - 1;
+        const added = parseInt(inp.value);
+        document.getElementById('ptsr-' + key).textContent = _ptsData.bases[key] + added;
+        document.getElementById('ptsf-' + key).textContent = _ptsData.full[key]  + added;
         document.getElementById('pts-modal-free').textContent = _ptsData.free - _ptsAdded();
     }
 
     function ptsSave() {
         const body = {
-            str:   parseInt(document.getElementById('ptsi-str').value)   || 0,
-            int:   parseInt(document.getElementById('ptsi-int').value)   || 0,
-            agil:  parseInt(document.getElementById('ptsi-agil').value)  || 0,
-            intel: parseInt(document.getElementById('ptsi-intel').value) || 0,
-            mud:   parseInt(document.getElementById('ptsi-mud').value)   || 0,
-            ostr:   _ptsData.bases.str,
-            oint:   _ptsData.bases.int,
-            oagil:  _ptsData.bases.agil,
-            ointel: _ptsData.bases.intel,
-            omud:   _ptsData.bases.mud,
+            strength:     parseInt(document.getElementById('ptsi-strength').value)     || 0,
+            intuition:    parseInt(document.getElementById('ptsi-intuition').value)    || 0,
+            agility:      parseInt(document.getElementById('ptsi-agility').value)      || 0,
+            intelligence: parseInt(document.getElementById('ptsi-intelligence').value) || 0,
+            wisdom:       parseInt(document.getElementById('ptsi-wisdom').value)       || 0,
+            ostrength:     _ptsData.bases.strength,
+            ointuition:    _ptsData.bases.intuition,
+            oagility:      _ptsData.bases.agility,
+            ointelligence: _ptsData.bases.intelligence,
+            owisdom:       _ptsData.bases.wisdom,
         };
 
         fetch(_ptsData.saveUrl, {

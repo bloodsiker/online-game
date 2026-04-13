@@ -43,11 +43,11 @@ class ItemRequirementService
         $stat = PlayerStatKey::tryFrom($key);
 
         $value = match ($stat) {
-            PlayerStatKey::STR => (int) floor($player->str),
-            PlayerStatKey::AGIL => (int) floor($player->agil),
-            PlayerStatKey::INT => (int) floor($player->int),
-            PlayerStatKey::MUD => (int) floor($player->mud),
-            PlayerStatKey::INTEL => (int) floor($player->intel),
+            PlayerStatKey::STRENGTH    => (int) floor($player->strength),
+            PlayerStatKey::AGILITY     => (int) floor($player->agility),
+            PlayerStatKey::INTUITION   => (int) floor($player->intuition),
+            PlayerStatKey::WISDOM      => (int) floor($player->wisdom),
+            PlayerStatKey::INTELLIGENCE => (int) floor($player->intelligence),
             null => 0,
         };
 

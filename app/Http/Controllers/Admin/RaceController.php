@@ -47,11 +47,11 @@ class RaceController extends Controller
     private function fillRace(Race $race, Request $request): void
     {
         $race->name       = $request->input('name');
-        $race->str        = (float) $request->input('str', 0);
-        $race->agil       = (float) $request->input('agil', 0);
-        $race->int        = (float) $request->input('int', 0);
-        $race->mud        = (float) $request->input('mud', 0);
-        $race->intel      = (float) $request->input('intel', 0);
+        $race->strength     = (float) $request->input('strength', 0);
+        $race->agility      = (float) $request->input('agility', 0);
+        $race->intuition    = (float) $request->input('intuition', 0);
+        $race->wisdom       = (float) $request->input('wisdom', 0);
+        $race->intelligence = (float) $request->input('intelligence', 0);
         $race->free_stats = (int) $request->input('free_stats', 0);
     }
 }

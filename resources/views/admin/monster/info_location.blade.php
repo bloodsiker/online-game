@@ -67,7 +67,7 @@
 
     <div id="modalForm" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
-            <form action="{{ route('admin.monster.info.location', ['monster' => $monster->id]) }}" method="post">
+            <form action="{{ route('admin.monster.info.location.save', ['monster' => $monster->id]) }}" method="post">
                 <header class="card-header">
                     <h2 class="card-title">Добавить локацию</h2>
                 </header>

@@ -33,11 +33,11 @@
                                 <tr style="vertical-align: middle">
                                     <td>{{ $race->id }}</td>
                                     <td><a href="{{ route('admin.race.info', $race->id) }}">{{ $race->name }}</a></td>
-                                    <td>{{ $race->str }}</td>
-                                    <td>{{ $race->agil }}</td>
-                                    <td>{{ $race->int }}</td>
-                                    <td>{{ $race->mud }}</td>
-                                    <td>{{ $race->intel }}</td>
+                                    <td>{{ $race->strength }}</td>
+                                    <td>{{ $race->agility }}</td>
+                                    <td>{{ $race->intuition }}</td>
+                                    <td>{{ $race->wisdom }}</td>
+                                    <td>{{ $race->intelligence }}</td>
                                     <td>{{ $race->free_stats }}</td>
                                     <td>
                                         <a href="{{ route('admin.race.info', $race->id) }}" class="btn btn-xs btn-primary">Изменить</a>

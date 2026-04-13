@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Enums;
+declare(strict_types=1);
+
+namespace App\Modules\Chat\Domain\Enums;
 
 enum ChatMessageType: string
 {

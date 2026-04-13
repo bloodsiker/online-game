@@ -8,7 +8,6 @@ use App\Http\Controllers\BlacksmithController;
 use App\Http\Controllers\GemController;
 use App\Http\Controllers\RuneController;
 use App\Http\Controllers\CharacterController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClanController;
 use App\Http\Controllers\ClanSkillController;
 use App\Http\Controllers\BankController;
@@ -219,15 +218,6 @@ Route::get('/items/drop/{id}', [ItemController::class, 'dropItem'])->name('items
 
 Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');
 
-Route::get('/chat', [ChatController::class, 'index'])->name('chat');
-Route::get('/chat-text', [ChatController::class, 'chat'])->name('chat.text');
-Route::get('/chat-log', [ChatController::class, 'chatLog'])->name('chat.log');
-Route::get('/chat-action', [ChatController::class, 'chatAction'])->name('chat.action');
-Route::get('/chat/messages', [ChatController::class, 'messages'])->name('chat.messages');
-Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-Route::post('/chat/ignore', [ChatController::class, 'addIgnore'])->name('chat.ignore.add');
-Route::delete('/chat/ignore/{userId}', [ChatController::class, 'removeIgnore'])->name('chat.ignore.remove');
-Route::get('/chat/ignores', [ChatController::class, 'ignoreList'])->name('chat.ignores');
 
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');

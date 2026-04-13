@@ -124,23 +124,23 @@ class Player extends Model implements FightHitInterface
     }
 
     public function getStrength() {
-        return floor($this->str);
+        return floor($this->strength);
     }
 
     public function getInt() {
-        return floor($this->int);
+        return floor($this->intuition);
     }
 
     public function getAgility() {
-        return floor($this->agil);
+        return floor($this->agility);
     }
 
     public function getMud() {
-        return floor($this->mud);
+        return floor($this->wisdom);
     }
 
     public function getIntelligence() {
-        return floor($this->intel);
+        return floor($this->intelligence);
     }
 
     public function getDodge(): int
@@ -155,9 +155,9 @@ class Player extends Model implements FightHitInterface
 
     public function getCombatClass(): CombatClass
     {
-        $str  = (float) $this->str;
-        $agil = (float) $this->agil;
-        $int  = (float) $this->int;
+        $str  = (float) $this->strength;
+        $agil = (float) $this->agility;
+        $int  = (float) $this->intuition;
 
         return match(true) {
             $str >= $agil && $str >= $int => CombatClass::TANK,
@@ -168,9 +168,9 @@ class Player extends Model implements FightHitInterface
 
     public function getClassDominance(): float
     {
-        $str   = (float) $this->str;
-        $agil  = (float) $this->agil;
-        $int   = (float) $this->int;
+        $str   = (float) $this->strength;
+        $agil  = (float) $this->agility;
+        $int   = (float) $this->intuition;
         $total = max(1.0, $str + $agil + $int);
 
         return match($this->getCombatClass()) {

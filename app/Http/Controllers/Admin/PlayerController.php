@@ -30,11 +30,11 @@ class PlayerController extends Controller
             $player->hp_max     = (int) $request->input('hp_max');
             $player->mp_now     = (int) $request->input('mp_now');
             $player->mp_max     = (int) $request->input('mp_max');
-            $player->str        = (float) $request->input('str');
-            $player->agil       = (float) $request->input('agil');
-            $player->int        = (float) $request->input('int');
-            $player->mud        = (float) $request->input('mud');
-            $player->intel      = (float) $request->input('intel');
+            $player->strength     = (float) $request->input('strength');
+            $player->agility      = (float) $request->input('agility');
+            $player->intuition    = (float) $request->input('intuition');
+            $player->wisdom       = (float) $request->input('wisdom');
+            $player->intelligence = (float) $request->input('intelligence');
             $player->min_dmg    = (float) $request->input('min_dmg');
             $player->max_dmg    = (float) $request->input('max_dmg');
             $player->free_stats = (int) $request->input('free_stats');

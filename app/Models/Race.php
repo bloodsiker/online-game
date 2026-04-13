@@ -9,5 +9,5 @@ class Race extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['str', 'agil', 'int', 'mud', 'intel', 'free_stats'];
+    protected $fillable = ['strength', 'agility', 'intuition', 'wisdom', 'intelligence', 'free_stats'];
 }

@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Models\Chat;
+declare(strict_types=1);
 
-use App\Enums\ChatChannel;
-use App\Enums\ChatMessageType;
+namespace App\Modules\Chat\Domain\Models;
+
 use App\Models\User;
+use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

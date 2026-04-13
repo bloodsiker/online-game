@@ -20,31 +20,31 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Сила</label>
-                                    <input type="number" step="0.01" class="form-control" name="str" value="{{ old('str', 0) }}">
+                                    <input type="number" step="0.01" class="form-control" name="strength" value="{{ old('strength', 0) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Ловкость</label>
-                                    <input type="number" step="0.01" class="form-control" name="agil" value="{{ old('agil', 0) }}">
+                                    <input type="number" step="0.01" class="form-control" name="agility" value="{{ old('agility', 0) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Интуиция</label>
-                                    <input type="number" step="0.01" class="form-control" name="int" value="{{ old('int', 0) }}">
+                                    <input type="number" step="0.01" class="form-control" name="intuition" value="{{ old('intuition', 0) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Мудрость</label>
-                                    <input type="number" step="0.01" class="form-control" name="mud" value="{{ old('mud', 0) }}">
+                                    <input type="number" step="0.01" class="form-control" name="wisdom" value="{{ old('wisdom', 0) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Интеллект</label>
-                                    <input type="number" step="0.01" class="form-control" name="intel" value="{{ old('intel', 0) }}">
+                                    <input type="number" step="0.01" class="form-control" name="intelligence" value="{{ old('intelligence', 0) }}">
                                 </div>
                             </div>
                             <div class="col-md-6">

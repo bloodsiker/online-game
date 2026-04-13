@@ -177,11 +177,11 @@ class GenerateSeed extends Command
     {
         $race = new Race();
         $race->name = 'Человек';
-        $race->str = 1;
-        $race->agil = 1;
-        $race->int = 1;
-        $race->mud = 1;
-        $race->intel = 1;
+        $race->strength = 1;
+        $race->agility = 1;
+        $race->intuition =1;
+        $race->wisdom =1;
+        $race->intelligence = 1;
         $race->free_stats = 5;
         $race->save();
 
@@ -189,42 +189,42 @@ class GenerateSeed extends Command
 
         $race = new Race();
         $race->name = 'Эльф';
-        $race->str = 0.7;
-        $race->agil = 0.3;
-        $race->int = 0.2;
-        $race->mud = 0.8;
-        $race->intel = 3;
+        $race->strength = 0.7;
+        $race->agility = 0.3;
+        $race->intuition =0.2;
+        $race->wisdom =0.8;
+        $race->intelligence = 3;
         $race->free_stats = 5;
         $race->save();
 
         $race = new Race();
         $race->name = 'Темный эльф';
-        $race->str = 0.7;
-        $race->agil = 0.2;
-        $race->int = 3;
-        $race->mud = 0.6;
-        $race->intel = 0.5;
+        $race->strength = 0.7;
+        $race->agility = 0.2;
+        $race->intuition =3;
+        $race->wisdom =0.6;
+        $race->intelligence = 0.5;
         $race->free_stats = 5;
         $race->save();
         $this->defaultRace = $race;
 
         $race = new Race();
         $race->name = 'Дварф';
-        $race->str = 3;
-        $race->agil = 0.5;
-        $race->int = 0.5;
-        $race->mud = 0.5;
-        $race->intel = 0.5;
+        $race->strength = 3;
+        $race->agility = 0.5;
+        $race->intuition =0.5;
+        $race->wisdom =0.5;
+        $race->intelligence = 0.5;
         $race->free_stats = 5;
         $race->save();
 
         $race = new Race();
         $race->name = 'Хоббит';
-        $race->str = 0.7;
-        $race->agil = 3;
-        $race->int = 0.2;
-        $race->mud = 0.5;
-        $race->intel = 0.6;
+        $race->strength = 0.7;
+        $race->agility = 3;
+        $race->intuition =0.2;
+        $race->wisdom =0.5;
+        $race->intelligence = 0.6;
         $race->free_stats = 5;
         $race->save();
 
@@ -253,11 +253,11 @@ class GenerateSeed extends Command
         $player->exp = 0;
         $player->exp_up = $exp->exp + $exp->exp_diff;
         $player->exp_diff = $exp->exp_diff;
-        $player->str = 1;
-        $player->agil = 1;
-        $player->int = 1;
-        $player->mud = 1;
-        $player->intel = 1;
+        $player->strength = 1;
+        $player->agility = 1;
+        $player->intuition = 1;
+        $player->wisdom = 1;
+        $player->intelligence = 1;
         $player->hp_now = 10;
         $player->hp_max = 10;
         $player->mp_now = 10;
@@ -295,11 +295,11 @@ class GenerateSeed extends Command
         $player->exp = 0;
         $player->exp_up = $exp->exp + $exp->exp_diff;
         $player->exp_diff = $exp->exp_diff;
-        $player->str = 1;
-        $player->agil = 1;
-        $player->int = 1;
-        $player->mud = 1;
-        $player->intel = 1;
+        $player->strength = 1;
+        $player->agility = 1;
+        $player->intuition = 1;
+        $player->wisdom = 1;
+        $player->intelligence = 1;
         $player->hp_now = 10;
         $player->hp_max = 10;
         $player->mp_now = 10;

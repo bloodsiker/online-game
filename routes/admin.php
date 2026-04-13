@@ -54,7 +54,8 @@ Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::cla
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
 Route::get('/monster/{monster}/drop/delete/{item}', [MonsterController::class, 'infoDropDeleteItem'])->name('monster.info.drop.delete_item');
-Route::post('/monster/{monster}/location', [MonsterController::class, 'location'])->name('monster.info.location');
+Route::get('/monster/{monster}/locations', [MonsterController::class, 'infoLocation'])->name('monster.info.location');
+Route::post('/monster/{monster}/location', [MonsterController::class, 'location'])->name('monster.info.location.save');
 Route::post('/monster/{monster}/location/{location}/aggression', [MonsterController::class, 'updateLocation'])->name('monster.info.location.aggression');
 Route::get('/monster/{monster}/delete/{location}', [MonsterController::class, 'deleteLocation'])->name('monster.info.delete_location');
 Route::post('/monster/{monster}/phase', [MonsterController::class, 'addPhase'])->name('monster.boss.phase.add');

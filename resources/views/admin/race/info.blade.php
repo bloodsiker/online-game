@@ -20,31 +20,31 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Сила</label>
-                                    <input type="number" step="0.01" class="form-control" name="str" value="{{ $race->str }}">
+                                    <input type="number" step="0.01" class="form-control" name="strength" value="{{ $race->strength }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Ловкость</label>
-                                    <input type="number" step="0.01" class="form-control" name="agil" value="{{ $race->agil }}">
+                                    <input type="number" step="0.01" class="form-control" name="agility" value="{{ $race->agility }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Интуиция</label>
-                                    <input type="number" step="0.01" class="form-control" name="int" value="{{ $race->int }}">
+                                    <input type="number" step="0.01" class="form-control" name="intuition" value="{{ $race->intuition }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Мудрость</label>
-                                    <input type="number" step="0.01" class="form-control" name="mud" value="{{ $race->mud }}">
+                                    <input type="number" step="0.01" class="form-control" name="wisdom" value="{{ $race->wisdom }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="col-form-label">Интеллект</label>
-                                    <input type="number" step="0.01" class="form-control" name="intel" value="{{ $race->intel }}">
+                                    <input type="number" step="0.01" class="form-control" name="intelligence" value="{{ $race->intelligence }}">
                                 </div>
                             </div>
                             <div class="col-md-6">

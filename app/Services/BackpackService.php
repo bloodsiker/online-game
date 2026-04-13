@@ -30,7 +30,7 @@ class BackpackService
     {
         $query = $this->getBaseQuery($user);
 
-        if (! empty($filters['sid'])) {
+        if (!empty($filters['sid'])) {
             $query->where('items.share_item_id', $filters['sid']);
         }
 

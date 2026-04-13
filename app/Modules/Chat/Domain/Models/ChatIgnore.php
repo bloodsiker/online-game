@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Models\Chat;
+declare(strict_types=1);
+
+namespace App\Modules\Chat\Domain\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;

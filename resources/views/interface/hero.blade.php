@@ -118,49 +118,16 @@
 
 <br>
 
-<table width="220" cellspacing="0" cellpadding="0" border="0"  class="achieve_bg" id="effectsContainer" style="display: none">
-    <tbody>
-    <tr>
-        <td class="achieve_bg_lt"></td>
-        <td class="achieve_bg_tr"></td>
-        <td class="achieve_bg_rt"></td>
-    </tr>
-    <tr>
-        <td class="achieve_bg_lr"></td>
-        <td style="vertical-align: top">
-            <table width="100%" cellspacing="0" cellpadding="2" border="0">
-                <tbody>
-                <tr>
-                    <td align="right">
-                        <nobr>
-                            <div class="effects-container">
-                                <div class="effects-section" id="blessingsSection">
-                                    <div class="effects-list" id="blessingsList">
-                                        <!-- Will be added dynamically -->
-                                    </div>
-                                </div>
-
-                                <div class="effects-section curses" id="cursesSection">
-                                    <div class="effects-list" id="cursesList">
-                                        <!-- Will be added dynamically -->
-                                    </div>
-                                </div>
-                            </div>
-                        </nobr>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </td>
-        <td class="achieve_bg_rr"></td>
-    </tr>
-    <tr>
-        <td class="achieve_bg_lb"><img src="{{ asset('img/bg/null.gif') }}" width="10" height="10"></td>
-        <td class="achieve_bg_br"></td>
-        <td class="achieve_bg_rb"><img src="{{ asset('img/bg/null.gif') }}" width="10" height="10"></td>
-    </tr>
-    </tbody>
-</table>
+<div id="effectsContainer" style="display:none; margin-top: 4px;">
+    <div class="effects-container">
+        <div id="blessingsSection" class="effects-section">
+            <div class="effects-list" id="blessingsList"></div>
+        </div>
+        <div id="cursesSection" class="effects-section curses" style="margin-top: 3px;">
+            <div class="effects-list" id="cursesList"></div>
+        </div>
+    </div>
+</div>
 
 <script>
     // Симуляція отримання пошкодження
@@ -413,22 +380,23 @@
     }
 
     // Створити HTML елемент ефекту
+    function formatEffectTime(s) {
+        if (s >= 3600) return Math.floor(s / 3600) + 'ч ' + Math.floor((s % 3600) / 60) + 'м';
+        if (s >= 60)   return Math.floor(s / 60) + 'м ' + (s % 60) + 'с';
+        return s + 'с';
+    }
+
     function createEffectElement(effect) {
         const div = document.createElement('div');
         div.className = 'effect-item';
         div.dataset.effectId = effect.id;
 
         const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
-        const isWarning = remaining <= 10;
+        const timerHtml = remaining > 0
+            ? `<span class="effect-timer${remaining <= 10 ? ' warning' : ''}" data-timer-id="${effect.id}">${formatEffectTime(remaining)}</span>`
+            : '';
 
-        div.innerHTML = `
-                <div class="effect-info">
-                    <span class="effect-name">${effect.name}</span>
-                </div>
-                <div class="effect-timer ${isWarning ? 'warning' : ''}" data-timer-id="${effect.id}">
-                    <span class="timer-value">${remaining}с</span>
-                </div>
-            `;
+        div.innerHTML = `<span class="effect-name">${effect.name}</span>${timerHtml}`;
 
         return div;
     }
@@ -441,36 +409,13 @@
 
         if (!effect) return;
 
-        const formatTime = (seconds) => {
-            if (seconds >= 3600) {
-                const h = Math.floor(seconds / 3600);
-                const m = Math.floor((seconds % 3600) / 60);
-                // const s = seconds % 60;
-                return `${h}ч ${m}м`;
-            } else if (seconds >= 60) {
-                const m = Math.floor(seconds / 60);
-                const s = seconds % 60;
-                return `${m}м ${s}с`;
-            } else {
-                return `${seconds}с`;
-            }
-        };
-
         const updateTimer = () => {
             const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
             const timerElement = document.querySelector(`[data-timer-id="${id}"]`);
             if (!timerElement) return;
 
-            const valueElement = timerElement.querySelector('.timer-value');
-            if (valueElement) {
-                valueElement.textContent = formatTime(remaining);
-            }
-
-            if (remaining <= 10) {
-                timerElement.classList.add('warning');
-            } else {
-                timerElement.classList.remove('warning');
-            }
+            timerElement.textContent = formatEffectTime(remaining);
+            remaining <= 10 ? timerElement.classList.add('warning') : timerElement.classList.remove('warning');
 
             if (remaining <= 0) {
                 removeEffect(id, type);

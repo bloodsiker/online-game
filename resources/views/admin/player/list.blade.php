@@ -40,10 +40,10 @@
                                     <td>{{ $player->lvl }}</td>
                                     <td>{{ $player->hp_now }} / {{ $player->hp_max }}</td>
                                     <td>{{ $player->mp_now }} / {{ $player->mp_max }}</td>
-                                    <td>{{ $player->str }}</td>
-                                    <td>{{ $player->agil }}</td>
-                                    <td>{{ $player->mud }}</td>
-                                    <td>{{ $player->intel }}</td>
+                                    <td>{{ $player->strength }}</td>
+                                    <td>{{ $player->agility }}</td>
+                                    <td>{{ $player->wisdom }}</td>
+                                    <td>{{ $player->intelligence }}</td>
                                     <td>{{ $player->user?->money ?? 0 }}</td>
                                     <td>{{ $player->user?->diamond ?? 0 }}</td>
                                     <td><a href="{{ route('admin.player.info', $player->id) }}" class="btn btn-xs btn-primary">Детали</a></td>

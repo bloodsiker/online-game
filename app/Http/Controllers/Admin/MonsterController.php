@@ -10,6 +10,7 @@ use App\Models\Location\Location;
 use App\Models\Monster\BossMechanic;
 use App\Models\Monster\BossPhase;
 use App\Models\Monster\Monster;
+use App\Models\Share\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -74,6 +75,14 @@ class MonsterController extends Controller
         return redirect()->back()->with('success', 'Предмет удалён.');
     }
 
+    public function infoLocation(Monster $monster): View
+    {
+        $monster->load(['locations.map']);
+        $locations = Location::orderBy('name')->get();
+
+        return view('admin.monster.info_location', compact('monster', 'locations'));
+    }
+
     public function location(Request $request, Monster $monster): RedirectResponse
     {
         $aggression = $request->input('aggression');
@@ -85,7 +94,7 @@ class MonsterController extends Controller
         return redirect()->back()->with('success', 'Локация добавлена.');
     }
 
-    public function updateLocation(Request $request, Monster $monster, Location $location): RedirectResponse
+    public function updateLocation(Request $request, Monster $monster, Location $location): \Illuminate\Http\JsonResponse
     {
         $aggression = $request->input('aggression');
 
@@ -93,7 +102,7 @@ class MonsterController extends Controller
             'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
         ]);
 
-        return redirect()->back()->with('success', 'Агрессия обновлена.');
+        return response()->json(['status' => 'ok']);
     }
 
     public function deleteLocation(Monster $monster, Location $location): RedirectResponse

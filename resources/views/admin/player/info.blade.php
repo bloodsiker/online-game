@@ -91,24 +91,24 @@
                                         <div class="col-lg-3">
                                             <h6 class="text-muted mb-3">Характеристики</h6>
                                             <div class="form-group">
-                                                <label class="col-form-label">Сила (str)</label>
-                                                <input type="number" step="0.01" class="form-control" name="str" value="{{ $player->str }}">
+                                                <label class="col-form-label">Сила</label>
+                                                <input type="number" step="0.01" class="form-control" name="strength" value="{{ $player->strength }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Ловкость (agil)</label>
-                                                <input type="number" step="0.01" class="form-control" name="agil" value="{{ $player->agil }}">
+                                                <label class="col-form-label">Ловкость</label>
+                                                <input type="number" step="0.01" class="form-control" name="agility" value="{{ $player->agility }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Интеллект (int)</label>
-                                                <input type="number" step="0.01" class="form-control" name="int" value="{{ $player->int }}">
+                                                <label class="col-form-label">Интуиция</label>
+                                                <input type="number" step="0.01" class="form-control" name="intuition" value="{{ $player->intuition }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Мудрость (mud)</label>
-                                                <input type="number" step="0.01" class="form-control" name="mud" value="{{ $player->mud }}">
+                                                <label class="col-form-label">Мудрость</label>
+                                                <input type="number" step="0.01" class="form-control" name="wisdom" value="{{ $player->wisdom }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Инт. (intel)</label>
-                                                <input type="number" step="0.01" class="form-control" name="intel" value="{{ $player->intel }}">
+                                                <label class="col-form-label">Интеллект</label>
+                                                <input type="number" step="0.01" class="form-control" name="intelligence" value="{{ $player->intelligence }}">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Уклонение</label>

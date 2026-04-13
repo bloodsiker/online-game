@@ -445,13 +445,15 @@
                         @else
                             @php
                                 $effectLabels = [
-                                    'str'     => 'Сила',
-                                    'int'     => 'Интеллект',
-                                    'agil'    => 'Ловкость',
-                                    'hp_max'  => 'Макс. HP',
-                                    'mp_max'  => 'Макс. MP',
-                                    'attack'  => 'Атака',
-                                    'defense' => 'Защита',
+                                    'strength'     => 'Сила',
+                                    'intuition'    => 'Интуиция',
+                                    'agility'      => 'Ловкость',
+                                    'intelligence' => 'Интеллект',
+                                    'wisdom'       => 'Мудрость',
+                                    'hp_max'       => 'Макс. HP',
+                                    'mp_max'       => 'Макс. MP',
+                                    'attack'       => 'Атака',
+                                    'defense'      => 'Защита',
                                 ];
                             @endphp
                             <div class="passive-list">

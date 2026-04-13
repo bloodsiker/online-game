@@ -350,15 +350,23 @@
                                     </div>
                                     <div class="char-card-body">
                                         @foreach([
-                                            ['Сила',       $player->getStrength()],
-                                            ['Интуиция',   $player->getInt()],
-                                            ['Ловкость',   $player->getAgility()],
-                                            ['Интеллект',  $player->getIntelligence()],
-                                            ['Мудрость',   $player->getMud()],
-                                        ] as [$label, $val])
+                                            ['Сила',       $player->getStrength(),       $playerDecorator->getStrength()],
+                                            ['Интуиция',   $player->getInt(),            $playerDecorator->getInt()],
+                                            ['Ловкость',   $player->getAgility(),        $playerDecorator->getAgility()],
+                                            ['Интеллект',  $player->getIntelligence(),   $playerDecorator->getIntelligence()],
+                                            ['Мудрость',   $player->getMud(),            $playerDecorator->getMud()],
+                                        ] as [$label, $base, $total])
+                                            @php $bonus = $total - $base; @endphp
                                             <div class="char-stat-row">
                                                 <span class="char-stat-label">{{ $label }}</span>
-                                                <span class="char-stat-val">{{ $val }}</span>
+                                                <span class="char-stat-val">
+                                                    {{ $base }}
+                                                    @if($bonus > 0)
+                                                        <span style="color:#2a7a2a;font-size:11px">(+{{ $bonus }})</span>
+                                                    @elseif($bonus < 0)
+                                                        <span style="color:#8b2020;font-size:11px">({{ $bonus }})</span>
+                                                    @endif
+                                                </span>
                                             </div>
                                         @endforeach
                                         @if($player->free_stats)
@@ -568,18 +576,18 @@
         parent.openPtsModal({
             free:  {{ $player->getFreeStats() }},
             bases: {
-                str:   {{ $player->getStrength() }},
-                int:   {{ $player->getInt() }},
-                agil:  {{ $player->getAgility() }},
-                intel: {{ $player->getIntelligence() }},
-                mud:   {{ $player->getMud() }},
+                strength:     {{ $player->getStrength() }},
+                intuition:    {{ $player->getInt() }},
+                agility:      {{ $player->getAgility() }},
+                intelligence: {{ $player->getIntelligence() }},
+                wisdom:       {{ $player->getMud() }},
             },
             full: {
-                str:   {{ $playerDecorator->getStrength() }},
-                int:   {{ $playerDecorator->getInt() }},
-                agil:  {{ $playerDecorator->getAgility() }},
-                intel: {{ $playerDecorator->getIntelligence() }},
-                mud:   {{ $playerDecorator->getMud() }},
+                strength:     {{ $playerDecorator->getStrength() }},
+                intuition:    {{ $playerDecorator->getInt() }},
+                agility:      {{ $playerDecorator->getAgility() }},
+                intelligence: {{ $playerDecorator->getIntelligence() }},
+                wisdom:       {{ $playerDecorator->getMud() }},
             },
             saveUrl: '{{ route('character.point_save') }}',
             csrf:    '{{ csrf_token() }}',

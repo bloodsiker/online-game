@@ -6,20 +6,20 @@ namespace App\Enums;
 
 enum PlayerStatKey: string
 {
-    case STR = 'str';
-    case AGIL = 'agil';
-    case INT = 'int';
-    case MUD = 'mud';
-    case INTEL = 'intel';
+    case STRENGTH    = 'strength';
+    case AGILITY     = 'agility';
+    case INTUITION   = 'intuition';
+    case WISDOM      = 'wisdom';
+    case INTELLIGENCE = 'intelligence';
 
     public function label(): string
     {
         return match ($this) {
-            self::STR => 'Сила',
-            self::AGIL => 'Ловкость',
-            self::INT => 'Интуиция',
-            self::MUD => 'Мудрость',
-            self::INTEL => 'Интеллект',
+            self::STRENGTH    => 'Сила',
+            self::AGILITY     => 'Ловкость',
+            self::INTUITION   => 'Интуиция',
+            self::WISDOM      => 'Мудрость',
+            self::INTELLIGENCE => 'Интеллект',
         };
     }
 }

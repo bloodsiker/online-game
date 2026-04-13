@@ -185,11 +185,11 @@
 
         <div class="pts-body">
             @foreach([
-                ['Сила',       'str',   $playerDecorator->getStrength(),     $player->getStrength()],
-                ['Интуиция',   'int',   $playerDecorator->getInt(),          $player->getInt()],
-                ['Ловкость',   'agil',  $playerDecorator->getAgility(),      $player->getAgility()],
-                ['Интеллект',  'intel', $playerDecorator->getIntelligence(), $player->getIntelligence()],
-                ['Мудрость',   'mud',   $playerDecorator->getMud(),          $player->getMud()],
+                ['Сила',       'strength',     $playerDecorator->getStrength(),     $player->getStrength()],
+                ['Интуиция',   'intuition',    $playerDecorator->getInt(),          $player->getInt()],
+                ['Ловкость',   'agility',      $playerDecorator->getAgility(),      $player->getAgility()],
+                ['Интеллект',  'intelligence', $playerDecorator->getIntelligence(), $player->getIntelligence()],
+                ['Мудрость',   'wisdom',       $playerDecorator->getMud(),          $player->getMud()],
             ] as [$label, $key, $full, $base])
                 <div class="pts-row">
                     <span class="pts-row-name">{{ $label }}</span>
@@ -225,11 +225,11 @@
         var cur = Math.floor(document.forms.incpoints[vid].value * 1);
         if (cur < 0) cur = 0;
         document.forms.incpoints[vid].value = cur;
-        var p = document.forms.incpoints["str"].value * 1
-              + document.forms.incpoints["int"].value * 1
-              + document.forms.incpoints["agil"].value * 1
-              + document.forms.incpoints["intel"].value * 1
-              + document.forms.incpoints["mud"].value * 1;
+        var p = document.forms.incpoints["strength"].value * 1
+              + document.forms.incpoints["intuition"].value * 1
+              + document.forms.incpoints["agility"].value * 1
+              + document.forms.incpoints["intelligence"].value * 1
+              + document.forms.incpoints["wisdom"].value * 1;
         if (allpoints - p < 0) {
             document.forms.incpoints[vid].value = cur + allpoints - p;
             document.forms.incpoints.points.value = 0;
@@ -246,11 +246,11 @@
         }
     }
 
-    newVal("str");
-    newVal("int");
-    newVal("agil");
-    newVal("intel");
-    newVal("mud");
+    newVal("strength");
+    newVal("intuition");
+    newVal("agility");
+    newVal("intelligence");
+    newVal("wisdom");
 
     function incval(incname) {
         if (document.forms.incpoints.points.value > 0) {

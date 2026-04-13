@@ -32,11 +32,11 @@ class RecalculatePlayerStats
         $player->exp_diff = $experience->exp_diff;
         $player->free_stats += $race->free_stats;
 
-        $player->str = $player->str + $race->str;
-        $player->int = $player->int + $race->int;
-        $player->agil = $player->agil + $race->agil;
-        $player->mud = $player->mud + $race->mud;
-        $player->intel = $player->intel + $race->intel;
+        $player->strength     = $player->strength     + $race->strength;
+        $player->intuition    = $player->intuition    + $race->intuition;
+        $player->agility      = $player->agility      + $race->agility;
+        $player->wisdom       = $player->wisdom       + $race->wisdom;
+        $player->intelligence = $player->intelligence + $race->intelligence;
 
         $player->save();
 
