@@ -3,10 +3,10 @@
 namespace App\Models\Share;
 
 use App\Enums\ItemRarity;
-use App\Enums\RuneRarity;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
-use App\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Models\Monster\Monster;
 use App\Models\Skill;
 use Illuminate\Database\Eloquent\Collection;

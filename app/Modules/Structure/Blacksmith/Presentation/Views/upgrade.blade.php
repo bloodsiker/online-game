@@ -67,7 +67,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            @include('blacksmith._tabs', ['activeTab' => 'upgrade'])
+            @include('blacksmith::_tabs', ['activeTab' => 'upgrade'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -262,7 +262,7 @@
         foreach ($items as $slot) {
             $lvl  = $slot->item->upgrade_lvl;
             $pity = $slot->item->upgrade_pity;
-            $service = app(\App\Services\UpgradeService::class);
+            $service = app(\App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService::class);
             $upgradeData[$slot->item->id] = [
                 'name'          => $slot->item->itemInfo->name,
                 'level'         => $lvl,

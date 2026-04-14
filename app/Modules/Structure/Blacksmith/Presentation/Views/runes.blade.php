@@ -80,7 +80,7 @@
 <tr height="22">
     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
     <td class="tbl-shp-sml tt" valign="top" align="left">
-        @include('blacksmith._tabs', ['activeTab' => 'runes'])
+        @include('blacksmith::_tabs', ['activeTab' => 'runes'])
     </td>
     <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
 </tr>
@@ -308,7 +308,7 @@
 const ITEMS_DATA = @json($itemsData);
 const RUNES_DATA = @json($runesData);
 const KEYS_DATA  = @json($keysData);
-const MAX_SLOTS  = {{ \App\Services\RuneService::MAX_RUNE_SLOTS }};
+const MAX_SLOTS  = {{ \App\Modules\Structure\Blacksmith\Domain\Services\RuneService::MAX_RUNE_SLOTS }};
 
 const STAT_LABELS = {
     attack: 'Атака', armor: 'Защита', hp_max: 'Макс. HP', mp_max: 'Макс. MP',

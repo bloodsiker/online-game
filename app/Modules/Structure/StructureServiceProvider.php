@@ -23,6 +23,8 @@ class StructureServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/Exchange/Presentation/Views', 'exchange',);
 
+        $this->loadViewsFrom(__DIR__ . '/Blacksmith/Presentation/Views', 'blacksmith');
+
         // Auction routes — inside updateLastOnline middleware (same as web.php group)
         Route::middleware(['web', 'updateLastOnline'])
             ->group(__DIR__ . '/Auction/Presentation/Http/Route/web.php');
@@ -42,5 +44,9 @@ class StructureServiceProvider extends ServiceProvider
         // Exchange routes — inside updateLastOnline middleware
         Route::middleware(['web', 'updateLastOnline'])
             ->group(__DIR__ . '/Exchange/Presentation/Http/Route/web.php');
+
+        // Blacksmith routes — inside updateLastOnline middleware
+        Route::middleware(['web', 'updateLastOnline'])
+            ->group(__DIR__ . '/Blacksmith/Presentation/Http/Route/web.php');
     }
 }

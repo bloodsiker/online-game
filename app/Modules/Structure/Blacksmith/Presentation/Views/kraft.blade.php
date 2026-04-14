@@ -184,7 +184,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            @include('blacksmith._tabs', ['activeTab' => 'kraft'])
+            @include('blacksmith::_tabs', ['activeTab' => 'kraft'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>

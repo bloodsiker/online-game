@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
+use App\Http\Controllers\Controller;
+use App\Modules\Structure\Blacksmith\Domain\Services\RuneService;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
-use App\Models\Item\ItemRune;
 use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
-use App\Services\RuneService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +66,7 @@ class RuneController extends Controller
             ->collectFrom(new BackpackItemTooltipStrategy($runeKeys))
             ->renderScript();
 
-        return view('blacksmith.runes', compact(
+        return view('blacksmith::runes', compact(
             'blacksmith', 'user', 'items', 'runes', 'runeKeys', 'itemTooltipScript'
         ));
     }
@@ -144,9 +144,9 @@ class RuneController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'item_id'       => 'required|integer',
-            'slot_index'    => 'required|integer|min:0|max:2',
-            'locked_indices' => 'nullable|array',
+            'item_id'          => 'required|integer',
+            'slot_index'       => 'required|integer|min:0|max:2',
+            'locked_indices'   => 'nullable|array',
             'locked_indices.*' => 'integer|min:0|max:4',
         ]);
 
@@ -209,8 +209,6 @@ class RuneController extends Controller
 
         return redirect()->route('blacksmith.runes', ['id' => $id]);
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
 
     private function findItemSlot(int $userId, int $itemId, array $types): ?Backpack
     {

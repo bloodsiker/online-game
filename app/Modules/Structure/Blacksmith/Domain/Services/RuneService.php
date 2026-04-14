@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Enums\RunePassiveType;
-use App\Enums\RuneRarity;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
@@ -21,7 +21,7 @@ class RuneService
      * 'type' maps to PlayerStatService::modifiersFromEntry() keys.
      */
     private const STAT_POOL = [
-        'attack'       => ['min' => 3,  'max' => 8],   // раскрывается в 4 стата урона
+        'attack'       => ['min' => 3,  'max' => 8],
         'armor'        => ['min' => 5,  'max' => 12],
         'hp_max'       => ['min' => 20, 'max' => 50],
         'mp_max'       => ['min' => 15, 'max' => 35],
@@ -32,16 +32,6 @@ class RuneService
         'dodge'        => ['min' => 1,  'max' => 4],
     ];
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Public API
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Вставить руну в слот предмета. Потребляет руну из рюкзака.
-     *
-     * Safe mode  — всегда успешно, случайные статы.
-     * Risk mode  — шанс провала (руна уничтожается), при успехе +25% к диапазону значений.
-     */
     public function imbue(
         User $user,
         Item $item,
@@ -70,7 +60,6 @@ class RuneService
         /** @var RuneRarity $rarity */
         $rarity = $runeInfo->rune_rarity;
 
-        // Режим риска: проверяем провал
         if ($riskMode && $rarity->riskFailChance() > 0) {
             $roll = random_int(1, 100);
             if ($roll <= $rarity->riskFailChance()) {
@@ -108,9 +97,6 @@ class RuneService
         ];
     }
 
-    /**
-     * Удалить руну из слота (руна уничтожается, слот освобождается).
-     */
     public function removeRune(Item $item, int $slotIndex): array
     {
         $itemRune = ItemRune::where('item_id', $item->id)
@@ -127,10 +113,6 @@ class RuneService
         return ['success' => true, 'message' => sprintf('Руна «%s» удалена. Руна уничтожена.', $runeName)];
     }
 
-    /**
-     * Переброс статов руны. Заблокированные статы (locked=true) не изменяются.
-     * Стоимость: base_cost * (reroll_count+1)^1.5 + locked_count * base_cost * 0.5
-     */
     public function reroll(User $user, Item $item, int $slotIndex, array $lockedIndices = []): array
     {
         $itemRune = ItemRune::where('item_id', $item->id)
@@ -154,7 +136,6 @@ class RuneService
         $oldStats  = $itemRune->stats;
         $newStats  = $this->rollStats($itemRune->runeInfo, false);
 
-        // Preserve locked stats
         $merged = [];
         foreach ($newStats as $i => $newStat) {
             if (isset($lockedIndices[$i]) && isset($oldStats[$i])) {
@@ -164,7 +145,6 @@ class RuneService
             }
         }
 
-        // Keep lock flags on any extra old stats beyond new count
         foreach ($oldStats as $i => $oldStat) {
             if ($i >= count($newStats) && in_array($i, $lockedIndices, true) && isset($merged[$i])) {
                 $merged[$i] = array_merge($oldStat, ['locked' => true]);
@@ -185,9 +165,6 @@ class RuneService
         ];
     }
 
-    /**
-     * Открыть новый рунный слот (потребляет RUNE_KEY из рюкзака).
-     */
     public function openSlot(Item $item, Backpack $keySlot): array
     {
         if ($item->rune_slot_count >= self::MAX_RUNE_SLOTS) {
@@ -209,9 +186,6 @@ class RuneService
         ];
     }
 
-    /**
-     * Стоимость следующего переброса для клиента.
-     */
     public function nextRerollCost(ItemRune $itemRune, int $lockedCount = 0): int
     {
         $rarity   = $itemRune->runeInfo->rune_rarity;
@@ -222,27 +196,20 @@ class RuneService
         return $cost;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Private helpers
-    // ─────────────────────────────────────────────────────────────────────────
-
     private function rollStats(\App\Models\Share\ShareItem $runeInfo, bool $riskMode): array
     {
         /** @var RuneRarity $rarity */
         $rarity = $runeInfo->rune_rarity;
         $mult   = $rarity->multiplier();
 
-        // Risk mode: roll in upper 75-100% of range instead of 0-100%
         $rangeLow = $riskMode ? 0.75 : 0.0;
 
-        // Пул доступных статов (тематика руны или все)
         $pool = $runeInfo->rune_stat_pool ?? array_keys(self::STAT_POOL);
 
         [$min, $max] = $rarity->statCount();
         $count       = random_int($min, $max);
         $count       = min($count, count($pool));
 
-        // Shuffle pool, pick N without duplicates
         $keys     = $pool;
         shuffle($keys);
         $selected = array_slice($keys, 0, $count);

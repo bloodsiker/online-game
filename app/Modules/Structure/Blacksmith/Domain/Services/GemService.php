@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
@@ -40,7 +40,6 @@ class GemService
             return ['success' => false, 'message' => 'Сокет уже занят. Сначала извлеките камень.'];
         }
 
-        // Consume gem from backpack
         if ($gemSlot->count > 1) {
             $gemSlot->count -= 1;
             $gemSlot->save();
@@ -77,7 +76,6 @@ class GemService
 
         $gemShareItemId = $itemGem->share_item_id;
 
-        // Try to stack in existing backpack slot
         $existingSlot = Backpack::select('backpacks.*')
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->where('backpacks.user_id', $user->id)
@@ -106,7 +104,6 @@ class GemService
 
     /**
      * Open a new socket on an item (requires socket kit from backpack).
-     * socket_kit_share_item_id — id share_item of the socket drill.
      */
     public function openSocket(User $user, Item $item, Backpack $kitSlot): array
     {
@@ -114,7 +111,6 @@ class GemService
             return ['success' => false, 'message' => 'Достигнуто максимальное количество сокетов.'];
         }
 
-        // Consume kit
         if ($kitSlot->count > 1) {
             $kitSlot->count -= 1;
             $kitSlot->save();

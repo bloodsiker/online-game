@@ -1,7 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
+namespace App\Modules\Structure\Blacksmith\Presentation\Http;
+
+use App\Http\Controllers\Controller;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
 use App\Models\Item\Item;
@@ -11,7 +16,6 @@ use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Services\PlayerStatService;
-use App\Services\UpgradeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +28,7 @@ class BlacksmithController extends Controller
         private readonly PlayerStatService $statService,
     ) {}
 
-    public function index(Request $request, $id)
+    public function index(Request $request, mixed $id): mixed
     {
         $user = Auth::user();
         $blacksmith = Structure::find($id);
@@ -63,10 +67,10 @@ class BlacksmithController extends Controller
             ->collectFrom(new ShareItemTooltipStrategy($ingredientItems))
             ->renderScript();
 
-        return view('blacksmith.kraft', compact('blacksmith', 'user', 'recipes', 'resources', 'itemTooltipScript'));
+        return view('blacksmith::kraft', compact('blacksmith', 'user', 'recipes', 'resources', 'itemTooltipScript'));
     }
 
-    public function kraftItem(Request $request, $id)
+    public function kraftItem(Request $request, mixed $id): mixed
     {
         $user = Auth::user();
 
@@ -114,7 +118,6 @@ class BlacksmithController extends Controller
         if ($allowKraft) {
             $percentKraft = mt_rand(0, 100);
             if ($percentKraft <= $recipe->percent) {
-
                 $successKraftItem = new Item;
                 $successKraftItem->share_item_id = $recipe->kraftItem->id;
                 $successKraftItem->save();
@@ -142,7 +145,6 @@ class BlacksmithController extends Controller
                     Item::where('id', $itemBackpack->item_id)->delete();
                 }
             }
-
         } else {
             session()->flash('message', 'Не достаточно ресурсов для крафта');
         }
@@ -150,7 +152,7 @@ class BlacksmithController extends Controller
         return redirect()->back();
     }
 
-    public function breakItem($id, Request $request)
+    public function breakItem(mixed $id, Request $request): mixed
     {
         $user = Auth::user();
         $blacksmith = Structure::find($id);
@@ -214,7 +216,7 @@ class BlacksmithController extends Controller
             ->collectFrom(new BackpackItemTooltipStrategy($items))
             ->renderScript();
 
-        return view('blacksmith.break', compact('blacksmith', 'user', 'items', 'crystal', 'itemTooltipScript'));
+        return view('blacksmith::break', compact('blacksmith', 'user', 'items', 'crystal', 'itemTooltipScript'));
     }
 
     public function upgrade(Request $request, int $id): \Illuminate\Contracts\View\View
@@ -245,7 +247,7 @@ class BlacksmithController extends Controller
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
             ->where('share_items.type', ShareItemType::SCROLL->value)
-            ->where('share_items.upgrade_scroll_type', \App\Enums\UpgradeScrollType::BASE->value)
+            ->where('share_items.upgrade_scroll_type', UpgradeScrollType::BASE->value)
             ->get();
 
         $bonusScrolls = Backpack::select('backpacks.*')
@@ -256,9 +258,9 @@ class BlacksmithController extends Controller
             ->where('backpacks.equipped', 0)
             ->where('share_items.type', ShareItemType::SCROLL->value)
             ->whereIn('share_items.upgrade_scroll_type', [
-                \App\Enums\UpgradeScrollType::PROTECTION->value,
-                \App\Enums\UpgradeScrollType::STABILIZER->value,
-                \App\Enums\UpgradeScrollType::LUCKY->value,
+                UpgradeScrollType::PROTECTION->value,
+                UpgradeScrollType::STABILIZER->value,
+                UpgradeScrollType::LUCKY->value,
             ])
             ->get();
 
@@ -271,7 +273,7 @@ class BlacksmithController extends Controller
         $player = $user->player;
         $playerDecorator = $this->statService->resolve($player);
 
-        return view('blacksmith.upgrade', compact('blacksmith', 'user', 'player', 'playerDecorator', 'items', 'baseScrolls', 'bonusScrolls', 'itemTooltipScript'));
+        return view('blacksmith::upgrade', compact('blacksmith', 'user', 'player', 'playerDecorator', 'items', 'baseScrolls', 'bonusScrolls', 'itemTooltipScript'));
     }
 
     public function upgradeProcess(Request $request, int $id): \Illuminate\Http\RedirectResponse
@@ -308,7 +310,7 @@ class BlacksmithController extends Controller
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.item_id', $request->integer('base_scroll_id'))
-            ->where('share_items.upgrade_scroll_type', \App\Enums\UpgradeScrollType::BASE->value)
+            ->where('share_items.upgrade_scroll_type', UpgradeScrollType::BASE->value)
             ->first();
 
         if (! $baseScrollSlot instanceof Backpack) {
@@ -326,9 +328,9 @@ class BlacksmithController extends Controller
                 ->where('backpacks.item_id', $request->integer('bonus_scroll_id'))
                 ->where('share_items.type', ShareItemType::SCROLL->value)
                 ->whereIn('share_items.upgrade_scroll_type', [
-                    \App\Enums\UpgradeScrollType::PROTECTION->value,
-                    \App\Enums\UpgradeScrollType::STABILIZER->value,
-                    \App\Enums\UpgradeScrollType::LUCKY->value,
+                    UpgradeScrollType::PROTECTION->value,
+                    UpgradeScrollType::STABILIZER->value,
+                    UpgradeScrollType::LUCKY->value,
                 ])
                 ->first();
         }

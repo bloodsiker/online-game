@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
+use App\Http\Controllers\Controller;
+use App\Modules\Structure\Blacksmith\Domain\Services\GemService;
 use App\Enums\ShareItemType;
 use App\Models\Backpack;
-use App\Models\Item\Item;
-use App\Models\Item\ItemGem;
-use App\Models\Share\ShareItem;
 use App\Models\Structure;
-use App\Services\GemService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use Illuminate\Http\RedirectResponse;
@@ -70,7 +68,7 @@ class GemController extends Controller
             ->collectFrom(new BackpackItemTooltipStrategy($socketKits))
             ->renderScript();
 
-        return view('blacksmith.gems', compact(
+        return view('blacksmith::gems', compact(
             'blacksmith', 'user', 'items', 'gems', 'socketKits', 'itemTooltipScript'
         ));
     }

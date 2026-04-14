@@ -64,7 +64,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            @include('blacksmith._tabs', ['activeTab' => 'gems'])
+            @include('blacksmith::_tabs', ['activeTab' => 'gems'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -312,7 +312,7 @@
 const ITEMS_DATA = @json($itemsData);
 const GEMS_DATA  = @json($gemsData);
 const KITS_DATA  = @json($kitsData);
-const MAX_SOCKETS = {{ \App\Services\GemService::MAX_SOCKETS }};
+const MAX_SOCKETS = {{ \App\Modules\Structure\Blacksmith\Domain\Services\GemService::MAX_SOCKETS }};
 
 let selectedItemId   = parseInt(localStorage.getItem('gem_selected_item') || '0');
 let selectedGemId    = 0;

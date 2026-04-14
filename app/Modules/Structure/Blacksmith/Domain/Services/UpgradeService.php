@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Models\Backpack;
 use App\Models\User;
 
@@ -80,15 +80,12 @@ class UpgradeService
         $user->money -= $cost;
         $user->save();
 
-        // Consume base scroll (always)
         $this->consumeScroll($baseScrollSlot);
 
-        // Consume bonus scroll if provided
         if ($bonusScrollSlot) {
             $this->consumeScroll($bonusScrollSlot);
         }
 
-        // Guaranteed success after streak
         $guaranteed = $item->upgrade_fail_streak >= self::GUARANTEED_SUCCESS_STREAK;
         $successChance = $this->getSuccessChance($currentLevel, $item->upgrade_pity, $isLucky);
         $roll = mt_rand(1, 100);
@@ -108,11 +105,9 @@ class UpgradeService
             ];
         }
 
-        // Failure path
         $item->upgrade_pity++;
         $item->upgrade_fail_streak++;
 
-        // Check destruction (only lvl 12+)
         $destroyChance = $this->getDestroyChance($currentLevel);
         if (! $isProtection && $destroyChance > 0 && mt_rand(1, 100) <= $destroyChance) {
             $item->save();
@@ -127,7 +122,6 @@ class UpgradeService
             ];
         }
 
-        // Downgrade (lvl 6+ loses 1 level unless stabilizer)
         if (! $isStabilizer && $currentLevel >= 6) {
             $item->upgrade_lvl = max(0, $currentLevel - 1);
         }
