@@ -3,7 +3,7 @@
 namespace App\Models\Quest;
 
 use App\Enums\QuestPlayerStatus;
-use App\Models\Clan\Clan;
+use App\Modules\Clan\Domain\Models\Clan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

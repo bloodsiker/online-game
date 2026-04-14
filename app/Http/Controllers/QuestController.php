@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ClanLogAction;
+use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Enums\QuestPlayerStatus;
 use App\Enums\QuestRewardType;
 use App\Enums\QuestType;
-use App\Models\Clan\ClanLog;
+use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Models\Npc;
 use App\Models\Player\PlayerLocationAccess;
 use App\Models\Quest\Quest;
@@ -870,7 +870,7 @@ class QuestController extends Controller
         return implode(' | ', array_filter($parts));
     }
 
-    private function giveClanPoints(\App\Models\Clan\Clan $clan, int $amount, $user): void
+    private function giveClanPoints(\App\Modules\Clan\Domain\Models\Clan $clan, int $amount, $user): void
     {
         $clan->increment('points', $amount);
         $user->clanMembership?->increment('points', $amount);

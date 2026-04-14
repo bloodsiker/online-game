@@ -10,7 +10,7 @@ use App\Enums\QuestType;
 use App\Enums\ShareItemStatType;
 use App\Enums\ShareItemType;
 use App\Enums\UpgradeScrollType;
-use App\Models\Auction\Auction;
+use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Models\Exchange;
 use App\Models\Experience;
 use App\Models\Item\Item;

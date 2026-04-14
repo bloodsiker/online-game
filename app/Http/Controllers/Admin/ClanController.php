@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Clan\Clan;
-use App\Models\Clan\ClanTreasuryLog;
-use App\Models\Clan\ClanWarehouse;
-use App\Models\Clan\ClanWarehouseLog;
+use App\Modules\Clan\Domain\Models\Clan;
+use App\Modules\Clan\Domain\Models\ClanTreasuryLog;
+use App\Modules\Clan\Domain\Models\ClanWarehouse;
+use App\Modules\Clan\Domain\Models\ClanWarehouseLog;
 use Illuminate\Http\Request;
 
 class ClanController extends Controller

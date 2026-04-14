@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Structure\Auction\Application\UseCases;
+
+use App\Modules\Structure\Auction\Domain\Models\Auction;
+use App\Models\Backpack;
+use App\Models\Structure;
+use App\Models\User;
+use App\Modules\Structure\Auction\Domain\Services\AuctionFeeCalculator;
+use Illuminate\Support\Facades\DB;
+
+class CreateLot
+{
+    public function __construct(
+        private readonly AuctionFeeCalculator $feeCalculator,
+    ) {}
+
+    /**
+     * @return array{ok: bool, message: string}
+     */
+    public function execute(
+        User $user,
+        Structure $auction,
+        int $itemId,
+        int $amount,
+        int $price,
+        bool $isAnonymous,
+    ): array {
+        $fee = $this->feeCalculator->calculate($price);
+        if ($user->money < $fee) {
+            return ['ok' => false, 'message' => 'Не достаточно монет что бы оплатить налог.'];
+        }
+
+        $result = ['ok' => true, 'message' => ''];
+
+        DB::transaction(function () use ($user, $auction, $itemId, $amount, $price, $fee, $isAnonymous, &$result) {
+            $slotItem = Backpack::where('item_id', $itemId)
+                ->where('user_id', $user->id)
+                ->where('equipped', 0)
+                ->lockForUpdate()
+                ->with('item.itemInfo')
+                ->first();
+
+            if (! $slotItem instanceof Backpack) {
+                $result = ['ok' => false, 'message' => 'Не найдено предмета в сумке.'];
+                return;
+            }
+
+            $qty = min($amount, $slotItem->count);
+
+            Auction::create([
+                'user_id'      => $user->id,
+                'structure_id' => $auction->id,
+                'item_id'      => $slotItem->item->id,
+                'count'        => $qty,
+                'is_anonymous' => $isAnonymous,
+                'price'        => $price,
+            ]);
+
+            if ($slotItem->count <= $qty) {
+                $slotItem->delete();
+            } else {
+                $slotItem->decrement('count', $qty);
+            }
+
+            $user->decrement('money', $fee);
+
+            $result = ['ok' => true, 'message' => sprintf('%s выставлен на продажу', $slotItem->item->itemInfo->name)];
+        });
+
+        return $result;
+    }
+}

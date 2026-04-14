@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\ShareItemStatType;
-use App\Models\Clan\ClanMember;
+use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Models\Player\Player;
 use App\Models\Location\Location;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
