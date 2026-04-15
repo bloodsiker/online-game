@@ -6,7 +6,7 @@ use App\Models\Backpack;
 use App\Models\Player\PlayerSlot;
 use App\Services\HotbarService;
 use App\Services\ItemEffect\EffectHandler;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

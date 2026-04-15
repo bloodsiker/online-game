@@ -8,7 +8,7 @@ use App\DTO\AttackResultDTO;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Player\Player;
 use App\Services\Combat\BattleEffectService;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

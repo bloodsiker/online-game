@@ -1,6 +1,8 @@
 <?php
 
-namespace App\DTO;
+declare(strict_types=1);
+
+namespace App\Modules\Player\Domain\DTO;
 
 use App\Enums\CombatClass;
 use App\Services\Combat\FightHitInterface;

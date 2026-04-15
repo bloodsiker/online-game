@@ -14,7 +14,7 @@ use App\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Services\PlayerMagicSkillService;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 
 readonly class AttackStrategyResolver
 {

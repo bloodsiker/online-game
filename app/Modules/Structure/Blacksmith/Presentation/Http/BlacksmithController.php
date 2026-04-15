@@ -15,7 +15,7 @@ use App\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\BackpackItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
+
+namespace App\Modules\Structure\Warehouse\Presentation\Http;
 
 use App\Enums\ShareItemType;
+use App\Http\Controllers\Controller;
 use App\Models\Backpack;
 use App\Models\Structure;
 use App\Models\Warehouse;
@@ -11,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class WarehouseController extends Controller
 {
-    public function index(Request $request, int $id)
+    public function index(Request $request, int $id): mixed
     {
         $user      = Auth::user();
         $warehouse = Structure::findOrFail($id);
@@ -36,10 +39,10 @@ class WarehouseController extends Controller
             ->orderBy('share_items.type', 'desc')
             ->get();
 
-        return view('warehouse.put', compact('warehouse', 'user', 'putItems', 'countInWarehouse'));
+        return view('warehouse::put', compact('warehouse', 'user', 'putItems', 'countInWarehouse'));
     }
 
-    public function takeItem(Request $request, int $id)
+    public function takeItem(Request $request, int $id): mixed
     {
         $user      = Auth::user();
         $warehouse = Structure::findOrFail($id);
@@ -64,10 +67,10 @@ class WarehouseController extends Controller
             ->where('structure_id', $warehouse->id)
             ->count();
 
-        return view('warehouse.take', compact('warehouse', 'user', 'itemsToTake', 'countInWarehouse'));
+        return view('warehouse::take', compact('warehouse', 'user', 'itemsToTake', 'countInWarehouse'));
     }
 
-    private function handlePut(Request $request, $user, Structure $warehouse, int $countInWarehouse)
+    private function handlePut(Request $request, mixed $user, Structure $warehouse, int $countInWarehouse): mixed
     {
         $checkedItems = $request->input('item', []);
         $putItems     = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
@@ -87,14 +90,13 @@ class WarehouseController extends Controller
             ->get();
 
         $toInsert        = [];
-        $toStack         = [];  // ['warehouse' => Warehouse, 'add' => int]
-        $toSubtract      = [];  // ['item' => Backpack, 'count' => int]
+        $toStack         = [];
+        $toSubtract      = [];
         $toDeleteItemIds = [];
         $isLimit         = false;
         $totalCost       = 0;
         $newSlots        = 0;
 
-        // --- Pass 1: collect changes, no mutations ---
         foreach ($items as $item) {
             if ($countInWarehouse + $newSlots >= $user->warehouse_count) {
                 $isLimit = true;
@@ -134,7 +136,6 @@ class WarehouseController extends Controller
             }
         }
 
-        // --- Check money before any mutations ---
         if ($user->money < $totalCost) {
             session()->flash('message', sprintf(
                 'У вас не достаточно %s монет для хранения вещей',
@@ -143,7 +144,6 @@ class WarehouseController extends Controller
             return redirect()->back();
         }
 
-        // --- Pass 2: apply mutations ---
         foreach ($toStack as $stack) {
             $stack['warehouse']->count += $stack['add'];
             $stack['warehouse']->save();
@@ -172,7 +172,7 @@ class WarehouseController extends Controller
         return null;
     }
 
-    private function handleTake(Request $request, $user, Structure $warehouse)
+    private function handleTake(Request $request, mixed $user, Structure $warehouse): mixed
     {
         $checkedItems = $request->input('item', []);
         $takeItems    = array_filter($checkedItems, fn ($p) => isset($p['selected']) && $p['selected'] == 1);
@@ -222,5 +222,4 @@ class WarehouseController extends Controller
 
         return null;
     }
-
 }

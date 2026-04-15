@@ -9,7 +9,7 @@ use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Services\ClanSkillService;
 use App\Models\Backpack;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class ClanSkillController extends Controller

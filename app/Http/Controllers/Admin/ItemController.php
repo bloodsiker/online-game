@@ -70,7 +70,7 @@ class ItemController extends Controller
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = \App\Enums\ShareItemRequirementType::cases();
-        $playerStatKeys = \App\Enums\PlayerStatKey::cases();
+        $playerStatKeys = \App\Modules\Player\Domain\Enums\PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
         return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));

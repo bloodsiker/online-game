@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Structure;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Services\Recovery\RecoveryStrategyFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;

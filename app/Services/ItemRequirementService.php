@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\PlayerStatKey;
+use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Enums\ShareItemRequirementType;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSkill;

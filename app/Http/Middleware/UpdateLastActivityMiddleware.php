@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;

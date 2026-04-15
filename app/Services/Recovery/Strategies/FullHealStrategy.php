@@ -4,7 +4,7 @@ namespace App\Services\Recovery\Strategies;
 
 use App\Models\Player\Player;
 use App\Models\Structure;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Services\Recovery\Dto\RecoveryResultDto;
 
 class FullHealStrategy implements RecoveryStrategyInterface

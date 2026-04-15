@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BackpackController;
-use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
@@ -25,7 +24,6 @@ use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ReferralController;
-use App\Http\Controllers\WarehouseController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -65,10 +63,6 @@ Route::post('/register/check', [RegisterController::class, 'registerCheck'])->na
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
 
 Route::middleware(['updateLastOnline'])->group(function () {
-    Route::post('/character/points-save', [CharacterController::class, 'pointSave'])->name('character.point_save');
-    Route::get('/character/points', [CharacterController::class, 'point'])->name('character.point');
-    Route::get('/character', [CharacterController::class, 'index'])->name('character');
-
     Route::post('/magic-skill/update', [MagicSkillController::class, 'updateSkill'])->name('magic_skill.update');
     Route::post('/magic-skill/order', [MagicSkillController::class, 'updateOrder'])->name('magic_skill.order');
     Route::post('/magic-skill/{skill}/use', [MagicSkillController::class, 'useSkill'])->name('magic_skill.use');
@@ -95,9 +89,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
 
 
-
-    Route::match(['GET', 'POST'], '/warehouse/{id}/take-item', [WarehouseController::class, 'takeItem'])->name('warehouse.take_item');
-    Route::match(['GET', 'POST'], '/warehouse/{id}', [WarehouseController::class, 'index'])->name('warehouse');
 
 
 });

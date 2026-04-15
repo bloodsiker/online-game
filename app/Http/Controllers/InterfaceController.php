@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Map;
 use App\Models\Referral\Referral;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;

@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\PlayerChangeStat;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 
 class RecalculatePlayerModification
 {

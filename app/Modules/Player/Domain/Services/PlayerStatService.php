@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Services;
+declare(strict_types=1);
 
-use App\DTO\StatModifier;
-use App\DTO\StatSheet;
+namespace App\Modules\Player\Domain\Services;
+
+use App\Modules\Player\Domain\DTO\StatModifier;
+use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Enums\CombatClass;
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;

@@ -10,7 +10,7 @@ use App\Services\Battle\BattleOrchestrator;
 use App\Services\BattleService;
 use App\Services\Combat\FightOrchestrator;
 use App\Services\DungeonService;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class FightController extends Controller

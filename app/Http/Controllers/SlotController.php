@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Backpack;
 use App\Services\HotbarService;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

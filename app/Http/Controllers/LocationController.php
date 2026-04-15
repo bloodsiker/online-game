@@ -15,7 +15,7 @@ use App\Services\Battle\MonsterSelector;
 use App\Services\BattleService;
 use App\Services\DungeonService;
 use App\Services\PlayerMovementService;
-use App\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
