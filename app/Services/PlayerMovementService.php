@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\DTO\MoveResultDTO;
 use App\Models\Dungeon\DungeonGate;
 use App\Models\Dungeon\DungeonSession;

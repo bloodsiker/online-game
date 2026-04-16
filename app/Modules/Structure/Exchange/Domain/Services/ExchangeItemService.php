@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Exchange\Domain\Services;
 
 use App\Modules\Structure\Exchange\Domain\DTO\ExchangeItemDTO;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use App\Models\User;
-use App\Services\BackpackService;
 use Illuminate\Support\Collection;
 
 readonly class ExchangeItemService

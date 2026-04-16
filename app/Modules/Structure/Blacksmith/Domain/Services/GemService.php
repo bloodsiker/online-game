@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
 use App\Enums\ShareItemType;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemGem;
 use App\Models\User;

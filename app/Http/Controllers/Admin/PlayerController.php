@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Models\Player\Player;
 use App\Models\Share\ShareItem;
-use App\Services\BackpackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

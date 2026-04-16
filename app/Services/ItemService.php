@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Dungeon\DungeonSession;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;

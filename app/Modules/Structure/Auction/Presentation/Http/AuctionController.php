@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;

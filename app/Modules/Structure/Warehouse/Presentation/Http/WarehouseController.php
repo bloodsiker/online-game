@@ -6,7 +6,7 @@ namespace App\Modules\Structure\Warehouse\Presentation\Http;
 
 use App\Enums\ShareItemType;
 use App\Http\Controllers\Controller;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Structure;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;

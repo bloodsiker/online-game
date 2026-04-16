@@ -7,7 +7,7 @@ namespace App\Modules\Structure\Blacksmith\Domain\Services;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Enums\ShareItemType;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemRune;
 use App\Models\User;

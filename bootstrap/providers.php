@@ -6,4 +6,5 @@ return [
     App\Modules\Player\PlayerServiceProvider::class,
     App\Modules\Structure\StructureServiceProvider::class,
     App\Modules\Clan\ClanServiceProvider::class,
+    App\Modules\Backpack\BackpackServiceProvider::class,
 ];

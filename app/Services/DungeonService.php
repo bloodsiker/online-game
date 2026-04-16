@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Enums\DungeonCooldownType;
 use App\Models\Dungeon\Dungeon;
 use App\Models\Dungeon\DungeonSession;

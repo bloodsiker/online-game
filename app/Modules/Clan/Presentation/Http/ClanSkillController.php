@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Services\ClanSkillService;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 

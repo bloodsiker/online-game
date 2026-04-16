@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Reputation\Reputation;
 use App\Models\Reputation\ReputationShopItem;
 use App\Models\User;
-use App\Services\BackpackService;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Services\ReputationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;

@@ -6,7 +6,7 @@ namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 

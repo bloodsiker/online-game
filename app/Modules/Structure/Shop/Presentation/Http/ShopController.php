@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Structure;
 use App\Modules\Structure\Shop\Application\UseCases\BuyItem;
 use App\Modules\Structure\Shop\Application\UseCases\SellItems;

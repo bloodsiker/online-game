@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Player\PlayerSlot;
 use App\Services\HotbarService;
 use App\Services\ItemEffect\EffectHandler;

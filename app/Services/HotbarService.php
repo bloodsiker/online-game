@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ShareItemStatType;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSlot;

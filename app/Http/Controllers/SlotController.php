@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\Request;

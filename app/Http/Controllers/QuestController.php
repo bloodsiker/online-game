@@ -17,7 +17,7 @@ use App\Models\Quest\QuestPlayerObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Quest\QuestStage;
 use App\Models\Share\ShareItem;
-use App\Services\BackpackService;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Services\ChatService;
 use App\Models\Reputation\ReputationTierQuest;
 use App\Services\ReputationService;

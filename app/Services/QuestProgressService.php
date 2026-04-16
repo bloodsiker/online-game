@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\DTO\AttackResultDTO;
 use App\Enums\QuestPlayerStatus;
 use App\Enums\QuestType;

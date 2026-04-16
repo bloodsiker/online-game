@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\BackpackController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
@@ -83,14 +82,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
     Route::get('/location/move/{direction}', [LocationController::class, 'moveTo'])->name('move-to');
     Route::get('/location', [LocationController::class, 'index'])->name('location');
-
-    Route::get('/backpack', [BackpackController::class, 'index'])->name('backpack');
-    Route::post('/backpack/order', [BackpackController::class, 'updateOrder'])->name('backpack.order');
-
-
-
-
-
 });
 
 Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monster');
