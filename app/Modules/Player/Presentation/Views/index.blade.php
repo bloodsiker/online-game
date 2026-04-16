@@ -263,15 +263,15 @@
                                 {{-- Портрет --}}
                                 <div class="char-card">
                                     <div class="char-card-body" style="text-align:center;">
-                                        <div class="char-name">{{ $player->user->name }}</div>
+                                        <div class="char-name">{{ $character->playerName }}</div>
                                         <img src="{{ asset('img/avatar/dark_elf.jpg') }}"
                                              class="char-portrait" alt="Портрет">
                                         <div style="font-size:11px; color:#461c0b;">
-                                            Ур. <b>{{ $player->lvl }}</b>
+                                            Ур. <b>{{ $character->level }}</b>
                                             &nbsp;·&nbsp;
-                                            <b>{{ $player->race->name }}</b>
+                                            <b>{{ $character->raceName }}</b>
                                         </div>
-                                        @php $combatClass = $playerDecorator->getCombatClass(); @endphp
+                                        @php $combatClass = $character->stats->getCombatClass(); @endphp
                                         <div style="margin-top:5px;">
                                             <span style="font-size:11px; color:#5a3a2a;">Класс: </span>
                                             <span style="display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:bold;
@@ -288,15 +288,15 @@
                                     <div class="char-card-title">Опыт</div>
                                     <div class="char-card-body">
                                         <div style="display:flex;justify-content:space-between;font-size:11px;">
-                                            <span class="char-stat-label">{{ $player->exp }}</span>
-                                            <span class="char-stat-val">{{ $player->getPercentExp() }}%</span>
+                                            <span class="char-stat-label">{{ $character->exp }}</span>
+                                            <span class="char-stat-val">{{ $character->expPercent }}%</span>
                                         </div>
                                         <div class="char-bar-wrap">
                                             <div class="char-bar-fill char-bar-exp"
-                                                 style="width:{{ $player->getPercentExp() }}%"></div>
+                                                 style="width:{{ $character->expPercent }}%"></div>
                                         </div>
                                         <div style="font-size:10px; color:#888;">
-                                            след. уровень: <b style="color:#461c0b">{{ $player->exp_up }}</b>
+                                            след. уровень: <b style="color:#461c0b">{{ $character->expUp }}</b>
                                         </div>
                                     </div>
                                 </div>
@@ -310,7 +310,7 @@
                                                 <img src="{{ asset('img/icon/m_game.gif') }}" width="14" height="14" style="vertical-align:middle; margin-right:3px;" alt="">
                                                 Монеты
                                             </span>
-                                            <span class="char-stat-val">{{ number_format($user->money, 0, '', ' ') }}</span>
+                                            <span class="char-stat-val">{{ number_format($character->money, 0, '', ' ') }}</span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">
@@ -332,8 +332,8 @@
                                     <div class="char-card-title">Статистика</div>
                                     <div class="char-card-body">
                                         <div class="char-battle-row">
-                                            <span>⚔ Побед: <b>{{ $player->victory }}</b></span>
-                                            <span>💀 Поражений: <b>{{ $player->death }}</b></span>
+                                            <span>⚔ Побед: <b>{{ $character->victory }}</b></span>
+                                            <span>💀 Поражений: <b>{{ $character->death }}</b></span>
                                         </div>
                                     </div>
                                 </div>
@@ -350,11 +350,11 @@
                                     </div>
                                     <div class="char-card-body">
                                         @foreach([
-                                            ['Сила',       $player->getStrength(),       $playerDecorator->getStrength()],
-                                            ['Интуиция',   $player->getInt(),            $playerDecorator->getInt()],
-                                            ['Ловкость',   $player->getAgility(),        $playerDecorator->getAgility()],
-                                            ['Интеллект',  $player->getIntelligence(),   $playerDecorator->getIntelligence()],
-                                            ['Мудрость',   $player->getMud(),            $playerDecorator->getMud()],
+                                            ['Сила',       $character->baseStrength,       $character->stats->getStrength()],
+                                            ['Интуиция',   $character->baseIntuition,      $character->stats->getInt()],
+                                            ['Ловкость',   $character->baseAgility,        $character->stats->getAgility()],
+                                            ['Интеллект',  $character->baseIntelligence,   $character->stats->getIntelligence()],
+                                            ['Мудрость',   $character->baseWisdom,         $character->stats->getMud()],
                                         ] as [$label, $base, $total])
                                             @php $bonus = $total - $base; @endphp
                                             <div class="char-stat-row">
@@ -369,9 +369,9 @@
                                                 </span>
                                             </div>
                                         @endforeach
-                                        @if($player->free_stats)
+                                        @if($character->freeStats)
                                             <div class="char-freepoints">
-                                                Свободных очков: <b id="pts-free-count">{{ $player->free_stats }}</b>
+                                                Свободных очков: <b id="pts-free-count">{{ $character->freeStats }}</b>
                                                 &nbsp;<a href="#" id="pts-open-modal" onclick="openPtsModal();return false;">Распределить »</a>
                                             </div>
                                         @endif
@@ -384,30 +384,30 @@
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Здоровье:
-                                            <b style="color:#8b2020">{{ $player->hp_now }}</b>
-                                            / <b style="color:#461c0b">{{ $playerDecorator->getHpMax() }}</b>
+                                            <b style="color:#8b2020">{{ $character->hpNow }}</b>
+                                            / <b style="color:#461c0b">{{ $character->stats->getHpMax() }}</b>
                                         </div>
-                                        @php $hpPct = $playerDecorator->getHpMax() > 0 ? min(round($player->hp_now * 100 / $playerDecorator->getHpMax()), 100) : 0; @endphp
+                                        @php $hpPct = $character->stats->getHpMax() > 0 ? min(round($character->hpNow * 100 / $character->stats->getHpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
                                             <div class="char-bar-fill char-bar-hp" style="width:{{ $hpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Класс</span>
-                                            <span class="char-stat-val" style="color:{{ match($playerDecorator->getCombatClass()->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }}">
-                                                {{ $playerDecorator->getCombatClass()->getLabel() }}
+                                            <span class="char-stat-val" style="color:{{ match($character->stats->getCombatClass()->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }}">
+                                                {{ $character->stats->getCombatClass()->getLabel() }}
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Броня</span>
-                                            <span class="char-stat-val">{{ $playerDecorator->getArmor() }}</span>
+                                            <span class="char-stat-val">{{ $character->stats->getArmor() }}</span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Крит</span>
-                                            <span class="char-stat-val">{{ $playerDecorator->getCritical() }}</span>
+                                            <span class="char-stat-val">{{ $character->stats->getCritical() }}</span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Уворот</span>
-                                            <span class="char-stat-val">{{ $playerDecorator->getDodge() }}</span>
+                                            <span class="char-stat-val">{{ $character->stats->getDodge() }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -418,10 +418,10 @@
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Мана:
-                                            <b style="color:#2040a0">{{ $player->mp_now }}</b>
-                                            / <b style="color:#461c0b">{{ $playerDecorator->getMpMax() }}</b>
+                                            <b style="color:#2040a0">{{ $character->mpNow }}</b>
+                                            / <b style="color:#461c0b">{{ $character->stats->getMpMax() }}</b>
                                         </div>
-                                        @php $mpPct = $playerDecorator->getMpMax() > 0 ? min(round($player->mp_now * 100 / $playerDecorator->getMpMax()), 100) : 0; @endphp
+                                        @php $mpPct = $character->stats->getMpMax() > 0 ? min(round($character->mpNow * 100 / $character->stats->getMpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
                                             <div class="char-bar-fill char-bar-mp" style="width:{{ $mpPct }}%"></div>
                                         </div>
@@ -441,11 +441,11 @@
                                 <div class="char-card">
                                     <div class="char-card-title">Боевые навыки</div>
                                     <div class="char-card-body">
-                                        @foreach($player->skills as $skill)
-                                            @php $pct = $skill->exp_up > 0 ? round($skill->exp * 100 / $skill->exp_up, 1) : 0; @endphp
+                                        @foreach($character->skills as $skill)
+                                            @php $pct = $skill->expPercent(); @endphp
                                             <div class="char-skill-row">
                                                 <div class="char-skill-head">
-                                                    <span>{{ $skill->skill->name }}: <b>{{ $skill->lvl }}</b></span>
+                                                    <span>{{ $skill->name }}: <b>{{ $skill->level }}</b></span>
                                                     <span class="char-skill-pct">{{ $pct }}%</span>
                                                 </div>
                                                 <div class="char-bar-wrap" style="margin:2px 0 0;">
@@ -543,15 +543,15 @@
     });
 
     let hp = {
-        current: parseInt('{{ $player->hp_now }}'),
-        max: parseInt('{{ $playerDecorator->getHpMax() }}')
+        current: parseInt('{{ $character->hpNow }}'),
+        max: parseInt('{{ $character->stats->getHpMax() }}')
     };
     let mp = {
-        current: parseInt('{{ $player->mp_now }}'),
-        max: parseInt('{{ $playerDecorator->getMpMax() }}')
+        current: parseInt('{{ $character->mpNow }}'),
+        max: parseInt('{{ $character->stats->getMpMax() }}')
     };
-    let experience = parseFloat('{{ $player->getPercentExp() }}');
-    let lvl = parseInt('{{ $player->lvl }}');
+    let experience = parseFloat('{{ $character->expPercent }}');
+    let lvl = parseInt('{{ $character->level }}');
 
     function playerAction() {
         parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
@@ -572,20 +572,20 @@
 <script>
     function openPtsModal() {
         parent.openPtsModal({
-            free:  {{ $player->getFreeStats() }},
+            free:  {{ $character->freeStats }},
             bases: {
-                strength:     {{ $player->getStrength() }},
-                intuition:    {{ $player->getInt() }},
-                agility:      {{ $player->getAgility() }},
-                intelligence: {{ $player->getIntelligence() }},
-                wisdom:       {{ $player->getMud() }},
+                strength:     {{ $character->baseStrength }},
+                intuition:    {{ $character->baseIntuition }},
+                agility:      {{ $character->baseAgility }},
+                intelligence: {{ $character->baseIntelligence }},
+                wisdom:       {{ $character->baseWisdom }},
             },
             full: {
-                strength:     {{ $playerDecorator->getStrength() }},
-                intuition:    {{ $playerDecorator->getInt() }},
-                agility:      {{ $playerDecorator->getAgility() }},
-                intelligence: {{ $playerDecorator->getIntelligence() }},
-                wisdom:       {{ $playerDecorator->getMud() }},
+                strength:     {{ $character->stats->getStrength() }},
+                intuition:    {{ $character->stats->getInt() }},
+                agility:      {{ $character->stats->getAgility() }},
+                intelligence: {{ $character->stats->getIntelligence() }},
+                wisdom:       {{ $character->stats->getMud() }},
             },
             saveUrl: '{{ route('character.point_save') }}',
             csrf:    '{{ csrf_token() }}',

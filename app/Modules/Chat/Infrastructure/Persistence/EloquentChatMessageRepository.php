@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use App\Enums\PlayerRelationshipType;
 
 class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
@@ -22,12 +21,13 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
         return ChatMessage::create($data);
     }
 
+    /** @return ChatMessage[] */
     public function getForChannel(
         User $user,
         ChatChannel $channel,
         ?int $afterId,
         int $limit,
-    ): Collection {
+    ): array {
         $query = ChatMessage::query()->with('sender', 'target');
         $this->applyChannelFilter($query, $user, $channel);
 
@@ -35,14 +35,16 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
             return $query->where('id', '>', $afterId)
                 ->orderBy('id', 'asc')
                 ->limit($limit)
-                ->get();
+                ->get()
+                ->all();
         }
 
         return $query->orderBy('id', 'desc')
             ->limit($limit)
             ->get()
             ->reverse()
-            ->values();
+            ->values()
+            ->all();
     }
 
     public function filterValidIds(User $user, ChatChannel $channel, array $ids): array

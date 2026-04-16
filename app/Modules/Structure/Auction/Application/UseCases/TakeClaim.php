@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\User;
@@ -12,10 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class TakeClaim
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, int $claimId): array
+    public function execute(User $user, int $claimId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
@@ -44,7 +42,7 @@ class TakeClaim
             $result = ['ok' => true, 'message' => ''];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 
     private function findBackpackSlot(int $userId, int $shareItemId): ?Backpack

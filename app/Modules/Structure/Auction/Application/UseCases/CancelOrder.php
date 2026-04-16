@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CancelOrder
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, int $orderId): array
+    public function execute(User $user, int $orderId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
@@ -35,6 +33,6 @@ class CancelOrder
             $result = ['ok' => true, 'message' => sprintf('Заявка отменена. Возвращено %d монет', $refund)];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 }

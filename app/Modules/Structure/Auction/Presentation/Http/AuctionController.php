@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Structure\Auction\Domain\Models\Auction;
-use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
-use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;
 use App\Modules\Structure\Auction\Application\UseCases\CancelLot;
 use App\Modules\Structure\Auction\Application\UseCases\CancelOrder;
 use App\Modules\Structure\Auction\Application\UseCases\CreateLot;
 use App\Modules\Structure\Auction\Application\UseCases\CreateOrder;
 use App\Modules\Structure\Auction\Application\UseCases\FulfillOrder;
+use App\Modules\Structure\Auction\Application\UseCases\GetAuctionLots;
+use App\Modules\Structure\Auction\Application\UseCases\GetClaims;
+use App\Modules\Structure\Auction\Application\UseCases\GetExchangeOrders;
+use App\Modules\Structure\Auction\Application\UseCases\GetLotForEdit;
+use App\Modules\Structure\Auction\Application\UseCases\GetMyOrders;
+use App\Modules\Structure\Auction\Application\UseCases\GetSellableItems;
 use App\Modules\Structure\Auction\Application\UseCases\SellToShop;
 use App\Modules\Structure\Auction\Application\UseCases\TakeClaim;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +38,12 @@ class AuctionController extends Controller
         private readonly FulfillOrder $fulfillOrder,
         private readonly TakeClaim $takeClaim,
         private readonly SellToShop $sellToShop,
+        private readonly GetAuctionLots $getAuctionLots,
+        private readonly GetLotForEdit $getLotForEdit,
+        private readonly GetExchangeOrders $getExchangeOrders,
+        private readonly GetMyOrders $getMyOrders,
+        private readonly GetClaims $getClaims,
+        private readonly GetSellableItems $getSellableItems,
     ) {}
 
     public function index(int $id): mixed
@@ -45,9 +55,7 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
-        $auctionSlots = Auction::where('structure_id', $auction->id)
-            ->with(['item.itemInfo'])
-            ->get();
+        $auctionSlots = $this->getAuctionLots->execute($auction->id);
 
         return view('auction::list', compact('auction', 'user', 'auctionSlots'));
     }
@@ -61,10 +69,7 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
-        $auctionSlots = Auction::where('structure_id', $auction->id)
-            ->where('user_id', $user->id)
-            ->with(['item.itemInfo'])
-            ->get();
+        $auctionSlots = $this->getAuctionLots->execute($auction->id, $user->id);
 
         return view('auction::list_my_lot', compact('auction', 'user', 'auctionSlots'));
     }
@@ -78,9 +83,7 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
-        $itemEdit = Auction::where('id', $slotId)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
+        $itemEdit = $this->getLotForEdit->execute($slotId, $user->id);
 
         return view('auction::edit_lot', compact('auction', 'user', 'itemEdit'));
     }
@@ -95,7 +98,7 @@ class AuctionController extends Controller
         }
 
         $result = $this->cancelLot->execute($user, $slotId);
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->route('auction.my_lot', ['id' => $auction->id]);
     }
@@ -117,7 +120,7 @@ class AuctionController extends Controller
                 ->first();
         }
 
-        $itemsToSell = $this->getSellableBackpackItems($user->id);
+        $itemsToSell = $this->getSellableItems->execute($user->id);
 
         return view('auction::new_lot', compact('auction', 'user', 'itemsToSell', 'selectedItem'));
     }
@@ -143,7 +146,7 @@ class AuctionController extends Controller
             isAnonymous: (bool) ($data['form']['is_anonymous'] ?? false),
         );
 
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->route('auction.new_lot', ['id' => $auction->id]);
     }
@@ -154,7 +157,7 @@ class AuctionController extends Controller
         $auction = Structure::findOrFail($id);
 
         $result = $this->buyLot->execute($user, $auction, $itemId);
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->back();
     }
@@ -166,14 +169,14 @@ class AuctionController extends Controller
 
         if ($request->isMethod('POST')) {
             $result = $this->sellToShop->execute($user, (array) $request->input('item', []));
-            session()->flash('message', $result['message']);
+            session()->flash('message', $result->message);
 
-            if (! $result['ok']) {
+            if (! $result->ok) {
                 return redirect()->back();
             }
         }
 
-        $itemsToSell = $this->getSellableBackpackItems($user->id);
+        $itemsToSell = $this->getSellableItems->execute($user->id);
 
         return view('shop::sell', compact('shop', 'user', 'itemsToSell'));
     }
@@ -183,42 +186,23 @@ class AuctionController extends Controller
         $user    = Auth::user();
         $auction = Structure::findOrFail($id);
 
-        $query = AuctionOrder::where('structure_id', $auction->id)
-            ->where('user_id', '!=', $user->id)
-            ->with(['shareItem', 'user']);
+        $filter = new ExchangeFilterDTO(
+            matching: $request->input('filter.matching', '1') === '1',
+            name: $request->filled('filter.name') ? $request->input('filter.name') : null,
+            type: $request->filled('filter.type') ? $request->input('filter.type') : null,
+            countMin: $request->filled('filter.count_min') ? (int) $request->input('filter.count_min') : null,
+            countMax: $request->filled('filter.count_max') ? (int) $request->input('filter.count_max') : null,
+        );
 
-        if ($request->input('filter.matching', '1') === '1') {
-            $userShareItemIds = Backpack::select('items.share_item_id')
-                ->join('items', 'backpacks.item_id', '=', 'items.id')
-                ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-                ->where('backpacks.user_id', $user->id)
-                ->where('backpacks.equipped', 0)
-                ->where('share_items.is_sell', 1)
-                ->pluck('items.share_item_id');
+        $orders     = $this->getExchangeOrders->execute($auction->id, $user->id, $filter);
+        $filterRaw  = $request->input('filter', []);
 
-            $query->whereIn('share_item_id', $userShareItemIds);
-        }
-
-        if ($request->filled('filter.name')) {
-            $query->whereHas('shareItem', fn ($q) => $q->where('name', 'like', '%' . $request->input('filter.name') . '%'));
-        }
-
-        if ($request->filled('filter.type')) {
-            $query->whereHas('shareItem', fn ($q) => $q->where('type', $request->input('filter.type')));
-        }
-
-        if ($request->filled('filter.count_min')) {
-            $query->where('count', '>=', (int) $request->input('filter.count_min'));
-        }
-
-        if ($request->filled('filter.count_max')) {
-            $query->where('count', '<=', (int) $request->input('filter.count_max'));
-        }
-
-        $orders = $query->orderByDesc('price')->get();
-        $filter = $request->input('filter', []);
-
-        return view('auction::exchange', compact('auction', 'user', 'orders', 'filter'));
+        return view('auction::exchange', [
+            'auction' => $auction,
+            'user'    => $user,
+            'orders'  => $orders,
+            'filter'  => $filterRaw,
+        ]);
     }
 
     public function myOrders(int $id): mixed
@@ -226,10 +210,7 @@ class AuctionController extends Controller
         $user    = Auth::user();
         $auction = Structure::findOrFail($id);
 
-        $orders = AuctionOrder::where('structure_id', $auction->id)
-            ->where('user_id', $user->id)
-            ->with('shareItem')
-            ->get();
+        $orders = $this->getMyOrders->execute($auction->id, $user->id);
 
         return view('auction::my_orders', compact('auction', 'user', 'orders'));
     }
@@ -272,7 +253,7 @@ class AuctionController extends Controller
             isAnonymous: (bool) ($data['form']['is_anonymous'] ?? false),
         );
 
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->route('auction.my_orders', ['id' => $auction->id]);
     }
@@ -283,7 +264,7 @@ class AuctionController extends Controller
         $auction = Structure::findOrFail($id);
 
         $result = $this->cancelOrder->execute($user, $orderId);
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->route('auction.my_orders', ['id' => $auction->id]);
     }
@@ -296,7 +277,7 @@ class AuctionController extends Controller
         $auction = Structure::findOrFail($id);
 
         $result = $this->fulfillOrder->execute($user, $auction, $orderId, (int) ($data['count'] ?? 1));
-        session()->flash('message', $result['message']);
+        session()->flash('message', $result->message);
 
         return redirect()->route('auction.exchange', ['id' => $auction->id]);
     }
@@ -306,10 +287,7 @@ class AuctionController extends Controller
         $user    = Auth::user();
         $auction = Structure::findOrFail($id);
 
-        $claims = AuctionClaim::where('user_id', $user->id)
-            ->where('structure_id', $auction->id)
-            ->with('item.itemInfo')
-            ->get();
+        $claims = $this->getClaims->execute($auction->id, $user->id);
 
         return view('auction::claims', compact('auction', 'user', 'claims'));
     }
@@ -320,24 +298,11 @@ class AuctionController extends Controller
         $auction = Structure::findOrFail($id);
 
         $result = $this->takeClaim->execute($user, $claimId);
-        if (! $result['ok']) {
-            session()->flash('message', $result['message']);
+        if (! $result->ok) {
+            session()->flash('message', $result->message);
         }
 
         return redirect()->route('auction.claims', ['id' => $auction->id]);
-    }
-
-    private function getSellableBackpackItems(int $userId): mixed
-    {
-        return Backpack::select('backpacks.*')
-            ->with(['item.itemInfo'])
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $userId)
-            ->where('backpacks.equipped', 0)
-            ->where('share_items.is_sell', 1)
-            ->orderBy('items.share_item_id', 'desc')
-            ->get();
     }
 
     private function redirectWithMessage(string $message): RedirectResponse

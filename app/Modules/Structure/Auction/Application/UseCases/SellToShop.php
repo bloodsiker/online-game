@@ -7,15 +7,15 @@ namespace App\Modules\Structure\Auction\Application\UseCases;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\User;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use Illuminate\Support\Facades\DB;
 
 class SellToShop
 {
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
-     * @return array{ok: bool, message: string, total: int}
      */
-    public function execute(User $user, array $checkedItems): array
+    public function execute(User $user, array $checkedItems): AuctionResultDTO
     {
         $filtered = array_filter(
             $checkedItems,
@@ -23,7 +23,7 @@ class SellToShop
         );
 
         if (empty($filtered)) {
-            return ['ok' => false, 'message' => 'Не выбраны предметы для продажи', 'total' => 0];
+            return new AuctionResultDTO(false, 'Не выбраны предметы для продажи');
         }
 
         $total = DB::transaction(function () use ($user, $filtered): int {
@@ -63,10 +63,9 @@ class SellToShop
             return $sum;
         });
 
-        return [
-            'ok'      => true,
-            'message' => sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')),
-            'total'   => $total,
-        ];
+        return new AuctionResultDTO(
+            true,
+            sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')),
+        );
     }
 }

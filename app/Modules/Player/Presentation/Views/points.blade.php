@@ -167,29 +167,29 @@
 
 <form action="{{ route('character.point_save') }}" name="incpoints" method="post">
     {{ csrf_field() }}
-    <input name="ostr"   type="hidden" value="{{ $player->getStrength() }}">
-    <input name="oint"   type="hidden" value="{{ $player->getInt() }}">
-    <input name="oagil"  type="hidden" value="{{ $player->getAgility() }}">
-    <input name="ointel" type="hidden" value="{{ $player->getIntelligence() }}">
-    <input name="omud"   type="hidden" value="{{ $player->getMud() }}">
+    <input name="ostr"   type="hidden" value="{{ $character->baseStrength }}">
+    <input name="oint"   type="hidden" value="{{ $character->baseIntuition }}">
+    <input name="oagil"  type="hidden" value="{{ $character->baseAgility }}">
+    <input name="ointel" type="hidden" value="{{ $character->baseIntelligence }}">
+    <input name="omud"   type="hidden" value="{{ $character->baseWisdom }}">
 
     <div class="pts-wrap">
 
         <div class="pts-header">
             <span class="pts-header-title">Распределение очков</span>
             <span class="pts-points-badge">
-                Свободно: <b><input type="text" value="{{ $player->getFreeStats() }}" name="points"
+                Свободно: <b><input type="text" value="{{ $character->freeStats }}" name="points"
                     style="background:transparent;border:0;font-weight:bold;font-size:13px;color:#8b2000;width:30px;padding:0;font-family:Tahoma;" readonly></b>
             </span>
         </div>
 
         <div class="pts-body">
             @foreach([
-                ['Сила',       'strength',     $playerDecorator->getStrength(),     $player->getStrength()],
-                ['Интуиция',   'intuition',    $playerDecorator->getInt(),          $player->getInt()],
-                ['Ловкость',   'agility',      $playerDecorator->getAgility(),      $player->getAgility()],
-                ['Интеллект',  'intelligence', $playerDecorator->getIntelligence(), $player->getIntelligence()],
-                ['Мудрость',   'wisdom',       $playerDecorator->getMud(),          $player->getMud()],
+                ['Сила',       'strength',     $character->stats->getStrength(),     $character->baseStrength],
+                ['Интуиция',   'intuition',    $character->stats->getInt(),          $character->baseIntuition],
+                ['Ловкость',   'agility',      $character->stats->getAgility(),      $character->baseAgility],
+                ['Интеллект',  'intelligence', $character->stats->getIntelligence(), $character->baseIntelligence],
+                ['Мудрость',   'wisdom',       $character->stats->getMud(),          $character->baseWisdom],
             ] as [$label, $key, $full, $base])
                 <div class="pts-row">
                     <span class="pts-row-name">{{ $label }}</span>
@@ -219,7 +219,7 @@
 </form>
 
 <script>
-    allpoints = {{ $player->getFreeStats() }};
+    allpoints = {{ $character->freeStats }};
 
     function checkval7(vid) {
         var cur = Math.floor(document.forms.incpoints[vid].value * 1);

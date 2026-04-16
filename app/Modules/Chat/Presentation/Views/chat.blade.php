@@ -86,45 +86,45 @@
 
                 @foreach ($messages as $msg)
                     @php
-                        $chClass = match($msg['channel']) {
+                        $chClass = match($msg->channel) {
                             'clan'     => ' msg-ch-clan',
                             'trade'    => ' msg-ch-trade',
                             'location' => ' msg-ch-location',
                             default    => '',
                         };
-                        $showArrow = in_array($msg['type'], ['private', 'mention']);
+                        $showArrow = in_array($msg->type, ['private', 'mention']);
                     @endphp
-                    <div class="message msg-{{ $msg['type'] }}{{ $chClass }}" data-id="{{ $msg['id'] }}">
+                    <div class="message msg-{{ $msg->type }}{{ $chClass }}" data-id="{{ $msg->id }}">
 
-                        @if ($msg['type'] === 'private' && $msg['reply_to'])
+                        @if ($msg->type === 'private' && $msg->reply_to)
                             <small class="msg-time-reply"
-                                   onclick="replyToUser('{{ addslashes($msg['reply_to']) }}')"
-                                   title="Ответить {{ $msg['reply_to'] }}">{{ $msg['time'] }}</small>
+                                   onclick="replyToUser('{{ addslashes($msg->reply_to) }}')"
+                                   title="Ответить {{ $msg->reply_to }}">{{ $msg->time }}</small>
                         @else
-                            <small>{{ $msg['time'] }}</small>
+                            <small>{{ $msg->time }}</small>
                         @endif
                         @if ($showArrow) » @endif
 
-                        @if ($msg['type'] === 'system')
-                            <span class="msg-system-icon">★</span> {!! $msg['content'] !!}
+                        @if ($msg->type === 'system')
+                            <span class="msg-system-icon">★</span> {!! $msg->content !!}
 
-                        @elseif ($msg['type'] === 'information')
-                            <span class="msg-information-icon">✔</span> {!! $msg['content'] !!}
+                        @elseif ($msg->type === 'information')
+                            <span class="msg-information-icon">✔</span> {!! $msg->content !!}
 
-                        @elseif ($msg['type'] === 'quest')
-                            {!! $msg['content'] !!}
+                        @elseif ($msg->type === 'quest')
+                            {!! $msg->content !!}
 
-                        @elseif ($msg['type'] === 'private')
-                            <span class="prv-name">{{ $msg['sender_name'] }}</span>
+                        @elseif ($msg->type === 'private')
+                            <span class="prv-name">{{ $msg->sender_name }}</span>
                             »
-                            <span class="prv-name">{{ $msg['target_name'] ?? '?' }}</span> {!! $msg['content'] !!}
+                            <span class="prv-name">{{ $msg->target_name ?? '?' }}</span> {!! $msg->content !!}
 
                         @else
                             <a href="#"
                                class="player-link n"
-                               data-uid="{{ $msg['sender_id'] }}"
-                               onclick="chatPlayerClick({{ $msg['sender_id'] }}, '{{ addslashes($msg['sender_name']) }}'); return false;"
-                            >{{ $msg['sender_name'] }}</a> {!! $msg['content'] !!}
+                               data-uid="{{ $msg->sender_id }}"
+                               onclick="chatPlayerClick({{ $msg->sender_id }}, '{{ addslashes($msg->sender_name) }}'); return false;"
+                            >{{ $msg->sender_name }}</a> {!! $msg->content !!}
                         @endif
                     </div>
                 @endforeach

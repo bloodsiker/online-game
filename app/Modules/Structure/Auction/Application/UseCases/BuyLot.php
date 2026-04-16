@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Models\AuctionHistory;
 use App\Modules\Backpack\Domain\Models\Backpack;
@@ -14,13 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class BuyLot
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, Structure $auction, int $itemId): array
+    public function execute(User $user, Structure $auction, int $itemId): AuctionResultDTO
     {
         if ($auction->location_id !== $user->location_id) {
-            return ['ok' => false, 'message' => 'Вы не находитесь рядом с Комиссионным магазином!'];
+            return new AuctionResultDTO(false, 'Вы не находитесь рядом с Комиссионным магазином!');
         }
 
         $result = ['ok' => true, 'message' => ''];
@@ -72,7 +70,7 @@ class BuyLot
             $result = ['ok' => true, 'message' => sprintf('Куплено %s %s шт', $shareItem->name, $lot->count)];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 
     private function findBackpackSlot(int $userId, int $shareItemId): ?Backpack

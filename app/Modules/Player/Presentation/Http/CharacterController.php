@@ -22,69 +22,50 @@ class CharacterController extends Controller
 
     public function index(Request $request): View
     {
-        $user            = Auth::user();
-        $player          = $user->player;
-        $playerDecorator = $this->getCharacter->execute($player);
-        $group           = $request->get('group', 'character');
+        $player    = Auth::user()->player;
+        $character = $this->getCharacter->execute($player);
+        $group     = $request->get('group', 'character');
 
-        return view('player::index', compact('user', 'player', 'playerDecorator', 'group'));
+        return view('player::index', compact('character', 'group'));
     }
 
     public function point(): View
     {
-        $user            = Auth::user();
-        $player          = $user->player;
-        $playerDecorator = $this->getCharacter->execute($player);
+        $player    = Auth::user()->player;
+        $character = $this->getCharacter->execute($player);
 
-        return view('player::points', compact('user', 'player', 'playerDecorator'));
+        return view('player::points', compact('character'));
     }
 
     public function pointSave(Request $request): RedirectResponse|JsonResponse
     {
-        $data   = $request->toArray();
-        $user   = Auth::user();
-        $player = $user->player;
+        $data    = $request->toArray();
+        $player  = Auth::user()->player;
 
-        $statKeys  = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom'];
-        $stats     = array_map('intval', array_intersect_key($data, array_flip($statKeys)));
-        $sumChange = array_sum($stats);
+        $statKeys = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom'];
+        $stats    = array_map('intval', array_intersect_key($data, array_flip($statKeys)));
 
-        if ($sumChange > $player->getFreeStats()) {
+        try {
+            $result = $this->allocateStats->execute($player, $stats);
+        } catch (\DomainException $e) {
             if ($request->expectsJson()) {
-                return response()->json(['status' => 'error', 'message' => 'У вас нет столько свободных характеристик'], 422);
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
             }
-            session()->flash('message', 'У вас нет столько свободных характеристик');
+            session()->flash('message', $e->getMessage());
 
             return redirect()->back();
         }
-
-        $nowToSum    = ['ostrength', 'ointuition', 'oagility', 'ointelligence', 'owisdom'];
-        $filteredNow = array_filter($data, fn ($v, $k) => in_array($k, $nowToSum, true), ARRAY_FILTER_USE_BOTH);
-        $oldStatSum  = array_sum(array_map('intval', $filteredNow));
-
-        if ($sumChange === 0 || $oldStatSum === $player->getSumStats()) {
-            if ($request->expectsJson()) {
-                return response()->json(['status' => 'ok', 'message' => 'Основные характеристики остались прежними.']);
-            }
-            session()->flash('message', 'Основные характеристики остались прежними.');
-
-            return redirect()->back();
-        }
-
-        $this->allocateStats->execute($player, $stats);
 
         if ($request->expectsJson()) {
-            $player->refresh();
-
             return response()->json([
                 'status'       => 'ok',
                 'message'      => 'Характеристики изменены.',
-                'free_stats'   => $player->free_stats,
-                'strength'     => $player->getStrength(),
-                'intuition'    => $player->getInt(),
-                'agility'      => $player->getAgility(),
-                'intelligence' => $player->getIntelligence(),
-                'wisdom'       => $player->getMud(),
+                'free_stats'   => $result->freeStats,
+                'strength'     => $result->strength,
+                'intuition'    => $result->intuition,
+                'agility'      => $result->agility,
+                'intelligence' => $result->intelligence,
+                'wisdom'       => $result->wisdom,
             ]);
         }
 

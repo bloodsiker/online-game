@@ -160,8 +160,8 @@ class PlayerStatService
                     ShareItemStatType::ARMOR         => 'armor',
                     ShareItemStatType::HP_MAX        => 'hp_max',
                     ShareItemStatType::AGILITY       => 'agility',
-                    ShareItemStatType::INTUITION     => 'int',
-                    ShareItemStatType::WISDOM        => 'mud',
+                    ShareItemStatType::INTUITION     => 'intuition',
+                    ShareItemStatType::WISDOM        => 'wisdom',
                     ShareItemStatType::INTELLIGENCE  => 'intelligence',
                     ShareItemStatType::DODGE         => 'dodge',
                     ShareItemStatType::CRITICAL      => 'critical',
@@ -263,7 +263,6 @@ class PlayerStatService
 
         $passiveSkills = $player->magicSkills()
             ->where('is_passive', true)
-            ->wherePivot('is_equipped', true)
             ->with('skillEffects')
             ->get();
 
@@ -350,6 +349,8 @@ class PlayerStatService
             return [];
         }
 
+        $type = $this->normalizeStatKey($type);
+
         if ($type === 'attack') {
             return [
                 new StatModifier('left_min_dmg', $value, $isPct, $source),
@@ -360,6 +361,21 @@ class PlayerStatService
         }
 
         return [new StatModifier($type, $value, $isPct, $source)];
+    }
+
+    /**
+     * Normalize legacy or abbreviated stat keys to canonical form.
+     */
+    private function normalizeStatKey(string $key): string
+    {
+        return match($key) {
+            'str'  => 'strength',
+            'int'  => 'intuition',
+            'agi'  => 'agility',
+            'mud'  => 'wisdom',
+            'intel' => 'intelligence',
+            default => $key,
+        };
     }
 
     /**

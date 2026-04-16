@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\User;
@@ -12,10 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class CancelLot
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, int $slotId): array
+    public function execute(User $user, int $slotId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
@@ -44,7 +42,7 @@ class CancelLot
             $result = ['ok' => true, 'message' => sprintf('Вы забрали %s %s шт', $shareItem->name, $slot->count)];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 
     private function findBackpackSlot(int $userId, int $shareItemId): ?Backpack

@@ -11,6 +11,7 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Structure;
 use App\Models\User;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Services\AuctionFeeCalculator;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +21,7 @@ class FulfillOrder
         private readonly AuctionFeeCalculator $feeCalculator,
     ) {}
 
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, Structure $auction, int $orderId, int $count): array
+    public function execute(User $user, Structure $auction, int $orderId, int $count): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
@@ -104,6 +102,6 @@ class FulfillOrder
             )];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 }

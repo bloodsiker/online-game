@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Structure;
@@ -17,9 +18,6 @@ class CreateLot
         private readonly AuctionFeeCalculator $feeCalculator,
     ) {}
 
-    /**
-     * @return array{ok: bool, message: string}
-     */
     public function execute(
         User $user,
         Structure $auction,
@@ -27,10 +25,10 @@ class CreateLot
         int $amount,
         int $price,
         bool $isAnonymous,
-    ): array {
+    ): AuctionResultDTO {
         $fee = $this->feeCalculator->calculate($price);
         if ($user->money < $fee) {
-            return ['ok' => false, 'message' => 'Не достаточно монет что бы оплатить налог.'];
+            return new AuctionResultDTO(false, 'Не достаточно монет что бы оплатить налог.');
         }
 
         $result = ['ok' => true, 'message' => ''];
@@ -70,6 +68,6 @@ class CreateLot
             $result = ['ok' => true, 'message' => sprintf('%s выставлен на продажу', $slotItem->item->itemInfo->name)];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
@@ -12,9 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class CreateOrder
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
     public function execute(
         User $user,
         Structure $auction,
@@ -22,10 +20,10 @@ class CreateOrder
         int $count,
         int $price,
         bool $isAnonymous,
-    ): array {
+    ): AuctionResultDTO {
         $shareItem = ShareItem::where('id', $shareItemId)->where('is_sell', 1)->first();
         if (! $shareItem) {
-            return ['ok' => false, 'message' => 'Предмет не найден.'];
+            return new AuctionResultDTO(false, 'Предмет не найден.');
         }
 
         $totalCost = 100 + ($count * $price);
@@ -60,6 +58,6 @@ class CreateOrder
             )];
         });
 
-        return $result;
+        return new AuctionResultDTO($result['ok'], $result['message']);
     }
 }

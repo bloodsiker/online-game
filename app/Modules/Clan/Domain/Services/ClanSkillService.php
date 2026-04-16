@@ -147,7 +147,7 @@ class ClanSkillService
                 ->firstWhere('level', $learned->current_level);
 
             if ($levelData?->magic_skill_id) {
-                PlayerMagicSkill::firstOrCreate(
+                PlayerMagicSkill::updateOrCreate(
                     ['player_id' => $player->id, 'magic_skill_id' => $levelData->magic_skill_id],
                     ['is_equipped' => true],
                 );

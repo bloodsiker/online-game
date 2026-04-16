@@ -5,19 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Presentation\Http;
 
 use App\Modules\Chat\Domain\Enums\ChatChannel;
-use App\Modules\Chat\Domain\Enums\ChatMessageType;
-use App\Enums\PlayerRelationshipType;
 use App\Http\Controllers\Controller;
-use App\Modules\Chat\Domain\Models\ChatMessage;
+use App\Enums\PlayerRelationshipType;
 use App\Models\Player\PlayerRelationship;
 use App\Models\User;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
-use App\Modules\Chat\Domain\Services\MessageRenderer;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ChatController extends Controller
 {
@@ -25,34 +23,31 @@ class ChatController extends Controller
         private readonly SendMessage $sendMessage,
         private readonly GetMessages $getMessages,
         private readonly ManageIgnore $manageIgnore,
-        private readonly MessageRenderer $renderer,
     ) {}
 
-    public function index(): \Illuminate\View\View
+    public function index(): View
     {
         return view('chat::index');
     }
 
-    public function chat(Request $request): \Illuminate\View\View
+    public function chat(Request $request): View
     {
         $channel  = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
         $user     = auth()->user();
         $messages = $this->getMessages->execute($user, $channel);
 
-        $formatted = $messages->map(fn ($msg) => $this->formatMessage($msg, $user));
-
         return view('chat::chat', [
-            'messages' => $formatted,
+            'messages' => $messages,
             'channel'  => $channel,
         ]);
     }
 
-    public function chatLog(): \Illuminate\View\View
+    public function chatLog(): View
     {
         return view('chat::log');
     }
 
-    public function chatAction(Request $request): \Illuminate\View\View
+    public function chatAction(Request $request): View
     {
         $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
 
@@ -119,9 +114,7 @@ class ChatController extends Controller
         $user     = auth()->user();
         $messages = $this->getMessages->execute($user, $channel, null, 30);
 
-        return response()->json(
-            $messages->map(fn ($msg) => $this->formatMessage($msg, $user))->values()
-        );
+        return response()->json($messages);
     }
 
     public function addIgnore(Request $request): JsonResponse
@@ -139,37 +132,10 @@ class ChatController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    public function ignoreList(): \Illuminate\View\View
+    public function ignoreList(): View
     {
         $ignores = $this->manageIgnore->list(auth()->user());
 
         return view('chat::ignores', compact('ignores'));
-    }
-
-    private function formatMessage(ChatMessage $msg, User $user): array
-    {
-        $senderName = $msg->sender?->name ?? 'Система';
-        $targetName = $msg->target?->name;
-        $trusted    = in_array($msg->type, [ChatMessageType::System, ChatMessageType::Information, ChatMessageType::Quest]);
-        $content    = $this->renderer->render($msg->message, $trusted);
-        $isOwn      = $msg->user_id === $user->id;
-
-        $replyTo = null;
-        if ($msg->type === ChatMessageType::Private) {
-            $replyTo = $isOwn ? $targetName : $senderName;
-        }
-
-        return [
-            'id'          => $msg->id,
-            'type'        => $msg->type->value,
-            'channel'     => $msg->channel->value,
-            'sender_name' => $senderName,
-            'target_name' => $targetName,
-            'sender_id'   => $msg->user_id,
-            'content'     => $content,
-            'time'        => $msg->created_at->format('H:i'),
-            'is_own'      => $isOwn,
-            'reply_to'    => $replyTo,
-        ];
     }
 }
