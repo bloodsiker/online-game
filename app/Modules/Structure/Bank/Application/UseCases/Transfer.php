@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\UseCases;
 
+use App\Modules\Structure\Bank\Application\DTOs\BankResultDTO;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
 use App\Modules\Structure\Bank\Domain\Models\BankLog;
 use App\Models\User;
@@ -13,26 +14,23 @@ class Transfer
 {
     public const COMMISSION = 0.01; // 1%
 
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $sender, string $account, int $amount): array
+    public function execute(User $sender, string $account, int $amount): BankResultDTO
     {
         $recipient = User::where('bank_account', $account)->first();
 
         if (! $recipient) {
-            return ['ok' => false, 'message' => 'Счёт не найден.'];
+            return new BankResultDTO(false, 'Счёт не найден.');
         }
 
         if ($recipient->id === $sender->id) {
-            return ['ok' => false, 'message' => 'Нельзя переводить самому себе.'];
+            return new BankResultDTO(false, 'Нельзя переводить самому себе.');
         }
 
         $commission = (int) ceil($amount * self::COMMISSION);
         $total      = $amount + $commission;
 
         if ($sender->bank_balance < $total) {
-            return ['ok' => false, 'message' => 'Недостаточно монет на счёте (с учётом комиссии).'];
+            return new BankResultDTO(false, 'Недостаточно монет на счёте (с учётом комиссии).');
         }
 
         DB::transaction(function () use ($sender, $recipient, $amount, $commission, $total) {
@@ -59,11 +57,11 @@ class Transfer
             ]);
         });
 
-        return ['ok' => true, 'message' => sprintf(
+        return new BankResultDTO(true, sprintf(
             'Перевод выполнен. Списано: %s (перевод: %s + комиссия: %s) монет.',
             number_format($total),
             number_format($amount),
             number_format($commission),
-        )];
+        ));
     }
 }

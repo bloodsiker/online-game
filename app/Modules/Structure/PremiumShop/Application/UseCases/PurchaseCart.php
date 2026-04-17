@@ -8,6 +8,7 @@ use App\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\User;
+use App\Modules\Structure\PremiumShop\Application\DTOs\PremiumShopResultDTO;
 use App\Services\ShopCartService;
 use Illuminate\Support\Facades\DB;
 
@@ -17,19 +18,16 @@ class PurchaseCart
         private readonly ShopCartService $shopCartService,
     ) {}
 
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, int $shopId): array
+    public function execute(User $user, int $shopId): PremiumShopResultDTO
     {
         $cart = $this->shopCartService->getCart($user, $shopId);
 
         if ($cart->getTotalDiamond() && $user->diamond < $cart->getTotalDiamond()) {
-            return ['ok' => false, 'message' => 'У Вас недостаточно денег, чтобы оплатить заказ!'];
+            return new PremiumShopResultDTO(false, 'У Вас недостаточно денег, чтобы оплатить заказ!');
         }
 
         if ($cart->getTotalPrice() && $user->money < $cart->getTotalPrice()) {
-            return ['ok' => false, 'message' => 'У Вас недостаточно денег, чтобы оплатить заказ!'];
+            return new PremiumShopResultDTO(false, 'У Вас недостаточно денег, чтобы оплатить заказ!');
         }
 
         DB::transaction(function () use ($user, $cart, $shopId) {
@@ -63,6 +61,6 @@ class PurchaseCart
             $this->shopCartService->clearCart($user, $shopId);
         });
 
-        return ['ok' => true, 'message' => ''];
+        return new PremiumShopResultDTO(true, '');
     }
 }

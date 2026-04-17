@@ -7,14 +7,14 @@ namespace App\Modules\Structure\Shop\Application\UseCases;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\User;
+use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 
 class SellItems
 {
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
-     * @return array{ok: bool, message: string, total: int}
      */
-    public function execute(User $user, array $checkedItems): array
+    public function execute(User $user, array $checkedItems): ShopResultDTO
     {
         $filtered = array_filter(
             $checkedItems,
@@ -22,7 +22,7 @@ class SellItems
         );
 
         if (empty($filtered)) {
-            return ['ok' => false, 'message' => 'Не выбраны предметы для продажи', 'total' => 0];
+            return new ShopResultDTO(false, 'Не выбраны предметы для продажи');
         }
 
         $items = Backpack::select('backpacks.*')
@@ -59,10 +59,6 @@ class SellItems
             Item::whereIn('id', $idsToDelete)->delete();
         }
 
-        return [
-            'ok'      => true,
-            'message' => sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')),
-            'total'   => $total,
-        ];
+        return new ShopResultDTO(true, sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')));
     }
 }

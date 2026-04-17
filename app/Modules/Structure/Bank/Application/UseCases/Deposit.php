@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\UseCases;
 
+use App\Modules\Structure\Bank\Application\DTOs\BankResultDTO;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
 use App\Modules\Structure\Bank\Domain\Models\BankLog;
 use App\Models\User;
@@ -11,8 +12,12 @@ use Illuminate\Support\Facades\DB;
 
 class Deposit
 {
-    public function execute(User $user, int $amount): string
+    public function execute(User $user, int $amount): BankResultDTO
     {
+        if ($amount > $user->money) {
+            return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+        }
+
         DB::transaction(function () use ($user, $amount) {
             $user->decrement('money', $amount);
             $user->increment('bank_balance', $amount);
@@ -25,6 +30,6 @@ class Deposit
             ]);
         });
 
-        return sprintf('Вы положили %s монет в банк.', number_format($amount));
+        return new BankResultDTO(true, sprintf('Вы положили %s монет в банк.', number_format($amount)));
     }
 }

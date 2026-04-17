@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Presentation\Http;
 
-use App\Modules\Structure\Bank\Domain\Enums\BankAction;
 use App\Http\Controllers\Controller;
-use App\Modules\Structure\Bank\Domain\Models\BankLog;
 use App\Models\User;
 use App\Modules\Structure\Bank\Application\UseCases\Deposit;
+use App\Modules\Structure\Bank\Application\UseCases\EnsureBankAccount;
+use App\Modules\Structure\Bank\Application\UseCases\GetBankLogs;
 use App\Modules\Structure\Bank\Application\UseCases\Transfer;
 use App\Modules\Structure\Bank\Application\UseCases\Withdraw;
-use App\Modules\Structure\Bank\Domain\Services\BankAccountGenerator;
+use App\Modules\Structure\Bank\Domain\Enums\BankAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +23,8 @@ class BankController extends Controller
         private readonly Deposit $deposit,
         private readonly Withdraw $withdraw,
         private readonly Transfer $transfer,
-        private readonly BankAccountGenerator $accountGenerator,
+        private readonly EnsureBankAccount $ensureBankAccount,
+        private readonly GetBankLogs $getBankLogs,
     ) {}
 
     public function index(Request $request): mixed
@@ -31,10 +32,7 @@ class BankController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if (! $user->bank_account) {
-            $user->bank_account = $this->accountGenerator->generate($user);
-            $user->save();
-        }
+        $this->ensureBankAccount->execute($user);
 
         if ($request->isMethod('POST')) {
             $action = $request->input('action');
@@ -45,35 +43,20 @@ class BankController extends Controller
                 return redirect()->back();
             }
 
-            if ($action === BankAction::DEPOSIT->value) {
-                if ($amount > $user->money) {
-                    session()->flash('message', 'Сумма превышает количество монет в кошельке.');
-                    return redirect()->back();
-                }
-                session()->flash('message', $this->deposit->execute($user, $amount));
-                return redirect()->back();
-            }
+            $result = match ($action) {
+                BankAction::DEPOSIT->value      => $this->deposit->execute($user, $amount),
+                BankAction::WITHDRAW->value     => $this->withdraw->execute($user, $amount),
+                BankAction::TRANSFER_OUT->value => $this->transfer->execute($user, $request->input('account', ''), $amount),
+                default                         => null,
+            };
 
-            if ($action === BankAction::WITHDRAW->value) {
-                if ($amount > $user->bank_balance) {
-                    session()->flash('message', 'Сумма превышает баланс банковского счёта.');
-                    return redirect()->back();
-                }
-                session()->flash('message', $this->withdraw->execute($user, $amount));
-                return redirect()->back();
-            }
-
-            if ($action === BankAction::TRANSFER_OUT->value) {
-                $result = $this->transfer->execute($user, $request->input('account', ''), $amount);
-                session()->flash('message', $result['message']);
+            if ($result !== null) {
+                session()->flash('message', $result->message);
                 return redirect()->back();
             }
         }
 
-        $logs = BankLog::with('relatedUser')
-            ->where('user_id', $user->id)
-            ->orderByDesc('created_at')
-            ->paginate(30);
+        $logs = $this->getBankLogs->execute($user->id);
 
         return view('bank::index', compact('user', 'logs'));
     }

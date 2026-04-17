@@ -9,19 +9,17 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\User;
+use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 
 class BuyItem
 {
-    /**
-     * @return array{ok: bool, message: string}
-     */
-    public function execute(User $user, int $shareItemId, int $count): array
+    public function execute(User $user, int $shareItemId, int $count): ShopResultDTO
     {
         $shareItem   = ShareItem::find($shareItemId);
         $totalCost   = $count * $shareItem->price;
 
         if ($user->money < $totalCost) {
-            return ['ok' => false, 'message' => 'Не достаточно монет для покупки.'];
+            return new ShopResultDTO(false, 'Не достаточно монет для покупки.');
         }
 
         $user->money -= $totalCost;
@@ -46,6 +44,6 @@ class BuyItem
             }
         }
 
-        return ['ok' => true, 'message' => sprintf('Куплено %s %s шт', $shareItem->name, $count)];
+        return new ShopResultDTO(true, sprintf('Куплено %s %s шт', $shareItem->name, $count));
     }
 }
