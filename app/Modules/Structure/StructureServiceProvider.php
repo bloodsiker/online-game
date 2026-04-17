@@ -15,6 +15,10 @@ use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithInventoryRepository;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\LaravelTransactionManager;
+use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager as WarehouseTransactionManager;
+use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;
+use App\Modules\Structure\Warehouse\Infrastructure\Persistence\EloquentWarehouseInventoryRepository;
+use App\Modules\Structure\Warehouse\Infrastructure\Persistence\LaravelTransactionManager as WarehouseLaravelTransactionManager;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +33,9 @@ class StructureServiceProvider extends ServiceProvider
         $this->app->bind(BlacksmithReadRepository::class, EloquentBlacksmithReadRepository::class);
         $this->app->bind(BlacksmithInventoryRepository::class, EloquentBlacksmithInventoryRepository::class);
         $this->app->bind(TransactionManager::class, LaravelTransactionManager::class);
+
+        $this->app->bind(WarehouseInventoryRepository::class, EloquentWarehouseInventoryRepository::class);
+        $this->app->bind(WarehouseTransactionManager::class, WarehouseLaravelTransactionManager::class);
     }
 
     public function boot(): void

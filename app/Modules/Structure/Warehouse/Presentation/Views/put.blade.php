@@ -142,13 +142,13 @@
                 <tr height="21">
                     <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
                     <td width="2%" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_1" href="{{ route('warehouse', ['id' => $warehouse->id]) }}" title="Купить" class="btn_2">Оставить</a>
+                        <a id="center_1" href="{{ route('warehouse', ['id' => $page->warehouseId]) }}" title="Купить" class="btn_2">Оставить</a>
                     </td>
                     <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
                     <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
                     <td width="2%" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_2" href="{{ route('warehouse.take_item', ['id' => $warehouse->id]) }}" title="Продать" class="btn_1">Забрать</a></td>
+                        <a id="center_2" href="{{ route('warehouse.take_item', ['id' => $page->warehouseId]) }}" title="Продать" class="btn_1">Забрать</a></td>
                     <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
                     <td></td>
@@ -179,12 +179,12 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->money) }} </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->diamonds) }} </b>
                     </td>
                     <td align="right" nowrap>
                         <b>Вместимость:</b>
-                        <b class="red">{{ $countInWarehouse }}/{{ $user->warehouse_count }}</b>
+                        <b class="red">{{ $page->countInWarehouse }}/{{ $page->warehouseCapacity }}</b>
                     </td>
                 </tr>
                 </tbody>
@@ -193,7 +193,7 @@
             <br>
 
 
-            <form action="{{ route('warehouse', ['id' => $warehouse->id]) }}" method="post">
+            <form action="{{ route('warehouse', ['id' => $page->warehouseId]) }}" method="post">
                 {{ csrf_field() }}
                 <table class="coll w100 brd2-all" border="0" id="item_list">
                     <colgroup>
@@ -211,11 +211,11 @@
                         <td class="brd2-top brd2" align="center"></td>
                         <td class="brd2-top brd2" align="center">Товар</td>
                     </tr>
-                    @foreach($putItems as $item)
+                    @foreach($page->items as $item)
                         <tr height="17" class="brd2-top brd2 " align="center">
                             <td nowrap="" align="center" style="text-align: center" class="sell-item-checkbox">
                                 <label for="checkbox-sell-{{ $item->id }}">
-                                    <input type="checkbox" class="input-custom" name="item[{{ $item->item_id }}][selected]" value="1" id="checkbox-sell-{{ $item->id }}" />
+                                    <input type="checkbox" class="input-custom" name="item[{{ $item->itemId }}][selected]" value="1" id="checkbox-sell-{{ $item->id }}" />
                                     <span class="custom-checkbox"></span>
                                 </label>
                             </td>
@@ -226,21 +226,21 @@
                                         <span class="b-input__inner">
                                             <span class="arrow left @if($item->count === 1) left-disabled @endif" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
                                             <span class="arrow right right-disabled" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                            <input type="text" data-id="{{ $item->id }}" data-max="{{ $item->count }}" name="item[{{ $item->item_id }}][count]" value="{{ $item->count }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                            <input type="text" data-id="{{ $item->id }}" data-max="{{ $item->count }}" name="item[{{ $item->itemId }}][count]" value="{{ $item->count }}" class="cart_amount_sell_input count_sell" autocomplete="off">
                                         </span>
                                     </span>
                                 </span>
                                 </div>
                             </td>
                             <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                                <img src="{{ $item->item->itemInfo->image }}" style="width: 50px; height: 50px" alt="">
+                                <img src="{{ $item->image }}" style="width: 50px; height: 50px" alt="">
                             </td>
                             <td align="left" >
-                                <a href="{{ route('items.info', ['id' => $item->item->id]) }}"
-                                   style="color:#666666" class="b">{{ $item->item->itemInfo->name }}</a>
+                                <a href="{{ $item->infoUrl }}"
+                                   style="color:#666666" class="b">{{ $item->name }}</a>
                                 <br>
                                 <span title="Тип предмета">
-                                <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}
+                                <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
                             </span>
                             </td>
                         </tr>

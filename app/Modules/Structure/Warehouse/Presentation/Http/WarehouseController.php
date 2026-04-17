@@ -6,9 +6,8 @@ namespace App\Modules\Structure\Warehouse\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Models\Structure;
-use App\Modules\Structure\Warehouse\Application\UseCases\GetBackpackItems;
-use App\Modules\Structure\Warehouse\Application\UseCases\GetWarehouseCount;
-use App\Modules\Structure\Warehouse\Application\UseCases\GetWarehouseItems;
+use App\Modules\Structure\Warehouse\Application\UseCases\GetPutPage;
+use App\Modules\Structure\Warehouse\Application\UseCases\GetTakePage;
 use App\Modules\Structure\Warehouse\Application\UseCases\PutItems;
 use App\Modules\Structure\Warehouse\Application\UseCases\TakeItems;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -20,9 +19,8 @@ class WarehouseController extends Controller
     public function __construct(
         private readonly PutItems $putItems,
         private readonly TakeItems $takeItems,
-        private readonly GetBackpackItems $getBackpackItems,
-        private readonly GetWarehouseItems $getWarehouseItems,
-        private readonly GetWarehouseCount $getWarehouseCount,
+        private readonly GetPutPage $getPutPage,
+        private readonly GetTakePage $getTakePage,
     ) {}
 
     public function index(Request $request, int $id): mixed
@@ -41,10 +39,9 @@ class WarehouseController extends Controller
             }
         }
 
-        $putItems = $this->getBackpackItems->execute($user->id);
-        $countInWarehouse = $this->getWarehouseCount->execute($user->id, $warehouse->id);
-
-        return view('warehouse::put', compact('warehouse', 'user', 'putItems', 'countInWarehouse'));
+        return view('warehouse::put', [
+            'page' => $this->getPutPage->execute($user, $warehouse),
+        ]);
     }
 
     public function takeItem(Request $request, int $id): mixed
@@ -62,9 +59,8 @@ class WarehouseController extends Controller
             }
         }
 
-        $itemsToTake = $this->getWarehouseItems->execute($user->id, $warehouse->id);
-        $countInWarehouse = $this->getWarehouseCount->execute($user->id, $warehouse->id);
-
-        return view('warehouse::take', compact('warehouse', 'user', 'itemsToTake', 'countInWarehouse'));
+        return view('warehouse::take', [
+            'page' => $this->getTakePage->execute($user, $warehouse),
+        ]);
     }
 }

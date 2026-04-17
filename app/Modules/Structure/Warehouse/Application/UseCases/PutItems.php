@@ -6,13 +6,18 @@ namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Models\Structure;
-use App\Models\Warehouse;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
+use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class PutItems
 {
+    public function __construct(
+        private readonly WarehouseInventoryRepository $inventoryRepository,
+        private readonly TransactionManager $transactionManager,
+    ) {}
+
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
      */
@@ -24,18 +29,8 @@ class PutItems
             return new WarehouseResultDTO(false, 'Не выбраны предметы для хранения.');
         }
 
-        $countInWarehouse = Warehouse::where('user_id', $user->id)
-            ->where('structure_id', $warehouse->id)
-            ->count();
-
-        $items = Backpack::select('backpacks.*')
-            ->with(['item', 'item.itemInfo'])
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $user->id)
-            ->whereIn('backpacks.item_id', array_keys($putItems))
-            ->where('equipped', 0)
-            ->get();
+        $countInWarehouse = $this->inventoryRepository->countWarehouseItems($user->id, $warehouse->id);
+        $items = $this->inventoryRepository->getBackpackItemsForTransfer($user->id, array_map('intval', array_keys($putItems)));
 
         $toInsert = [];
         $toStack = [];
@@ -57,12 +52,7 @@ class PutItems
 
             $stackTarget = null;
             if ($item->item->itemInfo->type === ShareItemType::RESOURCE || $item->item->itemInfo->type === ShareItemType::POTION) {
-                $stackTarget = Warehouse::select('warehouses.*')
-                    ->join('items', 'warehouses.item_id', '=', 'items.id')
-                    ->where('items.share_item_id', $item->item->share_item_id)
-                    ->where('warehouses.user_id', $user->id)
-                    ->where('warehouses.structure_id', $warehouse->id)
-                    ->first();
+                $stackTarget = $this->inventoryRepository->findWarehouseStack($user->id, $warehouse->id, $item->item->share_item_id);
             }
 
             if ($stackTarget) {
@@ -91,26 +81,28 @@ class PutItems
             ));
         }
 
-        foreach ($toStack as $stack) {
-            $stack['warehouse']->count += $stack['add'];
-            $stack['warehouse']->save();
-        }
+        $this->transactionManager->run(function () use ($toStack, $toInsert, $toSubtract, $toDeleteItemIds, $user, $totalCost): void {
+            foreach ($toStack as $stack) {
+                $stack['warehouse']->count += $stack['add'];
+                $this->inventoryRepository->saveWarehouseItem($stack['warehouse']);
+            }
 
-        if ($toInsert) {
-            Warehouse::insert($toInsert);
-        }
+            if ($toInsert !== []) {
+                $this->inventoryRepository->insertWarehouseItems($toInsert);
+            }
 
-        foreach ($toSubtract as $sub) {
-            $sub['item']->count -= $sub['count'];
-            $sub['item']->save();
-        }
+            foreach ($toSubtract as $sub) {
+                $sub['item']->count -= $sub['count'];
+                $this->inventoryRepository->saveBackpackItem($sub['item']);
+            }
 
-        if ($toDeleteItemIds) {
-            Backpack::whereIn('item_id', $toDeleteItemIds)->where('user_id', $user->id)->delete();
-        }
+            if ($toDeleteItemIds !== []) {
+                $this->inventoryRepository->deleteBackpackItems($user->id, $toDeleteItemIds);
+            }
 
-        $user->money -= $totalCost;
-        $user->save();
+            $user->money -= $totalCost;
+            $user->save();
+        });
 
         if ($isLimit) {
             return new WarehouseResultDTO(false, 'У вас не достаточно свободных мест в хранилище.');

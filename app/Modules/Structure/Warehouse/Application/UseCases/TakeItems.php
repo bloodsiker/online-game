@@ -6,13 +6,18 @@ namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Models\Structure;
-use App\Models\Warehouse;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
+use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class TakeItems
 {
+    public function __construct(
+        private readonly WarehouseInventoryRepository $inventoryRepository,
+        private readonly TransactionManager $transactionManager,
+    ) {}
+
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
      */
@@ -24,43 +29,33 @@ class TakeItems
             return new WarehouseResultDTO(false, 'Не выбраны предметы которые хотите забрать.');
         }
 
-        $items = Warehouse::with(['item', 'item.itemInfo'])
-            ->where('structure_id', $warehouse->id)
-            ->where('user_id', $user->id)
-            ->whereIn('item_id', array_keys($takeItems))
-            ->get();
+        $items = $this->inventoryRepository->getWarehouseItemsForTransfer($user->id, $warehouse->id, array_map('intval', array_keys($takeItems)));
 
-        foreach ($items as $wItem) {
-            $wantCount = (int) ($takeItems[$wItem->item_id]['count'] ?? $wItem->count);
-            $actualCount = min($wantCount, $wItem->count);
+        $this->transactionManager->run(function () use ($items, $takeItems, $user): void {
+            foreach ($items as $wItem) {
+                $wantCount = (int) ($takeItems[$wItem->item_id]['count'] ?? $wItem->count);
+                $actualCount = min($wantCount, $wItem->count);
 
-            if ($wItem->count <= $actualCount) {
-                $wItem->delete();
-            } else {
-                $wItem->count -= $actualCount;
-                $wItem->save();
+                if ($wItem->count <= $actualCount) {
+                    $this->inventoryRepository->deleteWarehouseItem($wItem);
+                } else {
+                    $wItem->count -= $actualCount;
+                    $this->inventoryRepository->saveWarehouseItem($wItem);
+                }
+
+                $existing = null;
+                if ($wItem->item->itemInfo->type === ShareItemType::RESOURCE || $wItem->item->itemInfo->type === ShareItemType::POTION) {
+                    $existing = $this->inventoryRepository->findBackpackStack($user->id, $wItem->item->share_item_id);
+                }
+
+                if ($existing) {
+                    $existing->count += $actualCount;
+                    $this->inventoryRepository->saveBackpackItem($existing);
+                } else {
+                    $this->inventoryRepository->createBackpackItem($user->id, $wItem->item_id, $actualCount);
+                }
             }
-
-            $existing = null;
-            if ($wItem->item->itemInfo->type === ShareItemType::RESOURCE || $wItem->item->itemInfo->type === ShareItemType::POTION) {
-                $existing = Backpack::select('backpacks.*')
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('items.share_item_id', $wItem->item->share_item_id)
-                    ->where('backpacks.user_id', $user->id)
-                    ->first();
-            }
-
-            if ($existing) {
-                $existing->count += $actualCount;
-                $existing->save();
-            } else {
-                Backpack::create([
-                    'user_id' => $user->id,
-                    'item_id' => $wItem->item_id,
-                    'count' => $actualCount,
-                ]);
-            }
-        }
+        });
 
         return new WarehouseResultDTO(true, '');
     }
