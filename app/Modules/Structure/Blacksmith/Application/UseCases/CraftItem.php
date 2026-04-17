@@ -4,77 +4,52 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
-use App\Enums\ShareItemType;
 use App\Models\Item\Item;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\CraftItemDTO;
-use Illuminate\Support\Facades\DB;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Blacksmith\Domain\Services\CraftService;
 
 class CraftItem
 {
+    public function __construct(
+        private readonly BlacksmithInventoryRepository $inventoryRepository,
+        private readonly BlacksmithReadRepository $readRepository,
+        private readonly TransactionManager $transactionManager,
+        private readonly CraftService $craftService,
+    ) {}
+
     public function execute(CraftItemDTO $data): BlacksmithActionResultDTO
     {
-        $recipeItem = Backpack::select('backpacks.*')
-            ->with(['item'])
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $data->user->id)
-            ->where('backpacks.item_id', $data->recipeItemId)
-            ->where('share_items.type', ShareItemType::RECIPE->value)
-            ->firstOrFail();
-
-        $resources = DB::table('share_items')
-            ->select(['share_items.id', 'backpacks.count'])
-            ->join('items', 'items.share_item_id', '=', 'share_items.id')
-            ->join('backpacks', 'backpacks.item_id', '=', 'items.id')
-            ->where('backpacks.user_id', $data->user->id)
-            ->where('backpacks.equipped', 0)
-            ->where('share_items.type', ShareItemType::RESOURCE)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'count' => $item->count,
-            ])
-            ->toArray();
+        $recipeItem = $this->inventoryRepository->findRecipeSlot($data->user, $data->recipeItemId);
+        abort_unless($recipeItem !== null, 404);
+        $resources = $this->readRepository->getResourceCounts($data->user);
 
         $recipe = $recipeItem->item->itemInfo->recipe;
-        $itemsNeedKraft = $recipe->items;
+        $craftResult = $this->craftService->craft($recipe, $resources);
 
-        foreach ($itemsNeedKraft as $itemNeedKraft) {
-            $resourceCount = $itemNeedKraft->getCountItemPerRecipe($resources);
-
-            if ($resourceCount < $itemNeedKraft->pivot->count) {
-                return new BlacksmithActionResultDTO(false, 'Не достаточно ресурсов для крафта');
-            }
+        if (! $craftResult->resourcesConsumed) {
+            return BlacksmithActionResultDTO::fromCraftResult($craftResult);
         }
 
-        return DB::transaction(function () use ($data, $recipeItem, $recipe, $itemsNeedKraft) {
-            $percentKraft = mt_rand(0, 100);
-
-            if ($percentKraft <= $recipe->percent) {
+        return $this->transactionManager->run(function () use ($data, $recipeItem, $recipe, $craftResult) {
+            if ($craftResult->craftedShareItemId !== null) {
                 $successKraftItem = new Item;
-                $successKraftItem->share_item_id = $recipe->kraftItem->id;
+                $successKraftItem->share_item_id = $craftResult->craftedShareItemId;
                 $successKraftItem->save();
 
                 $data->user->backpack()->attach($successKraftItem->id, ['equipped' => 0, 'count' => 1]);
-
-                $message = sprintf('Успешний крафт. Получено %s', $recipe->kraftItem->name);
-            } else {
-                $message = 'Не удачный крафт';
             }
 
             $recipeItem->item->delete();
             $recipeItem->delete();
 
-            foreach ($itemsNeedKraft as $itemDelete) {
-                $itemBackpack = Backpack::select('backpacks.*')
-                    ->where(['items.share_item_id' => $itemDelete->id])
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('backpacks.user_id', $data->user->id)
-                    ->first();
+            foreach ($recipe->items as $itemDelete) {
+                $itemBackpack = $this->inventoryRepository->findOwnedSlotByShareItemId($data->user, $itemDelete->id);
 
-                if (! $itemBackpack instanceof Backpack) {
+                if ($itemBackpack === null) {
                     continue;
                 }
 
@@ -87,7 +62,7 @@ class CraftItem
                 }
             }
 
-            return new BlacksmithActionResultDTO(true, $message, str_starts_with($message, 'Успеш'));
+            return BlacksmithActionResultDTO::fromCraftResult($craftResult);
         });
     }
 }

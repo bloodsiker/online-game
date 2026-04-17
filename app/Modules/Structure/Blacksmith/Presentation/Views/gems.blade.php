@@ -92,38 +92,6 @@
 
             <br>
 
-            @php
-                // Build JS data for items with socket info
-                $itemsData = $items->map(fn($slot) => [
-                    'id'           => $slot->item->id,
-                    'name'         => $slot->item->itemInfo->name,
-                    'img'          => $slot->item->itemInfo->image,
-                    'socket_count' => $slot->item->socket_count,
-                    'gems'         => $slot->item->gems->map(fn($g) => [
-                        'socket_index' => $g->socket_index,
-                        'share_item_id'=> $g->share_item_id,
-                        'name'         => $g->gemInfo->name,
-                        'img'          => $g->gemInfo->image,
-                        'stats'        => $g->gemInfo->gem_stats ?? [],
-                    ])->values()->toArray(),
-                ])->values()->toArray();
-
-                $gemsData = $gems->map(fn($slot) => [
-                    'id'    => $slot->item->id,
-                    'name'  => $slot->item->itemInfo->name,
-                    'img'   => $slot->item->itemInfo->image,
-                    'count' => $slot->count,
-                    'stats' => $slot->item->itemInfo->gem_stats ?? [],
-                ])->values()->toArray();
-
-                $kitsData = $socketKits->map(fn($slot) => [
-                    'id'    => $slot->item->id,
-                    'name'  => $slot->item->itemInfo->name,
-                    'img'   => $slot->item->itemInfo->image,
-                    'count' => $slot->count,
-                ])->values()->toArray();
-            @endphp
-
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
 
@@ -137,19 +105,19 @@
                             </thead>
                             <tbody>
                             @forelse($items as $slot)
-                                @php $socketCount = $slot->item->socket_count; @endphp
-                                <tr class="item-row" data-item-id="{{ $slot->item->id }}"
-                                    onclick="selectItem({{ $slot->item->id }})">
+                                @php $socketCount = $slot['socketCount']; @endphp
+                                <tr class="item-row" data-item-id="{{ $slot['id'] }}"
+                                    onclick="selectItem({{ $slot['id'] }})">
                                     <td width="44">
-                                        <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                             data-id="{{ $slot->item->id }}"
+                                        <img src="{{ $slot['image'] }}" width="40" height="40"
+                                             data-id="{{ $slot['id'] }}"
                                              onmouseover="showItemInfo(this,event,2)"
                                              onmouseout="showItemInfo(this,event,0)">
                                     </td>
                                     <td>
-                                        {{ $slot->item->itemInfo->name }}
-                                        @if($slot->item->upgrade_lvl > 0)
-                                            <span style="color:#2255aa; font-weight:bold;">+{{ $slot->item->upgrade_lvl }}</span>
+                                        {{ $slot['name'] }}
+                                        @if($slot['upgradeLevel'] > 0)
+                                            <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
                                         @endif
                                         <br>
                                         <span style="color:#888;">
@@ -157,7 +125,7 @@
                                                 Нет сокетов
                                             @else
                                                 {{ $socketCount }} сокет{{ $socketCount === 1 ? '' : ($socketCount < 5 ? 'а' : 'ов') }}
-                                                / {{ $slot->item->gems->count() }} заполнен
+                                                / {{ $slot['gemsCount'] }} заполнен
                                             @endif
                                         </span>
                                     </td>
@@ -205,20 +173,20 @@
                                 <td colspan="2" style="color:#888;">— отменить выбор —</td>
                             </tr>
                             @forelse($gems as $slot)
-                                <tr class="gem-row" data-gem-id="{{ $slot->item->id }}"
-                                    onclick="selectGem({{ $slot->item->id }}, this)">
+                                <tr class="gem-row" data-gem-id="{{ $slot['id'] }}"
+                                    onclick="selectGem({{ $slot['id'] }}, this)">
                                     <td width="44">
-                                        <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                             data-id="{{ $slot->item->id }}"
+                                        <img src="{{ $slot['image'] }}" width="40" height="40"
+                                             data-id="{{ $slot['id'] }}"
                                              onmouseover="showItemInfo(this,event,2)"
                                              onmouseout="showItemInfo(this,event,0)">
                                     </td>
                                     <td>
-                                        {{ $slot->item->itemInfo->name }}
-                                        @if($slot->count > 1)
-                                            <span style="color:#888;">({{ $slot->count }})</span>
+                                        {{ $slot['name'] }}
+                                        @if($slot['count'] > 1)
+                                            <span style="color:#888;">({{ $slot['count'] }})</span>
                                         @endif
-                                        @php $stats = $slot->item->itemInfo->gem_stats ?? []; @endphp
+                                        @php $stats = $slot['stats'] ?? []; @endphp
                                         @if(count($stats))
                                             <br>
                                             @foreach($stats as $st)
@@ -237,7 +205,7 @@
                         </table>
 
                         {{-- Socket kits --}}
-                        @if(count($kitsData) > 0)
+                        @if(count($socketKits) > 0)
                         <table class="coll brd2-all" width="100%" border="0">
                             <thead>
                             <tr class="bg_l" height="17">
@@ -249,18 +217,18 @@
                                 <td colspan="2" style="color:#888;">— отменить выбор —</td>
                             </tr>
                             @foreach($socketKits as $slot)
-                                <tr class="gem-row" data-kit-id="{{ $slot->item->id }}"
-                                    onclick="selectKit({{ $slot->item->id }}, this)">
+                                <tr class="gem-row" data-kit-id="{{ $slot['id'] }}"
+                                    onclick="selectKit({{ $slot['id'] }}, this)">
                                     <td width="44">
-                                        <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                             data-id="{{ $slot->item->id }}"
+                                        <img src="{{ $slot['image'] }}" width="40" height="40"
+                                             data-id="{{ $slot['id'] }}"
                                              onmouseover="showItemInfo(this,event,2)"
                                              onmouseout="showItemInfo(this,event,0)">
                                     </td>
                                     <td>
-                                        {{ $slot->item->itemInfo->name }}
-                                        @if($slot->count > 1)
-                                            <span style="color:#888;">({{ $slot->count }})</span>
+                                        {{ $slot['name'] }}
+                                        @if($slot['count'] > 1)
+                                            <span style="color:#888;">({{ $slot['count'] }})</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -309,9 +277,9 @@
 <script src="{{ asset('js/item_tooltip.js') }}"></script>
 
 <script>
-const ITEMS_DATA = @json($itemsData);
-const GEMS_DATA  = @json($gemsData);
-const KITS_DATA  = @json($kitsData);
+const ITEMS_DATA = @json($items);
+const GEMS_DATA  = @json($gems);
+const KITS_DATA  = @json($socketKits);
 const MAX_SOCKETS = {{ \App\Modules\Structure\Blacksmith\Domain\Services\GemService::MAX_SOCKETS }};
 
 let selectedItemId   = parseInt(localStorage.getItem('gem_selected_item') || '0');

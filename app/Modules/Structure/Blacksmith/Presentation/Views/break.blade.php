@@ -227,7 +227,7 @@
                                 <tr class="bg_l">
                                     <td>
                                         <div class="collections-title">
-                                            <b class="collection-name" style="color: #3300ff">{{ $item->item->itemInfo->name }}</b>
+                                            <b class="collection-name" style="color: #3300ff">{{ $item['name'] }}</b>
                                         </div>
                                         <span class="collections-divider"></span>
                                         <div class="collections-body">
@@ -237,15 +237,15 @@
                                                     <td>
                                                         <span class="collection-slot">
                                                             <span class="collection-slot__img">
-                                                                <a href="{{ $item->item->id }}" class="collection-resource redd">
-                                                                    <img src="{{ $item->item->itemInfo->image }}" class="collection-resource-img" alt="">
+                                                                <a href="{{ $item['itemId'] }}" class="collection-resource redd">
+                                                                    <img src="{{ $item['image'] }}" class="collection-resource-img" alt="">
                                                                 </a>
                                                             </span>
                                                              <span class="collection-slot__qty"></span>
                                                             <div class="collect-btn">
                                                                 <b class="butt2 pointer">
                                                                     <b>
-                                                                        <button type="button" class="pointer break-item" data-href="{{ route('blacksmith.break', ['id' => $blacksmith->id, 'iid' => $item->item->id]) }}" style="width: 36px;">сломать</button>
+                                                                        <button type="button" class="pointer break-item" data-href="{{ route('blacksmith.break', ['id' => $blacksmith->id, 'iid' => $item['itemId']]) }}" style="width: 36px;">сломать</button>
                                                                     </b>
                                                                 </b>
                                                             </div>
@@ -261,7 +261,7 @@
                                                                     <img src="{{ $crystal->image }}" class="collection-resource-img" alt="">
                                                                 </a>
                                                             </span>
-                                                             <span class="collection-slot__qty">{{ $item->item->itemInfo->break_crystal }}</span>
+                                                             <span class="collection-slot__qty">{{ $item['breakCrystal'] }}</span>
                                                         </span>
                                                     </td>
                                                 </tr>

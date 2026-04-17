@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure;
 
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithInventoryRepository;
+use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithReadRepository;
+use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\LaravelTransactionManager;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class StructureServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(BlacksmithReadRepository::class, EloquentBlacksmithReadRepository::class);
+        $this->app->bind(BlacksmithInventoryRepository::class, EloquentBlacksmithInventoryRepository::class);
+        $this->app->bind(TransactionManager::class, LaravelTransactionManager::class);
+    }
 
     public function boot(): void
     {

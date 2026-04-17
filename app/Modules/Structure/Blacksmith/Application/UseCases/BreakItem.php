@@ -6,39 +6,44 @@ namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Models\Item\Item;
-use App\Models\Share\ShareItem;
-use App\Models\Structure;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;
-use Illuminate\Support\Facades\DB;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Blacksmith\Domain\Services\BreakService;
 
 class BreakItem
 {
+    public function __construct(
+        private readonly BlacksmithReadRepository $readRepository,
+        private readonly BlacksmithInventoryRepository $inventoryRepository,
+        private readonly TransactionManager $transactionManager,
+        private readonly BreakService $breakService,
+    ) {}
+
     public function execute(BreakItemDTO $data): BlacksmithActionResultDTO
     {
-        Structure::findOrFail($data->blacksmithId);
-        $crystal = ShareItem::findOrFail(23);
+        $this->readRepository->findStructureOrFail($data->blacksmithId);
+        $crystal = $this->readRepository->findCrystalOrFail();
+        $item = $this->inventoryRepository->findOwnedSlot($data->user, $data->itemId, ['item', 'item.itemInfo']);
 
-        $item = Backpack::with(['item', 'item.itemInfo'])
-            ->where('backpacks.user_id', $data->user->id)
-            ->where(['item_id' => $data->itemId])
-            ->first();
-
-        if (! $item instanceof Backpack) {
+        if ($item === null) {
             return new BlacksmithActionResultDTO(false, 'Не найден предмет для кристализации');
         }
 
-        return DB::transaction(function () use ($data, $item, $crystal) {
-            $hasBackpack = Backpack::select('backpacks.*')
-                ->where(['items.share_item_id' => $crystal->id])
-                ->join('items', 'backpacks.item_id', '=', 'items.id')
-                ->where('backpacks.user_id', $data->user->id)
-                ->first();
+        $salvageResult = $this->breakService->salvage($item->item->itemInfo);
 
-            $countCrystal = $item->item->itemInfo->break_crystal;
+        if (! $salvageResult->success) {
+            return BlacksmithActionResultDTO::fromSalvageResult($salvageResult);
+        }
 
-            if ($hasBackpack instanceof Backpack && $crystal->type === ShareItemType::RESOURCE) {
+        return $this->transactionManager->run(function () use ($data, $item, $crystal, $salvageResult) {
+            $hasBackpack = $this->inventoryRepository->findOwnedSlotByShareItemId($data->user, $crystal->id);
+
+            $countCrystal = $salvageResult->crystalCount;
+
+            if ($hasBackpack !== null && $crystal->type === ShareItemType::RESOURCE) {
                 $hasBackpack->count += $countCrystal;
                 $hasBackpack->save();
             } else {
@@ -56,11 +61,7 @@ class BreakItem
             $item->delete();
             $item->item->delete();
 
-            return new BlacksmithActionResultDTO(
-                ok: true,
-                message: sprintf('Вы получили кристаллов в количестве %s шт', $countCrystal),
-                success: true,
-            );
+            return BlacksmithActionResultDTO::fromSalvageResult($salvageResult);
         });
     }
 }

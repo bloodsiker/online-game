@@ -7,6 +7,7 @@ namespace App\Modules\Structure\Blacksmith\Domain\Services;
 use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Domain\Results\UpgradeResult;
 
 class UpgradeService
 {
@@ -51,16 +52,13 @@ class UpgradeService
         return (int) (self::BASE_COST * ($currentLevel + 1) ** 2);
     }
 
-    /**
-     * @return array{success: bool, destroyed: bool, message: string, new_level: int}
-     */
-    public function upgrade(User $user, Backpack $itemSlot, Backpack $baseScrollSlot, ?Backpack $bonusScrollSlot): array
+    public function upgrade(User $user, Backpack $itemSlot, Backpack $baseScrollSlot, ?Backpack $bonusScrollSlot): UpgradeResult
     {
         $item = $itemSlot->item;
         $currentLevel = $item->upgrade_lvl;
 
         if ($currentLevel >= self::MAX_LEVEL) {
-            return ['success' => false, 'destroyed' => false, 'message' => 'Предмет уже достиг максимального уровня заточки.', 'new_level' => $currentLevel];
+            return UpgradeResult::failed('Предмет уже достиг максимального уровня заточки.', $currentLevel);
         }
 
         $bonusType = $bonusScrollSlot
@@ -74,7 +72,7 @@ class UpgradeService
         $cost = $this->getGoldCost($currentLevel);
 
         if ($user->money < $cost) {
-            return ['success' => false, 'destroyed' => false, 'message' => "Недостаточно монет. Необходимо: {$cost}.", 'new_level' => $currentLevel];
+            return UpgradeResult::failed("Недостаточно монет. Необходимо: {$cost}.", $currentLevel);
         }
 
         $user->money -= $cost;
@@ -97,12 +95,10 @@ class UpgradeService
             $item->upgrade_fail_streak = 0;
             $item->save();
 
-            return [
-                'success' => true,
-                'destroyed' => false,
-                'message' => sprintf('Заточка успешна! Предмет «%s» улучшен до +%d.', $item->itemInfo->name, $item->upgrade_lvl),
-                'new_level' => $item->upgrade_lvl,
-            ];
+            return UpgradeResult::succeeded(
+                sprintf('Заточка успешна! Предмет «%s» улучшен до +%d.', $item->itemInfo->name, $item->upgrade_lvl),
+                $item->upgrade_lvl,
+            );
         }
 
         $item->upgrade_pity++;
@@ -114,12 +110,11 @@ class UpgradeService
             $itemSlot->delete();
             $item->delete();
 
-            return [
-                'success' => false,
-                'destroyed' => true,
-                'message' => sprintf('Заточка провалилась. Предмет «%s +%d» уничтожен!', $item->itemInfo->name, $currentLevel),
-                'new_level' => 0,
-            ];
+            return UpgradeResult::failed(
+                sprintf('Заточка провалилась. Предмет «%s +%d» уничтожен!', $item->itemInfo->name, $currentLevel),
+                0,
+                true,
+            );
         }
 
         if (! $isStabilizer && $currentLevel >= 6) {
@@ -128,16 +123,14 @@ class UpgradeService
 
         $item->save();
 
-        return [
-            'success' => false,
-            'destroyed' => false,
-            'message' => sprintf(
+        return UpgradeResult::failed(
+            sprintf(
                 'Заточка провалилась. Уровень: +%d.%s',
                 $item->upgrade_lvl,
-                ($isStabilizer && $currentLevel >= 6 ? ' (Стабилизатор предотвратил понижение)' : '')
+                $isStabilizer && $currentLevel >= 6 ? ' (Стабилизатор предотвратил понижение)' : ''
             ),
-            'new_level' => $item->upgrade_lvl,
-        ];
+            $item->upgrade_lvl,
+        );
     }
 
     private function consumeScroll(Backpack $scrollSlot): void

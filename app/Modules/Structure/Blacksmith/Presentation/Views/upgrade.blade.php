@@ -118,25 +118,21 @@
                                 </thead>
                                 <tbody id="item-list">
                                 @forelse($items as $slot)
-                                    @php
-                                        $lvl  = $slot->item->upgrade_lvl;
-                                        $name = $slot->item->itemInfo->name;
-                                    @endphp
-                                    <tr class="item-row" data-item-id="{{ $slot->item->id }}"
-                                        data-name="{{ $name }}"
-                                        data-level="{{ $lvl }}"
-                                        data-pity="{{ $slot->item->upgrade_pity }}"
-                                        data-img="{{ $slot->item->itemInfo->image }}">
+                                    <tr class="item-row" data-item-id="{{ $slot['id'] }}"
+                                        data-name="{{ $slot['name'] }}"
+                                        data-level="{{ $slot['level'] }}"
+                                        data-pity="{{ $slot['pity'] }}"
+                                        data-img="{{ $slot['image'] }}">
                                         <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                                 data-id="{{ $slot->item->id }}"
+                                            <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                 data-id="{{ $slot['id'] }}"
                                                  onmouseover="showItemInfo(this,event,2)"
                                                  onmouseout="showItemInfo(this,event,0)">
                                         </td>
                                         <td style="padding:3px 4px;">
-                                            {{ $name }}
-                                            @if($lvl > 0)
-                                                <span class="lvl-badge">+{{ $lvl }}</span>
+                                            {{ $slot['name'] }}
+                                            @if($slot['level'] > 0)
+                                                <span class="lvl-badge">+{{ $slot['level'] }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -181,18 +177,18 @@
                                 <tbody>
                                 @forelse($baseScrolls as $scroll)
                                     <tr class="scroll-row base-scroll-row"
-                                        data-scroll-id="{{ $scroll->item->id }}"
-                                        onclick="selectBaseScroll({{ $scroll->item->id }}, this)">
+                                        data-scroll-id="{{ $scroll['id'] }}"
+                                        onclick="selectBaseScroll({{ $scroll['id'] }}, this)">
                                         <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $scroll->item->itemInfo->image }}" width="40" height="40"
-                                                 data-id="{{ $scroll->item->id }}"
+                                            <img src="{{ $scroll['image'] }}" width="40" height="40"
+                                                 data-id="{{ $scroll['id'] }}"
                                                  onmouseover="showItemInfo(this,event,2)"
                                                  onmouseout="showItemInfo(this,event,0)">
                                         </td>
                                         <td style="padding:3px 4px;">
-                                            {{ $scroll->item->itemInfo->name }}
-                                            @if($scroll->count > 1)
-                                                <span style="color:#888;">({{ $scroll->count }})</span>
+                                            {{ $scroll['name'] }}
+                                            @if($scroll['count'] > 1)
+                                                <span style="color:#888;">({{ $scroll['count'] }})</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -216,23 +212,22 @@
                                     <td style="padding:3px 4px; color:#888;">— без доп. свитка —</td>
                                 </tr>
                                 @foreach($bonusScrolls as $scroll)
-                                    @php $stype = $scroll->item->itemInfo->upgrade_scroll_type; @endphp
                                     <tr class="scroll-row bonus-scroll-row"
-                                        data-scroll-id="{{ $scroll->item->id }}"
-                                        data-scroll-bonus="{{ $stype?->value ?? '' }}"
-                                        onclick="selectBonusScroll({{ $scroll->item->id }}, this)">
+                                        data-scroll-id="{{ $scroll['id'] }}"
+                                        data-scroll-bonus="{{ $scroll['bonusType'] }}"
+                                        onclick="selectBonusScroll({{ $scroll['id'] }}, this)">
                                         <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $scroll->item->itemInfo->image }}" width="40" height="40"
-                                                 data-id="{{ $scroll->item->id }}"
+                                            <img src="{{ $scroll['image'] }}" width="40" height="40"
+                                                 data-id="{{ $scroll['id'] }}"
                                                  onmouseover="showItemInfo(this,event,2)"
                                                  onmouseout="showItemInfo(this,event,0)">
                                         </td>
                                         <td style="padding:3px 4px;">
-                                            {{ $scroll->item->itemInfo->name }}
-                                            @if($scroll->count > 1)
-                                                <span style="color:#888;">({{ $scroll->count }})</span>
+                                            {{ $scroll['name'] }}
+                                            @if($scroll['count'] > 1)
+                                                <span style="color:#888;">({{ $scroll['count'] }})</span>
                                             @endif
-                                            <br><span style="color:#666; font-size:10px;">{{ $stype?->description() }}</span>
+                                            <br><span style="color:#666; font-size:10px;">{{ $scroll['description'] }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -256,51 +251,9 @@
 </table>
 
 <script>
-    @php
-        // Pass upgrade data to JS
-        $upgradeData = [];
-        foreach ($items as $slot) {
-            $lvl  = $slot->item->upgrade_lvl;
-            $pity = $slot->item->upgrade_pity;
-            $service = app(\App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService::class);
-            $upgradeData[$slot->item->id] = [
-                'name'          => $slot->item->itemInfo->name,
-                'level'         => $lvl,
-                'pity'          => $pity,
-                'failStreak'    => $slot->item->upgrade_fail_streak,
-                'image'         => $slot->item->itemInfo->image ?? '',
-                'successChance' => $service->getSuccessChance($lvl, $pity, false),
-                'successChanceLucky' => $service->getSuccessChance($lvl, $pity, true),
-                'destroyChance' => $service->getDestroyChance($lvl),
-                'cost'          => $service->getGoldCost($lvl),
-                'isMax'         => $lvl >= 15,
-            ];
-        }
-    @endphp
-
-    const upgradeData = @json($upgradeData);
-
-    @php
-        $baseScrollData = [];
-        foreach ($baseScrolls as $s) {
-            $baseScrollData[$s->item->id] = [
-                'name'  => $s->item->itemInfo->name,
-                'image' => $s->item->itemInfo->image ?? '',
-                'count' => $s->count,
-            ];
-        }
-        $bonusScrollData = [];
-        foreach ($bonusScrolls as $s) {
-            $bonusScrollData[$s->item->id] = [
-                'name'        => $s->item->itemInfo->name,
-                'image'       => $s->item->itemInfo->image ?? '',
-                'count'       => $s->count,
-                'description' => $s->item->itemInfo->upgrade_scroll_type?->description() ?? '',
-            ];
-        }
-    @endphp
-    const baseScrollData  = @json($baseScrollData);
-    const bonusScrollData = @json($bonusScrollData);
+    const upgradeData = @json(collect($items)->keyBy('id'));
+    const baseScrollData  = @json(collect($baseScrolls)->keyBy('id'));
+    const bonusScrollData = @json(collect($bonusScrolls)->keyBy('id'));
 
     let selectedItemId        = null;
     let selectedBaseScrollId  = null;

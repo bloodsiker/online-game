@@ -104,43 +104,6 @@
 
         <br>
 
-        @php
-            $itemsData = $items->map(fn($slot) => [
-                'id'             => $slot->item->id,
-                'name'           => $slot->item->itemInfo->name,
-                'img'            => $slot->item->itemInfo->image,
-                'rune_slot_count'=> $slot->item->rune_slot_count,
-                'runes'          => $slot->item->runes->map(fn($r) => [
-                    'slot_index'    => $r->slot_index,
-                    'share_item_id' => $r->share_item_id,
-                    'name'          => $r->runeInfo->name,
-                    'img'           => $r->runeInfo->image,
-                    'rarity'        => $r->runeInfo->rune_rarity?->value ?? 'common',
-                    'rarity_label'  => $r->runeInfo->rune_rarity?->label() ?? '',
-                    'stats'         => $r->stats,
-                    'passive_skill' => $r->passive_skill,
-                    'reroll_count'  => $r->reroll_count,
-                    'reroll_cost'   => app(\App\Services\RuneService::class)->nextRerollCost($r, 0),
-                ])->values()->toArray(),
-            ])->values()->toArray();
-
-            $runesData   = $runes->map(fn($slot) => [
-                'id'     => $slot->item->id,
-                'name'   => $slot->item->itemInfo->name,
-                'img'    => $slot->item->itemInfo->image,
-                'count'  => $slot->count,
-                'rarity' => $slot->item->itemInfo->rune_rarity?->value ?? 'common',
-                'rarity_label' => $slot->item->itemInfo->rune_rarity?->label() ?? '',
-            ])->values()->toArray();
-
-            $keysData = $runeKeys->map(fn($slot) => [
-                'id'    => $slot->item->id,
-                'name'  => $slot->item->itemInfo->name,
-                'img'   => $slot->item->itemInfo->image,
-                'count' => $slot->count,
-            ])->values()->toArray();
-        @endphp
-
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr valign="top">
 
@@ -152,22 +115,22 @@
                     </tr></thead>
                     <tbody>
                     @forelse($items as $slot)
-                        <tr class="item-row" data-item-id="{{ $slot->item->id }}" onclick="selectItem({{ $slot->item->id }})">
+                        <tr class="item-row" data-item-id="{{ $slot['id'] }}" onclick="selectItem({{ $slot['id'] }})">
                             <td width="44">
-                                <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                     data-id="{{ $slot->item->id }}"
+                                <img src="{{ $slot['image'] }}" width="40" height="40"
+                                     data-id="{{ $slot['id'] }}"
                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
                             </td>
                             <td>
-                                {{ $slot->item->itemInfo->name }}
-                                @if($slot->item->upgrade_lvl > 0)
-                                    <span style="color:#2255aa; font-weight:bold;">+{{ $slot->item->upgrade_lvl }}</span>
+                                {{ $slot['name'] }}
+                                @if($slot['upgradeLevel'] > 0)
+                                    <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
                                 @endif
                                 <br>
                                 <span style="color:#888;">
-                                    @php $sc = $slot->item->rune_slot_count; @endphp
+                                    @php $sc = $slot['runeSlotCount']; @endphp
                                     @if($sc === 0) Нет слотов
-                                    @else {{ $sc }} слот{{ $sc === 1 ? '' : ($sc < 5 ? 'а' : 'ов') }} / {{ $slot->item->runes->count() }} занят
+                                    @else {{ $sc }} слот{{ $sc === 1 ? '' : ($sc < 5 ? 'а' : 'ов') }} / {{ count($slot['runes']) }} занят
                                     @endif
                                 </span>
                             </td>
@@ -208,18 +171,17 @@
                         <td colspan="2" style="color:#888;">— без руны —</td>
                     </tr>
                     @forelse($runes as $slot)
-                        @php $rar = $slot->item->itemInfo->rune_rarity; @endphp
-                        <tr class="rune-row" data-rune-id="{{ $slot->item->id }}" onclick="selectRune({{ $slot->item->id }}, this)">
+                        <tr class="rune-row" data-rune-id="{{ $slot['id'] }}" onclick="selectRune({{ $slot['id'] }}, this)">
                             <td width="44">
-                                <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                     data-id="{{ $slot->item->id }}"
+                                <img src="{{ $slot['image'] }}" width="40" height="40"
+                                     data-id="{{ $slot['id'] }}"
                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
                             </td>
                             <td>
-                                <span class="rarity-{{ $rar?->value ?? 'common' }}">{{ $rar?->label() }}</span><br>
-                                {{ $slot->item->itemInfo->name }}
-                                @if($slot->count > 1)
-                                    <span style="color:#888;">({{ $slot->count }})</span>
+                                <span class="rarity-{{ $slot['rarity'] ?? 'common' }}">{{ $slot['rarity_label'] }}</span><br>
+                                {{ $slot['name'] }}
+                                @if($slot['count'] > 1)
+                                    <span style="color:#888;">({{ $slot['count'] }})</span>
                                 @endif
                             </td>
                         </tr>
@@ -238,16 +200,16 @@
                         <td colspan="2" style="color:#888;">— без ключа —</td>
                     </tr>
                     @forelse($runeKeys as $slot)
-                        <tr class="rune-row" data-key-id="{{ $slot->item->id }}" onclick="selectKey({{ $slot->item->id }}, this)">
+                        <tr class="rune-row" data-key-id="{{ $slot['id'] }}" onclick="selectKey({{ $slot['id'] }}, this)">
                             <td width="44">
-                                <img src="{{ $slot->item->itemInfo->image }}" width="40" height="40"
-                                     data-id="{{ $slot->item->id }}"
+                                <img src="{{ $slot['image'] }}" width="40" height="40"
+                                     data-id="{{ $slot['id'] }}"
                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
                             </td>
                             <td>
-                                {{ $slot->item->itemInfo->name }}
-                                @if($slot->count > 1)
-                                    <span style="color:#888;">({{ $slot->count }})</span>
+                                {{ $slot['name'] }}
+                                @if($slot['count'] > 1)
+                                    <span style="color:#888;">({{ $slot['count'] }})</span>
                                 @endif
                             </td>
                         </tr>
@@ -305,9 +267,9 @@
 <script src="{{ asset('js/item_tooltip.js') }}"></script>
 
 <script>
-const ITEMS_DATA = @json($itemsData);
-const RUNES_DATA = @json($runesData);
-const KEYS_DATA  = @json($keysData);
+const ITEMS_DATA = @json($items);
+const RUNES_DATA = @json($runes);
+const KEYS_DATA  = @json($runeKeys);
 const MAX_SLOTS  = {{ \App\Modules\Structure\Blacksmith\Domain\Services\RuneService::MAX_RUNE_SLOTS }};
 
 const STAT_LABELS = {

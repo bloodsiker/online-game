@@ -5,78 +5,73 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\UpgradeItemDTO;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
+use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Domain\Policies\CanUpgradeItem;
 use App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService;
-use Illuminate\Support\Facades\DB;
 
 class UpgradeItem
 {
     public function __construct(
+        private readonly BlacksmithInventoryRepository $inventoryRepository,
+        private readonly TransactionManager $transactionManager,
         private readonly UpgradeService $upgradeService,
+        private readonly CanUpgradeItem $canUpgradeItem,
     ) {}
 
     public function execute(UpgradeItemDTO $data): BlacksmithActionResultDTO
     {
-        $itemSlot = Backpack::select('backpacks.*')
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $data->user->id)
-            ->where('backpacks.item_id', $data->itemId)
-            ->whereIn('share_items.type', [
-                ShareItemType::WEAPON->value,
-                ShareItemType::SHIELD->value,
-                ShareItemType::ARMOR->value,
-                ShareItemType::BELT->value,
-            ])
-            ->first();
+        $itemSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, $data->itemId, [
+            ShareItemType::WEAPON->value,
+            ShareItemType::SHIELD->value,
+            ShareItemType::ARMOR->value,
+            ShareItemType::BELT->value,
+        ]);
 
-        if (! $itemSlot instanceof Backpack) {
+        if ($itemSlot === null) {
             return new BlacksmithActionResultDTO(false, 'Предмет не найден.');
         }
 
-        $baseScrollSlot = Backpack::select('backpacks.*')
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $data->user->id)
-            ->where('backpacks.item_id', $data->baseScrollId)
-            ->where('share_items.upgrade_scroll_type', UpgradeScrollType::BASE->value)
-            ->first();
+        if (! $this->canUpgradeItem->check($itemSlot->item->itemInfo)) {
+            return new BlacksmithActionResultDTO(false, 'Предмет нельзя заточить.');
+        }
 
-        if (! $baseScrollSlot instanceof Backpack) {
+        $baseScrollSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, $data->baseScrollId, [
+            ShareItemType::SCROLL->value,
+        ]);
+
+        if ($baseScrollSlot === null || $baseScrollSlot->item->itemInfo->upgrade_scroll_type !== UpgradeScrollType::BASE) {
             return new BlacksmithActionResultDTO(false, 'Свиток заточки не найден. Для заточки необходим свиток заточки.');
         }
 
         $bonusScrollSlot = null;
         if ($data->bonusScrollId !== null) {
-            $bonusScrollSlot = Backpack::select('backpacks.*')
-                ->join('items', 'backpacks.item_id', '=', 'items.id')
-                ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-                ->where('backpacks.user_id', $data->user->id)
-                ->where('backpacks.item_id', $data->bonusScrollId)
-                ->where('share_items.type', ShareItemType::SCROLL->value)
-                ->whereIn('share_items.upgrade_scroll_type', [
-                    UpgradeScrollType::PROTECTION->value,
-                    UpgradeScrollType::STABILIZER->value,
-                    UpgradeScrollType::LUCKY->value,
-                ])
-                ->first();
+            $bonusScrollSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, $data->bonusScrollId, [
+                ShareItemType::SCROLL->value,
+            ]);
+
+            if (
+                $bonusScrollSlot !== null &&
+                ! in_array($bonusScrollSlot->item->itemInfo->upgrade_scroll_type, [
+                    UpgradeScrollType::PROTECTION,
+                    UpgradeScrollType::STABILIZER,
+                    UpgradeScrollType::LUCKY,
+                ], true)
+            ) {
+                $bonusScrollSlot = null;
+            }
         }
 
-        $result = DB::transaction(fn () => $this->upgradeService->upgrade(
+        $result = $this->transactionManager->run(fn () => $this->upgradeService->upgrade(
             $data->user,
             $itemSlot,
             $baseScrollSlot,
             $bonusScrollSlot,
         ));
 
-        return new BlacksmithActionResultDTO(
-            ok: $result['success'],
-            message: $result['message'],
-            success: $result['success'],
-            destroyed: $result['destroyed'] ?? false,
-        );
+        return BlacksmithActionResultDTO::fromUpgradeResult($result);
     }
 }

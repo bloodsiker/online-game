@@ -224,7 +224,7 @@
                                 <tr class="bg_l">
                                     <td>
                                         <div class="collections-title">
-                                            <b class="collection-name" style="color: #3300ff">{{ $recipe->item->itemInfo->name }}</b>
+                                            <b class="collection-name" style="color: #3300ff">{{ $recipe['recipeName'] }}</b>
                                         </div>
                                         <span class="collections-divider"></span>
                                         <div class="collections-body">
@@ -234,41 +234,31 @@
                                                     <td>
                                                     <span class="collection-slot">
                                                         <span class="collection-slot__img">
-                                                            <a href="{{ $recipe->item->id }}" class="collection-resource redd"
-                                                               data-id="{{ $recipe->item->id }}"
+                                                            <a href="{{ $recipe['recipeItemId'] }}" class="collection-resource redd"
+                                                               data-id="{{ $recipe['recipeItemId'] }}"
                                                                onmouseover="showItemInfo(this,event,2)"
                                                                onmouseout="showItemInfo(this,event,0)">
-                                                                <img src="{{ $recipe->item->itemInfo->image }}" class="collection-resource-img" alt="">
+                                                                <img src="{{ $recipe['recipeImage'] }}" class="collection-resource-img" alt="">
                                                             </a>
                                                         </span>
-                                                         <span class="collection-slot__qty">{{ $recipe->item->itemInfo->recipe->percent }}%</span>
+                                                         <span class="collection-slot__qty">{{ $recipe['chancePercent'] }}%</span>
                                                     </span>
                                                     </td>
                                                     <td>
                                                         <b class="collection-ico">+</b>
                                                     </td>
                                                     <td>
-                                                        @php
-                                                            $isKraft = true;
-                                                        @endphp
-                                                        @foreach($recipe->item->itemInfo->recipe->items as $item)
-                                                            @php
-                                                                $itemsHas = $item->getCountItemPerRecipe($resources);
-                                                                $active = $itemsHas >= $item->pivot->count;
-                                                                if ($isKraft) {
-                                                                    $isKraft = $active;
-                                                                }
-                                                            @endphp
-                                                            <span class="collection-slot @if($active)active @endif" style="cursor:pointer;">
-                                                                <span class="collection-slot__img @if(!$active)grayscale @endif">
+                                                        @foreach($recipe['ingredients'] as $item)
+                                                            <span class="collection-slot @if($item['active'])active @endif" style="cursor:pointer;">
+                                                                <span class="collection-slot__img @if(!$item['active'])grayscale @endif">
                                                                     <a href=""
-                                                                       data-id="{{ $item->id }}"
+                                                                       data-id="{{ $item['id'] }}"
                                                                        onmouseover="showItemInfo(this,event,2)"
                                                                        onmouseout="showItemInfo(this,event,0)">
-                                                                        <img src="{{ $item->image }}" class="collection-resource-img" alt="">
+                                                                        <img src="{{ $item['image'] }}" class="collection-resource-img" alt="">
                                                                     </a>
                                                                 </span>
-                                                                <span class="collection-slot__qty"><b class="collection-slot__qty-current">{{ $itemsHas }}</b>/{{ $item->pivot->count }}</span>
+                                                                <span class="collection-slot__qty"><b class="collection-slot__qty-current">{{ $item['availableCount'] }}</b>/{{ $item['requiredCount'] }}</span>
                                                             </span>
                                                         @endforeach
                                                     </td>
@@ -279,12 +269,12 @@
                                                         <span class="collection-slot">
                                                             <span class="collection-slot__img">
                                                                 <a href="#" class="collection-resource redd">
-                                                                    <img src="{{ $recipe->item->itemInfo->recipe->kraftItem->image }}" class="collection-resource-img" alt="">
+                                                                    <img src="{{ $recipe['resultImage'] }}" class="collection-resource-img" alt="">
                                                                 </a>
                                                             </span>
                                                             <span class="collection-slot__qty"></span>
                                                             <div class="collect-btn">
-                                                                @if(!$isKraft)
+                                                                @if(!$recipe['canCraft'])
                                                                 <b class="butt2 pointer disabled">
                                                                     <b>
                                                                         <button type="button" class="pointer kraft-item" style="width: 36px;">крафт</button>
@@ -293,7 +283,7 @@
                                                                 @else
                                                                 <b class="butt2 pointer">
                                                                     <b>
-                                                                        <button type="button" class="pointer kraft-item" data-href="{{ route('blacksmith.kraft', ['id' => $recipe->item->id]) }}" style="width: 36px;">крафт</button>
+                                                                        <button type="button" class="pointer kraft-item" data-href="{{ route('blacksmith.kraft', ['id' => $recipe['recipeItemId']]) }}" style="width: 36px;">крафт</button>
                                                                     </b>
                                                                 </b>
                                                                 @endif
