@@ -261,8 +261,8 @@
                 @foreach($items as $item)
                     <form action="{{ route('exchange.apply', ['id' => $exchange->id]) }}" method="POST">
                         @csrf
-                        <input type="hidden" name="from_id" value="{{ $item->getFromItem()->id }}">
-                        <input type="hidden" name="to_id" value="{{ $item->getToItem()->id }}">
+                        <input type="hidden" name="from_id" value="{{ $item->fromItem->id }}">
+                        <input type="hidden" name="to_id" value="{{ $item->toItem->id }}">
 
                         <tr class="collection-group-13">
                             <td colspan="3">
@@ -278,10 +278,10 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->getFromItem()->image) }}" class="collection-resource-img" alt="{{ $item->getFromItem()->name }}">
+                                                                        <img src="{{ asset($item->fromItem->image) }}" class="collection-resource-img" alt="{{ $item->fromItem->name }}">
                                                                     </a>
                                                                 </span>
-                                                                 <span class="collection-slot__qty qty_from" data-count="{{ $item->getFromAmount() }}">{{ $item->getFromAmount() }} шт</span>
+                                                                 <span class="collection-slot__qty qty_from" data-count="{{ $item->fromAmount }}">{{ $item->fromAmount }} шт</span>
                                                             </span>
                                                         </td>
                                                         <td>
@@ -291,7 +291,7 @@
                                                                         <span class="b-input__inner">
                                                                             <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
                                                                             <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                                                            <input type="text" data-id="{{ $item->getFromItem()->id }}" data-min="0" data-max="{{ $item->getAvailableCount() }}" name="count" value="{{ $item->getAvailableCount() }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                                                            <input type="text" data-id="{{ $item->fromItem->id }}" data-min="0" data-max="{{ $item->availableCount }}" name="count" value="{{ $item->availableCount }}" class="cart_amount_sell_input count_sell" autocomplete="off">
                                                                         </span>
                                                                     </span>
                                                                 </span>
@@ -301,10 +301,10 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->getToItem()->image) }}" class="collection-resource-img" alt="{{ $item->getToItem()->name }}">
+                                                                        <img src="{{ asset($item->toItem->image) }}" class="collection-resource-img" alt="{{ $item->toItem->name }}">
                                                                     </a>
                                                                 </span>
-                                                                <span class="collection-slot__qty qty_to" data-count="{{ $item->getToAmount() }}">{{ $item->getToAmount() }} шт</span>
+                                                                <span class="collection-slot__qty qty_to" data-count="{{ $item->toAmount }}">{{ $item->toAmount }} шт</span>
                                                             </span>
                                                         </td>
                                                         <td>
@@ -314,7 +314,7 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->getToItem()->image) }}" class="collection-resource-img" alt="{{ $item->getToItem()->name }}">
+                                                                        <img src="{{ asset($item->toItem->image) }}" class="collection-resource-img" alt="{{ $item->toItem->name }}">
                                                                     </a>
                                                                 </span>
                                                                 <span class="collection-slot__qty qty_total">0</span>

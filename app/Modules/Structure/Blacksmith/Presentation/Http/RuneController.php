@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
-use App\Http\Controllers\Controller;
-use App\Modules\Structure\Blacksmith\Domain\Services\RuneService;
 use App\Enums\ShareItemType;
+use App\Http\Controllers\Controller;
+use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
-use App\Models\Structure;
+use App\Modules\Structure\Blacksmith\Domain\Services\RuneService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class RuneController extends Controller
 
     public function index(Request $request, int $id): \Illuminate\Contracts\View\View
     {
-        $user       = Auth::user();
+        $user = Auth::user();
         $blacksmith = Structure::findOrFail($id);
 
         $imbueableTypes = [
@@ -75,10 +75,10 @@ class RuneController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'item_id'    => 'required|integer',
-            'rune_id'    => 'required|integer',
+            'item_id' => 'required|integer',
+            'rune_id' => 'required|integer',
             'slot_index' => 'required|integer|min:0|max:2',
-            'risk_mode'  => 'nullable|boolean',
+            'risk_mode' => 'nullable|boolean',
         ]);
 
         $itemSlot = $this->findItemSlot($user->id, $request->integer('item_id'), [
@@ -116,7 +116,7 @@ class RuneController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'item_id'    => 'required|integer',
+            'item_id' => 'required|integer',
             'slot_index' => 'required|integer|min:0|max:2',
         ]);
 
@@ -144,9 +144,9 @@ class RuneController extends Controller
     {
         $user = Auth::user();
         $request->validate([
-            'item_id'          => 'required|integer',
-            'slot_index'       => 'required|integer|min:0|max:2',
-            'locked_indices'   => 'nullable|array',
+            'item_id' => 'required|integer',
+            'slot_index' => 'required|integer|min:0|max:2',
+            'locked_indices' => 'nullable|array',
             'locked_indices.*' => 'integer|min:0|max:4',
         ]);
 
@@ -179,7 +179,7 @@ class RuneController extends Controller
         $user = Auth::user();
         $request->validate([
             'item_id' => 'required|integer',
-            'key_id'  => 'required|integer',
+            'key_id' => 'required|integer',
         ]);
 
         $itemSlot = $this->findItemSlot($user->id, $request->integer('item_id'), [

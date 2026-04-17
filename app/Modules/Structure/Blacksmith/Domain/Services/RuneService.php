@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemRune;
 use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 
 class RuneService
 {
@@ -21,15 +21,15 @@ class RuneService
      * 'type' maps to PlayerStatService::modifiersFromEntry() keys.
      */
     private const STAT_POOL = [
-        'attack'       => ['min' => 3,  'max' => 8],
-        'armor'        => ['min' => 5,  'max' => 12],
-        'hp_max'       => ['min' => 20, 'max' => 50],
-        'mp_max'       => ['min' => 15, 'max' => 35],
-        'strength'     => ['min' => 2,  'max' => 5],
-        'agility'      => ['min' => 2,  'max' => 5],
+        'attack' => ['min' => 3,  'max' => 8],
+        'armor' => ['min' => 5,  'max' => 12],
+        'hp_max' => ['min' => 20, 'max' => 50],
+        'mp_max' => ['min' => 15, 'max' => 35],
+        'strength' => ['min' => 2,  'max' => 5],
+        'agility' => ['min' => 2,  'max' => 5],
         'intelligence' => ['min' => 2,  'max' => 5],
-        'critical'     => ['min' => 1,  'max' => 4],
-        'dodge'        => ['min' => 1,  'max' => 4],
+        'critical' => ['min' => 1,  'max' => 4],
+        'dodge' => ['min' => 1,  'max' => 4],
     ];
 
     public function imbue(
@@ -66,25 +66,25 @@ class RuneService
                 $this->consumeFromBackpack($runeSlot);
 
                 return [
-                    'success'  => false,
-                    'message'  => sprintf('Вплавление провалилось! Руна «%s» уничтожена.', $runeInfo->name),
+                    'success' => false,
+                    'message' => sprintf('Вплавление провалилось! Руна «%s» уничтожена.', $runeInfo->name),
                     'destroyed' => true,
                 ];
             }
         }
 
-        $stats   = $this->rollStats($runeInfo, $riskMode);
+        $stats = $this->rollStats($runeInfo, $riskMode);
         $passive = $this->rollPassive($rarity);
 
         $this->consumeFromBackpack($runeSlot);
 
         ItemRune::create([
-            'item_id'       => $item->id,
-            'slot_index'    => $slotIndex,
+            'item_id' => $item->id,
+            'slot_index' => $slotIndex,
             'share_item_id' => $runeInfo->id,
-            'stats'         => $stats,
+            'stats' => $stats,
             'passive_skill' => $passive,
-            'reroll_count'  => 0,
+            'reroll_count' => 0,
         ]);
 
         $passiveNote = $passive
@@ -124,17 +124,17 @@ class RuneService
         }
 
         /** @var RuneRarity $rarity */
-        $rarity   = $itemRune->runeInfo->rune_rarity;
+        $rarity = $itemRune->runeInfo->rune_rarity;
         $baseCost = $rarity->rerollBaseCost();
-        $cost     = (int) round($baseCost * pow($itemRune->reroll_count + 1, 1.5));
-        $cost    += count($lockedIndices) * (int) round($baseCost * 0.5);
+        $cost = (int) round($baseCost * pow($itemRune->reroll_count + 1, 1.5));
+        $cost += count($lockedIndices) * (int) round($baseCost * 0.5);
 
         if ($user->money < $cost) {
             return ['success' => false, 'message' => sprintf('Недостаточно золота. Нужно: %d', $cost)];
         }
 
-        $oldStats  = $itemRune->stats;
-        $newStats  = $this->rollStats($itemRune->runeInfo, false);
+        $oldStats = $itemRune->stats;
+        $newStats = $this->rollStats($itemRune->runeInfo, false);
 
         $merged = [];
         foreach ($newStats as $i => $newStat) {
@@ -154,14 +154,14 @@ class RuneService
         $user->money -= $cost;
         $user->save();
 
-        $itemRune->stats         = $merged;
+        $itemRune->stats = $merged;
         $itemRune->reroll_count += 1;
         $itemRune->save();
 
         return [
             'success' => true,
             'message' => sprintf('Статы руны перебросаны. Потрачено: %d золота.', $cost),
-            'cost'    => $cost,
+            'cost' => $cost,
         ];
     }
 
@@ -188,10 +188,10 @@ class RuneService
 
     public function nextRerollCost(ItemRune $itemRune, int $lockedCount = 0): int
     {
-        $rarity   = $itemRune->runeInfo->rune_rarity;
+        $rarity = $itemRune->runeInfo->rune_rarity;
         $baseCost = $rarity->rerollBaseCost();
-        $cost     = (int) round($baseCost * pow($itemRune->reroll_count + 1, 1.5));
-        $cost    += $lockedCount * (int) round($baseCost * 0.5);
+        $cost = (int) round($baseCost * pow($itemRune->reroll_count + 1, 1.5));
+        $cost += $lockedCount * (int) round($baseCost * 0.5);
 
         return $cost;
     }
@@ -200,33 +200,33 @@ class RuneService
     {
         /** @var RuneRarity $rarity */
         $rarity = $runeInfo->rune_rarity;
-        $mult   = $rarity->multiplier();
+        $mult = $rarity->multiplier();
 
         $rangeLow = $riskMode ? 0.75 : 0.0;
 
         $pool = $runeInfo->rune_stat_pool ?? array_keys(self::STAT_POOL);
 
         [$min, $max] = $rarity->statCount();
-        $count       = random_int($min, $max);
-        $count       = min($count, count($pool));
+        $count = random_int($min, $max);
+        $count = min($count, count($pool));
 
-        $keys     = $pool;
+        $keys = $pool;
         shuffle($keys);
         $selected = array_slice($keys, 0, $count);
 
         $stats = [];
         foreach ($selected as $statType) {
-            $def      = self::STAT_POOL[$statType] ?? ['min' => 1, 'max' => 5];
-            $rawMin   = (int) round($def['min'] * $mult);
-            $rawMax   = (int) round($def['max'] * $mult);
-            $effMin   = (int) round($rawMin + ($rawMax - $rawMin) * $rangeLow);
-            $value    = random_int(max(1, $effMin), max(1, $rawMax));
+            $def = self::STAT_POOL[$statType] ?? ['min' => 1, 'max' => 5];
+            $rawMin = (int) round($def['min'] * $mult);
+            $rawMax = (int) round($def['max'] * $mult);
+            $effMin = (int) round($rawMin + ($rawMax - $rawMin) * $rangeLow);
+            $value = random_int(max(1, $effMin), max(1, $rawMax));
 
             $stats[] = [
-                'type'       => $statType,
-                'value'      => $value,
+                'type' => $statType,
+                'value' => $value,
                 'is_percent' => false,
-                'locked'     => false,
+                'locked' => false,
             ];
         }
 
@@ -244,14 +244,14 @@ class RuneService
         }
 
         $passives = RunePassiveType::cases();
-        $passive  = $passives[array_rand($passives)];
+        $passive = $passives[array_rand($passives)];
         [$min, $max] = $passive->valueRange();
         $value = random_int($min, $max);
 
         return [
-            'type'        => $passive->value,
-            'value'       => $value,
-            'label'       => $passive->label(),
+            'type' => $passive->value,
+            'value' => $value,
+            'label' => $passive->label(),
             'description' => $passive->description($value),
         ];
     }

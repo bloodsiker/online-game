@@ -6,17 +6,17 @@ namespace App\Modules\Structure\Blacksmith\Domain\Enums;
 
 enum RuneRarity: string
 {
-    case COMMON    = 'common';
-    case RARE      = 'rare';
-    case EPIC      = 'epic';
+    case COMMON = 'common';
+    case RARE = 'rare';
+    case EPIC = 'epic';
     case LEGENDARY = 'legendary';
 
     public function label(): string
     {
         return match ($this) {
-            self::COMMON    => 'Обычная',
-            self::RARE      => 'Редкая',
-            self::EPIC      => 'Эпическая',
+            self::COMMON => 'Обычная',
+            self::RARE => 'Редкая',
+            self::EPIC => 'Эпическая',
             self::LEGENDARY => 'Легендарная',
         };
     }
@@ -24,9 +24,9 @@ enum RuneRarity: string
     public function color(): string
     {
         return match ($this) {
-            self::COMMON    => '#888888',
-            self::RARE      => '#2266cc',
-            self::EPIC      => '#9933cc',
+            self::COMMON => '#888888',
+            self::RARE => '#2266cc',
+            self::EPIC => '#9933cc',
             self::LEGENDARY => '#cc7700',
         };
     }
@@ -35,9 +35,9 @@ enum RuneRarity: string
     public function statCount(): array
     {
         return match ($this) {
-            self::COMMON    => [1, 2],
-            self::RARE      => [2, 3],
-            self::EPIC      => [3, 4],
+            self::COMMON => [1, 2],
+            self::RARE => [2, 3],
+            self::EPIC => [3, 4],
             self::LEGENDARY => [4, 5],
         };
     }
@@ -46,9 +46,9 @@ enum RuneRarity: string
     public function multiplier(): float
     {
         return match ($this) {
-            self::COMMON    => 1.0,
-            self::RARE      => 1.8,
-            self::EPIC      => 3.0,
+            self::COMMON => 1.0,
+            self::RARE => 1.8,
+            self::EPIC => 3.0,
             self::LEGENDARY => 5.0,
         };
     }
@@ -57,9 +57,9 @@ enum RuneRarity: string
     public function passiveChance(): int
     {
         return match ($this) {
-            self::COMMON    => 0,
-            self::RARE      => 0,
-            self::EPIC      => 25,
+            self::COMMON => 0,
+            self::RARE => 0,
+            self::EPIC => 25,
             self::LEGENDARY => 60,
         };
     }
@@ -68,9 +68,9 @@ enum RuneRarity: string
     public function rerollBaseCost(): int
     {
         return match ($this) {
-            self::COMMON    => 100,
-            self::RARE      => 300,
-            self::EPIC      => 800,
+            self::COMMON => 100,
+            self::RARE => 300,
+            self::EPIC => 800,
             self::LEGENDARY => 2000,
         };
     }
@@ -79,9 +79,9 @@ enum RuneRarity: string
     public function riskFailChance(): int
     {
         return match ($this) {
-            self::COMMON    => 0,
-            self::RARE      => 15,
-            self::EPIC      => 30,
+            self::COMMON => 0,
+            self::RARE => 15,
+            self::EPIC => 30,
             self::LEGENDARY => 45,
         };
     }

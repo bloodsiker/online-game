@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Item\ItemGem;
 use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
 
 class GemService
 {
@@ -49,8 +49,8 @@ class GemService
         }
 
         ItemGem::create([
-            'item_id'       => $item->id,
-            'socket_index'  => $socketIndex,
+            'item_id' => $item->id,
+            'socket_index' => $socketIndex,
             'share_item_id' => $gemShareItem->id,
         ]);
 

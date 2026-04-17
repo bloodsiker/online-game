@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
-use App\Http\Controllers\Controller;
-use App\Modules\Structure\Blacksmith\Domain\Services\GemService;
 use App\Enums\ShareItemType;
+use App\Http\Controllers\Controller;
+use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
-use App\Models\Structure;
+use App\Modules\Structure\Blacksmith\Domain\Services\GemService;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,8 +78,8 @@ class GemController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'item_id'      => 'required|integer',
-            'gem_id'       => 'required|integer',
+            'item_id' => 'required|integer',
+            'gem_id' => 'required|integer',
             'socket_index' => 'required|integer|min:0|max:2',
         ]);
 
@@ -134,7 +134,7 @@ class GemController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'item_id'      => 'required|integer',
+            'item_id' => 'required|integer',
             'socket_index' => 'required|integer|min:0|max:2',
         ]);
 
@@ -168,7 +168,7 @@ class GemController extends Controller
 
         $request->validate([
             'item_id' => 'required|integer',
-            'kit_id'  => 'required|integer',
+            'kit_id' => 'required|integer',
         ]);
 
         $itemSlot = Backpack::select('backpacks.*')

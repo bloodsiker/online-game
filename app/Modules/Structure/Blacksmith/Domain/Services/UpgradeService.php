@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 
 class UpgradeService
 {
