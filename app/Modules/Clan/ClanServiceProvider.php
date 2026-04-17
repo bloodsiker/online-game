@@ -18,9 +18,9 @@ class ClanServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/Presentation/Views', 'clan');
+        $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'clan');
 
         Route::middleware(['web', 'updateLastOnline'])
-            ->group(__DIR__ . '/Presentation/Http/Route/web.php');
+            ->group(__DIR__.'/Presentation/Http/Route/web.php');
     }
 }

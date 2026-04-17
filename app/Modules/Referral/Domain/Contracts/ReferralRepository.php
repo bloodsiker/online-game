@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Domain\Contracts;
 
-use App\Models\User;
 use App\Modules\Referral\Infrastructure\Persistence\Models\Referral;
 use App\Modules\Referral\Infrastructure\Persistence\Models\ReferralRewardStage;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 
 interface ReferralRepository

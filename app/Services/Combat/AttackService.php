@@ -3,34 +3,33 @@
 namespace App\Services\Combat;
 
 use App\DTO\AttackResultDTO;
-use App\DTO\FightDTO;
 use App\DTO\FightHitDTO;
 use App\Events\PlayerLeveledUp;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Monster\Monster;
+use App\Models\Monster\MonsterActiveEffect;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\Player;
-use App\Models\Monster\MonsterActiveEffect;
 use App\Services\Combat\Boss\BossShieldService;
+use App\Services\DropService;
 use app\Services\PlayerSkillService;
 use App\Services\QuestProgressService;
-use App\Services\DropService;
 
 readonly class AttackService
 {
     public function __construct(
         private AttackStrategyResolver $resolver,
-        private QuestProgressService   $questService,
-        private PlayerSkillService     $playerSkillService,
-        private DropService            $dropService,
-        private BossShieldService      $shieldService,
-        private BattleEffectService    $effectService,
+        private QuestProgressService $questService,
+        private PlayerSkillService $playerSkillService,
+        private DropService $dropService,
+        private BossShieldService $shieldService,
+        private BattleEffectService $effectService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
     {
-        $result = new AttackResultDTO();
+        $result = new AttackResultDTO;
 
         // Restore HP the monster would have regenerated since the last attack
         $locMonster->regenerate();
@@ -43,11 +42,13 @@ readonly class AttackService
         foreach ($strategy->getHits() as $hit) {
             if ($hit->isCantCast()) {
                 $result->log(sprintf('<p><b class="color-info">%s</b></p>', $hit->getMessage()));
+
                 continue;
             }
 
             if ($hit->isDodge()) {
                 $result->log('<p>Вы атакуете неудачно... Враг <b class="color-green">увернулся</b></p>');
+
                 continue;
             }
 
@@ -64,6 +65,7 @@ readonly class AttackService
                         $effect->name
                     ));
                 }
+
                 continue;
             }
 
@@ -125,7 +127,7 @@ readonly class AttackService
                 )
             );
 
-            if (!$hit->getAppliedEffects()->isEmpty()) {
+            if (! $hit->getAppliedEffects()->isEmpty()) {
                 foreach ($hit->getAppliedEffects() as $effect) {
                     $this->effectService->applyEffectToMonster($effect, $locMonster, $battle, $result);
 
@@ -156,7 +158,7 @@ readonly class AttackService
         $metadata = $battle->boss_metadata ?? [];
         $damageToHeal = $metadata['damage_to_heal'] ?? null;
 
-        if (!$damageToHeal) {
+        if (! $damageToHeal) {
             return false;
         }
 
@@ -175,7 +177,7 @@ readonly class AttackService
 
         // Розраховуємо кількість лікування
         $conversionPercent = $damageToHeal['conversion_percent'];
-        $healAmount = (int)(($damage * $conversionPercent) / 100);
+        $healAmount = (int) (($damage * $conversionPercent) / 100);
 
         // Застосовуємо обмеження максимального лікування за хіт
         if ($damageToHeal['max_heal_per_hit']) {
@@ -203,7 +205,7 @@ readonly class AttackService
                 $actualHeal
             ));
         } else {
-            $convertedDamage = (int)(($damage * $conversionPercent) / 100);
+            $convertedDamage = (int) (($damage * $conversionPercent) / 100);
             $normalDamage = $damage - $convertedDamage;
 
             $result->log(sprintf(
@@ -235,7 +237,7 @@ readonly class AttackService
         $metadata = $battle->boss_metadata ?? [];
         $immunity = $metadata['immunity'] ?? null;
 
-        if (!$immunity) {
+        if (! $immunity) {
             return $damage;
         }
 
@@ -243,13 +245,14 @@ readonly class AttackService
             unset($metadata['immunity']);
             $battle->boss_metadata = $metadata;
             $battle->save();
+
             return $damage;
         }
 
         $immunityType = $immunity['type'];
         $attackType = $hit->getWeapon() ? 'physical' : 'magic';
 
-        $isImmune = match($immunityType) {
+        $isImmune = match ($immunityType) {
             'all' => true,
             'physical' => $attackType === 'physical',
             'magic' => $attackType === 'magic',
@@ -285,7 +288,7 @@ readonly class AttackService
         $metadata = $battle->boss_metadata ?? [];
         $reflect = $metadata['reflect_damage'] ?? null;
 
-        if (!$reflect) {
+        if (! $reflect) {
             return;
         }
 
@@ -293,10 +296,11 @@ readonly class AttackService
             unset($metadata['reflect_damage']);
             $battle->boss_metadata = $metadata;
             $battle->save();
+
             return;
         }
 
-        $reflectedDamage = (int)(($damage * $reflect['percent']) / 100);
+        $reflectedDamage = (int) (($damage * $reflect['percent']) / 100);
         $actualReflected = max(1, $reflectedDamage);
 
         $player->hp_now = max(0, $player->hp_now - $actualReflected);
@@ -335,7 +339,7 @@ readonly class AttackService
 
             event(new PlayerLeveledUp($player));
 
-            $result->log(sprintf("<p class=\"msg-levelup\">&#9650; Вы получили новый уровень <b>%s</b>!</p>", $player->lvl));
+            $result->log(sprintf('<p class="msg-levelup">&#9650; Вы получили новый уровень <b>%s</b>!</p>', $player->lvl));
         }
     }
 

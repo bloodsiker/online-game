@@ -28,7 +28,7 @@ class ImmunityMechanic extends BaseBossMechanic
         $battle->boss_metadata = $metadata;
         $battle->save();
 
-        $immunityText = match($immunityType) {
+        $immunityText = match ($immunityType) {
             'physical' => 'физического урона',
             'magic' => 'магического урона',
             default => 'всего урона'
@@ -49,7 +49,7 @@ class ImmunityMechanic extends BaseBossMechanic
         $duration = $this->getConfig('duration_turns', 2);
         $type = $this->getConfig('immunity_type', 'all');
 
-        $typeText = match($type) {
+        $typeText = match ($type) {
             'physical' => 'физического урона',
             'magic' => 'магического урона',
             default => 'всего урона'

@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Npc;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class NpcController extends Controller
@@ -21,7 +20,7 @@ class NpcController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $npc = new Npc();
+            $npc = new Npc;
             $this->fillNpc($npc, $request);
             $npc->save();
 
@@ -48,7 +47,7 @@ class NpcController extends Controller
 
     private function fillNpc(Npc $npc, Request $request): void
     {
-        $npc->name        = $request->input('name');
+        $npc->name = $request->input('name');
         $npc->description = $request->input('description');
         $npc->location_id = $request->input('location_id') ?: null;
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class SellItems
 {
@@ -35,7 +35,7 @@ class SellItems
             ->where('share_items.is_sell', 1)
             ->get();
 
-        $total       = 0;
+        $total = 0;
         $idsToDelete = [];
 
         foreach ($items as $sellItem) {
@@ -47,7 +47,7 @@ class SellItems
                 $sellItem->save();
             } else {
                 $total += (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
-                $idsToDelete[]  = $sellItem->item_id;
+                $idsToDelete[] = $sellItem->item_id;
             }
         }
 

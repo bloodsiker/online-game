@@ -6,10 +6,10 @@ namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Models\Structure;
-use App\Models\User;
 use App\Models\Warehouse;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class TakeItems
 {
@@ -31,7 +31,7 @@ class TakeItems
             ->get();
 
         foreach ($items as $wItem) {
-            $wantCount   = (int) ($takeItems[$wItem->item_id]['count'] ?? $wItem->count);
+            $wantCount = (int) ($takeItems[$wItem->item_id]['count'] ?? $wItem->count);
             $actualCount = min($wantCount, $wItem->count);
 
             if ($wItem->count <= $actualCount) {
@@ -57,7 +57,7 @@ class TakeItems
                 Backpack::create([
                     'user_id' => $user->id,
                     'item_id' => $wItem->item_id,
-                    'count'   => $actualCount,
+                    'count' => $actualCount,
                 ]);
             }
         }

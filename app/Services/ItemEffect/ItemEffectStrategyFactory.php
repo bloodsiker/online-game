@@ -13,9 +13,9 @@ class ItemEffectStrategyFactory
 {
     /** @var array<string, class-string<ItemEffectStrategyInterface>> */
     private static array $strategies = [
-        ItemEffectType::HEAL_HP->value      => HealHpStrategy::class,
-        ItemEffectType::HEAL_MP->value      => HealMpStrategy::class,
-        ItemEffectType::BUFF_ATTACK->value  => BuffAttackStrategy::class,
+        ItemEffectType::HEAL_HP->value => HealHpStrategy::class,
+        ItemEffectType::HEAL_MP->value => HealMpStrategy::class,
+        ItemEffectType::BUFF_ATTACK->value => BuffAttackStrategy::class,
         ItemEffectType::BUFF_DEFENSE->value => BuffDefenseStrategy::class,
     ];
 
@@ -23,10 +23,10 @@ class ItemEffectStrategyFactory
     {
         $strategyClass = self::$strategies[$type->value] ?? null;
 
-        if (null === $strategyClass) {
+        if ($strategyClass === null) {
             throw new \InvalidArgumentException("No strategy found for effect type: {$type->value}");
         }
 
-        return new $strategyClass();
+        return new $strategyClass;
     }
 }

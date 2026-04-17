@@ -5,8 +5,8 @@ namespace App\Services\Combat\Strategies;
 use App\Models\Item\Item;
 use App\Models\Monster\Monster;
 use App\Models\Player\PlayerEquipment;
-use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
+use App\Services\Combat\HitCalculator;
 
 class OneHandWeaponStrategy implements AttackStrategyInterface
 {
@@ -36,7 +36,7 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
             $hit
                 ->setWeaponName($activeWeapon->itemInfo->name)
                 ->setSkill($activeWeapon->itemInfo->skill)
-                ->setWeapon($activeWeapon->itemInfo)
+                ->setWeapon($activeWeapon->itemInfo),
         ];
     }
 }

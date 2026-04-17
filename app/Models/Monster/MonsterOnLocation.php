@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $is_drop_money
  * @property int $current_phase
  * @property Carbon|null $last_regen_at
- *
  * @property-read Location $location
  * @property-read Monster $monster
  */
@@ -26,7 +25,8 @@ class MonsterOnLocation extends Model
 {
     use HasFactory;
 
-    const REGEN_INTERVAL  = 5;   // seconds between regen ticks
+    const REGEN_INTERVAL = 5;   // seconds between regen ticks
+
     const FULL_REGEN_TIME = 600; // seconds for full HP recovery
 
     protected $table = 'monster_on_locations';
@@ -56,18 +56,19 @@ class MonsterOnLocation extends Model
         if (! $this->last_regen_at) {
             $this->last_regen_at = $now;
             $this->save();
+
             return;
         }
 
         $seconds = (int) $this->last_regen_at->diffInSeconds($now);
-        $ticks   = intdiv($seconds, self::REGEN_INTERVAL);
+        $ticks = intdiv($seconds, self::REGEN_INTERVAL);
 
         if ($ticks <= 0) {
             return;
         }
 
         $totalTicks = self::FULL_REGEN_TIME / self::REGEN_INTERVAL;
-        $hpPerTick  = $this->hp_max / $totalTicks;
+        $hpPerTick = $this->hp_max / $totalTicks;
 
         $this->hp_now = min(
             $this->hp_max,
@@ -89,11 +90,11 @@ class MonsterOnLocation extends Model
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Location::class,'location_id');
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function monster(): BelongsTo
     {
-        return $this->belongsTo(Monster::class,  'monster_id');
+        return $this->belongsTo(Monster::class, 'monster_id');
     }
 }

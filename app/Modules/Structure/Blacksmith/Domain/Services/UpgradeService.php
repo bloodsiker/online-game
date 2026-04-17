@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Modules\Structure\Blacksmith\Domain\Results\UpgradeResult;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class UpgradeService
 {

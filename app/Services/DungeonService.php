@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Enums\DungeonCooldownType;
 use App\Models\Dungeon\Dungeon;
 use App\Models\Dungeon\DungeonSession;
 use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Party\Party;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Repositories\DungeonCooldownRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -22,13 +22,13 @@ class DungeonService
 {
     public function __construct(
         private readonly DungeonCooldownRepository $cooldownRepository,
-        private readonly BackpackService           $backpackService,
+        private readonly BackpackService $backpackService,
     ) {}
 
     public function enterSolo(int $dungeonId): DungeonSession
     {
         $dungeon = Dungeon::findOrFail($dungeonId);
-        $user    = Auth::user();
+        $user = Auth::user();
 
         $this->validateEntry($dungeon, $user);
         $this->consumeEntryKey($dungeon, $user);
@@ -38,6 +38,7 @@ class DungeonService
             $this->teleportUser($user, $dungeon->first_location_id);
             $session = $this->createSession($dungeon, $user->id);
             $this->spawnMonstersForSession($dungeon, $session->id);
+
             return $session;
         });
     }
@@ -45,7 +46,7 @@ class DungeonService
     public function enterWithParty(int $dungeonId, Party $party): DungeonSession
     {
         $dungeon = Dungeon::findOrFail($dungeonId);
-        $leader  = Auth::user();
+        $leader = Auth::user();
 
         if (! $party->isLeader($leader->id)) {
             throw new RuntimeException('Только лидер группы может войти в данж.');
@@ -147,6 +148,7 @@ class DungeonService
             if ($location) {
                 $this->spawnWaveOnLocation($location, $sessionId);
             }
+
             return;
         }
 
@@ -157,13 +159,13 @@ class DungeonService
         foreach ($locations as $location) {
             foreach ($location->monsters as $monster) {
                 MonsterOnLocation::create([
-                    'location_id'        => $location->id,
+                    'location_id' => $location->id,
                     'dungeon_session_id' => $sessionId,
-                    'monster_id'         => $monster->id,
-                    'hp_now'             => $monster->hp,
-                    'hp_max'             => $monster->hp,
-                    'active'             => 1,
-                    'aggression'         => $monster->pivot->aggression ?? null,
+                    'monster_id' => $monster->id,
+                    'hp_now' => $monster->hp,
+                    'hp_max' => $monster->hp,
+                    'active' => 1,
+                    'aggression' => $monster->pivot->aggression ?? null,
                 ]);
             }
         }
@@ -201,6 +203,7 @@ class DungeonService
             if (! $session->isCompleted()) {
                 $this->giveCompletionRewards($dungeon, $session);
             }
+
             return;
         }
 
@@ -220,8 +223,8 @@ class DungeonService
         $session->completed_at = now();
         $session->save();
 
-        $user    = $session->user;
-        $player  = $user->player;
+        $user = $session->user;
+        $player = $user->player;
         $rewards = $dungeon->rewards()->with('shareItem')->get();
 
         foreach ($rewards as $reward) {
@@ -256,7 +259,7 @@ class DungeonService
      */
     public function spawnWaveOnLocation(Location $location, int $sessionId): void
     {
-        $pool  = $location->monsters; // пул типов монстров из location_has_monsters
+        $pool = $location->monsters; // пул типов монстров из location_has_monsters
         $count = max(1, $location->count_monster);
 
         if ($pool->isEmpty()) {
@@ -266,13 +269,13 @@ class DungeonService
         for ($i = 0; $i < $count; $i++) {
             $monster = $pool->random();
             MonsterOnLocation::create([
-                'location_id'        => $location->id,
+                'location_id' => $location->id,
                 'dungeon_session_id' => $sessionId,
-                'monster_id'         => $monster->id,
-                'hp_now'             => $monster->hp,
-                'hp_max'             => $monster->hp,
-                'active'             => 1,
-                'aggression'         => $monster->pivot->aggression ?? null,
+                'monster_id' => $monster->id,
+                'hp_now' => $monster->hp,
+                'hp_max' => $monster->hp,
+                'active' => 1,
+                'aggression' => $monster->pivot->aggression ?? null,
             ]);
         }
     }
@@ -395,10 +398,10 @@ class DungeonService
             : null;
 
         return DungeonSession::create([
-            'dungeon_id'         => $dungeon->id,
-            'user_id'            => $userId,
+            'dungeon_id' => $dungeon->id,
+            'user_id' => $userId,
             'primary_session_id' => $primarySessionId,
-            'expires_at'         => $expiresAt,
+            'expires_at' => $expiresAt,
         ]);
     }
 

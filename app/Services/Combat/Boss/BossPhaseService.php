@@ -18,7 +18,7 @@ class BossPhaseService
     ): void {
         $monster = $locationMonster->monster;
 
-        if (!$monster->isBoss()) {
+        if (! $monster->isBoss()) {
             return;
         }
 
@@ -32,7 +32,7 @@ class BossPhaseService
             ->orderBy('phase_number')
             ->first();
 
-        if (!$nextPhase) {
+        if (! $nextPhase) {
             return;
         }
 
@@ -46,7 +46,7 @@ class BossPhaseService
     private function activatePhase(
         MonsterOnLocation $locationMonster,
         Battle $battle,
-                          $phase,
+        $phase,
         AttackResultDTO $result
     ): void {
         $monster = $locationMonster->monster;
@@ -82,7 +82,7 @@ class BossPhaseService
         }
 
         // Зберігаємо активні скіли для поточної фази
-//        $metadata['active_skills'] = $this->calculateActiveSkills($monster, $phase->phase_number);
+        //        $metadata['active_skills'] = $this->calculateActiveSkills($monster, $phase->phase_number);
         $metadata['active_skills'] = [];
 
         // Зберігаємо оновлені метадані
@@ -175,6 +175,7 @@ class BossPhaseService
     public function getCurrentPhase(Battle $battle): int
     {
         $metadata = $battle->boss_metadata ?? [];
+
         return $metadata['current_phase'] ?? 1;
     }
 
@@ -211,6 +212,7 @@ class BossPhaseService
     public function getPhaseSkills(Battle $battle): array
     {
         $metadata = $battle->boss_metadata ?? [];
+
         return $metadata['active_skills'] ?? [];
     }
 
@@ -231,6 +233,7 @@ class BossPhaseService
     public function getPhaseHistory(Battle $battle): array
     {
         $metadata = $battle->boss_metadata ?? [];
+
         return $metadata['phase_history'] ?? [];
     }
 
@@ -240,6 +243,7 @@ class BossPhaseService
     public function isSkillActive(Battle $battle, string $skillCode): bool
     {
         $activeSkills = $this->getPhaseSkills($battle);
+
         return in_array($skillCode, $activeSkills);
     }
 
@@ -248,7 +252,7 @@ class BossPhaseService
      */
     private function getStatName(string $stat): string
     {
-        return match($stat) {
+        return match ($stat) {
             'attack' => 'Атака',
             'defence', 'defense' => 'Защита',
             'hp' => 'Здоров\'я',

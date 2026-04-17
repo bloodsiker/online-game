@@ -23,5 +23,4 @@ interface BossMechanicInterface
      * Пріоритет виконання (більше = раніше)
      */
     public function getPriority(): int;
-
 }

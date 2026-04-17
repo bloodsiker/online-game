@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetExchangeOrders
@@ -31,7 +31,7 @@ class GetExchangeOrders
         }
 
         if ($filter->name !== null) {
-            $query->whereHas('shareItem', fn ($q) => $q->where('name', 'like', '%' . $filter->name . '%'));
+            $query->whereHas('shareItem', fn ($q) => $q->where('name', 'like', '%'.$filter->name.'%'));
         }
 
         if ($filter->type !== null) {

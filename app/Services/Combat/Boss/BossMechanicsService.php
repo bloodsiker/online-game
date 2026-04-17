@@ -23,7 +23,7 @@ class BossMechanicsService
     ): void {
         $monster = $locationMonster->monster;
 
-        if (!$monster->isBoss()) {
+        if (! $monster->isBoss()) {
             return;
         }
 
@@ -120,6 +120,7 @@ class BossMechanicsService
     private function wasMechanicTriggered(Battle $battle, int $mechanicId): bool
     {
         $triggeredMechanics = $battle->boss_metadata['mechanics_triggered'] ?? [];
+
         return in_array($mechanicId, $triggeredMechanics);
     }
 

@@ -9,17 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property int         $id
- * @property int         $dungeon_id
- * @property int         $floor_number
+ * @property int $id
+ * @property int $dungeon_id
+ * @property int $floor_number
  * @property string|null $label
- * @property bool        $is_first
- * @property bool        $is_boss_floor
- * @property int|null    $time_limit_seconds
- * @property int         $min_monsters
- * @property int         $max_monsters
- * @property int         $wave_count
- * @property array|null  $extra_data
+ * @property bool $is_first
+ * @property bool $is_boss_floor
+ * @property int|null $time_limit_seconds
+ * @property int $min_monsters
+ * @property int $max_monsters
+ * @property int $wave_count
+ * @property array|null $extra_data
  * @property-read Dungeon $dungeon
  * @property-read \Illuminate\Database\Eloquent\Collection<DungeonFloorBranch>      $nextBranches
  * @property-read \Illuminate\Database\Eloquent\Collection<DungeonFloorMonsterPool> $monsterPool
@@ -33,9 +33,9 @@ class DungeonFloor extends Model
     ];
 
     protected $casts = [
-        'is_first'     => 'boolean',
+        'is_first' => 'boolean',
         'is_boss_floor' => 'boolean',
-        'extra_data'   => 'array',
+        'extra_data' => 'array',
     ];
 
     public function dungeon(): BelongsTo

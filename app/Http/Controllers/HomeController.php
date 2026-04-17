@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -15,34 +15,34 @@ class HomeController extends Controller
         Auth::login($user, true);
 
         return redirect()->route('game');
-//        return view('homepage');
+        //        return view('homepage');
     }
 
     public function gebug()
     {
         $diff = time() - Carbon::parse('2024-09-20 15:53')->timestamp;
         dd($diff / 60);
-//        $user = User::find(1);
-//        $player = $user->player;
-//        $player = app(\App\Services\PlayerStatService::class)->resolve($player);
-//
-//        echo "Min Left dmg: " . $player->getLeftHandMinDmg() . PHP_EOL . "\n";
-//        echo "Max Left dmg: " . $player->getLeftHandMaxDmg() . PHP_EOL . PHP_EOL;
-//        echo "Min Right dmg: " . $player->getRightHandMinDmg() . PHP_EOL . "\n";
-//        echo "Max Right dmg: " . $player->getRightHandMaxDmg() . PHP_EOL . PHP_EOL;
-//        echo "Сила: " . $player->getStrength() . PHP_EOL . PHP_EOL;
-//        echo "Ловкость: " . $player->getAgility(). PHP_EOL;
-//        echo "Интеллект: " . $player->getIntelligence();
+        //        $user = User::find(1);
+        //        $player = $user->player;
+        //        $player = app(\App\Services\PlayerStatService::class)->resolve($player);
+        //
+        //        echo "Min Left dmg: " . $player->getLeftHandMinDmg() . PHP_EOL . "\n";
+        //        echo "Max Left dmg: " . $player->getLeftHandMaxDmg() . PHP_EOL . PHP_EOL;
+        //        echo "Min Right dmg: " . $player->getRightHandMinDmg() . PHP_EOL . "\n";
+        //        echo "Max Right dmg: " . $player->getRightHandMaxDmg() . PHP_EOL . PHP_EOL;
+        //        echo "Сила: " . $player->getStrength() . PHP_EOL . PHP_EOL;
+        //        echo "Ловкость: " . $player->getAgility(). PHP_EOL;
+        //        echo "Интеллект: " . $player->getIntelligence();
 
-//        dd($finalDamage = 120 * (500 / (500 + 900)));
+        //        dd($finalDamage = 120 * (500 / (500 + 900)));
 
-        $attaker = new \StdClass();
+        $attaker = new \StdClass;
         $attaker->min_dmg = 5;
         $attaker->max_dmg = 20;
         $attaker->crit = 100;
         $attaker->armor = 15;
 
-        $defender = new \StdClass();
+        $defender = new \StdClass;
         $defender->min_dmg = 3;
         $defender->max_dmg = 16;
         $defender->crit = 200;
@@ -60,6 +60,7 @@ class HomeController extends Controller
     protected function calculateDodge($attackerAgility, $defenderAgility)
     {
         return $dodgeChance = max(0, min(100, 50 + ($defenderAgility - $attackerAgility) * 0.05));  // Линейная зависимость
+
         return mt_rand(0, 100) < $dodgeChance;
     }
 
@@ -69,7 +70,8 @@ class HomeController extends Controller
     protected function calculateCrit($attackerCrit, $defenderCritResistance)
     {
         $critChance = max(0, min(100, 50 + ($attackerCrit - $defenderCritResistance) * 0.05));
-//        return $critChance = max(0, min(100, 50 + ($attackerCrit - $defenderCritResistance) * 0.05));
+
+        //        return $critChance = max(0, min(100, 50 + ($attackerCrit - $defenderCritResistance) * 0.05));
         return mt_rand(0, 100) < $critChance;
     }
 

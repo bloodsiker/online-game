@@ -157,7 +157,7 @@ class NpcController extends Controller
                 continue;
             }
 
-            $sessionKey = 'rep_offer_' . $player->id . '_' . $reputation->id;
+            $sessionKey = 'rep_offer_'.$player->id.'_'.$reputation->id;
             $questCollection = $tier->quests->pluck('quest')->filter();
 
             $offeredQuestId = session($sessionKey);

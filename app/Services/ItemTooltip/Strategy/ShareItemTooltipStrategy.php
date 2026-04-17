@@ -30,9 +30,9 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $shareItem->description ?? '',
                 store: false,
-                nogive: !$shareItem->is_sell,
-                noweight: !$shareItem->is_weight,
-                nosell: !$shareItem->is_sell,
+                nogive: ! $shareItem->is_sell,
+                noweight: ! $shareItem->is_weight,
+                nosell: ! $shareItem->is_sell,
                 stats: ItemTooltipStatsBuilder::build($shareItem),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($shareItem),
             ));

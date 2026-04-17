@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Application\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CreateClanRequest extends FormRequest
 {
@@ -25,13 +25,13 @@ class CreateClanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required'    => 'Укажите название клана.',
-            'name.max'         => 'Название клана не может превышать 30 символов.',
-            'name.unique'      => 'Клан с таким названием уже существует.',
-            'logo.required'    => 'Загрузите значок клана.',
-            'logo.mimes'       => 'Значок должен быть в формате .gif.',
-            'logo.max'         => 'Размер значка не должен превышать 2 КБ.',
-            'logo.dimensions'  => 'Разрешение значка должно быть 13x13 пикселей.',
+            'name.required' => 'Укажите название клана.',
+            'name.max' => 'Название клана не может превышать 30 символов.',
+            'name.unique' => 'Клан с таким названием уже существует.',
+            'logo.required' => 'Загрузите значок клана.',
+            'logo.mimes' => 'Значок должен быть в формате .gif.',
+            'logo.max' => 'Размер значка не должен превышать 2 КБ.',
+            'logo.dimensions' => 'Разрешение значка должно быть 13x13 пикселей.',
         ];
     }
 
@@ -48,7 +48,7 @@ class CreateClanRequest extends FormRequest
         $name = $this->input('name', '');
 
         $hasCyrillic = (bool) preg_match('/[а-яёА-ЯЁ]/u', $name);
-        $hasLatin    = (bool) preg_match('/[a-zA-Z]/', $name);
+        $hasLatin = (bool) preg_match('/[a-zA-Z]/', $name);
 
         if ($hasCyrillic && $hasLatin) {
             $validator->errors()->add(
@@ -62,7 +62,7 @@ class CreateClanRequest extends FormRequest
     {
         $file = $this->file('logo');
 
-        if ($file === null || !$file->isValid()) {
+        if ($file === null || ! $file->isValid()) {
             return;
         }
 
@@ -70,13 +70,14 @@ class CreateClanRequest extends FormRequest
 
         if ($image === false) {
             $validator->errors()->add('logo', 'Не удалось прочитать файл значка.');
+
             return;
         }
 
         $hasTransparency = imagecolortransparent($image) >= 0;
         imagedestroy($image);
 
-        if (!$hasTransparency) {
+        if (! $hasTransparency) {
             $validator->errors()->add('logo', 'Значок должен иметь прозрачный фон.');
         }
     }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Modules\Player\Domain\DTO\StatModifier;
-use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Enums\CombatClass;
 use App\Enums\ItemEffectType;
 use App\Enums\ItemEffectValueType;
@@ -16,6 +14,8 @@ use App\Models\Item\Item;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerActiveEffect;
 use App\Models\Player\PlayerItemBuff;
+use App\Modules\Player\Domain\DTO\StatModifier;
+use App\Modules\Player\Domain\DTO\StatSheet;
 
 class PlayerStatService
 {
@@ -68,16 +68,16 @@ class PlayerStatService
             'agility' => (float) floor($player->agility),
             'wisdom' => (float) floor($player->wisdom),
             'intelligence' => (float) floor($player->intelligence),
-            'dodge'    => (float) max(0, ($player->agility - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
+            'dodge' => (float) max(0, ($player->agility - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
             'critical' => (float) max(0, ($player->intuition - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
-            'armor'    => (float) max(0, ($player->strength - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
+            'armor' => (float) max(0, ($player->strength - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
             'hp_max' => (float) $player->hp_max,
             'mp_max' => (float) $player->mp_max,
             'left_min_dmg' => (float) $player->min_dmg,
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
-            'magic_attack'  => (float) $player->intel,
+            'magic_attack' => (float) $player->intel,
         ];
 
         // Accumulate flat and percent per stat
@@ -104,24 +104,24 @@ class PlayerStatService
         }
 
         $sheet = new StatSheet;
-        $sheet->modifiers   = $modifiers;
-        $sheet->freeStats   = $player->free_stats;
-        $sheet->strength    = $computed['strength'];
-        $sheet->intuition   = $computed['intuition'];
-        $sheet->agility     = $computed['agility'];
-        $sheet->wisdom      = $computed['wisdom'];
+        $sheet->modifiers = $modifiers;
+        $sheet->freeStats = $player->free_stats;
+        $sheet->strength = $computed['strength'];
+        $sheet->intuition = $computed['intuition'];
+        $sheet->agility = $computed['agility'];
+        $sheet->wisdom = $computed['wisdom'];
         $sheet->intelligence = $computed['intelligence'];
-        $sheet->dodge       = $computed['dodge'];
-        $sheet->critical    = $computed['critical'];
-        $sheet->armor       = $computed['armor'];
-        $sheet->hpMax       = $computed['hp_max'];
-        $sheet->mpMax       = $computed['mp_max'];
-        $sheet->leftMinDmg  = $computed['left_min_dmg'];
-        $sheet->leftMaxDmg  = $computed['left_max_dmg'];
-        $sheet->rightMinDmg  = $computed['right_min_dmg'];
-        $sheet->rightMaxDmg  = $computed['right_max_dmg'];
-        $sheet->magicAttack  = $computed['magic_attack'];
-        $sheet->combatClass  = $this->determineCombatClass($player);
+        $sheet->dodge = $computed['dodge'];
+        $sheet->critical = $computed['critical'];
+        $sheet->armor = $computed['armor'];
+        $sheet->hpMax = $computed['hp_max'];
+        $sheet->mpMax = $computed['mp_max'];
+        $sheet->leftMinDmg = $computed['left_min_dmg'];
+        $sheet->leftMaxDmg = $computed['left_max_dmg'];
+        $sheet->rightMinDmg = $computed['right_min_dmg'];
+        $sheet->rightMaxDmg = $computed['right_max_dmg'];
+        $sheet->magicAttack = $computed['magic_attack'];
+        $sheet->combatClass = $this->determineCombatClass($player);
 
         return $sheet;
     }
@@ -157,16 +157,16 @@ class PlayerStatService
 
             foreach ($item->itemInfo->stats as $stat) {
                 $mappedStat = match ($stat->stat_type) {
-                    ShareItemStatType::ARMOR         => 'armor',
-                    ShareItemStatType::HP_MAX        => 'hp_max',
-                    ShareItemStatType::AGILITY       => 'agility',
-                    ShareItemStatType::INTUITION     => 'intuition',
-                    ShareItemStatType::WISDOM        => 'wisdom',
-                    ShareItemStatType::INTELLIGENCE  => 'intelligence',
-                    ShareItemStatType::DODGE         => 'dodge',
-                    ShareItemStatType::CRITICAL      => 'critical',
-                    ShareItemStatType::MAGIC_ATTACK  => 'magic_attack',
-                    default                          => null,
+                    ShareItemStatType::ARMOR => 'armor',
+                    ShareItemStatType::HP_MAX => 'hp_max',
+                    ShareItemStatType::AGILITY => 'agility',
+                    ShareItemStatType::INTUITION => 'intuition',
+                    ShareItemStatType::WISDOM => 'wisdom',
+                    ShareItemStatType::INTELLIGENCE => 'intelligence',
+                    ShareItemStatType::DODGE => 'dodge',
+                    ShareItemStatType::CRITICAL => 'critical',
+                    ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
+                    default => null,
                 };
 
                 if ($mappedStat !== null) {
@@ -301,10 +301,10 @@ class PlayerStatService
             ->get();
 
         foreach ($buffs as $buff) {
-            $stat = match($buff->effect_type) {
-                ItemEffectType::BUFF_ATTACK  => 'attack', // расширяется на все 4 dmg стата
+            $stat = match ($buff->effect_type) {
+                ItemEffectType::BUFF_ATTACK => 'attack', // расширяется на все 4 dmg стата
                 ItemEffectType::BUFF_DEFENSE => 'armor',
-                default                      => null,
+                default => null,
             };
 
             if ($stat === null) {
@@ -312,12 +312,12 @@ class PlayerStatService
             }
 
             $isPercent = $buff->value_type === ItemEffectValueType::PERCENT;
-            $source    = 'buff:' . $buff->effect_type->value;
+            $source = 'buff:'.$buff->effect_type->value;
 
             if ($stat === 'attack') {
                 array_push($modifiers,
-                    new StatModifier('left_min_dmg',  (float) $buff->value, $isPercent, $source),
-                    new StatModifier('left_max_dmg',  (float) $buff->value, $isPercent, $source),
+                    new StatModifier('left_min_dmg', (float) $buff->value, $isPercent, $source),
+                    new StatModifier('left_max_dmg', (float) $buff->value, $isPercent, $source),
                     new StatModifier('right_min_dmg', (float) $buff->value, $isPercent, $source),
                     new StatModifier('right_max_dmg', (float) $buff->value, $isPercent, $source),
                 );
@@ -368,11 +368,11 @@ class PlayerStatService
      */
     private function normalizeStatKey(string $key): string
     {
-        return match($key) {
-            'str'  => 'strength',
-            'int'  => 'intuition',
-            'agi'  => 'agility',
-            'mud'  => 'wisdom',
+        return match ($key) {
+            'str' => 'strength',
+            'int' => 'intuition',
+            'agi' => 'agility',
+            'mud' => 'wisdom',
             'intel' => 'intelligence',
             default => $key,
         };
@@ -401,14 +401,14 @@ class PlayerStatService
         foreach ($activeEffects as $playerEffect) {
             $effect = $playerEffect->effect;
 
-            if (!$effect || empty($effect->stat_modifiers)) {
+            if (! $effect || empty($effect->stat_modifiers)) {
                 continue;
             }
 
-            $source = 'active_effect:' . $effect->slug;
+            $source = 'active_effect:'.$effect->slug;
 
             foreach ($effect->stat_modifiers as $entry) {
-                if (!is_array($entry)) {
+                if (! is_array($entry)) {
                     continue;
                 }
                 array_push($modifiers, ...$this->modifiersFromEntry($entry, $source));

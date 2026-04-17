@@ -23,12 +23,12 @@ class PlayerSkillService
         if (! $playerSkill) {
             $req = $this->getRequirement($skill->id, 1);
 
-            $playerSkill = new PlayerSkill();
+            $playerSkill = new PlayerSkill;
             $playerSkill->player_id = $player->id;
-            $playerSkill->skill_id  = $skill->id;
-            $playerSkill->exp       = 0;
-            $playerSkill->exp_up    = $req?->exp_required ?? 1000;
-            $playerSkill->exp_diff  = $req?->exp_diff ?? 1000;
+            $playerSkill->skill_id = $skill->id;
+            $playerSkill->exp = 0;
+            $playerSkill->exp_up = $req?->exp_required ?? 1000;
+            $playerSkill->exp_diff = $req?->exp_diff ?? 1000;
             $playerSkill->save();
 
             return;
@@ -42,7 +42,7 @@ class PlayerSkillService
 
             $req = $this->getRequirement($skill->id, $playerSkill->lvl);
             if ($req) {
-                $playerSkill->exp_up   = $req->exp_required;
+                $playerSkill->exp_up = $req->exp_required;
                 $playerSkill->exp_diff = $req->exp_diff;
             }
         }

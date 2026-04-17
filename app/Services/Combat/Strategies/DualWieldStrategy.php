@@ -4,17 +4,17 @@ namespace App\Services\Combat\Strategies;
 
 use App\Models\Monster\Monster;
 use App\Models\Share\ShareItem;
-use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
+use App\Services\Combat\HitCalculator;
 
 class DualWieldStrategy implements AttackStrategyInterface
 {
     public function __construct(
         private readonly HitCalculator $hitCalc,
         private readonly FightHitInterface $player,
-        private readonly Monster       $monster,
-        private readonly ShareItem     $leftWeapon,
-        private readonly ShareItem     $rightWeapon,
+        private readonly Monster $monster,
+        private readonly ShareItem $leftWeapon,
+        private readonly ShareItem $rightWeapon,
     ) {}
 
     public function getHits(): array

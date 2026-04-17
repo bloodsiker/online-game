@@ -2,9 +2,8 @@
 
 namespace App\Models\Shop;
 
-use App\Models\Share\ShareShopCategory;
-use App\Models\Share\ShareStructureCategory;
 use App\Models\Share\ShareItem;
+use App\Models\Share\ShareStructureCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -14,8 +14,8 @@ class QuestPlayer extends Model
     use HasFactory;
 
     protected $casts = [
-        'status'       => QuestPlayerStatus::class,
-        'reset_at'     => 'datetime',
+        'status' => QuestPlayerStatus::class,
+        'reset_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
@@ -87,8 +87,7 @@ class QuestPlayer extends Model
             return false;
         }
 
-        return $this->objectives->every(fn ($o) =>
-            $o->questObjective->type === 'deliver' ||
+        return $this->objectives->every(fn ($o) => $o->questObjective->type === 'deliver' ||
             $o->amount >= $o->questObjective->required_amount
         );
     }

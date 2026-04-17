@@ -13,12 +13,12 @@ class ShareRecipe extends Model
 
     public function itemInfo(): BelongsTo
     {
-        return $this->belongsTo(ShareItem::class,'share_item_id');
+        return $this->belongsTo(ShareItem::class, 'share_item_id');
     }
 
     public function kraftItem(): BelongsTo
     {
-        return $this->belongsTo(ShareItem::class,'kraft_item_id');
+        return $this->belongsTo(ShareItem::class, 'kraft_item_id');
     }
 
     public function items(): BelongsToMany

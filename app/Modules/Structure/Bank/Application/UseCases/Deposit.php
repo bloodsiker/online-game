@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Structure\Bank\Application\DTOs\BankResultDTO;
 use App\Modules\Structure\Bank\Domain\Contracts\BankLogRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class Deposit
 {

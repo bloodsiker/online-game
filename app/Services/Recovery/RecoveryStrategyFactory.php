@@ -11,7 +11,7 @@ class RecoveryStrategyFactory
     public static function make(Structure $structure): RecoveryStrategyInterface
     {
         return match ($structure->type) {
-            Structure::TYPE_HEAL => new FullHealStrategy(),
+            Structure::TYPE_HEAL => new FullHealStrategy,
         };
     }
 }

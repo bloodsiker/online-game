@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Domain\Models;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $role_id
  * @property int $points
- *
  * @property-read User $user
  * @property-read Clan $clan
  * @property-read ClanRole $role

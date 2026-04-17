@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class BuyItem
 {
     public function execute(User $user, int $shareItemId, int $count): ShopResultDTO
     {
-        $shareItem   = ShareItem::find($shareItemId);
-        $totalCost   = $count * $shareItem->price;
+        $shareItem = ShareItem::find($shareItemId);
+        $totalCost = $count * $shareItem->price;
 
         if ($user->money < $totalCost) {
             return new ShopResultDTO(false, 'Не достаточно монет для покупки.');
@@ -35,9 +35,9 @@ class BuyItem
             $existing->save();
         } else {
             for ($i = 1; $i <= $count; $i++) {
-                $item               = new Item;
+                $item = new Item;
                 $item->share_item_id = $shareItem->id;
-                $item->count_use    = $shareItem->count_use;
+                $item->count_use = $shareItem->count_use;
                 $item->save();
 
                 $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);

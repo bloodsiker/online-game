@@ -8,7 +8,7 @@ use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
 use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class BattleRepository extends AbstractRepository
@@ -49,7 +49,7 @@ class BattleRepository extends AbstractRepository
 
     public function createBattleDetails(Battle $battle, ?User $user = null, ?MonsterOnLocation $monsterOnLocation = null): BattleDetail
     {
-        $battleDetails = new BattleDetail();
+        $battleDetails = new BattleDetail;
         $battleDetails->battle_id = $battle->id;
 
         if ($user instanceof User) {
@@ -71,13 +71,13 @@ class BattleRepository extends AbstractRepository
             $battle->increment('rounds');
 
             $round = BattleRound::create([
-                'battle_id'    => $battle->id,
+                'battle_id' => $battle->id,
                 'round_number' => $battle->rounds,
-                'user_id'      => $user->id,
-                'action'       => $action,
+                'user_id' => $user->id,
+                'action' => $action,
             ]);
 
-            if (!$round) {
+            if (! $round) {
                 throw new \RuntimeException('Failed to create battle round');
             }
 

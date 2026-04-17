@@ -6,22 +6,22 @@ namespace App\Models\Dungeon;
 
 use App\Enums\DungeonRunStatus;
 use App\Models\Party\Party;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property int               $id
- * @property int               $dungeon_id
- * @property int               $leader_user_id
- * @property int|null          $party_id
- * @property DungeonRunStatus  $status
- * @property int|null          $current_floor_id
- * @property \Carbon\Carbon    $started_at
+ * @property int $id
+ * @property int $dungeon_id
+ * @property int $leader_user_id
+ * @property int|null $party_id
+ * @property DungeonRunStatus $status
+ * @property int|null $current_floor_id
+ * @property \Carbon\Carbon $started_at
  * @property \Carbon\Carbon|null $expires_at
  * @property \Carbon\Carbon|null $completed_at
- * @property array|null        $metadata
+ * @property array|null $metadata
  * @property-read Dungeon      $dungeon
  * @property-read User         $leader
  * @property-read Party|null   $party
@@ -39,10 +39,10 @@ class DungeonRun extends Model
     ];
 
     protected $casts = [
-        'status'       => DungeonRunStatus::class,
-        'metadata'     => 'array',
-        'started_at'   => 'datetime',
-        'expires_at'   => 'datetime',
+        'status' => DungeonRunStatus::class,
+        'metadata' => 'array',
+        'started_at' => 'datetime',
+        'expires_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 

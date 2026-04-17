@@ -6,42 +6,42 @@ use App\DTO\FightHitDTO;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
 use App\Models\Player\Player;
-use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
+use App\Services\Combat\HitCalculator;
 
 class MagicAttackStrategy implements AttackStrategyInterface
 {
     public function __construct(
-        private HitCalculator       $hitCalc,
-        private FightHitInterface   $player,     // StatSheet с полными рассчитанными статами
-        private Player              $playerModel, // Player model для чтения/записи mp_now
-        private Monster             $monster,
-        private MagicSkill          $magicSkill,
+        private HitCalculator $hitCalc,
+        private FightHitInterface $player,     // StatSheet с полными рассчитанными статами
+        private Player $playerModel, // Player model для чтения/записи mp_now
+        private Monster $monster,
+        private MagicSkill $magicSkill,
     ) {}
 
     public function getHits(): array
     {
-        if (!$this->magicSkill instanceof MagicSkill) {
+        if (! $this->magicSkill instanceof MagicSkill) {
             return [
-                (new FightHitDTO())
+                (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage('Заклинание не изучено или отключено')
+                    ->setMessage('Заклинание не изучено или отключено'),
             ];
         }
 
-        if (!$this->magicSkill->isAttackSkill()) {
+        if (! $this->magicSkill->isAttackSkill()) {
             return [
-                (new FightHitDTO())
+                (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage('Это не атакующее заклинание')
+                    ->setMessage('Это не атакующее заклинание'),
             ];
         }
 
         if ($this->playerModel->mp_now < $this->magicSkill->mana_cost) {
             return [
-                (new FightHitDTO())
+                (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost))
+                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost)),
             ];
         }
 
@@ -54,7 +54,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
                 $dodgeHit
                     ->setMagicSkill($this->magicSkill)
                     ->setWeaponName($this->magicSkill->name)
-                    ->setWeapon(null)
+                    ->setWeapon(null),
             ];
         }
 
@@ -67,9 +67,9 @@ class MagicAttackStrategy implements AttackStrategyInterface
         $weaponMinBonus = $this->player->getMagicWeaponMinBonus ?? 0;
         $weaponMaxBonus = $this->player->getMagicWeaponMaxBonus ?? 0;
 
-//        $weaponBonus = $weaponMinBonus > 0 || $weaponMaxBonus > 0
-//            ? random_int($weaponMinBonus, $weaponMaxBonus)
-//            : 0;
+        //        $weaponBonus = $weaponMinBonus > 0 || $weaponMaxBonus > 0
+        //            ? random_int($weaponMinBonus, $weaponMaxBonus)
+        //            : 0;
 
         $totalMin = $baseDamage + $weaponMinBonus;
         $totalMax = $baseDamage + $weaponMaxBonus;
@@ -90,7 +90,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             $hit
                 ->setMagicSkill($this->magicSkill)
                 ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))
-                ->setWeapon(null)
+                ->setWeapon(null),
         ];
     }
 }

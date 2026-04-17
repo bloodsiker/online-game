@@ -21,11 +21,11 @@ class ItemOnLocation extends Model
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Location::class,'location_id');
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function item(): BelongsTo
     {
-        return $this->belongsTo(Item::class,  'item_id')->with(['itemInfo']);
+        return $this->belongsTo(Item::class, 'item_id')->with(['itemInfo']);
     }
 }

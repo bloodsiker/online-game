@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Infrastructure\Persistence;
 
-use App\Models\User;
 use App\Modules\Referral\Domain\Contracts\ReferralRepository;
 use App\Modules\Referral\Infrastructure\Persistence\Models\Referral;
 use App\Modules\Referral\Infrastructure\Persistence\Models\ReferralRewardClaim;
 use App\Modules\Referral\Infrastructure\Persistence\Models\ReferralRewardStage;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 
 final class EloquentReferralRepository implements ReferralRepository

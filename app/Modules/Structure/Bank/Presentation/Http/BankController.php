@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Bank\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Modules\Structure\Bank\Application\UseCases\Deposit;
 use App\Modules\Structure\Bank\Application\UseCases\EnsureBankAccount;
 use App\Modules\Structure\Bank\Application\UseCases\GetBankPage;
@@ -13,6 +12,7 @@ use App\Modules\Structure\Bank\Application\UseCases\LookupRecipient;
 use App\Modules\Structure\Bank\Application\UseCases\Transfer;
 use App\Modules\Structure\Bank\Application\UseCases\Withdraw;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

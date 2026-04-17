@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\PartyStatus;
 use App\Models\Party\Party;
-use App\Models\User;
 use App\Repositories\PartyRepository;
 use Illuminate\Support\Facades\Auth;
 use RuntimeException;
@@ -58,7 +56,7 @@ class PartyService
     public function leave(int $partyId): void
     {
         $userId = Auth::id();
-        $party  = $this->partyRepository->findOpenById($partyId)
+        $party = $this->partyRepository->findOpenById($partyId)
             ?? Party::find($partyId);
 
         if ($party === null) {
@@ -67,6 +65,7 @@ class PartyService
 
         if ($party->isLeader($userId)) {
             $this->partyRepository->disband($party);
+
             return;
         }
 

@@ -20,7 +20,7 @@ readonly class PlayerAttackInitiator
             ->where('active', 1)
             ->first();
 
-        if (!$monster) {
+        if (! $monster) {
             return null;
         }
 
@@ -30,7 +30,7 @@ readonly class PlayerAttackInitiator
         $this->battleRepository->createBattleDetails($battle, $user);
         $this->battleRepository->createBattleDetails($battle, null, $monster);
 
-        $action = sprintf("<p>Вы напали на врага - <b>%s...</b></p>", $monster->monster->name);
+        $action = sprintf('<p>Вы напали на врага - <b>%s...</b></p>', $monster->monster->name);
         $this->battleRepository->createBattleRound($battle, $action, $user);
 
         return $battle;

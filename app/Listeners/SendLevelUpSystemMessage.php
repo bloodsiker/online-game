@@ -12,7 +12,7 @@ class SendLevelUpSystemMessage
     public function handle(PlayerLeveledUp $event): void
     {
         $player = $event->player;
-        $name   = $player->user->name ?? 'Игрок';
+        $name = $player->user->name ?? 'Игрок';
 
         $this->chatService->sendSystem("Уровень {$name} увеличен до {$player->lvl}!");
     }

@@ -2,10 +2,10 @@
 
 namespace App\Services\ItemEffect\Strategies;
 
-use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 use App\Models\Player\Player;
+use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
 interface ItemEffectStrategyInterface
 {
-    public function apply(Player $player, ItemEffectValue $effect, int $hpMax = null, int $mpMax = null): void;
+    public function apply(Player $player, ItemEffectValue $effect, ?int $hpMax = null, ?int $mpMax = null): void;
 }

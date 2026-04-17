@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Domain\Contracts;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 interface BankUserRepository
 {

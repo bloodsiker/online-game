@@ -6,11 +6,11 @@ namespace App\Enums;
 
 enum ActiveEffectType: string
 {
-    case STUN   = 'stun';
+    case STUN = 'stun';
     case POISON = 'poison';
-    case BLEED  = 'bleed';
-    case BURN   = 'burn';
-    case REGEN  = 'regen';
+    case BLEED = 'bleed';
+    case BURN = 'burn';
+    case REGEN = 'regen';
 
     public function isStun(): bool
     {
@@ -19,9 +19,9 @@ enum ActiveEffectType: string
 
     public function isDoT(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::POISON, self::BLEED, self::BURN => true,
-            default                               => false,
+            default => false,
         };
     }
 
@@ -32,12 +32,12 @@ enum ActiveEffectType: string
 
     public function emoji(): string
     {
-        return match($this) {
-            self::STUN   => '💫',
+        return match ($this) {
+            self::STUN => '💫',
             self::POISON => '☠️',
-            self::BLEED  => '🩸',
-            self::BURN   => '🔥',
-            self::REGEN  => '💚',
+            self::BLEED => '🩸',
+            self::BURN => '🔥',
+            self::REGEN => '💚',
         };
     }
 }

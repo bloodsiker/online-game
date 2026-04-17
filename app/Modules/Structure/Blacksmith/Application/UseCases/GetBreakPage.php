@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakPageDTO;
 use App\Modules\Structure\Blacksmith\Application\Mappers\BreakPageViewMapper;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetBreakPage
 {

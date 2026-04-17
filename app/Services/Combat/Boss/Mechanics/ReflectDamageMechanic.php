@@ -41,6 +41,7 @@ class ReflectDamageMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $percent = $this->getConfig('reflect_percent', 30);
+
         return "Босс отбивает {$percent}% урона назад";
     }
 }

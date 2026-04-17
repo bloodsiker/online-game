@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Enums\BossMechanicType;
+use App\Http\Controllers\Controller;
 use App\Models\Location\Location;
 use App\Models\Monster\BossMechanic;
 use App\Models\Monster\BossPhase;
@@ -27,7 +27,7 @@ class MonsterController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $monster = new Monster();
+            $monster = new Monster;
             $this->fillMonster($monster, $request);
             $monster->save();
 
@@ -61,8 +61,8 @@ class MonsterController extends Controller
     {
         $monster->items()->attach($request->input('share_item_id'), [
             'drop_chance' => (float) $request->input('drop_chance', 0),
-            'min_count'   => (int)   $request->input('min_count', 1),
-            'max_count'   => (int)   $request->input('max_count', 1),
+            'min_count' => (int) $request->input('min_count', 1),
+            'max_count' => (int) $request->input('max_count', 1),
         ]);
 
         return redirect()->back()->with('success', 'Предмет добавлен.');
@@ -117,13 +117,13 @@ class MonsterController extends Controller
     public function addPhase(Request $request, Monster $monster): RedirectResponse
     {
         BossPhase::create([
-            'monster_id'      => $monster->id,
-            'phase_number'    => (int) $request->input('phase_number', 1),
-            'hp_threshold'    => (int) $request->input('hp_threshold', 50),
-            'description'     => $request->input('description'),
+            'monster_id' => $monster->id,
+            'phase_number' => (int) $request->input('phase_number', 1),
+            'hp_threshold' => (int) $request->input('hp_threshold', 50),
+            'description' => $request->input('description'),
             'stats_modifiers' => $request->filled('stats_modifiers') ? json_decode($request->input('stats_modifiers'), true) : null,
-            'new_skills'      => $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null,
-            'removed_skills'  => $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null,
+            'new_skills' => $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null,
+            'removed_skills' => $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null,
         ]);
 
         return redirect()->back()->with('success', 'Фаза добавлена.');
@@ -131,12 +131,12 @@ class MonsterController extends Controller
 
     public function updatePhase(Request $request, Monster $monster, BossPhase $phase): RedirectResponse
     {
-        $phase->phase_number    = (int) $request->input('phase_number', 1);
-        $phase->hp_threshold    = (int) $request->input('hp_threshold', 50);
-        $phase->description     = $request->input('description');
+        $phase->phase_number = (int) $request->input('phase_number', 1);
+        $phase->hp_threshold = (int) $request->input('hp_threshold', 50);
+        $phase->description = $request->input('description');
         $phase->stats_modifiers = $request->filled('stats_modifiers') ? json_decode($request->input('stats_modifiers'), true) : null;
-        $phase->new_skills      = $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null;
-        $phase->removed_skills  = $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null;
+        $phase->new_skills = $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null;
+        $phase->removed_skills = $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null;
         $phase->save();
 
         return redirect()->back()->with('success', 'Фаза обновлена.');
@@ -154,13 +154,13 @@ class MonsterController extends Controller
     public function addMechanic(Request $request, Monster $monster): RedirectResponse
     {
         BossMechanic::create([
-            'monster_id'         => $monster->id,
-            'mechanic_type'      => $request->input('mechanic_type'),
+            'monster_id' => $monster->id,
+            'mechanic_type' => $request->input('mechanic_type'),
             'trigger_hp_percent' => $request->filled('trigger_hp_percent') ? (int) $request->input('trigger_hp_percent') : null,
-            'trigger_turn'       => $request->filled('trigger_turn') ? (int) $request->input('trigger_turn') : null,
-            'priority'           => (int) $request->input('priority', 0),
-            'is_active'          => (bool) $request->input('is_active', true),
-            'config'             => $request->filled('config') ? json_decode($request->input('config'), true) : null,
+            'trigger_turn' => $request->filled('trigger_turn') ? (int) $request->input('trigger_turn') : null,
+            'priority' => (int) $request->input('priority', 0),
+            'is_active' => (bool) $request->input('is_active', true),
+            'config' => $request->filled('config') ? json_decode($request->input('config'), true) : null,
         ]);
 
         return redirect()->back()->with('success', 'Механика добавлена.');
@@ -168,12 +168,12 @@ class MonsterController extends Controller
 
     public function updateMechanic(Request $request, Monster $monster, BossMechanic $mechanic): RedirectResponse
     {
-        $mechanic->mechanic_type      = $request->input('mechanic_type');
+        $mechanic->mechanic_type = $request->input('mechanic_type');
         $mechanic->trigger_hp_percent = $request->filled('trigger_hp_percent') ? (int) $request->input('trigger_hp_percent') : null;
-        $mechanic->trigger_turn       = $request->filled('trigger_turn') ? (int) $request->input('trigger_turn') : null;
-        $mechanic->priority           = (int) $request->input('priority', 0);
-        $mechanic->is_active          = (bool) $request->input('is_active', true);
-        $mechanic->config             = $request->filled('config') ? json_decode($request->input('config'), true) : null;
+        $mechanic->trigger_turn = $request->filled('trigger_turn') ? (int) $request->input('trigger_turn') : null;
+        $mechanic->priority = (int) $request->input('priority', 0);
+        $mechanic->is_active = (bool) $request->input('is_active', true);
+        $mechanic->config = $request->filled('config') ? json_decode($request->input('config'), true) : null;
         $mechanic->save();
 
         return redirect()->back()->with('success', 'Механика обновлена.');
@@ -188,7 +188,7 @@ class MonsterController extends Controller
 
     public function toggleMechanic(Monster $monster, BossMechanic $mechanic): RedirectResponse
     {
-        $mechanic->is_active = !$mechanic->is_active;
+        $mechanic->is_active = ! $mechanic->is_active;
         $mechanic->save();
 
         return redirect()->back()->with('success', $mechanic->is_active ? 'Механика включена.' : 'Механика отключена.');
@@ -198,26 +198,26 @@ class MonsterController extends Controller
 
     private function fillMonster(Monster $monster, Request $request): void
     {
-        $monster->name        = $request->input('name');
+        $monster->name = $request->input('name');
         $monster->description = $request->input('description');
-        $monster->lvl         = (int)   $request->input('lvl', 1);
-        $monster->hp          = (int)   $request->input('hp', 1);
-        $monster->armor       = (int)   $request->input('armor', 0);
-        $monster->dodge       = (int)   $request->input('dodge', 0);
-        $monster->critical    = (int)   $request->input('critical', 0);
-        $monster->min_dmg     = (float) $request->input('min_dmg', 0);
-        $monster->max_dmg     = (float) $request->input('max_dmg', 0);
-        $monster->aggression  = (int)   $request->input('aggression', 0);
-        $monster->exp         = (int)   $request->input('exp', 0);
-        $monster->min_money   = (int)   $request->input('min_money', 0);
-        $monster->max_money   = (int)   $request->input('max_money', 0);
-        $monster->is_boss     = (bool)  $request->input('is_boss', false);
+        $monster->lvl = (int) $request->input('lvl', 1);
+        $monster->hp = (int) $request->input('hp', 1);
+        $monster->armor = (int) $request->input('armor', 0);
+        $monster->dodge = (int) $request->input('dodge', 0);
+        $monster->critical = (int) $request->input('critical', 0);
+        $monster->min_dmg = (float) $request->input('min_dmg', 0);
+        $monster->max_dmg = (float) $request->input('max_dmg', 0);
+        $monster->aggression = (int) $request->input('aggression', 0);
+        $monster->exp = (int) $request->input('exp', 0);
+        $monster->min_money = (int) $request->input('min_money', 0);
+        $monster->max_money = (int) $request->input('max_money', 0);
+        $monster->is_boss = (bool) $request->input('is_boss', false);
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $file->move(public_path('img/resource'), $filename);
-            $monster->image = 'img/resource/' . $filename;
+            $monster->image = 'img/resource/'.$filename;
         }
     }
 }

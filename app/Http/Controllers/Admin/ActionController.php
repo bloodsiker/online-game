@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Share\ShareAction;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -24,7 +23,7 @@ class ActionController extends Controller
         if ($request->isMethod('POST')) {
             $action = ShareAction::create([
                 'alias' => $request->input('alias'),
-                'name'  => $request->input('name'),
+                'name' => $request->input('name'),
             ]);
 
             return redirect()->route('admin.action.info', $action->id)->with('success', 'Действие создано.');
@@ -37,7 +36,7 @@ class ActionController extends Controller
     {
         if ($request->isMethod('POST')) {
             $action->alias = $request->input('alias');
-            $action->name  = $request->input('name');
+            $action->name = $request->input('name');
             $action->save();
 
             return redirect()->back()->with('success', 'Сохранено.');

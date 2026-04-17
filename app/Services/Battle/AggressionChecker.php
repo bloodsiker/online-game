@@ -4,7 +4,8 @@ namespace App\Services\Battle;
 
 use Illuminate\Support\Collection;
 
-class AggressionChecker {
+class AggressionChecker
+{
     public function getAggressive(Collection $monsters): Collection
     {
         return $monsters->filter(function ($locMonster) {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Structure;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanTreasuryLog;
-use App\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +20,7 @@ class ClanTreasuryController extends Controller
     public function index(Request $request, int $id): mixed
     {
         /** @var \App\Models\User $user */
-        $user          = Auth::user();
+        $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
         if (! $clanWarehouse->isClanBank()) {
@@ -30,10 +30,11 @@ class ClanTreasuryController extends Controller
         $membership = $user->clanMembership;
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
-        $clan        = $membership->clan;
+        $clan = $membership->clan;
         $canWithdraw = $membership->role->hasPermission(ClanPermission::WITHDRAW_MONEY);
 
         if ($request->isMethod('POST')) {
@@ -42,22 +43,27 @@ class ClanTreasuryController extends Controller
 
             if ($amount <= 0) {
                 session()->flash('message', 'Укажите корректную сумму.');
+
                 return redirect()->back();
             }
 
             if ($action === 'deposit') {
                 if ($amount > $user->money) {
                     session()->flash('message', 'Сумма превышает количество монет в кошельке.');
+
                     return redirect()->back();
                 }
+
                 return $this->deposit($user, $clan, $clanWarehouse, $amount);
             }
 
             if ($action === 'withdraw' && $canWithdraw) {
                 if ($amount > $clan->treasury) {
                     session()->flash('message', 'Сумма превышает баланс казны.');
+
                     return redirect()->back();
                 }
+
                 return $this->withdraw($user, $clan, $clanWarehouse, $amount);
             }
         }
@@ -75,6 +81,7 @@ class ClanTreasuryController extends Controller
     {
         if ($user->money < $amount) {
             session()->flash('message', 'Недостаточно монет.');
+
             return redirect()->back();
         }
 
@@ -85,23 +92,24 @@ class ClanTreasuryController extends Controller
             $balance = $clan->fresh()->treasury;
 
             ClanTreasuryLog::create([
-                'clan_id'      => $clan->id,
+                'clan_id' => $clan->id,
                 'structure_id' => $clanWarehouse->id,
-                'user_id'      => $user->id,
-                'action'       => 'deposit',
-                'amount'       => $amount,
+                'user_id' => $user->id,
+                'action' => 'deposit',
+                'amount' => $amount,
                 'balance_after' => $balance,
             ]);
 
             ClanLog::create([
                 'clan_id' => $clan->id,
                 'user_id' => $user->id,
-                'action'  => ClanLogAction::TREASURY_DEPOSIT,
+                'action' => ClanLogAction::TREASURY_DEPOSIT,
                 'details' => (string) $amount,
             ]);
         });
 
         session()->flash('message', sprintf('Вы внесли %s монет в казну клана.', number_format($amount)));
+
         return redirect()->back();
     }
 
@@ -109,6 +117,7 @@ class ClanTreasuryController extends Controller
     {
         if ($clan->treasury < $amount) {
             session()->flash('message', 'В казне недостаточно монет.');
+
             return redirect()->back();
         }
 
@@ -119,23 +128,24 @@ class ClanTreasuryController extends Controller
             $balance = $clan->fresh()->treasury;
 
             ClanTreasuryLog::create([
-                'clan_id'       => $clan->id,
-                'structure_id'  => $clanWarehouse->id,
-                'user_id'       => $user->id,
-                'action'        => 'withdraw',
-                'amount'        => $amount,
+                'clan_id' => $clan->id,
+                'structure_id' => $clanWarehouse->id,
+                'user_id' => $user->id,
+                'action' => 'withdraw',
+                'amount' => $amount,
                 'balance_after' => $balance,
             ]);
 
             ClanLog::create([
                 'clan_id' => $clan->id,
                 'user_id' => $user->id,
-                'action'  => ClanLogAction::TREASURY_WITHDRAW,
+                'action' => ClanLogAction::TREASURY_WITHDRAW,
                 'details' => (string) $amount,
             ]);
         });
 
         session()->flash('message', sprintf('Вы сняли %s монет из казны клана.', number_format($amount)));
+
         return redirect()->back();
     }
 }

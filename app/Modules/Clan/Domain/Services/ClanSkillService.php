@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Domain\Services;
 
+use App\Models\Player\Player;
+use App\Models\Player\PlayerMagicSkill;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
-use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Models\Player\Player;
-use App\Models\Player\PlayerMagicSkill;
 use Illuminate\Support\Facades\DB;
 
 class ClanSkillService
@@ -32,7 +32,7 @@ class ClanSkillService
         }
 
         $levelData = $definition->levels()->where('level', $nextLevel)->first();
-        if (!$levelData) {
+        if (! $levelData) {
             return 'Данные уровня навыка не найдены.';
         }
 
@@ -46,13 +46,13 @@ class ClanSkillService
 
         if ($levelData->share_item_id) {
             $stone = Backpack::where('user_id', $player->user_id)
-                ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->share_item_id))
+                ->whereHas('item', fn ($q) => $q->where('share_item_id', $levelData->share_item_id))
                 ->first();
 
             $required = $levelData->share_item_count ?? 1;
             $stoneName = $levelData->stoneItem?->name ?? 'Предмет';
 
-            if (!$stone || $stone->count < $required) {
+            if (! $stone || $stone->count < $required) {
                 return "В рюкзаке недостаточно предметов «{$stoneName}». Нужно: {$required}.";
             }
         }
@@ -62,7 +62,7 @@ class ClanSkillService
 
             if ($levelData->share_item_id) {
                 $stone = Backpack::where('user_id', $player->user_id)
-                    ->whereHas('item', fn($q) => $q->where('share_item_id', $levelData->share_item_id))
+                    ->whereHas('item', fn ($q) => $q->where('share_item_id', $levelData->share_item_id))
                     ->first();
 
                 $required = $levelData->share_item_count ?? 1;
@@ -78,9 +78,9 @@ class ClanSkillService
                 $learned->update(['current_level' => $nextLevel]);
             } else {
                 $learned = ClanLearnedSkill::create([
-                    'clan_id'                   => $clan->id,
-                    'clan_skill_definition_id'  => $definition->id,
-                    'current_level'             => $nextLevel,
+                    'clan_id' => $clan->id,
+                    'clan_skill_definition_id' => $definition->id,
+                    'current_level' => $nextLevel,
                 ]);
             }
 
@@ -90,7 +90,7 @@ class ClanSkillService
             ClanLog::create([
                 'clan_id' => $clan->id,
                 'user_id' => $player->user_id,
-                'action'  => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
+                'action' => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
                 'details' => $isNew
                     ? "Изучен новый навык «{$definition->name}»"
                     : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
@@ -128,10 +128,10 @@ class ClanSkillService
         }
 
         if ($newLevelData->magic_skill_id) {
-            $rows = $playerIds->map(fn($playerId) => [
-                'player_id'      => $playerId,
+            $rows = $playerIds->map(fn ($playerId) => [
+                'player_id' => $playerId,
                 'magic_skill_id' => $newLevelData->magic_skill_id,
-                'is_equipped'    => true,
+                'is_equipped' => true,
             ])->toArray();
 
             PlayerMagicSkill::upsert($rows, ['player_id', 'magic_skill_id'], ['is_equipped']);
@@ -163,6 +163,7 @@ class ClanSkillService
             ->flatMap(function ($learned) {
                 $levelData = $learned->definition->levels
                     ->firstWhere('level', $learned->current_level);
+
                 return $levelData?->magic_skill_id ? [$levelData->magic_skill_id] : [];
             });
 

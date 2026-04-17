@@ -14,9 +14,9 @@ class PlayerSkill extends Model
     protected $table = 'player_skills';
 
     protected $attributes = [
-        'lvl'      => 1,
-        'exp'      => 0,
-        'exp_up'   => 1000,
+        'lvl' => 1,
+        'exp' => 0,
+        'exp_up' => 1000,
         'exp_diff' => 1000,
     ];
 

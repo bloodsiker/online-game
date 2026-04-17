@@ -22,14 +22,14 @@ class BossRushDungeonStrategy implements DungeonStrategyInterface
     {
         $bossCount = DungeonBoss::where('dungeon_id', $run->dungeon_id)->count();
         $run->update(['metadata' => array_merge($run->metadata ?? [], [
-            'bosses_total'   => $bossCount,
+            'bosses_total' => $bossCount,
             'bosses_defeated' => 0,
         ])]);
     }
 
     public function onFloorComplete(DungeonRun $run, DungeonRunFloor $completedFloor): ?int
     {
-        $meta     = $run->metadata ?? [];
+        $meta = $run->metadata ?? [];
         $defeated = ($meta['bosses_defeated'] ?? 0) + 1;
         $run->update(['metadata' => array_merge($meta, ['bosses_defeated' => $defeated])]);
 
@@ -46,8 +46,8 @@ class BossRushDungeonStrategy implements DungeonStrategyInterface
 
     public function isRunComplete(DungeonRun $run): bool
     {
-        $meta     = $run->metadata ?? [];
-        $total    = $meta['bosses_total'] ?? 0;
+        $meta = $run->metadata ?? [];
+        $total = $meta['bosses_total'] ?? 0;
         $defeated = $meta['bosses_defeated'] ?? 0;
 
         return $total > 0 && $defeated >= $total;

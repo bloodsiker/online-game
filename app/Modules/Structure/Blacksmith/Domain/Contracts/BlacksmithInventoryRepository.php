@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Contracts;
 
-use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 interface BlacksmithInventoryRepository
 {

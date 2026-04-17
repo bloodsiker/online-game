@@ -3,12 +3,12 @@
 namespace App\Models\Share;
 
 use App\Enums\ItemRarity;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
-use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Models\Monster\Monster;
 use App\Models\Skill;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

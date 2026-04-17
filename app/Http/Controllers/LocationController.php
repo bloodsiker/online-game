@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Battle\Battle;
 use App\Models\Dungeon\DungeonSession;
 use App\Models\Item\ItemOnLocation;
-use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\User;
+use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Repositories\LocationRepository;
 use App\Repositories\MonsterOnLocationRepository;
 use App\Services\Battle\BattleOrchestrator;
@@ -15,7 +15,6 @@ use App\Services\Battle\MonsterSelector;
 use App\Services\BattleService;
 use App\Services\DungeonService;
 use App\Services\PlayerMovementService;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -23,14 +22,14 @@ use Illuminate\Support\Facades\Storage;
 class LocationController extends Controller
 {
     public function __construct(
-        readonly protected BattleOrchestrator $battleOrchestrator,
-        readonly protected BattleService $battleService,
-        readonly protected MonsterSelector $monsterSelector,
-        readonly protected MonsterOnLocationRepository $monsterOnLocationRepository,
-        readonly protected LocationRepository $locationRepository,
-        readonly protected PlayerMovementService $playerMovementService,
-        readonly protected PlayerStatService $statService,
-        readonly protected DungeonService $dungeonService,
+        protected readonly BattleOrchestrator $battleOrchestrator,
+        protected readonly BattleService $battleService,
+        protected readonly MonsterSelector $monsterSelector,
+        protected readonly MonsterOnLocationRepository $monsterOnLocationRepository,
+        protected readonly LocationRepository $locationRepository,
+        protected readonly PlayerMovementService $playerMovementService,
+        protected readonly PlayerStatService $statService,
+        protected readonly DungeonService $dungeonService,
     ) {}
 
     public function index()
@@ -40,6 +39,7 @@ class LocationController extends Controller
         // Teleport player out if dungeon session expired
         if ($this->dungeonService->expireSessionIfNeeded($user)) {
             session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
+
             return redirect()->route('location');
         }
 
@@ -47,12 +47,12 @@ class LocationController extends Controller
         $playerDecorator = $this->statService->resolve($player);
         $location = $user->currentLocation;
 
-        if (!$location) {
+        if (! $location) {
             abort(404);
         }
 
         $battle = $this->battleOrchestrator->handleLocationEntry($location);
-//        $battle = $this->battleService->battleOnLocation($location);
+        //        $battle = $this->battleService->battleOnLocation($location);
 
         if ($battle instanceof Battle) {
             $randomAttackedMonster = $this->monsterSelector->getRandomActiveMonster($battle);
@@ -63,9 +63,9 @@ class LocationController extends Controller
             return view('fight.index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
         }
 
-        $monsterOnLocation   = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
-        $locationUsersJson   = $this->getLocationUsersJson($location->id);
-        $dungeonSession      = $this->dungeonService->getActiveSession($user->id);
+        $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
+        $locationUsersJson = $this->getLocationUsersJson($location->id);
+        $dungeonSession = $this->dungeonService->getActiveSession($user->id);
         $itemsOnLocationCount = $this->getItemsOnLocation($user, $location->id)->count();
 
         return view('location.index', compact('location', 'battle', 'monsterOnLocation', 'player', 'playerDecorator', 'user', 'locationUsersJson', 'dungeonSession', 'itemsOnLocationCount'));
@@ -77,27 +77,27 @@ class LocationController extends Controller
 
         $result = $this->playerMovementService->move($user, $direction);
 
-        if (!$result->success) {
+        if (! $result->success) {
             session()->flash('message', $result->message);
         }
 
         $location = $this->locationRepository->getOneById($user->location_id);
 
         $battle = $this->battleService->battleOnLocation($location);
-//        $battle = $this->battleOrchestrator->handlePlayerAttack($location);
+        //        $battle = $this->battleOrchestrator->handlePlayerAttack($location);
 
         $monsterOnLocation = $this->monsterOnLocationRepository->getMonstersOnLocation($location);
 
         return view('location.index', [
-            'location'             => $location,
-            'battle'               => $battle,
-            'monsterOnLocation'    => $monsterOnLocation,
-            'user'                 => $user,
-            'player'               => $user->player,
-            'playerDecorator'      => $this->statService->resolve($user->player),
-            'speedModifier'        => $result->speedModifier,
-            'locationUsersJson'    => $this->getLocationUsersJson($location->id),
-            'dungeonSession'       => $this->dungeonService->getActiveSession($user->id),
+            'location' => $location,
+            'battle' => $battle,
+            'monsterOnLocation' => $monsterOnLocation,
+            'user' => $user,
+            'player' => $user->player,
+            'playerDecorator' => $this->statService->resolve($user->player),
+            'speedModifier' => $result->speedModifier,
+            'locationUsersJson' => $this->getLocationUsersJson($location->id),
+            'dungeonSession' => $this->dungeonService->getActiveSession($user->id),
             'itemsOnLocationCount' => $this->getItemsOnLocation($user, $location->id)->count(),
         ]);
     }
@@ -112,13 +112,14 @@ class LocationController extends Controller
             ->get()
             ->map(function (User $u) use ($tenMinutesAgo): array {
                 $clan = $u->clanMembership?->clan;
+
                 return [
-                    'id'        => $u->id,
-                    'name'      => $u->name,
-                    'lvl'       => $u->player->lvl,
-                    'time'      => $u->last_online_at?->format('H:i') ?? '',
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'lvl' => $u->player->lvl,
+                    'time' => $u->last_online_at?->format('H:i') ?? '',
                     'is_online' => ($u->last_online_at?->timestamp ?? 0) > $tenMinutesAgo->timestamp,
-                    'info_url'  => route('info.user', ['id' => $u->id]),
+                    'info_url' => route('info.user', ['id' => $u->id]),
                     'clan_name' => $clan?->name,
                     'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
                 ];
@@ -129,7 +130,7 @@ class LocationController extends Controller
 
     public function takeItems()
     {
-        $user     = Auth::user();
+        $user = Auth::user();
         $location = $user->currentLocation;
 
         $itemsOnLocation = $this->getItemsOnLocation($user, $location->id);
@@ -143,7 +144,7 @@ class LocationController extends Controller
 
         $dungeonSessionId = null;
         if ($user->currentLocation->dungeon_id !== null) {
-            $session          = DungeonSession::where('user_id', $user->id)->first();
+            $session = DungeonSession::where('user_id', $user->id)->first();
             $dungeonSessionId = $session?->monsterSessionId();
         }
 

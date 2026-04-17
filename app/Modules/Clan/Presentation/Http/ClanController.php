@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Presentation\Http;
 
+use App\Enums\QuestPlayerStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Quest\Quest;
+use App\Models\Quest\QuestClanProgress;
 use App\Modules\Clan\Application\Requests\CreateClanRequest;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
@@ -14,10 +17,7 @@ use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\Clan\Domain\Services\ClanService;
 use App\Modules\Clan\Domain\Services\ClanSkillService;
-use App\Enums\QuestPlayerStatus;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestClanProgress;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class ClanController extends Controller
         $user = Auth::user();
         $membership = $user->clanMembership;
 
-        if (!$membership) {
+        if (! $membership) {
             return view('interface.clan_frame', ['members' => collect(), 'clan' => null]);
         }
 
@@ -44,22 +44,22 @@ class ClanController extends Controller
         $members = ClanMember::where('clan_id', $membership->clan_id)
             ->with(['user.player', 'role'])
             ->get()
-            ->sortByDesc(fn($m) => $m->user->last_online_at);
+            ->sortByDesc(fn ($m) => $m->user->last_online_at);
 
         return view('interface.clan_frame', compact('members', 'tenMinutesAgo') + ['clan' => $membership->clan]);
     }
 
     public function index(): \Illuminate\View\View
     {
-        $user           = Auth::user();
-        $inClan         = $user->clanMembership !== null;
-        $activeQuests   = collect();
-        $isLeader       = false;
+        $user = Auth::user();
+        $inClan = $user->clanMembership !== null;
+        $activeQuests = collect();
+        $isLeader = false;
 
         if ($inClan) {
-            $clan         = $user->clanMembership->clan;
+            $clan = $user->clanMembership->clan;
             $activeQuests = $clan->activeQuestProgress;
-            $isLeader     = (int) $clan->owner_id === $user->id;
+            $isLeader = (int) $clan->owner_id === $user->id;
         }
 
         return view('clan::index', compact('inClan', 'activeQuests', 'isLeader'));
@@ -82,31 +82,31 @@ class ClanController extends Controller
         $onlineThreshold = Carbon::now()->subMinutes(10);
 
         $memberRows = $clan->members->map(fn ($m) => [
-            'type'       => 'member',
-            'user'       => $m->user,
-            'role'       => $m->role,
+            'type' => 'member',
+            'user' => $m->user,
+            'role' => $m->role,
             'membership' => $m,
-            'is_online'  => $m->user->last_online_at && $m->user->last_online_at > $onlineThreshold,
+            'is_online' => $m->user->last_online_at && $m->user->last_online_at > $onlineThreshold,
         ]);
 
         $requestRows = ClanJoinRequest::where('clan_id', $clan->id)
             ->with('user')
             ->get()
             ->map(fn ($r) => [
-                'type'      => 'request',
-                'id'        => $r->id,
-                'user'      => $r->user,
-                'status'    => $r->status,
+                'type' => 'request',
+                'id' => $r->id,
+                'user' => $r->user,
+                'status' => $r->status,
                 'is_online' => false,
             ]);
 
-        $rows       = $memberRows->concat($requestRows);
-        $allRoles   = $clan->roles;
+        $rows = $memberRows->concat($requestRows);
+        $allRoles = $clan->roles;
         $leaderRole = $clan->roles->firstWhere('is_leader', true);
 
         $onlineCount = $memberRows->filter(fn ($r) => $r['is_online'])->count();
-        $canKick     = $membership->role->hasPermission(ClanPermission::KICK);
-        $canInvite   = $membership->role->hasPermission(ClanPermission::INVITE);
+        $canKick = $membership->role->hasPermission(ClanPermission::KICK);
+        $canInvite = $membership->role->hasPermission(ClanPermission::INVITE);
 
         return view('clan::member', compact('clan', 'rows', 'membership', 'allRoles', 'leaderRole', 'onlineCount', 'canKick', 'canInvite'));
     }
@@ -123,9 +123,9 @@ class ClanController extends Controller
             return redirect()->route('clan');
         }
 
-        $clan           = $membership->clan()->with('roles')->first();
-        $roles          = $clan->roles;
-        $permissions    = ClanPermission::cases();
+        $clan = $membership->clan()->with('roles')->first();
+        $roles = $clan->roles;
+        $permissions = ClanPermission::cases();
         $canChangePerms = $membership->role->hasPermission(ClanPermission::CHANGE_PERMS);
 
         return view('clan::role', compact('clan', 'roles', 'membership', 'permissions', 'canChangePerms'));
@@ -138,6 +138,7 @@ class ClanController extends Controller
 
         if ($user->clanMembership !== null) {
             session()->flash('message', 'Вы уже состоите в клане.');
+
             return redirect()->route('clan');
         }
 
@@ -148,6 +149,7 @@ class ClanController extends Controller
         }
 
         session()->flash('message', 'Клан успешно создан!');
+
         return redirect()->route('clan.member');
     }
 
@@ -159,6 +161,7 @@ class ClanController extends Controller
 
         if ($membership === null || $membership->clan_id !== $joinRequest->clan_id) {
             session()->flash('message', 'Вы не можете отменить заявку');
+
             return redirect()->back();
         }
 
@@ -174,8 +177,9 @@ class ClanController extends Controller
 
     public function invite(Request $request): RedirectResponse
     {
-        if (!$request->filled('invite_nick')) {
+        if (! $request->filled('invite_nick')) {
             session()->flash('message', 'Введите ник игрока.');
+
             return redirect()->back();
         }
 
@@ -257,8 +261,9 @@ class ClanController extends Controller
 
     public function addRole(Request $request): RedirectResponse
     {
-        if (!$request->filled('name')) {
+        if (! $request->filled('name')) {
             session()->flash('message', 'Введите название звания.');
+
             return redirect()->back();
         }
 
@@ -308,16 +313,17 @@ class ClanController extends Controller
     public function information(): \Illuminate\View\View|RedirectResponse
     {
         /** @var \App\Models\User $user */
-        $user       = Auth::user();
+        $user = Auth::user();
         $membership = $user->clanMembership;
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
-        $clan           = $membership->clan;
-        $canChangeNews  = $membership->role->hasPermission(ClanPermission::CHANGE_NEWS);
+        $clan = $membership->clan;
+        $canChangeNews = $membership->role->hasPermission(ClanPermission::CHANGE_NEWS);
 
         return view('clan::information', compact('clan', 'membership', 'canChangeNews'));
     }
@@ -359,15 +365,16 @@ class ClanController extends Controller
 
     public function quests(Request $request): \Illuminate\View\View|RedirectResponse
     {
-        $user       = Auth::user();
+        $user = Auth::user();
         $membership = $user->clanMembership;
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
-        $clan     = $membership->clan;
+        $clan = $membership->clan;
         $isLeader = (int) $clan->owner_id === $user->id;
 
         $activeQuests = QuestClanProgress::where('clan_id', $clan->id)
@@ -393,11 +400,12 @@ class ClanController extends Controller
     public function logs(Request $request): \Illuminate\View\View|RedirectResponse
     {
         /** @var \App\Models\User $user */
-        $user       = Auth::user();
+        $user = Auth::user();
         $membership = $user->clanMembership;
 
         if ($membership === null) {
             session()->flash('message', 'Вы не состоите в клане.');
+
             return redirect()->route('clan');
         }
 
@@ -406,17 +414,17 @@ class ClanController extends Controller
             ->orderByDesc('id');
 
         $filterAction = $request->query('action');
-        $filterUser   = $request->query('player');
+        $filterUser = $request->query('player');
 
         if ($filterAction && ClanLogAction::tryFrom($filterAction)) {
             $query->where('action', $filterAction);
         }
 
         if ($filterUser) {
-            $query->whereHas('user', fn ($q) => $q->where('name', 'like', '%' . $filterUser . '%'));
+            $query->whereHas('user', fn ($q) => $q->where('name', 'like', '%'.$filterUser.'%'));
         }
 
-        $logs    = $query->paginate(50)->withQueryString();
+        $logs = $query->paginate(50)->withQueryString();
         $actions = ClanLogAction::cases();
 
         return view('clan::logs', compact('logs', 'actions', 'membership', 'filterAction', 'filterUser'));

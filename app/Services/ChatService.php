@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Modules\Chat\Domain\Enums\ChatChannel;
-use App\Modules\Chat\Domain\Enums\ChatMessageType;
-use App\Modules\Chat\Domain\Models\ChatMessage;
-use App\Models\User;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Application\UseCases\SendSystemMessage;
+use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 /**

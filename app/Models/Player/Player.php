@@ -7,7 +7,7 @@ use App\Enums\QuestPlayerStatus;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Quest\QuestPlayer;
 use App\Models\Race;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\Combat\FightHitInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
- *
  * @property-read User $user
  * @property-read Race $race
  * @property-read PlayerEquipment $playerEquip
@@ -35,20 +34,21 @@ class Player extends Model implements FightHitInterface
     use HasFactory;
 
     const REGEN_INTERVAL = 5; // секунд
+
     const FULL_REGEN_TIME = 300; // 20 минут в секундах
 
     protected $casts = [
-        'last_regen_at' => 'datetime'
+        'last_regen_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function race(): BelongsTo
     {
-        return $this->belongsTo(Race::class,  'race_id');
+        return $this->belongsTo(Race::class, 'race_id');
     }
 
     public function playerEquip(): HasOne
@@ -58,7 +58,7 @@ class Player extends Model implements FightHitInterface
 
     public function skills(): HasMany
     {
-        return $this->hasMany(PlayerSkill::class,  'player_id')->with('skill');
+        return $this->hasMany(PlayerSkill::class, 'player_id')->with('skill');
     }
 
     public function magicSkills()
@@ -98,12 +98,12 @@ class Player extends Model implements FightHitInterface
         return $this->max_dmg;
     }
 
-    public function getRightHandMinDmg():int
+    public function getRightHandMinDmg(): int
     {
         return $this->min_dmg;
     }
 
-    public function getRightHandMaxDmg():int
+    public function getRightHandMaxDmg(): int
     {
         return $this->max_dmg;
     }
@@ -123,23 +123,28 @@ class Player extends Model implements FightHitInterface
         return $this->mp_max;
     }
 
-    public function getStrength() {
+    public function getStrength()
+    {
         return floor($this->strength);
     }
 
-    public function getInt() {
+    public function getInt()
+    {
         return floor($this->intuition);
     }
 
-    public function getAgility() {
+    public function getAgility()
+    {
         return floor($this->agility);
     }
 
-    public function getMud() {
+    public function getMud()
+    {
         return floor($this->wisdom);
     }
 
-    public function getIntelligence() {
+    public function getIntelligence()
+    {
         return floor($this->intelligence);
     }
 
@@ -155,28 +160,28 @@ class Player extends Model implements FightHitInterface
 
     public function getCombatClass(): CombatClass
     {
-        $str  = (float) $this->strength;
+        $str = (float) $this->strength;
         $agil = (float) $this->agility;
-        $int  = (float) $this->intuition;
+        $int = (float) $this->intuition;
 
-        return match(true) {
+        return match (true) {
             $str >= $agil && $str >= $int => CombatClass::TANK,
-            $agil >= $int                 => CombatClass::DODGE,
-            default                       => CombatClass::CRIT,
+            $agil >= $int => CombatClass::DODGE,
+            default => CombatClass::CRIT,
         };
     }
 
     public function getClassDominance(): float
     {
-        $str   = (float) $this->strength;
-        $agil  = (float) $this->agility;
-        $int   = (float) $this->intuition;
+        $str = (float) $this->strength;
+        $agil = (float) $this->agility;
+        $int = (float) $this->intuition;
         $total = max(1.0, $str + $agil + $int);
 
-        return match($this->getCombatClass()) {
-            CombatClass::TANK  => $str  / $total,
+        return match ($this->getCombatClass()) {
+            CombatClass::TANK => $str / $total,
             CombatClass::DODGE => $agil / $total,
-            CombatClass::CRIT  => $int  / $total,
+            CombatClass::CRIT => $int / $total,
         };
     }
 
@@ -218,16 +223,17 @@ class Player extends Model implements FightHitInterface
             ->exists();
     }
 
-    public function regenerate(int $hpMax = null, int $mpMax = null): void
+    public function regenerate(?int $hpMax = null, ?int $mpMax = null): void
     {
         $hpMax = $hpMax ?? $this->hp_max;
         $mpMax = $mpMax ?? $this->mp_max;
 
         $now = Carbon::now();
 
-        if (!$this->last_regen_at) {
+        if (! $this->last_regen_at) {
             $this->last_regen_at = $now;
             $this->save();
+
             return;
         }
 
@@ -258,7 +264,7 @@ class Player extends Model implements FightHitInterface
         $this->save();
     }
 
-    public function changeHp(int $amount, int $hpMax = null): void
+    public function changeHp(int $amount, ?int $hpMax = null): void
     {
         $cap = $hpMax ?? $this->hp_max;
 
@@ -267,7 +273,7 @@ class Player extends Model implements FightHitInterface
         $this->save();
     }
 
-    public function changeMp(int $amount, int $mpMax = null): void
+    public function changeMp(int $amount, ?int $mpMax = null): void
     {
         $cap = $mpMax ?? $this->mp_max;
 

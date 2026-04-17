@@ -19,7 +19,7 @@ class DeathExplosionMechanic extends BaseBossMechanic
     {
         $damagePercent = $this->getConfig('damage_percent', 50);
         $maxHp = $context->getBossMaxHp();
-        $damage = (int)(($maxHp * $damagePercent) / 100);
+        $damage = (int) (($maxHp * $damagePercent) / 100);
 
         $actualDamage = max(1, $damage - $context->getPlayer()->getArmor());
         $context->dealDamageToPlayer($actualDamage);
@@ -33,6 +33,6 @@ class DeathExplosionMechanic extends BaseBossMechanic
 
     public function getDescription(): string
     {
-        return "Босс взорвался при смерти!";
+        return 'Босс взорвался при смерти!';
     }
 }

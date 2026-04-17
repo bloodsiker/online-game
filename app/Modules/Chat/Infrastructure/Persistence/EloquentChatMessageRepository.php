@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Infrastructure\Persistence;
 
+use App\Enums\PlayerRelationshipType;
+use App\Models\Player\PlayerRelationship;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
-use App\Models\Player\PlayerRelationship;
-use App\Models\User;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use App\Enums\PlayerRelationshipType;
 
 class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 {
@@ -70,8 +70,8 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
     private function applyChannelFilter(Builder $query, User $user, ChatChannel $channel): void
     {
-        $ignoredIds       = $this->getIgnoredUserIds($user);
-        $tenMinutesAgo    = Carbon::now()->subMinutes(10);
+        $ignoredIds = $this->getIgnoredUserIds($user);
+        $tenMinutesAgo = Carbon::now()->subMinutes(10);
         $thirtyMinutesAgo = Carbon::now()->subMinutes(30);
 
         $privateClause = function ($q) use ($user, $ignoredIds, $tenMinutesAgo) {

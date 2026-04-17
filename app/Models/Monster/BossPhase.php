@@ -2,7 +2,6 @@
 
 namespace App\Models\Monster;
 
-use App\Enums\BossMechanicType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,7 +10,7 @@ class BossPhase extends Model
     protected $fillable = [
         'monster_id', 'phase_number', 'hp_threshold',
         'stats_modifiers', 'new_skills', 'removed_skills',
-        'description'
+        'description',
     ];
 
     protected $casts = [

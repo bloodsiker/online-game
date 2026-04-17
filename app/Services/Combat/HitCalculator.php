@@ -19,7 +19,7 @@ readonly class HitCalculator
 
     private function calculateHit(FightHitInterface $attacker, FightHitInterface $defender, $min, $max): FightHitDTO
     {
-        $dto = new FightHitDTO();
+        $dto = new FightHitDTO;
 
         $attackerClass = $attacker->getCombatClass();
         $defenderClass = $defender->getCombatClass();
@@ -43,7 +43,7 @@ readonly class HitCalculator
             && $attackerClass === CombatClass::CRIT
             && $defenderClass === CombatClass::TANK
         ) {
-            $pierce         = 0.5 * $attacker->getClassDominance();
+            $pierce = 0.5 * $attacker->getClassDominance();
             $effectiveArmor = (int) ($effectiveArmor * (1 - $pierce));
         }
 
@@ -64,7 +64,7 @@ readonly class HitCalculator
         // Чистый TANK (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
         if ($attackerClass === CombatClass::TANK && $defenderClass === CombatClass::DODGE) {
             $reduction = 0.4 * $attacker->getClassDominance();
-            $chance   *= (1 - $reduction);
+            $chance *= (1 - $reduction);
         }
 
         return mt_rand(0, 100) < $chance;
@@ -82,7 +82,7 @@ readonly class HitCalculator
         // Чистый DODGE защитник (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
         if ($attackerClass === CombatClass::CRIT && $defenderClass === CombatClass::DODGE) {
             $reduction = 0.4 * $defender->getClassDominance();
-            $chance   *= (1 - $reduction);
+            $chance *= (1 - $reduction);
         }
 
         return mt_rand(0, 100) < $chance;

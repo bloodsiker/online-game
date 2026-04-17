@@ -36,8 +36,9 @@ class SetPlayerLevel extends Command
         // 1. Находим игрока
         $player = Player::find($playerId);
 
-        if (!$player) {
+        if (! $player) {
             $this->error("Игрок с ID {$playerId} не найден.");
+
             return Command::FAILURE;
         }
 
@@ -46,17 +47,19 @@ class SetPlayerLevel extends Command
         // 2. Проверки
         if ($targetLevel <= $currentLevel) {
             $this->error("Целевой уровень ({$targetLevel}) должен быть выше текущего ({$currentLevel})");
+
             return Command::FAILURE;
         }
 
         $maxLevel = DB::table('experiences')->max('lvl');
         if ($targetLevel > $maxLevel) {
             $this->error("Максимальный уровень в игре: {$maxLevel}");
+
             return Command::FAILURE;
         }
 
         $this->info("Повышаем игрока {$player->id} с уровня {$currentLevel} до {$targetLevel}");
-        $this->info("Всего уровней для прохождения: " . ($targetLevel - $currentLevel));
+        $this->info('Всего уровней для прохождения: '.($targetLevel - $currentLevel));
 
         // 3. Последовательно повышаем каждый уровень
         $bar = $this->output->createProgressBar($targetLevel - $currentLevel);
@@ -71,7 +74,7 @@ class SetPlayerLevel extends Command
         $this->newLine();
 
         $this->info("✓ Игрок успешно повышен до {$targetLevel} уровня!");
-        $this->info("Текущие характеристики:");
+        $this->info('Текущие характеристики:');
         $this->info("  HP: {$player->hp_now}/{$player->hp_max}");
         $this->info("  MP: {$player->mp_now}/{$player->mp_max}");
         $this->info("  STR: {$player->str}, AGIL: {$player->agil}, INT: {$player->int}");
@@ -87,7 +90,7 @@ class SetPlayerLevel extends Command
     {
         $levelConfig = DB::table('experiences')->where('lvl', $newLevel)->first();
 
-        if (!$levelConfig) {
+        if (! $levelConfig) {
             throw new \Exception("Конфигурация для уровня {$newLevel} не найдена");
         }
 

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Shop\ShopItem;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;
+use App\Models\Shop\ShopItem;
 use App\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,10 +27,10 @@ class StructureController extends Controller
     public function info(Request $request, Structure $structure): mixed
     {
         if ($request->isMethod('POST')) {
-            $structure->name        = $request->input('name');
-            $structure->type        = $request->input('type');
+            $structure->name = $request->input('name');
+            $structure->type = $request->input('type');
             $structure->location_id = $request->input('location_id') ?: null;
-            $structure->npc_id      = $request->input('npc_id') ?: null;
+            $structure->npc_id = $request->input('npc_id') ?: null;
             $structure->save();
 
             return redirect()->back()->with('success', 'Сохранено.');
@@ -45,11 +45,11 @@ class StructureController extends Controller
     public function infoShop(Request $request, Structure $structure): RedirectResponse
     {
         ShopItem::create([
-            'structure_id'   => $structure->id,
-            'share_item_id'  => (int) $request->input('share_item_id'),
-            'price'          => (int) $request->input('price', 0),
-            'diamond'        => (int) $request->input('diamond', 0),
-            'sort_order'     => (int) $request->input('sort_order', 0),
+            'structure_id' => $structure->id,
+            'share_item_id' => (int) $request->input('share_item_id'),
+            'price' => (int) $request->input('price', 0),
+            'diamond' => (int) $request->input('diamond', 0),
+            'sort_order' => (int) $request->input('sort_order', 0),
         ]);
 
         return redirect()->back()->with('success', 'Предмет добавлен.');

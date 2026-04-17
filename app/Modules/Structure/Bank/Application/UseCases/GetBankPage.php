@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Structure\Bank\Application\DTOs\BankPageDTO;
 use App\Modules\Structure\Bank\Application\Mappers\BankPageViewMapper;
 use App\Modules\Structure\Bank\Domain\Contracts\BankLogRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetBankPage
 {

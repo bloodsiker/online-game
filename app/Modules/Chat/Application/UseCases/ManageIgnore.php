@@ -6,7 +6,7 @@ namespace App\Modules\Chat\Application\UseCases;
 
 use App\Enums\PlayerRelationshipType;
 use App\Models\Player\PlayerRelationship;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class ManageIgnore
@@ -21,7 +21,7 @@ class ManageIgnore
         PlayerRelationship::firstOrCreate([
             'player_id' => $user->player_id,
             'target_id' => $targetUser->player_id,
-            'type'      => PlayerRelationshipType::IGNORE,
+            'type' => PlayerRelationshipType::IGNORE,
         ]);
     }
 

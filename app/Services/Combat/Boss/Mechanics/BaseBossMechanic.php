@@ -9,6 +9,7 @@ use App\Services\Combat\Boss\BossMechanicInterface;
 abstract class BaseBossMechanic implements BossMechanicInterface
 {
     protected BossMechanic $mechanic;
+
     protected array $config;
 
     public function __construct(BossMechanic $mechanic)

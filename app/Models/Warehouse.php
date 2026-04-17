@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Item\Item;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Item\Item;
 
 class Warehouse extends Model
 {
@@ -13,7 +13,7 @@ class Warehouse extends Model
 
     protected $fillable = ['user_id', 'structure_id', 'item_id'];
 
-//    protected $with = ['item'];
+    //    protected $with = ['item'];
 
     public function user(): BelongsTo
     {

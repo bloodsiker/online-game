@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Models;
 
+use App\Models\Item\Item;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Item\Item;
-use App\Models\User;
 
 /**
  * @property int $user_id

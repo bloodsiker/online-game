@@ -34,6 +34,7 @@ class EnrageMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $increase = $this->getConfig('damage_increase_percent', 50);
+
         return "Босс разозлился и увеличил урон на {$increase}%";
     }
 }

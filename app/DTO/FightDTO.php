@@ -10,9 +10,13 @@ use App\Models\Player\Player;
 final class FightDTO
 {
     protected Battle $battle;
+
     protected BattleRound $battleRound;
+
     protected ?BattleDetail $attackedMonster;
+
     protected Player $player;
+
     protected bool $isPlayerDead = false;
 
     public function getBattle(): Battle

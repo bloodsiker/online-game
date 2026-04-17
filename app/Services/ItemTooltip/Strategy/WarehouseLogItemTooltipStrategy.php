@@ -12,7 +12,7 @@ readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInt
     public function collect(ItemTooltipCollector $collector): void
     {
         foreach ($this->items as $log) {
-            $item     = $log->item;
+            $item = $log->item;
             $itemInfo = $item->itemInfo;
             $collector->add(new ItemTooltipDto(
                 id: $item->id,

@@ -8,14 +8,13 @@ use App\Models\Dungeon\Dungeon;
 use App\Models\Dungeon\DungeonFloorBranch;
 use App\Models\Dungeon\DungeonRun;
 use App\Models\Dungeon\DungeonRunFloor;
-use App\Enums\DungeonRunFloorStatus;
 use App\Repositories\DungeonRepository;
 use App\Repositories\DungeonRunRepository;
 
 class LinearDungeonStrategy implements DungeonStrategyInterface
 {
     public function __construct(
-        private readonly DungeonRepository    $dungeonRepository,
+        private readonly DungeonRepository $dungeonRepository,
         private readonly DungeonRunRepository $runRepository,
     ) {}
 

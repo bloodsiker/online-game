@@ -13,7 +13,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
     public function collect(ItemTooltipCollector $collector): void
     {
         foreach ($this->items as $warehouseItem) {
-            $item     = $warehouseItem->item;
+            $item = $warehouseItem->item;
             $itemInfo = $item->itemInfo;
 
             $collector->add(new ItemTooltipDto(
@@ -28,9 +28,9 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description,
                 store: false,
-                nogive: !$itemInfo->is_sell,
-                noweight: !$itemInfo->is_weight,
-                nosell: !$itemInfo->is_sell,
+                nogive: ! $itemInfo->is_sell,
+                noweight: ! $itemInfo->is_weight,
+                nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo),
             ));
         }

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Modules\Structure\Blacksmith\Application\DTOs\GemActionDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetGemsPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\InsertGem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\OpenSocket;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RemoveGem;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

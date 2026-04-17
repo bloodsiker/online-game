@@ -6,7 +6,7 @@ namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CancelOrder
@@ -23,6 +23,7 @@ class CancelOrder
 
             if (! $order instanceof AuctionOrder) {
                 $result = ['ok' => false, 'message' => 'Заявка не найдена.'];
+
                 return;
             }
 

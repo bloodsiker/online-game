@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Race;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -22,7 +21,7 @@ class RaceController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $race = new Race();
+            $race = new Race;
             $this->fillRace($race, $request);
             $race->save();
 
@@ -46,11 +45,11 @@ class RaceController extends Controller
 
     private function fillRace(Race $race, Request $request): void
     {
-        $race->name       = $request->input('name');
-        $race->strength     = (float) $request->input('strength', 0);
-        $race->agility      = (float) $request->input('agility', 0);
-        $race->intuition    = (float) $request->input('intuition', 0);
-        $race->wisdom       = (float) $request->input('wisdom', 0);
+        $race->name = $request->input('name');
+        $race->strength = (float) $request->input('strength', 0);
+        $race->agility = (float) $request->input('agility', 0);
+        $race->intuition = (float) $request->input('intuition', 0);
+        $race->wisdom = (float) $request->input('wisdom', 0);
         $race->intelligence = (float) $request->input('intelligence', 0);
         $race->free_stats = (int) $request->input('free_stats', 0);
     }

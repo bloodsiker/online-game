@@ -4,8 +4,8 @@ namespace App\Services\Combat\Strategies;
 
 use App\Models\Monster\Monster;
 use App\Models\Skill;
-use App\Services\Combat\HitCalculator;
 use App\Services\Combat\FightHitInterface;
+use App\Services\Combat\HitCalculator;
 
 class FistAttackStrategy implements AttackStrategyInterface
 {

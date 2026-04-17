@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\BattleStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Battle\Battle;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class DashboardController extends Controller
 {

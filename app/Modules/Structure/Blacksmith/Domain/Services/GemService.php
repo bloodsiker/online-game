@@ -7,8 +7,8 @@ namespace App\Modules\Structure\Blacksmith\Domain\Services;
 use App\Enums\ShareItemType;
 use App\Models\Item\Item;
 use App\Models\Item\ItemGem;
-use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GemService
 {

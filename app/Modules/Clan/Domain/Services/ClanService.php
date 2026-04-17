@@ -13,7 +13,7 @@ use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\Clan\Domain\Repositories\ClanRepositoryInterface;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\UploadedFile;
 
 readonly class ClanService
@@ -25,30 +25,30 @@ readonly class ClanService
         $iconPath = $icon->store('clan_icons', 'public');
 
         $clan = $this->clanRepository->create([
-            'name'     => $name,
+            'name' => $name,
             'owner_id' => $user->id,
-            'icon'     => $iconPath,
+            'icon' => $iconPath,
         ]);
 
         $leaderRole = ClanRole::create([
-            'clan_id'     => $clan->id,
-            'name'        => 'Глава клана',
+            'clan_id' => $clan->id,
+            'name' => 'Глава клана',
             'permissions' => ClanPermission::allBits(),
-            'is_leader'   => true,
-            'is_default'  => true,
+            'is_leader' => true,
+            'is_default' => true,
         ]);
 
         foreach (['Офицер', 'Рядовой', 'Новичок'] as $roleName) {
             ClanRole::create([
-                'clan_id'     => $clan->id,
-                'name'        => $roleName,
+                'clan_id' => $clan->id,
+                'name' => $roleName,
                 'permissions' => ClanPermission::CHAT->bit(),
-                'is_leader'   => false,
-                'is_default'  => true,
+                'is_leader' => false,
+                'is_default' => true,
             ]);
         }
 
-        $member          = new ClanMember();
+        $member = new ClanMember;
         $member->clan_id = $clan->id;
         $member->user_id = $user->id;
         $member->role_id = $leaderRole->id;
@@ -70,7 +70,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::INVITE)) {
+        if (! $membership->role->hasPermission(ClanPermission::INVITE)) {
             throw new \RuntimeException('У вас нет прав приглашать игроков в клан.');
         }
 
@@ -95,7 +95,7 @@ readonly class ClanService
         ClanJoinRequest::create([
             'clan_id' => $membership->clan_id,
             'user_id' => $target->id,
-            'status'  => ClanJoinRequestStatus::INVITE,
+            'status' => ClanJoinRequestStatus::INVITE,
         ]);
 
         $this->log(
@@ -114,7 +114,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::INVITE)) {
+        if (! $membership->role->hasPermission(ClanPermission::INVITE)) {
             throw new \RuntimeException('У вас нет прав приглашать игроков в клан.');
         }
 
@@ -161,7 +161,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::KICK)) {
+        if (! $membership->role->hasPermission(ClanPermission::KICK)) {
             throw new \RuntimeException('У вас нет прав исключать игроков из клана.');
         }
 
@@ -203,13 +203,13 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_RANKS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_RANKS)) {
             throw new \RuntimeException('У вас нет прав изменять звания участников.');
         }
 
         $clanId = $membership->clan_id;
 
-        $clanRoles   = ClanRole::where('clan_id', $clanId)->get()->keyBy('id');
+        $clanRoles = ClanRole::where('clan_id', $clanId)->get()->keyBy('id');
         $clanRoleIds = $clanRoles->keys()->all();
 
         $leaderRole = $clanRoles->first(fn ($r) => $r->is_leader);
@@ -261,7 +261,7 @@ readonly class ClanService
             $roleId = (int) ($data['grade'] ?? 0);
             $userId = (int) $userId;
 
-            if (!in_array($roleId, $clanRoleIds, true)) {
+            if (! in_array($roleId, $clanRoleIds, true)) {
                 continue;
             }
 
@@ -287,15 +287,15 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
             throw new \RuntimeException('У вас нет прав управлять ролями.');
         }
 
         return ClanRole::create([
-            'clan_id'     => $membership->clan_id,
-            'name'        => mb_substr($name, 0, 16),
+            'clan_id' => $membership->clan_id,
+            'name' => mb_substr($name, 0, 16),
             'permissions' => ClanPermission::CHAT->bit(),
-            'is_leader'   => false,
+            'is_leader' => false,
         ]);
     }
 
@@ -310,7 +310,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
             throw new \RuntimeException('У вас нет прав изменять полномочия.');
         }
 
@@ -335,7 +335,7 @@ readonly class ClanService
             }
 
             $role->update([
-                'name'        => mb_substr($data['title'] ?? $role->name, 0, 16),
+                'name' => mb_substr($data['title'] ?? $role->name, 0, 16),
                 'permissions' => $permissions,
             ]);
         }
@@ -360,7 +360,7 @@ readonly class ClanService
             throw new \RuntimeException('Нельзя удалить стандартную роль клана.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_PERMS)) {
             throw new \RuntimeException('У вас нет прав управлять ролями.');
         }
 
@@ -386,7 +386,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
             throw new \RuntimeException('У вас нет прав изменять описание клана.');
         }
 
@@ -403,7 +403,7 @@ readonly class ClanService
             throw new \RuntimeException('Вы не состоите в клане.');
         }
 
-        if (!$membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
+        if (! $membership->role->hasPermission(ClanPermission::CHANGE_NEWS)) {
             throw new \RuntimeException('У вас нет прав изменять новости клана.');
         }
 
@@ -434,7 +434,7 @@ readonly class ClanService
         ClanLog::create([
             'clan_id' => $clanId,
             'user_id' => $userId,
-            'action'  => $action,
+            'action' => $action,
             'details' => $details,
         ]);
     }

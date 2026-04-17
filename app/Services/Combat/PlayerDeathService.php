@@ -33,7 +33,7 @@ readonly class PlayerDeathService
         $attackedPlayer->status = 0;
         $attackedPlayer->save();
 
-        return (new FightDTO())
+        return (new FightDTO)
             ->setBattle($battle)
             ->setIsPlayerDead(true)
             ->setBattleRound($round)

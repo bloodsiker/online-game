@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
 use App\Modules\Structure\Bank\Domain\Services\BankAccountGenerator;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class EnsureBankAccount
 {

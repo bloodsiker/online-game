@@ -21,9 +21,9 @@ class PlayerServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/Presentation/Views', 'player');
+        $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'player');
 
         Route::middleware(['web'])
-            ->group(__DIR__ . '/Presentation/Http/Route/web.php');
+            ->group(__DIR__.'/Presentation/Http/Route/web.php');
     }
 }

@@ -25,7 +25,7 @@ class SurvivalDungeonStrategy implements DungeonStrategyInterface
 
     public function onFloorComplete(DungeonRun $run, DungeonRunFloor $completedFloor): ?int
     {
-        $meta    = $run->metadata ?? [];
+        $meta = $run->metadata ?? [];
         $survived = ($meta['waves_survived'] ?? 0) + 1;
         $run->update(['metadata' => array_merge($meta, ['waves_survived' => $survived])]);
 

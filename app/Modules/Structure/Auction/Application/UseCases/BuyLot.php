@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
+use App\Models\Structure;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Models\AuctionHistory;
-use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Models\Structure;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class BuyLot
@@ -31,24 +31,27 @@ class BuyLot
 
             if (! $lot instanceof Auction) {
                 $result = ['ok' => false, 'message' => 'Этого предмета уже нет в продаже'];
+
                 return;
             }
 
             if ($lot->user_id === $user->id) {
                 $result = ['ok' => false, 'message' => 'Нельзя купить собственный лот.'];
+
                 return;
             }
 
             $freshUser = User::lockForUpdate()->find($user->id);
             if ($freshUser->money < $lot->price) {
                 $result = ['ok' => false, 'message' => 'Не достаточно монет для покупки.'];
+
                 return;
             }
 
             $freshUser->decrement('money', $lot->price);
 
             $shareItem = $lot->item->itemInfo;
-            $existing  = $this->findBackpackSlot($user->id, $shareItem->id);
+            $existing = $this->findBackpackSlot($user->id, $shareItem->id);
 
             if ($existing instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                 $existing->increment('count', $lot->count);
@@ -57,12 +60,12 @@ class BuyLot
             }
 
             AuctionHistory::create([
-                'buy_user_id'  => $user->id,
+                'buy_user_id' => $user->id,
                 'sell_user_id' => $lot->user_id,
                 'structure_id' => $lot->structure_id,
-                'item_id'      => $lot->item_id,
-                'count'        => $lot->count,
-                'price'        => $lot->price,
+                'item_id' => $lot->item_id,
+                'count' => $lot->count,
+                'price' => $lot->price,
             ]);
 
             $lot->delete();

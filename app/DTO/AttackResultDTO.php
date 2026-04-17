@@ -9,6 +9,7 @@ final class AttackResultDTO
     public function log(string $text): self
     {
         $this->logs[] = $text;
+
         return $this;
     }
 

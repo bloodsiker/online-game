@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Enums\ShareItemType;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
-use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class TakeClaim
@@ -25,11 +25,12 @@ class TakeClaim
 
             if (! $claim instanceof AuctionClaim) {
                 $result = ['ok' => false, 'message' => 'Предмет не найден.'];
+
                 return;
             }
 
             $shareItem = $claim->item->itemInfo;
-            $existing  = $this->findBackpackSlot($user->id, $shareItem->id);
+            $existing = $this->findBackpackSlot($user->id, $shareItem->id);
 
             if ($existing instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                 $existing->increment('count', $claim->count);

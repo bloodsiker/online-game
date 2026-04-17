@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Services;
 
-use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
-use App\Models\User;
+use App\Modules\Backpack\Domain\DTO\BackpackDTO;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemRequirementService;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -33,7 +33,7 @@ class BackpackService
     {
         $query = $this->getBaseQuery($user);
 
-        if (!empty($filters['sid'])) {
+        if (! empty($filters['sid'])) {
             $query->where('items.share_item_id', $filters['sid']);
         }
 

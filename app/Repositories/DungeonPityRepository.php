@@ -38,7 +38,7 @@ class DungeonPityRepository extends AbstractRepository
         DungeonPity::where('dungeon_id', $dungeonId)
             ->where('user_id', $userId)
             ->update([
-                'fail_count'   => 0,
+                'fail_count' => 0,
                 'last_pity_at' => now(),
             ]);
     }

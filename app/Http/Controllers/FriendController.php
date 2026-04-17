@@ -62,9 +62,9 @@ class FriendController extends Controller
     public function addFriend(Request $request): RedirectResponse
     {
         $player = auth()->user()->player;
-        $name   = trim((string) $request->input('name', ''));
+        $name = trim((string) $request->input('name', ''));
 
-        $target = Player::whereHas('user', fn($q) => $q->where('name', $name))->first();
+        $target = Player::whereHas('user', fn ($q) => $q->where('name', $name))->first();
 
         if (! $target) {
             return redirect()->back()->with('error', 'Персонаж не найден.');
@@ -86,8 +86,8 @@ class FriendController extends Controller
         PlayerRelationship::create([
             'player_id' => $player->id,
             'target_id' => $target->id,
-            'type'      => PlayerRelationshipType::FRIEND,
-            'status'    => 'pending',
+            'type' => PlayerRelationshipType::FRIEND,
+            'status' => 'pending',
         ]);
 
         return redirect()->back()->with('success', 'Запрос дружбы отправлен.');
@@ -135,9 +135,9 @@ class FriendController extends Controller
     public function addEnemy(Request $request): RedirectResponse
     {
         $player = auth()->user()->player;
-        $name   = trim((string) $request->input('name', ''));
+        $name = trim((string) $request->input('name', ''));
 
-        $target = Player::whereHas('user', fn($q) => $q->where('name', $name))->first();
+        $target = Player::whereHas('user', fn ($q) => $q->where('name', $name))->first();
 
         if (! $target || $target->id === $player->id) {
             return redirect()->back()->with('error', 'Персонаж не найден.');
@@ -146,7 +146,7 @@ class FriendController extends Controller
         PlayerRelationship::firstOrCreate([
             'player_id' => $player->id,
             'target_id' => $target->id,
-            'type'      => PlayerRelationshipType::ENEMY,
+            'type' => PlayerRelationshipType::ENEMY,
         ]);
 
         return redirect()->back()->with('success', 'Добавлен в список врагов.');
@@ -168,9 +168,9 @@ class FriendController extends Controller
     public function addIgnore(Request $request): RedirectResponse
     {
         $player = auth()->user()->player;
-        $name   = trim((string) $request->input('name', ''));
+        $name = trim((string) $request->input('name', ''));
 
-        $target = Player::whereHas('user', fn($q) => $q->where('name', $name))->first();
+        $target = Player::whereHas('user', fn ($q) => $q->where('name', $name))->first();
 
         if (! $target || $target->id === $player->id) {
             return redirect()->back()->with('error', 'Персонаж не найден.');
@@ -179,7 +179,7 @@ class FriendController extends Controller
         PlayerRelationship::firstOrCreate([
             'player_id' => $player->id,
             'target_id' => $target->id,
-            'type'      => PlayerRelationshipType::IGNORE,
+            'type' => PlayerRelationshipType::IGNORE,
         ]);
 
         return redirect()->back()->with('success', 'Игрок добавлен в игнор-лист.');

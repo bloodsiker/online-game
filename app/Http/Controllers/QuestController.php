@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Enums\QuestPlayerStatus;
 use App\Enums\QuestRewardType;
 use App\Enums\QuestType;
-use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Models\Npc;
 use App\Models\Player\PlayerLocationAccess;
 use App\Models\Quest\Quest;
@@ -16,10 +14,12 @@ use App\Models\Quest\QuestPlayer;
 use App\Models\Quest\QuestPlayerObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Quest\QuestStage;
+use App\Models\Reputation\ReputationTierQuest;
 use App\Models\Share\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Clan\Domain\Enums\ClanLogAction;
+use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Services\ChatService;
-use App\Models\Reputation\ReputationTierQuest;
 use App\Services\ReputationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -312,7 +312,7 @@ class QuestController extends Controller
                 if ($reputation) {
                     $pr = $this->reputationService->getOrCreate($player, $reputation);
                     $pr->update(['last_completed_at' => now()]);
-                    session()->forget('rep_offer_' . $player->id . '_' . $reputation->id);
+                    session()->forget('rep_offer_'.$player->id.'_'.$reputation->id);
                 }
             }
         }
@@ -347,7 +347,7 @@ class QuestController extends Controller
             foreach ($progress->quest->objectives->where('type', 'deliver') as $objective) {
                 $shareItem = ShareItem::find($objective->target_id);
                 if ($shareItem) {
-                    $acceptorUser = \App\Models\User::find($progress->user_id);
+                    $acceptorUser = \App\Modules\User\Infrastructure\Persistence\Models\User::find($progress->user_id);
                     if ($acceptorUser) {
                         $this->backpackService->removeItemByShareItem($acceptorUser, $shareItem, $objective->required_amount);
                     }

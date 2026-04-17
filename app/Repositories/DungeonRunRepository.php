@@ -45,9 +45,9 @@ class DungeonRunRepository extends AbstractRepository
     public function addParticipant(int $runId, int $userId): DungeonRunParticipant
     {
         return DungeonRunParticipant::create([
-            'run_id'  => $runId,
+            'run_id' => $runId,
             'user_id' => $userId,
-            'status'  => DungeonParticipantStatus::ACTIVE,
+            'status' => DungeonParticipantStatus::ACTIVE,
         ]);
     }
 
@@ -75,10 +75,10 @@ class DungeonRunRepository extends AbstractRepository
     public function log(int $runId, ?int $userId, string $event, ?array $payload = null): void
     {
         DungeonRunLog::create([
-            'run_id'     => $runId,
-            'user_id'    => $userId,
-            'event'      => $event,
-            'payload'    => $payload,
+            'run_id' => $runId,
+            'user_id' => $userId,
+            'event' => $event,
+            'payload' => $payload,
             'created_at' => now(),
         ]);
     }

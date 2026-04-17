@@ -19,10 +19,10 @@ class PlayerMagicSkillService
             ->where('magic_skill_id', $skillId)
             ->first();
 
-//        if ($this->isSkillOnCooldown($player, $playerSkill)) {
-//            $secondsLeft = $this->getSkillCooldownLeft($player, $playerSkill);
-//            throw new \DomainException("Перезарядка: ещё {$secondsLeft} сек.");
-//        }
+        //        if ($this->isSkillOnCooldown($player, $playerSkill)) {
+        //            $secondsLeft = $this->getSkillCooldownLeft($player, $playerSkill);
+        //            throw new \DomainException("Перезарядка: ещё {$secondsLeft} сек.");
+        //        }
 
         return $playerSkill;
     }
@@ -31,23 +31,23 @@ class PlayerMagicSkillService
     {
         return true;
 
-//        if ($skill->cooldown <= 0) {
-//            return false;
-//        }
-//
-//        $lastUsed = Cache::get("skill_cooldown:{$player->id}:{$skill->id}");
-//
-//        if (!$lastUsed) {
-//            return false;
-//        }
-//
-//        return now()->lt($lastUsed->addSeconds($skill->cooldown));
+        //        if ($skill->cooldown <= 0) {
+        //            return false;
+        //        }
+        //
+        //        $lastUsed = Cache::get("skill_cooldown:{$player->id}:{$skill->id}");
+        //
+        //        if (!$lastUsed) {
+        //            return false;
+        //        }
+        //
+        //        return now()->lt($lastUsed->addSeconds($skill->cooldown));
     }
 
     private function getSkillCooldownLeft(Player $player, Skill $skill): int
     {
         $lastUsed = Cache::get("skill_cooldown:{$player->id}:{$skill->id}");
-        if (!$lastUsed) {
+        if (! $lastUsed) {
             return 0;
         }
 
@@ -59,12 +59,12 @@ class PlayerMagicSkillService
      */
     public function applySkillCooldown(Player $player, MagicSkill $skill): void
     {
-//        if ($skill->cooldown > 0) {
-//            Cache::put(
-//                "skill_cooldown:{$player->id}:{$skill->id}",
-//                now(),
-//                $skill->cooldown
-//            );
-//        }
+        //        if ($skill->cooldown > 0) {
+        //            Cache::put(
+        //                "skill_cooldown:{$player->id}:{$skill->id}",
+        //                now(),
+        //                $skill->cooldown
+        //            );
+        //        }
     }
 }

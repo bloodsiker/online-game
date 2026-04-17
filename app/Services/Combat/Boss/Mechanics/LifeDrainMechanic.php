@@ -16,7 +16,7 @@ class LifeDrainMechanic extends BaseBossMechanic
 
         // Розраховуємо урон від висмоктування
         $baseDamage = ($monster->min_dmg + $monster->max_dmg) / 2;
-        $drainDamage = (int)(($baseDamage * $drainPercent) / 100);
+        $drainDamage = (int) (($baseDamage * $drainPercent) / 100);
 
         $player = $context->getPlayer();
         $actualDamage = max(1, $drainDamage - $player->getArmor());
@@ -42,6 +42,7 @@ class LifeDrainMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $percent = $this->getConfig('drain_percent', 20);
+
         return "Босс высасывает жизнь ({$percent}% от атаки)";
     }
 }

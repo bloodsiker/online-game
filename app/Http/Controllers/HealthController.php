@@ -17,7 +17,7 @@ class HealthController extends Controller
         $user = Auth::user();
         $structure = Structure::find($id);
 
-        if (!$structure instanceof Structure) {
+        if (! $structure instanceof Structure) {
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
@@ -29,18 +29,19 @@ class HealthController extends Controller
         $playerDecorator = $this->statService->resolve($resultDto->player);
 
         return view('health.heal', [
-            'structure'      => $structure,
-            'player'         => $resultDto->player,
-            'playerDecorator'=> $playerDecorator,
-            'healHp'         => $resultDto->hpHealed,
-            'healMp'         => $resultDto->mpHealed,
-            'buffs'          => $resultDto->buffs,
+            'structure' => $structure,
+            'player' => $resultDto->player,
+            'playerDecorator' => $playerDecorator,
+            'healHp' => $resultDto->hpHealed,
+            'healMp' => $resultDto->mpHealed,
+            'buffs' => $resultDto->buffs,
         ]);
     }
 
     private function redirectWithMessage(string $message): RedirectResponse
     {
         session()->flash('message', $message);
+
         return redirect()->back();
     }
 }

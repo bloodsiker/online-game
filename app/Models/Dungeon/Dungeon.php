@@ -12,27 +12,26 @@ use App\Models\Share\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Dungeon\DungeonReward;
 
 /**
- * @property int                 $id
- * @property string              $name
- * @property string|null         $description
- * @property int                 $tier
- * @property DungeonType         $type
- * @property int|null            $entry_share_item_id
- * @property int                 $max_players
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int $tier
+ * @property DungeonType $type
+ * @property int|null $entry_share_item_id
+ * @property int $max_players
  * @property DungeonCooldownType $cooldown_type
- * @property int                 $cooldown_seconds
- * @property int|null            $time_limit_seconds
- * @property int                 $min_level
- * @property bool                $is_active
- * @property int|null            $map_id
- * @property int|null            $entry_location_id
- * @property int|null            $first_location_id
- * @property int|null            $exit_location_id
- * @property int|null            $return_location_id
- * @property bool                $monster_respawn
+ * @property int $cooldown_seconds
+ * @property int|null $time_limit_seconds
+ * @property int $min_level
+ * @property bool $is_active
+ * @property int|null $map_id
+ * @property int|null $entry_location_id
+ * @property int|null $first_location_id
+ * @property int|null $exit_location_id
+ * @property int|null $return_location_id
+ * @property bool $monster_respawn
  * @property-read ShareItem|null     $entryItem
  * @property-read Map|null           $map
  * @property-read Location|null      $entryLocation
@@ -57,9 +56,9 @@ class Dungeon extends Model
     ];
 
     protected $casts = [
-        'type'            => DungeonType::class,
-        'cooldown_type'   => DungeonCooldownType::class,
-        'is_active'       => 'boolean',
+        'type' => DungeonType::class,
+        'cooldown_type' => DungeonCooldownType::class,
+        'is_active' => 'boolean',
         'monster_respawn' => 'boolean',
     ];
 

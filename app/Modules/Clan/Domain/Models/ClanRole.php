@@ -16,8 +16,8 @@ class ClanRole extends Model
     protected $fillable = ['name', 'permissions', 'clan_id', 'is_leader', 'is_default'];
 
     protected $casts = [
-        'is_leader'   => 'boolean',
-        'is_default'  => 'boolean',
+        'is_leader' => 'boolean',
+        'is_default' => 'boolean',
         'permissions' => 'integer',
     ];
 

@@ -29,6 +29,7 @@ class SummonMinionsMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $count = $this->getConfig('count', 2);
+
         return "Босс вызвал {$count} юнитов в помощь";
     }
 }

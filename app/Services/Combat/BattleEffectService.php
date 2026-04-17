@@ -38,17 +38,18 @@ class BattleEffectService
         if ($existing) {
             $existing->stacks = max($existing->stacks, (int) $effect->duration);
             $existing->save();
+
             return;
         }
 
         MonsterActiveEffect::create([
             'location_monster_id' => $locMonster->id,
-            'effect_id'           => $effect->id,
-            'battle_id'           => $battle->id,
-            'type'                => $type,
-            'applied_at'          => now(),
-            'stacks'              => (int) $effect->duration,
-            'current_value'       => (float) $effect->value_per_tick,
+            'effect_id' => $effect->id,
+            'battle_id' => $battle->id,
+            'type' => $type,
+            'applied_at' => now(),
+            'stacks' => (int) $effect->duration,
+            'current_value' => (float) $effect->value_per_tick,
         ]);
     }
 
@@ -79,16 +80,17 @@ class BattleEffectService
             if ($existing) {
                 $existing->stacks = max($existing->stacks ?? 0, (int) $effect->duration);
                 $existing->save();
+
                 return;
             }
 
             PlayerActiveEffect::create([
-                'player_id'     => $player->id,
-                'effect_id'     => $effect->id,
-                'battle_id'     => $battle->id,
-                'type'          => $type,
-                'applied_at'    => now(),
-                'stacks'        => (int) $effect->duration,
+                'player_id' => $player->id,
+                'effect_id' => $effect->id,
+                'battle_id' => $battle->id,
+                'type' => $type,
+                'applied_at' => now(),
+                'stacks' => (int) $effect->duration,
                 'current_value' => (float) $effect->value_per_tick,
             ]);
         } else {
@@ -100,17 +102,18 @@ class BattleEffectService
             if ($existing) {
                 $existing->expires_at = $expiresAt;
                 $existing->save();
+
                 return;
             }
 
             PlayerActiveEffect::create([
-                'player_id'     => $player->id,
-                'effect_id'     => $effect->id,
-                'battle_id'     => null,
-                'type'          => $type,
-                'applied_at'    => now(),
-                'expires_at'    => $expiresAt,
-                'stacks'        => 0,
+                'player_id' => $player->id,
+                'effect_id' => $effect->id,
+                'battle_id' => null,
+                'type' => $type,
+                'applied_at' => now(),
+                'expires_at' => $expiresAt,
+                'stacks' => 0,
                 'current_value' => (float) $effect->value_per_tick,
             ]);
         }
@@ -134,15 +137,16 @@ class BattleEffectService
         if ($existing) {
             $existing->stacks = max($existing->stacks, $stacks);
             $existing->save();
+
             return;
         }
 
         PlayerActiveEffect::create([
-            'player_id'     => $player->id,
-            'battle_id'     => $battle->id,
-            'type'          => $type,
-            'applied_at'    => now(),
-            'stacks'        => $stacks,
+            'player_id' => $player->id,
+            'battle_id' => $battle->id,
+            'type' => $type,
+            'applied_at' => now(),
+            'stacks' => $stacks,
             'current_value' => $value,
         ]);
 
@@ -179,6 +183,7 @@ class BattleEffectService
                     ));
                     $effect->save();
                 }
+
                 continue;
             }
 
@@ -195,6 +200,7 @@ class BattleEffectService
 
                 $effect->stacks--;
                 $effect->stacks <= 0 ? $effect->delete() : $effect->save();
+
                 continue;
             }
 
@@ -248,6 +254,7 @@ class BattleEffectService
                     ));
                     $effect->save();
                 }
+
                 continue;
             }
 

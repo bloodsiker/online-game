@@ -2,7 +2,6 @@
 
 namespace App\DTO;
 
-
 use App\Models\MagicSkill\Effect;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Share\ShareItem;
@@ -12,21 +11,30 @@ use Illuminate\Support\Collection;
 final class FightHitDTO
 {
     protected int $damage;
+
     protected bool $dodge = false;
+
     protected bool $critical = false;
+
     protected ?ShareItem $weapon = null;
+
     protected string $weaponName;
+
     protected ?Skill $skill = null;
+
     protected bool $cantCast = false;
+
     protected ?string $message = null;
+
     protected ?MagicSkill $magicSkill = null;
 
     protected Collection $appliedEffects;
+
     protected Collection $selfAppliedEffects;
 
     public function __construct()
     {
-        $this->appliedEffects     = collect();
+        $this->appliedEffects = collect();
         $this->selfAppliedEffects = collect();
     }
 

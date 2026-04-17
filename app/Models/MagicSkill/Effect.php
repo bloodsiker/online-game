@@ -47,10 +47,10 @@ class Effect extends Model
         return $this->hasMany(PlayerEffect::class);
     }
 
-//    public function monsters(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Monster::class, 'monster_has_effects')
-//            ->withPivot('chance')
-//            ->withTimestamps();
-//    }
+    //    public function monsters(): BelongsToMany
+    //    {
+    //        return $this->belongsToMany(Monster::class, 'monster_has_effects')
+    //            ->withPivot('chance')
+    //            ->withTimestamps();
+    //    }
 }

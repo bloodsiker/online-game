@@ -88,28 +88,28 @@ class Monster extends Model implements FightHitInterface
      */
     public function getCombatClass(): CombatClass
     {
-        $armorScore = $this->armor    / 50;
-        $dodgeScore = $this->dodge    / 20;
-        $critScore  = $this->critical / 20;
+        $armorScore = $this->armor / 50;
+        $dodgeScore = $this->dodge / 20;
+        $critScore = $this->critical / 20;
 
-        return match(true) {
+        return match (true) {
             $armorScore >= $dodgeScore && $armorScore >= $critScore => CombatClass::TANK,
-            $dodgeScore >= $critScore                               => CombatClass::DODGE,
-            default                                                 => CombatClass::CRIT,
+            $dodgeScore >= $critScore => CombatClass::DODGE,
+            default => CombatClass::CRIT,
         };
     }
 
     public function getClassDominance(): float
     {
-        $armorScore = $this->armor    / 50;
-        $dodgeScore = $this->dodge    / 20;
-        $critScore  = $this->critical / 20;
-        $total      = max(0.001, $armorScore + $dodgeScore + $critScore);
+        $armorScore = $this->armor / 50;
+        $dodgeScore = $this->dodge / 20;
+        $critScore = $this->critical / 20;
+        $total = max(0.001, $armorScore + $dodgeScore + $critScore);
 
-        return match($this->getCombatClass()) {
-            CombatClass::TANK  => $armorScore / $total,
+        return match ($this->getCombatClass()) {
+            CombatClass::TANK => $armorScore / $total,
             CombatClass::DODGE => $dodgeScore / $total,
-            CombatClass::CRIT  => $critScore  / $total,
+            CombatClass::CRIT => $critScore / $total,
         };
     }
 }

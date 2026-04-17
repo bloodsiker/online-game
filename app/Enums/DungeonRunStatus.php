@@ -6,14 +6,14 @@ namespace App\Enums;
 
 enum DungeonRunStatus: string
 {
-    case ACTIVE    = 'active';
+    case ACTIVE = 'active';
     case COMPLETED = 'completed';
-    case FAILED    = 'failed';
+    case FAILED = 'failed';
     case ABANDONED = 'abandoned';
 
     public function isTerminal(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::COMPLETED, self::FAILED, self::ABANDONED => true,
             self::ACTIVE => false,
         };
@@ -21,10 +21,10 @@ enum DungeonRunStatus: string
 
     public function label(): string
     {
-        return match($this) {
-            self::ACTIVE    => 'Активный',
+        return match ($this) {
+            self::ACTIVE => 'Активный',
             self::COMPLETED => 'Пройден',
-            self::FAILED    => 'Провалено',
+            self::FAILED => 'Провалено',
             self::ABANDONED => 'Заброшен',
         };
     }

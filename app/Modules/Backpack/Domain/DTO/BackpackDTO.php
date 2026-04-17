@@ -37,91 +37,91 @@ final class BackpackDTO
 
     public function hasWeapon(): bool
     {
-        return $this->items->has( 'weapon');
+        return $this->items->has('weapon');
     }
 
     public function getWeapon(): Collection
     {
-        return $this->items->get( 'weapon');
+        return $this->items->get('weapon');
     }
 
     public function hasBag(): bool
     {
-        return $this->items->has( 'bag');
+        return $this->items->has('bag');
     }
 
     public function getBag(): Collection
     {
-        return $this->items->get( 'bag');
+        return $this->items->get('bag');
     }
 
     public function hasBelt(): bool
     {
-        return $this->items->has( 'belt');
+        return $this->items->has('belt');
     }
 
     public function getBelt(): Collection
     {
-        return $this->items->get( 'belt');
+        return $this->items->get('belt');
     }
 
     public function hasShield(): bool
     {
-        return $this->items->has( 'shield');
+        return $this->items->has('shield');
     }
 
     public function getShield(): Collection
     {
-        return $this->items->get( 'shield');
+        return $this->items->get('shield');
     }
 
     public function hasArmor(): bool
     {
-        return $this->items->has( 'armor');
+        return $this->items->has('armor');
     }
 
     public function getArmor(): Collection
     {
-        return $this->items->get( 'armor');
+        return $this->items->get('armor');
     }
 
     public function hasPotion(): bool
     {
-        return $this->items->has( 'potion');
+        return $this->items->has('potion');
     }
 
     public function getPotion(): Collection
     {
-        return $this->items->get( 'potion');
+        return $this->items->get('potion');
     }
 
     public function hasResource(): bool
     {
-        return $this->items->has( 'resource');
+        return $this->items->has('resource');
     }
 
     public function getResource(): Collection
     {
-        return $this->items->get( 'resource');
+        return $this->items->get('resource');
     }
 
     public function hasScroll(): bool
     {
-        return $this->items->has( 'scroll');
+        return $this->items->has('scroll');
     }
 
     public function getScroll(): Collection
     {
-        return $this->items->get( 'scroll');
+        return $this->items->get('scroll');
     }
 
     public function hasRecipe(): bool
     {
-        return $this->items->has( 'recipe');
+        return $this->items->has('recipe');
     }
 
     public function getRecipe(): Collection
     {
-        return $this->items->get( 'recipe');
+        return $this->items->get('recipe');
     }
 }

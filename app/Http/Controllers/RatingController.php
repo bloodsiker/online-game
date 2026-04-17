@@ -13,41 +13,41 @@ class RatingController extends Controller
 {
     public function index(Request $request)
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $player = $user->player;
 
         $menu = [
             'level' => [
-                'title'  => 'По уровню',
-                'name'   => 'Опыт',
+                'title' => 'По уровню',
+                'name' => 'Опыт',
                 'column' => 'exp',
             ],
             'victories' => [
-                'title'  => 'По победам',
-                'name'   => 'Победы',
+                'title' => 'По победам',
+                'name' => 'Победы',
                 'column' => 'victory',
             ],
             'deaths' => [
-                'title'  => 'По поражениям',
-                'name'   => 'Поражения',
+                'title' => 'По поражениям',
+                'name' => 'Поражения',
                 'column' => 'death',
             ],
             'wealth' => [
-                'title'  => 'По богатству',
-                'name'   => 'Монеты',
+                'title' => 'По богатству',
+                'name' => 'Монеты',
                 'column' => 'user.money',
             ],
         ];
 
         foreach (Skill::orderBy('id')->get() as $skill) {
-            $menu['skill_' . $skill->id] = [
-                'title'  => $skill->name,
-                'name'   => 'Уровень навыка',
+            $menu['skill_'.$skill->id] = [
+                'title' => $skill->name,
+                'name' => 'Уровень навыка',
                 'column' => 'lvl',
             ];
         }
 
-        $type          = request('type', array_key_first($menu));
+        $type = request('type', array_key_first($menu));
         $isSkillRating = str_starts_with($type, 'skill_');
 
         if (! array_key_exists($type, $menu)) {
@@ -67,12 +67,12 @@ class RatingController extends Controller
 
             $query = match ($type) {
                 'victories' => $query->orderByDesc('victory'),
-                'deaths'    => $query->orderByDesc('death'),
-                'wealth'    => $query
+                'deaths' => $query->orderByDesc('death'),
+                'wealth' => $query
                     ->join('users', 'players.user_id', '=', 'users.id')
                     ->orderByDesc('users.money')
                     ->select('players.*'),
-                default     => $query->orderByDesc('lvl')->orderByDesc('exp'),
+                default => $query->orderByDesc('lvl')->orderByDesc('exp'),
             };
 
             $players = $query->paginate(40)->withQueryString();
@@ -90,9 +90,9 @@ class RatingController extends Controller
             return response()->json(['error' => 'Введите ник игрока.']);
         }
 
-        $perPage  = 40;
+        $perPage = 40;
         $position = null;
-        $chunk    = 0;
+        $chunk = 0;
 
         if (str_starts_with($type, 'skill_')) {
             $skillId = (int) str_replace('skill_', '', $type);
@@ -106,6 +106,7 @@ class RatingController extends Controller
                         $chunk++;
                         if (mb_strtolower($item->player->user->name ?? '') === mb_strtolower($nick)) {
                             $position = $chunk;
+
                             return false;
                         }
                     }
@@ -115,12 +116,12 @@ class RatingController extends Controller
 
             $query = match ($type) {
                 'victories' => $query->orderByDesc('victory'),
-                'deaths'    => $query->orderByDesc('death'),
-                'wealth'    => $query
+                'deaths' => $query->orderByDesc('death'),
+                'wealth' => $query
                     ->join('users', 'players.user_id', '=', 'users.id')
                     ->orderByDesc('users.money')
                     ->select('players.*'),
-                default     => $query->orderByDesc('lvl')->orderByDesc('exp'),
+                default => $query->orderByDesc('lvl')->orderByDesc('exp'),
             };
 
             $query->chunk(200, function ($players) use ($nick, &$position, &$chunk) {
@@ -128,6 +129,7 @@ class RatingController extends Controller
                     $chunk++;
                     if (mb_strtolower($player->user->name ?? '') === mb_strtolower($nick)) {
                         $position = $chunk;
+
                         return false;
                     }
                 }

@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Share\ShareItem;
+use App\Models\Location\Location;
 use App\Models\Share\ShareAction;
+use App\Models\Share\ShareItem;
 use App\Models\Share\ShareStructureCategory;
 use App\Models\Shop\ShopItem;
-use App\Models\Location\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,13 +19,21 @@ class Structure extends Model
     use HasFactory;
 
     public const TYPE_SHOP = 'shop';
+
     public const TYPE_AUCTION = 'auction';
+
     public const TYPE_HEAL = 'heal';
+
     public const TYPE_WAREHOUSE = 'warehouse';
+
     public const TYPE_CLAN_WAREHOUSE = 'clan_warehouse';
+
     public const TYPE_BANK = 'bank';
+
     public const TYPE_CLAN_BANK = 'clan_bank';
+
     public const TYPE_BLACKSMITH = 'blacksmith';
+
     public const TYPE_EXCHANGE = 'exchange';
 
     public const TYPES = [
@@ -63,7 +71,7 @@ class Structure extends Model
 
     public function shopItems(): HasMany
     {
-//        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
+        //        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
         return $this->hasMany(ShopItem::class);
     }
 
@@ -81,7 +89,7 @@ class Structure extends Model
 
     public function exchangeItems(): HasMany
     {
-//        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
+        //        return $this->belongsToMany(ShareItem::class, 'shop_items', 'structure_id', 'share_item_id');
         return $this->hasMany(Exchange::class);
     }
 

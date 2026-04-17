@@ -48,7 +48,7 @@ class AuctionController extends Controller
 
     public function index(int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::find($id);
 
         if (! $auction) {
@@ -62,7 +62,7 @@ class AuctionController extends Controller
 
     public function myLot(int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::find($id);
 
         if (! $auction) {
@@ -76,7 +76,7 @@ class AuctionController extends Controller
 
     public function myLotEdit(int $id, int $slotId): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::find($id);
 
         if (! $auction) {
@@ -90,7 +90,7 @@ class AuctionController extends Controller
 
     public function myLotCancel(int $id, int $slotId): RedirectResponse
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::find($id);
 
         if (! $auction) {
@@ -105,7 +105,7 @@ class AuctionController extends Controller
 
     public function newLot(Request $request, int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::find($id);
 
         if (! $auction) {
@@ -128,13 +128,13 @@ class AuctionController extends Controller
     public function newLotSave(Request $request, int $id): RedirectResponse
     {
         $data = $request->validate([
-            'form.item_id'      => 'required|integer',
-            'form.amount'       => 'required|integer|min:1',
-            'form.price'        => 'required|integer|min:1',
+            'form.item_id' => 'required|integer',
+            'form.amount' => 'required|integer|min:1',
+            'form.price' => 'required|integer|min:1',
             'form.is_anonymous' => 'nullable|boolean',
         ]);
 
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->createLot->execute(
@@ -153,7 +153,7 @@ class AuctionController extends Controller
 
     public function buyItem(Request $request, int $id, int $itemId): RedirectResponse
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->buyLot->execute($user, $auction, $itemId);
@@ -183,7 +183,7 @@ class AuctionController extends Controller
 
     public function exchange(Request $request, int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $filter = new ExchangeFilterDTO(
@@ -194,20 +194,20 @@ class AuctionController extends Controller
             countMax: $request->filled('filter.count_max') ? (int) $request->input('filter.count_max') : null,
         );
 
-        $orders     = $this->getExchangeOrders->execute($auction->id, $user->id, $filter);
-        $filterRaw  = $request->input('filter', []);
+        $orders = $this->getExchangeOrders->execute($auction->id, $user->id, $filter);
+        $filterRaw = $request->input('filter', []);
 
         return view('auction::exchange', [
             'auction' => $auction,
-            'user'    => $user,
-            'orders'  => $orders,
-            'filter'  => $filterRaw,
+            'user' => $user,
+            'orders' => $orders,
+            'filter' => $filterRaw,
         ]);
     }
 
     public function myOrders(int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $orders = $this->getMyOrders->execute($auction->id, $user->id);
@@ -217,7 +217,7 @@ class AuctionController extends Controller
 
     public function newOrder(Request $request, int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $selectedItem = null;
@@ -236,12 +236,12 @@ class AuctionController extends Controller
     {
         $data = $request->validate([
             'form.share_item_id' => 'required|integer',
-            'form.count'         => 'required|integer|min:1',
-            'form.price'         => 'required|integer|min:1',
-            'form.is_anonymous'  => 'nullable|boolean',
+            'form.count' => 'required|integer|min:1',
+            'form.price' => 'required|integer|min:1',
+            'form.is_anonymous' => 'nullable|boolean',
         ]);
 
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->createOrder->execute(
@@ -260,7 +260,7 @@ class AuctionController extends Controller
 
     public function cancelOrder(int $id, int $orderId): RedirectResponse
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->cancelOrder->execute($user, $orderId);
@@ -273,7 +273,7 @@ class AuctionController extends Controller
     {
         $data = $request->validate(['count' => 'nullable|integer|min:1']);
 
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->fulfillOrder->execute($user, $auction, $orderId, (int) ($data['count'] ?? 1));
@@ -284,7 +284,7 @@ class AuctionController extends Controller
 
     public function claims(int $id): mixed
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $claims = $this->getClaims->execute($auction->id, $user->id);
@@ -294,7 +294,7 @@ class AuctionController extends Controller
 
     public function claimTake(int $id, int $claimId): RedirectResponse
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
         $result = $this->takeClaim->execute($user, $claimId);
@@ -308,6 +308,7 @@ class AuctionController extends Controller
     private function redirectWithMessage(string $message): RedirectResponse
     {
         session()->flash('message', $message);
+
         return redirect()->back();
     }
 }

@@ -5,8 +5,6 @@ namespace App\Listeners;
 use App\Events\PlayerChangeStat;
 use App\Events\PlayerLeveledUp;
 use App\Models\Experience;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class RecalculatePlayerStats
 {
@@ -32,10 +30,10 @@ class RecalculatePlayerStats
         $player->exp_diff = $experience->exp_diff;
         $player->free_stats += $race->free_stats;
 
-        $player->strength     = $player->strength     + $race->strength;
-        $player->intuition    = $player->intuition    + $race->intuition;
-        $player->agility      = $player->agility      + $race->agility;
-        $player->wisdom       = $player->wisdom       + $race->wisdom;
+        $player->strength = $player->strength + $race->strength;
+        $player->intuition = $player->intuition + $race->intuition;
+        $player->agility = $player->agility + $race->agility;
+        $player->wisdom = $player->wisdom + $race->wisdom;
         $player->intelligence = $player->intelligence + $race->intelligence;
 
         $player->save();

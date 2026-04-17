@@ -15,19 +15,21 @@ readonly class BossShieldService
         $metadata = $battle->boss_metadata ?? [];
         $shield = $metadata['shield'] ?? null;
 
-        if (!$shield) {
+        if (! $shield) {
             return false;
         }
 
         // Перевіряємо чи не закінчився час дії
         if ($shield['expires_at_turn'] < $battle->rounds) {
             $this->removeShield($battle);
+
             return false;
         }
 
         // Перевіряємо чи щит не зламано
         if ($shield['hp'] <= 0) {
             $this->removeShield($battle);
+
             return false;
         }
 
@@ -40,7 +42,7 @@ readonly class BossShieldService
      */
     public function damageShield(Battle $battle, int $damage, AttackResultDTO $result): int
     {
-        if (!$this->hasActiveShield($battle)) {
+        if (! $this->hasActiveShield($battle)) {
             return $damage;
         }
 
@@ -93,7 +95,7 @@ readonly class BossShieldService
      */
     public function updateShieldDuration(Battle $battle, AttackResultDTO $result): void
     {
-        if (!$this->hasActiveShield($battle)) {
+        if (! $this->hasActiveShield($battle)) {
             return;
         }
 
@@ -114,11 +116,12 @@ readonly class BossShieldService
      */
     public function getShieldInfo(Battle $battle): ?array
     {
-        if (!$this->hasActiveShield($battle)) {
+        if (! $this->hasActiveShield($battle)) {
             return null;
         }
 
         $metadata = $battle->boss_metadata ?? [];
+
         return $metadata['shield'] ?? null;
     }
 
@@ -129,7 +132,7 @@ readonly class BossShieldService
     {
         $shield = $this->getShieldInfo($battle);
 
-        if (!$shield) {
+        if (! $shield) {
             return null;
         }
 

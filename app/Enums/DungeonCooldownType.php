@@ -7,13 +7,13 @@ namespace App\Enums;
 enum DungeonCooldownType: string
 {
     case PERSONAL = 'personal';
-    case GLOBAL   = 'global';
+    case GLOBAL = 'global';
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PERSONAL => 'Личный',
-            self::GLOBAL   => 'Общий',
+            self::GLOBAL => 'Общий',
         };
     }
 }

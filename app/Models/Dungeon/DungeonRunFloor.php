@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int                   $id
- * @property int                   $run_id
- * @property int                   $floor_id
+ * @property int $id
+ * @property int $run_id
+ * @property int $floor_id
  * @property DungeonRunFloorStatus $status
- * @property int|null              $battle_id
- * @property \Carbon\Carbon        $started_at
- * @property \Carbon\Carbon|null   $floor_expires_at
- * @property \Carbon\Carbon|null   $completed_at
+ * @property int|null $battle_id
+ * @property \Carbon\Carbon $started_at
+ * @property \Carbon\Carbon|null $floor_expires_at
+ * @property \Carbon\Carbon|null $completed_at
  * @property-read DungeonRun   $run
  * @property-read DungeonFloor $floor
  * @property-read Battle|null  $battle
@@ -30,10 +30,10 @@ class DungeonRunFloor extends Model
     ];
 
     protected $casts = [
-        'status'           => DungeonRunFloorStatus::class,
-        'started_at'       => 'datetime',
+        'status' => DungeonRunFloorStatus::class,
+        'started_at' => 'datetime',
         'floor_expires_at' => 'datetime',
-        'completed_at'     => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public function run(): BelongsTo

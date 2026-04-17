@@ -32,7 +32,7 @@ readonly class FightOrchestrator
         return \DB::transaction(function () use ($id, $monsterId, $action) {
             $user = Auth::user();
             $player = $user->player;
-            $fightDTO = new FightDTO();
+            $fightDTO = new FightDTO;
 
             $battle = $this->battleRepository->getOneById($id);
             $battle->increment('rounds');
@@ -60,7 +60,7 @@ readonly class FightOrchestrator
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
 
-            $effectLog = new AttackResultDTO();
+            $effectLog = new AttackResultDTO;
 
             if ($isBoss) {
                 $this->shieldService->updateShieldDuration($battle, $effectLog);
@@ -74,7 +74,7 @@ readonly class FightOrchestrator
 
             $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
 
-            if (!$playerIsStunned) {
+            if (! $playerIsStunned) {
                 $roundLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
                 $effectLog->merge($roundLog);
             }
@@ -101,7 +101,7 @@ readonly class FightOrchestrator
             }
 
             // Атака монстра/боса (пропускаем если монстр оглушён)
-            if ($locationMonster->hp_now > 0 && !$monsterIsStunned) {
+            if ($locationMonster->hp_now > 0 && ! $monsterIsStunned) {
                 // BOSS: Використовуємо спеціальну атаку для боса
                 if ($isBoss) {
                     $this->monsterAttackService->executeBossAttack(
@@ -171,7 +171,7 @@ readonly class FightOrchestrator
 
     private function createRound(Battle $battle, int $userId, int $monsterId): BattleRound
     {
-        $battleRound = new BattleRound();
+        $battleRound = new BattleRound;
         $battleRound->battle_id = $battle->id;
         $battleRound->round_number = $battle->rounds;
         $battleRound->user_id = $userId;

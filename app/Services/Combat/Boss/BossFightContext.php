@@ -85,6 +85,7 @@ class BossFightContext
     public function getMechanicData(string $key, $default = null)
     {
         $metadata = $this->battle->boss_metadata ?? [];
+
         return $metadata['mechanic_data'][$key] ?? $default;
     }
 

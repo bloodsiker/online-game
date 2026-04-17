@@ -12,7 +12,7 @@ class BossMechanic extends Model
     protected $fillable = [
         'monster_id', 'mechanic_type', 'mechanic_class',
         'trigger_hp_percent', 'trigger_turn', 'config',
-        'priority', 'is_active'
+        'priority', 'is_active',
     ];
 
     protected $casts = [
@@ -31,7 +31,7 @@ class BossMechanic extends Model
      */
     public function getInstance(): BossMechanicInterface
     {
-        if (!$this->mechanic_type instanceof BossMechanicType) {
+        if (! $this->mechanic_type instanceof BossMechanicType) {
             throw new \InvalidArgumentException(
                 "Invalid mechanic type: {$this->mechanic_type}"
             );
@@ -39,7 +39,7 @@ class BossMechanic extends Model
 
         $class = $this->mechanic_type->getClass();
 
-        if (!class_exists($class)) {
+        if (! class_exists($class)) {
             throw new \RuntimeException(
                 "Mechanic class {$class} not found for type {$this->mechanic_type->value}"
             );

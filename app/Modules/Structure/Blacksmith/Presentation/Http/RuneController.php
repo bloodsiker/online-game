@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Modules\Structure\Blacksmith\Application\DTOs\RuneActionDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetRunesPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\ImbueRune;
 use App\Modules\Structure\Blacksmith\Application\UseCases\OpenRuneSlot;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RemoveRune;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RerollRune;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

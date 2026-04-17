@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\PremiumShop\Application\UseCases;
 
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\PremiumShop\Application\DTOs\PremiumShopResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ShopCartService;
 use Illuminate\Support\Facades\DB;
 
@@ -44,9 +44,9 @@ class PurchaseCart
                     $existing->save();
                 } else {
                     for ($i = 1; $i <= $itemInCart->quantity; $i++) {
-                        $item               = new Item;
+                        $item = new Item;
                         $item->share_item_id = $shareItem->id;
-                        $item->count_use    = $shareItem->count_use;
+                        $item->count_use = $shareItem->count_use;
                         $item->save();
 
                         $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
@@ -54,7 +54,7 @@ class PurchaseCart
                 }
             }
 
-            $user->money   -= $cart->getTotalPrice();
+            $user->money -= $cart->getTotalPrice();
             $user->diamond -= $cart->getTotalDiamond();
             $user->save();
 

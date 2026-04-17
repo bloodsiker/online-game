@@ -31,14 +31,14 @@ class MonsterOnLocationRepository extends AbstractRepository
 
     public function createMonsterOnLocation(Monster $monster, Location $location, ?int $dungeonSessionId = null, ?int $aggressionOverride = null): MonsterOnLocation
     {
-        $monsterOnLocation = new MonsterOnLocation();
-        $monsterOnLocation->monster_id         = $monster->id;
-        $monsterOnLocation->location_id        = $location->id;
+        $monsterOnLocation = new MonsterOnLocation;
+        $monsterOnLocation->monster_id = $monster->id;
+        $monsterOnLocation->location_id = $location->id;
         $monsterOnLocation->dungeon_session_id = $dungeonSessionId;
-        $monsterOnLocation->hp_now             = $monster->hp;
-        $monsterOnLocation->hp_max             = $monster->hp;
-        $monsterOnLocation->active             = 1;
-        $monsterOnLocation->aggression         = $aggressionOverride;
+        $monsterOnLocation->hp_now = $monster->hp;
+        $monsterOnLocation->hp_max = $monster->hp;
+        $monsterOnLocation->active = 1;
+        $monsterOnLocation->aggression = $aggressionOverride;
         $monsterOnLocation->save();
 
         return $monsterOnLocation;

@@ -2,8 +2,8 @@
 
 use App\Modules\Clan\Presentation\Http\ClanController;
 use App\Modules\Clan\Presentation\Http\ClanSkillController;
-use App\Modules\Clan\Presentation\Http\ClanWarehouseController;
 use App\Modules\Clan\Presentation\Http\ClanTreasuryController;
+use App\Modules\Clan\Presentation\Http\ClanWarehouseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/clan/member', [ClanController::class, 'member'])->name('clan.member');

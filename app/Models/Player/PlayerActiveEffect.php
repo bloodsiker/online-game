@@ -25,7 +25,7 @@ class PlayerActiveEffect extends Model
     protected $casts = [
         'applied_at' => 'datetime',
         'expires_at' => 'datetime',
-        'type'       => ActiveEffectType::class,
+        'type' => ActiveEffectType::class,
     ];
 
     public function player(): BelongsTo

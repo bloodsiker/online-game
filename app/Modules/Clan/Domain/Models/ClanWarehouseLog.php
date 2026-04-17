@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Domain\Models;
 
-use App\Modules\Clan\Domain\Enums\ClanWarehouseAction;
 use App\Models\Item\Item;
 use App\Models\Structure;
-use App\Models\User;
+use App\Modules\Clan\Domain\Enums\ClanWarehouseAction;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

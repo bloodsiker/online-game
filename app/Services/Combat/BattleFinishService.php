@@ -14,17 +14,16 @@ readonly class BattleFinishService
     public function __construct(
         private BattleRepository $battleRepository,
         private DropService $dropService,
-    ) {
-    }
+    ) {}
 
     public function checkAndFinish(Battle $battle, Location $location): object
     {
         $active = BattleDetail::where('battle_id', $battle->id)
-            ->whereHas('locationMonster', fn($q) => $q->where('active', 1))
+            ->whereHas('locationMonster', fn ($q) => $q->where('active', 1))
             ->exists();
 
         if ($active) {
-            return (object)['battle' => $battle];
+            return (object) ['battle' => $battle];
         }
 
         $battle->rounds++;
@@ -45,6 +44,6 @@ readonly class BattleFinishService
             }
         }
 
-        return (object)['battle' => $battle];
+        return (object) ['battle' => $battle];
     }
 }

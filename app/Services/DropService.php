@@ -9,7 +9,7 @@ use App\Models\Item\Item;
 use App\Models\Location\Location;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class DropService
 {
@@ -48,7 +48,7 @@ class DropService
                         $randomChance = mt_rand(0, 100000) / 1000;
                         if ($randomChance <= $item->pivot->drop_chance) {
                             $droppedItems[] = [
-                                'item'  => $item,
+                                'item' => $item,
                                 'count' => mt_rand($item->pivot->min_count, $item->pivot->max_count),
                             ];
                         }
@@ -57,9 +57,9 @@ class DropService
             }
 
             foreach ($droppedItems as $dropItem) {
-                $item = new Item();
+                $item = new Item;
                 $item->share_item_id = $dropItem['item']->id;
-                $item->count_use     = $dropItem['item']->count_use;
+                $item->count_use = $dropItem['item']->count_use;
                 $item->save();
 
                 $pivotData = ['count' => $dropItem['count']];

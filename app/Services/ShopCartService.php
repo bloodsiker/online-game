@@ -5,7 +5,7 @@ namespace App\Services;
 use App\DTO\ShopCartDTO;
 use App\Models\Shop\ShopCart;
 use App\Models\Shop\ShopItem;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ShopCartService
@@ -16,7 +16,7 @@ class ShopCartService
 //            ->where('is_active', true)
             ->firstOrFail();
 
-        return DB::transaction(function () use ($user, $shopItemId, $quantity, $shopItem) {
+        return DB::transaction(function () use ($user, $shopItemId, $quantity) {
             $cartItem = ShopCart::where('user_id', $user->id)
                 ->where('shop_item_id', $shopItemId)
                 ->first();
@@ -26,9 +26,9 @@ class ShopCartService
                 $cartItem->refresh();
             } else {
                 $cartItem = ShopCart::create([
-                    'user_id'       => $user->id,
-                    'shop_item_id'  => $shopItemId,
-                    'quantity'      => $quantity,
+                    'user_id' => $user->id,
+                    'shop_item_id' => $shopItemId,
+                    'quantity' => $quantity,
                 ]);
             }
 
@@ -45,6 +45,7 @@ class ShopCartService
         return DB::transaction(function () use ($cartItem, $quantity) {
             if ($quantity <= 0) {
                 $cartItem->delete();
+
                 return null;
             }
 
@@ -57,8 +58,8 @@ class ShopCartService
     public function removeItem(User $user, int $shopItemId): bool
     {
         return ShopCart::where('user_id', $user->id)
-                ->where('id', $shopItemId)
-                ->delete() > 0;
+            ->where('id', $shopItemId)
+            ->delete() > 0;
     }
 
     public function getCart(User $user, int $structureId): ShopCartDTO
@@ -79,9 +80,9 @@ class ShopCartService
         });
 
         return new ShopCartDTO(
-            items:        $cartItems,
+            items: $cartItems,
             totalDiamond: $totalDiamond,
-            totalPrice:   $totalPrice,
+            totalPrice: $totalPrice,
         );
     }
 

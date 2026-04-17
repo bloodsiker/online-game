@@ -11,7 +11,7 @@ use App\Models\Player\Player;
 class MagicBuffStrategy implements AttackStrategyInterface
 {
     public function __construct(
-        private Player     $playerModel,
+        private Player $playerModel,
         private MagicSkill $magicSkill,
     ) {}
 
@@ -19,15 +19,15 @@ class MagicBuffStrategy implements AttackStrategyInterface
     {
         if ($this->playerModel->mp_now < $this->magicSkill->mana_cost) {
             return [
-                (new FightHitDTO())
+                (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost))
+                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost)),
             ];
         }
 
         $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
 
-        $hit = (new FightHitDTO())
+        $hit = (new FightHitDTO)
             ->setDamage(0)
             ->setWeapon(null)
             ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))

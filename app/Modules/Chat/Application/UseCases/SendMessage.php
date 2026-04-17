@@ -7,8 +7,8 @@ namespace App\Modules\Chat\Application\UseCases;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
-use App\Models\User;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class SendMessage
 {
@@ -31,15 +31,15 @@ class SendMessage
         // Private message: prv[NAME] - text  OR  prv[NAME] text
         if (preg_match('/^prv\[([^\]]+)\]\s*-?\s*(.*)/is', $raw, $matches)) {
             $targetName = trim($matches[1]);
-            $text       = trim($matches[2]);
-            $target     = User::where('name', $targetName)->first();
+            $text = trim($matches[2]);
+            $target = User::where('name', $targetName)->first();
 
             return $this->repository->create([
-                'user_id'        => $sender->id,
-                'channel'        => ChatChannel::Private->value,
+                'user_id' => $sender->id,
+                'channel' => ChatChannel::Private->value,
                 'target_user_id' => $target?->id,
-                'message'        => $text ?: $raw,
-                'type'           => ChatMessageType::Private->value,
+                'message' => $text ?: $raw,
+                'type' => ChatMessageType::Private->value,
             ]);
         }
 
@@ -51,7 +51,7 @@ class SendMessage
             'user_id' => $sender->id,
             'channel' => $defaultChannel->value,
             'message' => $raw,
-            'type'    => $type->value,
+            'type' => $type->value,
         ];
 
         if ($defaultChannel === ChatChannel::Location) {

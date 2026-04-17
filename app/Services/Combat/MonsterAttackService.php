@@ -23,6 +23,7 @@ readonly class MonsterAttackService
 
         if ($hit->isDodge()) {
             $result->log(sprintf('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', $locationMonster->monster->name));
+
             return;
         }
 
@@ -60,15 +61,15 @@ readonly class MonsterAttackService
         $mechanicModifier = $metadata['attack_modifier'] ?? 0;
 
         if ($mechanicModifier > 0) {
-            $minDmg += (int)(($minDmg * $mechanicModifier) / 100);
-            $maxDmg += (int)(($maxDmg * $mechanicModifier) / 100);
+            $minDmg += (int) (($minDmg * $mechanicModifier) / 100);
+            $maxDmg += (int) (($maxDmg * $mechanicModifier) / 100);
         }
 
         // Отримуємо активні скіли з boss_metadata
         $availableSkills = $this->bossPhaseService->getPhaseSkills($battle);
 
         // З певною ймовірністю використовуємо спеціальний скіл
-        $useSpecialSkill = !empty($availableSkills) && random_int(1, 100) <= 35;
+        $useSpecialSkill = ! empty($availableSkills) && random_int(1, 100) <= 35;
 
         // Розраховуємо загальний модифікатор для виводу
         $phaseModifiers = $this->bossPhaseService->getPhaseModifiers($battle);
@@ -114,6 +115,7 @@ readonly class MonsterAttackService
                 '<p><b class="color-boss">%s</b> атакует неудачно... Вы <b class="color-green">увернулись</b></p>',
                 $monster->name
             ));
+
             return;
         }
 
@@ -157,7 +159,7 @@ readonly class MonsterAttackService
             ->where('skill_code', $randomSkill)
             ->first();
 
-        if (!$skill) {
+        if (! $skill) {
             $this->executeBossNormalAttack(
                 $player,
                 $locationMonster,
@@ -166,12 +168,13 @@ readonly class MonsterAttackService
                 $totalModifier,
                 $result
             );
+
             return;
         }
 
         $damageMultiplier = $skill->parameters['damage_multiplier'] ?? 1.0;
-        $skillMinDmg = (int)($minDmg * $damageMultiplier);
-        $skillMaxDmg = (int)($maxDmg * $damageMultiplier);
+        $skillMinDmg = (int) ($minDmg * $damageMultiplier);
+        $skillMaxDmg = (int) ($maxDmg * $damageMultiplier);
 
         $hit = $this->hitCalc->monsterHit($monster, $player, $skillMinDmg, $skillMaxDmg);
 
@@ -181,6 +184,7 @@ readonly class MonsterAttackService
                 $monster->name,
                 $skill->skill_name ?? $randomSkill
             ));
+
             return;
         }
 
@@ -215,7 +219,7 @@ readonly class MonsterAttackService
 
     private function getSkillEmoji(string $skillCode): string
     {
-        return match($skillCode) {
+        return match ($skillCode) {
             'fire_breath' => '🔥',
             'ice_breath' => '❄️',
             'lightning_strike' => '⚡',
@@ -240,10 +244,10 @@ readonly class MonsterAttackService
         AttackResultDTO $result
     ): void {
         foreach ($effects as $effect) {
-            $type   = ActiveEffectType::tryFrom($effect['type'] ?? '');
+            $type = ActiveEffectType::tryFrom($effect['type'] ?? '');
             $chance = $effect['chance'] ?? 100;
             $stacks = (int) ($effect['duration'] ?? $effect['stacks'] ?? 2);
-            $value  = (float) ($effect['value'] ?? 0);
+            $value = (float) ($effect['value'] ?? 0);
 
             if ($type === null || random_int(1, 100) > $chance) {
                 continue;

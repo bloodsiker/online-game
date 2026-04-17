@@ -20,11 +20,11 @@ class ItemInChest extends Model
 
     public function chest(): BelongsTo
     {
-        return $this->belongsTo(Item::class,'chest_id');
+        return $this->belongsTo(Item::class, 'chest_id');
     }
 
     public function item(): BelongsTo
     {
-        return $this->belongsTo(Item::class,  'item_id')->with(['itemInfo']);
+        return $this->belongsTo(Item::class, 'item_id')->with(['itemInfo']);
     }
 }

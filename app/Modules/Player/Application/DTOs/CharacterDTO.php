@@ -9,7 +9,7 @@ use App\Modules\Player\Domain\DTO\StatSheet;
 final readonly class CharacterDTO
 {
     /**
-     * @param PlayerSkillDTO[] $skills
+     * @param  PlayerSkillDTO[]  $skills
      */
     public function __construct(
         // Identity

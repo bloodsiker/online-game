@@ -24,9 +24,9 @@ class MapController extends Controller
     {
         if ($request->isMethod('POST')) {
             $map = Map::create([
-                'name'      => $request->input('name'),
-                'slug'      => $request->input('slug'),
-                'folder'    => $request->input('folder'),
+                'name' => $request->input('name'),
+                'slug' => $request->input('slug'),
+                'folder' => $request->input('folder'),
                 'parent_id' => $request->input('parent_id') ?: null,
             ]);
 
@@ -41,16 +41,16 @@ class MapController extends Controller
     public function info(Request $request, Map $map): mixed
     {
         if ($request->isMethod('POST')) {
-            $map->name      = $request->input('name');
-            $map->slug      = $request->input('slug');
-            $map->folder    = $request->input('folder');
+            $map->name = $request->input('name');
+            $map->slug = $request->input('slug');
+            $map->folder = $request->input('folder');
             $map->parent_id = $request->input('parent_id') ?: null;
             $map->save();
 
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $allMaps   = Map::where('id', '!=', $map->id)->orderBy('name')->get();
+        $allMaps = Map::where('id', '!=', $map->id)->orderBy('name')->get();
         $locations = Location::where('map_id', $map->id)->orderByDesc('id')->get();
 
         return view('admin.map.info', compact('map', 'allMaps', 'locations'));
@@ -58,7 +58,7 @@ class MapController extends Controller
 
     public function location(Request $request, Map $map): RedirectResponse
     {
-        $location         = Location::findOrFail((int) $request->input('location_id'));
+        $location = Location::findOrFail((int) $request->input('location_id'));
         $location->map_id = $map->id;
         $location->save();
 

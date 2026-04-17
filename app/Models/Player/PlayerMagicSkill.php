@@ -46,7 +46,7 @@ class PlayerMagicSkill extends Model
 
     public function cooldownRemaining(): ?int
     {
-        if (!$this->cooldown_end_at || $this->cooldown_end_at->isPast()) {
+        if (! $this->cooldown_end_at || $this->cooldown_end_at->isPast()) {
             return 0;
         }
 

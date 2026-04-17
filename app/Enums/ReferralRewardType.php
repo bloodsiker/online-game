@@ -6,16 +6,16 @@ namespace App\Enums;
 
 enum ReferralRewardType: string
 {
-    case GOLD    = 'gold';
+    case GOLD = 'gold';
     case DIAMOND = 'diamond';
-    case ITEM    = 'item';
+    case ITEM = 'item';
 
     public function label(): string
     {
         return match ($this) {
-            self::GOLD    => 'Золото',
+            self::GOLD => 'Золото',
             self::DIAMOND => 'Алмазы',
-            self::ITEM    => 'Предмет',
+            self::ITEM => 'Предмет',
         };
     }
 }

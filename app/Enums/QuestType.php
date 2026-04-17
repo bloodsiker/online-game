@@ -12,11 +12,11 @@ enum QuestType: string
 
     public function label(): string
     {
-        return match($this) {
-            self::ONE_TIME   => 'Одноразовый',
+        return match ($this) {
+            self::ONE_TIME => 'Одноразовый',
             self::REPEATABLE => 'Повторяемый',
-            self::MAIN       => 'Главный',
-            self::CLAN       => 'Клановый',
+            self::MAIN => 'Главный',
+            self::CLAN => 'Клановый',
             self::REPUTATION => 'Репутационный',
         };
     }

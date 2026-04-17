@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $value
  * @property ItemEffectValueType $value_type
  * @property int|null $duration_seconds
- *
  * @property-read ShareItem $itemInfo
  */
 class ShareItemEffect extends Model
@@ -29,7 +28,7 @@ class ShareItemEffect extends Model
 
     protected $casts = [
         'effect_type' => ItemEffectType::class,
-        'value_type'  => ItemEffectValueType::class,
+        'value_type' => ItemEffectValueType::class,
     ];
 
     public function toValueObject(): ItemEffectValue

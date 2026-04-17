@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\DTO\AttackResultDTO;
 use App\Enums\QuestPlayerStatus;
-use App\Enums\QuestType;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\Player;
 use App\Models\Quest\QuestClanProgress;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 
 class QuestProgressService
 {

@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int      $id
- * @property int      $dungeon_id
+ * @property int $id
+ * @property int $dungeon_id
  * @property int|null $floor_id
- * @property int      $monster_id
- * @property int      $sort_order
+ * @property int $monster_id
+ * @property int $sort_order
  * @property-read Dungeon      $dungeon
  * @property-read DungeonFloor|null $floor
  * @property-read Monster      $monster

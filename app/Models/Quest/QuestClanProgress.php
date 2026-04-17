@@ -4,7 +4,7 @@ namespace App\Models\Quest;
 
 use App\Enums\QuestPlayerStatus;
 use App\Modules\Clan\Domain\Models\Clan;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,8 +14,8 @@ class QuestClanProgress extends Model
     protected $table = 'quest_clan_progress';
 
     protected $casts = [
-        'status'       => QuestPlayerStatus::class,
-        'reset_at'     => 'datetime',
+        'status' => QuestPlayerStatus::class,
+        'reset_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
@@ -73,8 +73,7 @@ class QuestClanProgress extends Model
             return false;
         }
 
-        return $objectives->every(fn ($o) =>
-            $o->questObjective->type === 'deliver' ||
+        return $objectives->every(fn ($o) => $o->questObjective->type === 'deliver' ||
             $o->amount >= $o->questObjective->required_amount
         );
     }
@@ -89,8 +88,7 @@ class QuestClanProgress extends Model
             return false;
         }
 
-        return $this->objectives->every(fn ($o) =>
-            $o->questObjective->type === 'deliver' ||
+        return $this->objectives->every(fn ($o) => $o->questObjective->type === 'deliver' ||
             $o->amount >= $o->questObjective->required_amount
         );
     }

@@ -25,7 +25,7 @@ enum BossMechanicType: string
      */
     public function getClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ENRAGE => \App\Services\Combat\Boss\Mechanics\EnrageMechanic::class,
             self::REGENERATION => \App\Services\Combat\Boss\Mechanics\RegenerationMechanic::class,
             self::SUMMON_MINIONS => \App\Services\Combat\Boss\Mechanics\SummonMinionsMechanic::class,
@@ -49,7 +49,7 @@ enum BossMechanicType: string
      */
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ENRAGE => 'Ярость',
             self::REGENERATION => 'Регенерация',
             self::SUMMON_MINIONS => 'Вызов миньонов',
@@ -73,7 +73,7 @@ enum BossMechanicType: string
      */
     public function getIcon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ENRAGE => '💢',
             self::REGENERATION => '💚',
             self::SUMMON_MINIONS => '👥',
@@ -106,12 +106,12 @@ enum BossMechanicType: string
     public static function getAllForSelect(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn(self $type) => [
+            ->mapWithKeys(fn (self $type) => [
                 $type->value => [
                     'label' => $type->getLabel(),
                     'icon' => $type->getIcon(),
                     'value' => $type->value,
-                ]
+                ],
             ])
             ->toArray();
     }

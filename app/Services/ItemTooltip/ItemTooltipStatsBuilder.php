@@ -39,35 +39,37 @@ final class ItemTooltipStatsBuilder
         foreach ($item->stats as $stat) {
             if ($stat->stat_type === ShareItemStatType::ATTACK_MIN) {
                 $attackMin = $stat->value;
+
                 continue;
             }
             if ($stat->stat_type === ShareItemStatType::ATTACK_MAX) {
                 $attackMax = $stat->value;
+
                 continue;
             }
 
-            $valueStr = $stat->isPercent() ? $stat->value . '%' : (string) $stat->value;
-            $stats[] = ['title' => $stat->stat_type->label(), 'value' => '+' . $valueStr];
+            $valueStr = $stat->isPercent() ? $stat->value.'%' : (string) $stat->value;
+            $stats[] = ['title' => $stat->stat_type->label(), 'value' => '+'.$valueStr];
         }
 
         if ($attackMin !== null || $attackMax !== null) {
             $stats[] = [
                 'title' => 'Атака',
-                'value' => '+' . ($attackMin ?? 0) . ' .. +' . ($attackMax ?? 0),
+                'value' => '+'.($attackMin ?? 0).' .. +'.($attackMax ?? 0),
             ];
         }
 
         // Активные эффекты из share_item_effects (зелья, баффы)
         foreach ($item->effects as $effect) {
             $valueStr = $effect->value_type === ItemEffectValueType::PERCENT
-                ? $effect->value . '%'
+                ? $effect->value.'%'
                 : (string) $effect->value;
 
             if ($effect->duration_seconds) {
-                $valueStr .= ' (' . $effect->duration_seconds . ' сек.)';
+                $valueStr .= ' ('.$effect->duration_seconds.' сек.)';
             }
 
-            $stats[] = ['title' => $effect->effect_type->label(), 'value' => '+' . $valueStr];
+            $stats[] = ['title' => $effect->effect_type->label(), 'value' => '+'.$valueStr];
         }
 
         return $stats;
@@ -82,8 +84,8 @@ final class ItemTooltipStatsBuilder
 
         foreach ($item->requirements as $req) {
             $reqs[] = [
-                'title'    => $req->label(),
-                'type'     => $req->type->value,
+                'title' => $req->label(),
+                'type' => $req->type->value,
                 'stat_key' => $req->stat_key,
                 'skill_id' => $req->skill_id,
                 'min_value' => $req->min_value,

@@ -42,7 +42,7 @@ class PartyController extends Controller
 
         try {
             $this->partyService->invite(
-                partyId:      (int) $request->input('party_id'),
+                partyId: (int) $request->input('party_id'),
                 targetUserId: (int) $request->input('user_id'),
             );
 
@@ -56,6 +56,7 @@ class PartyController extends Controller
     {
         try {
             $this->partyService->leave($partyId);
+
             return back()->with('success', 'Вы покинули группу.');
         } catch (RuntimeException $e) {
             return back()->withErrors(['party' => $e->getMessage()]);
@@ -66,6 +67,7 @@ class PartyController extends Controller
     {
         try {
             $this->partyService->disband($partyId);
+
             return back()->with('success', 'Группа распущена.');
         } catch (RuntimeException $e) {
             return back()->withErrors(['party' => $e->getMessage()]);

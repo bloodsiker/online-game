@@ -43,6 +43,7 @@ class ShieldMechanic extends BaseBossMechanic
     {
         $hp = $this->getConfig('shield_hp', 1000);
         $duration = $this->getConfig('duration_turns', 3);
+
         return "Босс создал щит на {$hp} HP ({$duration} ходов)";
     }
 }

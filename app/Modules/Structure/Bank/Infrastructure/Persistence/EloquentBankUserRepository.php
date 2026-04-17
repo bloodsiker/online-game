@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Infrastructure\Persistence;
 
-use App\Models\User;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class EloquentBankUserRepository implements BankUserRepository
 {

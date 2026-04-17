@@ -6,16 +6,16 @@ namespace App\Enums;
 
 enum PartyStatus: string
 {
-    case OPEN       = 'open';
+    case OPEN = 'open';
     case IN_DUNGEON = 'in_dungeon';
-    case DISBANDED  = 'disbanded';
+    case DISBANDED = 'disbanded';
 
     public function label(): string
     {
-        return match($this) {
-            self::OPEN       => 'Открыта',
+        return match ($this) {
+            self::OPEN => 'Открыта',
             self::IN_DUNGEON => 'В данже',
-            self::DISBANDED  => 'Распущена',
+            self::DISBANDED => 'Распущена',
         };
     }
 }

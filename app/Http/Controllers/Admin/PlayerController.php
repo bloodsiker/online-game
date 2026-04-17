@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Models\Player\Player;
 use App\Models\Share\ShareItem;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,23 +24,23 @@ class PlayerController extends Controller
     public function info(Request $request, Player $player): mixed
     {
         if ($request->isMethod('POST')) {
-            $player->lvl        = (int) $request->input('lvl', 1);
-            $player->exp        = (int) $request->input('exp', 0);
-            $player->hp_now     = (int) $request->input('hp_now');
-            $player->hp_max     = (int) $request->input('hp_max');
-            $player->mp_now     = (int) $request->input('mp_now');
-            $player->mp_max     = (int) $request->input('mp_max');
-            $player->strength     = (float) $request->input('strength');
-            $player->agility      = (float) $request->input('agility');
-            $player->intuition    = (float) $request->input('intuition');
-            $player->wisdom       = (float) $request->input('wisdom');
+            $player->lvl = (int) $request->input('lvl', 1);
+            $player->exp = (int) $request->input('exp', 0);
+            $player->hp_now = (int) $request->input('hp_now');
+            $player->hp_max = (int) $request->input('hp_max');
+            $player->mp_now = (int) $request->input('mp_now');
+            $player->mp_max = (int) $request->input('mp_max');
+            $player->strength = (float) $request->input('strength');
+            $player->agility = (float) $request->input('agility');
+            $player->intuition = (float) $request->input('intuition');
+            $player->wisdom = (float) $request->input('wisdom');
             $player->intelligence = (float) $request->input('intelligence');
-            $player->min_dmg    = (float) $request->input('min_dmg');
-            $player->max_dmg    = (float) $request->input('max_dmg');
+            $player->min_dmg = (float) $request->input('min_dmg');
+            $player->max_dmg = (float) $request->input('max_dmg');
             $player->free_stats = (int) $request->input('free_stats');
             $player->save();
 
-            $player->user->money   = (int) $request->input('money');
+            $player->user->money = (int) $request->input('money');
             $player->user->diamond = (int) $request->input('diamond');
             $player->user->save();
 
@@ -61,7 +61,7 @@ class PlayerController extends Controller
     public function backpackAdd(Request $request, Player $player, BackpackService $backpackService): RedirectResponse
     {
         $shareItem = ShareItem::findOrFail((int) $request->input('share_item_id'));
-        $count     = max(1, (int) $request->input('count', 1));
+        $count = max(1, (int) $request->input('count', 1));
 
         $backpackService->addItemByShareItem($player->user, $shareItem, $count);
 

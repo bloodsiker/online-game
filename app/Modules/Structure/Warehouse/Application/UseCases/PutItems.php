@@ -6,10 +6,10 @@ namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
 use App\Enums\ShareItemType;
 use App\Models\Structure;
-use App\Models\User;
 use App\Models\Warehouse;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class PutItems
 {
@@ -37,13 +37,13 @@ class PutItems
             ->where('equipped', 0)
             ->get();
 
-        $toInsert        = [];
-        $toStack         = [];
-        $toSubtract      = [];
+        $toInsert = [];
+        $toStack = [];
+        $toSubtract = [];
         $toDeleteItemIds = [];
-        $isLimit         = false;
-        $totalCost       = 0;
-        $newSlots        = 0;
+        $isLimit = false;
+        $totalCost = 0;
+        $newSlots = 0;
 
         foreach ($items as $item) {
             if ($countInWarehouse + $newSlots >= $user->warehouse_count) {
@@ -51,9 +51,9 @@ class PutItems
                 break;
             }
 
-            $wantCount   = (int) ($putItems[$item->item_id]['count'] ?? $item->count);
+            $wantCount = (int) ($putItems[$item->item_id]['count'] ?? $item->count);
             $actualCount = min($wantCount, $item->count);
-            $totalCost  += 10;
+            $totalCost += 10;
 
             $stackTarget = null;
             if ($item->item->itemInfo->type === ShareItemType::RESOURCE || $item->item->itemInfo->type === ShareItemType::POTION) {
@@ -69,10 +69,10 @@ class PutItems
                 $toStack[] = ['warehouse' => $stackTarget, 'add' => $actualCount];
             } else {
                 $toInsert[] = [
-                    'user_id'      => $user->id,
+                    'user_id' => $user->id,
                     'structure_id' => $warehouse->id,
-                    'item_id'      => $item->item_id,
-                    'count'        => $actualCount,
+                    'item_id' => $item->item_id,
+                    'count' => $actualCount,
                 ];
                 $newSlots++;
             }

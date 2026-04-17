@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
-use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
-use App\Models\User;
+use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
+use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CreateOrder
@@ -27,7 +27,7 @@ class CreateOrder
         }
 
         $totalCost = 100 + ($count * $price);
-        $result    = ['ok' => true, 'message' => ''];
+        $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $auction, $shareItem, $count, $price, $totalCost, $isAnonymous, &$result) {
             $freshUser = User::lockForUpdate()->find($user->id);
@@ -38,18 +38,19 @@ class CreateOrder
                     $totalCost,
                     $count * $price,
                 )];
+
                 return;
             }
 
             $freshUser->decrement('money', $totalCost);
 
             AuctionOrder::create([
-                'user_id'       => $user->id,
-                'structure_id'  => $auction->id,
+                'user_id' => $user->id,
+                'structure_id' => $auction->id,
                 'share_item_id' => $shareItem->id,
-                'count'         => $count,
-                'price'         => $price,
-                'is_anonymous'  => $isAnonymous,
+                'count' => $count,
+                'price' => $price,
+                'is_anonymous' => $isAnonymous,
             ]);
 
             $result = ['ok' => true, 'message' => sprintf(

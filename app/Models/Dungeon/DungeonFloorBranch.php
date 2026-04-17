@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int         $id
- * @property int         $from_floor_id
- * @property int         $to_floor_id
+ * @property int $id
+ * @property int $from_floor_id
+ * @property int $to_floor_id
  * @property string|null $label
- * @property int         $sort_order
+ * @property int $sort_order
  * @property-read DungeonFloor $fromFloor
  * @property-read DungeonFloor $toFloor
  */

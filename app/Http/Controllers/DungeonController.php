@@ -15,13 +15,13 @@ class DungeonController extends Controller
 {
     public function __construct(
         private readonly DungeonService $dungeonService,
-        private readonly PartyService   $partyService,
+        private readonly PartyService $partyService,
     ) {}
 
     public function index()
     {
-        $dungeons       = Dungeon::where('is_active', true)->get();
-        $activeSession  = $this->dungeonService->getActiveSession(Auth::id());
+        $dungeons = Dungeon::where('is_active', true)->get();
+        $activeSession = $this->dungeonService->getActiveSession(Auth::id());
 
         return view('dungeon.index', compact('dungeons', 'activeSession'));
     }
@@ -37,7 +37,7 @@ class DungeonController extends Controller
     public function enter(int $id): RedirectResponse
     {
         try {
-            $party   = $this->partyService->getMyParty();
+            $party = $this->partyService->getMyParty();
             $dungeon = Dungeon::findOrFail($id);
 
             if ($dungeon->isGroup() && $party !== null) {

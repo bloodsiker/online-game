@@ -6,7 +6,7 @@ namespace App\Modules\Chat\Domain\Repositories;
 
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Models\ChatMessage;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 interface ChatMessageRepositoryInterface
 {

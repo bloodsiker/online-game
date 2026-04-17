@@ -13,12 +13,12 @@ enum QuestRewardType: string
 
     public function label(): string
     {
-        return match($this) {
-            self::EXP               => 'Опыт',
-            self::MONEY             => 'Монеты',
-            self::ITEM              => 'Предмет',
-            self::LOCATION_ACCESS   => 'Доступ к локации',
-            self::CLAN_POINTS       => 'Очки клана',
+        return match ($this) {
+            self::EXP => 'Опыт',
+            self::MONEY => 'Монеты',
+            self::ITEM => 'Предмет',
+            self::LOCATION_ACCESS => 'Доступ к локации',
+            self::CLAN_POINTS => 'Очки клана',
             self::REPUTATION_POINTS => 'Очки репутации',
         };
     }

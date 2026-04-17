@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $player_id
  * @property int $target_id
  * @property PlayerRelationshipType $type
- * @property string|null $status  pending|accepted
+ * @property string|null $status pending|accepted
  * @property-read Player $player
  * @property-read Player $target
  */

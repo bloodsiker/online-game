@@ -21,7 +21,6 @@ use App\Http\Controllers\QuestController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\SlotController;
-use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -32,7 +31,6 @@ Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
 Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
 Route::get('/login/{id}', [HomeController::class, 'login'])->name('login');
-Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
@@ -84,7 +82,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
 });
 
 Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monster');
-Route::get('/info/u/{id}', [UserController::class, 'info'])->name('info.user');
 Route::get('/info/npc/{id}', [NpcController::class, 'info'])->name('info.npc');
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');

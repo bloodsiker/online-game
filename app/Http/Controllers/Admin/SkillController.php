@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class SkillController extends Controller
@@ -21,7 +20,7 @@ class SkillController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $skill = new Skill();
+            $skill = new Skill;
             $this->fillSkill($skill, $request);
             $skill->save();
 
@@ -48,8 +47,8 @@ class SkillController extends Controller
 
     private function fillSkill(Skill $skill, Request $request): void
     {
-        $skill->name        = $request->input('name');
+        $skill->name = $request->input('name');
         $skill->description = $request->input('description');
-        $skill->type        = $request->input('type');
+        $skill->type = $request->input('type');
     }
 }

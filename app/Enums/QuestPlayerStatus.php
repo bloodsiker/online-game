@@ -10,7 +10,7 @@ enum QuestPlayerStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::IN_PROGRESS => 'В процессе',
             self::COMPLETED => 'Завершен',
             self::FAILED => 'Провален',

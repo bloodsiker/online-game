@@ -20,9 +20,9 @@ class PlayerItemBuff extends Model
     ];
 
     protected $casts = [
-        'expires_at'  => 'datetime',
+        'expires_at' => 'datetime',
         'effect_type' => ItemEffectType::class,
-        'value_type'  => ItemEffectValueType::class,
+        'value_type' => ItemEffectValueType::class,
     ];
 
     public function player(): BelongsTo

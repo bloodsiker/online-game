@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Referral\Infrastructure\Persistence;
 
 use App\Models\Item\Item;
-use App\Models\User;
 use App\Modules\Referral\Domain\Contracts\ReferralRewardIssuer;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final class EloquentReferralRewardIssuer implements ReferralRewardIssuer
 {

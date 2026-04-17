@@ -7,15 +7,15 @@ namespace App\Enums;
 enum DungeonParticipantStatus: string
 {
     case ACTIVE = 'active';
-    case DEAD   = 'dead';
-    case LEFT   = 'left';
+    case DEAD = 'dead';
+    case LEFT = 'left';
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'Активен',
-            self::DEAD   => 'Погиб',
-            self::LEFT   => 'Покинул',
+            self::DEAD => 'Погиб',
+            self::LEFT => 'Покинул',
         };
     }
 }

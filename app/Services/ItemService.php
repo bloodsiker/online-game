@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Dungeon\DungeonSession;
 use App\Models\Item\Item;
 use App\Models\Item\ItemInChest;
 use App\Models\Item\ItemOnLocation;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ItemService
@@ -30,10 +30,10 @@ class ItemService
     {
         return DB::transaction(function () use ($user, $itemId) {
             $location = $user->currentLocation;
-            $query    = ItemOnLocation::where('location_id', $location->id)->where('item_id', $itemId);
+            $query = ItemOnLocation::where('location_id', $location->id)->where('item_id', $itemId);
 
             if ($location->dungeon_id !== null) {
-                $session          = DungeonSession::where('user_id', $user->id)->first();
+                $session = DungeonSession::where('user_id', $user->id)->first();
                 $dungeonSessionId = $session?->monsterSessionId();
                 $dungeonSessionId !== null
                     ? $query->where('dungeon_session_id', $dungeonSessionId)

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Exchange\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangeActionDTO;
 use App\Modules\Structure\Exchange\Application\UseCases\ApplyExchange;
 use App\Modules\Structure\Exchange\Application\UseCases\GetExchangePage;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -3,17 +3,17 @@
 namespace App\Models\Location;
 
 use App\Models\Dungeon\Dungeon;
+use App\Models\Item\Item;
 use App\Models\Map;
+use App\Models\Monster\Monster;
 use App\Models\Npc;
+use App\Models\Share\ShareAction;
 use App\Models\Structure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Share\ShareAction;
-use App\Models\Monster\Monster;
-use App\Models\Item\Item;
 
 class Location extends Model
 {

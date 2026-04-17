@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Enums\ShareItemStatType;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSlot;
+use App\Modules\Backpack\Domain\Models\Backpack;
 
 class HotbarService
 {
@@ -19,7 +19,7 @@ class HotbarService
     public function maxSlots(Player $player): int
     {
         $equip = $player->playerEquip;
-        if (!$equip) {
+        if (! $equip) {
             return self::BASE_SLOTS;
         }
 
@@ -27,13 +27,13 @@ class HotbarService
         foreach (['beltFirstSlot', 'beltSecondSlot'] as $relation) {
             /** @var Item|null $beltItem */
             $beltItem = $equip->$relation;
-            if (!$beltItem) {
+            if (! $beltItem) {
                 continue;
             }
 
             $beltItem->itemInfo->loadMissing('stats');
             $extra += $beltItem->itemInfo->stats
-                ->filter(fn($s) => $s->stat_type === ShareItemStatType::BELT_SLOT)
+                ->filter(fn ($s) => $s->stat_type === ShareItemStatType::BELT_SLOT)
                 ->sum('value');
         }
 
@@ -57,7 +57,7 @@ class HotbarService
 
         return [
             'max_slots' => $maxSlots,
-            'slots'     => $slots,
+            'slots' => $slots,
         ];
     }
 
@@ -86,16 +86,16 @@ class HotbarService
                 ->where('item_id', $entityId)
                 ->first();
 
-            if (!$backpack) {
+            if (! $backpack) {
                 return 'Предмет не найден в рюкзаке.';
             }
 
-            if (!$backpack->item->itemInfo->is_slot_usable) {
+            if (! $backpack->item->itemInfo->is_slot_usable) {
                 return 'Этот предмет нельзя добавить на панель.';
             }
         } elseif ($entityType === 'skill') {
             $hasSkill = $player->magicSkills()->where('magic_skill_id', $entityId)->exists();
-            if (!$hasSkill) {
+            if (! $hasSkill) {
                 return 'Навык не найден.';
             }
         } else {
@@ -137,20 +137,20 @@ class HotbarService
 
     private function formatSlot(int $slotNumber, ?PlayerSlot $slot, Player $player): array
     {
-        if (!$slot) {
+        if (! $slot) {
             return [
-                'slot'        => $slotNumber,
-                'empty'       => true,
+                'slot' => $slotNumber,
+                'empty' => true,
                 'entity_type' => null,
-                'entity_id'   => null,
-                'name'        => null,
-                'image'       => null,
-                'cooldown'    => 0,
+                'entity_id' => null,
+                'name' => null,
+                'image' => null,
+                'cooldown' => 0,
             ];
         }
 
-        $name     = null;
-        $image    = null;
+        $name = null;
+        $image = null;
         $cooldown = 0;
 
         $count = null;
@@ -158,8 +158,8 @@ class HotbarService
         if ($slot->entity_type === 'item') {
             $item = Item::with('itemInfo')->find($slot->entity_id);
             if ($item) {
-                $name     = $item->itemInfo->name;
-                $image    = $item->itemInfo->image;
+                $name = $item->itemInfo->name;
+                $image = $item->itemInfo->image;
                 $cooldown = 1; // TODO: получать из атрибутов предмета
 
                 $backpack = Backpack::where('user_id', $player->user_id)
@@ -171,20 +171,20 @@ class HotbarService
             $skill = $player->magicSkills()->where('magic_skill_id', $slot->entity_id)->first()
                 ?? \App\Models\MagicSkill\MagicSkill::find($slot->entity_id);
             if ($skill) {
-                $name  = $skill->name;
+                $name = $skill->name;
                 $image = $skill->image ?? null;
             }
         }
 
         return [
-            'slot'        => $slotNumber,
-            'empty'       => false,
+            'slot' => $slotNumber,
+            'empty' => false,
             'entity_type' => $slot->entity_type,
-            'entity_id'   => $slot->entity_id,
-            'name'        => $name,
-            'image'       => $image,
-            'cooldown'    => $cooldown,
-            'count'       => $count,
+            'entity_id' => $slot->entity_id,
+            'name' => $name,
+            'image' => $image,
+            'cooldown' => $cooldown,
+            'count' => $count,
         ];
     }
 }

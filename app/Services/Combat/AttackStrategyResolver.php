@@ -7,14 +7,14 @@ use App\Models\Item\Item;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
 use App\Models\Player\Player;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Services\Combat\Strategies\AttackStrategyInterface;
-use App\Services\Combat\Strategies\FistAttackStrategy;
 use App\Services\Combat\Strategies\DualWieldStrategy;
+use App\Services\Combat\Strategies\FistAttackStrategy;
 use App\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Services\PlayerMagicSkillService;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 
 readonly class AttackStrategyResolver
 {
@@ -29,7 +29,7 @@ readonly class AttackStrategyResolver
         $sheet = $this->statService->resolve($player);
 
         $equip = $player->playerEquip;
-        $left  = $equip->handLeft;
+        $left = $equip->handLeft;
         $right = $equip->handRight;
 
         if ($action > 0) {
@@ -52,13 +52,13 @@ readonly class AttackStrategyResolver
         }
 
         // Nothing on — fist
-        if (!$left instanceof Item && !$right instanceof Item) {
+        if (! $left instanceof Item && ! $right instanceof Item) {
             return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
         }
 
         // Only the shield in the right hand, the left hand is empty — a fist
         if (
-            !$left instanceof Item &&
+            ! $left instanceof Item &&
             $right instanceof Item &&
             $right->itemInfo->type === ShareItemType::SHIELD
         ) {
@@ -94,7 +94,7 @@ readonly class AttackStrategyResolver
 
         // Only the right weapon (the left one is empty)
         if (
-            !$left instanceof Item &&
+            ! $left instanceof Item &&
             $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON
         ) {
             return new OneHandWeaponStrategy(
@@ -108,7 +108,7 @@ readonly class AttackStrategyResolver
         // Only the left weapon (the right one is empty)
         if (
             $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
-            !$right instanceof Item
+            ! $right instanceof Item
         ) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,

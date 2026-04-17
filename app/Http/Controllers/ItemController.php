@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item\Item;
 use App\Models\Item\ItemOnLocation;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ class ItemController extends Controller
 
     public function pickUp(int $id)
     {
-        $user     = Auth::user();
+        $user = Auth::user();
         $location = $user->currentLocation;
 
         $message = $this->itemService->pickUpFromLocation($user, $id);
@@ -51,10 +51,10 @@ class ItemController extends Controller
 
     public function handOver(int $id)
     {
-        $user         = Auth::user();
-        $item         = Item::find($id);
+        $user = Auth::user();
+        $item = Item::find($id);
         $isHandedItem = false;
-        $isUserMoved  = false;
+        $isUserMoved = false;
 
         $onlineOnLocation = User::with(['player'])
             ->where('location_id', $user->location_id)
@@ -68,19 +68,20 @@ class ItemController extends Controller
 
     public function handOverToUser(Request $request, int $id)
     {
-        $user         = Auth::user();
-        $item         = Item::find($id);
+        $user = Auth::user();
+        $item = Item::find($id);
         $isHandedItem = false;
-        $toUser       = null;
-        $isUserMoved  = false;
+        $toUser = null;
+        $isUserMoved = false;
 
         if ($item instanceof Item && $request->has('uid')) {
             $toUser = User::find($request->get('uid'));
-            $error  = $this->itemService->handOver($user, $item, $toUser);
+            $error = $this->itemService->handOver($user, $item, $toUser);
 
             if ($error) {
                 $isUserMoved = str_contains($error, 'рядом');
                 session()->flash('message', $error);
+
                 return redirect()->back();
             }
 
@@ -99,7 +100,7 @@ class ItemController extends Controller
 
     public function putOn(Request $request, int $id): RedirectResponse
     {
-        $user  = Auth::user();
+        $user = Auth::user();
         $error = $this->itemService->equip($user, $id);
 
         if ($error) {
@@ -142,7 +143,7 @@ class ItemController extends Controller
 
     public function pickUpInChest(int $chest, int $id)
     {
-        $user      = Auth::user();
+        $user = Auth::user();
         $chestItem = Item::with('itemsInChest')->find($chest);
 
         $message = $this->itemService->pickUpFromChest($user, $chestItem, $id);
@@ -160,6 +161,7 @@ class ItemController extends Controller
     private function needsHotbarRefresh(User $user, int $itemId): bool
     {
         $item = Item::find($itemId);
+
         return $item && $item->itemInfo?->slot?->value === 'belt';
     }
 }

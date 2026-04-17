@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Presentation\Http;
 
-use App\Modules\Chat\Domain\Enums\ChatChannel;
-use App\Http\Controllers\Controller;
 use App\Enums\PlayerRelationshipType;
+use App\Http\Controllers\Controller;
 use App\Models\Player\PlayerRelationship;
-use App\Models\User;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
+use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,13 +32,13 @@ class ChatController extends Controller
 
     public function chat(Request $request): View
     {
-        $channel  = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
-        $user     = auth()->user();
+        $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
+        $user = auth()->user();
         $messages = $this->getMessages->execute($user, $channel);
 
         return view('chat::chat', [
             'messages' => $messages,
-            'channel'  => $channel,
+            'channel' => $channel,
         ]);
     }
 
@@ -62,7 +62,7 @@ class ChatController extends Controller
         ]);
 
         $channel = ChatChannel::tryFrom($request->input('channel')) ?? ChatChannel::Main;
-        $raw     = $request->input('message');
+        $raw = $request->input('message');
 
         // Private message validation
         if (preg_match('/^prv\[([^\]]+)\]\s*-?\s*(.*)/is', $raw, $m)) {
@@ -110,8 +110,8 @@ class ChatController extends Controller
 
     public function messages(Request $request): JsonResponse
     {
-        $channel  = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
-        $user     = auth()->user();
+        $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
+        $user = auth()->user();
         $messages = $this->getMessages->execute($user, $channel, null, 30);
 
         return response()->json($messages);

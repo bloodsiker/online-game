@@ -3,17 +3,16 @@
 namespace App\Models\Battle;
 
 use App\Enums\BattleDetailStatus;
-use App\Models\User;
+use App\Models\Monster\MonsterOnLocation;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Monster\MonsterOnLocation;
 
 /**
  * @property int $user_id
  * @property int $location_monster_id
  * @property BattleDetailStatus $status
- *
  * @property-read User $user
  * @property-read MonsterOnLocation $locationMonster
  */
@@ -35,11 +34,11 @@ class BattleDetail extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function locationMonster(): BelongsTo
     {
-        return $this->belongsTo(MonsterOnLocation::class,'location_monster_id')->with(['monster']);
+        return $this->belongsTo(MonsterOnLocation::class, 'location_monster_id')->with(['monster']);
     }
 }

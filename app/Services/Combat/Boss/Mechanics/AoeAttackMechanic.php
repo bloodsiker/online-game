@@ -13,10 +13,10 @@ class AoeAttackMechanic extends BaseBossMechanic
     {
         $damagePercent = $this->getConfig('damage_percent', 30);
         $monster = $context->getLocationMonster()->monster;
-//        $baseDamage = $monster->attack;
+        //        $baseDamage = $monster->attack;
         $baseDamage = mt_rand($monster->min_dmg, $monster->max_dmg);
 
-        $damage = (int)(($baseDamage * $damagePercent) / 100);
+        $damage = (int) (($baseDamage * $damagePercent) / 100);
         $actualDamage = max(1, $damage - $context->getPlayer()->getArmor());
 
         $context->dealDamageToPlayer($actualDamage);
@@ -33,6 +33,7 @@ class AoeAttackMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $percent = $this->getConfig('damage_percent', 30);
+
         return "Босс атакует всех ({$percent}% от базового урона)";
     }
 }

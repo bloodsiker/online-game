@@ -13,7 +13,7 @@ class Exchange extends Model
 
     protected $fillable = ['structure_id', 'from_share_item_id', 'to_share_item_id', 'from_amount', 'to_amount', 'sort_order'];
 
-//    protected $with = ['item'];
+    //    protected $with = ['item'];
 
     protected $attributes = [
         'sort_order' => 0,

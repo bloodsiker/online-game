@@ -7,8 +7,8 @@ namespace App\Http\Controllers;
 use App\DTO\AttackResultDTO;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Player\Player;
-use App\Services\Combat\BattleEffectService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Services\Combat\BattleEffectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,13 +16,13 @@ use Illuminate\Support\Facades\Auth;
 class MagicSkillController extends Controller
 {
     public function __construct(
-        private PlayerStatService   $statService,
+        private PlayerStatService $statService,
         private BattleEffectService $effectService,
     ) {}
 
     public function index(Request $request)
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $player = $user->player;
 
         $group = $request->get('group', 'magic_skill');
@@ -31,10 +31,10 @@ class MagicSkillController extends Controller
 
         // Список онлайн-игроков на той же локации для выбора цели (кроме себя)
         $allyTargets = Player::whereHas('user', fn ($q) => $q
-                ->where('location_id', $user->location_id)
-                ->where('id', '!=', $user->id)
-                ->where('last_online_at', '>=', now()->subMinutes(10))
-            )
+            ->where('location_id', $user->location_id)
+            ->where('id', '!=', $user->id)
+            ->where('last_online_at', '>=', now()->subMinutes(10))
+        )
             ->with('user:id,name')
             ->get(['id', 'user_id']);
 
@@ -43,10 +43,10 @@ class MagicSkillController extends Controller
 
     public function updateSkill(Request $request): JsonResponse
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $player = $user->player;
 
-        $oldSheet    = $this->statService->resolve($player);
+        $oldSheet = $this->statService->resolve($player);
         $equippedIds = $request->input('skills', []);
 
         $player->magicSkills()->update(['is_equipped' => false]);
@@ -68,7 +68,7 @@ class MagicSkillController extends Controller
     public function updateOrder(Request $request): JsonResponse
     {
         $player = Auth::user()->player;
-        $ids    = $request->input('ids', []);
+        $ids = $request->input('ids', []);
 
         foreach ($ids as $index => $skillId) {
             $player->magicSkills()
@@ -85,16 +85,16 @@ class MagicSkillController extends Controller
      */
     public function useSkill(Request $request, MagicSkill $skill): JsonResponse
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $caster = $user->player;
 
         // Проверяем что скилл принадлежит игроку
         $owns = $caster->magicSkills()->where('magic_skill_id', $skill->id)->exists();
-        if (!$owns) {
+        if (! $owns) {
             return response()->json(['status' => 'error', 'message' => 'Заклинание не изучено'], 403);
         }
 
-        if (!$skill->isBuffSkill()) {
+        if (! $skill->isBuffSkill()) {
             return response()->json(['status' => 'error', 'message' => 'Это заклинание нельзя использовать вне боя'], 422);
         }
 
@@ -102,6 +102,7 @@ class MagicSkillController extends Controller
         $pivot = $caster->magicSkills()->where('magic_skill_id', $skill->id)->first()?->pivot;
         if ($pivot?->cooldown_end_at && now()->lt($pivot->cooldown_end_at)) {
             $remaining = (int) now()->diffInSeconds($pivot->cooldown_end_at, false);
+
             return response()->json(['status' => 'error', 'message' => sprintf('Заклинание на перезарядке ещё %d сек.', $remaining)], 422);
         }
 
@@ -111,9 +112,9 @@ class MagicSkillController extends Controller
 
         // Определяем цель
         $targetId = $request->input('target_player_id');
-        $target   = $targetId ? Player::find($targetId) : $caster;
+        $target = $targetId ? Player::find($targetId) : $caster;
 
-        if (!$target) {
+        if (! $target) {
             return response()->json(['status' => 'error', 'message' => 'Цель не найдена'], 404);
         }
 
@@ -123,7 +124,7 @@ class MagicSkillController extends Controller
         // Снимаем ману с кастера
         $caster->mp_now -= $skill->mana_cost;
 
-        $log = new AttackResultDTO();
+        $log = new AttackResultDTO;
 
         // Лечение
         if ($skill->base_healing > 0) {
@@ -140,8 +141,8 @@ class MagicSkillController extends Controller
                 $this->effectService->applyEffectToPlayer($effect, $target, null, $log);
                 if ($target->id === $caster->id) {
                     $appliedBlessings[] = [
-                        'id'       => $effect->slug . '_' . time(),
-                        'name'     => $effect->name,
+                        'id' => $effect->slug.'_'.time(),
+                        'name' => $effect->name,
                         'duration' => (int) $effect->duration,
                     ];
                 }
@@ -161,12 +162,12 @@ class MagicSkillController extends Controller
         $freshSheet = $this->statService->resolve($caster->fresh());
 
         return response()->json([
-            'status'         => 'success',
-            'message'        => $log->getLog() ?: sprintf('Применено: «%s»', $skill->name),
-            'hp'             => ['current' => $caster->hp_now, 'max' => $freshSheet->getHpMax()],
-            'mp'             => ['current' => $caster->mp_now, 'max' => $freshSheet->getMpMax()],
+            'status' => 'success',
+            'message' => $log->getLog() ?: sprintf('Применено: «%s»', $skill->name),
+            'hp' => ['current' => $caster->hp_now, 'max' => $freshSheet->getHpMax()],
+            'mp' => ['current' => $caster->mp_now, 'max' => $freshSheet->getMpMax()],
             'cooldown_until' => $cooldownEndsAt?->getTimestamp(),
-            'blessings'      => $appliedBlessings,
+            'blessings' => $appliedBlessings,
         ]);
     }
 }

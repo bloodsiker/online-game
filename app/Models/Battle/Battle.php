@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $rounds
  * @property array $boss_metadata
  * @property BattleStatus $status
- *
  * @property-read Location $location
  * @property-read Collection|BattleDetail[] $details
  * @property-read Collection|BattleDetail[] $detailsWithUsers
@@ -38,7 +37,7 @@ class Battle extends Model
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Location::class,'location_id');
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function details(): HasMany

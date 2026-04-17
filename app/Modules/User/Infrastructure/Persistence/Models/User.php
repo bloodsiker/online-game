@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+namespace App\Modules\User\Infrastructure\Persistence\Models;
+
 use App\Enums\ShareItemStatType;
-use App\Modules\Clan\Domain\Models\ClanMember;
-use App\Models\Player\Player;
+use App\Models\Backpack;
 use App\Models\Location\Location;
+use App\Models\Player\Player;
+use App\Modules\Clan\Domain\Models\ClanMember;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,7 +34,6 @@ use Illuminate\Notifications\Notifiable;
  * @property int $warehouse_count
  * @property int $bag_count
  * @property int $slot_count
- *
  * @property-read Collection|Backpack[] $backpack
  * @property-read Location $currentLocation
  * @property-read Location $prevLocation
@@ -41,11 +42,10 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -58,8 +58,6 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
      * @var array<int, string>
      */
     protected $hidden = [
@@ -68,8 +66,6 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -97,17 +93,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function currentLocation(): BelongsTo
     {
-        return $this->belongsTo(Location::class,'location_id');
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function prevLocation(): BelongsTo
     {
-        return $this->belongsTo(Location::class,'prev_location_id');
+        return $this->belongsTo(Location::class, 'prev_location_id');
     }
 
     public function player(): BelongsTo
     {
-        return $this->belongsTo(Player::class,'player_id')->with(['race']);
+        return $this->belongsTo(Player::class, 'player_id')->with(['race']);
     }
 
     public function clanMembership(): HasOne

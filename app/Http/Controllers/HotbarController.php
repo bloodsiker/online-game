@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Player\PlayerSlot;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Services\HotbarService;
 use App\Services\ItemEffect\EffectHandler;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +29,9 @@ class HotbarController extends Controller
     public function set(Request $request): JsonResponse
     {
         $request->validate([
-            'slot'        => ['required', 'integer', 'min:1'],
+            'slot' => ['required', 'integer', 'min:1'],
             'entity_type' => ['required', 'in:item,skill'],
-            'entity_id'   => ['required', 'integer'],
+            'entity_id' => ['required', 'integer'],
         ]);
 
         $player = Auth::user()->player;
@@ -62,14 +62,14 @@ class HotbarController extends Controller
     {
         $request->validate(['slot' => ['required', 'integer', 'min:1']]);
 
-        $user   = Auth::user();
+        $user = Auth::user();
         $player = $user->player;
 
         $playerSlot = PlayerSlot::where('player_id', $player->id)
             ->where('slot_number', $request->integer('slot'))
             ->first();
 
-        if (!$playerSlot || $playerSlot->entity_type !== 'item') {
+        if (! $playerSlot || $playerSlot->entity_type !== 'item') {
             return response()->json(['status' => 'error', 'message' => 'Слот пуст.'], 422);
         }
 
@@ -79,9 +79,10 @@ class HotbarController extends Controller
             ->where('equipped', 0)
             ->first();
 
-        if (!$backpack) {
+        if (! $backpack) {
             // Предмет закончился — очищаем слот
             $this->hotbarService->clearSlot($player, $playerSlot->slot_number);
+
             return response()->json(['status' => 'error', 'message' => 'Предмет закончился.', 'slot_cleared' => true], 422);
         }
 
@@ -89,18 +90,18 @@ class HotbarController extends Controller
         $stats = $this->statService->resolve($player);
 
         $instantEffects = $backpack->item->itemInfo->effects->filter(
-            fn($e) => $e->effect_type->isInstant()
+            fn ($e) => $e->effect_type->isInstant()
         );
 
         foreach ($instantEffects as $effectModel) {
-            $effect   = $effectModel->toValueObject();
+            $effect = $effectModel->toValueObject();
             $strategy = \App\Services\ItemEffect\ItemEffectStrategyFactory::make($effect->type);
             $strategy->apply($player, $effect, $stats->getHpMax(), $stats->getMpMax());
         }
 
         // Уменьшаем количество или удаляем
         $slotCleared = false;
-        $newCount    = 0;
+        $newCount = 0;
         if ($backpack->count <= 1) {
             $backpack->delete();
             $this->hotbarService->clearSlot($player, $playerSlot->slot_number);
@@ -114,13 +115,13 @@ class HotbarController extends Controller
         $stats = $this->statService->resolve($player); // re-resolve after refresh for response values
 
         return response()->json([
-            'status'       => 'success',
+            'status' => 'success',
             'slot_cleared' => $slotCleared,
-            'count'        => $newCount,
-            'hp_now'       => $player->hp_now,
-            'hp_max'       => $stats->getHpMax(),
-            'mp_now'       => $player->mp_now,
-            'mp_max'       => $stats->getMpMax(),
+            'count' => $newCount,
+            'hp_now' => $player->hp_now,
+            'hp_max' => $stats->getHpMax(),
+            'mp_now' => $player->mp_now,
+            'mp_max' => $stats->getMpMax(),
         ]);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ShopCartService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;

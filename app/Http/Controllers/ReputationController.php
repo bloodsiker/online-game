@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Reputation\Reputation;
 use App\Models\Reputation\ReputationShopItem;
-use App\Models\User;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ReputationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -96,7 +96,7 @@ class ReputationController extends Controller
                 ->with('rep_error', 'Нет доступных заданий для вашего уровня репутации.');
         }
 
-        session()->forget('rep_offer_' . $player->id . '_' . $id);
+        session()->forget('rep_offer_'.$player->id.'_'.$id);
 
         return redirect()->route('reputation.index', $id)
             ->with('rep_success', 'Задание получено!');
@@ -111,7 +111,7 @@ class ReputationController extends Controller
         $pr = $this->reputationService->getOrCreate($player, $reputation);
         $pr->update(['last_completed_at' => now()]);
 
-        session()->forget('rep_offer_' . $player->id . '_' . $id);
+        session()->forget('rep_offer_'.$player->id.'_'.$id);
 
         return redirect()->route('npc', $request->integer('npc'));
     }

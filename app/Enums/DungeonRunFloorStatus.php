@@ -6,16 +6,16 @@ namespace App\Enums;
 
 enum DungeonRunFloorStatus: string
 {
-    case ACTIVE    = 'active';
+    case ACTIVE = 'active';
     case COMPLETED = 'completed';
-    case FAILED    = 'failed';
+    case FAILED = 'failed';
 
     public function label(): string
     {
-        return match($this) {
-            self::ACTIVE    => 'Активный',
+        return match ($this) {
+            self::ACTIVE => 'Активный',
             self::COMPLETED => 'Пройден',
-            self::FAILED    => 'Провалено',
+            self::FAILED => 'Провалено',
         };
     }
 }

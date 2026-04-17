@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\DTO\MoveResultDTO;
 use App\Models\Dungeon\DungeonGate;
 use App\Models\Dungeon\DungeonSession;
@@ -10,7 +9,8 @@ use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
 use App\Models\Player\PlayerLocationAccess;
 use App\Models\Share\ShareItem;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final readonly class PlayerMovementService
 {
@@ -59,7 +59,7 @@ final readonly class PlayerMovementService
             }
         }
 
-        $capacity      = $user->getBagCount();
+        $capacity = $user->getBagCount();
         $speedModifier = $this->getSpeedModifier($backpackUsed, $capacity);
 
         $this->applyMove($user, $location->$direction);
@@ -71,8 +71,8 @@ final readonly class PlayerMovementService
     {
         return match ($gate->unlock_type) {
             'area_cleared' => $this->checkAreaCleared($gate, $user),
-            'boss_item'    => $this->checkBossItem($gate, $user),
-            default        => null,
+            'boss_item' => $this->checkBossItem($gate, $user),
+            default => null,
         };
     }
 
@@ -118,7 +118,7 @@ final readonly class PlayerMovementService
     private function applyMove(User $user, int $newLocationId): void
     {
         $user->prev_location_id = $user->location_id;
-        $user->location_id      = $newLocationId;
+        $user->location_id = $newLocationId;
         $user->save();
     }
 
@@ -130,7 +130,7 @@ final readonly class PlayerMovementService
             $ratio <= 1.0 => 1.0,
             $ratio <= 1.2 => 0.8,
             $ratio <= 1.5 => 0.5,
-            default       => 0.2,
+            default => 0.2,
         };
     }
 }

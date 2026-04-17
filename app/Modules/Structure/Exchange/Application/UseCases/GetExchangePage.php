@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Exchange\Application\UseCases;
 
 use App\Models\Structure;
-use App\Models\User;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangeItemDTO;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangePageDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use DomainException;
 use Illuminate\Support\Collection;
 

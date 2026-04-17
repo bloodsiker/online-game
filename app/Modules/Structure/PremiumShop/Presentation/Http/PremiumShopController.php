@@ -6,9 +6,9 @@ namespace App\Modules\Structure\PremiumShop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Models\Structure;
-use App\Models\User;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Services\ShopCartService;
@@ -33,11 +33,11 @@ class PremiumShopController extends Controller
         $user = Auth::user();
         $shop = Structure::with('shopItems.item', 'shopItems.requirements.item')->find(self::SHOP_ID);
 
-        $firstCategory    = $shop->categories()->first();
+        $firstCategory = $shop->categories()->first();
         $activeCategoryId = $request->integer('category_id', $firstCategory->id);
 
         $items = $this->getShopItems->execute($shop->id, $activeCategoryId);
-        $cart  = $this->shopCartService->getCart($user, $shop->id);
+        $cart = $this->shopCartService->getCart($user, $shop->id);
 
         $this->collector->collectFrom(new PremiumShopItemTooltipStrategy($items));
         $itemTooltipScript = $this->collector->renderScript();
@@ -48,7 +48,7 @@ class PremiumShopController extends Controller
     public function buy(Request $request): RedirectResponse
     {
         /** @var User $user */
-        $user   = Auth::user();
+        $user = Auth::user();
         $result = $this->purchaseCart->execute($user, self::SHOP_ID);
 
         if (! $result->ok) {

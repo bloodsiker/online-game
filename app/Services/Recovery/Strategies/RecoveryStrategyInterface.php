@@ -6,6 +6,7 @@ use App\Models\Player\Player;
 use App\Models\Structure;
 use App\Services\Recovery\Dto\RecoveryResultDto;
 
-interface RecoveryStrategyInterface {
+interface RecoveryStrategyInterface
+{
     public function recover(Player $player, Structure $structure): RecoveryResultDto;
 }

@@ -23,7 +23,7 @@ class MonsterActiveEffect extends Model
     protected $casts = [
         'applied_at' => 'datetime',
         'expires_at' => 'datetime',
-        'type'       => ActiveEffectType::class,
+        'type' => ActiveEffectType::class,
     ];
 
     public function locationMonster(): BelongsTo

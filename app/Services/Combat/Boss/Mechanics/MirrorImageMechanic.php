@@ -54,6 +54,7 @@ class MirrorImageMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $count = $this->getConfig('image_count', 2);
+
         return "Босс создал {$count} зеркальных отражений";
     }
 }

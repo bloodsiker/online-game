@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Application\Mappers;
 
-use App\Models\User;
 use App\Modules\Referral\Application\DTOs\ReferralInviteDTO;
 use App\Modules\Referral\Application\DTOs\ReferralPageDTO;
 use App\Modules\Referral\Application\DTOs\ReferralStageDTO;
 use App\Modules\Referral\Infrastructure\Persistence\Models\Referral;
 use App\Modules\Referral\Infrastructure\Persistence\Models\ReferralRewardStage;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 

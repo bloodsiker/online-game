@@ -7,8 +7,8 @@ use App\Factories\PlayerFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Race;
-use App\Models\User;
 use App\Modules\Referral\Application\UseCases\ApplyReferralCode;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 

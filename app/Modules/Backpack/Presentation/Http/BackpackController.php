@@ -15,14 +15,14 @@ use Illuminate\View\View;
 class BackpackController extends Controller
 {
     public function __construct(
-        private readonly GetBackpack  $getBackpack,
-        private readonly UpdateOrder  $updateOrder,
+        private readonly GetBackpack $getBackpack,
+        private readonly UpdateOrder $updateOrder,
     ) {}
 
     public function index(Request $request): View
     {
         $filters = [
-            'sid'   => $request->get('sid'),
+            'sid' => $request->get('sid'),
             'group' => $request->get('group', 'main'),
         ];
 

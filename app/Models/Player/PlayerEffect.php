@@ -29,14 +29,17 @@ class PlayerEffect extends Model
     {
         return $this->belongsTo(Player::class);
     }
+
     public function effect(): BelongsTo
     {
         return $this->belongsTo(Effect::class);
     }
+
     public function sourcePlayer(): BelongsTo
     {
         return $this->belongsTo(Player::class, 'source_player_id');
     }
+
     public function sourceMagicSkill(): BelongsTo
     {
         return $this->belongsTo(MagicSkill::class, 'source_magic_skill_id');
@@ -60,7 +63,7 @@ class PlayerEffect extends Model
 
     public function timeRemaining(): ?int
     {
-        if (!$this->expires_at || $this->expires_at->isPast()) {
+        if (! $this->expires_at || $this->expires_at->isPast()) {
             return 0;
         }
 

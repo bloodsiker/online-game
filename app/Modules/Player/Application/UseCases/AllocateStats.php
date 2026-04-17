@@ -16,7 +16,8 @@ class AllocateStats
     ) {}
 
     /**
-     * @param array<string, int> $stats
+     * @param  array<string, int>  $stats
+     *
      * @throws \DomainException
      */
     public function execute(Player $player, array $stats): AllocateStatsResultDTO
@@ -31,12 +32,12 @@ class AllocateStats
             throw new \DomainException('У вас нет столько свободных характеристик.');
         }
 
-        $player->strength     += $stats['strength'];
-        $player->intuition    += $stats['intuition'];
-        $player->agility      += $stats['agility'];
+        $player->strength += $stats['strength'];
+        $player->intuition += $stats['intuition'];
+        $player->agility += $stats['agility'];
         $player->intelligence += $stats['intelligence'];
-        $player->wisdom       += $stats['wisdom'];
-        $player->free_stats   -= $sumChange;
+        $player->wisdom += $stats['wisdom'];
+        $player->free_stats -= $sumChange;
 
         $this->playerRepository->save($player);
         event(new PlayerChangeStat($player));

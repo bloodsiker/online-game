@@ -7,9 +7,9 @@ namespace App\Modules\Structure\Exchange\Domain\Services;
 use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Models\Structure;
-use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use DomainException;
 
 readonly class ExchangeItemService
@@ -26,13 +26,13 @@ readonly class ExchangeItemService
 
         $fromShareItem = ShareItem::find($fromShareId);
 
-        if (!$fromShareItem instanceof ShareItem) {
+        if (! $fromShareItem instanceof ShareItem) {
             throw new DomainException('Предмет для обмена не найден.');
         }
 
         $backpackFromItem = $this->backpackService->getItem($user, $fromShareItem);
 
-        if (!$backpackFromItem instanceof Backpack) {
+        if (! $backpackFromItem instanceof Backpack) {
             throw new DomainException('У вас нет необходимого предмета для обмена.');
         }
 
@@ -42,7 +42,7 @@ readonly class ExchangeItemService
 
         $toShareItem = ShareItem::find($toShareId);
 
-        if (!$toShareItem instanceof ShareItem) {
+        if (! $toShareItem instanceof ShareItem) {
             throw new DomainException('Предмет результата обмена не найден.');
         }
 

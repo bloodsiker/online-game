@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models\Party;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int    $id
- * @property int    $party_id
- * @property int    $user_id
- * @property bool   $is_ready
+ * @property int $id
+ * @property int $party_id
+ * @property int $user_id
+ * @property bool $is_ready
  * @property-read Party $party
  * @property-read User  $user
  */

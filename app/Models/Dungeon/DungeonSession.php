@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Models\Dungeon;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int               $id
- * @property int               $dungeon_id
- * @property int               $user_id
- * @property int|null          $primary_session_id  Для партии: id сессии лидера (чьи монстры). Null — собственный id.
- * @property Carbon            $entered_at
- * @property Carbon|null       $expires_at
+ * @property int $id
+ * @property int $dungeon_id
+ * @property int $user_id
+ * @property int|null $primary_session_id Для партии: id сессии лидера (чьи монстры). Null — собственный id.
+ * @property Carbon $entered_at
+ * @property Carbon|null $expires_at
  * @property-read Dungeon      $dungeon
  * @property-read User         $user
  */
@@ -26,8 +26,8 @@ class DungeonSession extends Model
     ];
 
     protected $casts = [
-        'entered_at'   => 'datetime',
-        'expires_at'   => 'datetime',
+        'entered_at' => 'datetime',
+        'expires_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 

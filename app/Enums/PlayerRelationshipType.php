@@ -7,6 +7,6 @@ namespace App\Enums;
 enum PlayerRelationshipType: string
 {
     case FRIEND = 'friend';
-    case ENEMY  = 'enemy';
+    case ENEMY = 'enemy';
     case IGNORE = 'ignore';
 }

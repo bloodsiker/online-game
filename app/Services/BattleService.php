@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\DungeonType;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Dungeon\DungeonSession;
@@ -11,27 +10,26 @@ use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
 use App\Repositories\BattleRepository;
 use App\Repositories\MonsterOnLocationRepository;
-use App\Services\DungeonService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class BattleService
 {
     public function __construct(
-        readonly private BattleRepository $battleRepository,
-        readonly private MonsterOnLocationRepository $monsterOnLocationRepository,
-        readonly private DungeonService $dungeonService,
+        private readonly BattleRepository $battleRepository,
+        private readonly MonsterOnLocationRepository $monsterOnLocationRepository,
+        private readonly DungeonService $dungeonService,
     ) {}
 
     public function battleOnLocation(Location $location): ?Battle
     {
-        $user    = Auth::user();
-        $now     = Carbon::now();
-        $battle  = null;
+        $user = Auth::user();
+        $now = Carbon::now();
+        $battle = null;
 
         // Определяем изоляцию данжа: если локация принадлежит данжу — фильтруем по сессии
         $dungeonSessionId = null;
-        $session          = null;
+        $session = null;
         if ($location->dungeon_id !== null) {
             $session = DungeonSession::where('user_id', $user->id)->first();
             if ($session === null) {
@@ -46,7 +44,7 @@ class BattleService
         $battle = $this->battleRepository->findActiveBattleOnLocation($location);
         if ($battle instanceof Battle) {
             $battleDetails = BattleDetail::where(['user_id' => $user->id, 'battle_id' => $battle->id])->first();
-            if (!$battleDetails instanceof BattleDetail) {
+            if (! $battleDetails instanceof BattleDetail) {
                 $this->battleRepository->createBattleDetails($battle, $user);
 
                 $action = "<p><span class='text-red'><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>";
@@ -159,7 +157,7 @@ class BattleService
 
             $this->battleRepository->createBattleDetails($battle, null, $monsterAttacked);
 
-            $action = sprintf("<p>Вы напали на врага - <b>%s...</b></p>", $monsterAttacked->monster->name);
+            $action = sprintf('<p>Вы напали на врага - <b>%s...</b></p>', $monsterAttacked->monster->name);
             $this->battleRepository->createBattleRound($battle, $action, $user);
         }
 

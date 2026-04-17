@@ -27,7 +27,7 @@ class QuestController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $quest = new Quest();
+            $quest = new Quest;
             $this->fillQuest($quest, $request);
             $quest->save();
 
@@ -50,8 +50,8 @@ class QuestController extends Controller
         }
 
         $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
-        $questTypes   = QuestType::cases();
-        $rewardTypes  = QuestRewardType::cases();
+        $questTypes = QuestType::cases();
+        $rewardTypes = QuestRewardType::cases();
 
         return view('admin.quest.info', compact('quest', 'questTypes', 'rewardTypes'));
     }
@@ -59,14 +59,14 @@ class QuestController extends Controller
     public function addObjective(Request $request, Quest $quest): RedirectResponse
     {
         QuestObjective::create([
-            'quest_id'        => $quest->id,
-            'type'            => $request->input('type'),
-            'target_type'     => $request->input('target_type'),
-            'target_id'       => $request->input('target_id') ?: null,
-            'share_item_id'   => $request->input('share_item_id') ?: null,
+            'quest_id' => $quest->id,
+            'type' => $request->input('type'),
+            'target_type' => $request->input('target_type'),
+            'target_id' => $request->input('target_id') ?: null,
+            'share_item_id' => $request->input('share_item_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
-            'drop_chance'     => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
-            'description'     => $request->input('description'),
+            'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
+            'description' => $request->input('description'),
         ]);
 
         return redirect()->back()->with('success', 'Задание добавлено.');
@@ -82,11 +82,11 @@ class QuestController extends Controller
     public function addReward(Request $request, Quest $quest): RedirectResponse
     {
         QuestReward::create([
-            'quest_id'      => $quest->id,
-            'type'          => $request->input('type'),
-            'amount'        => (int) $request->input('amount', 0),
+            'quest_id' => $quest->id,
+            'type' => $request->input('type'),
+            'amount' => (int) $request->input('amount', 0),
             'share_item_id' => $request->input('share_item_id') ?: null,
-            'location_id'   => $request->input('location_id') ?: null,
+            'location_id' => $request->input('location_id') ?: null,
         ]);
 
         return redirect()->back()->with('success', 'Награда добавлена.');
@@ -103,15 +103,15 @@ class QuestController extends Controller
 
     private function fillQuest(Quest $quest, Request $request): void
     {
-        $quest->title            = $request->input('title');
-        $quest->description      = $request->input('description');
-        $quest->type             = $request->input('type');
-        $quest->start_npc_id     = $request->input('start_npc_id') ?: null;
-        $quest->complete_npc_id  = $request->input('complete_npc_id') ?: null;
-        $quest->parent_quest_id  = $request->input('parent_quest_id') ?: null;
-        $quest->after_quest_id   = $request->input('after_quest_id') ?: null;
-        $quest->reset_period     = $request->filled('reset_period') ? (int) $request->input('reset_period') : null;
-        $quest->is_active        = (bool) $request->input('is_active', true);
-        $quest->is_finish        = (bool) $request->input('is_finish', false);
+        $quest->title = $request->input('title');
+        $quest->description = $request->input('description');
+        $quest->type = $request->input('type');
+        $quest->start_npc_id = $request->input('start_npc_id') ?: null;
+        $quest->complete_npc_id = $request->input('complete_npc_id') ?: null;
+        $quest->parent_quest_id = $request->input('parent_quest_id') ?: null;
+        $quest->after_quest_id = $request->input('after_quest_id') ?: null;
+        $quest->reset_period = $request->filled('reset_period') ? (int) $request->input('reset_period') : null;
+        $quest->is_active = (bool) $request->input('is_active', true);
+        $quest->is_finish = (bool) $request->input('is_finish', false);
     }
 }

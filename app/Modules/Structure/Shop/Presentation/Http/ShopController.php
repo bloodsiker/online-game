@@ -6,10 +6,10 @@ namespace App\Modules\Structure\Shop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Models\Structure;
-use App\Models\User;
 use App\Modules\Structure\Shop\Application\UseCases\BuyItem;
 use App\Modules\Structure\Shop\Application\UseCases\GetSellableItems;
 use App\Modules\Structure\Shop\Application\UseCases\SellItems;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +37,7 @@ class ShopController extends Controller
     public function buyItem(Request $request, int $id, int $itemId): RedirectResponse
     {
         /** @var User $user */
-        $user   = Auth::user();
+        $user = Auth::user();
         $result = $this->buyItem->execute(
             user: $user,
             shareItemId: $itemId,

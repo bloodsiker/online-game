@@ -27,12 +27,12 @@ class MessageRenderer
                 return '<span class="chat-item-unknown" title="Предмет не найден">[???]</span>';
             }
 
-            $name  = e($item->getName());
-            $name .= $item->upgrade_lvl > 0 ? ' +' . $item->upgrade_lvl : '';
+            $name = e($item->getName());
+            $name .= $item->upgrade_lvl > 0 ? ' +'.$item->upgrade_lvl : '';
             $color = e($item->itemInfo->rarity?->color() ?? '#666666');
-            $desc  = e($item->itemInfo->description ?? '');
+            $desc = e($item->itemInfo->description ?? '');
 
-            return '<span class="chat-item" style="color:' . $color . '" title="' . $desc . '">' . $name . '</span>';
+            return '<span class="chat-item" style="color:'.$color.'" title="'.$desc.'">'.$name.'</span>';
         }, $escaped);
 
         // Highlight to[NAME] prefix

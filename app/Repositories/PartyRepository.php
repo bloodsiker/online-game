@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Enums\PartyStatus;
 use App\Models\Party\Party;
 use App\Models\Party\PartyMember;
-use Illuminate\Database\Eloquent\Model;
 
 class PartyRepository extends AbstractRepository
 {
@@ -35,13 +34,13 @@ class PartyRepository extends AbstractRepository
         /** @var Party $party */
         $party = Party::create([
             'leader_user_id' => $leaderId,
-            'status'         => PartyStatus::OPEN,
-            'max_size'       => $maxSize,
+            'status' => PartyStatus::OPEN,
+            'max_size' => $maxSize,
         ]);
 
         PartyMember::create([
             'party_id' => $party->id,
-            'user_id'  => $leaderId,
+            'user_id' => $leaderId,
         ]);
 
         return $party;
@@ -51,7 +50,7 @@ class PartyRepository extends AbstractRepository
     {
         return PartyMember::create([
             'party_id' => $partyId,
-            'user_id'  => $userId,
+            'user_id' => $userId,
         ]);
     }
 

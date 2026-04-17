@@ -6,7 +6,7 @@ namespace App\Modules\Clan\Domain\Enums;
 
 enum ClanWarehouseAction: string
 {
-    case PUT  = 'put';
+    case PUT = 'put';
     case TAKE = 'take';
 
     public function isPut(): bool
@@ -21,8 +21,8 @@ enum ClanWarehouseAction: string
 
     public function label(): string
     {
-        return match($this) {
-            self::PUT  => 'Положил',
+        return match ($this) {
+            self::PUT => 'Положил',
             self::TAKE => 'Забрал',
         };
     }

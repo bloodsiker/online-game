@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Domain\Models;
 
-use App\Models\User;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,7 +36,7 @@ class ChatMessage extends Model
 
     protected $casts = [
         'channel' => ChatChannel::class,
-        'type'    => ChatMessageType::class,
+        'type' => ChatMessageType::class,
     ];
 
     public function sender(): BelongsTo

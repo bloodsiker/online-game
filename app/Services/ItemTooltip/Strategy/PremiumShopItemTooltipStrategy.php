@@ -31,9 +31,9 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description,
                 store: true,
-                nogive: !$itemInfo->is_sell,
-                noweight: !$itemInfo->is_weight,
-                nosell: !$itemInfo->is_sell,
+                nogive: ! $itemInfo->is_sell,
+                noweight: ! $itemInfo->is_weight,
+                nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo),
             ));
         }

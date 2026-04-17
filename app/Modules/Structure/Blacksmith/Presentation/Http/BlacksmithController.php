@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\CraftItemDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\UpgradeItemDTO;
@@ -15,6 +14,7 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\GetBreakPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetKraftPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItem;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

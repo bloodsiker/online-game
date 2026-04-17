@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Referral\Application\DTOs\ReferralPageDTO;
 use App\Modules\Referral\Application\Mappers\ReferralPageViewMapper;
 use App\Modules\Referral\Domain\Contracts\ReferralRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final readonly class GetReferralPage
 {

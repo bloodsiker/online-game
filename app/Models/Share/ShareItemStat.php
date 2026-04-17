@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property ShareItemStatType  $stat_type
- * @property int                $value
+ * @property ShareItemStatType $stat_type
+ * @property int $value
  * @property ItemEffectValueType $value_type
  */
 class ShareItemStat extends Model
@@ -24,7 +24,7 @@ class ShareItemStat extends Model
     ];
 
     protected $casts = [
-        'stat_type'  => ShareItemStatType::class,
+        'stat_type' => ShareItemStatType::class,
         'value_type' => ItemEffectValueType::class,
     ];
 

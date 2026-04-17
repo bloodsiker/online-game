@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Services\HotbarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +31,7 @@ class SlotController extends Controller
         $usableItems = Backpack::where('user_id', $user->id)
             ->with('item.itemInfo.effects')
             ->get()
-            ->filter(fn($b) => $b->item?->itemInfo?->is_slot_usable)
+            ->filter(fn ($b) => $b->item?->itemInfo?->is_slot_usable)
             ->values();
 
         return view('slots.index', compact('user', 'player', 'group', 'passiveSkills', 'activeSkills', 'hotbarData', 'usableItems'));
@@ -57,6 +57,7 @@ class SlotController extends Controller
         $this->statService->scaleHp($player, $oldSheet->getHpMax(), $newSheet->getHpMax(), $oldSheet->getMpMax(), $newSheet->getMpMax());
 
         $message = count($equippedIds) ? 'Сохранено' : 'Сохранено. Не выбрано ни одного скилла';
+
         return response()->json(['status' => 'success', 'message' => $message]);
     }
 }

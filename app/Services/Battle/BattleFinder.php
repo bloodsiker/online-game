@@ -18,13 +18,13 @@ readonly class BattleFinder
         $user = auth()->user();
         $battle = $this->battleRepository->findActiveBattleOnLocation($location);
 
-        if (!$battle) {
+        if (! $battle) {
             return null;
         }
 
         $detail = BattleDetail::where(['user_id' => $user->id, 'battle_id' => $battle->id])->first();
 
-        if (!$detail) {
+        if (! $detail) {
             $this->battleRepository->createBattleDetails($battle, $user);
             $this->addJoinMessage($battle, $user);
         }

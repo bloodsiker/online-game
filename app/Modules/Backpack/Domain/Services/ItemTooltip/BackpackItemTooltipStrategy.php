@@ -16,7 +16,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
     public function collect(ItemTooltipCollector $collector): void
     {
         foreach ($this->items as $backpack) {
-            $item     = $backpack->item;
+            $item = $backpack->item;
             $itemInfo = $item->itemInfo;
             $itemInfo->loadMissing('requirements.skill');
             $upgradeLvl = $item->upgrade_lvl ?? 0;
@@ -36,9 +36,9 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description,
                 store: false,
-                nogive: !$itemInfo->is_sell,
-                noweight: !$itemInfo->is_weight,
-                nosell: !$itemInfo->is_sell,
+                nogive: ! $itemInfo->is_sell,
+                noweight: ! $itemInfo->is_weight,
+                nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
             ));

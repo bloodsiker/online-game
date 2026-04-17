@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\Mappers;
 
-use App\Models\User;
 use App\Modules\Structure\Bank\Application\DTOs\BankPageDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BankPageViewMapper

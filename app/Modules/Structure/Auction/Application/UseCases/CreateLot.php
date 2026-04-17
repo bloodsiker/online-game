@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Models\Structure;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
-use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Models\Structure;
-use App\Models\User;
 use App\Modules\Structure\Auction\Domain\Services\AuctionFeeCalculator;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CreateLot
@@ -43,18 +43,19 @@ class CreateLot
 
             if (! $slotItem instanceof Backpack) {
                 $result = ['ok' => false, 'message' => 'Не найдено предмета в сумке.'];
+
                 return;
             }
 
             $qty = min($amount, $slotItem->count);
 
             Auction::create([
-                'user_id'      => $user->id,
+                'user_id' => $user->id,
                 'structure_id' => $auction->id,
-                'item_id'      => $slotItem->item->id,
-                'count'        => $qty,
+                'item_id' => $slotItem->item->id,
+                'count' => $qty,
                 'is_anonymous' => $isAnonymous,
-                'price'        => $price,
+                'price' => $price,
             ]);
 
             if ($slotItem->count <= $qty) {

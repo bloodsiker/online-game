@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int         $id
- * @property int         $dungeon_id
- * @property int         $from_location_id
- * @property int         $to_location_id
- * @property string      $unlock_type  area_cleared|boss_item
- * @property int|null    $boss_share_item_id
+ * @property int $id
+ * @property int $dungeon_id
+ * @property int $from_location_id
+ * @property int $to_location_id
+ * @property string $unlock_type area_cleared|boss_item
+ * @property int|null $boss_share_item_id
  * @property-read Dungeon        $dungeon
  * @property-read Location       $fromLocation
  * @property-read Location       $toLocation

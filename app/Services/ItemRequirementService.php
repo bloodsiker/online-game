@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Enums\ShareItemRequirementType;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerSkill;
 use App\Models\Share\ShareItem;
+use App\Modules\Player\Domain\Enums\PlayerStatKey;
 
 class ItemRequirementService
 {
@@ -43,10 +43,10 @@ class ItemRequirementService
         $stat = PlayerStatKey::tryFrom($key);
 
         $value = match ($stat) {
-            PlayerStatKey::STRENGTH    => (int) floor($player->strength),
-            PlayerStatKey::AGILITY     => (int) floor($player->agility),
-            PlayerStatKey::INTUITION   => (int) floor($player->intuition),
-            PlayerStatKey::WISDOM      => (int) floor($player->wisdom),
+            PlayerStatKey::STRENGTH => (int) floor($player->strength),
+            PlayerStatKey::AGILITY => (int) floor($player->agility),
+            PlayerStatKey::INTUITION => (int) floor($player->intuition),
+            PlayerStatKey::WISDOM => (int) floor($player->wisdom),
             PlayerStatKey::INTELLIGENCE => (int) floor($player->intelligence),
             null => 0,
         };

@@ -11,7 +11,7 @@ use InvalidArgumentException;
 class DungeonStrategyResolver
 {
     public function __construct(
-        private readonly LinearDungeonStrategy   $linear,
+        private readonly LinearDungeonStrategy $linear,
         private readonly SurvivalDungeonStrategy $survival,
         private readonly BossRushDungeonStrategy $bossRush,
     ) {}
@@ -19,10 +19,10 @@ class DungeonStrategyResolver
     public function resolve(Dungeon $dungeon): DungeonStrategyInterface
     {
         return match ($dungeon->type) {
-            DungeonType::LINEAR    => $this->linear,
-            DungeonType::SURVIVAL  => $this->survival,
+            DungeonType::LINEAR => $this->linear,
+            DungeonType::SURVIVAL => $this->survival,
             DungeonType::BOSS_RUSH => $this->bossRush,
-            default                => throw new InvalidArgumentException("Unknown dungeon type: {$dungeon->type->value}"),
+            default => throw new InvalidArgumentException("Unknown dungeon type: {$dungeon->type->value}"),
         };
     }
 }

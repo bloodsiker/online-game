@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Application\UseCases;
 
-use App\Models\User;
 use App\Modules\Referral\Application\DTOs\ReferralFrameDTO;
 use App\Modules\Referral\Application\Mappers\ReferralFrameViewMapper;
 use App\Modules\Referral\Domain\Contracts\ReferralRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final readonly class GetReferralFrame
 {

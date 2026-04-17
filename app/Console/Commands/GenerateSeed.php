@@ -4,13 +4,11 @@ namespace App\Console\Commands;
 
 use App\Enums\BossMechanicType;
 use App\Enums\ItemEffectType;
-use App\Enums\ShareItemSlot;
 use App\Enums\ItemEffectValueType;
 use App\Enums\QuestType;
+use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemStatType;
 use App\Enums\ShareItemType;
-use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
-use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Models\Exchange;
 use App\Models\Experience;
 use App\Models\Item\Item;
@@ -27,16 +25,17 @@ use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Race;
-use App\Models\Share\ShareItemEffect;
-use App\Models\Share\ShareStructureCategory;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;
+use App\Models\Share\ShareItemEffect;
 use App\Models\Share\ShareRecipe;
+use App\Models\Share\ShareStructureCategory;
 use App\Models\Skill;
 use App\Models\Structure;
-use App\Models\User;
+use App\Modules\Structure\Auction\Domain\Models\Auction;
+use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
-use Database\Seeders\BuffSkillSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -59,21 +58,37 @@ class GenerateSeed extends Command
     protected $description = 'Command description';
 
     protected $location1 = null;
+
     protected $location2 = null;
+
     protected $location3 = null;
+
     protected $defaultRace = null;
+
     protected $user1 = null;
+
     protected $monster1 = null;
+
     protected $monster2 = null;
+
     protected $boss = null;
+
     protected $boss2 = null;
+
     protected $boss3 = null;
+
     protected $boss4 = null;
+
     protected $boss5 = null;
+
     protected $skill = null;
+
     protected $skill2 = null;
+
     protected $shopCategory1 = null;
+
     protected $shopCategory2 = null;
+
     protected $shopCategory3 = null;
 
     /**
@@ -167,63 +182,63 @@ class GenerateSeed extends Command
         DB::unprepared($sql);
 
         $this->location1 = Location::find(1);
-        $this->location2 = Location::find(2);;
-        $this->location3 = Location::find(3);;
+        $this->location2 = Location::find(2);
+        $this->location3 = Location::find(3);
 
         $this->info('Create Locations success');
     }
 
     protected function createRace()
     {
-        $race = new Race();
+        $race = new Race;
         $race->name = 'Человек';
         $race->strength = 1;
         $race->agility = 1;
-        $race->intuition =1;
-        $race->wisdom =1;
+        $race->intuition = 1;
+        $race->wisdom = 1;
         $race->intelligence = 1;
         $race->free_stats = 5;
         $race->save();
 
         $this->defaultRace = $race;
 
-        $race = new Race();
+        $race = new Race;
         $race->name = 'Эльф';
         $race->strength = 0.7;
         $race->agility = 0.3;
-        $race->intuition =0.2;
-        $race->wisdom =0.8;
+        $race->intuition = 0.2;
+        $race->wisdom = 0.8;
         $race->intelligence = 3;
         $race->free_stats = 5;
         $race->save();
 
-        $race = new Race();
+        $race = new Race;
         $race->name = 'Темный эльф';
         $race->strength = 0.7;
         $race->agility = 0.2;
-        $race->intuition =3;
-        $race->wisdom =0.6;
+        $race->intuition = 3;
+        $race->wisdom = 0.6;
         $race->intelligence = 0.5;
         $race->free_stats = 5;
         $race->save();
         $this->defaultRace = $race;
 
-        $race = new Race();
+        $race = new Race;
         $race->name = 'Дварф';
         $race->strength = 3;
         $race->agility = 0.5;
-        $race->intuition =0.5;
-        $race->wisdom =0.5;
+        $race->intuition = 0.5;
+        $race->wisdom = 0.5;
         $race->intelligence = 0.5;
         $race->free_stats = 5;
         $race->save();
 
-        $race = new Race();
+        $race = new Race;
         $race->name = 'Хоббит';
         $race->strength = 0.7;
         $race->agility = 3;
-        $race->intuition =0.2;
-        $race->wisdom =0.5;
+        $race->intuition = 0.2;
+        $race->wisdom = 0.5;
         $race->intelligence = 0.6;
         $race->free_stats = 5;
         $race->save();
@@ -233,7 +248,7 @@ class GenerateSeed extends Command
 
     protected function createUser()
     {
-        $user = new User();
+        $user = new User;
         $user->is_admin = true;
         $user->name = 'Tap0K';
         $user->password = Hash::make('q1w2q1w2');
@@ -246,7 +261,7 @@ class GenerateSeed extends Command
 
         $exp = Experience::where('lvl', 1)->first();
 
-        $player = new Player();
+        $player = new Player;
         $player->user_id = $user->id;
         $player->race_id = $this->defaultRace->id;
         $player->lvl = 1;
@@ -273,14 +288,14 @@ class GenerateSeed extends Command
         $player->is_active = 1;
         $player->save();
 
-        $equip1 = new PlayerEquipment();
+        $equip1 = new PlayerEquipment;
         $equip1->player_id = $player->id;
         $equip1->save();
 
         $user->player_id = $player->id;
         $user->save();
 
-        $user = new User();
+        $user = new User;
         $user->name = 'BlooDSikeR';
         $user->password = Hash::make('q1w2q1w2');
         $user->email = 'blood@ukr.net';
@@ -288,7 +303,7 @@ class GenerateSeed extends Command
         $user->location_id = $this->location2->id;
         $user->save();
 
-        $player = new Player();
+        $player = new Player;
         $player->user_id = $user->id;
         $player->race_id = $this->defaultRace->id;
         $player->lvl = 1;
@@ -315,7 +330,7 @@ class GenerateSeed extends Command
         $player->is_active = 1;
         $player->save();
 
-        $equip2 = new PlayerEquipment();
+        $equip2 = new PlayerEquipment;
         $equip2->player_id = $player->id;
         $equip2->save();
 
@@ -328,7 +343,7 @@ class GenerateSeed extends Command
 
     protected function createSkillAndEffects()
     {
-        $skill = new MagicSkill();
+        $skill = new MagicSkill;
         $skill->name = 'Огненный шар';
         $skill->slug = 'fireball';
         $skill->description = 'Огненный шар';
@@ -344,7 +359,7 @@ class GenerateSeed extends Command
         $skill->effects = null;
         $skill->save();
 
-        $skill2 = new MagicSkill();
+        $skill2 = new MagicSkill;
         $skill2->name = 'Ледяная стрела';
         $skill2->slug = 'ice_arrow';
         $skill2->description = 'Ледяная стрела';
@@ -360,7 +375,7 @@ class GenerateSeed extends Command
         $skill2->effects = null;
         $skill2->save();
 
-        $skill3 = new MagicSkill();
+        $skill3 = new MagicSkill;
         $skill3->name = 'Атака ястреба';
         $skill3->slug = 'hawk_attack';
         $skill3->description = 'Атака ястреба';
@@ -374,15 +389,15 @@ class GenerateSeed extends Command
         $skill3->target_type = 'self';
         $skill3->is_passive = true;
         $skill3->effects = [
-                        [
-                            'type'       => 'attack',
-                            'value'      => 2,
-                            'is_percent' => true,
-                        ]
-                    ];
+            [
+                'type' => 'attack',
+                'value' => 2,
+                'is_percent' => true,
+            ],
+        ];
         $skill3->save();
 
-        $effect = new Effect();
+        $effect = new Effect;
         $effect->name = 'Ожог';
         $effect->slug = 'burn';
         $effect->type = 'debuff';
@@ -398,10 +413,10 @@ class GenerateSeed extends Command
         $effect->save();
 
         $skill->skillEffects()->attach($effect->id, [
-            'chance' => $effect->chance
+            'chance' => $effect->chance,
         ]);
 
-        $effect2 = new Effect();
+        $effect2 = new Effect;
         $effect2->name = 'Оглушение';
         $effect2->slug = 'stun';
         $effect2->type = 'debuff';
@@ -416,7 +431,7 @@ class GenerateSeed extends Command
         $effect2->is_dispellable = false;
         $effect2->save();
 
-        $effect3 = new Effect();
+        $effect3 = new Effect;
         $effect3->name = 'Паралич';
         $effect3->slug = 'paralysis';
         $effect3->type = 'debuff';
@@ -431,7 +446,7 @@ class GenerateSeed extends Command
         $effect3->is_dispellable = true;
         $effect3->save();
 
-        $effect4 = new Effect();
+        $effect4 = new Effect;
         $effect4->name = 'Атака ястреба';
         $effect4->slug = 'hawk_attack';
         $effect4->type = 'buff';
@@ -454,29 +469,29 @@ class GenerateSeed extends Command
             $skill->id => [
                 'cooldown_end_at' => null,
                 'is_equipped' => false,
-            ]
+            ],
         ]);
         $player->magicSkills()->syncWithoutDetaching([
             $skill2->id => [
                 'cooldown_end_at' => null,
                 'is_equipped' => false,
-            ]
+            ],
         ]);
         $player->magicSkills()->syncWithoutDetaching([
             $skill3->id => [
                 'cooldown_end_at' => null,
                 'is_equipped' => false,
-            ]
+            ],
         ]);
 
         $this->monster1->effects()->attach($effect->id, [
-            'chance' => $effect->chance
+            'chance' => $effect->chance,
         ]);
         $this->monster1->effects()->attach($effect2->id, [
-            'chance' => $effect2->chance
+            'chance' => $effect2->chance,
         ]);
         $this->monster2->effects()->attach($effect3->id, [
-            'chance' => $effect3->chance
+            'chance' => $effect3->chance,
         ]);
 
         $this->info('Create Skills success');
@@ -485,7 +500,7 @@ class GenerateSeed extends Command
 
     protected function createMonster()
     {
-        $monster = new Monster();
+        $monster = new Monster;
         $monster->name = 'Мышь';
         $monster->lvl = 1;
         $monster->hp = 10;
@@ -502,7 +517,7 @@ class GenerateSeed extends Command
 
         $this->monster1 = $monster;
 
-        $monster2 = new Monster();
+        $monster2 = new Monster;
         $monster2->name = 'Летучая мышь';
         $monster2->lvl = 1;
         $monster2->hp = 15;
@@ -524,7 +539,7 @@ class GenerateSeed extends Command
 
     protected function createBoss()
     {
-        $boss = new Monster();
+        $boss = new Monster;
         $boss->name = 'Древний дракон';
         $boss->lvl = 30;
         $boss->hp = 5000;
@@ -595,7 +610,6 @@ class GenerateSeed extends Command
             'priority' => 70,
         ]);
 
-
         BossMechanic::create([
             'monster_id' => $boss->id,
             'mechanic_type' => BossMechanicType::SHIELD,
@@ -603,7 +617,7 @@ class GenerateSeed extends Command
             'config' => [
                 'shield_hp' => 5000,
                 'duration_turns' => 3,
-                'cooldown_turns' => 15
+                'cooldown_turns' => 15,
             ],
             'priority' => 80,
         ]);
@@ -613,7 +627,7 @@ class GenerateSeed extends Command
             'mechanic_type' => BossMechanicType::DEATH_EXPLOSION,
             'trigger_hp_percent' => 0, // При смерті
             'config' => [
-                'damage_percent' => 30
+                'damage_percent' => 30,
             ],
             'priority' => 200,
         ]);
@@ -839,19 +853,19 @@ class GenerateSeed extends Command
 
     protected function createSkills()
     {
-        $skill = new Skill();
+        $skill = new Skill;
         $skill->name = 'Кулачный бой';
         $skill->type = 'combat';
         $skill->save();
 
-        $skill1 = new Skill();
+        $skill1 = new Skill;
         $skill1->name = 'Стегающее оружие';
         $skill1->type = 'combat';
         $skill1->save();
 
         $this->skill = $skill1;
 
-        $skill2 = new Skill();
+        $skill2 = new Skill;
         $skill2->name = 'Рубящее оружие';
         $skill2->type = 'combat';
         $skill2->save();
@@ -861,7 +875,7 @@ class GenerateSeed extends Command
 
     protected function createItems()
     {
-        $sItem = new ShareItem();
+        $sItem = new ShareItem;
         $sItem->type = 'resource';
         $sItem->price = 10;
         $sItem->name = 'Коготь медведя';
@@ -870,15 +884,15 @@ class GenerateSeed extends Command
         $sItem->save();
 
         $sItem->monsters()->attach($this->monster1->id, ['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
-        $sItem->monsters()->attach($this->monster2->id,['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
+        $sItem->monsters()->attach($this->monster2->id, ['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
 
-        $item = new Item();
+        $item = new Item;
         $item->share_item_id = $sItem->id;
         $item->save();
 
         $this->location1->itemsOnLocation()->attach($item->id);
 
-        $sItem2 = new ShareItem();
+        $sItem2 = new ShareItem;
         $sItem2->type = 'weapon';
         $sItem2->skill_id = $this->skill2->id;
         $sItem2->skill_lvl = 0;
@@ -897,13 +911,13 @@ class GenerateSeed extends Command
         $sItem2->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem2->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $item2 = new Item();
+        $item2 = new Item;
         $item2->share_item_id = $sItem2->id;
         $item2->save();
 
         $this->location2->itemsOnLocation()->attach($item2->id);
 
-        $sItem3 = new ShareItem();
+        $sItem3 = new ShareItem;
         $sItem3->type = ShareItemType::POTION;
         $sItem3->price = 150;
         $sItem3->name = 'Сухой паек';
@@ -913,14 +927,14 @@ class GenerateSeed extends Command
         $sItem3->image = 'https://skazanie.com/img-item/53e82794f638.jpg';
         $sItem3->save();
 
-        $item3 = new Item();
+        $item3 = new Item;
         $item3->share_item_id = $sItem3->id;
         $item3->count_use = $sItem3->count_use;
         $item3->save();
 
         $this->location2->itemsOnLocation()->attach($item3->id);
 
-        $sItem4 = new ShareItem();
+        $sItem4 = new ShareItem;
         $sItem4->type = 'key';
         $sItem4->is_sell = 0;
         $sItem4->price = 0;
@@ -930,14 +944,14 @@ class GenerateSeed extends Command
         $sItem4->is_weight = false;
         $sItem4->save();
 
-        $item4 = new Item();
+        $item4 = new Item;
         $item4->share_item_id = $sItem4->id;
         $item4->count_use = $sItem4->count_use;
         $item4->save();
 
         $this->location1->itemsOnLocation()->attach($item4->id);
 
-        $sItem5 = new ShareItem();
+        $sItem5 = new ShareItem;
         $sItem5->type = 'weapon';
         $sItem5->skill_id = $this->skill2->id;
         $sItem5->skill_lvl = 5;
@@ -956,7 +970,7 @@ class GenerateSeed extends Command
         $sItem5->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem5->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem6 = new ShareItem();
+        $sItem6 = new ShareItem;
         $sItem6->type = 'weapon';
         $sItem6->skill_id = $this->skill2->id;
         $sItem6->skill_lvl = 10;
@@ -973,7 +987,7 @@ class GenerateSeed extends Command
             ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 8, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
-        $item3 = new Item();
+        $item3 = new Item;
         $item3->share_item_id = $sItem6->id;
         $item3->count_use = $sItem6->count_use;
         $item3->save();
@@ -982,7 +996,7 @@ class GenerateSeed extends Command
         $sItem6->monsters()->attach($this->monster1->id, ['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
         $sItem6->monsters()->attach($this->monster2->id, ['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem7 = new ShareItem();
+        $sItem7 = new ShareItem;
         $sItem7->type = 'shield';
         $sItem7->price = 100;
         $sItem7->name = 'Щит «Заступник небес»';
@@ -998,7 +1012,7 @@ class GenerateSeed extends Command
         $sItem7->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem7->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem8 = new ShareItem();
+        $sItem8 = new ShareItem;
         $sItem8->type = 'armor';
         $sItem8->price = 2000;
         $sItem8->break_crystal = 2;
@@ -1015,7 +1029,7 @@ class GenerateSeed extends Command
         $sItem8->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem8->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem9 = new ShareItem();
+        $sItem9 = new ShareItem;
         $sItem9->type = 'armor';
         $sItem9->price = 24000;
         $sItem9->break_crystal = 24;
@@ -1034,7 +1048,7 @@ class GenerateSeed extends Command
 
         $this->info('Create Items success');
 
-        $sItem9 = new ShareItem();
+        $sItem9 = new ShareItem;
         $sItem9->type = 'armor';
         $sItem9->price = 100;
         $sItem9->name = 'Шлем «Ночной бури»';
@@ -1050,7 +1064,7 @@ class GenerateSeed extends Command
         $sItem9->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem9->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem10 = new ShareItem();
+        $sItem10 = new ShareItem;
         $sItem10->type = 'armor';
         $sItem10->price = 90;
         $sItem10->name = 'Наручи «Ночной бури»';
@@ -1066,7 +1080,7 @@ class GenerateSeed extends Command
         $sItem10->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem10->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem11 = new ShareItem();
+        $sItem11 = new ShareItem;
         $sItem11->type = 'armor';
         $sItem11->price = 110;
         $sItem11->name = 'Сапоги «Ночной бури»';
@@ -1082,7 +1096,7 @@ class GenerateSeed extends Command
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sItem11 = new ShareItem();
+        $sItem11 = new ShareItem;
         $sItem11->type = 'armor';
         $sItem11->price = 105;
         $sItem11->name = 'Легкий плащ';
@@ -1098,7 +1112,7 @@ class GenerateSeed extends Command
         $sItem11->monsters()->attach($this->monster1->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
-        $sIte12 = new ShareItem();
+        $sIte12 = new ShareItem;
         $sIte12->type = ShareItemType::RESOURCE;
         $sIte12->price = 10;
         $sIte12->name = 'Слиток';
@@ -1109,13 +1123,13 @@ class GenerateSeed extends Command
         $sIte12->monsters()->attach($this->monster1->id, ['drop_chance' => 30, 'min_count' => 1, 'max_count' => 5]);
         $sIte12->monsters()->attach($this->monster2->id, ['drop_chance' => 30, 'min_count' => 1, 'max_count' => 5]);
 
-        $item12 = new Item();
+        $item12 = new Item;
         $item12->share_item_id = $sIte12->id;
         $item12->save();
 
         $this->location1->itemsOnLocation()->attach($item12->id, ['count' => 10]);
 
-        $sIte13 = new ShareItem();
+        $sIte13 = new ShareItem;
         $sIte13->type = ShareItemType::SCROLL;
         $sIte13->name = 'Сертификат «Новое имя»';
         $sIte13->description = 'Документ, подтверждающий ваше право воспользоваться услугой по смене игрового ника. Будьте внимательны! Новое имя должно быть уникально';
@@ -1123,7 +1137,7 @@ class GenerateSeed extends Command
         $sIte13->is_weight = false;
         $sIte13->save();
 
-        $sIte14 = new ShareItem();
+        $sIte14 = new ShareItem;
         $sIte14->type = ShareItemType::SCROLL;
         $sIte14->name = 'Сертификат «Смена расы»';
         $sIte14->description = 'Позволяет один раз изменить расу.';
@@ -1131,7 +1145,7 @@ class GenerateSeed extends Command
         $sIte14->is_weight = false;
         $sIte14->save();
 
-        $sIte15 = new ShareItem();
+        $sIte15 = new ShareItem;
         $sIte15->type = ShareItemType::POTION;
         $sIte15->price = 1000;
         $sIte15->name = 'Эликсир жизни';
@@ -1139,20 +1153,20 @@ class GenerateSeed extends Command
         $sIte15->image = '/img/resource/life_red.gif';
         $sIte15->save();
 
-        $sIteEffect15 = new ShareItemEffect();
+        $sIteEffect15 = new ShareItemEffect;
         $sIteEffect15->share_item_id = $sIte15->id;
         $sIteEffect15->effect_type = ItemEffectType::HEAL_HP;
         $sIteEffect15->value = 50;
         $sIteEffect15->value_type = ItemEffectValueType::PERCENT;
         $sIteEffect15->save();
 
-        $item15 = new Item();
+        $item15 = new Item;
         $item15->share_item_id = $sIte15->id;
         $item15->save();
 
         $this->user1->backpack()->attach($item15->id, ['equipped' => 0, 'count' => 200]);
 
-        $sIte16 = new ShareItem();
+        $sIte16 = new ShareItem;
         $sIte16->type = ShareItemType::POTION;
         $sIte16->price = 1500;
         $sIte16->name = 'Эликсир маны';
@@ -1160,20 +1174,20 @@ class GenerateSeed extends Command
         $sIte16->image = '/img/resource/mp_red.gif';
         $sIte16->save();
 
-        $sIteEffect16 = new ShareItemEffect();
+        $sIteEffect16 = new ShareItemEffect;
         $sIteEffect16->share_item_id = $sIte16->id;
         $sIteEffect16->effect_type = ItemEffectType::HEAL_MP;
         $sIteEffect16->value = 55;
         $sIteEffect16->value_type = ItemEffectValueType::PERCENT;
         $sIteEffect16->save();
 
-        $item16 = new Item();
+        $item16 = new Item;
         $item16->share_item_id = $sIte16->id;
         $item16->save();
 
         $this->user1->backpack()->attach($item16->id, ['equipped' => 0, 'count' => 200]);
 
-        $sIte17 = new ShareItem();
+        $sIte17 = new ShareItem;
         $sIte17->type = ShareItemType::BELT;
         $sIte17->price = 20000;
         $sIte17->name = 'Пояс титана';
@@ -1190,13 +1204,13 @@ class GenerateSeed extends Command
             ],
         ]);
 
-        $item17 = new Item();
+        $item17 = new Item;
         $item17->share_item_id = $sIte17->id;
         $item17->save();
 
         $this->user1->backpack()->attach($item17->id, ['equipped' => 0, 'count' => 1]);
 
-        $sIte18 = new ShareItem();
+        $sIte18 = new ShareItem;
         $sIte18->type = ShareItemType::BAG;
         $sIte18->price = 30000;
         $sIte18->name = 'Рюкзак путешественника';
@@ -1213,13 +1227,13 @@ class GenerateSeed extends Command
             ],
         ]);
 
-        $item18 = new Item();
+        $item18 = new Item;
         $item18->share_item_id = $sIte18->id;
         $item18->save();
 
         $this->user1->backpack()->attach($item18->id, ['equipped' => 0, 'count' => 1]);
 
-        $sItem19 = new ShareItem();
+        $sItem19 = new ShareItem;
         $sItem19->type = ShareItemType::SCROLL;
         $sItem19->price = 1000;
         $sItem19->name = 'Свиток заточки';
@@ -1228,13 +1242,13 @@ class GenerateSeed extends Command
         $sItem19->upgrade_scroll_type = UpgradeScrollType::BASE;
         $sItem19->save();
 
-        $item19 = new Item();
+        $item19 = new Item;
         $item19->share_item_id = $sItem19->id;
         $item19->save();
 
         $this->user1->backpack()->attach($item19->id, ['equipped' => 0, 'count' => 100]);
 
-        $sItem19 = new ShareItem();
+        $sItem19 = new ShareItem;
         $sItem19->type = ShareItemType::SCROLL;
         $sItem19->price = 5000;
         $sItem19->name = 'Свиток стабилизации';
@@ -1243,13 +1257,13 @@ class GenerateSeed extends Command
         $sItem19->upgrade_scroll_type = UpgradeScrollType::STABILIZER;
         $sItem19->save();
 
-        $item19 = new Item();
+        $item19 = new Item;
         $item19->share_item_id = $sItem19->id;
         $item19->save();
 
         $this->user1->backpack()->attach($item19->id, ['equipped' => 0, 'count' => 100]);
 
-        $sItem20 = new ShareItem();
+        $sItem20 = new ShareItem;
         $sItem20->type = ShareItemType::SCROLL;
         $sItem20->price = 10000;
         $sItem20->name = 'Свиток защиты';
@@ -1258,7 +1272,7 @@ class GenerateSeed extends Command
         $sItem20->upgrade_scroll_type = UpgradeScrollType::PROTECTION;
         $sItem20->save();
 
-        $item20 = new Item();
+        $item20 = new Item;
         $item20->share_item_id = $sItem20->id;
         $item20->save();
 
@@ -1271,7 +1285,7 @@ class GenerateSeed extends Command
     {
         $user = User::find(1);
 
-        $sItem1 = new ShareItem();
+        $sItem1 = new ShareItem;
         $sItem1->type = 'weapon';
         $sItem1->skill_id = $this->skill->id;
         $sItem1->skill_lvl = 50;
@@ -1288,11 +1302,11 @@ class GenerateSeed extends Command
             ['stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => 80, 'value_type' => ItemEffectValueType::FLAT],
         ]);
 
-        $item1 = new Item();
+        $item1 = new Item;
         $item1->share_item_id = $sItem1->id;
         $item1->save();
 
-        $sItem2 = new ShareItem();
+        $sItem2 = new ShareItem;
         $sItem2->type = 'recipe';
         $sItem2->price = 1000;
         $sItem2->name = 'Рецепт "Кнут Архангела"';
@@ -1300,17 +1314,17 @@ class GenerateSeed extends Command
         $sItem2->image = '/img/resource/scroll_weapon.gif';
         $sItem2->save();
 
-        $item2 = new Item();
+        $item2 = new Item;
         $item2->share_item_id = $sItem2->id;
         $item2->save();
 
-        $shareRecipe = new ShareRecipe();
+        $shareRecipe = new ShareRecipe;
         $shareRecipe->share_item_id = $sItem2->id;
         $shareRecipe->kraft_item_id = $sItem1->id;
         $shareRecipe->percent = 95;
         $shareRecipe->save();
 
-        $sItem3 = new ShareItem();
+        $sItem3 = new ShareItem;
         $sItem3->type = 'resource';
         $sItem3->price = 1000;
         $sItem3->name = 'Кристалл';
@@ -1318,7 +1332,7 @@ class GenerateSeed extends Command
         $sItem3->image = '/img/resource/crystal_gold.gif';
         $sItem3->save();
 
-        $item3 = new Item();
+        $item3 = new Item;
         $item3->share_item_id = $sItem3->id;
         $item3->save();
 
@@ -1335,7 +1349,7 @@ class GenerateSeed extends Command
 
     protected function createBoxItems()
     {
-        $sItem1 = new ShareItem();
+        $sItem1 = new ShareItem;
         $sItem1->type = 'chest';
         $sItem1->price = 0;
         $sItem1->break_crystal = 0;
@@ -1352,7 +1366,7 @@ class GenerateSeed extends Command
         $sItem1->itemHasItems()->attach($details2->id, ['min_count' => 1, 'max_count' => 1, 'drop_chance' => 70]);
         $sItem1->itemHasItems()->attach($details3->id, ['min_count' => 1, 'max_count' => 3, 'drop_chance' => 70]);
 
-        $item = new Item();
+        $item = new Item;
         $item->share_item_id = $sItem1->id;
         $item->save();
 
@@ -1361,47 +1375,47 @@ class GenerateSeed extends Command
 
     public function createShareActions()
     {
-        $action1 = new ShareAction();
+        $action1 = new ShareAction;
         $action1->alias = 'heal';
         $action1->name = 'Востановить жизни';
         $action1->save();
 
-        $action2 = new ShareAction();
+        $action2 = new ShareAction;
         $action2->alias = 'buy';
         $action2->name = 'Купить';
         $action2->save();
 
-        $action3 = new ShareAction();
+        $action3 = new ShareAction;
         $action3->alias = 'sell';
         $action3->name = 'Продать';
         $action3->save();
 
-        $action4 = new ShareAction();
+        $action4 = new ShareAction;
         $action4->alias = 'put_item';
         $action4->name = 'Оставить на хранение';
         $action4->save();
 
-        $action5 = new ShareAction();
+        $action5 = new ShareAction;
         $action5->alias = 'take_item';
         $action5->name = 'Забрать вещи';
         $action5->save();
 
-        $action6 = new ShareAction();
+        $action6 = new ShareAction;
         $action6->alias = 'kraft_item';
         $action6->name = 'Крафт предметов';
         $action6->save();
 
-        $action7 = new ShareAction();
+        $action7 = new ShareAction;
         $action7->alias = 'auction_buy';
         $action7->name = 'Купить товар';
         $action7->save();
 
-        $action8 = new ShareAction();
+        $action8 = new ShareAction;
         $action8->alias = 'auction_sell';
         $action8->name = 'Новый лот';
         $action8->save();
 
-        $action9 = new ShareAction();
+        $action9 = new ShareAction;
         $action9->alias = 'auction_my_lot';
         $action9->name = 'Мои лоты';
         $action9->save();
@@ -1409,19 +1423,19 @@ class GenerateSeed extends Command
 
     public function createShareShopCategory()
     {
-        $category1 = new ShareStructureCategory();
+        $category1 = new ShareStructureCategory;
         $category1->name = 'Оружие';
         $category1->save();
 
         $this->shopCategory1 = $category1;
 
-        $category2 = new ShareStructureCategory();
+        $category2 = new ShareStructureCategory;
         $category2->name = 'Артефакты';
         $category2->save();
 
         $this->shopCategory2 = $category2;
 
-        $category3 = new ShareStructureCategory();
+        $category3 = new ShareStructureCategory;
         $category3->name = 'Услуги';
         $category3->save();
 
@@ -1431,7 +1445,7 @@ class GenerateSeed extends Command
     public function createStructures()
     {
         $locationArmorShop = Location::find(18);
-        $shop1 = new Structure();
+        $shop1 = new Structure;
         $shop1->type = Structure::TYPE_SHOP;
         $shop1->name = 'Магазин брони';
         $shop1->location_id = $locationArmorShop->id;
@@ -1470,7 +1484,7 @@ class GenerateSeed extends Command
         $shop1->actions()->attach(3);
 
         $locationWeaponShop = Location::find(16);
-        $shop2 = new Structure();
+        $shop2 = new Structure;
         $shop2->type = Structure::TYPE_SHOP;
         $shop2->name = 'Магазин оружия';
         $shop2->location_id = $locationWeaponShop->id;
@@ -1493,7 +1507,7 @@ class GenerateSeed extends Command
         $shop2->actions()->attach(3);
 
         $locationHeal = Location::find(6);
-        $shop3 = new Structure();
+        $shop3 = new Structure;
         $shop3->type = Structure::TYPE_HEAL;
         $shop3->name = 'Целительный фонтан';
         $shop3->location_id = $locationHeal->id;
@@ -1502,7 +1516,7 @@ class GenerateSeed extends Command
         $shop3->actions()->attach(1);
 
         $locationHeal = Location::find(47);
-        $shop4 = new Structure();
+        $shop4 = new Structure;
         $shop4->type = Structure::TYPE_WAREHOUSE;
         $shop4->name = 'Хранилище';
         $shop4->location_id = $locationHeal->id;
@@ -1511,7 +1525,7 @@ class GenerateSeed extends Command
         $shop4->actions()->attach(4);
         $shop4->actions()->attach(5);
 
-        $clanWarehouse = new Structure();
+        $clanWarehouse = new Structure;
         $clanWarehouse->type = Structure::TYPE_CLAN_WAREHOUSE;
         $clanWarehouse->name = 'Клановое хранилище';
         $clanWarehouse->location_id = $locationHeal->id;
@@ -1520,23 +1534,22 @@ class GenerateSeed extends Command
         $clanWarehouse->actions()->attach(4);
         $clanWarehouse->actions()->attach(5);
 
-
         $locationBank = Location::find(46);
-        $bank = new Structure();
+        $bank = new Structure;
         $bank->type = Structure::TYPE_BANK;
         $bank->name = 'Банк';
         $bank->location_id = $locationBank->id;
         $bank->save();
 
         $locationBank = Location::find(46);
-        $bank = new Structure();
+        $bank = new Structure;
         $bank->type = Structure::TYPE_CLAN_BANK;
         $bank->name = 'Клановая казна';
         $bank->location_id = $locationBank->id;
         $bank->save();
 
         $locationHeal = Location::find(27);
-        $shop5 = new Structure();
+        $shop5 = new Structure;
         $shop5->type = Structure::TYPE_BLACKSMITH;
         $shop5->name = 'Кузня';
         $shop5->location_id = $locationHeal->id;
@@ -1545,7 +1558,7 @@ class GenerateSeed extends Command
         $shop5->actions()->attach(6);
 
         $locationHeal = Location::find(39);
-        $auction = new Structure();
+        $auction = new Structure;
         $auction->type = Structure::TYPE_AUCTION;
         $auction->name = 'Комисионный магазин';
         $auction->location_id = $locationHeal->id;
@@ -1556,7 +1569,7 @@ class GenerateSeed extends Command
         $auction->actions()->attach(9);
 
         $item = Item::find(1);
-        $auctionObj = new Auction();
+        $auctionObj = new Auction;
         $auctionObj->user_id = $this->user1->id;
         $auctionObj->structure_id = $auction->id;
         $auctionObj->item_id = $item->id;
@@ -1565,7 +1578,7 @@ class GenerateSeed extends Command
         $auctionObj->is_anonymous = 0;
         $auctionObj->save();
 
-        $premium = new Structure();
+        $premium = new Structure;
         $premium->type = Structure::TYPE_SHOP;
         $premium->name = 'Премиум';
         $premium->save();
@@ -1586,21 +1599,21 @@ class GenerateSeed extends Command
                 'share_structure_category_id' => $this->shopCategory3->id,
                 'diamond' => 100,
                 'sort_order' => 0,
-            ]
+            ],
         ]);
     }
 
     public function createNpcAndQuest()
     {
         $locationNpc = Location::find(3);
-        $npc = new Npc();
+        $npc = new Npc;
         $npc->name = 'Глава города';
         $npc->description = 'Старейшина, угрюмый лысый старик, ворчун и зануда, но большой патриот своего народа и мира. В прошлом хороший полководец, сейчас он делится опытом с воинами, обучает их всему, что знает сам.';
         $npc->location_id = $locationNpc->id;
         $npc->image = '/img/npc/stareyshina.jpg';
         $npc->save();
 
-        $quest1 = new Quest();
+        $quest1 = new Quest;
         $quest1->title = 'Познание мира';
         $quest1->description = 'Уфф... Давненько до такого не доходило! Но вы, воин, вовремя подоспели и
                                                 задали им! Простите, что втянул вас в этот бой. Многие воины погибли от
@@ -1622,7 +1635,7 @@ class GenerateSeed extends Command
             new QuestReward(['type' => 'experience', 'amount' => 1000]),
         ]);
 
-        $questObjective = new QuestObjective();
+        $questObjective = new QuestObjective;
         $questObjective->quest_id = $quest1->id;
         $questObjective->type = 'kill';
         $questObjective->target_type = 'monster';
@@ -1631,7 +1644,7 @@ class GenerateSeed extends Command
         $questObjective->description = 'Отправляйтесь на поиск Неферто [1] и добудьте Соцветие (10 шт).';
         $questObjective->save();
 
-        $shop1 = new Structure();
+        $shop1 = new Structure;
         $shop1->type = Structure::TYPE_SHOP;
         $shop1->name = 'Редкий магазин';
         $shop1->npc_id = $npc->id;
@@ -1640,13 +1653,13 @@ class GenerateSeed extends Command
         $shop1->actions()->attach(2);
         $shop1->actions()->attach(3);
 
-        $exchangeStructure = new Structure();
+        $exchangeStructure = new Structure;
         $exchangeStructure->type = Structure::TYPE_EXCHANGE;
         $exchangeStructure->name = 'Обмен у кузнеца';
         $exchangeStructure->npc_id = $npc->id;
         $exchangeStructure->save();
 
-        $sItem1 = new ShareItem();
+        $sItem1 = new ShareItem;
         $sItem1->type = ShareItemType::RESOURCE;
         $sItem1->price = 10;
         $sItem1->name = 'Монета древности';
@@ -1655,7 +1668,7 @@ class GenerateSeed extends Command
         $sItem1->is_weight = false;
         $sItem1->save();
 
-        $sItem2 = new ShareItem();
+        $sItem2 = new ShareItem;
         $sItem2->type = ShareItemType::RESOURCE;
         $sItem2->price = 3;
         $sItem2->name = 'Синий Камень Печати';
@@ -1663,7 +1676,7 @@ class GenerateSeed extends Command
         $sItem2->image = '/img/resource/water_rune.png';
         $sItem2->save();
 
-        $sItem3 = new ShareItem();
+        $sItem3 = new ShareItem;
         $sItem3->type = ShareItemType::RESOURCE;
         $sItem3->price = 5;
         $sItem3->name = 'Зеленый Камень Печати';
@@ -1671,7 +1684,7 @@ class GenerateSeed extends Command
         $sItem3->image = '/img/resource/wind_rune.png';
         $sItem3->save();
 
-        $sItem4 = new ShareItem();
+        $sItem4 = new ShareItem;
         $sItem4->type = ShareItemType::RESOURCE;
         $sItem4->price = 10;
         $sItem4->name = 'Красный Камень Печати';
@@ -1679,7 +1692,7 @@ class GenerateSeed extends Command
         $sItem4->image = '/img/resource/fire_rune.png';
         $sItem4->save();
 
-        $exchange = new Exchange();
+        $exchange = new Exchange;
         $exchange->structure_id = $exchangeStructure->id;
         $exchange->from_share_item_id = $sItem2->id;
         $exchange->to_share_item_id = $sItem1->id;
@@ -1688,7 +1701,7 @@ class GenerateSeed extends Command
         $exchange->sort_order = 1;
         $exchange->save();
 
-        $exchange = new Exchange();
+        $exchange = new Exchange;
         $exchange->structure_id = $exchangeStructure->id;
         $exchange->from_share_item_id = $sItem3->id;
         $exchange->to_share_item_id = $sItem1->id;
@@ -1697,7 +1710,7 @@ class GenerateSeed extends Command
         $exchange->sort_order = 2;
         $exchange->save();
 
-        $exchange = new Exchange();
+        $exchange = new Exchange;
         $exchange->structure_id = $exchangeStructure->id;
         $exchange->from_share_item_id = $sItem4->id;
         $exchange->to_share_item_id = $sItem1->id;
@@ -1706,9 +1719,8 @@ class GenerateSeed extends Command
         $exchange->sort_order = 3;
         $exchange->save();
 
-
         $locationNpc = Location::find(4);
-        $npc = new Npc();
+        $npc = new Npc;
         $npc->name = 'Мудрый Финко';
         $npc->description = 'Наемник братства «Крадущиеся в ночи». Один из старожил некогда могущественной организации, он высоко ценит и чтит законы братства, считая, что наемники не должны вмешиваться во внешние конфликты и быть их участниками.';
         $npc->location_id = $locationNpc->id;

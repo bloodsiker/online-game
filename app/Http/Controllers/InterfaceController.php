@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Map;
-use App\Models\User;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;

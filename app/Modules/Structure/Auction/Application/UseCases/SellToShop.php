@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Models\Item\Item;
-use App\Models\User;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class SellToShop
@@ -38,13 +38,13 @@ class SellToShop
                 ->lockForUpdate()
                 ->get();
 
-            $sum         = 0;
+            $sum = 0;
             $idsToDelete = [];
 
             foreach ($items as $sellItem) {
                 $requested = (int) ($filtered[$sellItem->item_id]['count'] ?? 0);
-                $qty       = min($requested, $sellItem->count);
-                $sum      += (int) round($sellItem->item->itemInfo->price / 2) * $qty;
+                $qty = min($requested, $sellItem->count);
+                $sum += (int) round($sellItem->item->itemInfo->price / 2) * $qty;
 
                 if ($qty >= $sellItem->count) {
                     $idsToDelete[] = $sellItem->item_id;

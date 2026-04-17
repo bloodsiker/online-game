@@ -16,22 +16,22 @@ use Illuminate\View\View;
 class CharacterController extends Controller
 {
     public function __construct(
-        private readonly GetCharacter  $getCharacter,
+        private readonly GetCharacter $getCharacter,
         private readonly AllocateStats $allocateStats,
     ) {}
 
     public function index(Request $request): View
     {
-        $player    = Auth::user()->player;
+        $player = Auth::user()->player;
         $character = $this->getCharacter->execute($player);
-        $group     = $request->get('group', 'character');
+        $group = $request->get('group', 'character');
 
         return view('player::index', compact('character', 'group'));
     }
 
     public function point(): View
     {
-        $player    = Auth::user()->player;
+        $player = Auth::user()->player;
         $character = $this->getCharacter->execute($player);
 
         return view('player::points', compact('character'));
@@ -39,11 +39,11 @@ class CharacterController extends Controller
 
     public function pointSave(Request $request): RedirectResponse|JsonResponse
     {
-        $data    = $request->toArray();
-        $player  = Auth::user()->player;
+        $data = $request->toArray();
+        $player = Auth::user()->player;
 
         $statKeys = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom'];
-        $stats    = array_map('intval', array_intersect_key($data, array_flip($statKeys)));
+        $stats = array_map('intval', array_intersect_key($data, array_flip($statKeys)));
 
         try {
             $result = $this->allocateStats->execute($player, $stats);
@@ -58,14 +58,14 @@ class CharacterController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'       => 'ok',
-                'message'      => 'Характеристики изменены.',
-                'free_stats'   => $result->freeStats,
-                'strength'     => $result->strength,
-                'intuition'    => $result->intuition,
-                'agility'      => $result->agility,
+                'status' => 'ok',
+                'message' => 'Характеристики изменены.',
+                'free_stats' => $result->freeStats,
+                'strength' => $result->strength,
+                'intuition' => $result->intuition,
+                'agility' => $result->agility,
                 'intelligence' => $result->intelligence,
-                'wisdom'       => $result->wisdom,
+                'wisdom' => $result->wisdom,
             ]);
         }
 

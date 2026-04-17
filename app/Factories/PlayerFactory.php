@@ -1,11 +1,11 @@
 <?php
 
-namespace  App\Factories;
+namespace App\Factories;
 
 use App\Models\Experience;
 use App\Models\Player\Player;
 use App\Models\Player\PlayerEquipment;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class PlayerFactory
 {

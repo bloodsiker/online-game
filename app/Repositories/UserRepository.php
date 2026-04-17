@@ -3,13 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\Role;
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepository extends AbstractRepository
 {
-
     public function getModelClass(): string
     {
         return User::class;
@@ -29,7 +28,7 @@ class UserRepository extends AbstractRepository
 
     public function update(array $data, int|string $id): \Illuminate\Database\Eloquent\Model
     {
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
 

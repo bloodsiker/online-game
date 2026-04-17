@@ -13,7 +13,7 @@ class RegenerationMechanic extends BaseBossMechanic
     {
         $healPercent = $this->getConfig('heal_percent', 10);
         $maxHp = $context->getBossMaxHp();
-        $healAmount = (int)(($maxHp * $healPercent) / 100);
+        $healAmount = (int) (($maxHp * $healPercent) / 100);
 
         $oldHp = $context->getBossCurrentHp();
         $context->healBoss($healAmount);
@@ -32,6 +32,7 @@ class RegenerationMechanic extends BaseBossMechanic
     public function getDescription(): string
     {
         $percent = $this->getConfig('heal_percent', 10);
+
         return "Босс восстановил {$percent}% своего здоровья";
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\DTO;
 
-final class MoveResultDTO {
-
+final class MoveResultDTO
+{
     private function __construct(
         public bool $success,
         public ?string $message = null,

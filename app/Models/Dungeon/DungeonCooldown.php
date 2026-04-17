@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models\Dungeon;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int             $id
- * @property int             $dungeon_id
- * @property int             $user_id   // 0 = global sentinel
- * @property \Carbon\Carbon  $available_at
+ * @property int $id
+ * @property int $dungeon_id
+ * @property int $user_id // 0 = global sentinel
+ * @property \Carbon\Carbon $available_at
  * @property-read Dungeon   $dungeon
  * @property-read User|null $user
  */

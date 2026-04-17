@@ -24,7 +24,7 @@ class ReputationController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
-            $reputation = new Reputation();
+            $reputation = new Reputation;
             $this->fillReputation($reputation, $request);
             $reputation->save();
 
@@ -53,10 +53,10 @@ class ReputationController extends Controller
     {
         ReputationTier::create([
             'reputation_id' => $reputation->id,
-            'min_points'    => (int) $request->input('min_points', 0),
-            'max_points'    => (int) $request->input('max_points', 0),
-            'medal_name'    => $request->input('medal_name'),
-            'medal_icon'    => $request->input('medal_icon'),
+            'min_points' => (int) $request->input('min_points', 0),
+            'max_points' => (int) $request->input('max_points', 0),
+            'medal_name' => $request->input('medal_name'),
+            'medal_icon' => $request->input('medal_icon'),
         ]);
 
         return redirect()->back()->with('success', 'Уровень добавлен.');
@@ -73,7 +73,7 @@ class ReputationController extends Controller
     public function addTierQuest(Request $request, Reputation $reputation, ReputationTier $tier): RedirectResponse
     {
         ReputationTierQuest::firstOrCreate([
-            'tier_id'  => $tier->id,
+            'tier_id' => $tier->id,
             'quest_id' => (int) $request->input('quest_id'),
         ]);
 
@@ -90,12 +90,12 @@ class ReputationController extends Controller
     public function addShopItem(Request $request, Reputation $reputation): RedirectResponse
     {
         ReputationShopItem::create([
-            'reputation_id'  => $reputation->id,
-            'share_item_id'  => (int) $request->input('share_item_id'),
-            'price'          => (int) $request->input('price', 0),
-            'diamond'        => (int) $request->input('diamond', 0),
-            'min_points'     => (int) $request->input('min_points', 0),
-            'sort_order'     => (int) $request->input('sort_order', 0),
+            'reputation_id' => $reputation->id,
+            'share_item_id' => (int) $request->input('share_item_id'),
+            'price' => (int) $request->input('price', 0),
+            'diamond' => (int) $request->input('diamond', 0),
+            'min_points' => (int) $request->input('min_points', 0),
+            'sort_order' => (int) $request->input('sort_order', 0),
         ]);
 
         return redirect()->back()->with('success', 'Предмет добавлен в магазин.');
@@ -112,9 +112,9 @@ class ReputationController extends Controller
 
     private function fillReputation(Reputation $reputation, Request $request): void
     {
-        $reputation->name        = $request->input('name');
+        $reputation->name = $request->input('name');
         $reputation->description = $request->input('description');
-        $reputation->npc_id      = $request->input('npc_id') ?: null;
-        $reputation->icon        = $request->input('icon');
+        $reputation->npc_id = $request->input('npc_id') ?: null;
+        $reputation->icon = $request->input('icon');
     }
 }
