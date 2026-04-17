@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Map;
-use App\Models\Referral\Referral;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Models\User;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
@@ -46,7 +45,7 @@ class InterfaceController extends Controller
             $view = sprintf('maps.%s.frame', $location->map->folder);
         }
 
-        if (!View::exists($view)) {
+        if (! View::exists($view)) {
             $view = 'maps.city.frame';
         }
 
@@ -81,20 +80,9 @@ class InterfaceController extends Controller
         return view('interface.who', compact('onlineOnLocation', 'onlineInGame', 'countOnlineLocation', 'tenMinutesAgo'));
     }
 
-    public function referralsFrame(): \Illuminate\View\View
-    {
-        $user = Auth::user();
-
-        $referrals = Referral::where('referrer_user_id', $user->id)
-            ->with(['referred.player', 'claims'])
-            ->get();
-
-        return view('interface.referrals_frame', compact('referrals'));
-    }
-
     public function hero()
     {
-        $user   = Auth::user();
+        $user = Auth::user();
         $player = $user->player;
         $playerDecorator = $this->statService->resolve($player);
 
@@ -116,8 +104,8 @@ class InterfaceController extends Controller
                     || ($activeEffect->effect && in_array($activeEffect->effect->type, ['debuff']));
 
                 return [
-                    'id'       => $activeEffect->effect?->slug . '_' . $activeEffect->id,
-                    'name'     => $name,
+                    'id' => $activeEffect->effect?->slug.'_'.$activeEffect->id,
+                    'name' => $name,
                     'duration' => max(0, $remainingSeconds),
                     'is_curse' => $isCurse,
                 ];

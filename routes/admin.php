@@ -1,35 +1,28 @@
 <?php
 
 use App\Http\Controllers\Admin\ActionController;
-use App\Http\Controllers\Admin\DocsController;
-use App\Http\Controllers\Admin\ClanController;
-use App\Http\Controllers\Admin\QuestController;
-use App\Http\Controllers\Admin\ReputationController;
 use App\Http\Controllers\Admin\ApiController;
+use App\Http\Controllers\Admin\ClanController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\MonsterController;
 use App\Http\Controllers\Admin\NpcController;
+use App\Http\Controllers\Admin\PlayerController;
+use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\RaceController;
+use App\Http\Controllers\Admin\ReputationController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
-use App\Http\Controllers\Admin\PlayerController;
-use App\Http\Controllers\Admin\ReferralController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
 Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
-
-Route::get('/referral/stages', [ReferralController::class, 'stages'])->name('referral.stages');
-Route::post('/referral/stages', [ReferralController::class, 'storeStage'])->name('referral.stage.store');
-Route::get('/referral/stages/{stage}/delete', [ReferralController::class, 'deleteStage'])->name('referral.stage.delete');
-Route::get('/referral/stats', [ReferralController::class, 'stats'])->name('referral.stats');
 
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');
@@ -77,11 +70,11 @@ Route::get('/structures', [StructureController::class, 'list'])->name('structure
 
 Route::match(['GET', 'POST'], '/map/create', [MapController::class, 'create'])->name('map.create');
 Route::post('/map/{map}/locations', [MapController::class, 'location'])->name('map.location');
-Route::match(['GET', 'POST'],'/map/{map}', [MapController::class, 'info'])->name('map.info');
+Route::match(['GET', 'POST'], '/map/{map}', [MapController::class, 'info'])->name('map.info');
 Route::get('/maps', [MapController::class, 'list'])->name('maps');
 
 Route::match(['GET', 'POST'], '/location/create', [LocationController::class, 'create'])->name('location.create');
-Route::match(['GET', 'POST'],'/location/{location}', [LocationController::class, 'info'])->name('location.info');
+Route::match(['GET', 'POST'], '/location/{location}', [LocationController::class, 'info'])->name('location.info');
 Route::get('/locations', [LocationController::class, 'list'])->name('locations');
 
 Route::match(['GET', 'POST'], '/action/create', [ActionController::class, 'create'])->name('action.create');
@@ -89,15 +82,15 @@ Route::match(['GET', 'POST'], '/action/{action}', [ActionController::class, 'inf
 Route::get('/action', [ActionController::class, 'list'])->name('action');
 
 Route::match(['GET', 'POST'], '/race/create', [RaceController::class, 'create'])->name('race.create');
-Route::match(['GET', 'POST'],'/race/{race}', [RaceController::class, 'info'])->name('race.info');
+Route::match(['GET', 'POST'], '/race/{race}', [RaceController::class, 'info'])->name('race.info');
 Route::get('/races', [RaceController::class, 'list'])->name('race');
 
 Route::match(['GET', 'POST'], '/npc/create', [NpcController::class, 'create'])->name('npc.create');
 Route::get('/npc/list', [NpcController::class, 'list'])->name('npc');
-Route::match(['GET', 'POST'],'/npc/{npc}', [NpcController::class, 'info'])->name('npc.info');
+Route::match(['GET', 'POST'], '/npc/{npc}', [NpcController::class, 'info'])->name('npc.info');
 
 Route::match(['GET', 'POST'], '/skill/create', [SkillController::class, 'create'])->name('skill.create');
-Route::match(['GET', 'POST'],'/skill/{skill}', [SkillController::class, 'info'])->name('skill.info');
+Route::match(['GET', 'POST'], '/skill/{skill}', [SkillController::class, 'info'])->name('skill.info');
 Route::get('/skills', [SkillController::class, 'list'])->name('skills');
 
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');

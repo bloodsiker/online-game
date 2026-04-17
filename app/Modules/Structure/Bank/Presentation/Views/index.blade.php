@@ -81,20 +81,20 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" nowrap="">
-                        <b>Счёт №:</b> <span class="account-number">{{ $user->bank_account }}</span>
+                        <b>Счёт №:</b> <span class="account-number">{{ $page->bankAccount }}</span>
                     </td>
                     <td align="center" nowrap="">
                         <b>Кошелёк:</b>
                         <b class="redd">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
-                            {{ format_money($user->money) }}
+                            {{ format_money($page->money) }}
                         </b>
                     </td>
                     <td align="right" nowrap="">
                         <b>На счёте в банке:</b>
                         <b class="redd">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
-                            {{ format_money($user->bank_balance) }}
+                            {{ format_money($page->bankBalance) }}
                         </b>
                     </td>
                 </tr>
@@ -160,24 +160,24 @@
                     <td class="brd2 p6h" align="center"><b>Получатель</b></td>
                     <td class="brd2 p6h" align="center"><b>Действие</b></td>
                 </tr>
-                @forelse($logs as $log)
+                @forelse($page->logs as $log)
                     <tr height="17" class="brd2-top">
                         <td class="brd2 p6h" align="center" style="font-size:11px;color:#888;">
-                            {{ $log->created_at->format('d.m.Y H:i') }}
+                            {{ $log['createdAt'] }}
                         </td>
                         <td class="brd2 p6h" align="center">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
-                            {{ format_money($log->amount) }}
+                            {{ format_money($log['amount']) }}
                         </td>
                         <td class="brd2 p6h" align="center">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
-                            {{ format_money($log->balance_after) }}
+                            {{ format_money($log['balanceAfter']) }}
                         </td>
                         <td class="brd2 p6h" align="center" style="color:#666;">
-                            {{ $log->relatedUser?->name ?? '—' }}
+                            {{ $log['relatedUserName'] }}
                         </td>
                         <td class="brd2 p6h" align="center">
-                            <span class="action-{{ $log->action->value }}">{{ $log->action->label() }}</span>
+                            <span class="action-{{ $log['actionValue'] }}">{{ $log['actionLabel'] }}</span>
                         </td>
                     </tr>
                 @empty
@@ -188,29 +188,29 @@
                 </tbody>
             </table>
 
-            @if($logs->hasPages())
+            @if($page->pagination['hasPages'])
                 @php
-                    $cur    = $logs->currentPage();
-                    $last   = $logs->lastPage();
-                    $pgFrom = max(1, $cur - 5);
-                    $pgTo   = min($last, $cur + 5);
+                    $cur    = $page->pagination['currentPage'];
+                    $last   = $page->pagination['lastPage'];
+                    $pgFrom = $page->pagination['pageFrom'];
+                    $pgTo   = $page->pagination['pageTo'];
                 @endphp
                 <table border="0" cellpadding="0" cellspacing="0" class="pg w100" style="margin-top: 6px;">
                     <tbody>
                     <tr>
                         <td class="b" width="10"><nobr>Страницы:&nbsp;</nobr></td>
                         @if($pgFrom > 1)
-                            <td class="pg-inact"><a href="{{ $logs->url(1) }}" class="pg-inact_lnk">1</a></td>
+                            <td class="pg-inact"><a href="{{ $page->pagination['urls'][1] }}" class="pg-inact_lnk">1</a></td>
                             @if($pgFrom > 2)<td class="b" style="padding:0 2px">…</td>@endif
                         @endif
                         @for($p = $pgFrom; $p <= $pgTo; $p++)
                             <td class="{{ $p === $cur ? 'pg-act' : 'pg-inact' }}">
-                                <a href="{{ $logs->url($p) }}" class="{{ $p === $cur ? 'pg-act_lnk' : 'pg-inact_lnk' }}">{{ $p }}</a>
+                                <a href="{{ $page->pagination['urls'][$p] }}" class="{{ $p === $cur ? 'pg-act_lnk' : 'pg-inact_lnk' }}">{{ $p }}</a>
                             </td>
                         @endfor
                         @if($pgTo < $last)
                             @if($pgTo < $last - 1)<td class="b" style="padding:0 2px">…</td>@endif
-                            <td class="pg-inact"><a href="{{ $logs->url($last) }}" class="pg-inact_lnk">{{ $last }}</a></td>
+                            <td class="pg-inact"><a href="{{ $page->pagination['urls'][$last] }}" class="pg-inact_lnk">{{ $last }}</a></td>
                         @endif
                     </tr>
                     </tbody>

@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Race;
 use App\Models\User;
-use App\Services\ReferralService;
+use App\Modules\Referral\Application\UseCases\ApplyReferralCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,21 +22,21 @@ class RegisterController extends Controller
         return view('auth.register', compact('races', 'refCode'));
     }
 
-    public function register(RegisterRequest $request, PlayerFactory $playerFactory, ReferralService $referralService)
+    public function register(RegisterRequest $request, PlayerFactory $playerFactory, ApplyReferralCode $applyReferralCode)
     {
         $user = User::create([
-            'name'             => $request->name,
-            'email'            => $request->email,
-            'password'         => Hash::make($request->password),
-            'sex'              => $request->sex,
-            'location_id'      => 1,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'sex' => $request->sex,
+            'location_id' => 1,
             'prev_location_id' => 1,
         ]);
 
         $playerFactory->create($user, $request->race);
 
         if ($request->filled('ref_code')) {
-            $referralService->applyCode($user, $request->input('ref_code'));
+            $applyReferralCode->handle($user, $request->input('ref_code'));
         }
 
         event(new UserRegistered($user));
@@ -50,6 +50,6 @@ class RegisterController extends Controller
     {
         $user = User::where('name', $request->get('nick'))->first();
 
-        return response()->json(['exists' => (bool)$user]);
+        return response()->json(['exists' => (bool) $user]);
     }
 }

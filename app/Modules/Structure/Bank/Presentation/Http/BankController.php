@@ -8,12 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Structure\Bank\Application\UseCases\Deposit;
 use App\Modules\Structure\Bank\Application\UseCases\EnsureBankAccount;
-use App\Modules\Structure\Bank\Application\UseCases\GetBankLogs;
+use App\Modules\Structure\Bank\Application\UseCases\GetBankPage;
+use App\Modules\Structure\Bank\Application\UseCases\LookupRecipient;
 use App\Modules\Structure\Bank\Application\UseCases\Transfer;
 use App\Modules\Structure\Bank\Application\UseCases\Withdraw;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,7 +24,8 @@ class BankController extends Controller
         private readonly Withdraw $withdraw,
         private readonly Transfer $transfer,
         private readonly EnsureBankAccount $ensureBankAccount,
-        private readonly GetBankLogs $getBankLogs,
+        private readonly GetBankPage $getBankPage,
+        private readonly LookupRecipient $lookupRecipient,
     ) {}
 
     public function index(Request $request): mixed
@@ -40,43 +41,42 @@ class BankController extends Controller
 
             if ($amount <= 0) {
                 session()->flash('message', 'Укажите корректную сумму.');
+
                 return redirect()->back();
             }
 
             $result = match ($action) {
-                BankAction::DEPOSIT->value      => $this->deposit->execute($user, $amount),
-                BankAction::WITHDRAW->value     => $this->withdraw->execute($user, $amount),
+                BankAction::DEPOSIT->value => $this->deposit->execute($user, $amount),
+                BankAction::WITHDRAW->value => $this->withdraw->execute($user, $amount),
                 BankAction::TRANSFER_OUT->value => $this->transfer->execute($user, $request->input('account', ''), $amount),
-                default                         => null,
+                default => null,
             };
 
             if ($result !== null) {
                 session()->flash('message', $result->message);
+
                 return redirect()->back();
             }
         }
 
-        $logs = $this->getBankLogs->execute($user->id);
+        $page = $this->getBankPage->execute($user);
 
-        return view('bank::index', compact('user', 'logs'));
+        return view('bank::index', [
+            'user' => $user,
+            'page' => $page,
+        ]);
     }
 
     public function lookup(Request $request): JsonResponse
     {
-        $account   = $request->input('account', '');
-        $recipient = User::where('bank_account', $account)->first();
-
-        if (! $recipient) {
-            return response()->json(['error' => 'Счёт не найден'], 404);
-        }
-
         /** @var User $sender */
         $sender = Auth::user();
+        $result = $this->lookupRecipient->execute($sender, $request->input('account', ''));
 
-        if ($recipient->id === $sender->id) {
-            return response()->json(['error' => 'Нельзя переводить самому себе'], 422);
+        if (! $result->ok) {
+            return response()->json(['error' => $result->error], $result->status);
         }
 
-        return response()->json(['name' => $recipient->name]);
+        return response()->json(['name' => $result->name]);
     }
 }

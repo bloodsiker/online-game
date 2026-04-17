@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int        $user_id
- * @property int|null   $related_user_id
+ * @property int $user_id
+ * @property int|null $related_user_id
  * @property BankAction $action
- * @property int        $amount
- * @property int        $balance_after
+ * @property int $amount
+ * @property int $balance_after
  */
 class BankLog extends Model
 {

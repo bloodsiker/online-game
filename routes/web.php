@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\FightController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
@@ -14,15 +16,12 @@ use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MonsterController;
 use App\Http\Controllers\NpcController;
+use App\Http\Controllers\PartyController;
 use App\Http\Controllers\QuestController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\SlotController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DungeonController;
-use App\Http\Controllers\FriendController;
-use App\Http\Controllers\PartyController;
-use App\Http\Controllers\ReferralController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -88,8 +87,6 @@ Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monst
 Route::get('/info/u/{id}', [UserController::class, 'info'])->name('info.user');
 Route::get('/info/npc/{id}', [NpcController::class, 'info'])->name('info.npc');
 
-
-
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 
 Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
@@ -121,11 +118,8 @@ Route::get('/items/drop/{id}', [ItemController::class, 'dropItem'])->name('items
 
 Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');
 
-
 Route::get('/rating', [RatingController::class, 'index'])->name('rating');
 Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');
-
-Route::get('/referral', [ReferralController::class, 'index'])->name('referral');
 
 Route::get('/friends', [FriendController::class, 'index'])->name('friends');
 Route::post('/friends/add', [FriendController::class, 'addFriend'])->name('friends.add');
@@ -154,7 +148,6 @@ Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
 Route::get('/who', [InterfaceController::class, 'who'])->name('who');
 Route::get('/who/friends', [FriendController::class, 'friendsFrame'])->name('who.friends');
-Route::get('/who/referrals', [InterfaceController::class, 'referralsFrame'])->name('who.referrals');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
