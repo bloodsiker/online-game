@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

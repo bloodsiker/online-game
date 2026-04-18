@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Infrastructure\Persistence\Models;
 
 use App\Models\Npc;
-use App\Models\Share\ShareAction;
-use App\Models\Share\ShareItem;
-use App\Models\Share\ShareStructureCategory;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;

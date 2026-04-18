@@ -2,7 +2,7 @@
 
 namespace App\Services\Combat\Boss\Mechanics;
 
-use App\Models\Monster\BossMechanic;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Services\Combat\Boss\BossFightContext;
 use App\Services\Combat\Boss\BossMechanicInterface;
 

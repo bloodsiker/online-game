@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Models\Share\ShareRecipe;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Blacksmith\Domain\Policies\CanCraftRecipe;
 use App\Modules\Structure\Blacksmith\Domain\Results\CraftResult;
 

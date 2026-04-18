@@ -10,7 +10,7 @@ use App\Enums\QuestRewardType;
 use App\Enums\QuestType;
 use App\Models\Npc;
 use App\Models\Reputation\ReputationTierQuest;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\ClanLog;

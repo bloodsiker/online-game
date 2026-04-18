@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Location\Application\UseCases;
 
 use App\Models\Battle\Battle;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Application\DTOs\LocationFightDTO;
 use App\Modules\Location\Application\DTOs\LocationResultDTO;
 use App\Modules\Location\Application\Mappers\LocationPageViewMapper;

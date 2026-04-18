@@ -5,8 +5,8 @@ namespace App\Services\Combat\Boss;
 use App\DTO\AttackResultDTO;
 use App\Enums\BossMechanicType;
 use App\Models\Battle\Battle;
-use App\Models\Monster\BossDefeatLog;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossDefeatLog;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Log;
 

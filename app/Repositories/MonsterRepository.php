@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Monster\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 
 class MonsterRepository extends AbstractRepository
 {

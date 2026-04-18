@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Policies\CanBreakItem;
 use App\Modules\Structure\Blacksmith\Domain\Results\SalvageResult;
 

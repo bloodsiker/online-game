@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Share\ShareAction;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Http\RedirectResponse;

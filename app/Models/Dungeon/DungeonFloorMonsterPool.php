@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Dungeon;
 
-use App\Models\Monster\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

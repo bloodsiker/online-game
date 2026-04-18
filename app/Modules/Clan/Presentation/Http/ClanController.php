@@ -36,7 +36,7 @@ class ClanController extends Controller
         $membership = $user->clanMembership;
 
         if (! $membership) {
-            return view('interface.clan_frame', ['members' => collect(), 'clan' => null]);
+            return view('interface::clan_frame', ['members' => collect(), 'clan' => null]);
         }
 
         $tenMinutesAgo = Carbon::now()->subMinutes(10);
@@ -46,7 +46,7 @@ class ClanController extends Controller
             ->get()
             ->sortByDesc(fn ($m) => $m->user->last_online_at);
 
-        return view('interface.clan_frame', compact('members', 'tenMinutesAgo') + ['clan' => $membership->clan]);
+        return view('interface::clan_frame', compact('members', 'tenMinutesAgo') + ['clan' => $membership->clan]);
     }
 
     public function index(): \Illuminate\View\View

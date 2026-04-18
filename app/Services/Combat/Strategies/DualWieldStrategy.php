@@ -2,8 +2,8 @@
 
 namespace App\Services\Combat\Strategies;
 
-use App\Models\Monster\Monster;
-use App\Models\Share\ShareItem;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Combat\FightHitInterface;
 use App\Services\Combat\HitCalculator;
 

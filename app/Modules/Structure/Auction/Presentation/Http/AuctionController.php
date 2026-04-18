@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;

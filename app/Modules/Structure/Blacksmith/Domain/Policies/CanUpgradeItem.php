@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Domain\Policies;
 
 use App\Enums\ShareItemType;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 final class CanUpgradeItem
 {

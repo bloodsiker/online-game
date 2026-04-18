@@ -4,7 +4,7 @@ namespace App\DTO;
 
 use App\Models\MagicSkill\Effect;
 use App\Models\MagicSkill\MagicSkill;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Models\Skill;
 use Illuminate\Support\Collection;
 

@@ -6,7 +6,7 @@ use App\Enums\BattleStatus;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;

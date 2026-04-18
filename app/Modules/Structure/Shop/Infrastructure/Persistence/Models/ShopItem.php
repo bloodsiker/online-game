@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Infrastructure\Persistence\Models;
 
-use App\Models\Share\ShareItem;
-use App\Models\Share\ShareStructureCategory;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

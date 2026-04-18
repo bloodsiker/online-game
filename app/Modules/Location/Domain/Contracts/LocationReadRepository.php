@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Location\Domain\Contracts;
 
 use App\Models\Dungeon\DungeonSession;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\User\Infrastructure\Persistence\Models\User;

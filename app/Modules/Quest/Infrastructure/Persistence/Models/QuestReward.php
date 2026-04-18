@@ -6,7 +6,7 @@ namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Enums\QuestRewardType;
 use App\Models\Reputation\Reputation;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

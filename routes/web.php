@@ -8,10 +8,8 @@ use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
-use App\Http\Controllers\InterfaceController;
 use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\MonsterController;
 use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PartyController;
 use App\Http\Controllers\ReputationController;
@@ -74,7 +72,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
 });
 
-Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monster');
 Route::get('/info/npc/{id}', [NpcController::class, 'info'])->name('info.npc');
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
@@ -101,11 +98,4 @@ Route::post('/party/invite', [PartyController::class, 'invite'])->name('party.in
 Route::post('/party/{partyId}/leave', [PartyController::class, 'leave'])->name('party.leave');
 Route::delete('/party/{partyId}', [PartyController::class, 'disband'])->name('party.disband');
 
-Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
-Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
-Route::get('/who', [InterfaceController::class, 'who'])->name('who');
-Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
-Route::get('/game', [InterfaceController::class, 'game'])->name('game');
-Route::get('/game', [InterfaceController::class, 'game'])->name('game');
-Route::get('/interface', [InterfaceController::class, 'interface'])->name('interface');
 Route::get('/', [MainController::class, 'index'])->name('index');

@@ -4,7 +4,7 @@ namespace App\Services\Combat\Boss;
 
 use App\DTO\AttackResultDTO;
 use App\Models\Battle\Battle;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class BossFightContext

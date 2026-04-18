@@ -6,10 +6,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\BossMechanicType;
 use App\Http\Controllers\Controller;
-use App\Models\Monster\BossMechanic;
-use App\Models\Monster\BossPhase;
-use App\Models\Monster\Monster;
-use App\Models\Share\ShareItem;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

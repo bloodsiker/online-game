@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\QuestPlayerStatus;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
@@ -210,6 +210,8 @@ class NpcController extends Controller
         $monsterLocation = MonsterOnLocation::find($id);
         $monster = $monsterLocation->monster;
 
-        return view('monster.info', compact('monster'));
+        return view('monster::info', [
+            'page' => new \App\Modules\Monster\Application\DTOs\MonsterInfoPageDTO($monster),
+        ]);
     }
 }

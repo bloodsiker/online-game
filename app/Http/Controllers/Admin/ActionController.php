@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Share\ShareAction;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

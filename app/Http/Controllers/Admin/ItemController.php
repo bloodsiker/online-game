@@ -11,10 +11,10 @@ use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemStatType;
 use App\Enums\ShareItemType;
 use App\Http\Controllers\Controller;
-use App\Models\Share\ShareItem;
-use App\Models\Share\ShareItemEffect;
-use App\Models\Share\ShareItemStat;
-use App\Models\Share\ShareRecipe;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
@@ -199,7 +199,7 @@ class ItemController extends Controller
         $statKey = $type === \App\Enums\ShareItemRequirementType::STAT ? $request->input('stat_key') : null;
         $skillId = $type === \App\Enums\ShareItemRequirementType::SKILL ? (int) $request->input('skill_id') : null;
 
-        \App\Models\Share\ShareItemRequirement::create([
+        \App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement::create([
             'share_item_id' => $item->id,
             'type' => $type,
             'stat_key' => $statKey,
@@ -210,7 +210,7 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Требование добавлено.');
     }
 
-    public function deleteRequirement(ShareItem $item, \App\Models\Share\ShareItemRequirement $requirement): RedirectResponse
+    public function deleteRequirement(ShareItem $item, \App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement $requirement): RedirectResponse
     {
         $requirement->delete();
 

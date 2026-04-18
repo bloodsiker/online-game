@@ -4,7 +4,7 @@ namespace App\Services\Combat\Strategies;
 
 use App\DTO\FightHitDTO;
 use App\Models\MagicSkill\MagicSkill;
-use App\Models\Monster\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Services\Combat\FightHitInterface;
 use App\Services\Combat\HitCalculator;

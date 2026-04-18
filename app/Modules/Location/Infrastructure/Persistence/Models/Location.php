@@ -6,9 +6,9 @@ namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
 use App\Models\Dungeon\Dungeon;
 use App\Models\Map;
-use App\Models\Monster\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Models\Npc;
-use App\Models\Share\ShareAction;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

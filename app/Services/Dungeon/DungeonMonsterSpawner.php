@@ -9,7 +9,7 @@ use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Dungeon\DungeonFloor;
 use App\Models\Dungeon\DungeonRunFloor;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

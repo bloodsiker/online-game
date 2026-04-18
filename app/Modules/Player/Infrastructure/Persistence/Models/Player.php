@@ -8,7 +8,7 @@ use App\Enums\CombatClass;
 use App\Enums\QuestPlayerStatus;
 use App\Models\MagicSkill\MagicSkill;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
-use App\Models\Race;
+use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\Combat\FightHitInterface;
 use Carbon\Carbon;

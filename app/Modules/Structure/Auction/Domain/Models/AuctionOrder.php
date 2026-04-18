@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Domain\Models;
 
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;

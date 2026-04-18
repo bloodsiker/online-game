@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Infrastructure\Persistence;
 
 use App\Enums\ShareItemType;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;

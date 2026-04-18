@@ -8,8 +8,8 @@ use App\DTO\AttackResultDTO;
 use App\Enums\ActiveEffectType;
 use App\Models\Battle\Battle;
 use App\Models\MagicSkill\Effect;
-use App\Models\Monster\MonsterActiveEffect;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 

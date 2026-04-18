@@ -7,7 +7,7 @@ namespace App\Models\Dungeon;
 use App\Enums\DungeonCooldownType;
 use App\Enums\DungeonType;
 use App\Models\Map;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

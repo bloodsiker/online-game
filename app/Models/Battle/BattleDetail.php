@@ -3,7 +3,7 @@
 namespace App\Models\Battle;
 
 use App\Enums\BattleDetailStatus;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

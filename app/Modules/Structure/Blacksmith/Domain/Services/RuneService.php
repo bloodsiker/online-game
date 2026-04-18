@@ -196,7 +196,7 @@ class RuneService
         return $cost;
     }
 
-    private function rollStats(\App\Models\Share\ShareItem $runeInfo, bool $riskMode): array
+    private function rollStats(\App\Modules\Share\Infrastructure\Persistence\Models\ShareItem $runeInfo, bool $riskMode): array
     {
         /** @var RuneRarity $rarity */
         $rarity = $runeInfo->rune_rarity;

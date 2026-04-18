@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;

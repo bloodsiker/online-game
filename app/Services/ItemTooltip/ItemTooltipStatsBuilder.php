@@ -6,7 +6,7 @@ namespace App\Services\ItemTooltip;
 
 use App\Enums\ItemEffectValueType;
 use App\Enums\ShareItemStatType;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 /**
  * Строит массив строк характеристик для тултипа предмета.

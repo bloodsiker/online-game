@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Models\Skill;
 use App\Models\Skill\SkillLevelRequirement;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

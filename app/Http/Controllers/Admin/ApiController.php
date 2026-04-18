@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Map;
 use App\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

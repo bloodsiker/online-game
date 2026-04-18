@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Domain\Models;
 
 use App\Models\MagicSkill\MagicSkill;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

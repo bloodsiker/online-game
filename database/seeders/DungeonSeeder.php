@@ -9,7 +9,7 @@ use App\Enums\DungeonType;
 use App\Models\Dungeon\Dungeon;
 use App\Models\Dungeon\DungeonGate;
 use App\Models\Map;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

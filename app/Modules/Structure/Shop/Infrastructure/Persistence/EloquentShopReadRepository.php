@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Infrastructure\Persistence;
 
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;

@@ -2,7 +2,7 @@
 
 namespace App\Services\Combat\Strategies;
 
-use App\Models\Monster\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Services\Combat\FightHitInterface;

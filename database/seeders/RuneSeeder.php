@@ -6,7 +6,7 @@ namespace Database\Seeders;
 
 use App\Enums\RuneRarity;
 use App\Enums\ShareItemType;
-use App\Models\Share\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Seeder;
 
 /**

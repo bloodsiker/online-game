@@ -6,7 +6,7 @@ namespace App\Modules\Quest\Domain\Services;
 
 use App\DTO\AttackResultDTO;
 use App\Enums\QuestPlayerStatus;
-use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
