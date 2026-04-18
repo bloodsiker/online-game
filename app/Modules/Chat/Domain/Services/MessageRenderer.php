@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Domain\Services;
 
-use App\Models\Item\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 
 class MessageRenderer
 {

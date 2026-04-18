@@ -10,12 +10,12 @@ use App\Enums\ItemEffectValueType;
 use App\Enums\ShareItemSlot;
 use App\Enums\ShareItemStatType;
 use App\Listeners\RecalculatePlayerModification;
-use App\Models\Item\Item;
-use App\Models\Player\Player;
-use App\Models\Player\PlayerActiveEffect;
-use App\Models\Player\PlayerItemBuff;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\DTO\StatModifier;
 use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemBuff;
 
 class PlayerStatService
 {

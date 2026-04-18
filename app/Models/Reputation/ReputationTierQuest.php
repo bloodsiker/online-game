@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Reputation;
 
-use App\Models\Quest\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\MagicSkill\MagicSkill;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Cache;
 
 class PlayerMagicSkillService

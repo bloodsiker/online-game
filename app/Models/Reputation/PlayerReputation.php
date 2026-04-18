@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Reputation;
 
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

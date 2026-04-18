@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Player\PlayerSlot;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
 use App\Services\HotbarService;
 use App\Services\ItemEffect\EffectHandler;
 use Illuminate\Http\JsonResponse;

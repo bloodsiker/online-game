@@ -6,8 +6,8 @@ namespace App\Modules\Clan\Presentation\Http;
 
 use App\Enums\QuestPlayerStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestClanProgress;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Clan\Application\Requests\CreateClanRequest;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Presentation\Http;
 
-use App\Enums\PlayerRelationshipType;
 use App\Http\Controllers\Controller;
-use App\Models\Player\PlayerRelationship;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +22,7 @@ class ChatController extends Controller
         private readonly SendMessage $sendMessage,
         private readonly GetMessages $getMessages,
         private readonly ManageIgnore $manageIgnore,
+        private readonly FriendRelationshipRepository $friendRelationshipRepository,
     ) {}
 
     public function index(): View
@@ -87,10 +87,10 @@ class ChatController extends Controller
                 return response()->json(['ok' => false, 'error' => "Игрок {$target->name} не в сети."]);
             }
 
-            $isIgnored = PlayerRelationship::where('player_id', $target->player_id)
-                ->where('target_id', auth()->user()->player_id)
-                ->where('type', PlayerRelationshipType::IGNORE)
-                ->exists();
+            $isIgnored = $this->friendRelationshipRepository->isIgnoring(
+                (int) $target->player_id,
+                (int) auth()->user()->player_id,
+            );
 
             if ($isIgnored) {
                 return response()->json(['ok' => false, 'error' => "Игрок {$target->name} добавил вас в список игнора."]);

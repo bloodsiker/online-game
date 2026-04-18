@@ -2,7 +2,7 @@
 
 namespace App\Services\ItemEffect\Strategies;
 
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
 class HealMpStrategy implements ItemEffectStrategyInterface

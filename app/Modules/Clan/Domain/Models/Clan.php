@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Domain\Models;
 
 use App\Enums\QuestPlayerStatus;
-use App\Models\Quest\QuestClanProgress;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

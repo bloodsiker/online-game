@@ -1,0 +1,120 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\Quest\Infrastructure\Persistence\Models;
+
+use App\Enums\QuestType;
+use App\Models\Npc;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Quest extends Model
+{
+    use HasFactory;
+
+    protected $casts = [
+        'type' => QuestType::class,
+        'is_active' => 'boolean',
+        'is_finish' => 'boolean',
+    ];
+
+    protected $attributes = [
+        'is_active' => 1,
+        'is_finish' => 0,
+    ];
+
+    protected $fillable = [
+        'title', 'description', 'type', 'start_npc_id', 'complete_npc_id',
+        'parent_quest_id', 'after_quest_id', 'reset_period', 'is_active', 'is_finish',
+    ];
+
+    protected $with = ['objectives'];
+
+    public function startNpc(): BelongsTo
+    {
+        return $this->belongsTo(Npc::class, 'start_npc_id');
+    }
+
+    public function completeNpc(): BelongsTo
+    {
+        return $this->belongsTo(Npc::class, 'complete_npc_id');
+    }
+
+    public function parentQuest(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_quest_id');
+    }
+
+    public function afterQuest(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'after_quest_id');
+    }
+
+    public function stages(): HasMany
+    {
+        return $this->hasMany(QuestStage::class, 'quest_id')->orderBy('order');
+    }
+
+    public function hasStages(): bool
+    {
+        return $this->stages()->exists();
+    }
+
+    public function firstStage(): ?QuestStage
+    {
+        return $this->stages()->first();
+    }
+
+    public function objectives(): HasMany
+    {
+        return $this->hasMany(QuestObjective::class, 'quest_id');
+    }
+
+    public function rewards(): HasMany
+    {
+        return $this->hasMany(QuestReward::class, 'quest_id');
+    }
+
+    public function clanProgress(): HasMany
+    {
+        return $this->hasMany(QuestClanProgress::class, 'quest_id');
+    }
+
+    public function reputationTierQuests(): HasMany
+    {
+        return $this->hasMany(\App\Models\Reputation\ReputationTierQuest::class, 'quest_id');
+    }
+
+    public function getTypeLabel(): string
+    {
+        return $this->type->label();
+    }
+
+    public function isRepeatable(): bool
+    {
+        return $this->type->isRepeatable();
+    }
+
+    public function isOneTime(): bool
+    {
+        return $this->type->isOneTime();
+    }
+
+    public function isMain(): bool
+    {
+        return $this->type->isMain();
+    }
+
+    public function isClan(): bool
+    {
+        return $this->type->isClan();
+    }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where('is_active', 1);
+    }
+}

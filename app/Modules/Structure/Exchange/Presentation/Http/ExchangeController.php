@@ -35,9 +35,7 @@ class ExchangeController extends Controller
         }
 
         return view('exchange::index', [
-            'exchange' => $page->exchange,
-            'user' => $user,
-            'items' => $page->items,
+            'page' => $page,
         ]);
     }
 

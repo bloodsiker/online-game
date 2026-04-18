@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
 use App\Enums\ShareItemType;
-use App\Models\Item\Item;
-use App\Models\Item\ItemGem;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\ItemGem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GemService

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Application\UseCases;
 
 use App\Enums\PlayerRelationshipType;
-use App\Models\Player\PlayerRelationship;
+use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class ManageIgnore
 {
+    public function __construct(private readonly FriendRelationshipRepository $friendRelationshipRepository) {}
+
     public function add(User $user, int $targetUserId): void
     {
         $targetUser = User::find($targetUserId);
@@ -18,11 +20,11 @@ class ManageIgnore
             return;
         }
 
-        PlayerRelationship::firstOrCreate([
-            'player_id' => $user->player_id,
-            'target_id' => $targetUser->player_id,
-            'type' => PlayerRelationshipType::IGNORE,
-        ]);
+        $this->friendRelationshipRepository->firstOrCreateRelationship(
+            (int) $user->player_id,
+            (int) $targetUser->player_id,
+            PlayerRelationshipType::IGNORE,
+        );
     }
 
     public function remove(User $user, int $targetUserId): void
@@ -32,17 +34,19 @@ class ManageIgnore
             return;
         }
 
-        PlayerRelationship::where('player_id', $user->player_id)
-            ->where('target_id', $targetUser->player_id)
-            ->where('type', PlayerRelationshipType::IGNORE)
-            ->delete();
+        $relationship = $this->friendRelationshipRepository->findRelationship(
+            (int) $user->player_id,
+            (int) $targetUser->player_id,
+            PlayerRelationshipType::IGNORE,
+        );
+
+        if ($relationship !== null) {
+            $this->friendRelationshipRepository->delete($relationship);
+        }
     }
 
     public function list(User $user): Collection
     {
-        return PlayerRelationship::where('player_id', $user->player_id)
-            ->where('type', PlayerRelationshipType::IGNORE)
-            ->with('target.user')
-            ->get();
+        return $this->friendRelationshipRepository->getIgnores((int) $user->player_id);
     }
 }

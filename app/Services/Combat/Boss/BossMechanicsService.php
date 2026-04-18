@@ -7,7 +7,7 @@ use App\Enums\BossMechanicType;
 use App\Models\Battle\Battle;
 use App\Models\Monster\BossDefeatLog;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Log;
 
 class BossMechanicsService

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Application\UseCases;
 
-use App\Models\Player\Player;
 use App\Modules\Player\Application\DTOs\CharacterDTO;
 use App\Modules\Player\Application\DTOs\PlayerSkillDTO;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class GetCharacter
 {

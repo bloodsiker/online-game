@@ -15,6 +15,18 @@ use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithInventoryRepository;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\LaravelTransactionManager;
+use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeInventoryRepository;
+use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeReadRepository;
+use App\Modules\Structure\Exchange\Domain\Contracts\TransactionManager as ExchangeTransactionManager;
+use App\Modules\Structure\Exchange\Infrastructure\Persistence\EloquentExchangeInventoryRepository;
+use App\Modules\Structure\Exchange\Infrastructure\Persistence\EloquentExchangeReadRepository;
+use App\Modules\Structure\Exchange\Infrastructure\Persistence\LaravelTransactionManager as ExchangeLaravelTransactionManager;
+use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
+use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
+use App\Modules\Structure\Shop\Domain\Contracts\TransactionManager as ShopTransactionManager;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\EloquentShopInventoryRepository;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\EloquentShopReadRepository;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\LaravelTransactionManager as ShopLaravelTransactionManager;
 use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager as WarehouseTransactionManager;
 use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;
 use App\Modules\Structure\Warehouse\Infrastructure\Persistence\EloquentWarehouseInventoryRepository;
@@ -33,6 +45,14 @@ class StructureServiceProvider extends ServiceProvider
         $this->app->bind(BlacksmithReadRepository::class, EloquentBlacksmithReadRepository::class);
         $this->app->bind(BlacksmithInventoryRepository::class, EloquentBlacksmithInventoryRepository::class);
         $this->app->bind(TransactionManager::class, LaravelTransactionManager::class);
+
+        $this->app->bind(ExchangeReadRepository::class, EloquentExchangeReadRepository::class);
+        $this->app->bind(ExchangeInventoryRepository::class, EloquentExchangeInventoryRepository::class);
+        $this->app->bind(ExchangeTransactionManager::class, ExchangeLaravelTransactionManager::class);
+
+        $this->app->bind(ShopReadRepository::class, EloquentShopReadRepository::class);
+        $this->app->bind(ShopInventoryRepository::class, EloquentShopInventoryRepository::class);
+        $this->app->bind(ShopTransactionManager::class, ShopLaravelTransactionManager::class);
 
         $this->app->bind(WarehouseInventoryRepository::class, EloquentWarehouseInventoryRepository::class);
         $this->app->bind(WarehouseTransactionManager::class, WarehouseLaravelTransactionManager::class);

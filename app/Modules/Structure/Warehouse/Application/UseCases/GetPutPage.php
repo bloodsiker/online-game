@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehousePageDTO;
 use App\Modules\Structure\Warehouse\Application\Mappers\WarehousePageViewMapper;
 use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;

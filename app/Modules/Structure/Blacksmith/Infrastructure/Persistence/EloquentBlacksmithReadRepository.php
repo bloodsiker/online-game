@@ -6,10 +6,10 @@ namespace App\Modules\Structure\Blacksmith\Infrastructure\Persistence;
 
 use App\Enums\ShareItemType;
 use App\Models\Share\ShareItem;
-use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

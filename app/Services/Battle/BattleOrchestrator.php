@@ -4,7 +4,7 @@ namespace App\Services\Battle;
 
 use App\Models\Battle\Battle;
 use App\Models\Dungeon\DungeonSession;
-use App\Models\Location\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Services\DungeonService;
 use Illuminate\Support\Facades\Auth;
 

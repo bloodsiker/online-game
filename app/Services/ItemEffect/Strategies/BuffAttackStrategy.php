@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\ItemEffect\Strategies;
 
-use App\Models\Player\Player;
-use App\Models\Player\PlayerItemBuff;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemBuff;
 use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 
 class BuffAttackStrategy implements ItemEffectStrategyInterface

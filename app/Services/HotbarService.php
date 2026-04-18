@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Enums\ShareItemStatType;
-use App\Models\Item\Item;
-use App\Models\Player\Player;
-use App\Models\Player\PlayerSlot;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
 
 class HotbarService
 {

@@ -6,9 +6,9 @@ namespace App\Modules\User\Infrastructure\Persistence\Models;
 
 use App\Enums\ShareItemStatType;
 use App\Models\Backpack;
-use App\Models\Location\Location;
-use App\Models\Player\Player;
 use App\Modules\Clan\Domain\Models\ClanMember;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

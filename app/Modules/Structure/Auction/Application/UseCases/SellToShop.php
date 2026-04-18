@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Models\Item\Item;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;

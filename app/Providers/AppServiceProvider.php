@@ -3,22 +3,13 @@
 namespace App\Providers;
 
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ShopCartService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        $this->app->singleton(ShopCartService::class, function () {
-            return new ShopCartService;
-        });
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap any application services.

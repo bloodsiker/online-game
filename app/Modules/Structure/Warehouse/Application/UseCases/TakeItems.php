@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
 use App\Enums\ShareItemType;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
 use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Warehouse\Domain\Contracts\WarehouseInventoryRepository;

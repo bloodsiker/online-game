@@ -5,10 +5,10 @@ namespace App\Services;
 use App\DTO\AttackResultDTO;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
-use App\Models\Item\Item;
-use App\Models\Location\Location;
 use App\Models\Monster\Monster;
 use App\Models\Monster\MonsterOnLocation;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class DropService

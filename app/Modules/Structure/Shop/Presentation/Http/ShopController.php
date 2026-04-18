@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Structure;
 use App\Modules\Structure\Shop\Application\UseCases\BuyItem;
-use App\Modules\Structure\Shop\Application\UseCases\GetSellableItems;
+use App\Modules\Structure\Shop\Application\UseCases\GetBuyPage;
+use App\Modules\Structure\Shop\Application\UseCases\GetSellPage;
 use App\Modules\Structure\Shop\Application\UseCases\SellItems;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -19,19 +19,18 @@ class ShopController extends Controller
     public function __construct(
         private readonly BuyItem $buyItem,
         private readonly SellItems $sellItems,
-        private readonly GetSellableItems $getSellableItems,
+        private readonly GetBuyPage $getBuyPage,
+        private readonly GetSellPage $getSellPage,
     ) {}
 
     public function index(int $id): mixed
     {
+        /** @var User $user */
         $user = Auth::user();
-        $shop = Structure::with('shopItems.item', 'shopItems.requirements.item')->find($id);
 
-        if (! $shop) {
-            abort(404);
-        }
-
-        return view('shop::buy', compact('shop', 'user'));
+        return view('shop::buy', [
+            'page' => $this->getBuyPage->execute($user, $id),
+        ]);
     }
 
     public function buyItem(Request $request, int $id, int $itemId): RedirectResponse
@@ -53,11 +52,6 @@ class ShopController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $shop = Structure::find($id);
-
-        if (! $shop) {
-            abort(404);
-        }
 
         if ($request->isMethod('POST')) {
             $result = $this->sellItems->execute($user, (array) $request->input('item', []));
@@ -68,8 +62,8 @@ class ShopController extends Controller
             }
         }
 
-        $itemsToSell = $this->getSellableItems->execute($user->id);
-
-        return view('shop::sell', compact('shop', 'user', 'itemsToSell'));
+        return view('shop::sell', [
+            'page' => $this->getSellPage->execute($user, $id),
+        ]);
     }
 }

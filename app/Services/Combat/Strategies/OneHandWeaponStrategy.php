@@ -2,9 +2,9 @@
 
 namespace App\Services\Combat\Strategies;
 
-use App\Models\Item\Item;
 use App\Models\Monster\Monster;
-use App\Models\Player\PlayerEquipment;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Services\Combat\FightHitInterface;
 use App\Services\Combat\HitCalculator;
 

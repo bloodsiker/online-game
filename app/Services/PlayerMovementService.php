@@ -5,11 +5,11 @@ namespace App\Services;
 use App\DTO\MoveResultDTO;
 use App\Models\Dungeon\DungeonGate;
 use App\Models\Dungeon\DungeonSession;
-use App\Models\Location\Location;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\Player\PlayerLocationAccess;
 use App\Models\Share\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final readonly class PlayerMovementService

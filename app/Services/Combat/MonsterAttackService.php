@@ -6,7 +6,7 @@ use App\DTO\AttackResultDTO;
 use App\Enums\ActiveEffectType;
 use App\Models\Battle\Battle;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Services\Combat\Boss\BossPhaseService;
 
 readonly class MonsterAttackService

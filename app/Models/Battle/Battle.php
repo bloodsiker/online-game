@@ -3,7 +3,7 @@
 namespace App\Models\Battle;
 
 use App\Enums\BattleStatus;
-use App\Models\Location\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

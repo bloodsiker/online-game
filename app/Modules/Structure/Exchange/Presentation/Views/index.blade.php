@@ -209,7 +209,7 @@
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="{{ route('exchange', ['id' => $exchange->id]) }}" title="Купить" class="btn_2">Обмен</a>
+            <a id="center_1" href="{{ route('exchange', ['id' => $page->exchangeId]) }}" title="Купить" class="btn_2">Обмен</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
@@ -246,8 +246,8 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->diamonds) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -258,11 +258,11 @@
 
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
-                @foreach($items as $item)
-                    <form action="{{ route('exchange.apply', ['id' => $exchange->id]) }}" method="POST">
+                @foreach($page->items as $item)
+                    <form action="{{ route('exchange.apply', ['id' => $page->exchangeId]) }}" method="POST">
                         @csrf
-                        <input type="hidden" name="from_id" value="{{ $item->fromItem->id }}">
-                        <input type="hidden" name="to_id" value="{{ $item->toItem->id }}">
+                        <input type="hidden" name="from_id" value="{{ $item->fromItemId }}">
+                        <input type="hidden" name="to_id" value="{{ $item->toItemId }}">
 
                         <tr class="collection-group-13">
                             <td colspan="3">
@@ -278,7 +278,7 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->fromItem->image) }}" class="collection-resource-img" alt="{{ $item->fromItem->name }}">
+                                                                        <img src="{{ asset($item->fromItemImage) }}" class="collection-resource-img" alt="{{ $item->fromItemName }}">
                                                                     </a>
                                                                 </span>
                                                                  <span class="collection-slot__qty qty_from" data-count="{{ $item->fromAmount }}">{{ $item->fromAmount }} шт</span>
@@ -291,7 +291,7 @@
                                                                         <span class="b-input__inner">
                                                                             <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
                                                                             <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                                                            <input type="text" data-id="{{ $item->fromItem->id }}" data-min="0" data-max="{{ $item->availableCount }}" name="count" value="{{ $item->availableCount }}" class="cart_amount_sell_input count_sell" autocomplete="off">
+                                                                            <input type="text" data-id="{{ $item->fromItemId }}" data-min="0" data-max="{{ $item->availableCount }}" name="count" value="{{ $item->availableCount }}" class="cart_amount_sell_input count_sell" autocomplete="off">
                                                                         </span>
                                                                     </span>
                                                                 </span>
@@ -301,7 +301,7 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->toItem->image) }}" class="collection-resource-img" alt="{{ $item->toItem->name }}">
+                                                                        <img src="{{ asset($item->toItemImage) }}" class="collection-resource-img" alt="{{ $item->toItemName }}">
                                                                     </a>
                                                                 </span>
                                                                 <span class="collection-slot__qty qty_to" data-count="{{ $item->toAmount }}">{{ $item->toAmount }} шт</span>
@@ -314,7 +314,7 @@
                                                             <span class="collection-slot">
                                                                 <span class="collection-slot__img">
                                                                     <a href="#" class="collection-resource redd">
-                                                                        <img src="{{ asset($item->toItem->image) }}" class="collection-resource-img" alt="{{ $item->toItem->name }}">
+                                                                        <img src="{{ asset($item->toItemImage) }}" class="collection-resource-img" alt="{{ $item->toItemName }}">
                                                                     </a>
                                                                 </span>
                                                                 <span class="collection-slot__qty qty_total">0</span>
@@ -500,8 +500,8 @@
         window.parent.postMessage({ url: url }, '*');
     }
 
-    let money = parseInt('{{ $user->money }}');
-    let diamond = parseInt('{{ $user->diamond }}');
+    let money = parseInt('{{ $page->money }}');
+    let diamond = parseInt('{{ $page->diamonds }}');
 
     parent.sendToFrame('character-frame', { money, diamond });
 

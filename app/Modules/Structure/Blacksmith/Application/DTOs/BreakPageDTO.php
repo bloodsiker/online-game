@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Application\DTOs;
 
 use App\Models\Share\ShareItem;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 
 final readonly class BreakPageDTO
 {

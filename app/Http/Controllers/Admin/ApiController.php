@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location\Location;
 use App\Models\Map;
 use App\Models\Npc;
-use App\Models\Quest\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Models\Share\ShareItem;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

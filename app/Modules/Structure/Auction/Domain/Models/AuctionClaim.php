@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Domain\Models;
 
-use App\Models\Item\Item;
-use App\Models\Structure;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

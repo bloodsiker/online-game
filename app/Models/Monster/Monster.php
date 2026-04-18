@@ -3,9 +3,9 @@
 namespace App\Models\Monster;
 
 use App\Enums\CombatClass;
-use App\Models\Location\Location;
 use App\Models\MagicSkill\Effect;
 use App\Models\Share\ShareItem;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Services\Combat\FightHitInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\DTO\AttackResultDTO;
 use App\Models\MagicSkill\MagicSkill;
-use App\Models\Player\Player;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Services\Combat\BattleEffectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

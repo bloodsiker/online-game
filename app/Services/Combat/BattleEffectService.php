@@ -10,8 +10,8 @@ use App\Models\Battle\Battle;
 use App\Models\MagicSkill\Effect;
 use App\Models\Monster\MonsterActiveEffect;
 use App\Models\Monster\MonsterOnLocation;
-use App\Models\Player\Player;
-use App\Models\Player\PlayerActiveEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 class BattleEffectService
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Domain\Contracts;
 
 use App\Models\Share\ShareItem;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 

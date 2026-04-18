@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Infrastructure\Persistence;
 
-use App\Models\Item\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Referral\Domain\Contracts\ReferralRewardIssuer;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 

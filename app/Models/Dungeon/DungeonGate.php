@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Dungeon;
 
-use App\Models\Location\Location;
 use App\Models\Share\ShareItem;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

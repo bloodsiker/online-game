@@ -2,8 +2,8 @@
 
 namespace App\Models\MagicSkill;
 
-use App\Models\Player\Player;
-use App\Models\Player\PlayerEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

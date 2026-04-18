@@ -2,7 +2,7 @@
 
 namespace App\Models\Monster;
 
-use App\Models\Location\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

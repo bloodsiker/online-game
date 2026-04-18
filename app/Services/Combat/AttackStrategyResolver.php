@@ -3,11 +3,11 @@
 namespace App\Services\Combat;
 
 use App\Enums\ShareItemType;
-use App\Models\Item\Item;
 use App\Models\MagicSkill\MagicSkill;
 use App\Models\Monster\Monster;
-use App\Models\Player\Player;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Services\Combat\Strategies\AttackStrategyInterface;
 use App\Services\Combat\Strategies\DualWieldStrategy;
 use App\Services\Combat\Strategies\FistAttackStrategy;

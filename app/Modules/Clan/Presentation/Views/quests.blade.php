@@ -247,7 +247,7 @@
 
                         @php
                             // Find last completed record per quest for cooldown display
-                            use App\Models\Quest\QuestClanProgress;
+                            use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
                             $lastCompleted = QuestClanProgress::where('clan_id', $clan->id)
                                 ->where('status', \App\Enums\QuestPlayerStatus::COMPLETED)
                                 ->get()

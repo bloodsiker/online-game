@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\PremiumShop\Application\UseCases;
 
-use App\Models\Shop\ShopItem;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetShopItems

@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\UserRegistered;
-use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 
 class GiveStarterBonus
 {

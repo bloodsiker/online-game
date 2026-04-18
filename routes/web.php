@@ -5,20 +5,15 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\FightController;
-use App\Http\Controllers\FriendController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
 use App\Http\Controllers\InterfaceController;
-use App\Http\Controllers\ItemController;
-use App\Http\Controllers\LocationController;
 use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\MonsterController;
 use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PartyController;
-use App\Http\Controllers\QuestController;
-use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\SlotController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -77,8 +72,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::get('/fight/attack/{id}/{monsterId}/{action}', [FightController::class, 'attack'])->name('fight.attack');
     Route::get('/fight/{id}', [FightController::class, 'index'])->name('fight');
 
-    Route::get('/location/move/{direction}', [LocationController::class, 'moveTo'])->name('move-to');
-    Route::get('/location', [LocationController::class, 'index'])->name('location');
 });
 
 Route::get('/info/m/{id}', [MonsterController::class, 'info'])->name('info.monster');
@@ -88,45 +81,12 @@ Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 
 Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
 
-Route::get('/quest/{id}/take', [QuestController::class, 'take'])->name('quest.take');
-Route::get('/quest/{id}/complete', [QuestController::class, 'complete'])->name('quest.complete');
-Route::post('/quest/{id}/cancel', [QuestController::class, 'cancelQuest'])->name('quest.cancel');
-Route::post('/quest/clan/{id}/cancel', [QuestController::class, 'cancelClanQuest'])->name('quest.clan.cancel');
-Route::get('/quest/{id}', [QuestController::class, 'quest'])->name('quest');
-Route::get('/quests', [QuestController::class, 'list'])->name('quests');
-
 Route::get('/reputations', [ReputationController::class, 'list'])->name('reputation.list');
 Route::get('/reputation/{id}', [ReputationController::class, 'index'])->name('reputation.index');
 Route::post('/reputation/{id}/take', [ReputationController::class, 'take'])->name('reputation.take');
 Route::post('/reputation/{id}/decline', [ReputationController::class, 'decline'])->name('reputation.decline');
 Route::get('/reputation/{id}/shop', [ReputationController::class, 'shop'])->name('reputation.shop');
 Route::post('/reputation/{id}/shop/{itemId}/buy', [ReputationController::class, 'buy'])->name('reputation.buy');
-
-Route::get('/items/info/{id}', [ItemController::class, 'info'])->name('items.info');
-Route::get('/items/put-on/{id}', [ItemController::class, 'putOn'])->name('items.put_on');
-Route::get('/items/put-off/{id}', [ItemController::class, 'putOff'])->name('items.put_off');
-Route::get('/items/pickup/{id}', [ItemController::class, 'pickUp'])->name('items.pick_up');
-Route::get('/items/open-chest/{id}', [ItemController::class, 'openChest'])->name('items.open_chest');
-Route::get('/items/view-chest/{id}', [ItemController::class, 'viewChest'])->name('items.view_chest');
-Route::get('/items/pickup-chest/{chest}/{id}', [ItemController::class, 'pickUpInChest'])->name('items.pickup_chest');
-Route::get('/items/hand-over/{id}', [ItemController::class, 'handOver'])->name('items.hand_over');
-Route::get('/items/hand-over-to-user/{id}', [ItemController::class, 'handOverToUser'])->name('items.hand_over_to_user');
-Route::get('/items/drop/{id}', [ItemController::class, 'dropItem'])->name('items.drop');
-
-Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');
-
-Route::get('/rating', [RatingController::class, 'index'])->name('rating');
-Route::get('/rating/search', [RatingController::class, 'search'])->name('rating.search');
-
-Route::get('/friends', [FriendController::class, 'index'])->name('friends');
-Route::post('/friends/add', [FriendController::class, 'addFriend'])->name('friends.add');
-Route::post('/friends/{relationship}/accept', [FriendController::class, 'acceptFriend'])->name('friends.accept');
-Route::post('/friends/{relationship}/decline', [FriendController::class, 'declineFriend'])->name('friends.decline');
-Route::delete('/friends/{relationship}', [FriendController::class, 'removeFriend'])->name('friends.remove');
-Route::post('/enemies/add', [FriendController::class, 'addEnemy'])->name('enemies.add');
-Route::delete('/enemies/{relationship}', [FriendController::class, 'removeEnemy'])->name('enemies.remove');
-Route::post('/ignores/add', [FriendController::class, 'addIgnore'])->name('ignores.add');
-Route::delete('/ignores/{relationship}', [FriendController::class, 'removeIgnore'])->name('ignores.remove');
 
 // Dungeon routes
 Route::get('/dungeons', [DungeonController::class, 'index'])->name('dungeon.index');
@@ -144,7 +104,6 @@ Route::delete('/party/{partyId}', [PartyController::class, 'disband'])->name('pa
 Route::get('/on-map', [InterfaceController::class, 'onMap'])->name('on_map');
 Route::get('/menu', [InterfaceController::class, 'menu'])->name('menu');
 Route::get('/who', [InterfaceController::class, 'who'])->name('who');
-Route::get('/who/friends', [FriendController::class, 'friendsFrame'])->name('who.friends');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');

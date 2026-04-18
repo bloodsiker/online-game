@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Structure\PremiumShop\Application\UseCases;
 
 use App\Enums\ShareItemType;
-use App\Models\Item\Item;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\PremiumShop\Application\DTOs\PremiumShopResultDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ShopCartService;
+use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseCart

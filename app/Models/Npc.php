@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Location\Location;
-use App\Models\Quest\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

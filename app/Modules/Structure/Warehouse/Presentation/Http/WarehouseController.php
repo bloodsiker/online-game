@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Warehouse\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\UseCases\GetPutPage;
 use App\Modules\Structure\Warehouse\Application\UseCases\GetTakePage;
 use App\Modules\Structure\Warehouse\Application\UseCases\PutItems;

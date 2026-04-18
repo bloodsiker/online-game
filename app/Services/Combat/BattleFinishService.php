@@ -4,7 +4,7 @@ namespace App\Services\Combat;
 
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
-use App\Models\Location\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Repositories\BattleRepository;
 use App\Services\DropService;
 use Carbon\Carbon;

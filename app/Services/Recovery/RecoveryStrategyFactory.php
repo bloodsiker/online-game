@@ -2,7 +2,7 @@
 
 namespace App\Services\Recovery;
 
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Services\Recovery\Strategies\FullHealStrategy;
 use App\Services\Recovery\Strategies\RecoveryStrategyInterface;
 

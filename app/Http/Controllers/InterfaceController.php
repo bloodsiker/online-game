@@ -86,7 +86,7 @@ class InterfaceController extends Controller
         $player = $user->player;
         $playerDecorator = $this->statService->resolve($player);
 
-        $activeEffects = \App\Models\Player\PlayerActiveEffect::where('player_id', $player->id)
+        $activeEffects = \App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect::where('player_id', $player->id)
             ->whereNull('battle_id')
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->with('effect')

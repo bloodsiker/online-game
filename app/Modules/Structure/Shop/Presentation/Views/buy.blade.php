@@ -141,13 +141,13 @@
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="{{ route('shop', ['id' => $shop->id]) }}" title="Купить" class="btn_2">Купить</a>
+            <a id="center_1" href="{{ route('shop', ['id' => $page->shopId]) }}" title="Купить" class="btn_2">Купить</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
         <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_2" href="{{ route('shop.sell_item', ['id' => $shop->id]) }}" title="Продать" class="btn_1">Продать</a></td>
+            <a id="center_2" href="{{ route('shop.sell_item', ['id' => $page->shopId]) }}" title="Продать" class="btn_1">Продать</a></td>
         <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
         <td></td>
@@ -183,8 +183,8 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->diamonds) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -209,17 +209,17 @@
                     <td class="brd2-top brd2" align="center">Кол-во</td>
                     <td class="brd2-top brd2" align="center">Купить</td>
                 </tr>
-                @foreach($shop->shopItems as $item)
+                @foreach($page->items as $item)
                     <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
                         <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                            <img src="{{ $item->item->image }}" style="width: 100%" alt="">
+                            <img src="{{ $item->image }}" style="width: 100%" alt="">
                         </td>
                         <td align="left" >
-                            <a href="{{ route('items.info', ['id' => $item->item->id]) }}"
+                            <a href="{{ $item->infoUrl }}"
                                onclick="showArtifactInfo(22195638,false);return false;"
-                               style="color:#666666" class="b">{{ $item->item->name }}</a><br>
+                               style="color:#666666" class="b">{{ $item->name }}</a><br>
                             <span title="Тип предмета">
-                                <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->item->getTypeName() }}
+                                <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
                             </span>
                         </td>
                         <td nowrap="">
@@ -233,14 +233,14 @@
                                         <span class="b-input__inner">
                                             <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
                                             <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                            <input type="text" data-id="{{ $item->item->id }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
+                                            <input type="text" data-id="{{ $item->shareItemId }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
                                         </span>
                                     </span>
                                 </span>
                             </div>
                         </td>
                         <td nowrap="">
-                            <b class="butt2 pointer"><b><input value="купить" type="submit" class="buy-item" data-id="{{ $item->item->id }}" data-href="{{ route('shop.buy_item', ['id' => $shop->id, 'itemId' => $item->item->id]) }}"></b></b>
+                            <b class="butt2 pointer"><b><input value="купить" type="submit" class="buy-item" data-id="{{ $item->shareItemId }}" data-href="{{ $item->buyUrl }}"></b></b>
                         </td>
                     </tr>
                 @endforeach
@@ -377,8 +377,8 @@
         });
     });
 
-    let money = parseInt('{{ $user->money }}');
-    let diamond = parseInt('{{ $user->diamond }}');
+    let money = parseInt('{{ $page->money }}');
+    let diamond = parseInt('{{ $page->diamonds }}');
 
     parent.sendToFrame('character-frame', { money, diamond });
 

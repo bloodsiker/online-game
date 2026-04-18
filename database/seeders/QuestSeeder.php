@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Location\Location;
 use App\Models\Npc;
 use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
 use App\Models\Quest\QuestStage;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Seeder;
 
 /**
@@ -240,72 +240,72 @@ class QuestSeeder extends Seeder
             ['title' => 'Три испытания'],
             [
                 'description' => 'Докажи свою доблесть, пройдя три испытания. Тебе предстоит сражаться, охотиться и выполнить особое поручение.',
-                'type'             => 'one_time',
-                'start_npc_id'     => $npc1->id,
-                'complete_npc_id'  => $npc1->id, // fallback for non-staged path
-                'after_quest_id'   => $quest3->id,
-                'is_active'        => true,
+                'type' => 'one_time',
+                'start_npc_id' => $npc1->id,
+                'complete_npc_id' => $npc1->id, // fallback for non-staged path
+                'after_quest_id' => $quest3->id,
+                'is_active' => true,
             ]
         );
 
         if ($quest6->stages()->doesntExist()) {
             // Stage 1: Kill 5 dragons — turn in at Глава города
             $stage1 = QuestStage::create([
-                'quest_id'        => $quest6->id,
+                'quest_id' => $quest6->id,
                 'complete_npc_id' => $npc1->id,
-                'order'           => 1,
-                'title'           => 'Зачистка',
-                'description'     => 'Сразись с драконами, обитающими в катакомбах.',
+                'order' => 1,
+                'title' => 'Зачистка',
+                'description' => 'Сразись с драконами, обитающими в катакомбах.',
             ]);
 
             // Stage 2: Collect 5 claws from bats (drop_chance=60%) — turn in at Вестник
             $stage2 = QuestStage::create([
-                'quest_id'        => $quest6->id,
+                'quest_id' => $quest6->id,
                 'complete_npc_id' => $npc2->id,
-                'order'           => 2,
-                'title'           => 'Охота за трофеями',
-                'description'     => 'Принеси когти летучих мышей Вестнику.',
+                'order' => 2,
+                'title' => 'Охота за трофеями',
+                'description' => 'Принеси когти летучих мышей Вестнику.',
             ]);
 
             // Stage 3: Deliver Кристалл x1 — turn in at Глава города
             $stage3 = QuestStage::create([
-                'quest_id'        => $quest6->id,
+                'quest_id' => $quest6->id,
                 'complete_npc_id' => $npc1->id,
-                'order'           => 3,
-                'title'           => 'Доставка реликвии',
-                'description'     => 'Доставь Кристалл Главе города.',
+                'order' => 3,
+                'title' => 'Доставка реликвии',
+                'description' => 'Доставь Кристалл Главе города.',
             ]);
 
             QuestObjective::create([
-                'quest_id'        => $quest6->id,
-                'stage_id'        => $stage1->id,
-                'type'            => 'kill',
-                'target_type'     => 'monster',
-                'target_id'       => 3, // Дракон
+                'quest_id' => $quest6->id,
+                'stage_id' => $stage1->id,
+                'type' => 'kill',
+                'target_type' => 'monster',
+                'target_id' => 3, // Дракон
                 'required_amount' => 5,
-                'description'     => 'Убить 5 драконов',
+                'description' => 'Убить 5 драконов',
             ]);
 
             QuestObjective::create([
-                'quest_id'        => $quest6->id,
-                'stage_id'        => $stage2->id,
-                'type'            => 'collect',
-                'target_type'     => 'monster',
-                'target_id'       => 2,    // Летучая мышь (monster)
-                'share_item_id'   => 1,    // Коготь медведя (ShareItem that drops into backpack)
+                'quest_id' => $quest6->id,
+                'stage_id' => $stage2->id,
+                'type' => 'collect',
+                'target_type' => 'monster',
+                'target_id' => 2,    // Летучая мышь (monster)
+                'share_item_id' => 1,    // Коготь медведя (ShareItem that drops into backpack)
                 'required_amount' => 5,
-                'drop_chance'     => 60.00,
-                'description'     => 'Собрать 5 когтей летучих мышей (шанс 60%)',
+                'drop_chance' => 60.00,
+                'description' => 'Собрать 5 когтей летучих мышей (шанс 60%)',
             ]);
 
             QuestObjective::create([
-                'quest_id'        => $quest6->id,
-                'stage_id'        => $stage3->id,
-                'type'            => 'deliver',
-                'target_type'     => 'share_item',
-                'target_id'       => 23, // Кристалл
+                'quest_id' => $quest6->id,
+                'stage_id' => $stage3->id,
+                'type' => 'deliver',
+                'target_type' => 'share_item',
+                'target_id' => 23, // Кристалл
                 'required_amount' => 1,
-                'description'     => 'Доставить Кристалл',
+                'description' => 'Доставить Кристалл',
             ]);
         }
 

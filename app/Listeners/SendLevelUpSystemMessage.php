@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\PlayerLeveledUp;
-use App\Services\ChatService;
+use App\Modules\Chat\Application\Services\ChatService;
 
 class SendLevelUpSystemMessage
 {

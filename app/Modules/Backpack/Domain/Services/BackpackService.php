@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Backpack\Domain\Services;
 
 use App\Enums\ShareItemType;
-use App\Models\Item\Item;
 use App\Models\Share\ShareItem;
 use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemRequirementService;
 use Illuminate\Database\Eloquent\Collection;

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\PlayerLeveledUp;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 

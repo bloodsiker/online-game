@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Share\ShareAction;
 use App\Models\Share\ShareItem;
-use App\Models\Shop\ShopItem;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

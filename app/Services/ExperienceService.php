@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class ExperienceService
 {

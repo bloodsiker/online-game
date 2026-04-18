@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Models\Item\Item;
-use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
 use App\Modules\Structure\Auction\Domain\Models\AuctionHistory;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
 use App\Modules\Structure\Auction\Domain\Services\AuctionFeeCalculator;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 

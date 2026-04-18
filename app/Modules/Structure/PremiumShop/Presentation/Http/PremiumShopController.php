@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Structure\PremiumShop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Structure;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
-use App\Services\ShopCartService;
+use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

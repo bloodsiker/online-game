@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Domain\Services;
 
-use App\Models\Player\Player;
-use App\Models\Player\PlayerMagicSkill;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
@@ -13,6 +11,8 @@ use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerMagicSkill;
 use Illuminate\Support\Facades\DB;
 
 class ClanSkillService

@@ -5,7 +5,7 @@ namespace App\DTO;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 final class FightDTO
 {

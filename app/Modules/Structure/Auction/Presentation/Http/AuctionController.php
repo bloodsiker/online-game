@@ -6,7 +6,6 @@ namespace App\Modules\Structure\Auction\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Models\Share\ShareItem;
-use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;
@@ -23,6 +22,7 @@ use App\Modules\Structure\Auction\Application\UseCases\GetMyOrders;
 use App\Modules\Structure\Auction\Application\UseCases\GetSellableItems;
 use App\Modules\Structure\Auction\Application\UseCases\SellToShop;
 use App\Modules\Structure\Auction\Application\UseCases\TakeClaim;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

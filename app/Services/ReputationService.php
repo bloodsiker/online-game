@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\QuestPlayerStatus;
-use App\Models\Player\Player;
-use App\Models\Quest\QuestPlayer;
-use App\Models\Quest\QuestPlayerObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Models\Reputation\PlayerReputation;
 use App\Models\Reputation\Reputation;
 use App\Models\Reputation\ReputationTier;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Models;
 
-use App\Models\Item\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -3,7 +3,7 @@
 namespace App\Models\Monster;
 
 use App\Models\Battle\Battle;
-use App\Models\Player\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

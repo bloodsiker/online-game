@@ -7,9 +7,9 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\QuestRewardType;
 use App\Enums\QuestType;
 use App\Http\Controllers\Controller;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestObjective;
-use App\Models\Quest\QuestReward;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

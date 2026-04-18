@@ -4,33 +4,34 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Exchange\Domain\Services;
 
-use App\Models\Item\Item;
-use App\Models\Share\ShareItem;
-use App\Models\Structure;
 use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeInventoryRepository;
+use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeReadRepository;
+use App\Modules\Structure\Exchange\Domain\Contracts\TransactionManager;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use DomainException;
 
 readonly class ExchangeItemService
 {
     public function __construct(
-        private BackpackService $backpackService,
+        private ExchangeReadRepository $readRepository,
+        private ExchangeInventoryRepository $inventoryRepository,
+        private TransactionManager $transactionManager,
     ) {}
 
-    public function performExchange(User $user, Structure $exchange, int $fromShareId, int $toShareId, int $count): void
+    public function performExchange(User $user, int $exchangeId, int $fromShareId, int $toShareId, int $count): void
     {
         if ($count <= 0) {
             throw new DomainException('Неверное количество для обмена.');
         }
 
-        $fromShareItem = ShareItem::find($fromShareId);
+        $fromShareItem = $this->inventoryRepository->findShareItem($fromShareId);
 
-        if (! $fromShareItem instanceof ShareItem) {
+        if ($fromShareItem === null) {
             throw new DomainException('Предмет для обмена не найден.');
         }
 
-        $backpackFromItem = $this->backpackService->getItem($user, $fromShareItem);
+        $backpackFromItem = $this->inventoryRepository->findBackpackItem($user, $fromShareId);
 
         if (! $backpackFromItem instanceof Backpack) {
             throw new DomainException('У вас нет необходимого предмета для обмена.');
@@ -40,16 +41,13 @@ readonly class ExchangeItemService
             throw new DomainException('У вас недостаточно предметов для обмена.');
         }
 
-        $toShareItem = ShareItem::find($toShareId);
+        $toShareItem = $this->inventoryRepository->findShareItem($toShareId);
 
-        if (! $toShareItem instanceof ShareItem) {
+        if ($toShareItem === null) {
             throw new DomainException('Предмет результата обмена не найден.');
         }
 
-        $exchangeItem = $exchange->exchangeItems()
-            ->where('from_share_item_id', $fromShareItem->id)
-            ->where('to_share_item_id', $toShareItem->id)
-            ->first();
+        $exchangeItem = $this->readRepository->findExchangeItem($exchangeId, $fromShareId, $toShareId);
 
         if ($exchangeItem === null) {
             throw new DomainException('Указанный обмен недоступен.');
@@ -58,33 +56,32 @@ readonly class ExchangeItemService
         $exchangeRate = $exchangeItem->to_amount / $exchangeItem->from_amount;
         $amountToExchange = $count * $exchangeRate;
 
-        \DB::transaction(function () use ($user, $count, $amountToExchange, $toShareItem, $backpackFromItem) {
+        $this->transactionManager->run(function () use ($user, $count, $amountToExchange, $toShareItem, $backpackFromItem): void {
             $this->removeItemsFromBackpack($backpackFromItem, $count);
-            $this->addItemsToBackpack($user, $toShareItem, $amountToExchange);
+            $this->addItemsToBackpack($user, $toShareItem->id, (int) $amountToExchange);
         });
     }
 
     public function removeItemsFromBackpack(Backpack $backpackFromItem, int $count): void
     {
         if ($backpackFromItem->count <= $count) {
-            $backpackFromItem->delete();
-            $backpackFromItem->item()->delete();
+            $this->inventoryRepository->deleteBackpackItem($backpackFromItem);
+            $this->inventoryRepository->deleteItemById((int) $backpackFromItem->item_id);
         } else {
-            $backpackFromItem->decrement('count', $count);
+            $backpackFromItem->count -= $count;
+            $this->inventoryRepository->saveBackpackItem($backpackFromItem);
         }
     }
 
-    public function addItemsToBackpack(User $user, ShareItem $toShareItem, int $amountToExchange): void
+    public function addItemsToBackpack(User $user, int $toShareItemId, int $amountToExchange): void
     {
-        $backpackToItem = $this->backpackService->getItem($user, $toShareItem);
+        $backpackToItem = $this->inventoryRepository->findBackpackItem($user, $toShareItemId);
 
         if ($backpackToItem instanceof Backpack) {
-            $backpackToItem->increment('count', $amountToExchange);
-            $backpackToItem->save();
+            $backpackToItem->count += $amountToExchange;
+            $this->inventoryRepository->saveBackpackItem($backpackToItem);
         } else {
-            $item = Item::create(['share_item_id' => $toShareItem->id]);
-
-            $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => $amountToExchange]);
+            $this->inventoryRepository->createBackpackItem($user, $toShareItemId, $amountToExchange);
         }
     }
 }

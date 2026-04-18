@@ -8,8 +8,8 @@ use App\Events\PlayerDied;
 use App\Models\Battle\Battle;
 use App\Models\Battle\BattleDetail;
 use App\Models\Battle\BattleRound;
-use App\Models\Player\Player;
-use App\Models\Player\PlayerActiveEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 readonly class PlayerDeathService
 {

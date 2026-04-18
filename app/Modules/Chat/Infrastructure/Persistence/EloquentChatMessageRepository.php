@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Infrastructure\Persistence;
 
-use App\Enums\PlayerRelationshipType;
-use App\Models\Player\PlayerRelationship;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 {
+    public function __construct(private readonly FriendRelationshipRepository $friendRelationshipRepository) {}
+
     public function create(array $data): ChatMessage
     {
         return ChatMessage::create($data);
@@ -61,11 +62,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
     public function getIgnoredUserIds(User $user): array
     {
-        return PlayerRelationship::where('player_relationships.player_id', $user->player_id)
-            ->where('player_relationships.type', PlayerRelationshipType::IGNORE)
-            ->join('users', 'player_relationships.target_id', '=', 'users.player_id')
-            ->pluck('users.id')
-            ->all();
+        return $this->friendRelationshipRepository->getIgnoredUserIdsByPlayerId((int) $user->player_id);
     }
 
     private function applyChannelFilter(Builder $query, User $user, ChatChannel $channel): void

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Application\Mappers;
 
-use App\Models\Structure;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use App\Modules\Structure\Blacksmith\Application\DTOs\GemPageDTO;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use Illuminate\Support\Collection;
 

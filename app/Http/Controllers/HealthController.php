@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Structure;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Services\Recovery\RecoveryStrategyFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;

@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
-use App\Models\Item\Item;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
+use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
+use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
+use App\Modules\Structure\Shop\Domain\Contracts\TransactionManager;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class SellItems
 {
+    public function __construct(
+        private readonly ShopReadRepository $readRepository,
+        private readonly ShopInventoryRepository $inventoryRepository,
+        private readonly TransactionManager $transactionManager,
+    ) {}
+
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
      */
@@ -25,39 +32,37 @@ class SellItems
             return new ShopResultDTO(false, 'Не выбраны предметы для продажи');
         }
 
-        $items = Backpack::select('backpacks.*')
-            ->with('item.itemInfo')
-            ->join('items', 'backpacks.item_id', '=', 'items.id')
-            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
-            ->where('backpacks.user_id', $user->id)
-            ->whereIn('item_id', array_keys($filtered))
-            ->where('equipped', 0)
-            ->where('share_items.is_sell', 1)
-            ->get();
+        $items = $this->readRepository->getSelectedSellableItems($user->id, array_map('intval', array_keys($filtered)));
 
         $total = 0;
         $idsToDelete = [];
 
-        foreach ($items as $sellItem) {
-            $requested = (int) ($filtered[$sellItem->item_id]['count'] ?? 0);
+        $this->transactionManager->run(function () use ($filtered, $items, $user, &$total, &$idsToDelete): void {
+            foreach ($items as $sellItem) {
+                $requested = (int) ($filtered[$sellItem->item_id]['count'] ?? 0);
 
-            if ($requested < $sellItem->count) {
-                $total += (int) round($sellItem->item->itemInfo->price / 2) * $requested;
-                $sellItem->count -= $requested;
-                $sellItem->save();
-            } else {
-                $total += (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
-                $idsToDelete[] = $sellItem->item_id;
+                if ($requested <= 0) {
+                    continue;
+                }
+
+                if ($requested < $sellItem->count) {
+                    $total += (int) round($sellItem->item->itemInfo->price / 2) * $requested;
+                    $sellItem->count -= $requested;
+                    $this->inventoryRepository->saveBackpackItem($sellItem);
+                } else {
+                    $total += (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
+                    $idsToDelete[] = (int) $sellItem->item_id;
+                }
             }
-        }
 
-        $user->money += $total;
-        $user->save();
+            $user->money += $total;
+            $this->inventoryRepository->saveUser($user);
 
-        if (! empty($idsToDelete)) {
-            Backpack::whereIn('item_id', $idsToDelete)->where('user_id', $user->id)->delete();
-            Item::whereIn('id', $idsToDelete)->delete();
-        }
+            if ($idsToDelete !== []) {
+                $this->inventoryRepository->deleteBackpackItems($user->id, $idsToDelete);
+                $this->inventoryRepository->deleteItemsByIds($idsToDelete);
+            }
+        });
 
         return new ShopResultDTO(true, sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')));
     }

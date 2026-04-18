@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Exchange\Application\UseCases;
 
-use App\Models\Structure;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangeActionDTO;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangeResultDTO;
+use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeReadRepository;
 use App\Modules\Structure\Exchange\Domain\Services\ExchangeItemService;
 use DomainException;
 
 class ApplyExchange
 {
     public function __construct(
+        private readonly ExchangeReadRepository $readRepository,
         private readonly ExchangeItemService $exchangeItemService,
     ) {}
 
     public function execute(ExchangeActionDTO $data): ExchangeResultDTO
     {
-        $exchange = Structure::with('npc')->findOrFail($data->exchangeId);
+        $exchange = $this->readRepository->findStructureOrFail($data->exchangeId);
 
         if ($data->user->location_id !== $exchange->npc->location_id) {
             return new ExchangeResultDTO(false, 'Вы находитесь не в том месте для обмена.');
@@ -27,7 +28,7 @@ class ApplyExchange
         try {
             $this->exchangeItemService->performExchange(
                 user: $data->user,
-                exchange: $exchange,
+                exchangeId: $exchange->id,
                 fromShareId: $data->fromShareId,
                 toShareId: $data->toShareId,
                 count: $data->count,

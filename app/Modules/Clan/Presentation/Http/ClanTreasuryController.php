@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Models\Structure;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanTreasuryLog;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

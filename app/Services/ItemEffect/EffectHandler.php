@@ -2,8 +2,8 @@
 
 namespace App\Services\ItemEffect;
 
-use App\Models\Item\Item;
-use App\Models\Player\Player;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class EffectHandler
 {

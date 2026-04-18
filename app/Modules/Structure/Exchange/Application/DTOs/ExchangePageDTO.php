@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Exchange\Application\DTOs;
 
-use App\Models\Structure;
-use Illuminate\Support\Collection;
-
 final readonly class ExchangePageDTO
 {
     /**
-     * @param  Collection<int, ExchangeItemDTO>  $items
+     * @param  list<ExchangeViewItemDTO>  $items
      */
     public function __construct(
-        public Structure $exchange,
-        public Collection $items,
+        public int $exchangeId,
+        public int $money,
+        public int $diamonds,
+        public array $items,
     ) {}
 }
