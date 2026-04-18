@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;

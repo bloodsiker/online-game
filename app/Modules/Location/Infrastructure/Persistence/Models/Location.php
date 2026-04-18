@@ -7,7 +7,7 @@ namespace App\Modules\Location\Infrastructure\Persistence\Models;
 use App\Models\Dungeon\Dungeon;
 use App\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Enums\QuestRewardType;
-use App\Models\Reputation\Reputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

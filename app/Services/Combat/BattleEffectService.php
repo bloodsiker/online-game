@@ -7,7 +7,7 @@ namespace App\Services\Combat;
 use App\DTO\AttackResultDTO;
 use App\Enums\ActiveEffectType;
 use App\Models\Battle\Battle;
-use App\Models\MagicSkill\Effect;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

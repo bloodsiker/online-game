@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Reputation\Reputation;
-use App\Models\Reputation\ReputationShopItem;
-use App\Models\Reputation\ReputationTier;
-use App\Models\Reputation\ReputationTierQuest;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 

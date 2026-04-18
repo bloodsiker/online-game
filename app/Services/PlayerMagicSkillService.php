@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Cache;
 

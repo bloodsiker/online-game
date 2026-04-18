@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
 use App\Enums\CombatClass;
-use App\Models\MagicSkill\Effect;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Services\Combat\FightHitInterface;

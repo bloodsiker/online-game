@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Combat\Strategies;
 
 use App\DTO\FightHitDTO;
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class MagicBuffStrategy implements AttackStrategyInterface

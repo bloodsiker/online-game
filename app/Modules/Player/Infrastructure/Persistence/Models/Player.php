@@ -6,7 +6,7 @@ namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
 use App\Enums\CombatClass;
 use App\Enums\QuestPlayerStatus;
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;

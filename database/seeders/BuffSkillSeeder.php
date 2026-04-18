@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\MagicSkill\Effect;
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

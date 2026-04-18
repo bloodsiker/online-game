@@ -2,8 +2,8 @@
 
 namespace App\DTO;
 
-use App\Models\MagicSkill\Effect;
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Models\Skill;
 use Illuminate\Support\Collection;

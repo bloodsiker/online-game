@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Models\Quest\Quest;
 use App\Models\Quest\QuestObjective;
 use App\Models\Quest\QuestReward;
-use App\Models\Reputation\Reputation;
-use App\Models\Reputation\ReputationShopItem;
-use App\Models\Reputation\ReputationTier;
-use App\Models\Reputation\ReputationTierQuest;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use Illuminate\Database\Seeder;
 
 /**

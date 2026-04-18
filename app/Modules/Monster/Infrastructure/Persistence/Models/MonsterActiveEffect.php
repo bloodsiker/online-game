@@ -6,7 +6,7 @@ namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
 use App\Enums\ActiveEffectType;
 use App\Models\Battle\Battle;
-use App\Models\MagicSkill\Effect;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

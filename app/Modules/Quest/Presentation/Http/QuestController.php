@@ -8,8 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Enums\QuestPlayerStatus;
 use App\Enums\QuestRewardType;
 use App\Enums\QuestType;
-use App\Models\Npc;
-use App\Models\Reputation\ReputationTierQuest;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
@@ -23,7 +23,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Chat\Application\Services\ChatService;
-use App\Services\ReputationService;
+use App\Modules\Reputation\Application\Services\ReputationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -934,7 +934,7 @@ class QuestController extends Controller
         if (! $reward->reputation_id) {
             return;
         }
-        $reputation = \App\Models\Reputation\Reputation::find($reward->reputation_id);
+        $reputation = \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation::find($reward->reputation_id);
         if ($reputation) {
             $this->reputationService->addPoints($player, $reputation, (int) $reward->amount);
         }

@@ -8,11 +8,8 @@ use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
-use App\Http\Controllers\MagicSkillController;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\NpcController;
 use App\Http\Controllers\PartyController;
-use App\Http\Controllers\ReputationController;
 use App\Http\Controllers\SlotController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -52,11 +49,6 @@ Route::post('/register/check', [RegisterController::class, 'registerCheck'])->na
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
 
 Route::middleware(['updateLastOnline'])->group(function () {
-    Route::post('/magic-skill/update', [MagicSkillController::class, 'updateSkill'])->name('magic_skill.update');
-    Route::post('/magic-skill/order', [MagicSkillController::class, 'updateOrder'])->name('magic_skill.order');
-    Route::post('/magic-skill/{skill}/use', [MagicSkillController::class, 'useSkill'])->name('magic_skill.use');
-    Route::get('/magic-skill', [MagicSkillController::class, 'index'])->name('magic_skill');
-
     Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
     Route::get('/slots', [SlotController::class, 'index'])->name('slots');
 
@@ -72,18 +64,7 @@ Route::middleware(['updateLastOnline'])->group(function () {
 
 });
 
-Route::get('/info/npc/{id}', [NpcController::class, 'info'])->name('info.npc');
-
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
-
-Route::get('/npc/{id}', [NpcController::class, 'index'])->name('npc');
-
-Route::get('/reputations', [ReputationController::class, 'list'])->name('reputation.list');
-Route::get('/reputation/{id}', [ReputationController::class, 'index'])->name('reputation.index');
-Route::post('/reputation/{id}/take', [ReputationController::class, 'take'])->name('reputation.take');
-Route::post('/reputation/{id}/decline', [ReputationController::class, 'decline'])->name('reputation.decline');
-Route::get('/reputation/{id}/shop', [ReputationController::class, 'shop'])->name('reputation.shop');
-Route::post('/reputation/{id}/shop/{itemId}/buy', [ReputationController::class, 'buy'])->name('reputation.buy');
 
 // Dungeon routes
 Route::get('/dungeons', [DungeonController::class, 'index'])->name('dungeon.index');

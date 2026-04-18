@@ -10,7 +10,7 @@
         ['group' => 'character',   'route' => 'character',        'params' => ['group' => 'character'],   'label' => 'Персонаж'],
         ['group' => 'magic_skill', 'route' => 'magic_skill',      'params' => ['group' => 'magic_skill'], 'label' => 'Книга заклинаний'],
         ['group' => 'slots',       'route' => 'slots',            'params' => ['group' => 'slots'],       'label' => 'Слоты'],
-        ['group' => 'reputation',  'route' => 'reputation.list',  'params' => [],                         'label' => 'Репутации'],
+        ['group' => 'reputation',  'route' => 'reputation.list',  'params' => ['group' => 'reputation'],  'label' => 'Репутации'],
     ];
 @endphp
 <table border="0" cellspacing="0" cellpadding="0" style="position: relative; top: -2px;">

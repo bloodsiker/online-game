@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\ClanSkillEffectType;
 use App\Models\Clan\ClanSkillDefinition;
 use App\Models\Clan\ClanSkillLevel;
-use App\Models\MagicSkill\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use Illuminate\Database\Seeder;
 
 class ClanSkillSeeder extends Seeder
