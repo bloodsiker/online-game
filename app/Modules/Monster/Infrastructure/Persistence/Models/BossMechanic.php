@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Enums\BossMechanicType;
-use App\Services\Combat\Boss\BossMechanicInterface;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

@@ -33,7 +33,7 @@
                             <td><b>{{ $stage->level_threshold }}</b></td>
                             <td>{{ $stage->reward_type->label() }}</td>
                             <td>
-                                @if($stage->reward_type === \App\Enums\ReferralRewardType::ITEM)
+                                @if($stage->reward_type === \App\Modules\Referral\Domain\Enums\ReferralRewardType::ITEM)
                                     {{ $stage->rewardItem?->name ?? '—' }}
                                 @else
                                     —

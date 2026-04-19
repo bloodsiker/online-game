@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Modules\Battle\Application\Services\Combat\Strategies;
+
+use App\DTO\FightHitDTO;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Battle\Application\Services\Combat\HitCalculator;
+
+class MagicAttackStrategy implements AttackStrategyInterface
+{
+    public function __construct(
+        private HitCalculator $hitCalc,
+        private FightHitInterface $player,     // StatSheet с полными рассчитанными статами
+        private Player $playerModel, // Player model для чтения/записи mp_now
+        private Monster $monster,
+        private MagicSkill $magicSkill,
+    ) {}
+
+    public function getHits(): array
+    {
+        if (! $this->magicSkill instanceof MagicSkill) {
+            return [
+                (new FightHitDTO)
+                    ->setCantCast(true)
+                    ->setMessage('Заклинание не изучено или отключено'),
+            ];
+        }
+
+        if (! $this->magicSkill->isAttackSkill()) {
+            return [
+                (new FightHitDTO)
+                    ->setCantCast(true)
+                    ->setMessage('Это не атакующее заклинание'),
+            ];
+        }
+
+        if ($this->playerModel->mp_now < $this->magicSkill->mana_cost) {
+            return [
+                (new FightHitDTO)
+                    ->setCantCast(true)
+                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost)),
+            ];
+        }
+
+        $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
+
+        // 1. Проверка уклонения — магию тоже можно увернуться (баланс настраивается в HitCalculator)
+        $dodgeHit = $this->hitCalc->playerHit($this->player, $this->monster, 0, 0);
+        if ($dodgeHit->isDodge()) {
+            return [
+                $dodgeHit
+                    ->setMagicSkill($this->magicSkill)
+                    ->setWeaponName($this->magicSkill->name)
+                    ->setWeapon(null),
+            ];
+        }
+
+        // 2. Базовый урон от скилла
+        $baseDamage = random_int($this->magicSkill->min_damage, $this->magicSkill->max_damage);
+
+        // 3. Бонус от магического оружия (посох, жезл, книга и т.д.)
+        // Предполагаем, что у Player есть методы:
+        //   getMagicWeaponMinBonus() и getMagicWeaponMaxBonus()
+        $weaponMinBonus = $this->player->getMagicWeaponMinBonus ?? 0;
+        $weaponMaxBonus = $this->player->getMagicWeaponMaxBonus ?? 0;
+
+        //        $weaponBonus = $weaponMinBonus > 0 || $weaponMaxBonus > 0
+        //            ? random_int($weaponMinBonus, $weaponMaxBonus)
+        //            : 0;
+
+        $totalMin = $baseDamage + $weaponMinBonus;
+        $totalMax = $baseDamage + $weaponMaxBonus;
+
+        // 4. Рассчитываем хит с итоговым диапазоном урона
+        $hit = $this->hitCalc->playerHit($this->player, $this->monster, $totalMin, $totalMax);
+
+        // Если вдруг хит критовал — всё ок, HitCalculator уже это посчитал
+        // Если уклонения нет — продолжаем
+
+        foreach ($this->magicSkill->skillEffects as $effectData) {
+            if (random_int(1, 100) <= $effectData->pivot->chance) {
+                $hit->addAppliedEffect($effectData);
+            }
+        }
+
+        return [
+            $hit
+                ->setMagicSkill($this->magicSkill)
+                ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))
+                ->setWeapon(null),
+        ];
+    }
+}

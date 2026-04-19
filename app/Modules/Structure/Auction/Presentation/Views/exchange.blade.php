@@ -201,7 +201,7 @@
                         <td nowrap="" width="100" align="center">
                             <nobr>Вид: <select name="filter[type]" class="dbgl2 b small" style="width:70px;">
                                     <option value="">--</option>
-                                    @foreach(\App\Enums\ShareItemType::cases() as $type)
+                                    @foreach(\App\Modules\Share\Domain\Enums\ShareItemType::cases() as $type)
                                         <option value="{{ $type->value }}" {{ ($filter['type'] ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
                                     @endforeach
                                 </select></nobr>

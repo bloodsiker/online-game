@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Friend\Infrastructure\Persistence\Models;
 
-use App\Enums\PlayerRelationshipType;
+use App\Modules\Friend\Domain\Enums\PlayerRelationshipType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

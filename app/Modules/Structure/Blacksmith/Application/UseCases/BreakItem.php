@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;

@@ -26,7 +26,7 @@ class LocationController extends Controller
         $result = $this->getLocationPage->execute($user);
 
         if ($result->fight !== null) {
-            return view('fight.index', [
+            return view('battle::index', [
                 'battle' => $result->fight->battle,
                 'player' => $result->fight->player,
                 'playerDecorator' => $result->fight->playerDecorator,

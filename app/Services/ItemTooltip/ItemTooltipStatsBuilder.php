@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\ItemTooltip;
 
-use App\Enums\ItemEffectValueType;
-use App\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 /**

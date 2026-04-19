@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
-use App\Enums\QuestRewardType;
+use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;

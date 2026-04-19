@@ -272,6 +272,9 @@
         window.parent.postMessage({ url: url }, '*');
     }
 
+    const currentLocationId = {{ $page->locationId }};
+    parent.sendToFrame('map-frame', { currentLocationId });
+
     (function () {
         const users = {!! $page->locationUsersJson !!};
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\BossMechanicType;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Http\Controllers\Controller;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;

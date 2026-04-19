@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Enums\QuestPlayerStatus;
-use App\Enums\QuestRewardType;
-use App\Enums\QuestType;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestRewardType;
+use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;

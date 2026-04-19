@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Application\Mappers;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Item\Application\DTOs\ItemLocationEntryDTO;
 use App\Modules\Item\Application\DTOs\PickupItemsPageDTO;
 use Illuminate\Support\Collection;

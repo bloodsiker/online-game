@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Application\Mappers;
 
-use App\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Item\Application\DTOs\ItemInfoPageDTO;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 

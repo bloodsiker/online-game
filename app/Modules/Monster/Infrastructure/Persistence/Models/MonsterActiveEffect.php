@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Enums\ActiveEffectType;
-use App\Models\Battle\Battle;
+use App\Modules\Battle\Domain\Enums\ActiveEffectType;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

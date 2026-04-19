@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Application\UseCases;
 
-use App\Enums\PlayerRelationshipType;
+use App\Modules\Friend\Domain\Enums\PlayerRelationshipType;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;

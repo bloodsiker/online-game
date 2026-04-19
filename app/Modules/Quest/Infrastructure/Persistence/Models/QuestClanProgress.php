@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;

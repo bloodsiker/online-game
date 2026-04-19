@@ -17,8 +17,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $amount_min
  * @property int $amount_max
  * @property float $drop_chance
- * @property int|null $pity_threshold
- * @property bool $is_pity_only
  * @property-read Dungeon        $dungeon
  * @property-read ShareItem|null $shareItem
  */
@@ -27,12 +25,10 @@ class DungeonReward extends Model
     protected $fillable = [
         'dungeon_id', 'type', 'share_item_id',
         'amount_min', 'amount_max', 'drop_chance',
-        'pity_threshold', 'is_pity_only',
     ];
 
     protected $casts = [
         'type' => DungeonRewardType::class,
-        'is_pity_only' => 'boolean',
         'drop_chance' => 'float',
     ];
 
@@ -49,11 +45,6 @@ class DungeonReward extends Model
     public function isItemReward(): bool
     {
         return $this->type === DungeonRewardType::ITEM;
-    }
-
-    public function hasPity(): bool
-    {
-        return $this->pity_threshold !== null;
     }
 
     public function randomAmount(): int

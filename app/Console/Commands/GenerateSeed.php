@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\BossMechanicType;
-use App\Enums\ItemEffectType;
-use App\Enums\ItemEffectValueType;
-use App\Enums\QuestType;
-use App\Enums\ShareItemSlot;
-use App\Enums\ShareItemStatType;
-use App\Enums\ShareItemType;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Quest\Domain\Enums\QuestType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Models\Exchange;
 use App\Models\Experience;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;

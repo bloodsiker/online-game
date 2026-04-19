@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Application\UseCases;
 
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Npc\Application\DTOs\NpcPageDTO;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;

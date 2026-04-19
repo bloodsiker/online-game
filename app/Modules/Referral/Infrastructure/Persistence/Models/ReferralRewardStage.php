@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Infrastructure\Persistence\Models;
 
-use App\Enums\ReferralRewardType;
+use App\Modules\Referral\Domain\Enums\ReferralRewardType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
 use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;

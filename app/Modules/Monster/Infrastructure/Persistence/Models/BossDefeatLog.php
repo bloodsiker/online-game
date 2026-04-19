@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Models\Battle\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

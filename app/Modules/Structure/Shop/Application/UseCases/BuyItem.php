@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;

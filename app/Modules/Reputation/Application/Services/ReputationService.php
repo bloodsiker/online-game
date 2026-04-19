@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Application\Services;
 
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;

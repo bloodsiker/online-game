@@ -9,7 +9,7 @@ use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\BattleService;
+use App\Modules\Battle\Application\Services\Battle\BattleService;
 use App\Services\DungeonService;
 use App\Services\PlayerMovementService;
 

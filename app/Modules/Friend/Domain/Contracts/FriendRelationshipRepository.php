@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Friend\Domain\Contracts;
 
-use App\Enums\PlayerRelationshipType;
+use App\Modules\Friend\Domain\Enums\PlayerRelationshipType;
 use App\Modules\Friend\Infrastructure\Persistence\Models\PlayerRelationship;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Collection;

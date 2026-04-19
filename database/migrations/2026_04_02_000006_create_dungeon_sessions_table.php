@@ -29,7 +29,7 @@ return new class extends Migration
         });
 
         Schema::table('monster_on_locations', function (Blueprint $table) {
-            $table->unsignedBigInteger('dungeon_session_id')->nullable()->after('dungeon_run_floor_id');
+            $table->unsignedBigInteger('dungeon_session_id')->nullable()->after('location_id');
 
             $table->foreign('dungeon_session_id')
                 ->references('id')

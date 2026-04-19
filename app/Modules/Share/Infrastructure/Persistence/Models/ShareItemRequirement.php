@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
-use App\Enums\ShareItemRequirementType;
+use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Models\Skill;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use Illuminate\Database\Eloquent\Model;

@@ -2,6 +2,7 @@
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Modules\Battle\BattleServiceProvider::class,
     App\Modules\Chat\ChatServiceProvider::class,
     App\Modules\Friend\FriendServiceProvider::class,
     App\Modules\Interface\InterfaceServiceProvider::class,

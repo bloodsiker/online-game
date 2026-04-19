@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\UseCases;
 
-use App\Models\Battle\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Application\DTOs\LocationFightDTO;
 use App\Modules\Location\Application\DTOs\LocationResultDTO;
@@ -12,8 +12,8 @@ use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\Battle\BattleOrchestrator;
-use App\Services\Battle\MonsterSelector;
+use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
+use App\Modules\Battle\Application\Services\Battle\MonsterSelector;
 use App\Services\DungeonService;
 
 class GetLocationPage

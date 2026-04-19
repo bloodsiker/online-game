@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
-use App\Enums\CombatClass;
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\Combat\FightHitInterface;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -2,8 +2,8 @@
 
 namespace App\Services\ItemEffect\ValueObjects;
 
-use App\Enums\ItemEffectType;
-use App\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 
 final readonly class ItemEffectValue
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
-use App\Enums\QuestType;
+use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

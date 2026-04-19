@@ -16,8 +16,6 @@ return new class extends Migration
             $table->unsignedInteger('amount_min')->default(1);
             $table->unsignedInteger('amount_max')->default(1);
             $table->decimal('drop_chance', 6, 3)->default(100.000); // 0.001 - 100.000
-            $table->unsignedSmallInteger('pity_threshold')->nullable(); // null = без pity
-            $table->boolean('is_pity_only')->default(false); // выдаётся только через pity
             $table->timestamps();
 
             $table->foreign('dungeon_id')->references('id')->on('dungeons')->onDelete('cascade');

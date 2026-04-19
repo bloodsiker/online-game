@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Infrastructure\Persistence;
 
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Structure\Blacksmith;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Models\Share\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Policies\CanBreakItem;
 use App\Modules\Structure\Blacksmith\Domain\Services\BreakService;

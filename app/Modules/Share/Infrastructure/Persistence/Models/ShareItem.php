@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Enums\ItemRarity;
-use App\Enums\ShareItemSlot;
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;

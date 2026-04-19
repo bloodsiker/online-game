@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

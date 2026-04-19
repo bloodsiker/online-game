@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Events\UserRegistered;
-use App\Factories\PlayerFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Modules\Player\Application\UseCases\RegisterPlayerProfile;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Referral\Application\UseCases\ApplyReferralCode;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -22,7 +22,7 @@ class RegisterController extends Controller
         return view('auth.register', compact('races', 'refCode'));
     }
 
-    public function register(RegisterRequest $request, PlayerFactory $playerFactory, ApplyReferralCode $applyReferralCode)
+    public function register(RegisterRequest $request, RegisterPlayerProfile $registerPlayerProfile, ApplyReferralCode $applyReferralCode)
     {
         $user = User::create([
             'name' => $request->name,
@@ -33,7 +33,7 @@ class RegisterController extends Controller
             'prev_location_id' => 1,
         ]);
 
-        $playerFactory->create($user, $request->race);
+        $registerPlayerProfile->execute($user, (int) $request->race);
 
         if ($request->filled('ref_code')) {
             $applyReferralCode->handle($user, $request->input('ref_code'));

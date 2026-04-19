@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\QuestRewardType;
-use App\Enums\QuestType;
+use App\Modules\Quest\Domain\Enums\QuestRewardType;
+use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Http\Controllers\Controller;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;

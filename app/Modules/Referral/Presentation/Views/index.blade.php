@@ -131,10 +131,10 @@
             <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                 <td class="p10h p4v" align="center"><b>{{ $stage->levelThreshold }}</b></td>
                 <td class="p10h p4v">
-                    @if($stage->rewardType === \App\Enums\ReferralRewardType::GOLD->value)
+                    @if($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::GOLD->value)
                         <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                         {{ $stage->rewardValue }} золота
-                    @elseif($stage->rewardType === \App\Enums\ReferralRewardType::DIAMOND->value)
+                    @elseif($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::DIAMOND->value)
                         <img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle">
                         {{ $stage->rewardValue }} алмазов
                     @else

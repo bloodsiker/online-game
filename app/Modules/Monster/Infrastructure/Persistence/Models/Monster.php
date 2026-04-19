@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Enums\CombatClass;
+use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Services\Combat\FightHitInterface;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +26,10 @@ class Monster extends Model implements FightHitInterface
 
     protected $attributes = [
         'is_boss' => false,
+    ];
+
+    protected $casts = [
+        'is_boss' => 'boolean',
     ];
 
     public function locations(): BelongsToMany

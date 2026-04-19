@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
-use App\Enums\ItemEffectType;
-use App\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

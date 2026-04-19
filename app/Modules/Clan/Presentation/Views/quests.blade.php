@@ -210,10 +210,10 @@
                                             <span class="q-reward">
                                                 @php
                                                     echo match($reward->type) {
-                                                        \App\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' exp',
-                                                        \App\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
-                                                        \App\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' кл. очков',
-                                                        \App\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' exp',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' кл. очков',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
                                                         default => '',
                                                     };
                                                 @endphp
@@ -249,7 +249,7 @@
                             // Find last completed record per quest for cooldown display
                             use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
                             $lastCompleted = QuestClanProgress::where('clan_id', $clan->id)
-                                ->where('status', \App\Enums\QuestPlayerStatus::COMPLETED)
+                                ->where('status', \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::COMPLETED)
                                 ->get()
                                 ->keyBy('quest_id');
                         @endphp
@@ -299,10 +299,10 @@
                                             <span class="q-reward">
                                                 @php
                                                     echo match($reward->type) {
-                                                        \App\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' опыта',
-                                                        \App\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
-                                                        \App\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' клановых очков',
-                                                        \App\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' опыта',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' клановых очков',
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
                                                         default => '',
                                                     };
                                                 @endphp

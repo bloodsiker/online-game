@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\DTO;
 
-use App\Enums\CombatClass;
-use App\Services\Combat\FightHitInterface;
+use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 
 class StatSheet implements FightHitInterface
 {

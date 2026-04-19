@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\DTO\AttackResultDTO;
-use App\Models\Battle\Battle;
-use App\Models\Battle\BattleDetail;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;

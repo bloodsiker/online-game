@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Friend\Application\UseCases;
 
-use App\Enums\PlayerRelationshipType;
+use App\Modules\Friend\Domain\Enums\PlayerRelationshipType;
 use App\Modules\Friend\Application\DTOs\FriendActionResultDTO;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;

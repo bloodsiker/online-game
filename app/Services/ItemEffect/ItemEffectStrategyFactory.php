@@ -2,7 +2,7 @@
 
 namespace App\Services\ItemEffect;
 
-use App\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Services\ItemEffect\Strategies\BuffAttackStrategy;
 use App\Services\ItemEffect\Strategies\BuffDefenseStrategy;
 use App\Services\ItemEffect\Strategies\HealHpStrategy;

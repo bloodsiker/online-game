@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Domain\Services;
 
 use App\DTO\AttackResultDTO;
-use App\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

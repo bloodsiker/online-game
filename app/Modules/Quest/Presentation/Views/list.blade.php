@@ -237,12 +237,12 @@
                                     @php
                                         function renderQuestReward($reward): string {
                                             return match($reward->type) {
-                                                \App\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' опыта',
-                                                \App\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
-                                                \App\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
-                                                \App\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
-                                                \App\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' клановых очков',
-                                                \App\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' очков репутации',
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' опыта',
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' клановых очков',
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' очков репутации',
                                             };
                                         }
                                     @endphp
@@ -262,7 +262,7 @@
                                                         <span style="color:#777; font-weight:normal;">— взял: {{ $cp->user->name }}</span>
                                                     </td>
                                                     <td class="brd2-top" align="right">
-                                                        @if($cp->status === \App\Enums\QuestPlayerStatus::IN_PROGRESS)
+                                                        @if($cp->status === \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::IN_PROGRESS)
                                                             @if(auth()->id() === (int)$cp->clan->owner_id)
                                                                 <form id="clan-cancel-{{ $cp->id }}" method="POST" action="{{ route('quest.clan.cancel', $cp->id) }}" style="display:inline;">
                                                                     @csrf
@@ -273,7 +273,7 @@
                                                             @else
                                                                 <span style="color:#c8990a;">В процессе</span>
                                                             @endif
-                                                        @elseif($cp->status === \App\Enums\QuestPlayerStatus::COMPLETED)
+                                                        @elseif($cp->status === \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::COMPLETED)
                                                             @if($cp->reset_at && now()->lt($cp->reset_at))
                                                                 <span style="color:#888;">Доступен через {{ $cp->reset_at->locale('ru')->diffForHumans(now(), true, false, 2) }}</span>
                                                             @else
@@ -289,7 +289,7 @@
                                                         @php
                                                             $stages = $cp->quest->stages;
                                                             $hasStages = $stages->isNotEmpty();
-                                                            $isCompleted = $cp->status === \App\Enums\QuestPlayerStatus::COMPLETED;
+                                                            $isCompleted = $cp->status === \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::COMPLETED;
                                                         @endphp
                                                         @if($hasStages)
                                                             @foreach($stages as $stage)

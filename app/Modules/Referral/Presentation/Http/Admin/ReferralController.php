@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Presentation\Http\Admin;
 
-use App\Enums\ReferralRewardType;
+use App\Modules\Referral\Domain\Enums\ReferralRewardType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Referral\Infrastructure\Persistence\Models\Referral;
 use App\Modules\Referral\Infrastructure\Persistence\Models\ReferralRewardStage;

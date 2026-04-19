@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Enums\CombatClass;
-use App\Enums\ItemEffectType;
-use App\Enums\ItemEffectValueType;
-use App\Enums\ShareItemSlot;
-use App\Enums\ShareItemStatType;
+use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Listeners\RecalculatePlayerModification;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\DTO\StatModifier;

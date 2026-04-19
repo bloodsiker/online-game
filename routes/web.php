@@ -4,7 +4,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\ErrorController;
-use App\Http\Controllers\FightController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
@@ -56,11 +55,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
     Route::post('/hotbar/set', [HotbarController::class, 'set'])->name('hotbar.set');
     Route::post('/hotbar/use', [HotbarController::class, 'use'])->name('hotbar.use');
     Route::delete('/hotbar/clear/{slot}', [HotbarController::class, 'clear'])->name('hotbar.clear');
-
-    Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])->name('fight.run-away');
-    Route::get('/fight/attack/monster/{id}', [FightController::class, 'attackMonster'])->name('fight.attack.monster');
-    Route::get('/fight/attack/{id}/{monsterId}/{action}', [FightController::class, 'attack'])->name('fight.attack');
-    Route::get('/fight/{id}', [FightController::class, 'index'])->name('fight');
 
 });
 

@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\ItemEffectType;
-use App\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Enums\ItemRarity;
-use App\Enums\ShareItemSlot;
-use App\Enums\ShareItemStatType;
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Http\Controllers\Controller;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Models\Skill;
@@ -69,7 +71,7 @@ class ItemController extends Controller
         $skills = Skill::orderBy('name')->get();
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
-        $requirementTypes = \App\Enums\ShareItemRequirementType::cases();
+        $requirementTypes = \App\Modules\Share\Domain\Enums\ShareItemRequirementType::cases();
         $playerStatKeys = \App\Modules\Player\Domain\Enums\PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
@@ -195,11 +197,11 @@ class ItemController extends Controller
 
     public function addRequirement(Request $request, ShareItem $item): RedirectResponse
     {
-        $type = \App\Enums\ShareItemRequirementType::from($request->input('type'));
-        $statKey = $type === \App\Enums\ShareItemRequirementType::STAT ? $request->input('stat_key') : null;
-        $skillId = $type === \App\Enums\ShareItemRequirementType::SKILL ? (int) $request->input('skill_id') : null;
+        $type = ShareItemRequirementType::from($request->input('type'));
+        $statKey = $type === ShareItemRequirementType::STAT ? $request->input('stat_key') : null;
+        $skillId = $type === ShareItemRequirementType::SKILL ? (int) $request->input('skill_id') : null;
 
-        \App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement::create([
+        ShareItemRequirement::create([
             'share_item_id' => $item->id,
             'type' => $type,
             'stat_key' => $statKey,
@@ -210,7 +212,7 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Требование добавлено.');
     }
 
-    public function deleteRequirement(ShareItem $item, \App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement $requirement): RedirectResponse
+    public function deleteRequirement(ShareItem $item, ShareItemRequirement $requirement): RedirectResponse
     {
         $requirement->delete();
 

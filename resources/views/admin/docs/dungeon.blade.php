@@ -48,31 +48,26 @@
                         <strong>Жизненный цикл данжа:</strong><br><br>
                         <code>dungeons</code> (справочник)
                         <span class="arrow">→</span>
-                        игрок входит, тратит ключ из <code>backpacks</code>
+                        игрок входит, при необходимости тратит ключ из <code>backpacks</code>
                         <span class="arrow">→</span>
-                        создаётся <code>dungeon_runs</code> (инстанс)
+                        создаётся <code>dungeon_sessions</code>
                         <span class="arrow">→</span>
-                        <code>dungeon_run_participants</code> (кто участвует)
+                        игрок или группа телепортируются в <code>first_location_id</code>
                         <span class="arrow">→</span>
-                        открывается первый <code>dungeon_run_floors</code>
+                        монстры спавнятся в <code>monster_on_locations</code> с привязкой по <code>dungeon_session_id</code>
                         <span class="arrow">→</span>
-                        спавнятся монстры в <code>monster_on_locations</code> (с <code>dungeon_run_floor_id</code>)
+                        бой идёт на обычных локациях данжа
                         <span class="arrow">→</span>
-                        создаётся <code>battles</code>
+                        при survival-данже волны двигаются через <code>current_wave</code> в сессии
                         <span class="arrow">→</span>
-                        бой завершён → переход на след. этаж
-                        <span class="arrow">→</span>
-                        все этажи пройдены → <code>dungeon_rewards</code> раздаются, ран помечается <code>completed</code>
+                        при завершении выдаются <code>dungeon_rewards</code>, сессия помечается <code>completed_at</code> или удаляется при выходе
                     </div>
 
                     <div class="flow-box">
                         <strong>Кулдаун:</strong>
-                        <code>dungeon_cooldowns</code> — после завершения рана. Если <code>user_id = 0</code> → глобальный кулдаун для всех.<br><br>
-                        <strong>Pity (гарантия дропа):</strong>
-                        <code>dungeon_pity</code> — считает провалы. При провале <code>fail_count++</code>. При успехе — сбрасывается.
-                        Если <code>fail_count >= pity_threshold</code> в <code>dungeon_rewards</code> → награда выдаётся гарантированно.<br><br>
+                        <code>dungeon_cooldowns</code> — персональный или глобальный кулдаун на вход. Если <code>user_id = 0</code> → глобальный кулдаун для всех.<br><br>
                         <strong>Группы:</strong>
-                        <code>parties</code> + <code>party_members</code> — до входа в данж. При входе статус группы → <code>in_dungeon</code>.
+                        <code>parties</code> + <code>party_members</code> — формируются до входа. Для группы создаётся ведущая сессия и дочерние сессии участников с общим пулом монстров.
                     </div>
                 </div>
 
@@ -198,229 +193,14 @@
                     </table>
                 </div>
 
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_floors --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
                 <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_floors</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonFloor</span>
-                    </h3>
+                    <h3><i class="bx bx-info-circle"></i> Актуальная реализация</h3>
                     <div class="section-intro">
-                        Этажи/комнаты данжа (справочник). Каждый данж имеет минимум 1 этаж.
-                        Порядок прохождения задаётся через <code>dungeon_floor_branches</code>.
+                        Старый экспериментальный слой с таблицами <code>dungeon_floors</code>, <code>dungeon_floor_branches</code>,
+                        <code>dungeon_floor_monster_pool</code>, <code>dungeon_bosses</code>, <code>dungeon_runs</code>,
+                        <code>dungeon_run_floors</code> и логикой pity удалён из runtime-кода как неиспользуемый.
+                        Текущая реализация работает через обычные локации, ворота данжа и таблицу <code>dungeon_sessions</code>.
                     </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>dungeon_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeons.id</code></td>
-                                <td>ID данжа</td>
-                            </tr>
-                            <tr>
-                                <td>floor_number</td>
-                                <td>tinyint</td>
-                                <td>Порядковый номер этажа (только для отображения)</td>
-                                <td><code>1</code>, <code>2</code>, <code>3</code> …</td>
-                            </tr>
-                            <tr>
-                                <td>label</td>
-                                <td>varchar / null</td>
-                                <td>Название этажа, показывается игроку при входе. NULL = просто «Этаж N»</td>
-                                <td>Строка или NULL</td>
-                            </tr>
-                            <tr>
-                                <td>is_first</td>
-                                <td>boolean</td>
-                                <td>
-                                    Является ли этаж стартовым. При создании рана система ищет этаж с <code>is_first=true</code>.
-                                    <span class="badge-note">Только 1 этаж в данже может быть первым</span>
-                                </td>
-                                <td><code>true</code> / <code>false</code></td>
-                            </tr>
-                            <tr>
-                                <td>is_boss_floor</td>
-                                <td>boolean</td>
-                                <td>Признак босс-этажа. Влияет только на отображение (иконка, цвет). Монстров всё равно берёт из пула.</td>
-                                <td><code>true</code> / <code>false</code></td>
-                            </tr>
-                            <tr>
-                                <td>time_limit_seconds</td>
-                                <td>int / null</td>
-                                <td>
-                                    Таймер на этот конкретный этаж. Отдельный от таймера всего инстанса.
-                                    <span class="badge-note">NULL = без таймера на этаже</span>
-                                </td>
-                                <td><code>60</code>=1мин … <code>600</code>=10мин или NULL</td>
-                            </tr>
-                            <tr>
-                                <td>min_monsters</td>
-                                <td>tinyint</td>
-                                <td>Минимальное кол-во монстров, которые спавнятся на этаже</td>
-                                <td><code>1</code>–<code>max_monsters</code></td>
-                            </tr>
-                            <tr>
-                                <td>max_monsters</td>
-                                <td>tinyint</td>
-                                <td>Максимальное кол-во монстров. Реальное число — случайное в диапазоне [min, max]</td>
-                                <td><code>1</code>–<code>20</code></td>
-                            </tr>
-                            <tr>
-                                <td>wave_count</td>
-                                <td>tinyint</td>
-                                <td>
-                                    Кол-во волн монстров на этаже. После победы над волной спавнится следующая.
-                                    <span class="badge-note">Сейчас используется только в survival</span>
-                                </td>
-                                <td><code>1</code>–<code>10</code></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_floor_branches --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_floor_branches</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonFloorBranch</span>
-                    </h3>
-                    <div class="section-intro">
-                        Связи между этажами — граф переходов. Для линейного данжа: каждый этаж имеет ровно 1 ветку.
-                        Для ветвящегося: несколько веток → игрок выбирает куда идти.
-                        Последний этаж не имеет веток — это признак конца данжа.
-                    </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>from_floor_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeon_floors.id</code>. С какого этажа идёт переход</td>
-                                <td>ID этажа</td>
-                            </tr>
-                            <tr>
-                                <td>to_floor_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeon_floors.id</code>. На какой этаж ведёт переход</td>
-                                <td>ID этажа</td>
-                            </tr>
-                            <tr>
-                                <td>label</td>
-                                <td>varchar / null</td>
-                                <td>Название кнопки выбора (при ветвлении). NULL = просто показывает номер этажа</td>
-                                <td>Строка или NULL. Пример: «Тёмный путь», «Лёгкий путь»</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h4>Примеры структур:</h4>
-                    <div class="flow-box">
-                        <strong>Линейный (3 этажа):</strong><br>
-                        <code>floor_1</code> → <code>floor_2</code> → <code>floor_3</code> → (нет веток = финал)
-                    </div>
-                    <div class="flow-box">
-                        <strong>Ветвящийся (выбор на 2м этаже):</strong><br>
-                        <code>floor_1</code> → <code>floor_2a</code> «Лёгкий» → <code>floor_3</code><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <code>floor_2b</code> «Сложный» → <code>floor_3</code>
-                    </div>
-                </div>
-
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_floor_monster_pool --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_floor_monster_pool</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonFloorMonsterPool</span>
-                    </h3>
-                    <div class="section-intro">
-                        Пул монстров для этажа. При входе на этаж система выбирает монстров из пула с учётом весов (<code>weight</code>).
-                        Кол-во монстров — случайное от <code>min_monsters</code> до <code>max_monsters</code> из <code>dungeon_floors</code>.
-                    </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>floor_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeon_floors.id</code></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>monster_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>monsters.id</code>. Обычный монстр из игры, тот же что и на локациях</td>
-                                <td>Любой существующий монстр</td>
-                            </tr>
-                            <tr>
-                                <td>weight</td>
-                                <td>tinyint</td>
-                                <td>
-                                    Вес при случайном выборе монстра из пула. Чем выше — тем чаще появляется.
-                                    Суммарные веса не обязаны давать 100 — это относительные числа.
-                                </td>
-                                <td>
-                                    <code>10</code> = редкий, <code>50</code> = средний, <code>100</code> = частый<br>
-                                    По умолчанию: <code>10</code>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_bosses --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_bosses</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonBoss</span>
-                    </h3>
-                    <div class="section-intro">
-                        Привязка боссов к данжу и этажу. Используется в стратегии <code>boss_rush</code> для трекинга количества боссов.
-                        Сам босс — это обычный монстр с <code>is_boss=true</code> в таблице <code>monsters</code>, уже имеющий фазы и механики.
-                    </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>dungeon_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeons.id</code></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>floor_id</td>
-                                <td>bigint / null</td>
-                                <td>FK → <code>dungeon_floors.id</code>. На каком этаже появляется босс. NULL = финальный этаж</td>
-                                <td>ID этажа или NULL</td>
-                            </tr>
-                            <tr>
-                                <td>monster_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>monsters.id</code>. Монстр-босс</td>
-                                <td>Монстры с <code>is_boss=true</code></td>
-                            </tr>
-                            <tr>
-                                <td>sort_order</td>
-                                <td>tinyint</td>
-                                <td>Порядок появления в boss_rush данже</td>
-                                <td><code>1</code>, <code>2</code>, <code>3</code> …</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
 
                 {{-- ══════════════════════════════════════════════════════════════ --}}
@@ -433,8 +213,8 @@
                         <span class="model-name">App\Models\Dungeon\DungeonReward</span>
                     </h3>
                     <div class="section-intro">
-                        Таблица наград данжа. Все награды раздаются при успешном завершении рана (<code>DungeonRewardService::distribute()</code>).
-                        Каждая строка — отдельная позиция награды с собственным шансом и pity.
+                        Таблица наград данжа. Награды выдаются при успешном завершении активной сессии данжа.
+                        Каждая строка — отдельная позиция награды с собственным шансом.
                     </div>
 
                     <table class="table table-bordered table-hover field-table">
@@ -488,45 +268,26 @@
                                 <td>drop_chance</td>
                                 <td>float</td>
                                 <td>
-                                    Шанс выпадения в процентах. Проверяется через <code>mt_rand(0, 10000) / 100 &lt; drop_chance</code>.
-                                    Игнорируется, если сработал pity.
+                                    Шанс выпадения в процентах. Проверяется в коде при завершении данжа.
                                 </td>
                                 <td><code>0.01</code> (0.01%) … <code>100.0</code> (гарантия)</td>
-                            </tr>
-                            <tr>
-                                <td>pity_threshold</td>
-                                <td>int / null</td>
-                                <td>
-                                    После скольких провалов подряд (<code>dungeon_pity.fail_count</code>) награда гарантируется.
-                                    <span class="badge-note">NULL = нет pity</span>
-                                </td>
-                                <td><code>5</code>, <code>10</code>, <code>20</code> … или NULL</td>
-                            </tr>
-                            <tr>
-                                <td>is_pity_only</td>
-                                <td>boolean</td>
-                                <td>
-                                    Если <code>true</code> — предмет выдаётся ТОЛЬКО по pity (шанс вообще не проверяется без срабатывания pity).
-                                    Используется для очень редких наград.
-                                </td>
-                                <td><code>true</code> / <code>false</code></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
                 {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_runs --}}
+                {{-- dungeon_sessions --}}
                 {{-- ══════════════════════════════════════════════════════════════ --}}
                 <div class="doc-section">
                     <h3>
-                        <span class="tbl-name">dungeon_runs</span>
+                        <span class="tbl-name">dungeon_sessions</span>
                         <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonRun</span>
+                        <span class="model-name">App\Models\Dungeon\DungeonSession</span>
                     </h3>
                     <div class="section-intro">
-                        Инстанс прохождения — конкретная «попытка» данжа игроком или группой.
-                        Создаётся при входе, живёт пока статус <code>active</code>.
+                        Активная сессия прохождения данжа для конкретного игрока.
+                        Для группы создаётся ведущая сессия лидера и дочерние сессии участников с общим пулом монстров.
                     </div>
 
                     <table class="table table-bordered table-hover field-table">
@@ -539,131 +300,41 @@
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>leader_id</td>
+                                <td>user_id</td>
                                 <td>bigint</td>
-                                <td>FK → <code>users.id</code>. Кто создал ран (лидер группы или соло игрок)</td>
+                                <td>FK → <code>users.id</code>. Для одного пользователя может существовать только одна активная сессия</td>
                                 <td></td>
                             </tr>
                             <tr>
-                                <td>party_id</td>
+                                <td>primary_session_id</td>
                                 <td>bigint / null</td>
-                                <td>FK → <code>parties.id</code>. <span class="badge-note">NULL для соло</span></td>
-                                <td>ID группы или NULL</td>
+                                <td>ID ведущей сессии. <span class="badge-note">NULL для соло и лидера группы</span></td>
+                                <td>ID сессии или NULL</td>
                             </tr>
                             <tr>
-                                <td>current_floor_id</td>
-                                <td>bigint / null</td>
-                                <td>FK → <code>dungeon_run_floors.id</code>. Указатель на текущий активный этаж инстанса</td>
-                                <td>ID текущего DungeonRunFloor</td>
+                                <td>current_wave</td>
+                                <td>tinyint</td>
+                                <td>Текущая волна survival-данжа. Для обычного данжа обычно остаётся <code>1</code></td>
+                                <td><code>1</code>, <code>2</code>, <code>3</code> …</td>
                             </tr>
                             <tr>
-                                <td>status</td>
-                                <td>enum</td>
-                                <td>
-                                    Текущее состояние рана:<br>
-                                    <span class="badge-enum">active</span> — в процессе прохождения<br>
-                                    <span class="badge-enum">completed</span> — успешно завершён, награды выданы<br>
-                                    <span class="badge-enum">failed</span> — провалён (таймер, смерть), наград нет<br>
-                                    <span class="badge-enum">abandoned</span> — покинут игроком вручную
-                                </td>
-                                <td>
-                                    <span class="badge-enum">active</span>
-                                    <span class="badge-enum">completed</span>
-                                    <span class="badge-enum">failed</span>
-                                    <span class="badge-enum">abandoned</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>started_at</td>
+                                <td>entered_at</td>
                                 <td>timestamp</td>
-                                <td>Когда начат ран</td>
+                                <td>
+                                    Когда игрок вошёл в данж
+                                </td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td>expires_at</td>
                                 <td>timestamp / null</td>
-                                <td>Дедлайн всего инстанса = <code>started_at + time_limit_seconds</code>. NULL если таймера нет.</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>metadata</td>
-                                <td>json / null</td>
-                                <td>
-                                    Дополнительные данные, специфичные для стратегии:<br>
-                                    survival: <code>{"waves_survived": 3}</code><br>
-                                    boss_rush: <code>{"bosses_total": 5, "bosses_defeated": 2}</code>
-                                </td>
-                                <td>JSON-объект или NULL</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_run_floors --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_run_floors</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonRunFloor</span>
-                    </h3>
-                    <div class="section-intro">
-                        Каждый открытый этаж инстанса. При входе на новый этаж создаётся запись здесь,
-                        спавнятся монстры, создаётся битва.
-                    </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>run_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeon_runs.id</code></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>floor_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeon_floors.id</code> — из справочника</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>battle_id</td>
-                                <td>bigint / null</td>
-                                <td>FK → <code>battles.id</code>. Заполняется сразу при открытии этажа через <code>DungeonMonsterSpawner</code></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>status</td>
-                                <td>enum</td>
-                                <td>
-                                    <span class="badge-enum">active</span> — бой идёт<br>
-                                    <span class="badge-enum">completed</span> — этаж пройден<br>
-                                    <span class="badge-enum">failed</span> — этаж провален (таймер/смерть)
-                                </td>
-                                <td>
-                                    <span class="badge-enum">active</span>
-                                    <span class="badge-enum">completed</span>
-                                    <span class="badge-enum">failed</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>started_at</td>
-                                <td>timestamp</td>
-                                <td>Когда игрок вошёл на этаж</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>floor_expires_at</td>
-                                <td>timestamp / null</td>
-                                <td>Дедлайн этажа = <code>started_at + dungeon_floors.time_limit_seconds</code></td>
+                                <td>Дедлайн сессии = <code>entered_at + time_limit_seconds</code>. NULL если таймера нет.</td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td>completed_at</td>
                                 <td>timestamp / null</td>
-                                <td>Когда этаж был завершён (победа или провал)</td>
+                                <td>Когда данж был полностью завершён и награды уже выданы</td>
                                 <td></td>
                             </tr>
                         </tbody>
@@ -707,58 +378,6 @@
                                 <td>available_at</td>
                                 <td>timestamp</td>
                                 <td>Когда данж снова доступен. Если <code>available_at &lt; now()</code> — кулдаун прошёл.</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                {{-- dungeon_pity --}}
-                {{-- ══════════════════════════════════════════════════════════════ --}}
-                <div class="doc-section">
-                    <h3>
-                        <span class="tbl-name">dungeon_pity</span>
-                        <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonPity</span>
-                    </h3>
-                    <div class="section-intro">
-                        Счётчик неудачных попыток для гарантии выпадения редкой награды.
-                        Логика: провал → <code>fail_count++</code>. Успех → <code>fail_count = 0</code>, <code>last_pity_at = now()</code>.
-                        Когда <code>fail_count >= dungeon_rewards.pity_threshold</code> — награда гарантируется.
-                    </div>
-
-                    <table class="table table-bordered table-hover field-table">
-                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th>Допустимые значения</th></tr></thead>
-                        <tbody>
-                            <tr>
-                                <td>dungeon_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>dungeons.id</code></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>user_id</td>
-                                <td>bigint</td>
-                                <td>FK → <code>users.id</code>. Pity всегда индивидуальный</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>fail_count</td>
-                                <td>int</td>
-                                <td>Текущее кол-во провалов подряд без получения pity-награды</td>
-                                <td><code>0</code> … ∞. Сбрасывается в 0 при успешном завершении</td>
-                            </tr>
-                            <tr>
-                                <td>last_fail_at</td>
-                                <td>timestamp / null</td>
-                                <td>Когда был последний провал. Для диагностики.</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>last_pity_at</td>
-                                <td>timestamp / null</td>
-                                <td>Когда последний раз срабатывал pity. Для диагностики.</td>
                                 <td></td>
                             </tr>
                         </tbody>
@@ -844,33 +463,27 @@
                         <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th></th></tr></thead>
                         <tbody>
                             <tr>
-                                <td>dungeon_run_floor_id</td>
+                                <td>dungeon_session_id</td>
                                 <td>bigint / null</td>
                                 <td>
-                                    FK → <code>dungeon_run_floors.id</code>. Добавлено для данжей.
-                                    При спавне монстра в данже <code>location_id = null</code>, <code>dungeon_run_floor_id = &lt;id&gt;</code>.
-                                    Обычные локационные монстры: <code>dungeon_run_floor_id = null</code>.
+                                    FK → <code>dungeon_sessions.id</code>. Добавлено для данжей.
+                                    При спавне монстра в данже поле указывает на сессию-владельца пула монстров.
+                                    Обычные локационные монстры: <code>dungeon_session_id = null</code>.
                                 </td>
-                                <td><span class="badge-note">миграция 000011</span></td>
+                                <td><span class="badge-note">миграция 000006</span></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <h4>battles</h4>
+                    <h4>item_on_locations</h4>
                     <table class="table table-bordered table-hover field-table">
                         <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th><th></th></tr></thead>
                         <tbody>
                             <tr>
-                                <td>location_id</td>
-                                <td>bigint / <strong>null</strong></td>
-                                <td>Стало nullable. Для данжевых битв = NULL.</td>
-                                <td><span class="badge-note">изменено в миграции 000012</span></td>
-                            </tr>
-                            <tr>
-                                <td>dungeon_run_floor_id</td>
+                                <td>dungeon_session_id</td>
                                 <td>bigint / null</td>
-                                <td>FK → <code>dungeon_run_floors.id</code>. Заполняется для данжевых битв. Для обычных = NULL.</td>
-                                <td><span class="badge-note">миграция 000012</span></td>
+                                <td>FK → <code>dungeon_sessions.id</code>. Используется для привязки дропа к конкретной сессии данжа.</td>
+                                <td><span class="badge-note">миграция 000006</span></td>
                             </tr>
                         </tbody>
                     </table>

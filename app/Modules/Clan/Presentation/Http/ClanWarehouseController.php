@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Presentation\Http;
 
-use App\Enums\ShareItemType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
