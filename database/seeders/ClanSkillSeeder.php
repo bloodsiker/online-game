@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ClanSkillEffectType;
-use App\Models\Clan\ClanSkillDefinition;
-use App\Models\Clan\ClanSkillLevel;
+
+use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
+use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
+use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use Illuminate\Database\Seeder;
 
@@ -19,7 +20,7 @@ class ClanSkillSeeder extends Seeder
                 'icon'        => null,
                 'max_level'   => 5,
                 'sort_order'  => 1,
-                'effect_type' => ClanSkillEffectType::STR,
+                'effect_type' => ClanSkillEffectType::STRENGTH,
                 'levels'      => [
                     ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
                     ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 5],
@@ -49,7 +50,7 @@ class ClanSkillSeeder extends Seeder
                 'icon'        => null,
                 'max_level'   => 5,
                 'sort_order'  => 3,
-                'effect_type' => ClanSkillEffectType::INT,
+                'effect_type' => ClanSkillEffectType::INTUITION,
                 'levels'      => [
                     ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
                     ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 5],
@@ -64,7 +65,7 @@ class ClanSkillSeeder extends Seeder
                 'icon'        => null,
                 'max_level'   => 5,
                 'sort_order'  => 4,
-                'effect_type' => ClanSkillEffectType::AGI,
+                'effect_type' => ClanSkillEffectType::AGILITY,
                 'levels'      => [
                     ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
                     ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 5],

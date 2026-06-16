@@ -6,8 +6,8 @@ namespace Database\Seeders;
 
 use App\Enums\DungeonCooldownType;
 use App\Enums\DungeonType;
-use App\Models\Dungeon\Dungeon;
-use App\Models\Dungeon\DungeonGate;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;

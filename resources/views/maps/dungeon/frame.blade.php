@@ -1,7 +1,7 @@
 @php
-use App\Models\Dungeon\Dungeon;
-use App\Models\Dungeon\DungeonGate;
-use App\Models\Location\Location;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 
 $user      = auth()->user();
 $curLoc    = $user?->currentLocation;

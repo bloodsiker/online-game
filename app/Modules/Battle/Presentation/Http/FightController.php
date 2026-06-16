@@ -4,14 +4,14 @@ namespace App\Modules\Battle\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Battle\Application\DTOs\FightDTO;
-use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
-use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
-use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
 use App\Modules\Battle\Application\Services\Battle\BattleService;
 use App\Modules\Battle\Application\Services\Combat\FightOrchestrator;
-use App\Services\DungeonService;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Support\Facades\Auth;
 
 class FightController extends Controller
@@ -21,7 +21,7 @@ class FightController extends Controller
         protected readonly BattleService $battleService,
         protected readonly FightOrchestrator $fightOrchestrator,
         protected readonly PlayerStatService $statService,
-        protected readonly DungeonService $dungeonService,
+        protected readonly ExpireDungeonSession $expireDungeonSession,
     ) {}
 
     public function index($id)
@@ -49,7 +49,7 @@ class FightController extends Controller
     public function attack(int $id, int $monsterId, int $action)
     {
         $user = Auth::user();
-        if ($this->dungeonService->expireSessionIfNeeded($user)) {
+        if ($this->expireDungeonSession->execute($user)) {
             session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
 
             return redirect()->route('location');

@@ -58,7 +58,8 @@ return new class extends Migration
             $table->integer('amount');
             $table->foreignId('share_item_id')->nullable()->constrained('share_items');
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
-            $table->foreignId('reputation_id')->nullable()->constrained('reputations')->nullOnDelete();
+            // FK на reputations добавляется позже в 2026_03_22_000001_create_reputation_tables
+            $table->unsignedBigInteger('reputation_id')->nullable();
             $table->timestamps();
         });
 

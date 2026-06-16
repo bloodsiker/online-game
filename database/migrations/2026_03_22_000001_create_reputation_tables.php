@@ -69,10 +69,18 @@ return new class extends Migration
             $table->unsignedInteger('quantity');
             $table->timestamps();
         });
+
+        Schema::table('quest_rewards', function (Blueprint $table) {
+            $table->foreign('reputation_id')->references('id')->on('reputations')->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        Schema::table('quest_rewards', function (Blueprint $table) {
+            $table->dropForeign(['reputation_id']);
+        });
+
         Schema::dropIfExists('reputation_shop_item_requirements');
         Schema::dropIfExists('reputation_shop_items');
         Schema::dropIfExists('player_reputations');

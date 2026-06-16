@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\User\Infrastructure\Persistence\Models;
 
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
-use App\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

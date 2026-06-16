@@ -3,13 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Models\Exchange;
 use App\Models\Experience;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -33,6 +33,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
@@ -279,8 +280,6 @@ class GenerateSeed extends Command
         $player->mp_max = 10;
         $player->min_dmg = 1;
         $player->max_dmg = 2;
-        $player->dodge = 0;
-        $player->critical = 0;
         $player->free_stats = 5;
         $player->victory = 0;
         $player->death = 0;
@@ -321,8 +320,6 @@ class GenerateSeed extends Command
         $player->mp_max = 10;
         $player->min_dmg = 1;
         $player->max_dmg = 2;
-        $player->dodge = 0;
-        $player->critical = 0;
         $player->free_stats = 5;
         $player->victory = 0;
         $player->death = 0;
@@ -1631,8 +1628,8 @@ class GenerateSeed extends Command
         $quest1->save();
 
         $quest1->rewards()->saveMany([
-            new QuestReward(['type' => 'money', 'amount' => 10000]),
-            new QuestReward(['type' => 'experience', 'amount' => 1000]),
+            new QuestReward(['type' => QuestRewardType::MONEY, 'amount' => 10000]),
+            new QuestReward(['type' => QuestRewardType::EXP, 'amount' => 1000]),
         ]);
 
         $questObjective = new QuestObjective;

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DungeonController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
@@ -59,12 +58,6 @@ Route::middleware(['updateLastOnline'])->group(function () {
 });
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
-
-// Dungeon routes
-Route::get('/dungeons', [DungeonController::class, 'index'])->name('dungeon.index');
-Route::get('/dungeon/{id}', [DungeonController::class, 'show'])->name('dungeon.show');
-Route::post('/dungeon/{id}/enter', [DungeonController::class, 'enter'])->name('dungeon.enter');
-Route::post('/dungeon/exit', [DungeonController::class, 'exit'])->name('dungeon.exit');
 
 // Party routes
 Route::get('/party', [PartyController::class, 'show'])->name('party.show');

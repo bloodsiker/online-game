@@ -78,7 +78,7 @@
                     <h3>
                         <span class="tbl-name">dungeons</span>
                         <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\Dungeon</span>
+                        <span class="model-name">App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon</span>
                     </h3>
                     <div class="section-intro">
                         Справочник данжей. Каждая запись — отдельный тип данжа (не инстанс!).
@@ -210,7 +210,7 @@
                     <h3>
                         <span class="tbl-name">dungeon_rewards</span>
                         <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonReward</span>
+                        <span class="model-name">App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonReward</span>
                     </h3>
                     <div class="section-intro">
                         Таблица наград данжа. Награды выдаются при успешном завершении активной сессии данжа.
@@ -283,7 +283,7 @@
                     <h3>
                         <span class="tbl-name">dungeon_sessions</span>
                         <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonSession</span>
+                        <span class="model-name">App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession</span>
                     </h3>
                     <div class="section-intro">
                         Активная сессия прохождения данжа для конкретного игрока.
@@ -348,7 +348,7 @@
                     <h3>
                         <span class="tbl-name">dungeon_cooldowns</span>
                         <small class="text-muted ms-2">→</small>
-                        <span class="model-name">App\Models\Dungeon\DungeonCooldown</span>
+                        <span class="model-name">App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonCooldown</span>
                     </h3>
                     <div class="section-intro">
                         Хранит информацию о том, когда данж снова доступен.

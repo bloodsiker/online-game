@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\UseCases;
 
+use App\Modules\Battle\Application\Services\Battle\BattleService;
+use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
 use App\Modules\Location\Application\DTOs\LocationPageDTO;
 use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\Battle\Application\Services\Battle\BattleService;
-use App\Services\DungeonService;
 use App\Services\PlayerMovementService;
 
 class MoveToLocation
@@ -20,7 +20,7 @@ class MoveToLocation
         private readonly BattleService $battleService,
         private readonly LocationReadRepository $readRepository,
         private readonly PlayerStatService $statService,
-        private readonly DungeonService $dungeonService,
+        private readonly GetActiveDungeonSession $getActiveDungeonSession,
         private readonly LocationPageViewMapper $mapper,
     ) {}
 
@@ -42,7 +42,7 @@ class MoveToLocation
             $battle?->id,
             $this->readRepository->getMonstersOnLocation($location->id),
             $this->readRepository->getLocationUsers($location->id),
-            $this->dungeonService->getActiveSession($user->id),
+            $this->getActiveDungeonSession->execute($user->id),
             $this->readRepository->getItemsOnLocation($user, $location->id)->count(),
         );
     }

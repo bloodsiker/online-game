@@ -85,7 +85,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
             $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
-            $table->enum('action', array_column(\App\Enums\ClanWarehouseAction::cases(), 'value'));
+            $table->enum('action', array_column(\App\Modules\Clan\Domain\Enums\ClanWarehouseAction::cases(), 'value'));
             $table->unsignedInteger('count');
             $table->timestamps();
         });

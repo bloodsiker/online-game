@@ -6,9 +6,9 @@ namespace App\Modules\Item\Domain\Services;
 
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Models\Dungeon\DungeonSession;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;

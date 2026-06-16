@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Infrastructure\Persistence;
 
-use App\Models\Dungeon\DungeonSession;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Item\Domain\Contracts\ItemReadRepository;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;

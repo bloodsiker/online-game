@@ -2,15 +2,16 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
-use App\Models\Dungeon\DungeonSession;
+use App\Modules\Dungeon\Application\UseCases\AdvanceSurvivalWave;
+use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Repositories\MonsterOnLocationRepository;
-use App\Services\DungeonService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +20,8 @@ class BattleService
     public function __construct(
         private readonly BattleRepository $battleRepository,
         private readonly MonsterOnLocationRepository $monsterOnLocationRepository,
-        private readonly DungeonService $dungeonService,
+        private readonly GetActiveDungeonSession $getActiveDungeonSession,
+        private readonly AdvanceSurvivalWave $advanceSurvivalWave,
     ) {}
 
     public function battleOnLocation(Location $location): ?Battle
@@ -32,7 +34,7 @@ class BattleService
         $dungeonSessionId = null;
         $session = null;
         if ($location->dungeon_id !== null) {
-            $session = DungeonSession::where('user_id', $user->id)->first();
+            $session = $this->getActiveDungeonSession->execute($user->id);
             if ($session === null) {
                 return null; // игрок в данже-локации без сессии — монстров нет
             }
@@ -143,7 +145,7 @@ class BattleService
      */
     private function handleSurvivalWave(DungeonSession $session, Location $location): void
     {
-        $this->dungeonService->tryAdvanceSurvivalWave($session, $location);
+        $this->advanceSurvivalWave->execute($session, $location);
     }
 
     public function attackMonster(Location $location, int $id): ?Battle

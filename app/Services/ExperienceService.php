@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class ExperienceService

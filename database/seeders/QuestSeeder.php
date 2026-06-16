@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestObjective;
-use App\Models\Quest\QuestReward;
-use App\Models\Quest\QuestStage;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use Illuminate\Database\Seeder;
 
 /**
@@ -184,7 +184,7 @@ class QuestSeeder extends Seeder
             QuestObjective::create([
                 'quest_id' => $quest4->id,
                 'type' => 'deliver',
-                'target_type' => 'share_item',
+                'target_type' => 'item',
                 'target_id' => 23, // Кристалл
                 'required_amount' => 1,
                 'description' => 'Доставить Кристалл Вестнику',
@@ -302,7 +302,7 @@ class QuestSeeder extends Seeder
                 'quest_id' => $quest6->id,
                 'stage_id' => $stage3->id,
                 'type' => 'deliver',
-                'target_type' => 'share_item',
+                'target_type' => 'item',
                 'target_id' => 23, // Кристалл
                 'required_amount' => 1,
                 'description' => 'Доставить Кристалл',

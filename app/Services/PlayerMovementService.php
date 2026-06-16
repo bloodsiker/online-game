@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\DTO\MoveResultDTO;
-use App\Models\Dungeon\DungeonGate;
-use App\Models\Dungeon\DungeonSession;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -22,7 +22,7 @@ final readonly class PlayerMovementService
     {
         $location = $user->currentLocation;
 
-        if (! $location->$direction) {
+        if (!$location->$direction) {
             return MoveResultDTO::blocked('Нельзя идти в этом направлении');
         }
 

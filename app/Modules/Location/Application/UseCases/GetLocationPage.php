@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\UseCases;
 
+use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
+use App\Modules\Battle\Application\Services\Battle\MonsterSelector;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
 use App\Modules\Location\Application\DTOs\LocationFightDTO;
 use App\Modules\Location\Application\DTOs\LocationResultDTO;
 use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
-use App\Modules\Battle\Application\Services\Battle\MonsterSelector;
-use App\Services\DungeonService;
 
 class GetLocationPage
 {
@@ -23,13 +23,13 @@ class GetLocationPage
         private readonly MonsterSelector $monsterSelector,
         private readonly LocationReadRepository $readRepository,
         private readonly PlayerStatService $statService,
-        private readonly DungeonService $dungeonService,
+        private readonly ExpireDungeonSession $expireDungeonSession,
         private readonly LocationPageViewMapper $mapper,
     ) {}
 
     public function execute(User $user): LocationResultDTO
     {
-        if ($this->dungeonService->expireSessionIfNeeded($user)) {
+        if ($this->expireDungeonSession->execute($user)) {
             session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
         }
 

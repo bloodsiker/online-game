@@ -4,136 +4,122 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Presentation\Http;
 
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Http\Controllers\Controller;
-use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
-use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Clan\Application\Requests\CreateClanRequest;
-use App\Modules\Clan\Domain\Enums\ClanLogAction;
-use App\Modules\Clan\Domain\Enums\ClanPermission;
+use App\Modules\Clan\Application\UseCases\AddClanRole;
+use App\Modules\Clan\Application\UseCases\CancelClanRequest;
+use App\Modules\Clan\Application\UseCases\CreateClan;
+use App\Modules\Clan\Application\UseCases\DeleteClanRole;
+use App\Modules\Clan\Application\UseCases\GetClanIndexPage;
+use App\Modules\Clan\Application\UseCases\GetClanInformationPage;
+use App\Modules\Clan\Application\UseCases\GetClanLogsPage;
+use App\Modules\Clan\Application\UseCases\GetClanMemberPage;
+use App\Modules\Clan\Application\UseCases\GetClanMembersFrame;
+use App\Modules\Clan\Application\UseCases\GetClanQuestsPage;
+use App\Modules\Clan\Application\UseCases\GetClanRolePage;
+use App\Modules\Clan\Application\UseCases\InviteToClan;
+use App\Modules\Clan\Application\UseCases\KickClanMember;
+use App\Modules\Clan\Application\UseCases\LeaveClan;
+use App\Modules\Clan\Application\UseCases\SaveClanDescription;
+use App\Modules\Clan\Application\UseCases\SaveClanMemberRoles;
+use App\Modules\Clan\Application\UseCases\SaveClanNews;
+use App\Modules\Clan\Application\UseCases\SaveClanRoles;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
-use App\Modules\Clan\Domain\Models\ClanLog;
-use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Clan\Domain\Models\ClanRole;
-use App\Modules\Clan\Domain\Services\ClanService;
-use App\Modules\Clan\Domain\Services\ClanSkillService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class ClanController extends Controller
 {
     public function __construct(
-        private readonly ClanService $clanService,
-        private readonly ClanSkillService $clanSkillService,
+        private readonly GetClanMembersFrame $getClanMembersFrame,
+        private readonly GetClanIndexPage $getClanIndexPage,
+        private readonly GetClanMemberPage $getClanMemberPage,
+        private readonly GetClanRolePage $getClanRolePage,
+        private readonly CreateClan $createClan,
+        private readonly CancelClanRequest $cancelClanRequest,
+        private readonly InviteToClan $inviteToClan,
+        private readonly LeaveClan $leaveClan,
+        private readonly KickClanMember $kickClanMember,
+        private readonly SaveClanMemberRoles $saveClanMemberRoles,
+        private readonly AddClanRole $addClanRole,
+        private readonly DeleteClanRole $deleteClanRole,
+        private readonly SaveClanRoles $saveClanRoles,
+        private readonly GetClanInformationPage $getClanInformationPage,
+        private readonly SaveClanDescription $saveClanDescription,
+        private readonly SaveClanNews $saveClanNews,
+        private readonly GetClanQuestsPage $getClanQuestsPage,
+        private readonly GetClanLogsPage $getClanLogsPage,
     ) {}
 
     public function membersFrame(): \Illuminate\View\View
     {
-        $user = Auth::user();
-        $membership = $user->clanMembership;
+        $page = $this->getClanMembersFrame->execute(Auth::user());
 
-        if (! $membership) {
-            return view('interface::clan_frame', ['members' => collect(), 'clan' => null]);
-        }
-
-        $tenMinutesAgo = Carbon::now()->subMinutes(10);
-
-        $members = ClanMember::where('clan_id', $membership->clan_id)
-            ->with(['user.player', 'role'])
-            ->get()
-            ->sortByDesc(fn ($m) => $m->user->last_online_at);
-
-        return view('interface::clan_frame', compact('members', 'tenMinutesAgo') + ['clan' => $membership->clan]);
+        return view('interface::clan_frame', [
+            'members' => $page->members,
+            'clan' => $page->clan,
+            'tenMinutesAgo' => $page->tenMinutesAgo,
+        ]);
     }
 
     public function index(): \Illuminate\View\View
     {
-        $user = Auth::user();
-        $inClan = $user->clanMembership !== null;
-        $activeQuests = collect();
-        $isLeader = false;
+        $page = $this->getClanIndexPage->execute(Auth::user());
 
-        if ($inClan) {
-            $clan = $user->clanMembership->clan;
-            $activeQuests = $clan->activeQuestProgress;
-            $isLeader = (int) $clan->owner_id === $user->id;
-        }
-
-        return view('clan::index', compact('inClan', 'activeQuests', 'isLeader'));
+        return view('clan::index', [
+            'inClan' => $page->inClan,
+            'activeQuests' => $page->activeQuests,
+            'isLeader' => $page->isLeader,
+        ]);
     }
 
     public function member(): \Illuminate\View\View|RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null) {
-            session()->flash('message', 'Вы не состоите в клане.');
+        try {
+            $page = $this->getClanMemberPage->execute(Auth::user());
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
 
             return redirect()->route('clan');
         }
 
-        $clan = $membership->clan()->with(['members.user.currentLocation', 'members.role', 'roles'])->first();
-
-        $onlineThreshold = Carbon::now()->subMinutes(10);
-
-        $memberRows = $clan->members->map(fn ($m) => [
-            'type' => 'member',
-            'user' => $m->user,
-            'role' => $m->role,
-            'membership' => $m,
-            'is_online' => $m->user->last_online_at && $m->user->last_online_at > $onlineThreshold,
+        return view('clan::member', [
+            'clan' => $page->clan,
+            'rows' => $page->rows,
+            'membership' => $page->membership,
+            'allRoles' => $page->allRoles,
+            'leaderRole' => $page->leaderRole,
+            'onlineCount' => $page->onlineCount,
+            'canKick' => $page->canKick,
+            'canInvite' => $page->canInvite,
         ]);
-
-        $requestRows = ClanJoinRequest::where('clan_id', $clan->id)
-            ->with('user')
-            ->get()
-            ->map(fn ($r) => [
-                'type' => 'request',
-                'id' => $r->id,
-                'user' => $r->user,
-                'status' => $r->status,
-                'is_online' => false,
-            ]);
-
-        $rows = $memberRows->concat($requestRows);
-        $allRoles = $clan->roles;
-        $leaderRole = $clan->roles->firstWhere('is_leader', true);
-
-        $onlineCount = $memberRows->filter(fn ($r) => $r['is_online'])->count();
-        $canKick = $membership->role->hasPermission(ClanPermission::KICK);
-        $canInvite = $membership->role->hasPermission(ClanPermission::INVITE);
-
-        return view('clan::member', compact('clan', 'rows', 'membership', 'allRoles', 'leaderRole', 'onlineCount', 'canKick', 'canInvite'));
     }
 
     public function role(): \Illuminate\View\View|RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null) {
-            session()->flash('message', 'Вы не состоите в клане.');
+        try {
+            $page = $this->getClanRolePage->execute(Auth::user());
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
 
             return redirect()->route('clan');
         }
 
-        $clan = $membership->clan()->with('roles')->first();
-        $roles = $clan->roles;
-        $permissions = ClanPermission::cases();
-        $canChangePerms = $membership->role->hasPermission(ClanPermission::CHANGE_PERMS);
-
-        return view('clan::role', compact('clan', 'roles', 'membership', 'permissions', 'canChangePerms'));
+        return view('clan::role', [
+            'clan' => $page->clan,
+            'roles' => $page->roles,
+            'membership' => $page->membership,
+            'permissions' => $page->permissions,
+            'canChangePerms' => $page->canChangePerms,
+        ]);
     }
 
     public function store(CreateClanRequest $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if ($user->clanMembership !== null) {
@@ -142,11 +128,7 @@ class ClanController extends Controller
             return redirect()->route('clan');
         }
 
-        $clan = $this->clanService->create($user, $request->input('name'), $request->file('logo'));
-
-        if ($user->player) {
-            $this->clanSkillService->applyAllSkillsToPlayer($user->player, $clan);
-        }
+        $this->createClan->execute($user, $request->input('name'), $request->file('logo'));
 
         session()->flash('message', 'Клан успешно создан!');
 
@@ -155,18 +137,8 @@ class ClanController extends Controller
 
     public function cancelRequest(ClanJoinRequest $joinRequest): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null || $membership->clan_id !== $joinRequest->clan_id) {
-            session()->flash('message', 'Вы не можете отменить заявку');
-
-            return redirect()->back();
-        }
-
         try {
-            $this->clanService->inviteCancel($user, $joinRequest);
+            $this->cancelClanRequest->execute(Auth::user(), $joinRequest);
             session()->flash('message', 'Заявка отменена.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -177,17 +149,8 @@ class ClanController extends Controller
 
     public function invite(Request $request): RedirectResponse
     {
-        if (! $request->filled('invite_nick')) {
-            session()->flash('message', 'Введите ник игрока.');
-
-            return redirect()->back();
-        }
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->invite($user, $request->input('invite_nick'));
+            $this->inviteToClan->execute(Auth::user(), $request->input('invite_nick'));
             session()->flash('message', 'Приглашение в клан отправлено');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -198,20 +161,8 @@ class ClanController extends Controller
 
     public function leaveClan(): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $membership = $user->clanMembership;
-            $clan = $membership?->clan;
-            $player = $user->player;
-
-            $this->clanService->leaveClan($user);
-
-            if ($clan && $player) {
-                $this->clanSkillService->removeAllSkillsFromPlayer($player, $clan);
-            }
-
+            $this->leaveClan->execute(Auth::user());
             session()->flash('message', 'Вы покинули клан.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -222,20 +173,8 @@ class ClanController extends Controller
 
     public function kickMember(User $target): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $membership = $user->clanMembership;
-            $clan = $membership?->clan;
-            $targetPlayer = $target->player;
-
-            $this->clanService->kickMember($user, $target);
-
-            if ($clan && $targetPlayer) {
-                $this->clanSkillService->removeAllSkillsFromPlayer($targetPlayer, $clan);
-            }
-
+            $this->kickClanMember->execute(Auth::user(), $target);
             session()->flash('message', 'Игрок исключён из клана.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -246,11 +185,8 @@ class ClanController extends Controller
 
     public function saveMemberRoles(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->saveMemberRoles($user, $request->input('form.mem', []));
+            $this->saveClanMemberRoles->execute(Auth::user(), $request->input('form.mem', []));
             session()->flash('message', 'Звания участников сохранены.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -261,17 +197,8 @@ class ClanController extends Controller
 
     public function addRole(Request $request): RedirectResponse
     {
-        if (! $request->filled('name')) {
-            session()->flash('message', 'Введите название звания.');
-
-            return redirect()->back();
-        }
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->addRole($user, $request->input('name'));
+            $this->addClanRole->execute(Auth::user(), $request->input('name'));
             session()->flash('message', 'Звание добавлено.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -282,11 +209,8 @@ class ClanController extends Controller
 
     public function deleteRole(ClanRole $role): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->deleteRole($user, $role);
+            $this->deleteClanRole->execute(Auth::user(), $role);
             session()->flash('message', 'Звание удалено.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -297,11 +221,8 @@ class ClanController extends Controller
 
     public function saveRoles(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->saveRoles($user, $request->input('form.grades', []));
+            $this->saveClanRoles->execute(Auth::user(), $request->input('form.grades', []));
             session()->flash('message', 'Полномочия сохранены.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -312,29 +233,25 @@ class ClanController extends Controller
 
     public function information(): \Illuminate\View\View|RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null) {
-            session()->flash('message', 'Вы не состоите в клане.');
+        try {
+            $page = $this->getClanInformationPage->execute(Auth::user());
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
 
             return redirect()->route('clan');
         }
 
-        $clan = $membership->clan;
-        $canChangeNews = $membership->role->hasPermission(ClanPermission::CHANGE_NEWS);
-
-        return view('clan::information', compact('clan', 'membership', 'canChangeNews'));
+        return view('clan::information', [
+            'clan' => $page->clan,
+            'membership' => $page->membership,
+            'canChangeNews' => $page->canChangeNews,
+        ]);
     }
 
     public function saveDescription(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->saveDescription($user, $request->input('description', ''));
+            $this->saveClanDescription->execute(Auth::user(), $request->input('description', ''));
             session()->flash('message', 'Описание клана сохранено.');
         } catch (\RuntimeException $e) {
             session()->flash('message', $e->getMessage());
@@ -345,12 +262,9 @@ class ClanController extends Controller
 
     public function saveNews(Request $request): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
         try {
-            $this->clanService->saveNews(
-                $user,
+            $this->saveClanNews->execute(
+                Auth::user(),
                 $request->input('news_1', ''),
                 $request->input('news_2', ''),
                 $request->input('news_3', ''),
@@ -365,68 +279,44 @@ class ClanController extends Controller
 
     public function quests(Request $request): \Illuminate\View\View|RedirectResponse
     {
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null) {
-            session()->flash('message', 'Вы не состоите в клане.');
+        try {
+            $page = $this->getClanQuestsPage->execute(Auth::user());
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
 
             return redirect()->route('clan');
         }
 
-        $clan = $membership->clan;
-        $isLeader = (int) $clan->owner_id === $user->id;
-
-        $activeQuests = QuestClanProgress::where('clan_id', $clan->id)
-            ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('objectives.questObjective', 'quest.rewards', 'user')
-            ->get();
-
-        $availableQuests = Quest::where('type', 'clan')
-            ->where('is_active', true)
-            ->with('objectives', 'rewards')
-            ->get();
-
-        $history = QuestClanProgress::where('clan_id', $clan->id)
-            ->where('status', QuestPlayerStatus::COMPLETED)
-            ->with('quest', 'user')
-            ->orderByDesc('completed_at')
-            ->limit(20)
-            ->get();
-
-        return view('clan::quests', compact('clan', 'isLeader', 'activeQuests', 'availableQuests', 'history', 'membership'));
+        return view('clan::quests', [
+            'clan' => $page->clan,
+            'isLeader' => $page->isLeader,
+            'activeQuests' => $page->activeQuests,
+            'availableQuests' => $page->availableQuests,
+            'history' => $page->history,
+            'membership' => $page->membership,
+        ]);
     }
 
     public function logs(Request $request): \Illuminate\View\View|RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $membership = $user->clanMembership;
-
-        if ($membership === null) {
-            session()->flash('message', 'Вы не состоите в клане.');
+        try {
+            $page = $this->getClanLogsPage->execute(
+                Auth::user(),
+                $request->query('action'),
+                $request->query('player'),
+            );
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
 
             return redirect()->route('clan');
         }
 
-        $query = ClanLog::where('clan_id', $membership->clan_id)
-            ->with('user')
-            ->orderByDesc('id');
-
-        $filterAction = $request->query('action');
-        $filterUser = $request->query('player');
-
-        if ($filterAction && ClanLogAction::tryFrom($filterAction)) {
-            $query->where('action', $filterAction);
-        }
-
-        if ($filterUser) {
-            $query->whereHas('user', fn ($q) => $q->where('name', 'like', '%'.$filterUser.'%'));
-        }
-
-        $logs = $query->paginate(50)->withQueryString();
-        $actions = ClanLogAction::cases();
-
-        return view('clan::logs', compact('logs', 'actions', 'membership', 'filterAction', 'filterUser'));
+        return view('clan::logs', [
+            'logs' => $page->logs,
+            'actions' => $page->actions,
+            'membership' => $page->membership,
+            'filterAction' => $page->filterAction,
+            'filterUser' => $page->filterUser,
+        ]);
     }
 }

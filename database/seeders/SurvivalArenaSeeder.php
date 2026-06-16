@@ -7,7 +7,7 @@ namespace Database\Seeders;
 use App\Enums\DungeonCooldownType;
 use App\Enums\DungeonRewardType;
 use App\Enums\DungeonType;
-use App\Models\Dungeon\Dungeon;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestObjective;
-use App\Models\Quest\QuestReward;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use Illuminate\Database\Seeder;
 
 /**

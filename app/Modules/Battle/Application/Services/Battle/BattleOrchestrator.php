@@ -3,9 +3,9 @@
 namespace App\Modules\Battle\Application\Services\Battle;
 
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Models\Dungeon\DungeonSession;
+use App\Modules\Dungeon\Application\UseCases\AdvanceSurvivalWave;
+use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Services\DungeonService;
 use Illuminate\Support\Facades\Auth;
 
 readonly class BattleOrchestrator
@@ -15,7 +15,8 @@ readonly class BattleOrchestrator
         private MonsterSpawner $spawner,
         private BattleCreator $creator,
         private PlayerAttackInitiator $attackInitiator,
-        private DungeonService $dungeonService,
+        private GetActiveDungeonSession $getActiveDungeonSession,
+        private AdvanceSurvivalWave $advanceSurvivalWave,
     ) {}
 
     public function handleLocationEntry(Location $location): ?Battle
@@ -24,11 +25,11 @@ readonly class BattleOrchestrator
 
         if ($location->dungeon_id !== null) {
             $user = Auth::user();
-            $session = DungeonSession::where('user_id', $user->id)->first();
+            $session = $this->getActiveDungeonSession->execute($user->id);
             if ($session === null) {
                 return null;
             }
-            $this->dungeonService->tryAdvanceSurvivalWave($session, $location);
+            $this->advanceSurvivalWave->execute($session, $location);
             $dungeonSessionId = $session->monsterSessionId();
         }
 

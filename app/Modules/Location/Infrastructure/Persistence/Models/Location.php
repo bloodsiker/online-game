@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
-use App\Models\Dungeon\Dungeon;
 use App\Models\Map;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;

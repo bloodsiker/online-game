@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->unsignedTinyInteger('level');
             $table->unsignedTinyInteger('required_clan_level')->default(1);
             $table->unsignedInteger('required_bonus_points')->default(0);
-            $table->foreignId('share_item_id')->constrained('share_items')->nullOnDelete();
+            $table->foreignId('share_item_id')->nullable()->constrained('share_items')->nullOnDelete();
             $table->unsignedInteger('share_item_count')->nullable();
             $table->foreignId('magic_skill_id')->nullable()->constrained('magic_skills')->nullOnDelete();
             $table->unique(['clan_skill_definition_id', 'level']);

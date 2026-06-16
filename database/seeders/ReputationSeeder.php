@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
-use App\Models\Quest\Quest;
-use App\Models\Quest\QuestObjective;
-use App\Models\Quest\QuestReward;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
