@@ -80,6 +80,12 @@
                             <span>Монстры</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.dungeons', 'admin.dungeon.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.dungeons') }}">
+                            <i class="bx bx-grid-alt" aria-hidden="true"></i>
+                            <span>Данжи</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.structures', 'admin.structure.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.structures') }}">
                             <i class="bx bx-layout" aria-hidden="true"></i>

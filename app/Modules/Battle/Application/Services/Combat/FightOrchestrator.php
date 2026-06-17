@@ -4,13 +4,13 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\DTO\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightDTO;
-use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
-use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
-use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicsService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
+use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use Illuminate\Support\Facades\Auth;
 
 readonly class FightOrchestrator
@@ -32,6 +32,7 @@ readonly class FightOrchestrator
         return \DB::transaction(function () use ($id, $monsterId, $action) {
             $user = Auth::user();
             $player = $user->player;
+            $battleLocation = $user->currentLocation;
             $fightDTO = new FightDTO;
 
             $battle = $this->battleRepository->getOneById($id);
@@ -141,7 +142,7 @@ readonly class FightOrchestrator
                     $roundLog
                 );
 
-                $this->finishService->checkAndFinish($battle, $user->currentLocation);
+                $this->finishService->checkAndFinish($battle, $battleLocation);
 
                 return $fightDTO;
             }
@@ -151,7 +152,7 @@ readonly class FightOrchestrator
 
             $this->attackService->checkLevelUp($player, $roundLog);
 
-            $finishDTO = $this->finishService->checkAndFinish($battle, $user->currentLocation);
+            $finishDTO = $this->finishService->checkAndFinish($battle, $battleLocation);
 
             $battleRound->action = $roundLog->getLog();
             $battleRound->save();

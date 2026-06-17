@@ -20,6 +20,10 @@ class EnterDungeon
     public function execute(User $user, int $dungeonId): void
     {
         $dungeon = $this->readRepository->findByIdOrFail($dungeonId);
+        if ($this->coordinator->resumeExistingSessionIfAllowed($dungeon, $user) !== null) {
+            return;
+        }
+
         $party = $this->partyService->getMyParty();
 
         if ($dungeon->isGroup() && $party !== null) {

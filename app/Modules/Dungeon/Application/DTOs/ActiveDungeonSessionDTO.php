@@ -10,5 +10,6 @@ final readonly class ActiveDungeonSessionDTO
         public int $dungeonId,
         public string $dungeonName,
         public ?int $expiresAtTimestamp,
+        public bool $canReenter,
     ) {}
 }

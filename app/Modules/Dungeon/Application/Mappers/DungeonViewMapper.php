@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Dungeon\Application\Mappers;
 
+use App\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Application\DTOs\ActiveDungeonSessionDTO;
 use App\Modules\Dungeon\Application\DTOs\DungeonIndexPageDTO;
 use App\Modules\Dungeon\Application\DTOs\DungeonShowPageDTO;
@@ -43,6 +44,8 @@ class DungeonViewMapper
             dungeonId: $session->dungeon_id,
             dungeonName: (string) $session->dungeon->name,
             expiresAtTimestamp: $session->expires_at?->timestamp,
+            canReenter: $session->dungeon->death_behavior === DungeonDeathBehavior::KICK_CAN_REENTER
+                || (int) $session->user?->currentLocation?->dungeon_id !== (int) $session->dungeon_id,
         );
     }
 
@@ -61,6 +64,9 @@ class DungeonViewMapper
             requiresKey: $dungeon->requiresKey(),
             entryKeyName: $dungeon->entryItem?->name,
             entryLocationId: $dungeon->entry_location_id,
+            deathBehavior: $dungeon->death_behavior->value,
+            deathBehaviorLabel: $dungeon->death_behavior->label(),
+            deathReturnLocationId: $dungeon->death_return_location_id,
             monsterRespawn: (bool) $dungeon->monster_respawn,
         );
     }

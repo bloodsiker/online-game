@@ -19,6 +19,9 @@ final readonly class DungeonViewDTO
         public bool $requiresKey,
         public ?string $entryKeyName,
         public ?int $entryLocationId,
+        public string $deathBehavior,
+        public string $deathBehaviorLabel,
+        public ?int $deathReturnLocationId,
         public bool $monsterRespawn,
     ) {}
 }

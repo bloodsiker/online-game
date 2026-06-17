@@ -14,7 +14,7 @@ class EloquentDungeonSessionRepository implements DungeonSessionRepository
     public function findByUserId(int $userId): ?DungeonSession
     {
         return DungeonSession::query()
-            ->with('dungeon')
+            ->with(['dungeon', 'user.currentLocation'])
             ->where('user_id', $userId)
             ->first();
     }

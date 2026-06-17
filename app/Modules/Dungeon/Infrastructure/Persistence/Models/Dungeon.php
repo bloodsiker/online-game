@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Dungeon\Infrastructure\Persistence\Models;
 
 use App\Enums\DungeonCooldownType;
+use App\Enums\DungeonDeathBehavior;
 use App\Enums\DungeonType;
 use App\Models\Map;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -21,7 +22,9 @@ class Dungeon extends Model
         'cooldown_type', 'cooldown_seconds',
         'time_limit_seconds', 'min_level', 'is_active',
         'map_id', 'entry_location_id', 'first_location_id',
-        'exit_location_id', 'return_location_id', 'monster_respawn',
+        'exit_location_id', 'return_location_id',
+        'death_behavior', 'death_return_location_id',
+        'monster_respawn',
         'wave_count',
         'xp_multiplier',
     ];
@@ -29,6 +32,7 @@ class Dungeon extends Model
     protected $casts = [
         'type' => DungeonType::class,
         'cooldown_type' => DungeonCooldownType::class,
+        'death_behavior' => DungeonDeathBehavior::class,
         'is_active' => 'boolean',
         'monster_respawn' => 'boolean',
     ];
@@ -61,6 +65,11 @@ class Dungeon extends Model
     public function returnLocation(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'return_location_id');
+    }
+
+    public function deathReturnLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'death_return_location_id');
     }
 
     public function gates(): HasMany

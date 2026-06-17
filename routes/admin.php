@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ApiController;
 use App\Http\Controllers\Admin\ClanController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
+use App\Http\Controllers\Admin\DungeonController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\MapController;
@@ -23,6 +24,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
 Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
+
+Route::get('/dungeons', [DungeonController::class, 'list'])->name('dungeons');
+Route::match(['GET', 'POST'], '/dungeon/{dungeon}', [DungeonController::class, 'info'])->name('dungeon.info');
 
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');

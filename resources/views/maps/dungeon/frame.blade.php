@@ -14,6 +14,8 @@ $positions = [];
 $gated     = []; // "fromId-toId"
 $maxCol    = 0;
 $maxRow    = 0;
+$visibleCols = 17;
+$leftPad = 0;
 
 if ($dungeon && $dungeon->first_location_id) {
     $locations = Location::where('dungeon_id', $dungeon->id)->get()->keyBy('id');
@@ -60,6 +62,9 @@ if ($dungeon && $dungeon->first_location_id) {
             $positions[$id] = [$nc, $nr];
             $grid[$nr][$nc] = $id;
         }
+
+        $visibleCols = max(17, $maxCol + 1);
+        $leftPad = intdiv($visibleCols - ($maxCol + 1), 2);
     }
 }
 @endphp
@@ -67,20 +72,39 @@ if ($dungeon && $dungeon->first_location_id) {
 <style type="text/css">
     <!--
     body {
-        scrollbar-color: #4a3060 #1a0a2e;
+        scrollbar-face-color: #FAE8D3;
+        scrollbar-highlight-color: white;
+        scrollbar-shadow-color: #D1A77F;
+        scrollbar-3dlight-color: #FBDCCF;
+        scrollbar-arrow-color: #AA968A;
+        scrollbar-track-color: #EDD9C8;
+        scrollbar-darkshadow-color: #AA968A;
+    }
+
+    html {
+        scrollbar-color: #CBB8A7 #E6D6C5;
         scrollbar-width: thin;
     }
+
     body::-webkit-scrollbar { width: 7px; height: 7px; }
-    body::-webkit-scrollbar-thumb { background: #5a3a80; border-radius: 5px; }
-    body::-webkit-scrollbar-track { background: #1a0a2e; }
-    a:link, a:visited { color: #c0a0e0; }
+    body::-webkit-scrollbar-thumb { background: #CBB8A7; border-radius: 5px; }
+    body::-webkit-scrollbar-thumb:hover { background: #AA968A; }
+    body::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-corner { background: #E6D6C5; border-radius: 5px; }
+
+    a:link, a:visited { color: black; }
     a:hover { color: #FF8000; }
+    A.wt:link, A.wt:visited { color: white; }
+    A.wt:hover { color: #aaaaaa; background-color: #666666; }
+    A.b:link, A.b:visited { color: blue; }
+    a.b:hover { color: #FF8000; }
+    A.r:hover { color: #FF8000; }
     a:active { color: yellow; background-color: black; }
 
-    .br { border-right: 1px solid #6a3a9a; }
-    .bt { border-top: 1px solid #6a3a9a; }
-    .bl { border-left: 1px solid #6a3a9a; }
-    .bb { border-bottom: 1px solid #6a3a9a; }
+    .br { border-right: 1px solid #AD998C; }
+    .bt { border-top: 1px solid #AD998C; }
+    .bl { border-left: 1px solid #AD998C; }
+    .bb { border-bottom: 1px solid #AD998C; }
 
     .s2box {
         border-spacing: 0;
@@ -94,22 +118,24 @@ if ($dungeon && $dungeon->first_location_id) {
         padding: 0;
         vertical-align: middle;
         box-sizing: border-box;
-        color: #d0b0f0;
     }
     .s2box s { display: none; }
 
     .ulocation {
         animation: ula 1s linear infinite;
         border-radius: 50%;
-        box-shadow: inset 0 0 0 4px #9966cc;
-        background-color: rgba(153, 102, 204, 0.3);
+        box-shadow: inset 0 0 0 4px #B59387;
+        background-color: rgba(181, 147, 135, 0.3);
         display: inline-block;
     }
 
+    .maplegend {
+    }
+
     @keyframes ula {
-        0%   { box-shadow: inset 0 0 0 4px #9966cc; }
-        50%  { box-shadow: inset 0 0 0 4px #cc88ff; }
-        100% { box-shadow: inset 0 0 0 4px #9966cc; }
+        0%   { box-shadow: inset 0 0 0 4px #B59387; }
+        50%  { box-shadow: inset 0 0 0 4px #D1A77F; }
+        100% { box-shadow: inset 0 0 0 4px #B59387; }
     }
 
     .s2box cite {
@@ -123,27 +149,33 @@ if ($dungeon && $dungeon->first_location_id) {
         white-space: nowrap;
         font-weight: normal;
         font-size: 10px;
-        color: #d0b0f0;
+        color: #706258;
         display: inline;
-        background-color: #1a0a2e;
-        border: 1px outset #5a3a80;
-        padding: 8px;
+        background-color: #FFF8EA;
+        border: 1px outset #CEBBAA;
+        padding: 10px;
     }
     .s2box em {
         position: relative;
         font-style: normal;
         font-weight: normal;
-        opacity: 0.90;
+        opacity: 0.80;
         display: inline-block;
         margin: 0;
         min-width: 20px;
-        border: 1px outset #6a3a9a;
+        border: 1px outset #AD998C;
         padding: 3px;
-        color: #d0b0f0;
-        background-color: rgba(40, 10, 70, 0.6);
+        color: black;
+    }
+    .s2box em::after {
+        content: "?";
+        color: #9C8D84;
+        top: -4px;
+        font-size: smaller;
+        position: absolute;
     }
     .listloc {
-        border: 1px solid #6a3a9a;
+        border: 1px solid black;
         width: 32px;
         vertical-align: middle;
         display: inline-block;
@@ -151,102 +183,65 @@ if ($dungeon && $dungeon->first_location_id) {
         margin: 0;
         font-size: 10px;
         cursor: pointer;
+        cursor: hand;
     }
+    .alvl { z-index: 2; }
     .anorth {
-        position: absolute; left: 14px; top: -13px;
-        font-size: 14px; text-decoration: none; z-index: 1;
+        position: absolute; left: 19px; top: -15px;
+        font-size: 18px; text-decoration: none; z-index: 1;
     }
     .asouth {
-        position: absolute; left: 14px; bottom: -10px;
-        font-size: 14px; text-decoration: none; z-index: 1;
+        position: absolute; left: 19px; bottom: -12px;
+        font-size: 18px; text-decoration: none; z-index: 1;
     }
     .awest {
-        position: absolute; left: -10px; top: 12px;
-        font-size: 14px; text-decoration: none; z-index: 1;
+        position: absolute; left: -12px; top: 10px;
+        font-size: 18px; text-decoration: none; z-index: 1;
     }
     .aeast {
-        position: absolute; right: -10px; top: 12px;
-        font-size: 14px; text-decoration: none; z-index: 1;
+        position: absolute; right: -12px; top: 10px;
+        font-size: 18px; text-decoration: none; z-index: 1;
     }
     .anorth:hover, .awest:hover, .asouth:hover, .aeast:hover { text-decoration: none; }
     .an { animation: borderAnimation 1s linear infinite; }
+
+    .maptable th {
+        padding: 5px;
+        font-size: 14px;
+    }
+
+    .maptable a {
+        text-decoration: none;
+    }
 
     .maptable {
         box-sizing: padding-box;
         empty-cells: hide;
         border-collapse: separate;
-        background-color: rgba(20, 5, 40, 0.8);
+        background-color: rgba(250, 233, 218, 0.5);
         padding: 0;
         margin: 0;
-        border: 1px solid #5a3a80;
+        border: 1px solid #CEBBAA;
     }
-    .maptable a { text-decoration: none; }
-
-    /* Zone colours */
-    .a-z1  { background-color: rgba(60, 30, 90, 0.7); }
-    .a-z2  { background-color: rgba(30, 10, 70, 0.7); }
-    .a-z3  { background-color: rgba(80, 10, 30, 0.7); }
-    .a-exit { background-color: rgba(10, 60, 30, 0.7); }
-
-    .gate-ico { color: #cc2222; font-size: 11px; }
-    .loc-boss em { border-color: #cc2222 !important; color: #ff6666 !important; }
-    .loc-exit em { border-color: #22aa55 !important; color: #44ff88 !important; }
     -->
 </style>
 
 @if($dungeon)
 
-@php
-    // Zone BFS: assign zones by DungeonGate boundaries
-    $zoneMap    = [];
-    $z          = 1;
-    $frontier   = [$dungeon->first_location_id];
-    $allVisited = [];
-    while (!empty($frontier) && $z <= 3) {
-        $next  = [];
-        $inner = $frontier;
-        while (!empty($inner)) {
-            $id = array_shift($inner);
-            if (isset($allVisited[$id])) continue;
-            $allVisited[$id] = true;
-            $zoneMap[$id]    = $z;
-
-            $l = $locations[$id] ?? null;
-            if (!$l) continue;
-
-            foreach (['east', 'west', 'north', 'south'] as $dir) {
-                $nId = $l->$dir;
-                if (!$nId || !isset($locations[$nId]) || isset($allVisited[$nId])) continue;
-                if (isset($gated[$id . '-' . $nId])) {
-                    $next[] = $nId;
-                } else {
-                    $inner[] = $nId;
-                }
-            }
-        }
-        $frontier = $next;
-        $z++;
-    }
-@endphp
-
-<p style="color:#c0a0e0; font-size:11px; margin:0 0 4px 0; text-align:center;">
-    <b>{{ $dungeon->name }}</b>
-    @if($dungeon->time_limit_seconds)
-        &nbsp;— {{ round($dungeon->time_limit_seconds / 60) }} мин.
-    @endif
-    @if(!$dungeon->monster_respawn)
-        &nbsp;| Мобы не респят
-    @endif
-</p>
-
-<table cellspacing="1" cellpadding="0" id="m0" class="maptable">
+<table width="{{ $visibleCols * 49 }}" cellspacing="1" cellpadding="0" id="m0" class="maptable">
 <tbody>
+<tr style=" @if(request()->has('hide')) display: none; @endif">
+    <th colspan="{{ $visibleCols }}" class="t0" align="left" style="padding:5px;font-size:14px;"></th>
+</tr>
 @for($r = 0; $r <= $maxRow; $r++)
 <tr>
-@for($c = 0; $c <= $maxCol; $c++)
-@if(isset($grid[$r][$c]))
+@for($c = 0; $c < $visibleCols; $c++)
 @php
-    $locId = $grid[$r][$c];
+    $gridCol = $c - $leftPad;
+@endphp
+@if(isset($grid[$r][$gridCol]))
+@php
+    $locId = $grid[$r][$gridCol];
     $l     = $locations[$locId] ?? null;
 
     $borders = [];
@@ -256,14 +251,8 @@ if ($dungeon && $dungeon->first_location_id) {
     if ($l && $l->east)  $borders[] = 'br';
     $borderClass = implode(' ', $borders);
 
-    $zone      = $zoneMap[$locId] ?? 1;
-    $zoneClass = 'a-z' . $zone;
-
     $isExit = $dungeon->exit_location_id === (int)$locId;
-    $isBoss = $l && $l->count_monster >= 4 && $zone === 3 && !$isExit;
-
-    $locClass  = $isBoss ? 'loc-boss' : ($isExit ? 'loc-exit' : '');
-    $zoneClass = $isExit ? 'a-exit' : $zoneClass;
+    $isBoss = $l && $l->count_monster >= 4 && !$isExit;
 
     $hasEastGate  = $l && $l->east  && isset($gated[$locId . '-' . $l->east]);
     $hasSouthGate = $l && $l->south && isset($gated[$locId . '-' . $l->south]);
@@ -271,29 +260,21 @@ if ($dungeon && $dungeon->first_location_id) {
     $hasWestGate  = $l && $l->west  && isset($gated[$l->west  . '-' . $locId]);
 @endphp
 <td width="48" height="48">
-    <div class="{{ $zoneClass }}">
+    <div class="a1" style="">
         <div id="u{{ $locId }}">
-            <div id="l{{ $locId }}" class="s2box {{ $borderClass }} {{ $locClass }}">
+            <div id="l{{ $locId }}" class="s2box {{ $borderClass }}">
                 <s id="z{{ $locId }}">0</s>
-                @if($isExit)
-                    <em title="Выход">⬆</em>
-                @elseif($isBoss)
-                    <em title="Босс">☠</em>
-                @else
-                    <em>{{ $locId }}</em>
-                @endif
+                <em>{{ $locId }}</em>
                 <cite>
                     {{ $l->name ?? '' }}
-                    @if($hasEastGate || $hasSouthGate || $hasNorthGate || $hasWestGate) ⚷ [Ворота] @endif
-                    @if($isExit) — ВЫХОД @endif
-                    @if($isBoss) — БОСС @endif
+                    @if($hasEastGate || $hasSouthGate || $hasNorthGate || $hasWestGate) [Ворота] @endif
+                    @if($isExit) [Выход] @endif
+                    @if($isBoss) [Босс] @endif
                 </cite>
                 @if($l && $l->north)<a href="#{{ $l->north }}" class="anorth">↑</a>@endif
                 @if($l && $l->south)<a href="#{{ $l->south }}" class="asouth">↓</a>@endif
                 @if($l && $l->west)<a href="#{{ $l->west }}" class="awest">←</a>@endif
                 @if($l && $l->east)<a href="#{{ $l->east }}" class="aeast">→</a>@endif
-                @if($hasEastGate)<span class="aeast gate-ico">🔒</span>@endif
-                @if($hasSouthGate)<span class="asouth gate-ico">🔒</span>@endif
             </div>
         </div>
     </div>
@@ -308,7 +289,7 @@ if ($dungeon && $dungeon->first_location_id) {
 </table>
 
 @else
-<p style="color:#c0a0e0; text-align:center; padding:20px;">Вы не в подземелье</p>
+<p style="color:#706258; text-align:center; padding:20px;">Вы не в подземелье</p>
 @endif
 
 <script>
@@ -337,7 +318,7 @@ if ($dungeon && $dungeon->first_location_id) {
         var el = document.getElementById('l' + lid);
         if (!el) return;
         if ((lc[lid] == undefined || lc[lid] == false) && s < 2)
-            el.style.outline = s == 1 ? '4px dotted #9966cc' : '';
+            el.style.outline = s == 1 ? '4px dotted #B59387' : '';
         if (s == 2) {
             lc[lid] = !lc[lid];
             if (lc[lid]) {
@@ -347,7 +328,7 @@ if ($dungeon && $dungeon->first_location_id) {
                     lc[i] = false;
                 }
             }
-            el.style.outline = lc[lid] ? '4px dotted #9966cc' : '';
+            el.style.outline = lc[lid] ? '4px dotted #B59387' : '';
             el.scrollIntoView({ block: 'center', inline: 'center' });
         }
     }

@@ -28,6 +28,8 @@ return new class extends Migration
             $table->unsignedBigInteger('first_location_id')->nullable();
             $table->unsignedBigInteger('exit_location_id')->nullable();
             $table->unsignedBigInteger('return_location_id')->nullable();
+            $table->enum('death_behavior', ['exit', 'return_to_start', 'kick_can_reenter'])->default('return_to_start');
+            $table->unsignedBigInteger('death_return_location_id')->nullable();
             $table->boolean('monster_respawn')->default(false);
             $table->unsignedTinyInteger('wave_count')->nullable();
             // Множитель опыта за каждого убитого монстра внутри данжа (1.00 = без бонуса)
@@ -41,6 +43,7 @@ return new class extends Migration
             $table->foreign('first_location_id')->references('id')->on('locations')->onDelete('set null');
             $table->foreign('exit_location_id')->references('id')->on('locations')->onDelete('set null');
             $table->foreign('return_location_id')->references('id')->on('locations')->onDelete('set null');
+            $table->foreign('death_return_location_id')->references('id')->on('locations')->onDelete('set null');
         });
     }
 

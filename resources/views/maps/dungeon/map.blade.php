@@ -159,21 +159,6 @@
         .brd2-bt { border-bottom: 1px solid #db9f73; }
         .brd2-top { border-top: 1px solid #db9f73; }
         .bg_l { background-image: url({{ asset('img/bg/info/bg_l.gif') }}); }
-        .legend-z1 { display:inline-block; width:12px; height:12px; background:rgba(60,30,90,0.9); border:1px solid #db9f73; vertical-align:middle; }
-        .legend-z2 { display:inline-block; width:12px; height:12px; background:rgba(30,10,70,0.9); border:1px solid #db9f73; vertical-align:middle; }
-        .legend-z3 { display:inline-block; width:12px; height:12px; background:rgba(80,10,30,0.9); border:1px solid #db9f73; vertical-align:middle; }
-        .legend-exit { display:inline-block; width:12px; height:12px; background:rgba(10,60,30,0.9); border:1px solid #db9f73; vertical-align:middle; }
-        .ulocation-legend {
-            animation: ula 1s linear infinite;
-            border-radius: 50%; box-shadow: inset 0 0 0 4px #9966cc;
-            background-color: rgba(153,102,204,0.3); display:inline-block;
-            width:14px; height:14px; vertical-align:middle;
-        }
-        @keyframes ula {
-            0%   { box-shadow: inset 0 0 0 4px #9966cc; }
-            50%  { box-shadow: inset 0 0 0 4px #cc88ff; }
-            100% { box-shadow: inset 0 0 0 4px #9966cc; }
-        }
     </style>
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
@@ -218,73 +203,6 @@
                     <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt></td>
                     <td class="tbl-shp_sml-bottom" valign="top" align="center">&nbsp;</td>
                     <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt></td>
-                </tr></tbody></table>
-
-                {{-- Легенда --}}
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
-                <tbody><tr>
-                <td>
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
-                    <tbody><tr height="22">
-                        <td width="20" align="right" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}" width="20" height="22" alt></td>
-                        <td class="tbl-shp_sml-top" valign="top" align="center">
-                            <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
-                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
-                                <td class="tbl-usi_label-center">Зоны подземелья</td>
-                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
-                            </tr></tbody></table>
-                        </td>
-                        <td width="20" align="left" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}" width="20" height="22" alt></td>
-                    </tr>
-                    <tr>
-                        <td class="tbl-usi_left">&nbsp;</td>
-                        <td class="tbl-usi_bg" valign="top" style="padding:6px 4px;">
-                            <table class="coll w100 p10h p2v brd2-all"><tbody>
-                                <tr class="bg_l"><td class="brd2-top brd2-bt b"><span class="legend-z1"></span> Зона 1 — Вход</td></tr>
-                                <tr><td class="brd2-top brd2-bt b"><span class="legend-z2"></span> Зона 2 — Катакомбы</td></tr>
-                                <tr class="bg_l"><td class="brd2-top brd2-bt b"><span class="legend-z3"></span> Зона 3 — Логово Босса</td></tr>
-                                <tr><td class="brd2-top brd2-bt b"><span class="legend-exit"></span> ⬆ Выход</td></tr>
-                            </tbody></table>
-                        </td>
-                        <td class="tbl-usi_right">&nbsp;</td>
-                    </tr>
-                    <tr height="18">
-                        <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt></td>
-                        <td class="tbl-shp_sml-bottom" valign="top" align="center">&nbsp;</td>
-                        <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt></td>
-                    </tr></tbody></table>
-                </td>
-                <td>
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
-                    <tbody><tr height="22">
-                        <td width="20" align="right" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}" width="20" height="22" alt></td>
-                        <td class="tbl-shp_sml-top" valign="top" align="center">
-                            <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
-                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
-                                <td class="tbl-usi_label-center">Условные обозначения</td>
-                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
-                            </tr></tbody></table>
-                        </td>
-                        <td width="20" align="left" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}" width="20" height="22" alt></td>
-                    </tr>
-                    <tr>
-                        <td class="tbl-usi_left">&nbsp;</td>
-                        <td class="tbl-usi_bg" valign="top" style="padding:6px 4px;">
-                            <table class="coll w100 p10h p2v brd2-all"><tbody>
-                                <tr class="bg_l"><td class="brd2-top brd2-bt b"><span class="ulocation-legend"></span> — Вы здесь</td></tr>
-                                <tr><td class="brd2-top brd2-bt b">🔒 — Ворота (убить монстров)</td></tr>
-                                <tr class="bg_l"><td class="brd2-top brd2-bt b">☠ — Комната Босса</td></tr>
-                                <tr><td class="brd2-top brd2-bt b">⬆ — Выход из подземелья</td></tr>
-                            </tbody></table>
-                        </td>
-                        <td class="tbl-usi_right">&nbsp;</td>
-                    </tr>
-                    <tr height="18">
-                        <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt></td>
-                        <td class="tbl-shp_sml-bottom" valign="top" align="center">&nbsp;</td>
-                        <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt></td>
-                    </tr></tbody></table>
-                </td>
                 </tr></tbody></table>
 
             </div></div></div></div></div></div></div>

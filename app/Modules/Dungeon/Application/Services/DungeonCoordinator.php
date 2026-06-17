@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Dungeon\Application\Services;
 
 use App\Enums\DungeonCooldownType;
+use App\Enums\DungeonDeathBehavior;
 use App\Enums\DungeonRewardType;
 use App\Models\Party\Party;
 use App\Modules\Backpack\Domain\Services\BackpackService;
@@ -15,6 +16,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +44,43 @@ class DungeonCoordinator
 
             return $session;
         });
+    }
+
+    public function resumeExistingSessionIfAllowed(Dungeon $dungeon, User $user): ?DungeonSession
+    {
+        $session = $this->sessionRepository->findByUserId($user->id);
+
+        if ($session === null) {
+            return null;
+        }
+
+        if ($session->isExpired()) {
+            $this->expireSessionIfNeeded($user);
+
+            return null;
+        }
+
+        if ($session->dungeon_id !== $dungeon->id) {
+            throw new RuntimeException('Вы уже находитесь в другом данже.');
+        }
+
+        $user->loadMissing('currentLocation');
+        $isOutsideDungeon = (int) $user->currentLocation?->dungeon_id !== (int) $session->dungeon_id;
+
+        if ($dungeon->death_behavior !== DungeonDeathBehavior::KICK_CAN_REENTER && ! $isOutsideDungeon) {
+            throw new RuntimeException('Вы уже находитесь в данже.');
+        }
+
+        $returnLocationId = $dungeon->first_location_id;
+        if ($returnLocationId === null) {
+            throw new RuntimeException('Данж ещё не настроен (нет первой локации).');
+        }
+
+        $this->transactionManager->run(function () use ($user, $returnLocationId) {
+            $this->teleportUser($user, $returnLocationId);
+        });
+
+        return $session;
     }
 
     public function enterWithParty(Dungeon $dungeon, User $leader, Party $party): DungeonSession
@@ -122,6 +161,36 @@ class DungeonCoordinator
         });
 
         return true;
+    }
+
+    public function handlePlayerDeath(Player $player): ?string
+    {
+        $player->loadMissing('user');
+        $user = $player->user;
+
+        if ($user === null) {
+            return null;
+        }
+
+        $session = $this->sessionRepository->findByUserId($user->id);
+
+        if ($session === null) {
+            return null;
+        }
+
+        if ($session->isExpired()) {
+            $this->expireSessionIfNeeded($user);
+
+            return 'Время похода истекло. Вы перенесены из данжа.';
+        }
+
+        $dungeon = $session->dungeon;
+
+        return match ($dungeon->death_behavior) {
+            DungeonDeathBehavior::EXIT => $this->handleDeathExit($user, $session),
+            DungeonDeathBehavior::RETURN_TO_START => $this->handleDeathReturnToStart($user, $dungeon),
+            DungeonDeathBehavior::KICK_CAN_REENTER => $this->handleDeathKickCanReenter($user, $dungeon),
+        };
     }
 
     public function tryAdvanceSurvivalWave(DungeonSession $session, Location $location): void
@@ -245,6 +314,46 @@ class DungeonCoordinator
                 default => null,
             };
         }
+    }
+
+    private function handleDeathExit(User $user, DungeonSession $session): string
+    {
+        $returnLocationId = $session->dungeon->return_location_id ?? 6;
+
+        $this->transactionManager->run(function () use ($user, $session, $returnLocationId) {
+            $this->teleportUser($user, $returnLocationId);
+            $this->cleanupSessionMonsters($session);
+            $this->sessionRepository->delete($session);
+        });
+
+        return 'Смерть завершила поход. Вы выброшены из данжа.';
+    }
+
+    private function handleDeathReturnToStart(User $user, Dungeon $dungeon): string
+    {
+        $returnLocationId = $dungeon->death_return_location_id
+            ?? $dungeon->first_location_id
+            ?? $dungeon->return_location_id
+            ?? 6;
+
+        $this->transactionManager->run(function () use ($user, $returnLocationId) {
+            $this->teleportUser($user, $returnLocationId);
+        });
+
+        return 'После смерти вы вернулись к началу данжа.';
+    }
+
+    private function handleDeathKickCanReenter(User $user, Dungeon $dungeon): string
+    {
+        $returnLocationId = $dungeon->death_return_location_id
+            ?? $dungeon->return_location_id
+            ?? 6;
+
+        $this->transactionManager->run(function () use ($user, $returnLocationId) {
+            $this->teleportUser($user, $returnLocationId);
+        });
+
+        return 'Вы выброшены из данжа, но можете вернуться, пока не истекло время похода.';
     }
 
     private function cleanupSessionMonsters(DungeonSession $session): void

@@ -60,6 +60,8 @@
                         <span class="arrow">→</span>
                         при survival-данже волны двигаются через <code>current_wave</code> в сессии
                         <span class="arrow">→</span>
+                        при смерти игрока применяется настройка <code>death_behavior</code>
+                        <span class="arrow">→</span>
                         при завершении выдаются <code>dungeon_rewards</code>, сессия помечается <code>completed_at</code> или удаляется при выходе
                     </div>
 
@@ -68,6 +70,12 @@
                         <code>dungeon_cooldowns</code> — персональный или глобальный кулдаун на вход. Если <code>user_id = 0</code> → глобальный кулдаун для всех.<br><br>
                         <strong>Группы:</strong>
                         <code>parties</code> + <code>party_members</code> — формируются до входа. Для группы создаётся ведущая сессия и дочерние сессии участников с общим пулом монстров.
+                    </div>
+
+                    <div class="flow-box">
+                        <strong>Админка:</strong>
+                        базовые настройки поведения при смерти редактируются в разделе <code>/admin/dungeons</code>.
+                        Выбранная локация возврата должна принадлежать этому же данжу.
                     </div>
                 </div>
 
@@ -189,6 +197,86 @@
                                 <td>Виден ли данж игрокам и доступен ли для входа</td>
                                 <td><code>true</code> / <code>false</code></td>
                             </tr>
+                            <tr>
+                                <td>map_id</td>
+                                <td>bigint / null</td>
+                                <td>FK → <code>maps.id</code>. Карта, к которой относится вход или отображение данжа</td>
+                                <td>ID карты или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>entry_location_id</td>
+                                <td>bigint / null</td>
+                                <td>FK → <code>locations.id</code>. Локация снаружи, откуда игрок заходит в данж</td>
+                                <td>ID локации или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>first_location_id</td>
+                                <td>bigint / null</td>
+                                <td>
+                                    FK → <code>locations.id</code>. Первая внутренняя локация данжа.
+                                    При входе игрок телепортируется сюда.
+                                </td>
+                                <td>ID локации данжа или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>exit_location_id</td>
+                                <td>bigint / null</td>
+                                <td>
+                                    FK → <code>locations.id</code>. Внутренняя локация, на которой разрешён обычный выход из данжа.
+                                </td>
+                                <td>ID локации данжа или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>return_location_id</td>
+                                <td>bigint / null</td>
+                                <td>
+                                    FK → <code>locations.id</code>. Внешняя локация, куда игрок возвращается при выходе, окончании таймера или варианте смерти с выбросом наружу.
+                                </td>
+                                <td>ID локации или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>death_behavior</td>
+                                <td>enum</td>
+                                <td>
+                                    Что делать с игроком после смерти в бою внутри данжа:<br>
+                                    <span class="badge-enum">exit</span> — завершить поход и вывести наружу<br>
+                                    <span class="badge-enum">return_to_start</span> — оставить сессию и вернуть в начало/указанную локацию данжа<br>
+                                    <span class="badge-enum">kick_can_reenter</span> — вывести наружу, но сохранить сессию до конца таймера
+                                </td>
+                                <td>
+                                    <span class="badge-enum">exit</span>
+                                    <span class="badge-enum">return_to_start</span>
+                                    <span class="badge-enum">kick_can_reenter</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>death_return_location_id</td>
+                                <td>bigint / null</td>
+                                <td>
+                                    FK → <code>locations.id</code>. Переопределяет точку телепорта после смерти.
+                                    Для <code>return_to_start</code> должна быть внутренней локацией текущего данжа.
+                                    В админке допускается выбирать только локации этого данжа.
+                                </td>
+                                <td>ID локации данжа или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>monster_respawn</td>
+                                <td>boolean</td>
+                                <td>Разрешён ли респаун монстров внутри активной сессии данжа</td>
+                                <td><code>true</code> / <code>false</code></td>
+                            </tr>
+                            <tr>
+                                <td>wave_count</td>
+                                <td>tinyint / null</td>
+                                <td>Количество волн для survival-данжа</td>
+                                <td><code>1</code>… или NULL</td>
+                            </tr>
+                            <tr>
+                                <td>xp_multiplier</td>
+                                <td>decimal / float</td>
+                                <td>Множитель опыта за прохождение/боевые события данжа</td>
+                                <td><code>1.0</code>, <code>1.5</code>, <code>2.0</code> …</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -201,6 +289,44 @@
                         <code>dungeon_run_floors</code> и логикой pity удалён из runtime-кода как неиспользуемый.
                         Текущая реализация работает через обычные локации, ворота данжа и таблицу <code>dungeon_sessions</code>.
                     </div>
+                </div>
+
+                <div class="doc-section">
+                    <h3><i class="bx bx-skull"></i> Поведение при смерти в данже</h3>
+                    <div class="section-intro">
+                        Поведение задаётся на уровне конкретного данжа полями <code>death_behavior</code> и
+                        <code>death_return_location_id</code>. Настройки доступны в админке: <code>/admin/dungeons</code>.
+                    </div>
+
+                    <table class="table table-bordered table-hover field-table">
+                        <thead><tr><th>Значение</th><th>Что происходит</th><th>Сессия</th><th>Куда телепортирует</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td>exit</td>
+                                <td>Поход считается проваленным, игрок выходит из данжа</td>
+                                <td>Удаляется</td>
+                                <td><code>return_location_id</code>, если задан; иначе безопасная внешняя локация по умолчанию</td>
+                            </tr>
+                            <tr>
+                                <td>return_to_start</td>
+                                <td>Игрок остаётся в активном походе и возвращается назад в данж</td>
+                                <td>Сохраняется</td>
+                                <td><code>death_return_location_id</code>, если задан; иначе <code>first_location_id</code></td>
+                            </tr>
+                            <tr>
+                                <td>kick_can_reenter</td>
+                                <td>Игрока выбрасывает наружу, но кнопка входа может вернуть его в активный поход, пока не истёк таймер</td>
+                                <td>Сохраняется до истечения <code>expires_at</code> или ручного выхода</td>
+                                <td><code>death_return_location_id</code>, если задан; иначе <code>return_location_id</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p>
+                        Для варианта <code>kick_can_reenter</code> важно наличие таймера <code>time_limit_seconds</code>,
+                        иначе активная сессия может жить слишком долго. Для <code>return_to_start</code> поле
+                        <code>death_return_location_id</code> должно указывать на внутреннюю локацию этого же данжа.
+                    </p>
                 </div>
 
                 {{-- ══════════════════════════════════════════════════════════════ --}}

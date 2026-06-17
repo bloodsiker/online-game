@@ -6,10 +6,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,13 +18,19 @@ class ApiController extends Controller
     public function locations(Request $request): JsonResponse
     {
         $search = $request->input('q', '');
+        $dungeonId = $request->input('dungeon_id');
         $page = max(1, (int) $request->input('page', 1));
         $perPage = 20;
 
         $query = Location::with('map')
+            ->when($dungeonId !== null && $dungeonId !== '', function ($q) use ($dungeonId) {
+                $q->where('dungeon_id', (int) $dungeonId);
+            })
             ->when($search, function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+                $q->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+                });
             })
             ->orderBy('name');
 

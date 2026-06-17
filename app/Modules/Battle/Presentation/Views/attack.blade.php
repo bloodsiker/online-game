@@ -323,71 +323,164 @@
         }
 
         /* Action panel */
-        .act-panel { padding: 8px 10px; min-width: 180px; }
+        .act-panel {
+            min-width: 198px;
+            padding: 7px;
+            color: #3b260d;
+            background: #f4dc9b;
+            border: 1px solid #a8762d;
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 238, .78),
+                inset 0 10px 18px rgba(255, 255, 245, .38),
+                0 2px 0 rgba(112, 73, 21, .35);
+            box-sizing: border-box;
+        }
         .act-title {
+            position: relative;
+            margin: 0 0 7px;
+            padding: 0 0 5px 18px;
+            color: #4b2b08;
             font-size: 11px;
             font-weight: bold;
-            color: #3a2500;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #c8a055;
-            margin-bottom: 8px;
+            line-height: 1.25;
+            text-shadow: 0 1px 0 rgba(255, 242, 194, .8);
+            border-bottom: 1px solid rgba(141, 90, 24, .55);
+        }
+        .act-title:before {
+            content: "";
+            position: absolute;
+            left: 1px;
+            top: -1px;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 50% 45%, #ffe08a 0 22%, #ad5a20 24% 48%, #2b1309 51% 100%);
+            border: 1px solid #9a6b2c;
+            transform: rotate(45deg);
+            box-shadow: 0 0 6px rgba(255, 245, 172, .5);
         }
         .act-btn {
+            position: relative;
             display: block;
             width: 100%;
-            padding: 5px 10px;
+            min-height: 25px;
             margin-bottom: 4px;
-            background: linear-gradient(to bottom, #f5d890, #d4a843);
-            border: 1px solid #8b6914;
-            border-radius: 3px;
-            color: #2a1a00;
+            padding: 5px 7px 5px 28px;
+            color: #2f1b07;
             font-family: Tahoma;
             font-size: 12px;
             font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
+            line-height: 1.2;
             text-align: left;
+            text-decoration: none;
+            text-shadow: 0 1px 0 rgba(255, 232, 168, .75);
+            cursor: pointer;
+            border: 1px solid #8c5f22;
+            border-radius: 2px;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 242, .78), rgba(255, 246, 210, .12) 44%),
+                linear-gradient(to bottom, #ffe49b, #dca558);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 252, 213, .45),
+                0 1px 0 rgba(81, 45, 10, .5);
             box-sizing: border-box;
         }
-        .act-btn:hover { background: linear-gradient(to bottom, #ffeaa0, #e8bb55); border-color: #6b4a10; color: #1a0e00; }
-        .act-btn-attack { border-left: 3px solid #cc2200; }
-        .act-btn-spell  { border-left: 3px solid #6633cc; }
-        .act-btn-flee   {
-            background: linear-gradient(to bottom, #ddd8cc, #c4bdb0);
-            border: 1px solid #9a8878;
-            border-left: 3px solid #9a8878;
-            color: #5a4a3a;
-            font-weight: normal;
-        }
-        .act-btn-flee:hover { background: linear-gradient(to bottom, #ece8e0, #d4cec4); color: #3a2a1a; }
-        .act-spell-label {
+        .act-btn:before {
+            position: absolute;
+            left: 7px;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            margin-top: -7px;
+            color: #1c0b04;
             font-size: 11px;
             font-weight: bold;
-            color: #4a2a88;
-            margin: 6px 0 3px 2px;
+            line-height: 13px;
+            text-align: center;
+            text-shadow: 0 1px 0 rgba(255, 230, 166, .4);
+            border: 1px solid rgba(255, 219, 128, .42);
+            border-radius: 50%;
+            background: linear-gradient(to bottom, #d69b3d, #8a411b);
+            box-shadow: inset 0 1px 0 rgba(255, 244, 192, .45);
+        }
+        .act-btn:hover {
+            color: #1f1003;
+            border-color: #9b4d18;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 235, .82), rgba(255, 244, 190, 0) 42%),
+                linear-gradient(to bottom, #ffe28f, #dda047);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 250, 205, .6),
+                0 0 8px rgba(173, 93, 21, .28);
+        }
+        .act-btn-attack { border-left: 3px solid #d3311a; }
+        .act-btn-attack:before { content: "\2694"; }
+        .act-btn-spell  {
+            border-left: 3px solid #6f5ae8;
+            background:
+                linear-gradient(to bottom, rgba(245, 240, 255, .68), rgba(212, 205, 255, 0) 42%),
+                linear-gradient(to bottom, #c5b2f0, #8567c9);
+        }
+        .act-btn-spell:before { content: "\2726"; }
+        .act-btn-spell:hover {
+            background:
+                linear-gradient(to bottom, rgba(255, 252, 255, .82), rgba(225, 219, 255, 0) 42%),
+                linear-gradient(to bottom, #dacdff, #9677da);
+        }
+        .act-btn-flee {
+            color: #493826;
+            font-weight: normal;
+            border-color: #9c8466;
+            border-left: 3px solid #9a8878;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 45%),
+                linear-gradient(to bottom, #e7d9be, #bca27f);
+        }
+        .act-btn-flee:before { content: "\2190"; background: linear-gradient(to bottom, #b9aa90, #766454); }
+        .act-btn-flee:hover { color: #2f2113; background: linear-gradient(to bottom, #f4e8cf, #cbb18c); }
+        .act-spell-label {
+            margin: 6px 0 3px;
+            padding-left: 3px;
+            color: #553987;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 1px 0 rgba(255, 245, 220, .85);
         }
         .act-mana {
             display: inline-block;
-            background: #3355aa;
-            color: #cce0ff;
-            font-size: 9px;
-            padding: 1px 5px;
-            border-radius: 8px;
+            min-width: 16px;
             margin-right: 5px;
-            font-weight: bold;
+            padding: 1px 5px;
+            color: #eef5ff;
+            font-size: 10px;
+            font-weight: normal;
+            text-align: center;
             vertical-align: middle;
+            border: 1px solid #516ead;
+            border-radius: 8px;
+            background: linear-gradient(to bottom, #254baf, #132a71);
+            box-shadow: inset 0 1px 0 rgba(194, 218, 255, .35);
         }
         .act-stats {
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid #c8a055;
+            margin-top: 7px;
+            padding-top: 5px;
+            border-top: 1px solid rgba(141, 90, 24, .45);
         }
-        .act-stat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .act-stat-label { color: #5a3a10; font-size: 11px; width: 58px; flex-shrink: 0; }
-        .act-stat-bar { flex: 1; height: 6px; background: #3a2a1a; border-radius: 3px; overflow: hidden; }
-        .act-stat-hp { height: 100%; background: linear-gradient(to right, #aa1a00, #ff4422); border-radius: 3px; }
-        .act-stat-mp { height: 100%; background: linear-gradient(to right, #0044bb, #2277ee); border-radius: 3px; }
-        .act-stat-val { font-size: 10px; color: #777; white-space: nowrap; }
+        .act-stat-row { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+        .act-stat-label { width: 54px; flex-shrink: 0; color: #5a3711; font-size: 11px; text-shadow: 0 1px 0 rgba(255, 238, 190, .8); }
+        .act-stat-bar {
+            flex: 1;
+            min-width: 56px;
+            height: 8px;
+            padding: 1px;
+            overflow: hidden;
+            background: #8b6429;
+            border: 1px solid #9b6d2b;
+            box-shadow: inset 0 1px 3px rgba(36, 18, 4, .65);
+            box-sizing: border-box;
+        }
+        .act-stat-hp { height: 100%; background: linear-gradient(to right, #811306, #e23b1d 62%, #ff8c4a); box-shadow: 0 0 5px rgba(224, 42, 20, .45); }
+        .act-stat-mp { height: 100%; background: linear-gradient(to right, #16398f, #2b78e8 62%, #82c6ff); box-shadow: 0 0 5px rgba(48, 116, 232, .45); }
+        .act-stat-val { min-width: 44px; color: #4c3212; font-size: 10px; text-align: right; white-space: nowrap; }
 
         /* Battle side panel */
         .bp-wrap { min-width: 140px; padding: 6px 8px; }
