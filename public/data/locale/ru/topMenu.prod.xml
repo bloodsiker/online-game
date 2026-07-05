@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<data version="3">
+	<item id="1" label="6" command="b02" pict="backPack"/>
+	<item id="2" label="3" command="b06" pict="location"/>
+	<item id="3" label="4" command="b07" pict="hunt"/>
+	<item id="4" label="0" command=""  pict="character">
+		<item id="13" label="24" command="b18" pict="achieve"/>
+		<item id="14" label="9" command="b14" pict="clan"/>
+		<item id="15" label="8" command="b13" pict="form"/>
+		<item id="16" label="20" command="b16" pict="contacts"/>
+		<!--<item id="17" label="23" command="b17" pict="refferals"/>
+		<item id="28" label="28" command="b28" pict="search_group"/> -->
+		<item id="29" label="29" command="b19" pict="rating"/>
+	</item>
+	<item id="5" label="21" command="b04"  pict="battleField"/>
+	<item id="6" label="2" command=""  pict="map">
+		<item id="18" label="17" command="b51" pict="world"/>
+		<item id="19" label="18" command="b52" pict="inst"/>
+	</item>
+	<item id="7" label="22" command="b11"  pict="p_event.png"/>
+	<item id="10" label="5" command="b08"  pict="fights"/>
+	<item id="8" label="16" command="b36"  pict="bank"/>
+	<item id="9" label="25" command="" pict="auction">
+		<item id="9" label="25" command="b37" pict="auction"/>
+		<item id="17" label="23" command="b29" pict="refferals"/>
+		<item id="28" label="28" command="b28" pict="search_group"/>
+	</item>
+	<item id="11" label="26" commands="" pict="infoPortal"/>
+</data>

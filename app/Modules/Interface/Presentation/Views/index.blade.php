@@ -173,9 +173,9 @@
 
 <table cellpadding="0" cellspacing="0" width="100%" height="69%" border="0">
     <tbody>
-    <tr class="tbl-main_top-bg" style="height: 73px">
+    <tr class="tbl-main_top-bg" style="height: 90px">
         <td colspan="3">
-            <iframe id="menu-frame" width="100%" height="60px" frameborder="0" src="{{ route('menu') }}"></iframe>
+            <iframe id="menu-frame" width="100%" height="78px" frameborder="0" src="{{ route('menu') }}"></iframe>
         </td>
     </tr>
     <tr>
@@ -941,6 +941,75 @@
 
 
 <div id="error_div" class="error_div" style="display: none; z-index: 1000; width: 100%; height: 100vh;"></div>
+<img src="{{ asset('data/img/close.png') }}" width="27" height="27" alt="Выход" title="Выход из игры"
+     style="position: absolute; top: 0; right: 8px; z-index: 1005; cursor: pointer;" onclick="showLogoutConfirm()">
+
+<div id="fullscreen_button" title="Полноэкранный режим"
+     style="position: absolute; top: 50px; right: 3px; z-index: 1005; cursor: pointer;" onclick="toggleFullscreen()">
+    <img id="fsc_img" src="{{ asset('data/img/fscreen.png') }}" width="20" height="20" alt="">
+</div>
+
+<div id="logout_confirm_overlay" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 1100;" onclick="hideLogoutConfirm()"></div>
+<div id="logout_confirm" class="popup_global_container" style="display: none; position: fixed; left: 50%; top: 30%; width: 380px; margin-left: -190px; z-index: 1101;">
+    <div class="popup-top-left">
+        <div class="popup-top-right">
+            <div class="popup-top-center">
+                <div class="popup_global_title">Выход из игры</div>
+            </div>
+        </div>
+        <div class="popup_global_close_btn" onclick="hideLogoutConfirm();"></div>
+    </div>
+    <div class="popup-left-center">
+        <div class="popup-right-center">
+            <div class="popup_global_content" style="padding: 20px;">
+                <div style="text-align: center;">
+                    <b>Вы уверены, что хотите выйти из игры?</b>
+                </div>
+                <div style="margin-top: 25px; text-align: center;">
+                    <b class="butt1 pointer"><b><input value="Выход" type="button" onclick="confirmLogout();" style="width: 100px;"></b></b>
+                    <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="hideLogoutConfirm();" style="width: 100px;"></b></b>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="popup-left-bottom">
+        <div class="popup-right-bottom">
+            <div class="popup-bottom-center"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showLogoutConfirm() {
+        document.getElementById('logout_confirm_overlay').style.display = 'block';
+        document.getElementById('logout_confirm').style.display = 'block';
+    }
+
+    function hideLogoutConfirm() {
+        document.getElementById('logout_confirm_overlay').style.display = 'none';
+        document.getElementById('logout_confirm').style.display = 'none';
+    }
+
+    function confirmLogout() {
+        window.location.href = '{{ route('logout') }}';
+    }
+
+    function toggleFullscreen() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            document.documentElement.requestFullscreen();
+        }
+    }
+
+    // Иконка меняется и при выходе по Esc
+    document.addEventListener('fullscreenchange', function () {
+        document.getElementById('fsc_img').src = document.fullscreenElement
+            ? '{{ asset('data/img/fscreen2.png') }}'
+            : '{{ asset('data/img/fscreen.png') }}';
+    });
+</script>
+
 <iframe width="1" height="1" frameborder="0" id="error" name="error" src="" scrolling="no" style="display: none; position: absolute; left: 0px; top: 0px; z-index: 1001;" allowtransparency="true"></iframe>
 
 <script language="javaScript" src="{{ asset('js/common.js') }}"></script>

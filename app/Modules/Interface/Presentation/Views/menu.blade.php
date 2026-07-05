@@ -13,8 +13,20 @@
             font-size: 11px;
         }
 
-        .menu-wrap {
+        .canvas-menu-wrap {
             display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            height: 100%;
+        }
+        #top_mnu_cont {
+            width: 670px;
+            height: 78px;
+        }
+
+        /* Fallback HTML menu (shown only if the canvas menu fails to start) */
+        .menu-wrap {
+            display: none;
             align-items: center;
             justify-content: center;
             height: 100%;
@@ -22,7 +34,6 @@
             padding: 0 8px;
         }
 
-        /* Sprite-based button: left cap | center repeat | right cap */
         .menu-btn {
             display: inline-flex;
             align-items: center;
@@ -55,38 +66,139 @@
         }
 
         .menu-sep {
-            width: 1px;
-            height: 14px;
-            background: #b08060;
-            margin: 0 2px;
+            width: 5px;
+            height: 19px;
+            background: url({{ asset('img/bg/separator_v.gif') }}) center center no-repeat;
+            margin: 0 3px;
             flex-shrink: 0;
         }
-
-        .menu-btn.logout {
-            color: #8b1a0a;
-        }
-        .menu-btn.logout:hover {
-            color: #ffb090;
-        }
     </style>
+
+    <script src="{{ asset('main/js/canvas/pixi.js') }}"></script>
+    <script src="{{ asset('main/js/canvas/pixi-filters.js') }}"></script>
+    <script src="{{ asset('main/js/canvas/canvas.all.js') }}"></script>
 </head>
 <body>
 
-<div class="menu-wrap">
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('location') }}'); return false;">Перемещение</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('character') }}', true); return false;">Персонаж</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('backpack') }}', true); return false;">Вещи</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('clan') }}', true); return false;">Клан</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('clan.member') }}', true); return false;">Состав клана</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('quests') }}', true); return false;">Квесты</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('premium.shop') }}', true); return false;">Премиум</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(true); window.top.toLocation('{{ route('rating') }}', true); return false;">Рейтинг</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('friends') }}', true); return false;">Друзья</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('dungeon.index') }}', true); return false;">Данжи</a>
-    <a class="menu-btn" href="#" onclick="window.top.toggleMap(false); window.top.toLocation('{{ route('referral') }}', true); return false;">Рефералы</a>
-    <div class="menu-sep"></div>
-    <a class="menu-btn logout" href="{{ route('logout') }}">Выход</a>
+<div class="canvas-menu-wrap">
+    <div id="top_mnu_cont"></div>
 </div>
+
+{{-- Fallback: обычное HTML-меню, включается если канвас не стартовал --}}
+<div class="menu-wrap" id="html-menu">
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('location') }}'); return false;">Перемещение</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">Персонаж</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">Вещи</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan') }}', true); return false;">Клан</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Состав клана</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">Данжи</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('friends') }}', true); return false;">Друзья</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">Рейтинг</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">Премиум</a>
+</div>
+
+<script>
+    function menuGo(showMap, url, hideHero) {
+        window.top.toggleMap(showMap);
+        window.top.toLocation(url, hideHero);
+    }
+
+    // Команды из public/data/locale/ru/topMenu.xml → роуты игры
+    var menuCommands = {
+        m_location:    function () { menuGo(true,  '{{ route('location') }}'); },
+        m_character:   function () { menuGo(true,  '{{ route('character') }}', true); },
+        m_backpack:    function () { menuGo(false, '{{ route('backpack') }}', true); },
+        m_clan:        function () { menuGo(false, '{{ route('clan') }}', true); },
+        m_clan_member: function () { menuGo(false, '{{ route('clan.member') }}', true); },
+        m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
+        m_dungeon:     function () { menuGo(false, '{{ route('dungeon.index') }}', true); },
+        m_friends:     function () { menuGo(false, '{{ route('friends') }}', true); },
+        m_rating:      function () { menuGo(true,  '{{ route('rating') }}', true); },
+        m_referral:    function () { menuGo(false, '{{ route('referral') }}', true); },
+        m_premium:     function () { menuGo(false, '{{ route('premium.shop') }}', true); }
+    };
+
+    // Канвас-меню вызывает глобальный processMenu(command) при клике по пункту
+    function processMenu(command) {
+        if (menuCommands[command]) menuCommands[command]();
+    }
+
+    // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 2)
+    var buttonIds = {
+        location: 1, character: 2, backpack: 3, clan: 2, clan_member: 2,
+        quests: 4, dungeon: 5, friends: 2, rating: 6, referral: 2, premium: 7
+    };
+
+    // Мигание кнопки из родителя:
+    // document.getElementById('menu-frame').contentWindow.blinkButton('quests', true)
+    function blinkButton(name, status) {
+        if (window.top_mnu && buttonIds[name]) {
+            window.top_mnu.blinkButton(buttonIds[name], !!status);
+        }
+    }
+
+    function showFallbackMenu() {
+        document.querySelector('.canvas-menu-wrap').style.display = 'none';
+        document.getElementById('html-menu').style.display = 'flex';
+    }
+
+    try {
+        // canvas.Config.init() строит пути от домена (/images/data/...);
+        // задаём их заранее, чтобы ресурсы читались из public/data/
+        var C = canvas.Config;
+        C.domain = location.origin;
+        C.wwwPath = '/';
+        C.dataPath = '/data/';
+        C.imgPath = '/data/canvas/';
+        C.soundsPath = C.imgPath + 'sounds/';
+        C.fontsPath = C.imgPath + 'fonts/';
+        C.ui = C.imgPath + 'ui/';
+        C.effectsAtlasPath = C.imgPath + 'effects/';
+        C.effectsPath = C.imgPath + 'effects/mci/';
+        C.localePath = C.imgPath + 'locale/';
+        C.effects = C.imgPath + 'effects/effects.json';
+        C.entryPoint = '/entry_point.php';
+        C.isMobile = canvas.isMobile();
+        C.initLang('ru');
+
+        // В атласе иконки двух размеров (57x59 и 45x51 — прод использовал мелкие
+        // только в подменю); растягиваем иконку до подложки item_back
+        var ItemView = canvas.app.topMenu.view.ItemView;
+        var itemViewInit = ItemView.prototype.init;
+        ItemView.prototype.init = function () {
+            itemViewInit.call(this);
+            if (!this.isSmall && this.image) {
+                this.image.width = 57;
+                this.image.height = 59;
+                this.image.position.set(6, 0);
+            }
+        };
+
+        // Ряд иконок центрируется по ширине канваса (движок прижимает его влево)
+        var topMenuReady = canvas.app.CanvasTopMenu.prototype.ready;
+        canvas.app.CanvasTopMenu.prototype.ready = function () {
+            topMenuReady.call(this);
+            this.main.x = Math.round((this.par.width - this.main.view.items.length * 55) / 2);
+        };
+
+        window.top_mnu = new canvas.app.CanvasTopMenu({
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум',
+            dragDropItems: '0',
+            configXml: '/data/locale/ru/topMenu.xml',
+            blink: '',
+            js_popup: '1',
+            lang: 'ru',
+            locale_file: 'data/locale/ru/flash_translate.xml',
+            width: 670,
+            height: 78
+        }, document.getElementById('top_mnu_cont'));
+    } catch (e) {
+        console.error('Canvas top menu failed, falling back to HTML menu:', e);
+        showFallbackMenu();
+    }
+</script>
 
 </body>
 </html>

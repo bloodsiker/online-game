@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="3">
+	<item id="1" label="0" command="m_location" pict="location"/>
+	<item id="2" label="1" command="" pict="character">
+		<item id="21" label="1" command="m_character" pict="form"/>
+		<item id="22" label="3" command="m_clan" pict="clan"/>
+		<item id="23" label="4" command="m_clan_member" pict="search_group"/>
+		<item id="24" label="7" command="m_friends" pict="contacts"/>
+		<item id="25" label="9" command="m_referral" pict="refferals"/>
+	</item>
+	<item id="3" label="2" command="m_backpack" pict="backPack"/>
+	<item id="4" label="5" command="m_quests" pict="p_event"/>
+	<item id="5" label="6" command="m_dungeon" pict="inst"/>
+	<item id="6" label="8" command="m_rating" pict="rating"/>
+	<item id="7" label="10" command="m_premium" pict="bank"/>
+</data>

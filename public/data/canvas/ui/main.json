@@ -324,42 +324,6 @@
 	"sourceSize": {"w":30,"h":31},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"avatar/premium6.png":
-{
-	"frame": {"x":473,"y":261,"w":30,"h":31},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":31},
-	"sourceSize": {"w":30,"h":31},
-	"pivot": {"x":0.5,"y":0.5}
-},
-"avatar/premium7.png":
-{
-	"frame": {"x":473,"y":297,"w":30,"h":31},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":31},
-	"sourceSize": {"w":30,"h":31},
-	"pivot": {"x":0.5,"y":0.5}
-},
-"avatar/premium8.png":
-{
-	"frame": {"x":473,"y":332,"w":30,"h":31},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":31},
-	"sourceSize": {"w":30,"h":31},
-	"pivot": {"x":0.5,"y":0.5}
-},
-"avatar/premium9.png":
-{
-	"frame": {"x":473,"y":367,"w":30,"h":31},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":31},
-	"sourceSize": {"w":30,"h":31},
-	"pivot": {"x":0.5,"y":0.5}
-},
 "avatar/premium_back.png":
 {
 	"frame": {"x":126,"y":438,"w":47,"h":60},
@@ -582,6 +546,15 @@
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":4,"y":7,"w":33,"h":26},
+	"sourceSize": {"w":41,"h":41},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"right/reputation_new_image.png":
+{
+	"frame": {"x":189,"y":508,"w":41,"h":41},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":41},
 	"sourceSize": {"w":41,"h":41},
 	"pivot": {"x":0.5,"y":0.5}
 },
@@ -918,6 +891,15 @@
 	"sourceSize": {"w":57,"h":59},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"top/festival_new.png":
+{
+	"frame": {"x":3,"y":502,"w":56,"h":56},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":1,"w":56,"h":56},
+	"sourceSize": {"w":57,"h":59},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "top/inst.png":
 {
 	"frame": {"x":414,"y":213,"w":43,"h":43},
@@ -1043,7 +1025,15 @@
 	"spriteSourceSize": {"x":1,"y":7,"w":43,"h":43},
 	"sourceSize": {"w":45,"h":51},
 	"pivot": {"x":0.5,"y":0.5}
-}},
+},
+"avatar/eday_bonus.png": {
+  "frame": { "x": 261, "y": 528, "w": 22, "h": 22 },
+  "rotated": false,
+  "trimmed": false,
+  "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
+  "sourceSize": { "w": 22, "h": 22 },
+  "pivot": { "x": 0.5, "y": 0.5 }
+}}, 
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
