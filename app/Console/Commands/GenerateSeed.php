@@ -873,7 +873,7 @@ class GenerateSeed extends Command
     protected function createItems()
     {
         $sItem = new ShareItem;
-        $sItem->type = 'resource';
+        $sItem->type = ShareItemType::RESOURCE;
         $sItem->price = 10;
         $sItem->name = 'Коготь медведя';
         $sItem->description = 'Коготь медведя';
@@ -890,7 +890,7 @@ class GenerateSeed extends Command
         $this->location1->itemsOnLocation()->attach($item->id);
 
         $sItem2 = new ShareItem;
-        $sItem2->type = 'weapon';
+        $sItem2->type = ShareItemType::WEAPON;
         $sItem2->skill_id = $this->skill2->id;
         $sItem2->skill_lvl = 0;
         $sItem2->price = 10;
@@ -932,7 +932,7 @@ class GenerateSeed extends Command
         $this->location2->itemsOnLocation()->attach($item3->id);
 
         $sItem4 = new ShareItem;
-        $sItem4->type = 'key';
+        $sItem4->type = ShareItemType::KEY;
         $sItem4->is_sell = 0;
         $sItem4->price = 0;
         $sItem4->name = 'Изумрудный ключ';
@@ -949,7 +949,7 @@ class GenerateSeed extends Command
         $this->location1->itemsOnLocation()->attach($item4->id);
 
         $sItem5 = new ShareItem;
-        $sItem5->type = 'weapon';
+        $sItem5->type = ShareItemType::WEAPON;
         $sItem5->skill_id = $this->skill2->id;
         $sItem5->skill_lvl = 5;
         $sItem5->price = 300;
@@ -968,7 +968,7 @@ class GenerateSeed extends Command
         $sItem5->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem6 = new ShareItem;
-        $sItem6->type = 'weapon';
+        $sItem6->type = ShareItemType::WEAPON;
         $sItem6->skill_id = $this->skill2->id;
         $sItem6->skill_lvl = 10;
         $sItem6->price = 1000;
@@ -994,7 +994,7 @@ class GenerateSeed extends Command
         $sItem6->monsters()->attach($this->monster2->id, ['drop_chance' => 20, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem7 = new ShareItem;
-        $sItem7->type = 'shield';
+        $sItem7->type = ShareItemType::SHIELD;
         $sItem7->price = 100;
         $sItem7->name = 'Щит «Заступник небес»';
         $sItem7->description = 'Щит «Заступник небес»';
@@ -1010,7 +1010,7 @@ class GenerateSeed extends Command
         $sItem7->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem8 = new ShareItem;
-        $sItem8->type = 'armor';
+        $sItem8->type = ShareItemType::ARMOR;
         $sItem8->price = 2000;
         $sItem8->break_crystal = 2;
         $sItem8->name = 'Кольчуга «Ночной бури»';
@@ -1027,7 +1027,7 @@ class GenerateSeed extends Command
         $sItem8->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem9 = new ShareItem;
-        $sItem9->type = 'armor';
+        $sItem9->type = ShareItemType::ARMOR;
         $sItem9->price = 24000;
         $sItem9->break_crystal = 24;
         $sItem9->name = 'Нагрудник «Ночной бури»';
@@ -1046,7 +1046,7 @@ class GenerateSeed extends Command
         $this->info('Create Items success');
 
         $sItem9 = new ShareItem;
-        $sItem9->type = 'armor';
+        $sItem9->type = ShareItemType::ARMOR;
         $sItem9->price = 100;
         $sItem9->name = 'Шлем «Ночной бури»';
         $sItem9->description = 'Шлем «Ночной бури»';
@@ -1062,7 +1062,7 @@ class GenerateSeed extends Command
         $sItem9->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem10 = new ShareItem;
-        $sItem10->type = 'armor';
+        $sItem10->type = ShareItemType::ARMOR;
         $sItem10->price = 90;
         $sItem10->name = 'Наручи «Ночной бури»';
         $sItem10->description = 'Наручи «Ночной бури»';
@@ -1078,7 +1078,7 @@ class GenerateSeed extends Command
         $sItem10->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem11 = new ShareItem;
-        $sItem11->type = 'armor';
+        $sItem11->type = ShareItemType::ARMOR;
         $sItem11->price = 110;
         $sItem11->name = 'Сапоги «Ночной бури»';
         $sItem11->description = 'Сапоги «Ночной бури»';
@@ -1094,7 +1094,7 @@ class GenerateSeed extends Command
         $sItem11->monsters()->attach($this->monster2->id, ['drop_chance' => 5, 'min_count' => 1, 'max_count' => 1]);
 
         $sItem11 = new ShareItem;
-        $sItem11->type = 'armor';
+        $sItem11->type = ShareItemType::ARMOR;
         $sItem11->price = 105;
         $sItem11->name = 'Легкий плащ';
         $sItem11->description = 'Легкий плащ';
@@ -1283,7 +1283,7 @@ class GenerateSeed extends Command
         $user = User::find(1);
 
         $sItem1 = new ShareItem;
-        $sItem1->type = 'weapon';
+        $sItem1->type = ShareItemType::WEAPON;
         $sItem1->skill_id = $this->skill->id;
         $sItem1->skill_lvl = 50;
         $sItem1->price = 7000000;
@@ -1304,7 +1304,7 @@ class GenerateSeed extends Command
         $item1->save();
 
         $sItem2 = new ShareItem;
-        $sItem2->type = 'recipe';
+        $sItem2->type = ShareItemType::RECIPE;
         $sItem2->price = 1000;
         $sItem2->name = 'Рецепт "Кнут Архангела"';
         $sItem2->description = 'Рецепт "Кнут Архангела"';
@@ -1322,7 +1322,7 @@ class GenerateSeed extends Command
         $shareRecipe->save();
 
         $sItem3 = new ShareItem;
-        $sItem3->type = 'resource';
+        $sItem3->type = ShareItemType::RESOURCE;
         $sItem3->price = 1000;
         $sItem3->name = 'Кристалл';
         $sItem3->description = 'Кристалл';
@@ -1347,7 +1347,7 @@ class GenerateSeed extends Command
     protected function createBoxItems()
     {
         $sItem1 = new ShareItem;
-        $sItem1->type = 'chest';
+        $sItem1->type = ShareItemType::CHEST;
         $sItem1->price = 0;
         $sItem1->break_crystal = 0;
         $sItem1->name = 'Сундук';
