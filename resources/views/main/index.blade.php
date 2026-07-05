@@ -34,10 +34,6 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/timer.css') }}">
     <script language="javaScript" src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/art_alt.css') }}">
-    <div id="error_div" class="error_div" style="display:none; z-index: 1000; "></div>
-    <iframe width="1" height="1" frameborder="0" id="error" name="error" src="index.html" scrolling="no"
-            style="display: none; position: absolute; left: 35%; top: 10%; z-index: 1001;"
-            ALLOWTRANSPARENCY="true"></iframe>
     <script src="{{ asset('main/js/jquery-1.7.1.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('main/css/portal_desktop.min.css') }}"/>
@@ -126,7 +122,7 @@
     </script>
 
 
-    <script type="text/javascript" src="{{ asset('main/js/ru.js') }}new_design/js/ru.js"></script>
+    <script type="text/javascript" src="{{ asset('main/js/ru.js') }}"></script>
 
     <script type="text/javascript" src="{{ asset('main/js/underscore.js') }}"></script>
     <script type="text/javascript" src="{{ asset('main/js/backbone.js') }}"></script>
@@ -269,38 +265,6 @@
 
         </div>
 
-        <!-- Окно 1 -->
-
-        <style>
-            .overlay {
-                position: absolute;
-                z-index: -2;
-                top: 27px;
-                left: 90px;
-                display: block;
-            }
-
-            .overlay.active {
-                display: block;
-
-            }
-
-
-        </style>
-
-        <script>
-            // функция вызова окна
-            function show_popap(id_popap) {
-                var id = "#" + id_popap;
-                $(id).addClass('active');
-            }
-
-            // функция закрытия окна
-            $(".close_popap").click(function () {
-                $(".overlay").removeClass("active");
-            });
-        </script>
-
         <div class="b-nav-lvl-1__menu">
             <ul class="b-nav-lvl-1__menu-list">
                 <li class="b-nav-lvl-1__menu-item">
@@ -335,29 +299,6 @@
     </header>
 
 
-    <style>
-        .video-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            overflow: hidden;
-        }
-
-        .video-container video {
-            max-width: 100vw;
-            height: auto;
-            mask-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 1) 64%, rgba(0, 0, 0, 0));
-            /*-webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 75%, rgba(0, 0, 0, 0));*/
-        }
-    </style>
-
-{{--    <div class="video-container" style=" position: absolute; top: -140px; z-index: -1; ">--}}
-{{--        <video autoplay loop muted playsinline id="desktop-video">--}}
-{{--            <source src="{{ asset('main/video/live_dwar.ltd.mp4') }}" type="video/mp4">--}}
-{{--        </video>--}}
-{{--    </div>--}}
-
 
 </div>
 
@@ -368,14 +309,8 @@
 <div class="b-page__container">
 
     <div class="b-page__content">
-
-
         <aside class="b-page__sidebar b-page__sidebar--left">
-
-
             <div class="b-aside b-aside--left">
-
-
                 <div class="b-aside__column" style=" position: relative; top: -110px; ">
                     <div style="text-align: left;position: absolute;top: -142px;left: -2px;">
                         <div align="center">
@@ -544,85 +479,7 @@
                     </div>
 
                     <div class="b-aside__discuss">
-                        <!--                        <div class="b-shape__header">-->
-                        <!--                            <div class="b-shape__decor"></div>-->
-                        <!--                            <div class="cufon-mp ir font-head">Гарячi битви</div>-->
-                        <!--                        </div>-->
                         <div class="b-shape__content">
-
-
-                            <!--                            <a href="fight_info.php?fight_id=587987&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/transform/transform_bot_4.jpg"-->
-                            <!--                                                                    height="20px">   Лiтня битва [5-12] рівнів</span>-->
-                            <!--                                <span class="b-discuss__desc">29 червня 2025 11:00</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=581355&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/transform/transform_bot_4.jpg"-->
-                            <!--                                                                    height="20px">   Лiтня битва [5-12] рівнів</span>-->
-                            <!--                                <span class="b-discuss__desc">28 червня 2025 22:01</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=580545&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/stronghold_pics/kiriit.jpg"-->
-                            <!--                                                                    height="20px"> Бій за фортецю </span>-->
-                            <!--                                <span class="b-discuss__desc">28 червня 2025 21:01</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=580544&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/stronghold_pics/kiriit.jpg"-->
-                            <!--                                                                    height="20px"> Бій за фортецю </span>-->
-                            <!--                                <span class="b-discuss__desc">28 червня 2025 21:01</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=564809&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/stronghold_pics/kiriit.jpg"-->
-                            <!--                                                                    height="20px"> Бій за фортецю </span>-->
-                            <!--                                <span class="b-discuss__desc">27 червня 2025 21:00</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=586637&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/artifacts/vip_kl_kostdragon.gif"-->
-                            <!--                                                                    height="20px"> Бій драконів </span>-->
-                            <!--                                <span class="b-discuss__desc">29 червня 2025 10:00</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=586636&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/artifacts/vip_kl_kostdragon.gif"-->
-                            <!--                                                                    height="20px"> Бій драконів </span>-->
-                            <!--                                <span class="b-discuss__desc">29 червня 2025 10:00</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=581692&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/artifacts/troll_3.gif"-->
-                            <!--                                                                    height="20px"> Бій з Гідрою </span>-->
-                            <!--                                <span class="b-discuss__desc">28 червня 2025 22:30</span>-->
-                            <!--                            </a>-->
-
-
-                            <!--                            <a href="fight_info.php?fight_id=581693&amp;stat=1&amp;server_id=0" target="_blank"-->
-                            <!--                               class="b-discuss__element">-->
-                            <!--                                <span class="b-discuss__title"><img src="images/data/artifacts/troll_3.gif"-->
-                            <!--                                                                    height="20px"> Бій з Гідрою </span>-->
-                            <!--                                <span class="b-discuss__desc">28 червня 2025 22:30</span>-->
-                            <!--                            </a>-->
-
-
                             <div class="b-shape__header">
                                 <div class="b-shape__decor"></div>
                                 <div class="cufon-mp ir font-head">Игра открылась</div>
@@ -672,64 +529,6 @@
 
 
                     </div>
-
-                    <div class="b-aside__impo">
-                        <div class="b-aside__impo-element">
-                            <div class="b-aside__impo-title">
-                                <div class="cufon-mp font-head font-get-started ir">с чего начать</div>
-                            </div>
-                            <a href="index.html?&amp;b=42" class="b-aside__impo-link">Помощь будущему герою…</a>
-                        </div>
-
-                    </div>
-
-
-                    <div class="b-aside__discuss">
-                        <div class="b-shape__header">
-                            <div class="b-shape__decor"></div>
-                            <div class="cufon-mp ir font-head">горячое с форума</div>
-                        </div>
-                        <div class="b-shape__content">
-
-                            <a href="forum.php?c=1&amp;t=293" target="_blank" class="b-discuss__element">
-                                <span class="b-discuss__title">Изменения за июнь 2025</span>
-                                <span class="b-discuss__desc">28 июня 2025 01:45</span>
-
-
-                            </a>
-
-
-                            <a href="forum.php?c=35&amp;t=279" target="_blank" class="b-discuss__element">
-                                <span class="b-discuss__title">Важные фиксы/дополнения контента д...</span>
-                                <span class="b-discuss__desc">22 июня 2025 14:00</span>
-
-
-                            </a>
-
-
-                            <a href="forum.php?c=6&amp;t=8" target="_blank" class="b-discuss__element">
-                                <span class="b-discuss__title">День рождения</span>
-                                <span class="b-discuss__desc">20 июня 2025 20:18</span>
-
-
-                            </a>
-
-
-                            <a href="forum.php?c=6&amp;t=8" target="_blank" class="b-discuss__element">
-                                <span class="b-discuss__title">День рождения</span>
-                                <span class="b-discuss__desc">20 июня 2025 20:15</span>
-
-
-                            </a>
-
-
-                            <a href="forum.php?c=6&amp;t=8" target="_blank" class="b-discuss__element">
-                                <span class="b-discuss__title">День рождения</span>
-                                <span class="b-discuss__desc">20 июня 2025 20:09</span>
-                            </a>
-                        </div>
-                    </div>
-
 
                     <div class="b-aside__support">
                         <div class="b-aside__support-content">
@@ -882,7 +681,6 @@
                                             </h2>
                                         </div>
                                     </div>
-                                    <script data-cfasync="false" src="{{ asset('main/js/cloudflare-static/email-decode.min.js') }}"></script>
                                     <script>
                                         function block_openhide(obj) {
                                             var fn = $('#add_fast_news');
@@ -1378,25 +1176,6 @@
 
                     <a class="b-link b-link--default" href="#">Все новости </a>
                 </div>
-                <div class="b-game-about">
-
-
-                    <div class="b-game-about__content">
-                        <div class="b-game-about__title">New Online Game – браузерна MMORPG</div>
-                        <p>
-                            The standard Lorem Ipsum passage, used since the 1500s
-                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                        </p>
-                        <p>
-                            Section 1.10.32 of "de Finibus Bonorum et Malorum", written by Cicero in 45 BC
-                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?"
-                        </p>
-                        <p>
-                            1914 translation by H. Rackham
-                            "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?"
-                        </p>
-                    </div>
-                </div>
             </div>
 
             <footer class="b-footer">
@@ -1411,98 +1190,6 @@
             <div class="b-aside b-aside--right" style=" top: -110px; ">
 
 
-                <!--                <div class="b-aside__shape b-shape&#45;&#45;try-fight">-->
-                <!--                    <div class="b-shape__header">-->
-                <!--                        <div class="b-shape__decor"></div>-->
-                <!--                        <div class="cufon-mp font-head ir">Форма входу</div>-->
-                <!--                    </div>-->
-                <!--                    <div class="b-shape__content">-->
-                <!--                        <div class="">-->
-
-                <!--                            <div style="position: relative;top: -51px;left: -7px;">-->
-                <!--                                <div class="flex-popap">-->
-                <!--                                    <div class="popap">-->
-                <!--                                        <div id="ifAuthDiv" class="pop-reg">-->
-                <!--                                            <div id="mainContent">-->
-                <!--                                                <div class="pop-block ">-->
-                <!--                                                    <div id="popup" class="popup" style="display: none;">-->
-                <!--                                                        <div class="popup-title nonselectable"></div>-->
-                <!--                                                        <div class="popup-text"></div>-->
-                <!--                                                        <span class="btn fixed okButton">-->
-                <!--                                                            <span class="btn-link fixed yellow">ок</span>-->
-                <!--                                                        </span>-->
-                <!--                                                    </div>-->
-
-                <!--                                                    <div class="pop-content">-->
-
-                <!--                                                        <div class="pop-overlay" style="display: none;"></div>-->
-                <!--                                                        <div id="loading" class="pop-loader"-->
-                <!--                                                             style="display: none;"></div>-->
-                <!--                                                        <div id="viewContent">-->
-
-                <!--                                                            <form style="opacity: 1;"-->
-                <!--                                                                  action="https://dwar.ltd/login.php" name="enter"-->
-                <!--                                                                  method="post">-->
-                <!--                                                                <div class="form-wrapper">-->
-                <!--                                                                    <fieldset class="p-v-20">-->
-
-                <!--                                                                    </fieldset>-->
-                <!--                                                                    <fieldset class="lt pt-10">-->
-
-                <!--                                                                        <div class="input-block">-->
-                <!--                                                                            <div style="display: none;"-->
-                <!--                                                                                 class="hint hint_top emailHint"-->
-                <!--                                                                                 name="email-hint">-->
-                <!--                                                                                <div class="hint-text">Введіть ваш-->
-                <!--                                                                                    e-mail-->
-                <!--                                                                                </div>-->
-                <!--                                                                            </div>-->
-                <!--                                                                            <input class="form-input" type="text"-->
-                <!--                                                                                   name="email" id="userEmail" value=""-->
-                <!--                                                                                   placeholder="Введіть e-mail">-->
-                <!--                                                                        </div>-->
-
-
-                <!--                                                                    </fieldset>-->
-                <!--                                                                    <fieldset class="lt pt-20 pb-30">-->
-
-                <!--                                                                        <input class="form-input" type="password"-->
-                <!--                                                                               name="passwd" id="userPassword"-->
-                <!--                                                                               maxlength="50"-->
-                <!--                                                                               placeholder="Введіть пароль">-->
-
-                <!--                                                                    </fieldset>-->
-
-                <!--                                                                </div>-->
-
-                <!--                                                                <span style="position: relative;left: 5px;top: -22px;">-->
-                <!--                                                                <button type="submit"><span class="btn big fll quickStartButton">-->
-                <!--                                                                    <span class="btn-link yellow"><span class="title">Увійти в гру</span></span>-->
-                <!--                                                                </span></button>-->
-                <!--                                                                <span onclick="window.open('https://dwar.ltd/register.php')" class="btn big flr createAccountButton"-->
-                <!--                                                                      style="position: relative;left: -13px;">-->
-                <!--                                                                    <span class="btn-link yellow"><span class="title">Створити акаунт</span></span>-->
-                <!--                                                                </span>-->
-                <!--                                                                </span>-->
-
-
-                <!--                                                                <input type="submit"-->
-                <!--                                                                       style="width: 0px; height: 0px; visibility: hidden;">-->
-                <!--                                                            </form>-->
-                <!--                                                        </div>-->
-
-                <!--                                                    </div>-->
-                <!--                                                </div>-->
-                <!--                                            </div>-->
-                <!--                                        </div>-->
-                <!--                                    </div>-->
-                <!--                                </div>-->
-                <!--                            </div>-->
-
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                </div>-->
-
 
                 <div class="b-aside__column">
 
@@ -1510,16 +1197,7 @@
                         <div class="b-shape b-aside__shape" id="ratings">
                             <div class="b-shape__header">
                                 <div class="b-shape__decor"></div>
-                                <div class="cufon-mp ir font-head font-top-clans1">
-                                    <cufon class="cufon cufon-canvas" alt="Топ " style="width: 72px; height: 18px;">
-                                        <canvas width="86" height="22" style="width: 86px; height: 22px; top: -3px; left: -1px;"></canvas>
-                                        <cufontext>Топ</cufontext>
-                                    </cufon>
-                                    <cufon class="cufon cufon-canvas" alt="игроки" style="width: 57px; height: 18px;">
-                                        <canvas width="62" height="22" style="width: 62px; height: 22px; top: -3px; left: -1px;"></canvas>
-                                        <cufontext>игроки</cufontext>
-                                    </cufon>
-                                </div>
+                                <div class="cufon-mp ir font-head font-top-clans1">Топ игроки</div>
                             </div>
                             <div class="b-rate">
 
@@ -1605,16 +1283,7 @@
                         <div class="b-shape b-aside__shape" id="ratings2">
                             <div class="b-shape__header">
                                 <div class="b-shape__decor"></div>
-                                <div class="cufon-mp ir font-head font-top-clans">
-                                    <cufon class="cufon cufon-canvas" alt="Топ " style="width: 72px; height: 18px;">
-                                        <canvas width="86" height="22" style="width: 86px; height: 22px; top: -3px; left: -1px;"></canvas>
-                                        <cufontext>Топ</cufontext>
-                                    </cufon>
-                                    <cufon class="cufon cufon-canvas" alt="кланiв" style="width: 57px; height: 18px;">
-                                        <canvas width="62" height="22" style="width: 62px; height: 22px; top: -3px; left: -1px;"></canvas>
-                                        <cufontext>кланов</cufontext>
-                                    </cufon>
-                                </div>
+                                <div class="cufon-mp ir font-head font-top-clans">Топ кланов</div>
                             </div>
                             <div class="b-rate">
 
@@ -1696,32 +1365,6 @@
                     </div>
 
 
-                    <!--                    <div class="b-shape__header">-->
-                    <!--                        <div class="b-shape__decor"></div>-->
-                    <!--                        <div class="cufon-mp font-head font-screens ir">Перемоги раси</div>-->
-                    <!--                    </div>-->
-
-                    <!--                    <div class="b-great-battles" style="position: relative;top: -6px;left: -2px;">-->
-                    <!--						<span class="b-great-battles__frame">-->
-                    <!--							<span class="b-great-battles__frame-inner"></span>-->
-                    <!--						</span>-->
-                    <!--                        <span class="b-great-battles__human-ico"></span>-->
-                    <!--                        <span class="b-great-battles__magmar-ico"></span>-->
-                    <!--                        <div class="b-great-battles__ratings clearfix">-->
-                    <!--                            <div class="b-great-battles__ratings-l" style="width: 45%;">-->
-                    <!--                                &lt;!&ndash; Играть с этими параметрами &ndash;&gt;-->
-                    <!--                                <span class="b-great-battles__arrow"></span>-->
-                    <!--                            </div>-->
-                    <!--                            <div class="b-great-battles__ratings-r"></div>-->
-                    <!--                        </div>-->
-                    <!--                        <span class="b-great-battles__rating b-great-battles__rating_human">-->
-                    <!--							<span class="b-great-battles__rating-inner">64126</span>-->
-                    <!--						</span>-->
-                    <!--                        <span class="b-great-battles__rating b-great-battles__rating_magmar">-->
-                    <!--							<span class="b-great-battles__rating-inner">76605</span>-->
-                    <!--						</span>-->
-                    <!--                    </div>-->
-
                     <div class="b-shape__header">
                         <div class="b-shape__decor"></div>
                         <div class="cufon-mp font-head font-screens ir">Прием платежей</div>
@@ -1741,37 +1384,6 @@
     </div>
 </div>
 
-<br>
-<style>
-    .telegram-link.telegram-icon--visible {
-        display: block;
-    }
-
-    .telegram-link {
-        background: transparent url({{ asset('main/images/news/telegram.svg') }}) center no-repeat;
-        position: fixed;
-        background-size: contain;
-        bottom: 35px;
-        right: 40px;
-        z-index: 2147483603;
-        width: 58px;
-        height: 58px;
-        cursor: pointer;
-        -webkit-animation: shake 6s infinite alternate;
-        animation: shake 6s infinite alternate;
-        display: none;
-    }
-</style>
-<a href="#" target="_blank" rel="noopener" title="messenger" class="telegram-link telegram-icon--visible"></a>
-<center><h2>Оффициальный сервер</h2></center>
-
-
-{{--<noindex>--}}
-{{--    <center>--}}
-{{--        <a href="https://rpgtop.su/27069" title="Рейтинг RPG" target="_blank">--}}
-{{--            <img src="news/2024/top8015_2.gif" alt="Рейтинг RPG" border="0" width="80" height="15"></a>--}}
-{{--    </center>--}}
-{{--</noindex>--}}
 
 </body>
 </html>

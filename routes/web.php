@@ -18,12 +18,13 @@ Route::get('/map', [HomeController::class, 'map'])->name('map');
 Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
 Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
-Route::get('/login/{id}', [HomeController::class, 'login'])->name('login');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::post('/register/check', [RegisterController::class, 'registerCheck'])->name('register.check');
+
+Route::get('/login/{id}', [HomeController::class, 'login'])->name('login.as');
 
 // // ======== Ручная настройка верификации ======== //
 //
