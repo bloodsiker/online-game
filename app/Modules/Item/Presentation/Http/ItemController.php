@@ -84,6 +84,8 @@ class ItemController extends Controller
 
         if ($result->message !== '') {
             session()->flash('message', $result->message);
+        } else {
+            session()->flash('equip_changed', true);
         }
         if ($result->hotbarRefresh) {
             session()->flash('hotbar_refresh', true);
@@ -98,6 +100,7 @@ class ItemController extends Controller
         $user = Auth::user();
         $result = $this->unequipItem->execute($user, $id);
 
+        session()->flash('equip_changed', true);
         if ($result->hotbarRefresh) {
             session()->flash('hotbar_refresh', true);
         }

@@ -19,7 +19,19 @@ class BackpackController extends Controller
         private readonly UpdateOrder $updateOrder,
     ) {}
 
-    public function index(Request $request): View
+    public function index(): View
+    {
+        return view('backpack::index');
+    }
+
+    public function equip(): View
+    {
+        return view('backpack::equip', [
+            'playerEquip' => Auth::user()->player->playerEquip,
+        ]);
+    }
+
+    public function bag(Request $request): View
     {
         $filters = [
             'sid' => $request->get('sid'),
@@ -28,7 +40,7 @@ class BackpackController extends Controller
 
         $viewData = $this->getBackpack->execute(Auth::user(), $filters);
 
-        return view('backpack::index', $viewData);
+        return view('backpack::bag', $viewData);
     }
 
     public function updateOrder(Request $request): JsonResponse

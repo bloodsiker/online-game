@@ -383,24 +383,48 @@
 .effects-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px;
+    gap: 4px;
 }
 
+/* Пергаментный жетон с резной рамкой в стиле игровых панелей */
 .effect-item {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    padding: 2px 6px 2px 5px;
-    border-radius: 10px;
-    background: rgba(42, 110, 26, 0.15);
-    border: 1px solid rgba(42, 110, 26, 0.35);
+    gap: 4px;
+    padding: 3px 7px 6px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #fdf3dd 0%, #f3dfbb 55%, #e9cfa4 100%);
+    border: 1px solid #a97949;
+    box-shadow:
+        inset 0 0 0 1px #fff3d8,
+        inset 0 -6px 8px -6px rgba(106, 58, 12, 0.45),
+        0 1px 2px rgba(60, 30, 0, 0.35);
     animation: effectAppear 0.2s ease-out;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .curses .effect-item {
-    background: rgba(140, 20, 20, 0.15);
-    border-color: rgba(140, 20, 20, 0.35);
+    border-color: #9c4a34;
+    background: linear-gradient(180deg, #fbeadb 0%, #f1d4b6 55%, #e6bf9c 100%);
+}
+
+/* Самоцвет-индикатор: зелёный у благословений, рубиновый у проклятий */
+.effect-item::before {
+    content: '';
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid rgba(70, 35, 5, 0.55);
+    background: radial-gradient(circle at 30% 30%, #c6f89c, #3f8f1d 60%, #1d5407);
+    box-shadow: 0 0 3px rgba(63, 143, 29, 0.9);
+}
+
+.curses .effect-item::before {
+    background: radial-gradient(circle at 30% 30%, #ffb1a0, #b52a17 60%, #5f0f04);
+    box-shadow: 0 0 3px rgba(181, 42, 23, 0.9);
 }
 
 .effect-item.removing {
@@ -419,7 +443,8 @@
 .effect-name {
     font-size: 10px;
     font-weight: bold;
-    color: #2a5c10;
+    color: #5c3312;
+    text-shadow: 0 1px 0 rgba(255, 244, 214, 0.8);
 }
 
 .curses .effect-name {
@@ -429,7 +454,8 @@
 .effect-timer {
     font-size: 9px;
     font-weight: bold;
-    color: #888;
+    color: #8a5a2a;
+    text-shadow: 0 1px 0 rgba(255, 244, 214, 0.8);
 }
 
 .effect-timer.warning {
@@ -440,6 +466,31 @@
 @keyframes timerPulse {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.5; }
+}
+
+/* Полоска остатка длительности по нижней кромке жетона */
+.effect-bar {
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: 1px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: rgba(90, 50, 10, 0.25);
+    box-shadow: inset 0 1px 1px rgba(60, 30, 0, 0.35);
+    overflow: hidden;
+}
+
+.effect-bar-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(180deg, #9ed86e 0%, #4f9e28 45%, #2f7212 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    transition: width 0.25s linear;
+}
+
+.curses .effect-bar-fill {
+    background: linear-gradient(180deg, #ef8a6d 0%, #c23a20 45%, #8c1d09 100%);
 }
 
 /*******  END EFFECTS*******/

@@ -390,13 +390,18 @@
         const div = document.createElement('div');
         div.className = 'effect-item';
         div.dataset.effectId = effect.id;
+        div.title = effect.name;
 
         const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
         const timerHtml = remaining > 0
             ? `<span class="effect-timer${remaining <= 10 ? ' warning' : ''}" data-timer-id="${effect.id}">${formatEffectTime(remaining)}</span>`
             : '';
+        const percent = effect.duration > 0 ? Math.min(100, (effect.endTime - Date.now()) / effect.duration * 100) : 0;
+        const barHtml = remaining > 0
+            ? `<span class="effect-bar"><span class="effect-bar-fill" data-bar-id="${effect.id}" style="width: ${percent}%"></span></span>`
+            : '';
 
-        div.innerHTML = `<span class="effect-name">${effect.name}</span>${timerHtml}`;
+        div.innerHTML = `<span class="effect-name">${effect.name}</span>${timerHtml}${barHtml}`;
 
         return div;
     }
@@ -416,6 +421,11 @@
 
             timerElement.textContent = formatEffectTime(remaining);
             remaining <= 10 ? timerElement.classList.add('warning') : timerElement.classList.remove('warning');
+
+            const barElement = document.querySelector(`[data-bar-id="${id}"]`);
+            if (barElement && effect.duration > 0) {
+                barElement.style.width = Math.max(0, (effect.endTime - Date.now()) / effect.duration * 100) + '%';
+            }
 
             if (remaining <= 0) {
                 removeEffect(id, type);
