@@ -30,7 +30,15 @@
         .tbl-main_separator-v { background-image: url({{ asset('img/bg/separator_v.gif') }}); background-repeat: repeat-y; width: 3px; }
         .lvl { font-size: 11px; color: #5c4030; }
         .claims { font-size: 10px; color: #7a5c3e; }
-        .empty { padding: 6px; color: #7a6050; }
+        .redd { color: #BA0000; font-weight: bold; }
+
+        /* Кнопка чата, как на проде: левая кромка | центр | правая кромка */
+        .cht-btn { background: url({{ asset('img/bg/chat/cht-btn-center.png') }}) right top repeat-x; font-size: 11px; }
+        .cht-btn-left { background: url({{ asset('data/img/cht-btn-left.png') }}) left top no-repeat; }
+        .cht-btn-right { background: url({{ asset('img/bg/chat/cht-btn-right.png') }}) right top no-repeat; }
+        .cht-btn-parent { display: inline-block; margin: 0; color: #5b4736 !important; cursor: pointer; font-weight: bold; text-decoration: none; }
+        .cht-btn-parent .cht-btn-right { display: inline-block; }
+        .cht-btn-parent .cht-btn { display: inline-block; margin: 0 13px; padding: 8px 5px 9px; }
     </style>
 </head>
 <body>
@@ -38,10 +46,7 @@
     <tbody>
     <tr class="lgb" width="100%" height="100%" style="vertical-align: top">
         <td width="1%" class="lgb-left" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
-        <td>
-            <center><b style="color:green">Приглашённых: {{ count($frame->referrals) }}</b></center>
-            <br>
-
+        <td valign="top" style="padding: 4px 4px 22px;">
             @forelse($frame->referrals as $referral)
                 <div class="info">
                     <a href="{{ route('info.user', ['id' => $referral->userId]) }}" target="_blank"
@@ -52,8 +57,14 @@
                     @endif
                 </div>
             @empty
-                <div class="empty">Вы ещё никого не пригласили</div>
+                <br><br>
+                <div align="center"><b class="redd">У Вас нет рефералов.</b></div>
             @endforelse
+
+            <br>
+            <div align="center">
+                <a href="#" class="cht-btn-parent cht-btn-left" onclick="openReferralPage(); return false;"><span class="cht-btn-right"><span class="cht-btn">Информация</span></span></a>
+            </div>
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
     </tr>
@@ -67,5 +78,16 @@
     </tr>
     </tbody>
 </table>
+<script>
+    // Открыть полную страницу рефералов в игровом фрейме
+    function openReferralPage() {
+        try {
+            window.top.toggleMap(false);
+            window.top.toLocation('{{ route('referral') }}', true);
+        } catch (e) {
+            console.error('[referrals] error:', e);
+        }
+    }
+</script>
 </body>
 </html>

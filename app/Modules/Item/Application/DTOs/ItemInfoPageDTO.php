@@ -6,18 +6,24 @@ namespace App\Modules\Item\Application\DTOs;
 
 final readonly class ItemInfoPageDTO
 {
+    /**
+     * @param  list<array{title: string, value: string}>  $stats
+     * @param  list<array{label: string, value: int}>  $requirements
+     */
     public function __construct(
         public int $itemId,
         public int $shareItemId,
         public string $name,
+        public string $color,
         public ?string $image,
-        public ?int $minAttack,
-        public ?int $maxAttack,
-        public bool $isHandSlot,
-        public bool $isTwoHand,
-        public ?string $skillName,
-        public ?int $skillLevel,
         public string $typeName,
+        public int $price,
+        public ?string $description,
+        public bool $noGive,
+        public bool $noWeight,
+        public bool $noSell,
+        public array $stats,
+        public array $requirements,
         public string $handOverUrl,
         public string $dropUrl,
         public string $sameItemsUrl,

@@ -3,7 +3,7 @@
 use App\Modules\Item\Presentation\Http\ItemController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/items/info/{id}', [ItemController::class, 'info'])->name('items.info');
+Route::get('/item/info/{id}', [ItemController::class, 'info'])->name('items.info');
 Route::get('/items/put-on/{id}', [ItemController::class, 'putOn'])->name('items.put_on');
 Route::get('/items/put-off/{id}', [ItemController::class, 'putOff'])->name('items.put_off');
 Route::get('/items/pickup/{id}', [ItemController::class, 'pickUp'])->name('items.pick_up');

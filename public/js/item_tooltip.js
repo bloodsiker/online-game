@@ -463,14 +463,9 @@ function showArtifactInfo(artifact_id, artikul_id, set_id, evnt, user_store) {
         chat_add_macros('artikul_'+artikul_id);
         return;
     }
-    var url = "/artifact_info.php";
-    if (artifact_id) url += "?artifact_id=" + artifact_id;
-    else if (artikul_id) url += "?artikul_id=" + artikul_id;
-    else if (set_id) url += "?set_id=" + set_id;
+    var url;
+    if (artifact_id) url = "/item/info/" + artifact_id;
     else return;
-    if (user_store) {
-        url += '&user_store=1';
-    }
     window.open(url, "", "width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no");
 }
 

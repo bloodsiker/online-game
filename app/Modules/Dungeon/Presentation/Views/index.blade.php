@@ -2,200 +2,37 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Данжи</title>
+    <title>Подземелья</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body {
-            min-height: 100%;
+            height: 100%;
             margin: 0;
-            color: #2f1f0b;
+            color: #955c4a;
             font-family: Tahoma, Arial, sans-serif;
             font-size: 11px;
+            background: url({{ asset('img/bg/bgg.gif') }});
         }
 
         a, a:link, a:visited, a:active { color: #5a1f00; text-decoration: none; }
         a:hover { color: #8b2f00; text-decoration: underline; }
-        table.coll { border-collapse: collapse; border-spacing: 0; }
 
-        .brd2-all { border: 1px solid #db9f73; }
-        .brd2-top { border-top: 1px solid #db9f73; }
-        .brd2, .brd2 td { border: 1px solid #db9f73; }
-        .w100 { width: 100%; }
-        .p10h, .p10h td { padding-left: 10px; padding-right: 10px; }
-        .p6h, .p6h td { padding-left: 6px; padding-right: 6px; }
-        .p2v, .p2v td { padding-top: 2px; padding-bottom: 2px; }
-        .p4v, .p4v td { padding-top: 4px; padding-bottom: 4px; }
-        .bg_l { background-image: url(/img/bg/bg_l.gif); }
-
-        .dng-page {
-            padding: 8px;
-            box-sizing: border-box;
+        /* Вертикальные отступы ячеек, как p4v на проде */
+        .p4v, .p4v td {
+            padding-top: 4px;
+            padding-bottom: 4px;
         }
 
-        .dng-shell {
-            max-width: 980px;
-            margin: 0 auto;
-            border: 1px solid #b77a32;
-            background: #f4dc9b;
-            box-shadow:
-                inset 0 0 0 1px rgba(255, 255, 238, .75),
-                0 2px 0 rgba(112, 73, 21, .3);
-        }
+        .black, .black * { color: #2f1f0b; }
+        .grn { color: #1e7a00; }
 
-        .dng-hero {
-            padding: 10px 12px;
-            border-bottom: 1px solid #b77a32;
-            background: #e8bd67;
-        }
+        .dng-page { padding: 8px 10px; }
 
-        .dng-title {
-            margin: 0;
-            color: #3f2608;
-            font-size: 16px;
-            line-height: 1.2;
-            text-shadow: 0 1px 0 rgba(255, 242, 194, .8);
-        }
-
-        .dng-subtitle {
-            margin-top: 4px;
-            color: #67431a;
-            line-height: 1.35;
-        }
-
-        .dng-content {
-            padding: 8px;
-        }
-
-        .dng-panel {
-            margin-bottom: 8px;
-            border: 1px solid #b9853b;
-            background: #f8e6ad;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 238, .65);
-        }
-
-        .dng-panel-title {
-            padding: 6px 9px;
-            color: #3e2508;
-            font-size: 12px;
-            font-weight: bold;
-            border-bottom: 1px solid #b9853b;
-            background: #e5b865;
-            text-shadow: 0 1px 0 rgba(255, 242, 194, .75);
-        }
-
-        .dng-panel-body {
-            padding: 8px;
-        }
-
-        .dng-alert {
-            margin-bottom: 8px;
-            padding: 6px 8px;
-            border: 1px solid #8fb36a;
-            background: #eef8d6;
-            color: #2f5a19;
-            font-weight: bold;
-        }
-
-        .dng-error {
-            margin-bottom: 8px;
-            padding: 6px 8px;
-            border: 1px solid #c56f5f;
-            background: #ffe1d6;
-            color: #8a1f0c;
-            font-weight: bold;
-        }
-
-        .active-run-banner {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding: 7px 8px;
-            border: 1px solid #c29343;
-            background: #fff2bf;
-        }
-
-        .active-run-main {
-            min-width: 0;
-            line-height: 1.35;
-        }
-
-        .active-run-name {
-            color: #4a2b08;
-            font-weight: bold;
-        }
-
-        .dng-actions {
-            display: inline-flex;
-            gap: 5px;
-            align-items: center;
-            white-space: nowrap;
-        }
-
-        .dng-btn {
-            display: inline-block;
-            min-height: 23px;
-            padding: 4px 9px;
-            color: #2f1b07 !important;
-            font-family: Tahoma, Arial, sans-serif;
-            font-size: 11px;
-            font-weight: bold;
-            line-height: 14px;
-            text-align: center;
-            text-decoration: none !important;
-            border: 1px solid #8c5f22;
-            background: #f1c36a;
-            box-shadow: inset 0 1px 0 rgba(255, 252, 213, .55);
-            cursor: pointer;
-            box-sizing: border-box;
-        }
-
-        .dng-btn:hover {
-            background: #ffd87e;
-            color: #1f1003 !important;
-        }
-
-        .dng-btn-danger {
-            color: #fff3dc !important;
-            border-color: #7f241a;
-            background: #a74735;
-        }
-
-        .dng-btn-danger:hover {
-            background: #c05b46;
-            color: #fff8e8 !important;
-        }
-
-        .dng-btn-enter {
-            border-color: #477b28;
-            background: #9fc866;
-        }
-
-        .dng-btn-enter:hover { background: #b8da7a; }
-
-        .dng-badge {
-            display: inline-block;
-            min-width: 42px;
-            padding: 2px 6px;
-            color: #3e2508;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid #a86f2d;
-            background: #f1c36a;
-            box-shadow: inset 0 1px 0 rgba(255, 252, 213, .55);
-        }
+        .dng-window { margin-bottom: 10px; }
 
         .dng-name {
             color: #471f00;
-            font-weight: bold;
             font-size: 12px;
-        }
-
-        .dng-muted {
-            color: #735a35;
-            line-height: 1.35;
         }
 
         .dng-desc {
@@ -204,187 +41,210 @@
             line-height: 1.35;
         }
 
-        .dng-meta {
-            color: #5f431d;
-            white-space: nowrap;
+        .dng-muted { color: #857767; }
+
+        .dng-msg {
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: bold;
         }
 
         .dng-empty {
-            padding: 12px 10px;
-            color: #806c4c;
+            padding: 10px;
             text-align: center;
-        }
-
-        .dng-table-row:hover td {
-            background: #fff4c8;
-        }
-
-        @media (max-width: 760px) {
-            .active-run-banner {
-                display: block;
-            }
-
-            .dng-actions {
-                display: flex;
-                margin-top: 6px;
-            }
-
-            .dng-actions .dng-btn,
-            .dng-actions form {
-                flex: 1;
-            }
-
-            .dng-actions form .dng-btn {
-                width: 100%;
-            }
+            color: #857767;
         }
     </style>
 </head>
 <body>
+
 <div class="dng-page">
-    <div class="dng-shell">
-        <div class="dng-hero">
-            <h1 class="dng-title">Данжи</h1>
-            <div class="dng-subtitle">Выберите подземелье, проверьте требования и войдите в испытание.</div>
-        </div>
 
-        <div class="dng-content">
-            @if (session('info'))
-                <div class="dng-alert">{{ session('info') }}</div>
-            @endif
+    @if (session('info'))
+        <div class="dng-msg grn">{{ session('info') }}</div>
+    @endif
 
-            @if ($errors->has('dungeon'))
-                <div class="dng-error">{{ $errors->first('dungeon') }}</div>
-            @endif
+    @if ($errors->has('dungeon'))
+        <div class="dng-msg redd">{{ $errors->first('dungeon') }}</div>
+    @endif
 
-            @if ($page->activeSession)
-                <div class="active-run-banner">
-                    <div class="active-run-main">
-                        <span class="active-run-name">Вы в данже:</span> {{ $page->activeSession->dungeonName }}
-                        @if ($page->activeSession->expiresAtTimestamp)
-                            <span class="dng-muted">- осталось <b id="dungeon-timer"></b></span>
-                            <script>
-                                (function() {
-                                    const exp = {{ $page->activeSession->expiresAtTimestamp }};
-                                    function tick() {
-                                        const el = document.getElementById('dungeon-timer');
-                                        if (!el) {
-                                            return;
-                                        }
+    {{-- ======== ТЕКУЩИЙ ПОХОД ======== --}}
+    @if ($page->activeSession)
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="dng-window">
+            <tbody>
+            <tr height="22">
+                <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+                <td class="tbl-shp-sml tt" valign="top" align="center">
+                    <table border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                        <tr height="22">
+                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                            <td align="center" class="tbl-usi-hdr mbg">Текущий поход</td>
+                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
+            </tr>
+            <tr>
+                <td class="tbl-shp-sides ls">&nbsp;</td>
+                <td class="tbl-usi_bg" valign="top" style="padding: 10px 10px 12px;">
+                    <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                        <tr class="bg_l">
+                            <td class="b" width="30%" align="right" nowrap>Вы в подземелье:</td>
+                            <td class="b black">{{ $page->activeSession->dungeonName }}</td>
+                            <td width="240" rowspan="2" align="center">
+                                @if ($page->activeSession->canReenter)
+                                    <form method="POST" action="{{ route('dungeon.enter', $page->activeSession->dungeonId) }}" style="display:inline; margin:0;">
+                                        @csrf
+                                        <b class="butt1 pointer"><b><input value="Вернуться" type="submit" style="width: 100px;" class="redd"></b></b>
+                                    </form>
+                                @else
+                                    <b class="butt1 pointer"><b><input value="В данж" type="button" onclick="location.href='{{ route('location') }}'" style="width: 100px;" class="redd"></b></b>
+                                @endif
+                                <form method="POST" action="{{ route('dungeon.exit') }}" style="display:inline; margin:0;">
+                                    @csrf
+                                    <b class="butt1 pointer"><b><input value="Покинуть" type="submit" style="width: 100px;"></b></b>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr class="brd2-top">
+                            <td class="b" align="right" nowrap>Осталось времени:</td>
+                            <td class="b redd">
+                                @if ($page->activeSession->expiresAtTimestamp)
+                                    <span id="dungeon-timer">--:--</span>
+                                @else
+                                    без ограничения
+                                @endif
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td class="tbl-shp-sides rs">&nbsp;</td>
+            </tr>
+            <tr height="18">
+                <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+                <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+                <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+            </tr>
+            </tbody>
+        </table>
 
-                                        const left = exp - Math.floor(Date.now() / 1000);
-                                        if (left <= 0) {
-                                            el.textContent = '00:00';
-                                            return;
-                                        }
+        @if ($page->activeSession->expiresAtTimestamp)
+            <script>
+                (function () {
+                    var exp = {{ $page->activeSession->expiresAtTimestamp }};
+                    function tick() {
+                        var el = document.getElementById('dungeon-timer');
+                        if (!el) return;
 
-                                        const m = String(Math.floor(left / 60)).padStart(2, '0');
-                                        const s = String(left % 60).padStart(2, '0');
-                                        el.textContent = m + ':' + s;
-                                    }
-                                    tick();
-                                    setInterval(tick, 1000);
-                                })();
-                            </script>
-                        @endif
-                    </div>
+                        var left = exp - Math.floor(Date.now() / 1000);
+                        if (left <= 0) {
+                            el.textContent = '00:00';
+                            return;
+                        }
 
-                    <div class="dng-actions">
-                        @if ($page->activeSession->canReenter)
-                            <form method="POST" action="{{ route('dungeon.enter', $page->activeSession->dungeonId) }}" style="display:inline;">
-                                @csrf
-                                <button class="dng-btn dng-btn-enter">Вернуться в данж</button>
-                            </form>
-                        @else
-                            <a href="{{ route('location') }}" class="dng-btn">В данж</a>
-                        @endif
-                        <form method="POST" action="{{ route('dungeon.exit') }}" style="display:inline;">
-                            @csrf
-                            <button class="dng-btn dng-btn-danger">Покинуть</button>
-                        </form>
-                    </div>
-                </div>
-            @endif
+                        var m = String(Math.floor(left / 60)).padStart(2, '0');
+                        var s = String(left % 60).padStart(2, '0');
+                        el.textContent = m + ':' + s;
+                    }
+                    tick();
+                    setInterval(tick, 1000);
+                })();
+            </script>
+        @endif
+    @endif
 
-            <div class="dng-panel">
-                <div class="dng-panel-title">Доступные данжи</div>
-                <div class="dng-panel-body">
-                    @if ($page->dungeons === [])
-                        <div class="dng-empty">Нет доступных данжей.</div>
-                    @else
-                        <table class="coll w100 p10h p4v brd2" border="0" width="100%" style="margin-top:4px;margin-bottom:4px">
-                            <colgroup>
-                                <col width="70">
-                                <col>
-                                <col width="120">
-                                <col width="160">
-                                <col width="115">
-                            </colgroup>
-                            <tbody>
-                            <tr>
-                                <td class="b" align="center" title="Сложность подземелья">Тир</td>
-                                <td class="b" align="center" title="Название и описание данжа">Название</td>
-                                <td class="b" align="center" title="Требования к игроку или группе">Требования</td>
-                                <td class="b" align="center" title="Кулдаун, таймер, ключ, точка входа и смерть">Условия</td>
-                                <td class="b" align="center" title="Доступные действия">Действия</td>
+    {{-- ======== ДОСТУПНЫЕ ПОДЗЕМЕЛЬЯ ======== --}}
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="dng-window">
+        <tbody>
+        <tr height="22">
+            <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+            <td class="tbl-shp-sml tt" valign="top" align="center">
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Доступные подземелья</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+            <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
+        </tr>
+        <tr>
+            <td class="tbl-shp-sides ls">&nbsp;</td>
+            <td class="tbl-usi_bg" valign="top" style="padding: 10px 10px 12px;">
+                @if ($page->dungeons === [])
+                    <div class="dng-empty">Нет доступных подземелий.</div>
+                @else
+                    <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                        <tr>
+                            <td class="b" width="50" align="center">Тир</td>
+                            <td class="b">Название</td>
+                            <td class="b" width="110" align="center">Требования</td>
+                            <td class="b" width="170" align="center">Условия</td>
+                            <td class="b" width="130" align="center">Действия</td>
+                        </tr>
+                        @foreach ($page->dungeons as $dungeon)
+                            <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
+                                <td class="brd2-top brd2-bt b redd" align="center">{{ $dungeon->tier }}</td>
+                                <td class="brd2-top brd2-bt">
+                                    <a href="{{ route('dungeon.show', $dungeon->id) }}" class="dng-name" title="Подробнее о подземелье"><b>{{ $dungeon->name }}</b></a>
+                                    @if ($dungeon->description)
+                                        <div class="dng-desc">{{ $dungeon->description }}</div>
+                                    @endif
+                                </td>
+                                <td class="brd2-top brd2-bt" align="center">
+                                    <div class="b">{{ $dungeon->maxPlayers === 1 ? 'Соло' : 'До ' . $dungeon->maxPlayers . ' игроков' }}</div>
+                                    <div>Мин. уровень: <b class="redd">{{ $dungeon->minLevel }}</b></div>
+                                </td>
+                                <td class="brd2-top brd2-bt" align="center">
+                                    @if ($dungeon->cooldownSeconds > 0)
+                                        <div>Кулдаун: <b>{{ round($dungeon->cooldownSeconds / 3600, 1) }} ч.</b></div>
+                                    @endif
+                                    @if ($dungeon->timeLimitSeconds)
+                                        <div>Таймер: <b>{{ round($dungeon->timeLimitSeconds / 60) }} мин.</b></div>
+                                    @endif
+                                    @if ($dungeon->requiresKey)
+                                        <div>Ключ: <b>{{ $dungeon->entryKeyName ?? '?' }}</b></div>
+                                    @endif
+                                    <div class="dng-muted">Смерть: {{ $dungeon->deathBehaviorLabel }}</div>
+                                    @if (! $dungeon->cooldownSeconds && ! $dungeon->timeLimitSeconds && ! $dungeon->requiresKey)
+                                        <div class="dng-muted">Без особых условий</div>
+                                    @endif
+                                </td>
+                                <td class="brd2-top brd2-bt" align="center">
+                                    @if (! $page->activeSession)
+                                        <form method="POST" action="{{ route('dungeon.enter', $dungeon->id) }}" style="margin:0 0 4px;">
+                                            @csrf
+                                            <b class="butt1 pointer"><b><input value="Войти" type="submit" style="width: 100px;" class="redd"></b></b>
+                                        </form>
+                                    @endif
+                                    <b class="butt1 pointer"><b><input value="Подробнее" type="button" onclick="location.href='{{ route('dungeon.show', $dungeon->id) }}'" style="width: 100px;"></b></b>
+                                </td>
                             </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </td>
+            <td class="tbl-shp-sides rs">&nbsp;</td>
+        </tr>
+        <tr height="18">
+            <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+            <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+            <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+        </tr>
+        </tbody>
+    </table>
 
-                            @foreach ($page->dungeons as $dungeon)
-                                <tr class="dng-table-row {{ $loop->even ? 'bg_l' : '' }}">
-                                    <td align="center" valign="top">
-                                        <span class="dng-badge">Тир {{ $dungeon->tier }}</span>
-                                    </td>
-                                    <td valign="top">
-                                        <div class="dng-name">{{ $dungeon->name }}</div>
-                                        @if ($dungeon->description)
-                                            <div class="dng-desc">{{ $dungeon->description }}</div>
-                                        @else
-                                            <div class="dng-muted">Описание пока не добавлено.</div>
-                                        @endif
-                                    </td>
-                                    <td align="center" valign="top">
-                                        <div class="dng-meta">{{ $dungeon->maxPlayers === 1 ? 'Соло' : 'До ' . $dungeon->maxPlayers }}</div>
-                                        <div class="dng-muted">Мин. ур.: {{ $dungeon->minLevel }}</div>
-                                    </td>
-                                    <td align="center" valign="top">
-                                        @if ($dungeon->cooldownSeconds > 0)
-                                            <div class="dng-meta">КД: {{ round($dungeon->cooldownSeconds / 3600, 1) }} ч.</div>
-                                        @endif
-                                        @if ($dungeon->timeLimitSeconds)
-                                            <div class="dng-meta">Таймер: {{ round($dungeon->timeLimitSeconds / 60) }} мин.</div>
-                                        @endif
-                                        @if ($dungeon->requiresKey)
-                                            <div class="dng-muted">Ключ: {{ $dungeon->entryKeyName ?? '?' }}</div>
-                                        @endif
-                                        @if ($dungeon->entryLocationId)
-                                            <div class="dng-muted">Вход: лок. #{{ $dungeon->entryLocationId }}</div>
-                                        @endif
-                                        <div class="dng-muted">Смерть: {{ $dungeon->deathBehaviorLabel }}</div>
-                                        @if ($dungeon->deathReturnLocationId)
-                                            <div class="dng-muted">Возврат: лок. #{{ $dungeon->deathReturnLocationId }}</div>
-                                        @endif
-                                        @if (! $dungeon->cooldownSeconds && ! $dungeon->timeLimitSeconds && ! $dungeon->requiresKey && ! $dungeon->entryLocationId && ! $dungeon->deathReturnLocationId)
-                                            <div class="dng-muted">Без особых условий</div>
-                                        @endif
-                                    </td>
-                                    <td align="center" valign="top" nowrap="">
-                                        <a href="{{ route('dungeon.show', $dungeon->id) }}" class="dng-btn">Подробнее</a>
-                                        @if (!$page->activeSession)
-                                            <form method="POST" action="{{ route('dungeon.enter', $dungeon->id) }}" style="margin-top:4px;">
-                                                @csrf
-                                                <button class="dng-btn dng-btn-enter" style="width:100%;">Войти</button>
-                                            </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+
 </body>
 </html>

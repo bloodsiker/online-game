@@ -155,7 +155,7 @@
     {!! $playerStatsScript !!}
     {!! $itemTooltipScript !!}
 
-    <script src="{{ asset('js/item_tooltip.js') }}"></script>
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
     <script src="{{ asset('js/lib/Sortable.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 </head>

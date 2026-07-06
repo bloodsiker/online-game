@@ -116,6 +116,9 @@
 
         if (!msg) return;
 
+        // Закрыть панель смайлов и отжать её кнопку
+        try { window.top.hideSmiles(); } catch (e) {}
+
         var btn = gebi('send_btn');
         if (btn) btn.src = '{{ asset('img/bg/chat/send-pressed.gif') }}';
 
@@ -178,7 +181,14 @@
     }
 
     function chatShowSmiles(el) {
-        // Reserved for smileys panel
+        try { window.top.toggleSmiles(); } catch (e) {}
+    }
+
+    // Вернуть кнопку смайлов в отжатое состояние (вызывается и из главного окна)
+    function chatResetSmileBtn() {
+        chatButtonState['smile_btn'] = false;
+        var btn = gebi('smile_btn');
+        if (btn) btn.src = '{{ asset('img/bg/chat/smile-reg.gif') }}';
     }
 
     var channelSlugToCode = { main: 1, location: 2, trade: 8, clan: 4, private: 32 };

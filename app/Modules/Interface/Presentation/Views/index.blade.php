@@ -949,6 +949,146 @@
     <img id="fsc_img" src="{{ asset('data/img/fscreen.png') }}" width="20" height="20" alt="">
 </div>
 
+{{-- Панель смайлов (как smiles.php на проде): живёт в главном окне, чтобы ложиться поверх фреймов --}}
+@php
+    $chatSmiles = \App\Modules\Chat\Domain\Services\MessageRenderer::SMILES;
+    $smilePages = array_chunk($chatSmiles, 40, true);
+@endphp
+<style>
+    #smiles_panel {
+        display: none;
+        position: fixed;
+        right: 8px;
+        bottom: 50px;
+        width: 356px;
+        z-index: 1000;
+        padding: 4px;
+        border: 1px solid #6f4a24;
+        background: url({{ asset('img/bg/bgg.gif') }});
+        box-shadow: 2px 2px 8px rgba(0, 0, 0, .45);
+    }
+    .smiles-page { display: none; height: 220px; overflow: hidden; }
+    .smiles-page.active { display: block; }
+    .smiles-grid { width: 100%; border-collapse: collapse; border-spacing: 0; }
+    .smiles-grid td {
+        width: 40px;
+        height: 40px;
+        padding: 1px;
+        border: 1px solid #C49485;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+    }
+    .smiles-grid td:hover { background-color: #fff; }
+    .smiles-grid td img { max-height: 40px; max-width: 40px; vertical-align: middle; border: 0; }
+    .smiles-pager { margin-top: 4px; }
+    .smiles-pager table { width: 100%; border-collapse: collapse; }
+    .smiles-pager td { color: #8D2616; height: 17px; text-align: center; vertical-align: middle; padding: 0 1px; font-size: 11px; }
+    .smiles-pager .lbl { font-weight: bold; white-space: nowrap; text-align: left; width: 10px; }
+    .pg-num {
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        background: url({{ asset('data/img/pg-inact.gif') }}) no-repeat center center;
+    }
+    .pg-num a { color: #8D2616; font-size: 9px; font-weight: bold; text-decoration: none; }
+    .pg-num.active { background-image: url({{ asset('data/img/pg-act.gif') }}); }
+    .pg-num.active a { color: #FFF3D2; }
+    .pg-arrow { cursor: pointer; vertical-align: middle; }
+</style>
+<div id="smiles_panel">
+    @foreach($smilePages as $p => $pageSmiles)
+        <div class="smiles-page{{ $p === 0 ? ' active' : '' }}" data-page="{{ $p }}">
+            <table class="smiles-grid">
+                @foreach(array_chunk($pageSmiles, 8, true) as $row)
+                    <tr>
+                        @foreach($row as $code => $img)
+                            <td onclick="pickSmile('{{ $code }}')" title="{{ $code }}"><img src="{{ asset('data/smiles/' . $img) }}" alt="{{ $code }}"></td>
+                        @endforeach
+                        @for($i = count($row); $i < 8; $i++)
+                            <td></td>
+                        @endfor
+                    </tr>
+                @endforeach
+            </table>
+        </div>
+    @endforeach
+
+    <div class="smiles-pager">
+        <table>
+            <tbody>
+            <tr>
+                <td class="lbl"><nobr>Страницы:&nbsp;</nobr></td>
+                @foreach($smilePages as $p => $pageSmiles)
+                    <td class="pg-num{{ $p === 0 ? ' active' : '' }}" data-page="{{ $p }}" onclick="smilesPage({{ $p }})"><a href="#" onclick="return false;">{{ $p + 1 }}</a></td>
+                @endforeach
+                <td style="text-align: left;"></td>
+                <td width="1%" nowrap style="text-align: right;">
+                    <img id="smiles-prev" class="pg-arrow" src="{{ asset('data/img/p-left-gray.gif') }}" width="29" height="17" title="Предыдущая" onclick="smilesPageShift(-1)">
+                    <img src="{{ asset('data/img/pg-act.gif') }}" width="17" height="17" style="vertical-align: middle;">
+                    <img id="smiles-next" class="pg-arrow" src="{{ asset('data/img/p-right-red.gif') }}" width="29" height="17" title="Следующая" onclick="smilesPageShift(1)">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var smilesCurrentPage = 0;
+    var smilesPagesTotal = {{ count($smilePages) }};
+
+    function toggleSmiles() {
+        var panel = document.getElementById('smiles_panel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function hideSmiles() {
+        document.getElementById('smiles_panel').style.display = 'none';
+        // отжать кнопку смайлов в нижней панели чата
+        try {
+            var chatFrame = document.getElementById('chat-frame');
+            var bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
+            bottomFrame.contentWindow.chatResetSmileBtn();
+        } catch (e) {}
+    }
+
+    function pickSmile(code) {
+        try {
+            var chatFrame = document.getElementById('chat-frame');
+            var bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
+            bottomFrame.contentWindow.postMessage({ type: 'insertItem', code: code + ' ' }, '*');
+        } catch (e) {}
+    }
+
+    function smilesPage(n) {
+        if (n < 0 || n >= smilesPagesTotal) return;
+        smilesCurrentPage = n;
+        document.querySelectorAll('.smiles-page').forEach(function (p) {
+            p.classList.toggle('active', parseInt(p.dataset.page) === n);
+        });
+        document.querySelectorAll('.pg-num').forEach(function (p) {
+            p.classList.toggle('active', parseInt(p.dataset.page) === n);
+        });
+        document.getElementById('smiles-prev').src = n > 0
+            ? '{{ asset('data/img/p-left-red.gif') }}'
+            : '{{ asset('data/img/p-left-gray.gif') }}';
+        document.getElementById('smiles-next').src = n < smilesPagesTotal - 1
+            ? '{{ asset('data/img/p-right-red.gif') }}'
+            : '{{ asset('data/img/p-right-gray.gif') }}';
+    }
+
+    function smilesPageShift(d) {
+        smilesPage(smilesCurrentPage + d);
+    }
+
+    document.addEventListener('click', function (e) {
+        var panel = document.getElementById('smiles_panel');
+        if (panel.style.display === 'block' && !panel.contains(e.target)) {
+            hideSmiles();
+        }
+    });
+</script>
+
 <div id="logout_confirm_overlay" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 1100;" onclick="hideLogoutConfirm()"></div>
 <div id="logout_confirm" class="popup_global_container" style="display: none; position: fixed; left: 50%; top: 30%; width: 380px; margin-left: -190px; z-index: 1101;">
     <div class="popup-top-left">

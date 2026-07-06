@@ -47,6 +47,14 @@ Route::get('/login/{id}', [HomeController::class, 'login'])->name('login.as');
 
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
 
+// Легаси-адрес прода: старые ссылки и закэшированный JS ведут на artifact_info.php
+Route::get('/artifact_info.php', function (): mixed {
+    $id = (int) request()->query('artifact_id');
+    abort_if($id < 1, 404);
+
+    return redirect()->route('items.info', ['id' => $id]);
+});
+
 Route::middleware(['updateLastOnline'])->group(function () {
     Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
     Route::get('/slots', [SlotController::class, 'index'])->name('slots');

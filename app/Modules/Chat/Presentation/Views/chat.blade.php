@@ -53,7 +53,8 @@
         .msg-time-reply   { cursor: pointer; text-decoration: underline dotted #999; color: #ff0000; }
         .msg-time-reply:hover { opacity: 0.75; }
         .chat-to          { color: #996600; font-weight: bold; }
-        .chat-item        { color: #006699; font-weight: bold; cursor: help; }
+        .chat-item        { color: #006699; font-weight: bold; cursor: pointer; text-decoration: underline; }
+        .chat-item:hover  { text-decoration: underline; }
         .chat-item-unknown{ color: #999; }
         .player-link      { color: #990000; font-weight: bold; }
         .player-link:hover { text-decoration: underline; }

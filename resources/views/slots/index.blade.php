@@ -337,7 +337,7 @@
         }
     </style>
 
-    <script src="{{ asset('js/item_tooltip.js') }}"></script>
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body>
 
