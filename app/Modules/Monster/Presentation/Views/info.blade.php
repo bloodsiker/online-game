@@ -244,7 +244,7 @@
                                 @endif
 
                             </div>
-                            </div></div></div></div></div></div>
+                            </div></div></div></div></div></div></div>
                             <div class="bg-b"></div>
                         </div>
                     </td>
