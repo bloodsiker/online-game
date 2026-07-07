@@ -34,7 +34,7 @@
                         <div class="bp-unit{{ $isTarget ? ' bp-unit-target' : '' }}">
                             <div class="bp-unit-name">
                                 @if($isTarget)<span class="bp-target-arrow">&#9658;</span>@endif
-                                <a href="{{ route('info.monster', ['id' => $details->locationMonster->id]) }}" target="_blank" class="{{ $isTarget ? 'color-red' : '' }}">{{ $details->locationMonster->monster->name }}</a><span class="bp-unit-lvl">{{ $details->locationMonster->monster->lvl }}</span>
+                                <a href="{{ route('info.monster', ['id' => $details->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="{{ $isTarget ? 'color-red' : '' }}">{{ $details->locationMonster->monster->name }}</a><span class="bp-unit-lvl">{{ $details->locationMonster->monster->lvl }}</span>
                             </div>
                             <div class="bp-hp-row">
                                 <div class="bp-hp-bar"><div class="bp-hp-fill {{ $hpClass }}" style="width:{{ $hpPct }}%"></div></div>
@@ -69,7 +69,7 @@
                 @endforeach
 
                 <div class="bp-footer">
-                    <a href="/battle/?bid={{ $battle->id }}" target="_blank">История сражения &raquo;</a>
+                    <a href="#" onclick="window.open('{{ route('fight.log', ['id' => $battle->id]) }}', '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">История сражения &raquo;</a>
                 </div>
 
             </div>

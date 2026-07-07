@@ -50,6 +50,7 @@ Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::cla
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
+Route::post('/monster/{monster}/drop/{item}', [MonsterController::class, 'infoDropUpdate'])->name('monster.info.drop.update');
 Route::get('/monster/{monster}/drop/delete/{item}', [MonsterController::class, 'infoDropDeleteItem'])->name('monster.info.drop.delete_item');
 Route::get('/monster/{monster}/locations', [MonsterController::class, 'infoLocation'])->name('monster.info.location');
 Route::post('/monster/{monster}/location', [MonsterController::class, 'location'])->name('monster.info.location.save');

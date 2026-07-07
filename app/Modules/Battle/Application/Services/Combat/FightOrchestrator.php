@@ -11,6 +11,7 @@ use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRoundHit;
 use Illuminate\Support\Facades\Auth;
 
 readonly class FightOrchestrator
@@ -40,14 +41,18 @@ readonly class FightOrchestrator
 
             $attackedMonster = BattleDetail::with(['locationMonster.monster'])
                 ->where(['location_monster_id' => $monsterId])
-                ->lockForUpdate() // Блокуємо для конкурентних запитів
+                ->lockForUpdate()
                 ->first();
 
             $attackedPlayer = BattleDetail::with('user')
                 ->where(['user_id' => $user->id])
                 ->first();
 
-            $battleRound = $this->createRound($battle, $user->id, $attackedMonster->location_monster_id);
+            $battleRound = $this->createRound(
+                $battle,
+                $user->id,
+                $attackedMonster->location_monster_id,
+            );
 
             if ($attackedMonster->status->isDeath()) {
                 return $fightDTO->setBattle($battle)
@@ -61,76 +66,51 @@ readonly class FightOrchestrator
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
 
-            $effectLog = new AttackResultDTO;
+            // player log: effects + player attack + boss mechanics + kill events
+            $playerLog = new AttackResultDTO;
+            // monster log: only the monster's counterattack
+            $monsterLog = new AttackResultDTO;
 
             if ($isBoss) {
-                $this->shieldService->updateShieldDuration($battle, $effectLog);
+                $this->shieldService->updateShieldDuration($battle, $playerLog);
             }
 
-            // Process active effects on player (DoT tick, stun check)
-            $playerIsStunned = $this->effectService->processPlayerEffects($player, $battle, $effectLog);
-
-            // Process active effects on monster (DoT tick, stun check)
-            $monsterIsStunned = $this->effectService->processMonsterEffects($locationMonster, $battle, $effectLog);
-
-            $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
+            $playerIsStunned = $this->effectService->processPlayerEffects($player, $battle, $playerLog);
+            $monsterIsStunned = $this->effectService->processMonsterEffects($locationMonster, $battle, $playerLog);
 
             if (! $playerIsStunned) {
-                $roundLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
-                $effectLog->merge($roundLog);
+                $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
+                $attackLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
+                $playerLog->merge($attackLog);
             }
 
-            $roundLog = $effectLog;
+            $monsterHpAfterPlayerAttack = $locationMonster->hp_now;
 
-            // BOSS: Перевірка фаз ПЕРЕД атакою боса
             if ($isBoss && $locationMonster->hp_now > 0) {
-                $this->bossPhaseService->checkAndTriggerPhase(
-                    $locationMonster,
-                    $battle,
-                    $roundLog
-                );
+                $this->bossPhaseService->checkAndTriggerPhase($locationMonster, $battle, $playerLog);
+                $this->bossMechanicsService->processMechanics($locationMonster, $battle, $player, $playerLog);
             }
 
-            // BOSS: Виконання механік ПЕРЕД атакою боса
-            if ($isBoss && $locationMonster->hp_now > 0) {
-                $this->bossMechanicsService->processMechanics(
-                    $locationMonster,
-                    $battle,
-                    $player,
-                    $roundLog
-                );
-            }
-
-            // Атака монстра/боса (пропускаем если монстр оглушён)
             if ($locationMonster->hp_now > 0 && ! $monsterIsStunned) {
-                // BOSS: Використовуємо спеціальну атаку для боса
                 if ($isBoss) {
-                    $this->monsterAttackService->executeBossAttack(
-                        $player,
-                        $locationMonster,
-                        $battle,
-                        $roundLog
-                    );
+                    $this->monsterAttackService->executeBossAttack($player, $locationMonster, $battle, $monsterLog);
                 } else {
-                    $this->monsterAttackService->execute($player, $locationMonster, $roundLog);
+                    $this->monsterAttackService->execute($player, $locationMonster, $monsterLog);
                 }
             }
 
             if ($locationMonster->hp_now <= 0) {
-                $this->attackService->handleMonsterDeath($player, $locationMonster, $attackedMonster, $roundLog);
+                $this->attackService->handleMonsterDeath($player, $locationMonster, $attackedMonster, $playerLog);
 
-                // BOSS: Додаткова обробка смерті боса
                 if ($isBoss) {
-                    $this->bossMechanicsService->handleBossDeath(
-                        $locationMonster,
-                        $battle,
-                        $player,
-                        $roundLog
-                    );
+                    $this->bossMechanicsService->handleBossDeath($locationMonster, $battle, $player, $playerLog);
                 }
             }
 
             $player->save();
+            $playerHpAfterRound = $player->hp_now;
+
+            $fullLog = (new AttackResultDTO)->merge($playerLog)->merge($monsterLog);
 
             if ($player->hp_now <= 0) {
                 $fightDTO = $this->playerDeathService->handle(
@@ -139,9 +119,10 @@ readonly class FightOrchestrator
                     $battleRound,
                     $attackedPlayer,
                     $attackedMonster,
-                    $roundLog
+                    $fullLog,
                 );
 
+                $this->saveHits($battleRound, $user->id, $attackedMonster->location_monster_id, $playerHpAfterRound, $monsterHpAfterPlayerAttack, $playerLog, $monsterLog);
                 $this->finishService->checkAndFinish($battle, $battleLocation);
 
                 return $fightDTO;
@@ -150,14 +131,16 @@ readonly class FightOrchestrator
             $user->save();
             $locationMonster->save();
 
-            $this->attackService->checkLevelUp($player, $roundLog);
+            $this->attackService->checkLevelUp($player, $playerLog);
 
             $finishDTO = $this->finishService->checkAndFinish($battle, $battleLocation);
 
-            $battleRound->action = $roundLog->getLog();
+            $fullLog = (new AttackResultDTO)->merge($playerLog)->merge($monsterLog);
+            $battleRound->action = $fullLog->getLog();
             $battleRound->save();
 
-            // Зберігаємо метадані бою з босом
+            $this->saveHits($battleRound, $user->id, $attackedMonster->location_monster_id, $playerHpAfterRound, $monsterHpAfterPlayerAttack, $playerLog, $monsterLog);
+
             if ($isBoss) {
                 $this->saveBossMetadata($battle, $battleRound, $locationMonster);
             }
@@ -179,6 +162,36 @@ readonly class FightOrchestrator
         $battleRound->location_monster_id = $monsterId;
 
         return $battleRound;
+    }
+
+    private function saveHits(
+        BattleRound $round,
+        int $userId,
+        int $monsterId,
+        int $playerHpAfter,
+        int $monsterHpAfter,
+        AttackResultDTO $playerLog,
+        AttackResultDTO $monsterLog,
+    ): void {
+        if ($playerLog->getLog() !== '') {
+            BattleRoundHit::create([
+                'battle_round_id'  => $round->id,
+                'participant_type' => 'user',
+                'participant_id'   => $userId,
+                'hp_after'         => $playerHpAfter,
+                'action'           => $playerLog->getLog(),
+            ]);
+        }
+
+        if ($monsterLog->getLog() !== '') {
+            BattleRoundHit::create([
+                'battle_round_id'  => $round->id,
+                'participant_type' => 'monster',
+                'participant_id'   => $monsterId,
+                'hp_after'         => $monsterHpAfter,
+                'action'           => $monsterLog->getLog(),
+            ]);
+        }
     }
 
     private function saveBossMetadata(Battle $battle, BattleRound $round, $locationMonster): void

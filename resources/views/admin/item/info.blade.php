@@ -15,17 +15,17 @@
                             <li class="nav-item active">
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
-                            @if($item->type === \App\Enums\ShareItemType::GEM)
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::GEM)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-gem" href="#tab-gem" data-bs-toggle="tab">Камень</a>
                                 </li>
                             @endif
-                            @if($item->type === \App\Enums\ShareItemType::RUNE)
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RUNE)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-rune" href="#tab-rune" data-bs-toggle="tab">Руна</a>
                                 </li>
                             @endif
-                            @if($item->upgrade_scroll_type !== null || $item->type === \App\Enums\ShareItemType::SCROLL)
+                            @if($item->upgrade_scroll_type !== null || $item->type === \App\Modules\Share\Domain\Enums\ShareItemType::SCROLL)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-scroll" href="#tab-scroll" data-bs-toggle="tab">Свиток заточки</a>
                                 </li>
@@ -47,7 +47,7 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Тип</label>
                                                 <select class="form-control" name="type" data-plugin-selectTwo>
-                                                    @foreach(\App\Enums\ShareItemType::cases() as $type)
+                                                    @foreach(\App\Modules\Share\Domain\Enums\ShareItemType::cases() as $type)
                                                         <option value="{{ $type->value }}" @selected($item->type === $type)>{{ $type->label() }}</option>
                                                     @endforeach
                                                 </select>
@@ -68,7 +68,7 @@
                                                 <label class="col-form-label">Слот</label>
                                                 <select class="form-control" name="slot" data-plugin-selectTwo>
                                                     <option value=""></option>
-                                                    @foreach(\App\Enums\ShareItemSlot::cases() as $slot)
+                                                    @foreach(\App\Modules\Share\Domain\Enums\ShareItemSlot::cases() as $slot)
                                                         <option value="{{ $slot->value }}" @selected($item->slot === $slot)>{{ $slot->label() }}</option>
                                                     @endforeach
                                                 </select>
@@ -174,7 +174,7 @@
                                 </div>
 
                                 {{-- КАМЕНЬ --}}
-                                @if($item->type === \App\Enums\ShareItemType::GEM)
+                                @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::GEM)
                                     <div id="tab-gem" class="tab-pane">
                                         <div class="row pt-3 pb-3">
                                             <div class="col-lg-6">
@@ -196,7 +196,7 @@
                                 @endif
 
                                 {{-- РУНА --}}
-                                @if($item->type === \App\Enums\ShareItemType::RUNE)
+                                @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RUNE)
                                     <div id="tab-rune" class="tab-pane">
                                         <div class="row pt-3 pb-3">
                                             <div class="col-lg-4">
@@ -204,7 +204,7 @@
                                                     <label class="col-form-label">Редкость руны</label>
                                                     <select class="form-control" name="rune_rarity">
                                                         <option value="">— не указана —</option>
-                                                        @foreach(\App\Enums\RuneRarity::cases() as $rarity)
+                                                        @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity::cases() as $rarity)
                                                             <option value="{{ $rarity->value }}"
                                                                 @selected(old('rune_rarity', $item->rune_rarity?->value) === $rarity->value)
                                                                 style="color: {{ $rarity->color() }}">
@@ -239,7 +239,7 @@
                                 @endif
 
                                 {{-- СВИТОК ЗАТОЧКИ --}}
-                                @if($item->upgrade_scroll_type !== null || $item->type === \App\Enums\ShareItemType::SCROLL)
+                                @if($item->upgrade_scroll_type !== null || $item->type === \App\Modules\Share\Domain\Enums\ShareItemType::SCROLL)
                                     <div id="tab-scroll" class="tab-pane">
                                         <div class="row pt-3 pb-3">
                                             <div class="col-lg-5">
@@ -247,7 +247,7 @@
                                                     <label class="col-form-label">Тип свитка заточки</label>
                                                     <select class="form-control" name="upgrade_scroll_type">
                                                         <option value="">— не свиток заточки —</option>
-                                                        @foreach(\App\Enums\UpgradeScrollType::cases() as $scrollType)
+                                                        @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType::cases() as $scrollType)
                                                             <option value="{{ $scrollType->value }}"
                                                                 @selected(old('upgrade_scroll_type', $item->upgrade_scroll_type?->value) === $scrollType->value)>
                                                                 {{ $scrollType->label() }}
@@ -256,7 +256,7 @@
                                                     </select>
                                                 </div>
                                                 <div class="mt-3">
-                                                    @foreach(\App\Enums\UpgradeScrollType::cases() as $scrollType)
+                                                    @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType::cases() as $scrollType)
                                                         <div class="mb-2">
                                                             <strong>{{ $scrollType->label() }}</strong>
                                                             <span class="text-muted small"> — {{ $scrollType->description() }}</span>
@@ -333,7 +333,7 @@
                                     <tr style="vertical-align: middle">
                                         <td>{{ $stat->stat_type->label() }}</td>
                                         <td>{{ $stat->value }}</td>
-                                        <td>{{ $stat->value_type === \App\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
+                                        <td>{{ $stat->value_type === \App\Modules\Share\Domain\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
                                         <td>
                                             <a href="{{ route('admin.item.stat.delete', ['item' => $item->id, 'stat' => $stat->id]) }}"
                                                class="btn btn-xs btn-danger"
@@ -407,7 +407,7 @@
                                     <tr style="vertical-align: middle">
                                         <td>{{ $effect->effect_type->label() }}</td>
                                         <td>{{ $effect->value }}</td>
-                                        <td>{{ $effect->value_type === \App\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
+                                        <td>{{ $effect->value_type === \App\Modules\Share\Domain\Enums\ItemEffectValueType::PERCENT ? '%' : 'ед.' }}</td>
                                         <td>{{ $effect->duration_seconds ? $effect->duration_seconds . ' сек.' : '—' }}</td>
                                         <td>
                                             <a href="{{ route('admin.item.effect.delete', ['item' => $item->id, 'effect' => $effect->id]) }}"
@@ -514,7 +514,7 @@
     </div>
 
     {{-- РЕЦЕПТ (только для типа RECIPE) --}}
-    @if($item->type === \App\Enums\ShareItemType::RECIPE && $item->recipe)
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
         <div class="row">
             <div class="col-md-12">
                 <section class="card">
@@ -622,7 +622,7 @@
         }
     });
 
-    @if($item->type === \App\Enums\ShareItemType::GEM)
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::GEM)
     const gemStatOptions = `
         <option value="attack">Атака</option><option value="armor">Защита</option>
         <option value="hp_max">Макс HP</option><option value="mp_max">Макс MP</option>
@@ -671,7 +671,7 @@
     loadGemFromJson();
     @endif
 
-    @if($item->type === \App\Enums\ShareItemType::RECIPE && $item->recipe)
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
     $('#sel-kraft-item').select2({
         theme: 'bootstrap',
         placeholder: 'Выберите предмет',

@@ -12,7 +12,7 @@ class EloquentMonsterReadRepository implements MonsterReadRepository
 {
     public function findByLocationMonsterId(int $locationMonsterId): ?Monster
     {
-        return MonsterOnLocation::with('monster')
+        return MonsterOnLocation::with('monster.items')
             ->find($locationMonsterId)
             ?->monster;
     }

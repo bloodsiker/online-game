@@ -18,6 +18,11 @@ class EloquentItemReadRepository implements ItemReadRepository
         return Item::find($id);
     }
 
+    public function findItemByShareItemId(int $shareItemId): ?Item
+    {
+        return Item::where('share_item_id', $shareItemId)->first();
+    }
+
     public function findChestWithItems(int $id): ?Item
     {
         return Item::with('itemsInChest')->find($id);

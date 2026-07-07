@@ -68,6 +68,17 @@ class MonsterController extends Controller
         return redirect()->back()->with('success', 'Предмет добавлен.');
     }
 
+    public function infoDropUpdate(Request $request, Monster $monster, ShareItem $item): RedirectResponse
+    {
+        $monster->items()->updateExistingPivot($item->id, [
+            'drop_chance' => (float) $request->input('drop_chance', 0),
+            'min_count' => (int) $request->input('min_count', 1),
+            'max_count' => (int) $request->input('max_count', 1),
+        ]);
+
+        return redirect()->back()->with('success', 'Дроп обновлён.');
+    }
+
     public function infoDropDeleteItem(Monster $monster, ShareItem $item): RedirectResponse
     {
         $monster->items()->detach($item->id);

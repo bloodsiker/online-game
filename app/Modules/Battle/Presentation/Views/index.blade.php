@@ -325,7 +325,7 @@
         @if($battle)
             <td>
                 @if($battle->status->isActive())
-                    <p><u><b>Раунд N {{ $battle->rounds }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" target="_blank">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
+                    <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
                     @include('battle::partials.action_panel')
                 @endif
@@ -434,6 +434,24 @@
         parent.startCooldown();
     }
 </script>
+
+@if($battle && $battle->status->isActive() && $randomAttackedMonster)
+<script>
+    (function() {
+        try {
+            var chatFrame = window.parent.document.getElementById('chat-frame');
+            var chatLogWin = chatFrame && chatFrame.contentWindow && chatFrame.contentWindow.frames['chat_log'];
+            if (chatLogWin && typeof chatLogWin.addBattleEntry === 'function') {
+                chatLogWin.addBattleEntry({
+                    battleId: {{ $battle->id }},
+                    battleUrl: '{{ route('fight.log', ['id' => $battle->id]) }}',
+                    monsterName: '{{ addslashes($randomAttackedMonster->locationMonster->monster->name) }}',
+                });
+            }
+        } catch(e) {}
+    })();
+</script>
+@endif
 
 </body>
 </html>

@@ -60,131 +60,24 @@
             color: #fd8b35;
             background: url({{ asset('img/bg/chat/fightlog_dbg.gif') }});
         }
+        table.log .battle-entry a {
+            color: inherit;
+            text-decoration: none;
+        }
+        table.log .battle-entry a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-<body leftmargin="0" rightmargin="0" id="body_content" onload="loaded=true;">
+<body leftmargin="0" rightmargin="0" id="body_content">
 
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr>
         <td width="100%" style="" valign="top" class="log">
-            <div style="width: 100%; height: 100%;" class="log">
+            <div style="width: 100%; height: 100%; overflow-y: auto;" class="log" id="log-scroll">
                 <table class="log" cellspacing="0" id="content">
-
-                    <tbody>
-                    <tr class="fightlog_dark">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span title="Шальной пес [3]">Шальной пе... [3]</span><img
-                                src="images/sw1.gif" width="14" height="10"><span title="Tap0K [3]">Tap0K [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk1">уворот</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_light">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span
-                                title="Tap0K [3]">Tap0K [3]</span><img src="images/swd2.gif" width="14"
-                                                                       height="10"><span title="Шальной пес [3]">Шальной пе... [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk3">-307 удар</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_dark">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span title="Шальной пес [3]">Шальной пе... [3]</span><img
-                                src="images/sw3.gif" width="14" height="10"><span title="Tap0K [3]">Tap0K [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk1">уворот</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_light">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span
-                                title="Tap0K [3]">Tap0K [3]</span><img src="images/swd3.gif" width="14"
-                                                                       height="10"><span title="Шальной пес [3]">Шальной пе... [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk3">-307 удар</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_dark">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span title="Шальной пес [3]">Шальной пе... [3]</span><img
-                                src="images/sw2.gif" width="14" height="10"><span title="Tap0K [3]">Tap0K [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk1">уворот</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_light">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span
-                                title="Tap0K [3]">Tap0K [3]</span><img src="images/swd2.gif" width="14"
-                                                                       height="10"><span title="Шальной пес [3]">Шальной пе... [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk3">-313 удар</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_dark">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span title="Шальной пес [3]">Шальной пе... [3]</span><img
-                                src="images/sw2.gif" width="14" height="10"><span title="Tap0K [3]">Tap0K [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk1">уворот</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_light">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span
-                                title="Tap0K [3]">Tap0K [3]</span><img src="images/swd3.gif" width="14"
-                                                                       height="10"><span title="Шальной пес [3]">Шальной пе... [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk3">-294 удар</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    <tr class="fightlog_dark">
-                        <td nowrap="" class="action" style="background: rgb(2, 2, 2);"><span title="Шальной пес [3]">Шальной пе... [3]</span><img
-                                src="images/sw1.gif" width="14" height="10"><span title="Tap0K [3]">Tap0K [3]</span>
-                        </td>
-                        <td class="separator"></td>
-                        <td nowrap="" class="result flk1">уворот</td>
-                    </tr>
-                    <tr class="separator">
-                        <td class="s1"></td>
-                        <td class="s2"></td>
-                        <td class="s3"></td>
-                    </tr>
-                    </tbody>
+                    <tbody id="log-body"></tbody>
                 </table>
             </div>
         </td>
@@ -192,6 +85,67 @@
     </tbody>
 </table>
 
+<script>
+    var rowIndex = 0;
+
+    function renderEntry(entry) {
+        var tbody = document.getElementById('log-body');
+        if (!tbody) return;
+
+        var cls = (rowIndex % 2 === 0) ? 'fightlog_dark' : 'fightlog_light';
+        rowIndex++;
+
+        var pad = function(n) { return String(n).padStart(2, '0'); };
+        var d = new Date(entry.ts);
+        var datetime = pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear()
+            + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+
+        var tr = document.createElement('tr');
+        tr.className = cls;
+        tr.innerHTML = '<td nowrap="" class="action battle-entry">'
+            + datetime + ' &mdash; '
+            + '<a href="' + entry.battleUrl + '" target="_blank">Сражение #' + entry.battleId + '</a>'
+            + '</td>'
+            + '<td class="separator"></td>'
+            + '<td nowrap="" class="result battle-entry">' + (entry.monsterName || '') + '</td>';
+        tbody.appendChild(tr);
+
+        var sep = document.createElement('tr');
+        sep.className = 'separator';
+        sep.innerHTML = '<td class="s1"></td><td class="s2"></td><td class="s3"></td>';
+        tbody.appendChild(sep);
+
+        var scroll = document.getElementById('log-scroll');
+        if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    }
+
+    window.addBattleEntry = function(data) {
+        var entries = JSON.parse(sessionStorage.getItem('battleLog') || '[]');
+        var exists = entries.some(function(e) { return e.battleId === data.battleId; });
+        if (!exists) {
+            var entry = {
+                battleId: data.battleId,
+                battleUrl: data.battleUrl,
+                monsterName: data.monsterName,
+                ts: Date.now(),
+            };
+            entries.push(entry);
+            sessionStorage.setItem('battleLog', JSON.stringify(entries));
+            renderEntry(entry);
+        }
+    };
+
+    window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'battle_event') {
+            window.addBattleEntry(e.data);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var entries = JSON.parse(sessionStorage.getItem('battleLog') || '[]');
+        entries.forEach(function(entry) { renderEntry(entry); });
+    });
+</script>
 
 </body>
 </html>

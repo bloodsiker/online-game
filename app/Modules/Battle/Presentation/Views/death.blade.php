@@ -91,7 +91,7 @@
     <tbody>
     <tr valign="top">
         <td>
-            <p><u><b>Раунд N {{ $battle->rounds++ }}</b></u> - <a href="{{ route('info.monster', ['id' => $attackedMonster->locationMonster->id]) }}" target="_blank">{{ $attackedMonster->locationMonster->monster->name }}</a> {{ $attackedMonster->locationMonster->monster->lvl }} ({{ $attackedMonster->locationMonster->hp_now }}/{{ $attackedMonster->locationMonster->hp_max }})</p>
+            <p><u><b>Раунд N {{ $battle->rounds }}</b></u> - <a href="{{ route('info.monster', ['id' => $attackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $attackedMonster->locationMonster->monster->name }}</a> {{ $attackedMonster->locationMonster->monster->lvl }} ({{ $attackedMonster->locationMonster->hp_now }}/{{ $attackedMonster->locationMonster->hp_max }})</p>
 
             {!! $round->action !!}
 

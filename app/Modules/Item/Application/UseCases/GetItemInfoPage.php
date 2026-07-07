@@ -22,4 +22,12 @@ class GetItemInfoPage
 
         return $this->mapper->map($item);
     }
+
+    public function executeByShareItemId(int $shareItemId): ItemInfoPageDTO
+    {
+        $item = $this->readRepository->findItemByShareItemId($shareItemId);
+        abort_if($item === null, 404);
+
+        return $this->mapper->map($item);
+    }
 }

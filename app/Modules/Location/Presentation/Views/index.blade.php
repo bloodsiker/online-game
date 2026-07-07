@@ -99,10 +99,10 @@
                             <div>
                                 @if($monster->isBoss)
                                     <b>
-                                        <a href="{{ $monster->infoUrl }}" target="_blank" class="color-red">{{ $monster->name }}</a>
+                                        <a href="{{ $monster->infoUrl }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $monster->name }}</a>
                                     </b>
                                 @else
-                                    <a href="{{ $monster->infoUrl }}" target="_blank" class="color-red">{{ $monster->name }}</a>
+                                    <a href="{{ $monster->infoUrl }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $monster->name }}</a>
                                 @endif
                                 [<a href="{{ $monster->attackUrl }}">атаковать</a>]
                             </div>

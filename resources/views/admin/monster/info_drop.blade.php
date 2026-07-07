@@ -45,7 +45,16 @@
                                             <td>{{ $item->pivot->drop_chance }}</td>
                                             <td>{{ $item->pivot->min_count }} - {{ $item->pivot->max_count }}</td>
                                             <td>{{ number_format($item->price, 0, '', ' ') }}</td>
-                                            <td><a href="{{ route('admin.monster.info.drop.delete_item', ['monster' => $monster->id, 'item' => $item->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a></td>
+                                            <td>
+                                                <a href="#modalEditDrop"
+                                                   class="mb-1 mt-1 me-1 btn btn-xs btn-warning modal-with-zoom-anim js-edit-drop"
+                                                   data-action="{{ route('admin.monster.info.drop.update', ['monster' => $monster->id, 'item' => $item->id]) }}"
+                                                   data-name="{{ $item->name }}"
+                                                   data-chance="{{ $item->pivot->drop_chance }}"
+                                                   data-min="{{ $item->pivot->min_count }}"
+                                                   data-max="{{ $item->pivot->max_count }}">Изменить</a>
+                                                <a href="{{ route('admin.monster.info.drop.delete_item', ['monster' => $monster->id, 'item' => $item->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -111,6 +120,56 @@
             </form>
         </section>
     </div>
+    <div id="modalEditDrop" class="modal-block zoom-anim-dialog modal-block-warning mfp-hide">
+        <section class="card">
+            <form id="editDropForm" action="" method="post">
+                @csrf
+                <header class="card-header">
+                    <h2 class="card-title">Изменить дроп: <span id="editDropName"></span></h2>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-2">
+                            <div class="form-group">
+                                <label class="control-label text-lg-end" for="edit_drop_chance">Шанс %</label>
+                                <input type="text" class="form-control" name="drop_chance" id="edit_drop_chance">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="form-group">
+                                <label class="control-label text-lg-end" for="edit_min_count">Мин количество</label>
+                                <input type="text" class="form-control" name="min_count" id="edit_min_count">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="form-group">
+                                <label class="control-label text-lg-end" for="edit_max_count">Макс количество</label>
+                                <input type="text" class="form-control" name="max_count" id="edit_max_count">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="row">
+                        <div class="col-md-12 text-end">
+                            <button class="btn btn-warning">Сохранить</button>
+                            <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        document.querySelectorAll('.js-edit-drop').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementById('editDropForm').action = this.dataset.action;
+                document.getElementById('editDropName').textContent = this.dataset.name;
+                document.getElementById('edit_drop_chance').value = this.dataset.chance;
+                document.getElementById('edit_min_count').value = this.dataset.min;
+                document.getElementById('edit_max_count').value = this.dataset.max;
+            });
+        });
+    </script>
 @endsection
-
-

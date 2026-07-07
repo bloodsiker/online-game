@@ -94,6 +94,17 @@ class FightController extends Controller
         return view('battle::index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
     }
 
+    public function log(int $id): \Illuminate\Contracts\View\View
+    {
+        $battle = Battle::with(['location'])->findOrFail($id);
+        $rounds = BattleRound::with(['user.player', 'locationMonster.monster', 'hits'])
+            ->where('battle_id', $id)
+            ->orderBy('round_number')
+            ->get();
+
+        return view('battle::log', compact('battle', 'rounds'));
+    }
+
     public function runAway($id)
     {
         $user = Auth::user();

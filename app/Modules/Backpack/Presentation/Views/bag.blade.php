@@ -1799,6 +1799,7 @@
     }
 
     var _ctxItemId    = null;
+    var _ctxItemType  = null;
     var _ctxItemCount = 1;
     var _ctxItemName  = '';
     var _ctxItemImage = '';
@@ -1809,10 +1810,11 @@
         try { showItemInfo(el, event, 0); } catch(e) {}
         document.onmousemove = function(){};
         _ctxItemId    = el.getAttribute('data-id');
+        _ctxItemType  = el.getAttribute('data-type');
         _ctxItemCount = parseInt(el.getAttribute('data-count')) || 1;
         _ctxItemName  = el.getAttribute('data-name') || '';
         _ctxItemImage = el.getAttribute('data-image') || '';
-        var type     = el.getAttribute('data-type');
+        var type     = _ctxItemType;
         var equipped = el.getAttribute('data-equipped') === '1';
 
         var equippable = ['weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
@@ -1843,7 +1845,13 @@
             case 'info':    showArtifactInfo(id, null, null, null); break;
             case 'equip':   location.href = base + '/put-on/'     + id; break;
             case 'unequip': location.href = base + '/put-off/'    + id; break;
-            case 'use':     location.href = base + '/open-chest/' + id; break;
+            case 'use':
+                if (_ctxItemType === 'chest') {
+                    location.href = base + '/open-chest/' + id;
+                } else {
+                    useItemAjax(id);
+                }
+                break;
             case 'drop':
                 showDropDialog(id, _ctxItemCount);
                 break;
@@ -1855,6 +1863,56 @@
                 } catch(e) {}
                 break;
         }
+    }
+
+    function useItemAjax(itemId) {
+        fetch('{{ route('items.use', ['id' => '__ID__']) }}'.replace('__ID__', itemId), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            },
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status !== 'success') {
+                try { window.top.showErrorIframe(data.message || 'Ошибка'); } catch(e) { alert(data.message || 'Ошибка'); }
+                return;
+            }
+
+            // Обновляем счётчик или удаляем предмет из рюкзака
+            var td = document.querySelector('td[data-id="' + itemId + '"]');
+            if (td) {
+                if (data.removed) {
+                    var li = td.closest('li.item');
+                    if (li) li.remove();
+                } else {
+                    var bpdig = td.querySelector('.bpdig');
+                    if (data.count > 1) {
+                        if (!bpdig) {
+                            bpdig = document.createElement('div');
+                            bpdig.className = 'bpdig';
+                            td.appendChild(bpdig);
+                        }
+                        bpdig.textContent = data.count;
+                    } else if (bpdig) {
+                        bpdig.remove();
+                    }
+                    td.setAttribute('data-count', data.count);
+                }
+            }
+
+            // Отправляем HP/MP в character-frame
+            var hpMp = {
+                hp: { current: data.hp_now, max: data.hp_max },
+                mp: { current: data.mp_now, max: data.mp_max },
+            };
+            try { window.top.sendToFrame('character-frame', hpMp); } catch(e) {}
+            try { window.top.refreshHotbar(); } catch(e) {}
+        })
+        .catch(function() {
+            try { window.top.showErrorIframe('Ошибка использования предмета'); } catch(e) {}
+        });
     }
 
     function showDropDialog(itemId, count) {

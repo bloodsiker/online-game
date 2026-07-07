@@ -42,7 +42,7 @@ class BattleRepository extends AbstractRepository
         return $this->create([
             'location_id' => $location->id,
             'status' => BattleStatus::ACTIVE,
-            'rounds' => 1,
+            'rounds' => 0,
         ]);
     }
 
