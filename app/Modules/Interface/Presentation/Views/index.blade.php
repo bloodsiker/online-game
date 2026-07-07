@@ -407,21 +407,7 @@
 
                             refreshHotbar();
 
-                            function handleHotbarKey(e) {
-                                const key = parseInt(e.key);
-                                if (key >= 1 && key <= 9) {
-                                    useAbility(key);
-                                }
-                            }
-
-                            document.addEventListener('keydown', handleHotbarKey);
-
-                            // Пробрасываем хоткеи из game-frame в хотбар
-                            gameFrame.addEventListener('load', () => {
-                                try {
-                                    gameFrame.contentDocument.addEventListener('keydown', handleHotbarKey);
-                                } catch (e) {}
-                            });
+                            {{-- Хоткеи 1-9 отключены: срабатывали при наборе текста --}}
 
                             // Сворачивание/разворачивание панели
                             let isCollapsed = localStorage.getItem('hotbar-collapsed') === 'true';

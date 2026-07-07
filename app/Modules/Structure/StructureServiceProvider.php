@@ -40,6 +40,7 @@ class StructureServiceProvider extends ServiceProvider
     {
         $this->app->bind(BankUserRepository::class, EloquentBankUserRepository::class);
         $this->app->bind(BankLogRepository::class, EloquentBankLogRepository::class);
+        $this->app->bind(\App\Modules\Structure\Bank\Domain\Contracts\BankDepositRepository::class, \App\Modules\Structure\Bank\Infrastructure\Persistence\EloquentBankDepositRepository::class);
         $this->app->bind(\App\Modules\Structure\Bank\Domain\Contracts\TransactionManager::class, BankLaravelTransactionManager::class);
 
         $this->app->bind(BlacksmithReadRepository::class, EloquentBlacksmithReadRepository::class);

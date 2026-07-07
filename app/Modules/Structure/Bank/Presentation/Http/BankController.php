@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Bank\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Structure\Bank\Application\UseCases\ClaimDeposit;
 use App\Modules\Structure\Bank\Application\UseCases\Deposit;
 use App\Modules\Structure\Bank\Application\UseCases\EnsureBankAccount;
 use App\Modules\Structure\Bank\Application\UseCases\GetBankPage;
+use App\Modules\Structure\Bank\Application\UseCases\GetDepositsPage;
 use App\Modules\Structure\Bank\Application\UseCases\LookupRecipient;
+use App\Modules\Structure\Bank\Application\UseCases\OpenDeposit;
 use App\Modules\Structure\Bank\Application\UseCases\Transfer;
 use App\Modules\Structure\Bank\Application\UseCases\Withdraw;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
@@ -26,6 +29,9 @@ class BankController extends Controller
         private readonly EnsureBankAccount $ensureBankAccount,
         private readonly GetBankPage $getBankPage,
         private readonly LookupRecipient $lookupRecipient,
+        private readonly OpenDeposit $openDeposit,
+        private readonly ClaimDeposit $claimDeposit,
+        private readonly GetDepositsPage $getDepositsPage,
     ) {}
 
     public function index(Request $request): mixed
@@ -64,6 +70,31 @@ class BankController extends Controller
         return view('bank::index', [
             'user' => $user,
             'page' => $page,
+        ]);
+    }
+
+    public function deposits(Request $request): mixed
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($request->isMethod('POST')) {
+            $result = match ($request->input('action')) {
+                'open' => $this->openDeposit->execute($user, (int) $request->input('amount', 0), (int) $request->input('term', 0)),
+                'claim' => $this->claimDeposit->execute($user, (int) $request->input('deposit_id', 0)),
+                default => null,
+            };
+
+            if ($result !== null) {
+                session()->flash('message', $result->message);
+            }
+
+            return redirect()->route('bank.deposits', ['id' => $request->input('id')]);
+        }
+
+        return view('bank::deposits', [
+            'user' => $user,
+            'page' => $this->getDepositsPage->execute($user),
         ]);
     }
 
