@@ -8,3 +8,5 @@ Route::post('/premium/buy', [PremiumShopController::class, 'buy'])->name('premiu
 Route::post('/premium/add-cart', [PremiumShopController::class, 'addCart'])->name('premium.add_cart');
 Route::get('/premium/delete-cart/{id}', [PremiumShopController::class, 'deleteCart'])->name('premium.delete_cart');
 Route::get('/premium/clear-cart', [PremiumShopController::class, 'clearCart'])->name('premium.clear_cart');
+Route::get('/premium/topup', [PremiumShopController::class, 'topup'])->name('premium.topup');
+Route::get('/premium/stock', [PremiumShopController::class, 'stock'])->name('premium.stock');

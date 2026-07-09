@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ActionController;
 use App\Http\Controllers\Admin\ApiController;
+use App\Http\Controllers\Admin\BankStockController;
 use App\Http\Controllers\Admin\ClanController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
@@ -120,6 +121,17 @@ Route::post('/reputation/{reputation}/shop', [ReputationController::class, 'addS
 Route::get('/reputation/{reputation}/shop/{shopItem}/delete', [ReputationController::class, 'deleteShopItem'])->name('reputation.shop.delete');
 
 Route::get('/users', [UserController::class, 'index'])->name('users');
+
+Route::get('/bank/stocks', [BankStockController::class, 'list'])->name('bank.stocks');
+Route::get('/bank/stock/create', [BankStockController::class, 'create'])->name('bank.stock.create');
+Route::post('/bank/stock/create', [BankStockController::class, 'store'])->name('bank.stock.store');
+Route::match(['GET', 'POST'], '/bank/stock/{stock}', [BankStockController::class, 'info'])->name('bank.stock.info');
+Route::post('/bank/stock/{stock}/tier', [BankStockController::class, 'addTier'])->name('bank.stock.tier.add');
+Route::get('/bank/stock/{stock}/tier/{tier}/delete', [BankStockController::class, 'deleteTier'])->name('bank.stock.tier.delete');
+Route::post('/bank/stock/{stock}/tier/{tier}/item', [BankStockController::class, 'addTierItem'])->name('bank.stock.tier.item.add');
+Route::get('/bank/stock/{stock}/tier/{tier}/item/{item}/delete', [BankStockController::class, 'deleteTierItem'])->name('bank.stock.tier.item.delete');
+Route::get('/bank/stock/{stock}/delete', [BankStockController::class, 'delete'])->name('bank.stock.delete');
+Route::get('/bank/stock/{stock}/duplicate', [BankStockController::class, 'duplicate'])->name('bank.stock.duplicate');
 
 Route::get('/players', [PlayerController::class, 'index'])->name('players');
 Route::match(['GET', 'POST'], '/player/{player}', [PlayerController::class, 'info'])->name('player.info');

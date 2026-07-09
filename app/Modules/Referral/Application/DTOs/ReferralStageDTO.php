@@ -11,6 +11,8 @@ final readonly class ReferralStageDTO
         public string $rewardType,
         public int $rewardValue,
         public ?string $rewardItemName,
+        public ?int $rewardItemId,
+        public ?string $rewardItemImage,
         public string $description,
     ) {}
 }

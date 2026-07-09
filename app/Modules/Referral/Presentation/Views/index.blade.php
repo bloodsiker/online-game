@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Реферальная программа</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    {!! $itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
     <style>
         html, body {
             height: 100%;
@@ -23,6 +25,16 @@
             padding-bottom: 4px;
         }
 
+        .brd2, .brd2 td { border: 1px solid #db9f73; }
+        .step_info_awards { width: 100%; border: 1px #e3b766 solid; background: #ffedbcc4; }
+        .artifact-table { display: inline-table; vertical-align: middle; margin: 1px; }
+        .artifact-table td { width: 59px; height: 59px; cursor: pointer; position: relative; border: none !important; padding: 0 !important; }
+        .bpdig {
+            border: solid 1px #6f4a24 !important; background-color: #6e534c !important;
+            min-width: 34px !important; height: 12px !important; color: #f6d9a6 !important;
+            font-weight: bold !important; margin: 2px !important; text-align: center !important;
+            font-size: 10px; position: absolute; bottom: 0; left: 0;
+        }
         .black, .black * { color: #2f1f0b; }
 
         .ref-page { padding: 8px 10px; }
@@ -190,30 +202,47 @@
                 @if($page->stages === [])
                     <div class="ref-empty">Этапы наград не настроены.</div>
                 @else
-                    <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
-                        <tbody>
-                        <tr>
-                            <td class="b" width="30%">Уровень реферала</td>
-                            <td class="b" width="30%">Награда</td>
-                            <td class="b">Описание</td>
+                    <div class="step_info_awards">
+                    <table class="coll brd2 w100 p6v p6h" cellspacing="0" cellpadding="0" border="0">
+                        <tr style="background: #ff000021;">
+                            <td width="1%" align="center"><b style="color: #284310 !important;">#</b></td>
+                            <td align="center"><b style="color: #284310 !important;">Уровень реферала</b></td>
+                            <td width="100%" align="center"><b style="color: #284310 !important;">Награда</b></td>
                         </tr>
-                        @foreach($page->stages as $stage)
-                            <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
-                                <td class="brd2-top brd2-bt b">{{ $stage->levelThreshold }}</td>
-                                <td class="brd2-top brd2-bt">
+                        @foreach($page->stages as $i => $stage)
+                            <tr>
+                                <td width="1%" align="center"><b class="redd">{{ $i + 1 }}</b></td>
+                                <td align="center" nowrap>
+                                    <b>{{ $stage->levelThreshold }}</b> уровень
+                                </td>
+                                <td width="100%">
                                     @if($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::GOLD->value)
                                         <span title="Золото"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
                                     @elseif($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::DIAMOND->value)
                                         <span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
                                     @else
-                                        <b class="redd">{{ $stage->rewardValue }}x</b> {{ $stage->rewardItemName ?? '?' }}
+                                        @if($stage->rewardItemId && $stage->rewardItemImage)
+                                            <table width="59" height="59" cellpadding="0" cellspacing="0" border="0" class="artifact-table"
+                                                   background="{{ $stage->rewardItemImage }}" style="background-repeat: no-repeat; background-position: center; background-size: cover; display: inline-table;">
+                                                <tr>
+                                                    <td data-id="{{ $stage->rewardItemId }}"
+                                                        onmouseover="showItemInfo(this,event,2)"
+                                                        onmouseout="showItemInfo(this,event,0)">
+                                                        @if($stage->rewardValue > 1)
+                                                            <div class="bpdig">{{ $stage->rewardValue }}</div>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        @else
+                                            <b class="redd">{{ $stage->rewardValue }}x</b> {{ $stage->rewardItemName ?? '?' }}
+                                        @endif
                                     @endif
                                 </td>
-                                <td class="brd2-top brd2-bt">{{ $stage->description }}</td>
                             </tr>
                         @endforeach
-                        </tbody>
                     </table>
+                    </div>
                 @endif
             </td>
             <td class="tbl-shp-sides rs">&nbsp;</td>

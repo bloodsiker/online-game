@@ -13,4 +13,6 @@
 	<item id="5" label="6" command="m_dungeon" pict="inst"/>
 	<item id="6" label="8" command="m_rating" pict="rating"/>
 	<item id="7" label="10" command="m_premium" pict="bank"/>
+	<item id="8" label="11" command="m_events" pict="p_event"/>
+	<item id="9" label="12" command="m_infoportal" pict="infoPortal"/>
 </data>

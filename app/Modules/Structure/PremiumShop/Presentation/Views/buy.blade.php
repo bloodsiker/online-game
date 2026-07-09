@@ -146,19 +146,20 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@php
+    $btnLeft1   = 'img/bg/btn/btn-left1.gif';
+    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
+    $btnRight1  = 'img/bg/btn/btn-right1.gif';
+    $btnLeft2   = 'img/bg/btn/btn-left2.gif';
+    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
+    $btnRight2  = 'img/bg/btn/btn-right2.gif';
+    $active     = false;
+@endphp
+
+@include('premium_shop::_nav', ['activeMenu' => 'shop'])
+
 <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
-    @php
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-
-        $active = false;
-    @endphp
     <tr height="21">
         @foreach($shop->categories as $category)
             @php
@@ -172,11 +173,6 @@
         @endforeach
 
         <td></td>
-
-        <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
-        <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
     </tbody>
 </table>

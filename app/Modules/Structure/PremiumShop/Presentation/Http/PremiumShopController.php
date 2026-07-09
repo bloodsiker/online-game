@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Modules\Structure\PremiumShop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Structure\Bank\Infrastructure\Persistence\Models\BankStock;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
+use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PremiumShopController extends Controller
 {
-    private const SHOP_ID = 8;
+    private const SHOP_ID = 10;
 
     public function __construct(
         private readonly ShopCartService $shopCartService,
@@ -87,5 +89,55 @@ class PremiumShopController extends Controller
         $this->shopCartService->clearCart($user, self::SHOP_ID);
 
         return redirect()->back();
+    }
+
+    public function topup(): \Illuminate\View\View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return view('premium_shop::topup', compact('user'));
+    }
+
+    public function stock(ItemTooltipCollector $tooltipCollector): mixed
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $stock = BankStock::current();
+
+        $userTotal = 0.0;
+        $reachedTierIndex = -1;
+        $itemTooltipScript = '';
+
+        if ($stock) {
+            $stock->load('tiers.items.shareItem');
+
+            $userTotal = (float) $stock->contributions()
+                ->where('user_id', $user->id)
+                ->sum('amount');
+
+            foreach ($stock->tiers as $i => $tier) {
+                if ($userTotal >= $tier->diamond_threshold) {
+                    $reachedTierIndex = $i;
+                }
+            }
+
+            $shareItems = $stock->tiers
+                ->flatMap(fn ($tier) => $tier->items->map->shareItem)
+                ->filter()
+                ->unique('id');
+
+            $tooltipCollector->collectFrom(new ShareItemTooltipStrategy($shareItems));
+            $itemTooltipScript = $tooltipCollector->renderScript();
+        }
+
+        return view('premium_shop::stock', [
+            'user'              => $user,
+            'stock'             => $stock,
+            'userTotal'         => $userTotal,
+            'reachedTierIndex'  => $reachedTierIndex,
+            'itemTooltipScript' => $itemTooltipScript,
+        ]);
     }
 }

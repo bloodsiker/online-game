@@ -74,6 +74,7 @@ class BankController extends Controller
     }
 
     public function deposits(Request $request): mixed
+
     {
         /** @var User $user */
         $user = Auth::user();

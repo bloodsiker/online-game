@@ -51,6 +51,8 @@ final class ReferralPageViewMapper
                     rewardType: $stage->reward_type->value,
                     rewardValue: $stage->reward_value,
                     rewardItemName: $stage->rewardItem?->name,
+                    rewardItemId: $stage->reward_item_id,
+                    rewardItemImage: $stage->rewardItem?->image,
                     description: $stage->description(),
                 )
             )->all(),

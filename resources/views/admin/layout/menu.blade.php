@@ -92,6 +92,12 @@
                             <span>Построение</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.bank.stocks', 'admin.bank.stock.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.bank.stocks') }}">
+                            <i class="bx bx-trending-up" aria-hidden="true"></i>
+                            <span>Акции банка</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.action', 'admin.action.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.action') }}">
                             <i class="bx bx-loader-circle" aria-hidden="true"></i>

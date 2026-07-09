@@ -97,6 +97,8 @@
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">Рейтинг</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">Премиум</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">События</a>
+    <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} return false;">Инфопортал</a>
 </div>
 
 <script>
@@ -117,7 +119,9 @@
         m_friends:     function () { menuGo(false, '{{ route('friends') }}', true); },
         m_rating:      function () { menuGo(true,  '{{ route('rating') }}', true); },
         m_referral:    function () { menuGo(false, '{{ route('referral') }}', true); },
-        m_premium:     function () { menuGo(false, '{{ route('premium.shop') }}', true); }
+        m_premium:     function () { menuGo(false, '{{ route('premium.shop') }}', true); },
+        m_events:      function () { menuGo(false, '{{ route('events') }}', true); },
+        m_infoportal:  function () { try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} }
     };
 
     // Канвас-меню вызывает глобальный processMenu(command) при клике по пункту
@@ -128,7 +132,8 @@
     // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 2)
     var buttonIds = {
         location: 1, character: 2, backpack: 3, clan: 2, clan_member: 2,
-        quests: 4, dungeon: 5, friends: 2, rating: 6, referral: 2, premium: 7
+        quests: 4, dungeon: 5, friends: 2, rating: 6, referral: 2, premium: 7,
+        events: 8, infoportal: 9
     };
 
     // Мигание кнопки из родителя:
@@ -184,7 +189,7 @@
         };
 
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум',
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал',
             dragDropItems: '0',
             configXml: '/data/locale/ru/topMenu.xml',
             blink: '',

@@ -23,4 +23,5 @@ return [
     App\Modules\Structure\StructureServiceProvider::class,
     App\Modules\Clan\ClanServiceProvider::class,
     App\Modules\Backpack\BackpackServiceProvider::class,
+    App\Modules\Event\EventServiceProvider::class,
 ];

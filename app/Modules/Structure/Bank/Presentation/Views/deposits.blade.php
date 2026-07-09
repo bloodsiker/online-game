@@ -51,6 +51,11 @@
                         <a href="{{ route('bank.deposits', ['id' => request('id')]) }}" class="btn_2">Депозит</a>
                     </td>
                     <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
+                    <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('premium.stock', ['id' => request('id')]) }}" class="btn_1">Акции</a>
+                    </td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
                     <td></td>
                     <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
                     <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
