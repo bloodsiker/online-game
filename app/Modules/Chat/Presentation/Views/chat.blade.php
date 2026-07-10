@@ -56,8 +56,12 @@
         .chat-item        { color: #006699; font-weight: bold; cursor: pointer; text-decoration: underline; }
         .chat-item:hover  { text-decoration: underline; }
         .chat-item-unknown{ color: #999; }
+        .chat-user        { color: inherit; text-decoration: underline; }
+        .chat-user:hover  { color: #990000; }
         .player-link      { color: #990000; font-weight: bold; }
         .player-link:hover { text-decoration: underline; }
+        .chat-clan-icon   { vertical-align: middle; margin-right: 2px; }
+        .chat-level       { color: #666; font-weight: normal; }
 
         /* Clan channel */
         .msg-ch-clan small         { color: #007a03; }
@@ -116,16 +120,23 @@
                             {!! $msg->content !!}
 
                         @elseif ($msg->type === 'private')
-                            <span class="prv-name">{{ $msg->sender_name }}</span>
+                            @if ($msg->sender_clan_icon)
+                                <img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt="">
+                            @endif
+                            <span class="prv-name">{{ $msg->sender_name }}</span>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
                             »
                             <span class="prv-name">{{ $msg->target_name ?? '?' }}</span> {!! $msg->content !!}
 
                         @else
+                            @if ($msg->sender_clan_icon)
+                                <img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt="">
+                            @endif
                             <a href="#"
                                class="player-link n"
                                data-uid="{{ $msg->sender_id }}"
+                               data-name="{{ $msg->sender_name }}"
                                onclick="chatPlayerClick({{ $msg->sender_id }}, '{{ addslashes($msg->sender_name) }}'); return false;"
-                            >{{ $msg->sender_name }}</a> {!! $msg->content !!}
+                            >{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif {!! $msg->content !!}
                         @endif
                     </div>
                 @endforeach
@@ -162,6 +173,16 @@
         return escapeHtml(String(str || '')).replace(/'/g, '&#39;');
     }
 
+    function clanIconHtml(msg) {
+        if (!msg.sender_clan_icon) return '';
+        return '<img src="' + safeAttr(msg.sender_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt="">';
+    }
+
+    function levelHtml(msg) {
+        if (!msg.sender_level) return '';
+        return ' <small class="chat-level">[' + parseInt(msg.sender_level, 10) + ']</small>';
+    }
+
     function buildMessageHtml(msg) {
         // Time — clickable for private messages
         var timeHtml;
@@ -184,14 +205,17 @@
         } else if (msg.type === 'quest') {
             html += msg.content;
         } else if (msg.type === 'private') {
-            html += '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'
+            html += clanIconHtml(msg)
+                  + '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'
+                  + levelHtml(msg)
                   + ' » '
                   + '<span class="prv-name">' + escapeHtml(msg.target_name || '?') + '</span>'
                   + '&nbsp;' +msg.content;
         } else {
-            html += '<a href="#" class="player-link n" data-uid="' + msg.sender_id + '" '
+            html += clanIconHtml(msg)
+                  + '<a href="#" class="player-link n" data-uid="' + msg.sender_id + '" data-name="' + safeAttr(msg.sender_name) + '" '
                   + 'onclick="chatPlayerClick(' + msg.sender_id + ', \'' + safeAttr(msg.sender_name) + '\'); return false;">'
-                  + escapeHtml(msg.sender_name) + '</a> ' + msg.content;
+                  + escapeHtml(msg.sender_name) + '</a>' + levelHtml(msg) + ' ' + msg.content;
         }
 
         return html;
@@ -290,6 +314,21 @@
             }
         } catch (e) {}
     }
+</script>
+<script src="{{ asset('js/player_menu.js') }}?v={{ filemtime(public_path('js/player_menu.js')) }}"></script>
+<script>
+    // Контекстное меню персонажа (ПКМ по нику в чате)
+    initPlayerMenu({
+        myUserId: {{ (int) auth()->id() }},
+        csrfToken: '{{ csrf_token() }}',
+        ignoredIds: @json(array_map('intval', $ignoredUserIds)),
+        friendsAddUrl: '{{ route('friends.add') }}',
+        ignoreAddUrl: '{{ route('chat.ignore.add') }}',
+        ignoreRemoveBase: '{{ url('/chat/ignore') }}/',
+        infoUrlBase: '{{ url('/info/u') }}/',
+        sendPrivate: replyToUser,
+        selector: 'a.player-link[data-uid]',
+    });
 </script>
 </body>
 </html>

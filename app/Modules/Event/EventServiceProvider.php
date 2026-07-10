@@ -15,5 +15,10 @@ class EventServiceProvider extends ServiceProvider
 
         Route::middleware(['web', 'updateLastOnline'])
             ->group(__DIR__.'/Presentation/Http/Route/web.php');
+
+        Route::middleware(['web', 'isAdmin'])
+            ->prefix('admin')
+            ->name('admin.')
+            ->group(__DIR__.'/Presentation/Http/Route/admin.php');
     }
 }

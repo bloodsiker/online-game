@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Interface\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\Interface\Application\UseCases\GetHeroPage;
 use App\Modules\Interface\Application\UseCases\GetOnMapPage;
 use App\Modules\Interface\Application\UseCases\GetWhoPage;
@@ -53,13 +54,14 @@ class InterfaceController extends Controller
         return view('interface::menu');
     }
 
-    public function who()
+    public function who(FriendRelationshipRepository $friendRepository)
     {
         /** @var User $user */
         $user = Auth::user();
 
         return view('interface::who', [
             'page' => $this->getWhoPage->execute($user),
+            'ignoredUserIds' => $friendRepository->getIgnoredUserIdsByPlayerId((int) $user->player_id),
         ]);
     }
 

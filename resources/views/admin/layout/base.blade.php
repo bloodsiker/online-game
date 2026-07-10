@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="{{ asset('admin/css/skins/default.css') }}" />
     <link rel="stylesheet" href="{{ asset('admin/css/custom.css') }}" />
 
+    @stack('styles')
+
     <script src="{{ asset('admin/vendor/modernizr/modernizr.js') }}"></script>
 </head>
 <body>

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\DungeonSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,5 +23,6 @@ class DatabaseSeeder extends Seeder
         $this->call(DungeonSeeder::class);
         $this->call(SurvivalArenaSeeder::class);
         $this->call(BuffSkillSeeder::class);
+        $this->call(EventActivitySeeder::class);
     }
 }

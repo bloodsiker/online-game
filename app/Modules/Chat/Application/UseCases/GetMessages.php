@@ -11,6 +11,7 @@ use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class GetMessages
 {
@@ -50,6 +51,8 @@ class GetMessages
             $replyTo = $isOwn ? $targetName : $senderName;
         }
 
+        $clan = $msg->sender?->clanMembership?->clan;
+
         return new ChatMessageDTO(
             id: $msg->id,
             type: $msg->type->value,
@@ -61,6 +64,8 @@ class GetMessages
             time: $msg->created_at->format('H:i'),
             is_own: $isOwn,
             reply_to: $replyTo,
+            sender_level: $msg->sender?->player?->lvl,
+            sender_clan_icon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
         );
     }
 }

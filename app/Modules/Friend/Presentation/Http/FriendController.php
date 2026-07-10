@@ -16,6 +16,7 @@ use App\Modules\Friend\Application\UseCases\RemoveEnemy;
 use App\Modules\Friend\Application\UseCases\RemoveFriend;
 use App\Modules\Friend\Application\UseCases\RemoveIgnore;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -55,9 +56,15 @@ class FriendController extends Controller
         ]);
     }
 
-    public function addFriend(Request $request): RedirectResponse
+    public function addFriend(Request $request): RedirectResponse|JsonResponse
     {
-        return $this->backWith($this->addFriend->execute(auth()->user(), (string) $request->input('name', '')));
+        $result = $this->addFriend->execute(auth()->user(), (string) $request->input('name', ''));
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => $result->ok, 'message' => $result->message]);
+        }
+
+        return $this->backWith($result);
     }
 
     public function acceptFriend(int $relationship): RedirectResponse

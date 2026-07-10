@@ -17,5 +17,7 @@ final readonly class ChatMessageDTO
         public string $time,
         public bool $is_own,
         public ?string $reply_to,
+        public ?int $sender_level,
+        public ?string $sender_clan_icon,
     ) {}
 }

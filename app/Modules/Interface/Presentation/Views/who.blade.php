@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Игра</title>
     <style>
         html {
@@ -84,6 +85,7 @@
             cursor: pointer;
             vertical-align: middle;
         }
+
     </style>
 </head>
 <body>
@@ -104,6 +106,7 @@
                              onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
                         <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                            class="pnick {{ $user->isOnline ? '' : 'user_offline' }}"
+                           data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                            title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                         @if($user->clanName)
                             @if($user->clanIcon)
@@ -129,7 +132,8 @@
                     <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                          onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
                     <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
-                       class="pnick" title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
+                       class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
+                       title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                     @if($user->clanName)
                         @if($user->clanIcon)
                             <img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}">
@@ -153,6 +157,7 @@
     </tbody>
 </table>
 
+<script src="{{ asset('js/player_menu.js') }}?v={{ filemtime(public_path('js/player_menu.js')) }}"></script>
 <script>
     function sendPrivate(name) {
         try {
@@ -192,7 +197,7 @@
                 +   '<span class="' + offCls.trim() + '">'
                 +     '<span class="time">' + u.time + '</span> '
                 +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(\'' + u.name.replace(/'/g, "\\'") + '\')" alt="Приват"> '
-                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
+                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" data-uid="' + u.id + '" data-name="' + u.name.replace(/"/g, '&quot;') + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
                 +     clan
                 +   '</span>'
                 + '</div>';
@@ -205,6 +210,19 @@
         if (e.data && e.data.type === 'locationUsers') {
             renderLocationUsers(e.data.users);
         }
+    });
+
+    // ── Контекстное меню персонажа (как на проде: ПКМ по нику) ──────────────
+    initPlayerMenu({
+        myUserId: {{ (int) auth()->id() }},
+        csrfToken: document.querySelector('meta[name="csrf-token"]').content,
+        ignoredIds: @json(array_map('intval', $ignoredUserIds)),
+        friendsAddUrl: '{{ route('friends.add') }}',
+        ignoreAddUrl: '{{ route('chat.ignore.add') }}',
+        ignoreRemoveBase: '{{ url('/chat/ignore') }}/',
+        infoUrlBase: '{{ url('/info/u') }}/',
+        sendPrivate: sendPrivate,
+        selector: 'a.pnick[data-uid]',
     });
 </script>
 </body>

@@ -30,7 +30,7 @@ class ChatController extends Controller
         return view('chat::index');
     }
 
-    public function chat(Request $request): View
+    public function chat(Request $request, FriendRelationshipRepository $friendRepository): View
     {
         $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
         $user = auth()->user();
@@ -39,6 +39,7 @@ class ChatController extends Controller
         return view('chat::chat', [
             'messages' => $messages,
             'channel' => $channel,
+            'ignoredUserIds' => $friendRepository->getIgnoredUserIdsByPlayerId((int) $user->player_id),
         ]);
     }
 

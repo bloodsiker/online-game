@@ -14,8 +14,7 @@ final readonly class ActivityCardDTO
         public int $progressTotal,
         public string $descriptionHtml,
         public ?string $bonusHtml = null,
-    ) {
-    }
+    ) {}
 
     public function isRewardReady(): bool
     {

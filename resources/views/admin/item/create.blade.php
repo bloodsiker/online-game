@@ -42,7 +42,7 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="type">Тип</label>
                                                 <select class="form-control" name="type" id="type">
-                                                    @foreach(\App\Enums\ShareItemType::cases() as $type)
+                                                    @foreach(\App\Modules\Share\Domain\Enums\ShareItemType::cases() as $type)
                                                         <option value="{{ $type->value }}" @selected(old('type') === $type->value)>
                                                             {{ $type->label() }}
                                                         </option>
@@ -54,7 +54,7 @@
                                                 <label class="col-form-label" for="slot">Слот</label>
                                                 <select class="form-control" name="slot" id="slot">
                                                     <option value=""></option>
-                                                    @foreach(\App\Enums\ShareItemSlot::cases() as $slot)
+                                                    @foreach(\App\Modules\Share\Domain\Enums\ShareItemSlot::cases() as $slot)
                                                         <option value="{{ $slot->value }}" @selected(old('slot') === $slot->value)>
                                                             {{ $slot->label() }}
                                                         </option>
@@ -219,7 +219,7 @@
                                                 <label class="col-form-label" for="rune_rarity">Редкость руны</label>
                                                 <select class="form-control" name="rune_rarity" id="rune_rarity">
                                                     <option value="">— не указана —</option>
-                                                    @foreach(\App\Enums\RuneRarity::cases() as $rarity)
+                                                    @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity::cases() as $rarity)
                                                         <option value="{{ $rarity->value }}" @selected(old('rune_rarity') === $rarity->value)
                                                                 style="color: {{ $rarity->color() }}">
                                                             {{ $rarity->label() }}
@@ -269,7 +269,7 @@
                                                 <label class="col-form-label" for="upgrade_scroll_type">Тип свитка заточки</label>
                                                 <select class="form-control" name="upgrade_scroll_type" id="upgrade_scroll_type">
                                                     <option value="">— не свиток заточки —</option>
-                                                    @foreach(\App\Enums\UpgradeScrollType::cases() as $scrollType)
+                                                    @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType::cases() as $scrollType)
                                                         <option value="{{ $scrollType->value }}" @selected(old('upgrade_scroll_type') === $scrollType->value)>
                                                             {{ $scrollType->label() }}
                                                         </option>
@@ -277,7 +277,7 @@
                                                 </select>
                                             </div>
                                             <div class="mt-3">
-                                                @foreach(\App\Enums\UpgradeScrollType::cases() as $scrollType)
+                                                @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType::cases() as $scrollType)
                                                     <div class="mb-2">
                                                         <strong>{{ $scrollType->label() }}</strong>
                                                         <span class="text-muted small"> — {{ $scrollType->description() }}</span>
@@ -302,6 +302,8 @@
             </section>
         </div>
     </div>
+
+@include('admin.layout.summernote', ['selector' => 'textarea[name=description]'])
 
 @push('footer_scripts')
 <script>

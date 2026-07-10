@@ -611,6 +611,8 @@
         </div>
     @endif
 
+@include('admin.layout.summernote', ['selector' => 'textarea[name=description]'])
+
 @push('footer_scripts')
 <script>
     document.getElementById('image').addEventListener('change', function () {

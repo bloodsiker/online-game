@@ -5,22 +5,24 @@ namespace App\Modules\Battle\Application\Services\Combat;
 use App\DTO\AttackResultDTO;
 use App\DTO\FightHitDTO;
 use App\Events\PlayerLeveledUp;
+use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Services\DropService;
 use App\Services\PlayerSkillService;
-use App\Modules\Quest\Domain\Services\QuestProgressService;
 
 readonly class AttackService
 {
     public function __construct(
         private AttackStrategyResolver $resolver,
         private QuestProgressService $questService,
+        private EventActivityProgressService $eventActivityProgressService,
         private PlayerSkillService $playerSkillService,
         private DropService $dropService,
         private BossShieldService $shieldService,
@@ -329,6 +331,7 @@ readonly class AttackService
 
         $this->dropService->dropMoney($player->user, $locationMonster, $result);
         $this->questService->progressKillAndCollect($player, $locationMonster, $result);
+        $this->eventActivityProgressService->progressKill($player, $locationMonster);
     }
 
     public function checkLevelUp(Player $player, AttackResultDTO $result)

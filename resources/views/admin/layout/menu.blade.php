@@ -132,6 +132,17 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="{{ request()->routeIs('admin.event.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-calendar-event" aria-hidden="true"></i>
+                            <span>События</span>
+                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.event.activities', 'admin.event.activity.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.event.activities') }}">Активности</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-parent">
                         <a class="nav-link" href="#">
                             <i class="bx bx-cart-alt" aria-hidden="true"></i>
