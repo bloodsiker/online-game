@@ -143,6 +143,12 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="{{ request()->routeIs('admin.post.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.post.send') }}">
+                            <i class="bx bx-envelope" aria-hidden="true"></i>
+                            <span>Почта</span>
+                        </a>
+                    </li>
                     <li class="nav-parent">
                         <a class="nav-link" href="#">
                             <i class="bx bx-cart-alt" aria-hidden="true"></i>

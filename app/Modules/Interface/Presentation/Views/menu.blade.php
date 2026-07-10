@@ -98,6 +98,7 @@
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">Премиум</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">События</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('post') }}', true); return false;">Почта</a>
     <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} return false;">Инфопортал</a>
 </div>
 
@@ -121,6 +122,7 @@
         m_referral:    function () { menuGo(false, '{{ route('referral') }}', true); },
         m_premium:     function () { menuGo(false, '{{ route('premium.shop') }}', true); },
         m_events:      function () { menuGo(false, '{{ route('events') }}', true); },
+        m_post:        function () { menuGo(false, '{{ route('post') }}', true); },
         m_infoportal:  function () { try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} }
     };
 
@@ -133,7 +135,7 @@
     var buttonIds = {
         location: 1, character: 2, backpack: 3, clan: 2, clan_member: 2,
         quests: 4, dungeon: 5, friends: 2, rating: 6, referral: 2, premium: 7,
-        events: 8, infoportal: 9
+        events: 8, post: 9, infoportal: 10
     };
 
     // Мигание кнопки из родителя:
@@ -168,6 +170,16 @@
         C.isMobile = canvas.isMobile();
         C.initLang('ru');
 
+        // Иконки почты нет в наборе top/ атласа — подменяем на иконку
+        // из правой панели прода (right/mail_image)
+        var getImage = canvas.ResourceLoader.getImage;
+        canvas.ResourceLoader.getImage = function (atlas, frame) {
+            if (frame === 'top/post') {
+                return getImage.call(canvas.ResourceLoader, 'ui', 'right/mail_image');
+            }
+            return getImage.apply(canvas.ResourceLoader, arguments);
+        };
+
         // В атласе иконки двух размеров (57x59 и 45x51 — прод использовал мелкие
         // только в подменю); растягиваем иконку до подложки item_back
         var ItemView = canvas.app.topMenu.view.ItemView;
@@ -189,7 +201,7 @@
         };
 
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал',
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта',
             dragDropItems: '0',
             configXml: '/data/locale/ru/topMenu.xml',
             blink: '',

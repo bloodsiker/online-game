@@ -14,5 +14,6 @@
 	<item id="6" label="8" command="m_rating" pict="rating"/>
 	<item id="7" label="10" command="m_premium" pict="bank"/>
 	<item id="8" label="11" command="m_events" pict="p_event"/>
-	<item id="9" label="12" command="m_infoportal" pict="infoPortal"/>
+	<item id="9" label="13" command="m_post" pict="post"/>
+	<item id="10" label="12" command="m_infoportal" pict="infoPortal"/>
 </data>

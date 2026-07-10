@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Services;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemRequirementService;
 use Illuminate\Database\Eloquent\Collection;
@@ -134,6 +134,31 @@ class BackpackService
         ]);
 
         return $this->getItemById($user, $item->id);
+    }
+
+    /**
+     * Выдаёт несколько единиц предмета с учётом стакаемости типа:
+     * стакающиеся кладутся одной ячейкой (count += quantity),
+     * экипировка — отдельными экземплярами по одному в ячейке.
+     *
+     * @return list<Backpack>
+     */
+    public function giveItemsByShareItem(User $user, ShareItem $shareItem, int $quantity = 1): array
+    {
+        $quantity = max(1, $quantity);
+
+        if ($shareItem->type->isStackable()) {
+            return [$this->addItemByShareItem($user, $shareItem, $quantity)];
+        }
+
+        $created = [];
+        for ($i = 0; $i < $quantity; $i++) {
+            $item = Item::create(['share_item_id' => $shareItem->id]);
+            $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
+            $created[] = $this->getItemById($user, $item->id);
+        }
+
+        return $created;
     }
 
     public function addItem(User $user, int $itemId, int $quantity = 1, array $attributes = []): Backpack

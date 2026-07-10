@@ -26,6 +26,30 @@ enum ShareItemType: string
     case RUNE = 'rune';
     case RUNE_KEY = 'rune_key';
 
+    /**
+     * Экипировка занимает слоты и адресуется по конкретному item_id,
+     * поэтому каждый экземпляр — отдельный предмет (не стакается).
+     */
+    public function isEquipment(): bool
+    {
+        return in_array($this, [
+            self::WEAPON,
+            self::SHIELD,
+            self::ARMOR,
+            self::BELT,
+            self::BAG,
+        ], true);
+    }
+
+    /**
+     * Стакается ли предмет в одной ячейке рюкзака (несколько штук в count).
+     * Экипировка — нет: каждый предмет хранится отдельным экземпляром.
+     */
+    public function isStackable(): bool
+    {
+        return ! $this->isEquipment();
+    }
+
     public function label(): string
     {
         return match ($this) {
