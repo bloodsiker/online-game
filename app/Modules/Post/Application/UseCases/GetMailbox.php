@@ -48,6 +48,15 @@ class GetMailbox
             ->count();
     }
 
+    public function unreadCount(User $user): int
+    {
+        return PostLetter::query()
+            ->where('recipient_user_id', $user->id)
+            ->whereNull('recipient_deleted_at')
+            ->whereNull('read_at')
+            ->count();
+    }
+
     /**
      * Сроки хранения как на проде: непрочитанное — 30 дней, прочитанное — 3 дня.
      */

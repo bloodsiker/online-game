@@ -2,18 +2,20 @@
 <data version="3">
 	<item id="1" label="0" command="m_location" pict="location"/>
 	<item id="2" label="1" command="" pict="character">
-		<item id="21" label="1" command="m_character" pict="form"/>
+		<item id="21" label="1" command="m_character" pict="char_portrait"/>
 		<item id="22" label="3" command="m_clan" pict="clan"/>
 		<item id="23" label="4" command="m_clan_member" pict="search_group"/>
 		<item id="24" label="7" command="m_friends" pict="contacts"/>
 		<item id="25" label="9" command="m_referral" pict="refferals"/>
 	</item>
 	<item id="3" label="2" command="m_backpack" pict="backPack"/>
-	<item id="4" label="5" command="m_quests" pict="p_event"/>
+	<item id="4" label="5" command="m_quests" pict="quest"/>
 	<item id="5" label="6" command="m_dungeon" pict="inst"/>
-	<item id="6" label="8" command="m_rating" pict="rating"/>
-	<item id="7" label="10" command="m_premium" pict="bank"/>
-	<item id="8" label="11" command="m_events" pict="p_event"/>
-	<item id="9" label="13" command="m_post" pict="post"/>
-	<item id="10" label="12" command="m_infoportal" pict="infoPortal"/>
+	<item id="6" label="14" command="m_maps" pict="world"/>
+	<item id="7" label="8" command="m_rating" pict="rating"/>
+	<item id="8" label="10" command="m_premium" pict="bank"/>
+	<item id="9" label="11" command="m_events" pict="p_event"/>
+	<item id="10" label="13" command="m_post" pict="post"/>
+	<item id="11" label="15" command="m_fights" pict="fights"/>
+	<item id="12" label="12" command="m_infoportal" pict="infoPortal"/>
 </data>

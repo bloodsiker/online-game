@@ -14,5 +14,20 @@ interface FightHitInterface
 
     public function getCombatClass(): CombatClass;
 
-    public function getClassDominance(): float;
+    /**
+     * Доля выраженности класса у бойца (0..1): насколько билд «танковый»,
+     * «уворотливый» или «критовый». Контры треугольника масштабируются
+     * непрерывно от долей, а не от дискретного класса — гибрид получает
+     * пропорционально ослабленные бонусы и штрафы.
+     */
+    public function getClassShare(CombatClass $class): float;
+
+    /** Множитель критического урона в процентах (150 = ×1.5) */
+    public function getCritDamage(): int;
+
+    /**
+     * Уровень бойца — масштабирует константы боя (K шансов, знаменатель брони),
+     * чтобы баланс не разваливался с ростом стат.
+     */
+    public function getLevel(): int;
 }

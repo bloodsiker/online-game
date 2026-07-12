@@ -1258,6 +1258,20 @@
         toLocation(routes[direction]);
     }
 
+    // Мигание кнопки «Почта» в верхнем меню при новых непрочитанных письмах
+    function checkUnreadMail() {
+        fetch('{{ route('post.unread-count') }}')
+            .then(r => r.json())
+            .then(data => {
+                const menuFrame = document.getElementById('menu-frame');
+                menuFrame?.contentWindow?.blinkButton?.('post', data.unread > 0);
+            })
+            .catch(() => {});
+    }
+
+    checkUnreadMail();
+    setInterval(checkUnreadMail, 60000);
+
     function attackMonster(id, monsterId, action) {
         let routeTemplate = "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
         document.getElementById('game-frame').contentWindow.location.href = routeTemplate
@@ -1424,7 +1438,7 @@
         document.getElementById('pts-modal-free').textContent = data.free;
         document.getElementById('pts-msg').style.display = 'none';
 
-        const labels = { strength: 'Сила', intuition: 'Интуиция', agility: 'Ловкость', intelligence: 'Интеллект', wisdom: 'Мудрость' };
+        const labels = { strength: 'Сила', intuition: 'Интуиция', agility: 'Ловкость', intelligence: 'Интеллект', wisdom: 'Мудрость', endurance: 'Выносливость' };
         const rows   = document.getElementById('pts-rows');
         const btnStyle = 'width:24px;height:24px;border:1px solid #a07040;background:url(/img/bg/table-header.jpg) repeat-x top left #c8924a;color:#461c0b;font-weight:bold;font-size:15px;cursor:pointer;border-radius:3px;padding:0;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);';
         const inpStyle = 'width:34px;text-align:center;border:1px solid #CEBBAA;border-radius:3px;padding:3px 0;font-family:Tahoma;font-size:12px;color:#461c0b;font-weight:bold;background:#fffaf3;';
@@ -1460,7 +1474,7 @@
     }
 
     function _ptsAdded() {
-        return ['strength','intuition','agility','intelligence','wisdom'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
+        return ['strength','intuition','agility','intelligence','wisdom','endurance'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);
     }
 
     function ptsInc(key) {
@@ -1490,11 +1504,13 @@
             agility:      parseInt(document.getElementById('ptsi-agility').value)      || 0,
             intelligence: parseInt(document.getElementById('ptsi-intelligence').value) || 0,
             wisdom:       parseInt(document.getElementById('ptsi-wisdom').value)       || 0,
+            endurance:    parseInt(document.getElementById('ptsi-endurance').value)    || 0,
             ostrength:     _ptsData.bases.strength,
             ointuition:    _ptsData.bases.intuition,
             oagility:      _ptsData.bases.agility,
             ointelligence: _ptsData.bases.intelligence,
             owisdom:       _ptsData.bases.wisdom,
+            oendurance:    _ptsData.bases.endurance,
         };
 
         fetch(_ptsData.saveUrl, {

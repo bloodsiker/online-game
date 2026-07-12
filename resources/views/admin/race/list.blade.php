@@ -24,6 +24,7 @@
                                 <th width="80">Интуиция</th>
                                 <th width="80">Мудрость</th>
                                 <th width="80">Интеллект</th>
+                                <th width="90">Выносл.</th>
                                 <th width="100">Своб. хар.</th>
                                 <th width="70"></th>
                             </tr>
@@ -38,13 +39,14 @@
                                     <td>{{ $race->intuition }}</td>
                                     <td>{{ $race->wisdom }}</td>
                                     <td>{{ $race->intelligence }}</td>
+                                    <td>{{ $race->endurance }}</td>
                                     <td>{{ $race->free_stats }}</td>
                                     <td>
                                         <a href="{{ route('admin.race.info', $race->id) }}" class="btn btn-xs btn-primary">Изменить</a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="9" class="text-center text-muted">Нет рас</td></tr>
+                                <tr><td colspan="10" class="text-center text-muted">Нет рас</td></tr>
                             @endforelse
                             </tbody>
                         </table>

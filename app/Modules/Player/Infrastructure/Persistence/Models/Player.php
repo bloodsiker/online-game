@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
 use App\Modules\Battle\Domain\Enums\CombatClass;
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Collection|MagicSkill[] $magicSkills
  * @property-read Collection|QuestPlayer[] $quests
  */
-class Player extends Model implements FightHitInterface
+class Player extends Model
 {
     use HasFactory;
 
@@ -112,11 +111,6 @@ class Player extends Model implements FightHitInterface
         return $this->max_dmg;
     }
 
-    public function getArmor(): int
-    {
-        return 0;
-    }
-
     public function getHpMax(): int
     {
         return $this->hp_max;
@@ -152,14 +146,9 @@ class Player extends Model implements FightHitInterface
         return floor($this->intelligence);
     }
 
-    public function getDodge(): int
+    public function getEndurance()
     {
-        return 0;
-    }
-
-    public function getCritical(): int
-    {
-        return 0;
+        return floor($this->endurance);
     }
 
     public function getCombatClass(): CombatClass
@@ -172,20 +161,6 @@ class Player extends Model implements FightHitInterface
             $str >= $agil && $str >= $int => CombatClass::TANK,
             $agil >= $int => CombatClass::DODGE,
             default => CombatClass::CRIT,
-        };
-    }
-
-    public function getClassDominance(): float
-    {
-        $str = (float) $this->strength;
-        $agil = (float) $this->agility;
-        $int = (float) $this->intuition;
-        $total = max(1.0, $str + $agil + $int);
-
-        return match ($this->getCombatClass()) {
-            CombatClass::TANK => $str / $total,
-            CombatClass::DODGE => $agil / $total,
-            CombatClass::CRIT => $int / $total,
         };
     }
 

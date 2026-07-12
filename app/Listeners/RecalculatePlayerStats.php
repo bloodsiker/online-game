@@ -35,6 +35,7 @@ class RecalculatePlayerStats
         $player->agility = $player->agility + $race->agility;
         $player->wisdom = $player->wisdom + $race->wisdom;
         $player->intelligence = $player->intelligence + $race->intelligence;
+        $player->endurance = $player->endurance + $race->endurance;
 
         $player->save();
 

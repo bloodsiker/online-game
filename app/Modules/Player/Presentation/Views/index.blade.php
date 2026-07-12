@@ -271,13 +271,12 @@
                                             &nbsp;·&nbsp;
                                             <b>{{ $character->raceName }}</b>
                                         </div>
-                                        @php $combatClass = $character->stats->getCombatClass(); @endphp
                                         <div style="margin-top:5px;">
                                             <span style="font-size:11px; color:#5a3a2a;">Класс: </span>
                                             <span style="display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:bold;
-                                                background:{{ match($combatClass->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }};
+                                                background:{{ $character->stats->getDisplayCombatClassColor() }};
                                                 color:#fff;">
-                                                {{ $combatClass->getLabel() }}
+                                                {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
                                     </div>
@@ -355,6 +354,7 @@
                                             ['Ловкость',   $character->baseAgility,        $character->stats->getAgility()],
                                             ['Интеллект',  $character->baseIntelligence,   $character->stats->getIntelligence()],
                                             ['Мудрость',   $character->baseWisdom,         $character->stats->getMud()],
+                                            ['Выносливость', $character->baseEndurance,    $character->stats->getEndurance()],
                                         ] as [$label, $base, $total])
                                             @php $bonus = $total - $base; @endphp
                                             <div class="char-stat-row">
@@ -393,8 +393,8 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Класс</span>
-                                            <span class="char-stat-val" style="color:{{ match($character->stats->getCombatClass()->value) { 'tank' => '#3a5a8a', 'dodge' => '#3a7a4a', 'crit' => '#8a3a3a' } }}">
-                                                {{ $character->stats->getCombatClass()->getLabel() }}
+                                            <span class="char-stat-val" style="color:{{ $character->stats->getDisplayCombatClassColor() }}">
+                                                {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
@@ -579,6 +579,7 @@
                 agility:      {{ $character->baseAgility }},
                 intelligence: {{ $character->baseIntelligence }},
                 wisdom:       {{ $character->baseWisdom }},
+                endurance:    {{ $character->baseEndurance }},
             },
             full: {
                 strength:     {{ $character->stats->getStrength() }},
@@ -586,6 +587,7 @@
                 agility:      {{ $character->stats->getAgility() }},
                 intelligence: {{ $character->stats->getIntelligence() }},
                 wisdom:       {{ $character->stats->getMud() }},
+                endurance:    {{ $character->stats->getEndurance() }},
             },
             saveUrl: '{{ route('character.point_save') }}',
             csrf:    '{{ csrf_token() }}',

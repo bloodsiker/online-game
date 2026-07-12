@@ -116,6 +116,9 @@
                             <li class="{{ request()->routeIs('admin.docs.clan') ? 'nav-active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.docs.clan') }}">Кланы</a>
                             </li>
+                            <li class="{{ request()->routeIs('admin.docs.battle') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.docs.battle') }}">Боевой треугольник</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="{{ request()->routeIs('admin.referral.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">

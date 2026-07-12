@@ -172,6 +172,7 @@
     <input name="oagil"  type="hidden" value="{{ $character->baseAgility }}">
     <input name="ointel" type="hidden" value="{{ $character->baseIntelligence }}">
     <input name="omud"   type="hidden" value="{{ $character->baseWisdom }}">
+    <input name="oendurance" type="hidden" value="{{ $character->baseEndurance }}">
 
     <div class="pts-wrap">
 
@@ -190,6 +191,7 @@
                 ['Ловкость',   'agility',      $character->stats->getAgility(),      $character->baseAgility],
                 ['Интеллект',  'intelligence', $character->stats->getIntelligence(), $character->baseIntelligence],
                 ['Мудрость',   'wisdom',       $character->stats->getMud(),          $character->baseWisdom],
+                ['Выносливость', 'endurance',  $character->stats->getEndurance(),    $character->baseEndurance],
             ] as [$label, $key, $full, $base])
                 <div class="pts-row">
                     <span class="pts-row-name">{{ $label }}</span>
@@ -229,7 +231,8 @@
               + document.forms.incpoints["intuition"].value * 1
               + document.forms.incpoints["agility"].value * 1
               + document.forms.incpoints["intelligence"].value * 1
-              + document.forms.incpoints["wisdom"].value * 1;
+              + document.forms.incpoints["wisdom"].value * 1
+              + document.forms.incpoints["endurance"].value * 1;
         if (allpoints - p < 0) {
             document.forms.incpoints[vid].value = cur + allpoints - p;
             document.forms.incpoints.points.value = 0;
@@ -251,6 +254,7 @@
     newVal("agility");
     newVal("intelligence");
     newVal("wisdom");
+    newVal("endurance");
 
     function incval(incname) {
         if (document.forms.incpoints.points.value > 0) {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -92,11 +92,22 @@ class Monster extends Model implements FightHitInterface
      * Класс монстра определяется доминирующей характеристикой.
      * Нормализуем через базовые значения, т.к. у монстров нет первичных стат.
      */
+    /**
+     * Нормировка вторичных стат монстра к сопоставимым «весам» классов:
+     * у монстров нет первичных характеристик, поэтому берём броню/уворот/крит
+     * и приводим их к общей шкале (50 брони ≈ 20 уворота ≈ 20 крита).
+     */
+    private const ARMOR_CLASS_SCALE = 50;
+
+    private const DODGE_CLASS_SCALE = 20;
+
+    private const CRIT_CLASS_SCALE = 20;
+
     public function getCombatClass(): CombatClass
     {
-        $armorScore = $this->armor / 50;
-        $dodgeScore = $this->dodge / 20;
-        $critScore = $this->critical / 20;
+        $armorScore = $this->armor / self::ARMOR_CLASS_SCALE;
+        $dodgeScore = $this->dodge / self::DODGE_CLASS_SCALE;
+        $critScore = $this->critical / self::CRIT_CLASS_SCALE;
 
         return match (true) {
             $armorScore >= $dodgeScore && $armorScore >= $critScore => CombatClass::TANK,
@@ -105,17 +116,27 @@ class Monster extends Model implements FightHitInterface
         };
     }
 
-    public function getClassDominance(): float
+    public function getClassShare(CombatClass $class): float
     {
-        $armorScore = $this->armor / 50;
-        $dodgeScore = $this->dodge / 20;
-        $critScore = $this->critical / 20;
+        $armorScore = $this->armor / self::ARMOR_CLASS_SCALE;
+        $dodgeScore = $this->dodge / self::DODGE_CLASS_SCALE;
+        $critScore = $this->critical / self::CRIT_CLASS_SCALE;
         $total = max(0.001, $armorScore + $dodgeScore + $critScore);
 
-        return match ($this->getCombatClass()) {
+        return match ($class) {
             CombatClass::TANK => $armorScore / $total,
             CombatClass::DODGE => $dodgeScore / $total,
             CombatClass::CRIT => $critScore / $total,
         };
+    }
+
+    public function getCritDamage(): int
+    {
+        return 150;
+    }
+
+    public function getLevel(): int
+    {
+        return max(1, (int) $this->lvl);
     }
 }

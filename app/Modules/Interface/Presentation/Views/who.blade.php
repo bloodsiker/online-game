@@ -74,7 +74,6 @@
             width: 13px;
             height: 13px;
             vertical-align: middle;
-            margin-left: 2px;
         }
         .clan-tag {
             font-size: 11px;
@@ -104,10 +103,6 @@
                         <span class="time">{{ $user->time }}</span>
                         <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                              onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
-                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
-                           class="pnick {{ $user->isOnline ? '' : 'user_offline' }}"
-                           data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
-                           title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                         @if($user->clanName)
                             @if($user->clanIcon)
                                 <img class="clan-icon" src="{{ $user->clanIcon }}"
@@ -117,6 +112,11 @@
                                 <span class="clan-tag">[{{ $user->clanName }}]</span>
                             @endif
                         @endif
+                        <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
+                           class="pnick {{ $user->isOnline ? '' : 'user_offline' }}"
+                           data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
+                           title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
+                        <a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                     </span>
                 </div>
             @endforeach
@@ -131,9 +131,6 @@
                     <span class="time">{{ $user->time }}</span>
                     <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                          onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
-                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
-                       class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
-                       title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                     @if($user->clanName)
                         @if($user->clanIcon)
                             <img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}">
@@ -141,6 +138,10 @@
                             <span class="clan-tag">[{{ $user->clanName }}]</span>
                         @endif
                     @endif
+                    <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
+                       class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
+                       title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
+                    <a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                 </div>
             @endforeach
         </td>
@@ -172,6 +173,13 @@
 
     var prvArrowSrc = '{{ asset('img/icon/users-arrow.gif') }}';
     var infoUrlBase = '{{ url('/info/user') }}/';
+    var playerInfoIconSrc = '{{ asset('main/images/player_info.gif') }}';
+
+    // Иконка информации о персонаже возле ника — открывает карточку игрока в отдельном окне
+    function whoOpenUserInfo(userId) {
+        window.open('{{ url('/info/u') }}/' + userId, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        return false;
+    }
 
     function renderLocationUsers(users) {
         var container = document.getElementById('location-users');
@@ -197,8 +205,9 @@
                 +   '<span class="' + offCls.trim() + '">'
                 +     '<span class="time">' + u.time + '</span> '
                 +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(\'' + u.name.replace(/'/g, "\\'") + '\')" alt="Приват"> '
-                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" data-uid="' + u.id + '" data-name="' + u.name.replace(/"/g, '&quot;') + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
                 +     clan
+                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" data-uid="' + u.id + '" data-name="' + u.name.replace(/"/g, '&quot;') + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
+                +     '<a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo(' + u.id + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
                 +   '</span>'
                 + '</div>';
         });

@@ -27,7 +27,7 @@
     }
 
     function openUserInfo(uid) {
-        window.open(cfg.infoUrlBase + uid, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        window.open(cfg.infoUrlBase + uid, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
     }
 
     function copyNick(name) {

@@ -68,9 +68,59 @@
         .medal_bg_c { background: url({{ asset('img/medal/medal_c.gif') }}) top center; width: 45px; }
         .medal_bg_c img { width: 35px; height: 35px; border: 0; vertical-align: middle; }
         .medal_bg img { cursor: pointer; }
+        #artifact_alt .aa-table {
+            border-radius: 30px 30px 0 0;
+            box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, 0.2);
+            font-size: 11px;
+        }
+        .aa-tl {
+            background: url(/img/bg/item_info/tbl-pop_corner-top-left.gif) no-repeat;
+            width: 14px;
+            height: 24px;
+        }
+        .aa-t {
+            background: url(/img/bg/item_info/tbl-pop_top.gif);
+            height: 24px;
+        }
+        .aa-tr {
+            background: url(/img/bg/item_info/tbl-pop_corner-top-right.gif) no-repeat;
+            width: 14px;
+            height: 24px;
+        }
+        .aa-l {
+            background: url(/img/bg/item_info/tbl-pop_left.gif) repeat-y;
+            width: 14px;
+        }
+        .aa-r {
+            background: url(/img/bg/item_info/tbl-pop_right.gif) repeat-y;
+            width: 14px;
+        }
+        .aa-bl {
+            background: url(/img/bg/item_info/tbl-pop_corner-bottom-left.gif) no-repeat;
+            width: 14px;
+            height: 5px;
+        }
+        .aa-b {
+            background: url(/img/bg/item_info/tbl-pop_bottom.gif) repeat-x;
+            height: 5px;
+        }
+        .aa-br {
+            background: url(/img/bg/item_info/tbl-pop_corner-bottom-right.gif) no-repeat;
+            width: 14px;
+            height: 5px;
+        }
+        .list_dark { background-color: #F4BB8A; }
+        .skill_list td { padding: 0 7px; }
+        .red, .red * { color: #d00000; }
     </style>
+    {!! $itemTooltipScript !!}
+    <script>
+        window.gebi = window.gebi || function (id) { return document.getElementById(id); };
+    </script>
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
+<div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
 <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
     <tbody>
     <tr>
@@ -118,13 +168,18 @@
                                             </table>
                                             <div style="height:6px;font-size:1px;">&nbsp;</div>
 
-                                            @php $equip = $user->player->playerEquip; @endphp
+                                            @php
+                                                $equip = $user->player->playerEquip;
+                                                $itemTooltipAttrs = static fn ($item): string => $item === null
+                                                    ? ''
+                                                    : 'data-id="'.(int) $item->id.'" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"';
+                                            @endphp
                                             <table cellspacing="0" cellpadding="0" border="0" align="center">
                                                 <tbody>
                                                 <tr>
                                                     <td>
                                                         @if($equip?->helmet)
-                                                            <img src="{{ $equip->helmetSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->helmetSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->helmetSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->helmetSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -137,7 +192,7 @@
                                                 <tr>
                                                     <td>
                                                         @if($equip?->handLeft)
-                                                            <img src="{{ $equip->handLeft->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->handLeft->itemInfo->name }}">
+                                                            <img src="{{ $equip->handLeft->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->handLeft) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -147,7 +202,7 @@
                                                     </td>
                                                     <td>
                                                         @if($equip?->handRight)
-                                                            <img src="{{ $equip->handRight->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->handRight->itemInfo->name }}">
+                                                            <img src="{{ $equip->handRight->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->handRight) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -156,7 +211,7 @@
                                                 <tr>
                                                     <td>
                                                         @if($equip?->armor)
-                                                            <img src="{{ $equip->armorSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->armorSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->armorSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->armorSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -166,14 +221,14 @@
                                                 <tr>
                                                     <td>
                                                         @if($equip?->chain_armor)
-                                                            <img src="{{ $equip->chainArmorSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->chainArmorSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->chainArmorSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->chainArmorSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
                                                     </td>
                                                     <td>
                                                         @if($equip?->cloak)
-                                                            <img src="{{ $equip->cloakSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->cloakSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->cloakSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->cloakSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -182,14 +237,14 @@
                                                 <tr>
                                                     <td>
                                                         @if($equip?->shoes)
-                                                            <img src="{{ $equip->shoesSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->shoesSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->shoesSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->shoesSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
                                                     </td>
                                                     <td>
                                                         @if($equip?->gloves)
-                                                            <img src="{{ $equip->glovesSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->glovesSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->glovesSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->glovesSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -198,28 +253,28 @@
                                                 <tr>
                                                     <td align="center">
                                                         @if($equip?->belt_first)
-                                                            <img src="{{ $equip->beltFirstSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->beltFirstSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->beltFirstSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->beltFirstSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
                                                     </td>
                                                     <td align="center">
                                                         @if($equip?->belt_second)
-                                                            <img src="{{ $equip->beltSecondSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->beltSecondSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->beltSecondSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->beltSecondSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
                                                     </td>
                                                     <td align="center">
                                                         @if($equip?->bag_first)
-                                                            <img src="{{ $equip->bagFirstSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->bagFirstSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->bagFirstSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->bagFirstSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
                                                     </td>
                                                     <td align="center">
                                                         @if($equip?->bag_second)
-                                                            <img src="{{ $equip->bagSecondSlot->itemInfo->image }}" class="hero-itm equipped" title="{{ $equip->bagSecondSlot->itemInfo->name }}">
+                                                            <img src="{{ $equip->bagSecondSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->bagSecondSlot) !!}>
                                                         @else
                                                             <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
                                                         @endif
@@ -307,14 +362,18 @@
                                                             </tr>
                                                             @endif
                                                             <tr>
+                                                                <td class="brd2-top brd2-bt b">Класс персонажа</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getDisplayCombatClassLabel() }}</td>
+                                                            </tr>
+                                                            <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Побед</td>
                                                                 <td class="brd2-top brd2-bt b redd" align="right">{{ $user->player->victory }}</td>
                                                             </tr>
-                                                            <tr class="bg_l">
+                                                            <tr>
                                                                 <td class="brd2-top brd2-bt b">Поражений</td>
                                                                 <td class="brd2-top brd2-bt b redd" align="right">{{ $user->player->death }}</td>
                                                             </tr>
-                                                            <tr>
+                                                            <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Онлайн:</td>
                                                                 <td class="brd2-top brd2-bt b" align="right">
                                                                     @if($isOnline)
@@ -344,10 +403,14 @@
                                                                 <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->intuition }}</td>
                                                             </tr>
                                                             <tr>
+                                                                <td class="brd2-top brd2-bt b">Выносливость</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getEndurance() }}</td>
+                                                            </tr>
+                                                            <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Мудрость</td>
                                                                 <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->wisdom }}</td>
                                                             </tr>
-                                                            <tr class="bg_l">
+                                                            <tr>
                                                                 <td class="brd2-top brd2-bt b">Интеллект</td>
                                                                 <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->intelligence }}</td>
                                                             </tr>

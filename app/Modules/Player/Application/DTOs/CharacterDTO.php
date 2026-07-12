@@ -36,6 +36,7 @@ final readonly class CharacterDTO
         public int $baseAgility,
         public int $baseIntelligence,
         public int $baseWisdom,
+        public int $baseEndurance,
         // Full resolved stat sheet (with equipment, passives, buffs)
         public StatSheet $stats,
         // Skills

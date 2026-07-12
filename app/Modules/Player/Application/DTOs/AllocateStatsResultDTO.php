@@ -13,5 +13,6 @@ final readonly class AllocateStatsResultDTO
         public int $agility,
         public int $intelligence,
         public int $wisdom,
+        public int $endurance,
     ) {}
 }

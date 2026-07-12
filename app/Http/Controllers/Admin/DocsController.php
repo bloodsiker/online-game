@@ -18,4 +18,9 @@ class DocsController extends Controller
     {
         return view('admin.docs.clan');
     }
+
+    public function battle(): View
+    {
+        return view('admin.docs.battle');
+    }
 }

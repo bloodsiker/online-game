@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Modules\Battle\Domain\Enums\CombatClass;
-use App\Modules\Share\Domain\Enums\ItemEffectType;
-use App\Modules\Share\Domain\Enums\ItemEffectValueType;
-use App\Modules\Share\Domain\Enums\ShareItemSlot;
-use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Listeners\RecalculatePlayerModification;
+use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\DTO\StatModifier;
 use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemBuff;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
 
 class PlayerStatService
 {
@@ -56,31 +56,93 @@ class PlayerStatService
     // Sheet assembly
     // -------------------------------------------------------------------------
 
+    /**
+     * Двухпроходный расчёт: сначала итоговые первичные статы (с учётом
+     * модификаторов шмота/баффов), затем производные — уворот/крит/броня/
+     * критурон/бонус урона считаются уже от итоговых первичных. Иначе
+     * «+ловкость» на предмете не давала уворота.
+     */
     private function buildSheet(Player $player, array $modifiers): StatSheet
     {
-        $equip = $player->playerEquip;
-
-        // Base values. Weapon slots: if a weapon is equipped the base is 0
-        // (weapon damage comes entirely from the item's ATTACK_MIN/MAX effects).
-        $base = [
+        // ── Проход 1: первичные статы ────────────────────────────────────────
+        $primaryBase = [
             'strength' => (float) floor($player->strength),
             'intuition' => (float) floor($player->intuition),
             'agility' => (float) floor($player->agility),
             'wisdom' => (float) floor($player->wisdom),
             'intelligence' => (float) floor($player->intelligence),
-            'dodge' => (float) max(0, ($player->agility - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
-            'critical' => (float) max(0, ($player->intuition - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
-            'armor' => (float) max(0, ($player->strength - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
-            'hp_max' => (float) $player->hp_max,
+            'endurance' => (float) floor($player->endurance),
+        ];
+
+        $primary = $this->applyModifiers($primaryBase, $modifiers);
+
+        // ── Проход 2: производные от итоговых первичных ─────────────────────
+        $derivedBase = [
+            'dodge' => (float) max(0, ($primary['agility'] - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
+            'critical' => (float) max(0, ($primary['intuition'] - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
+            'armor' => (float) max(0, ($primary['strength'] - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
+            // Как и броня от силы — от итоговой выносливости (с учётом шмота/баффов),
+            // а не от «сырого» hp_max: иначе +выносливость с предмета не давала бы HP.
+            'hp_max' => (float) (RecalculatePlayerModification::DEFAULT_HP
+                + RecalculatePlayerModification::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
+                + RecalculatePlayerModification::HP_PER_ENDURANCE * max(0, $primary['endurance'] - 1)),
             'mp_max' => (float) $player->mp_max,
             'left_min_dmg' => (float) $player->min_dmg,
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
             'magic_attack' => (float) $player->intel,
+            // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
+            'crit_damage' => RecalculatePlayerModification::CRIT_DAMAGE_BASE
+                + RecalculatePlayerModification::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
         ];
 
-        // Accumulate flat and percent per stat
+        // Сила усиливает урон оружия процентом — от итоговой силы, с мягким потолком
+        $strengthDmgPct = RecalculatePlayerModification::strengthDamagePercent(
+            (float) $primary['strength'],
+            max(1, (int) $player->lvl),
+        );
+        foreach (['left_min_dmg', 'left_max_dmg', 'right_min_dmg', 'right_max_dmg'] as $dmgStat) {
+            $modifiers[] = new StatModifier(stat: $dmgStat, value: $strengthDmgPct, isPercent: true, source: 'strength');
+        }
+
+        $computed = $primary + $this->applyModifiers($derivedBase, $modifiers);
+
+        $sheet = new StatSheet;
+        $sheet->modifiers = $modifiers;
+        $sheet->freeStats = $player->free_stats;
+        $sheet->strength = $computed['strength'];
+        $sheet->intuition = $computed['intuition'];
+        $sheet->agility = $computed['agility'];
+        $sheet->wisdom = $computed['wisdom'];
+        $sheet->intelligence = $computed['intelligence'];
+        $sheet->endurance = $computed['endurance'];
+        $sheet->dodge = $computed['dodge'];
+        $sheet->critical = $computed['critical'];
+        $sheet->armor = $computed['armor'];
+        $sheet->hpMax = $computed['hp_max'];
+        $sheet->mpMax = $computed['mp_max'];
+        $sheet->leftMinDmg = $computed['left_min_dmg'];
+        $sheet->leftMaxDmg = $computed['left_max_dmg'];
+        $sheet->rightMinDmg = $computed['right_min_dmg'];
+        $sheet->rightMaxDmg = $computed['right_max_dmg'];
+        $sheet->magicAttack = $computed['magic_attack'];
+        $sheet->critDamage = $computed['crit_damage'];
+        $sheet->level = max(1, (int) $player->lvl);
+        $sheet->combatClass = $this->determineCombatClass($player);
+
+        return $sheet;
+    }
+
+    /**
+     * base + flat модификаторы, затем процентные: floor((base+flat)×(1+pct/100)).
+     *
+     * @param  array<string, float>  $base
+     * @param  StatModifier[]  $modifiers
+     * @return array<string, int>
+     */
+    private function applyModifiers(array $base, array $modifiers): array
+    {
         $flat = array_fill_keys(array_keys($base), 0.0);
         $percent = array_fill_keys(array_keys($base), 0.0);
 
@@ -95,35 +157,12 @@ class PlayerStatService
             }
         }
 
-        // Formula: floor( (base + flat) * (1 + percent / 100) )
         $computed = [];
         foreach ($base as $stat => $baseVal) {
-            $computed[$stat] = (int) floor(
-                ($baseVal + $flat[$stat]) * (1 + $percent[$stat] / 100)
-            );
+            $computed[$stat] = (int) floor(($baseVal + $flat[$stat]) * (1 + $percent[$stat] / 100));
         }
 
-        $sheet = new StatSheet;
-        $sheet->modifiers = $modifiers;
-        $sheet->freeStats = $player->free_stats;
-        $sheet->strength = $computed['strength'];
-        $sheet->intuition = $computed['intuition'];
-        $sheet->agility = $computed['agility'];
-        $sheet->wisdom = $computed['wisdom'];
-        $sheet->intelligence = $computed['intelligence'];
-        $sheet->dodge = $computed['dodge'];
-        $sheet->critical = $computed['critical'];
-        $sheet->armor = $computed['armor'];
-        $sheet->hpMax = $computed['hp_max'];
-        $sheet->mpMax = $computed['mp_max'];
-        $sheet->leftMinDmg = $computed['left_min_dmg'];
-        $sheet->leftMaxDmg = $computed['left_max_dmg'];
-        $sheet->rightMinDmg = $computed['right_min_dmg'];
-        $sheet->rightMaxDmg = $computed['right_max_dmg'];
-        $sheet->magicAttack = $computed['magic_attack'];
-        $sheet->combatClass = $this->determineCombatClass($player);
-
-        return $sheet;
+        return $computed;
     }
 
     // -------------------------------------------------------------------------
@@ -166,6 +205,8 @@ class PlayerStatService
                     ShareItemStatType::DODGE => 'dodge',
                     ShareItemStatType::CRITICAL => 'critical',
                     ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
+                    ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
+                    ShareItemStatType::ENDURANCE => 'endurance',
                     default => null,
                 };
 
@@ -341,7 +382,8 @@ class PlayerStatService
      */
     private function modifiersFromEntry(array $entry, string $source): array
     {
-        $type = $entry['type'] ?? null;
+        // Камни пишут ключ 'stat', эффекты — 'type'; принимаем оба
+        $type = $entry['type'] ?? $entry['stat'] ?? null;
         $value = (float) ($entry['value'] ?? 0);
         $isPct = (bool) ($entry['is_percent'] ?? false);
 

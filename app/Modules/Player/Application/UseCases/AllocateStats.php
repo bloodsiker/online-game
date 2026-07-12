@@ -37,6 +37,7 @@ class AllocateStats
         $player->agility += $stats['agility'];
         $player->intelligence += $stats['intelligence'];
         $player->wisdom += $stats['wisdom'];
+        $player->endurance += $stats['endurance'] ?? 0;
         $player->free_stats -= $sumChange;
 
         $this->playerRepository->save($player);
@@ -50,6 +51,7 @@ class AllocateStats
             agility: (int) $player->getAgility(),
             intelligence: (int) $player->getIntelligence(),
             wisdom: (int) $player->getMud(),
+            endurance: (int) $player->getEndurance(),
         );
     }
 }

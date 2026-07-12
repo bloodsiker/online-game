@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\DTO;
 
-use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Battle\Domain\Enums\CombatClass;
 
 class StatSheet implements FightHitInterface
 {
@@ -18,6 +18,9 @@ class StatSheet implements FightHitInterface
     public int $wisdom = 0;
 
     public int $intelligence = 0;
+
+    /** Отвечает только за HP: не входит в определение боевого класса (танк/уворот/крит) */
+    public int $endurance = 0;
 
     public int $dodge = 0;
 
@@ -38,6 +41,11 @@ class StatSheet implements FightHitInterface
     public int $rightMaxDmg = 0;
 
     public int $magicAttack = 0;
+
+    /** Множитель критического урона, % (150 = ×1.5) */
+    public int $critDamage = 150;
+
+    public int $level = 1;
 
     public int $freeStats = 0;
 
@@ -67,18 +75,80 @@ class StatSheet implements FightHitInterface
         return $this->combatClass;
     }
 
-    public function getClassDominance(): float
+    public function getDisplayCombatClassLabel(): string
+    {
+        $shares = $this->combatClassShares();
+        $maxShare = max($shares);
+        $minShare = min($shares);
+
+        if (($maxShare - $minShare) <= 0.10) {
+            return 'Универсал';
+        }
+
+        arsort($shares);
+        $classes = array_keys($shares);
+        $primary = CombatClass::from($classes[0]);
+        $secondary = CombatClass::from($classes[1]);
+
+        if (($shares[$classes[0]] - $shares[$classes[1]]) <= 0.15) {
+            return 'Гибрид: '.$primary->getLabel().'/'.$secondary->getLabel();
+        }
+
+        return $primary->getLabel();
+    }
+
+    public function getDisplayCombatClassColor(): string
+    {
+        $shares = $this->combatClassShares();
+        $maxShare = max($shares);
+        $minShare = min($shares);
+
+        if (($maxShare - $minShare) <= 0.10) {
+            return '#6b5a2a';
+        }
+
+        arsort($shares);
+        $classes = array_keys($shares);
+
+        if (($shares[$classes[0]] - $shares[$classes[1]]) <= 0.15) {
+            return '#6a4a7a';
+        }
+
+        return match (CombatClass::from($classes[0])) {
+            CombatClass::TANK => '#3a5a8a',
+            CombatClass::DODGE => '#3a7a4a',
+            CombatClass::CRIT => '#8a3a3a',
+        };
+    }
+
+    public function getClassShare(CombatClass $class): float
+    {
+        return $this->combatClassShares()[$class->value];
+    }
+
+    /** @return array<string, float> */
+    private function combatClassShares(): array
     {
         $str = (float) $this->strength;
         $agil = (float) $this->agility;
         $int = (float) $this->intuition;
         $total = max(1.0, $str + $agil + $int);
 
-        return match ($this->combatClass) {
-            CombatClass::TANK => $str / $total,
-            CombatClass::DODGE => $agil / $total,
-            CombatClass::CRIT => $int / $total,
-        };
+        return [
+            CombatClass::TANK->value => $str / $total,
+            CombatClass::DODGE->value => $agil / $total,
+            CombatClass::CRIT->value => $int / $total,
+        ];
+    }
+
+    public function getCritDamage(): int
+    {
+        return $this->critDamage;
+    }
+
+    public function getLevel(): int
+    {
+        return $this->level;
     }
 
     // Stat getters (used in views and combat strategies)
@@ -105,6 +175,11 @@ class StatSheet implements FightHitInterface
     public function getIntelligence(): int
     {
         return $this->intelligence;
+    }
+
+    public function getEndurance(): int
+    {
+        return $this->endurance;
     }
 
     public function getHpMax(): int

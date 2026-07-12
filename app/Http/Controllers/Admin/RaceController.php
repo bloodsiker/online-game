@@ -51,6 +51,7 @@ class RaceController extends Controller
         $race->intuition = (float) $request->input('intuition', 0);
         $race->wisdom = (float) $request->input('wisdom', 0);
         $race->intelligence = (float) $request->input('intelligence', 0);
+        $race->endurance = (float) $request->input('endurance', 0);
         $race->free_stats = (int) $request->input('free_stats', 0);
     }
 }

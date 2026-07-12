@@ -3,11 +3,11 @@
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\DTO\FightHitDTO;
+use App\Modules\Battle\Application\Services\Combat\HitCalculator;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Battle\Domain\Contracts\FightHitInterface;
-use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 
 class MagicAttackStrategy implements AttackStrategyInterface
 {
@@ -47,18 +47,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
 
         $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
 
-        // 1. Проверка уклонения — магию тоже можно увернуться (баланс настраивается в HitCalculator)
-        $dodgeHit = $this->hitCalc->playerHit($this->player, $this->monster, 0, 0);
-        if ($dodgeHit->isDodge()) {
-            return [
-                $dodgeHit
-                    ->setMagicSkill($this->magicSkill)
-                    ->setWeaponName($this->magicSkill->name)
-                    ->setWeapon(null),
-            ];
-        }
-
-        // 2. Базовый урон от скилла
+        // Базовый урон от скилла (уворот бросается один раз — внутри hit() ниже)
         $baseDamage = random_int($this->magicSkill->min_damage, $this->magicSkill->max_damage);
 
         // 3. Бонус от магического оружия (посох, жезл, книга и т.д.)
@@ -74,11 +63,17 @@ class MagicAttackStrategy implements AttackStrategyInterface
         $totalMin = $baseDamage + $weaponMinBonus;
         $totalMax = $baseDamage + $weaponMaxBonus;
 
-        // 4. Рассчитываем хит с итоговым диапазоном урона
-        $hit = $this->hitCalc->playerHit($this->player, $this->monster, $totalMin, $totalMax);
+        // Рассчитываем хит с итоговым диапазоном урона
+        $hit = $this->hitCalc->hit($this->player, $this->monster, $totalMin, $totalMax);
 
-        // Если вдруг хит критовал — всё ок, HitCalculator уже это посчитал
-        // Если уклонения нет — продолжаем
+        if ($hit->isDodge()) {
+            return [
+                $hit
+                    ->setMagicSkill($this->magicSkill)
+                    ->setWeaponName($this->magicSkill->name)
+                    ->setWeapon(null),
+            ];
+        }
 
         foreach ($this->magicSkill->skillEffects as $effectData) {
             if (random_int(1, 100) <= $effectData->pivot->chance) {

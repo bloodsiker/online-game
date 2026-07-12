@@ -4,88 +4,160 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\DTO\FightHitDTO;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
 
 readonly class HitCalculator
 {
-    public function playerHit(FightHitInterface $attacker, FightHitInterface $defender, $min, $max): FightHitDTO
-    {
-        return $this->calculateHit($attacker, $defender, $min, $max);
-    }
+    /** Базовый шанс уворота/крита при равных статах, % */
+    private const BASE_CHANCE = 5.0;
 
-    public function monsterHit(FightHitInterface $attacker, FightHitInterface $defender, $min, $max): FightHitDTO
-    {
-        return $this->calculateHit($attacker, $defender, $min, $max);
-    }
+    /** Нижний порог шанса: отставание в статах не обнуляет уворот/крит полностью */
+    private const MIN_CHANCE = 5.0;
 
-    private function calculateHit(FightHitInterface $attacker, FightHitInterface $defender, $min, $max): FightHitDTO
+    /** Максимальная прибавка к базовому шансу от перевеса стат, % (потолок = 5 + 70 = 75%) */
+    private const MAX_STAT_BONUS = 70.0;
+
+    /**
+     * Уровень, на котором калиброваны константы: K шансов и знаменатель брони
+     * масштабируются от среднего уровня бойцов относительно этого якоря,
+     * иначе на высоких уровнях шансы прилипают к потолку, а броня растёт бесконечно.
+     */
+    private const REFERENCE_LEVEL = 12.0;
+
+    /** Константа смягчения шансов на референсном уровне (перевес K даёт половину прибавки) */
+    private const SOFTCAP_K = 55.0;
+
+    /** Знаменатель формулы брони на референсном уровне: митигция = A/(A+armor) */
+    private const ARMOR_CONSTANT = 220.0;
+
+    /** Софткап критурона: рост выше базы асимптотически ограничен CRIT_DAMAGE_CAP */
+    private const CRIT_DAMAGE_BASE = 175.0;
+
+    private const CRIT_DAMAGE_CAP = 300.0;
+
+    /** Контра «Танк > Уворот»: максимальное срезание шанса уворота (при чистом танке) */
+    private const DODGE_COUNTER = 0.27;
+
+    /** Контра «Уворот > Крит»: максимальное срезание шанса крита (при чистом увороте) */
+    private const CRIT_COUNTER = 0.05;
+
+    /** Контра «Крит > Танк»: максимальное пробитие брони на крите (при чистом крите) */
+    private const ARMOR_PIERCE = 0.92;
+
+    public function __construct(
+        private RandomizerInterface $random,
+    ) {}
+
+    public function hit(FightHitInterface $attacker, FightHitInterface $defender, int $min, int $max): FightHitDTO
     {
         $dto = new FightHitDTO;
 
-        $attackerClass = $attacker->getCombatClass();
-        $defenderClass = $defender->getCombatClass();
-
-        if ($this->isDodge($attacker, $defender, $attackerClass, $defenderClass)) {
+        if ($this->isDodge($attacker, $defender)) {
             return $dto->setDodge(true);
         }
 
-        $damage = mt_rand($min, $max);
-        $isCrit = $this->isCritical($attacker, $defender, $attackerClass, $defenderClass);
+        $damage = $this->random->between(min($min, $max), max($min, $max));
+        $isCrit = $this->isCritical($attacker, $defender);
 
         if ($isCrit) {
             $dto->setCritical(true);
-            $damage *= 2;
+            $damage = (int) round($damage * $this->effectiveCritDamage($attacker) / 100);
         }
 
-        // Крит > Танк: пробитие брони до 50%, масштабируется по доминированию атакующего
-        // Чистый CRIT (dominance≈0.9) → -45% брони; гибрид (dominance≈0.35) → -17% брони
-        $effectiveArmor = $defender->getArmor();
-        if ($isCrit
-            && $attackerClass === CombatClass::CRIT
-            && $defenderClass === CombatClass::TANK
-        ) {
-            $pierce = 0.5 * $attacker->getClassDominance();
-            $effectiveArmor = (int) ($effectiveArmor * (1 - $pierce));
-        }
-
-        $final = $damage * (100 / (100 + $effectiveArmor));
+        $armorConstant = self::ARMOR_CONSTANT * $this->levelScale($attacker, $defender);
+        $final = $damage * ($armorConstant / ($armorConstant + $this->effectiveArmor($attacker, $defender, $isCrit)));
 
         return $dto->setDamage(max(1, (int) round($final)));
     }
 
-    private function isDodge(
-        FightHitInterface $attacker,
-        FightHitInterface $defender,
-        CombatClass $attackerClass,
-        CombatClass $defenderClass,
-    ): bool {
-        $chance = max(0, min(100, 5 + ($defender->getDodge() - $attacker->getDodge()) * 0.3));
+    /**
+     * Масштаб констант от среднего уровня сторон: на 12 уровне ×1,
+     * дальше пропорционально — сохраняет форму кривых на любом уровне.
+     */
+    private function levelScale(FightHitInterface $attacker, FightHitInterface $defender): float
+    {
+        $avgLevel = ($attacker->getLevel() + $defender->getLevel()) / 2;
 
-        // Танк > Уворот: снижение шанса уворота до 40%, масштабируется по доминированию атакующего
-        // Чистый TANK (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
-        if ($attackerClass === CombatClass::TANK && $defenderClass === CombatClass::DODGE) {
-            $reduction = 0.4 * $attacker->getClassDominance();
-            $chance *= (1 - $reduction);
-        }
-
-        return mt_rand(0, 100) < $chance;
+        return max(1.0, $avgLevel / self::REFERENCE_LEVEL);
     }
 
-    private function isCritical(
-        FightHitInterface $attacker,
-        FightHitInterface $defender,
-        CombatClass $attackerClass,
-        CombatClass $defenderClass,
-    ): bool {
-        $chance = max(0, min(100, 5 + ($attacker->getCritical() - $defender->getCritical()) * 0.3));
+    /**
+     * Выраженность класса сверх «универсальной» трети: у ровного билда контры
+     * нулевые, у чистого (~0.9 доли) — почти максимальные. Без вычитания базы
+     * универсал получал бы понемногу от всех трёх контр сразу.
+     */
+    private function classShareAboveBaseline(FightHitInterface $fighter, CombatClass $class): float
+    {
+        return max(0.0, ($fighter->getClassShare($class) - 1 / 3) / (2 / 3));
+    }
 
-        // Уворот > Крит: снижение шанса крита до 40%, масштабируется по доминированию защитника
-        // Чистый DODGE защитник (dominance≈0.9) → -36%; гибрид (dominance≈0.35) → -14%
-        if ($attackerClass === CombatClass::CRIT && $defenderClass === CombatClass::DODGE) {
-            $reduction = 0.4 * $defender->getClassDominance();
-            $chance *= (1 - $reduction);
+    /**
+     * Крит > Танк: критовость атакующего пробивает броню на крите.
+     */
+    private function effectiveArmor(FightHitInterface $attacker, FightHitInterface $defender, bool $isCrit): float
+    {
+        $armor = (float) $defender->getArmor();
+
+        if (! $isCrit) {
+            return $armor;
         }
 
-        return mt_rand(0, 100) < $chance;
+        $pierce = self::ARMOR_PIERCE * $this->classShareAboveBaseline($attacker, CombatClass::TANK->beatenBy());
+
+        return $armor * (1 - $pierce);
+    }
+
+    /** Критурон с мягким потолком: 175% → асимптотически к 300% */
+    private function effectiveCritDamage(FightHitInterface $attacker): float
+    {
+        $raw = (float) $attacker->getCritDamage();
+
+        if ($raw <= self::CRIT_DAMAGE_BASE) {
+            return $raw;
+        }
+
+        $growth = $raw - self::CRIT_DAMAGE_BASE;
+        $span = self::CRIT_DAMAGE_CAP - self::CRIT_DAMAGE_BASE;
+
+        return self::CRIT_DAMAGE_BASE + $span * $growth / ($growth + $span);
+    }
+
+    /**
+     * Танк > Уворот: танковость атакующего продавливает уворот защитника.
+     */
+    private function isDodge(FightHitInterface $attacker, FightHitInterface $defender): bool
+    {
+        $chance = $this->statChance($defender->getDodge(), $attacker->getDodge(), $this->levelScale($attacker, $defender));
+
+        $reduction = self::DODGE_COUNTER * $this->classShareAboveBaseline($attacker, CombatClass::DODGE->beatenBy());
+
+        return $this->random->chance($chance * (1 - $reduction));
+    }
+
+    /**
+     * Уворот > Крит: уворотливость защитника сбивает прицел атакующего.
+     */
+    private function isCritical(FightHitInterface $attacker, FightHitInterface $defender): bool
+    {
+        $chance = $this->statChance($attacker->getCritical(), $defender->getCritical(), $this->levelScale($attacker, $defender));
+
+        $reduction = self::CRIT_COUNTER * $this->classShareAboveBaseline($defender, CombatClass::CRIT->beatenBy());
+
+        return $this->random->chance($chance * (1 - $reduction));
+    }
+
+    /**
+     * Шанс от перевеса стат с убывающей отдачей и мягким потолком:
+     * равные статы → 5%; перевес K(уровень) → 40%; асимптотически к 75%.
+     * Отставание плавно уводит шанс к нижнему порогу 5%, но не в ноль.
+     */
+    private function statChance(int $attackStat, int $counterStat, float $levelScale): float
+    {
+        $delta = (float) ($attackStat - $counterStat);
+        $k = self::SOFTCAP_K * $levelScale;
+        $bonus = self::MAX_STAT_BONUS * $delta / (abs($delta) + $k);
+
+        return max(self::MIN_CHANCE, self::BASE_CHANCE + $bonus);
     }
 }

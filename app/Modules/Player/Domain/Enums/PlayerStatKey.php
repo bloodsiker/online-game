@@ -11,6 +11,7 @@ enum PlayerStatKey: string
     case INTUITION = 'intuition';
     case WISDOM = 'wisdom';
     case INTELLIGENCE = 'intelligence';
+    case ENDURANCE = 'endurance';
 
     public function label(): string
     {
@@ -20,6 +21,7 @@ enum PlayerStatKey: string
             self::INTUITION => 'Интуиция',
             self::WISDOM => 'Мудрость',
             self::INTELLIGENCE => 'Интеллект',
+            self::ENDURANCE => 'Выносливость',
         };
     }
 }

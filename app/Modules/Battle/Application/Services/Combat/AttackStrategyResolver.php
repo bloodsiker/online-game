@@ -2,18 +2,18 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Modules\Item\Infrastructure\Persistence\Models\Item;
-use App\Modules\Player\Domain\Services\PlayerStatService;
-use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Battle\Application\Services\Combat\Strategies\AttackStrategyInterface;
 use App\Modules\Battle\Application\Services\Combat\Strategies\DualWieldStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\FistAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\OneHandWeaponStrategy;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Services\PlayerMagicSkillService;
 
 readonly class AttackStrategyResolver
@@ -53,7 +53,7 @@ readonly class AttackStrategyResolver
 
         // Nothing on — fist
         if (! $left instanceof Item && ! $right instanceof Item) {
-            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
+            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
         }
 
         // Only the shield in the right hand, the left hand is empty — a fist
@@ -62,7 +62,7 @@ readonly class AttackStrategyResolver
             $right instanceof Item &&
             $right->itemInfo->type === ShareItemType::SHIELD
         ) {
-            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
+            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
         }
 
         // Weapon in left hand + shield in right hand — only left weapon
@@ -119,6 +119,6 @@ readonly class AttackStrategyResolver
         }
 
         // Any other case — fist
-        return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $player, monster: $monster);
+        return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
     }
 }

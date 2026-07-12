@@ -3,12 +3,13 @@
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\DTO\AttackResultDTO;
-use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 
 readonly class MonsterAttackService
 {
@@ -16,11 +17,14 @@ readonly class MonsterAttackService
         private HitCalculator $hitCalc,
         private BossPhaseService $bossPhaseService,
         private BattleEffectService $effectService,
+        private PlayerStatService $statService,
     ) {}
 
-    public function execute(FightHitInterface $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
-        $hit = $this->hitCalc->monsterHit($locationMonster->monster, $player, $locationMonster->monster->min_dmg, $locationMonster->monster->max_dmg);
+        // Защита считается по итоговым статам (шмот/баффы), а не по сырой модели
+        $sheet = $this->statService->resolve($player);
+        $hit = $this->hitCalc->hit($locationMonster->monster, $sheet, $locationMonster->monster->min_dmg, $locationMonster->monster->max_dmg);
 
         if ($hit->isDodge()) {
             $result->log(sprintf('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', $locationMonster->monster->name));
@@ -76,9 +80,12 @@ readonly class MonsterAttackService
         $phaseModifiers = $this->bossPhaseService->getPhaseModifiers($battle);
         $totalModifier = ($phaseModifiers['attack'] ?? 0) + $mechanicModifier;
 
+        $sheet = $this->statService->resolve($player);
+
         if ($useSpecialSkill) {
             $this->executeBossSpecialSkill(
                 $player,
+                $sheet,
                 $locationMonster,
                 $battle,
                 $availableSkills,
@@ -90,6 +97,7 @@ readonly class MonsterAttackService
         } else {
             $this->executeBossNormalAttack(
                 $player,
+                $sheet,
                 $locationMonster,
                 $minDmg,
                 $maxDmg,
@@ -100,7 +108,8 @@ readonly class MonsterAttackService
     }
 
     private function executeBossNormalAttack(
-        FightHitInterface $player,
+        Player $player,
+        StatSheet $sheet,
         MonsterOnLocation $locationMonster,
         int $minDmg,
         int $maxDmg,
@@ -109,7 +118,7 @@ readonly class MonsterAttackService
     ): void {
         $monster = $locationMonster->monster;
 
-        $hit = $this->hitCalc->monsterHit($monster, $player, $minDmg, $maxDmg);
+        $hit = $this->hitCalc->hit($monster, $sheet, $minDmg, $maxDmg);
 
         if ($hit->isDodge()) {
             $result->log(sprintf(
@@ -145,6 +154,7 @@ readonly class MonsterAttackService
 
     private function executeBossSpecialSkill(
         Player $player,
+        StatSheet $sheet,
         MonsterOnLocation $locationMonster,
         Battle $battle,
         array $availableSkills,
@@ -163,6 +173,7 @@ readonly class MonsterAttackService
         if (! $skill) {
             $this->executeBossNormalAttack(
                 $player,
+                $sheet,
                 $locationMonster,
                 $minDmg,
                 $maxDmg,
@@ -177,7 +188,7 @@ readonly class MonsterAttackService
         $skillMinDmg = (int) ($minDmg * $damageMultiplier);
         $skillMaxDmg = (int) ($maxDmg * $damageMultiplier);
 
-        $hit = $this->hitCalc->monsterHit($monster, $player, $skillMinDmg, $skillMaxDmg);
+        $hit = $this->hitCalc->hit($monster, $sheet, $skillMinDmg, $skillMaxDmg);
 
         if ($hit->isDodge()) {
             $result->log(sprintf(

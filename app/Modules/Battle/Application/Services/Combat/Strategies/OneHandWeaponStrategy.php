@@ -2,11 +2,11 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Modules\Item\Infrastructure\Persistence\Models\Item;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
-use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
+use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 
 class OneHandWeaponStrategy implements AttackStrategyInterface
 {
@@ -30,7 +30,7 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
             ? $this->player->getLeftHandMaxDmg()
             : $this->player->getRightHandMaxDmg();
 
-        $hit = $this->hitCalc->playerHit($this->player, $this->monster, $min, $max);
+        $hit = $this->hitCalc->hit($this->player, $this->monster, $min, $max);
 
         return [
             $hit

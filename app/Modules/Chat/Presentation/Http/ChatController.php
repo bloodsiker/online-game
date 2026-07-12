@@ -113,7 +113,9 @@ class ChatController extends Controller
     {
         $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
         $user = auth()->user();
-        $messages = $this->getMessages->execute($user, $channel, null, 30);
+        $afterId = $request->query('after_id');
+        $afterId = is_numeric($afterId) ? max(0, (int) $afterId) : null;
+        $messages = $this->getMessages->execute($user, $channel, $afterId, $afterId === null ? 30 : 100);
 
         return response()->json($messages);
     }

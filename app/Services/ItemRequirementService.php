@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 class ItemRequirementService
 {
@@ -48,6 +48,7 @@ class ItemRequirementService
             PlayerStatKey::INTUITION => (int) floor($player->intuition),
             PlayerStatKey::WISDOM => (int) floor($player->wisdom),
             PlayerStatKey::INTELLIGENCE => (int) floor($player->intelligence),
+            PlayerStatKey::ENDURANCE => (int) floor($player->endurance),
             null => 0,
         };
 

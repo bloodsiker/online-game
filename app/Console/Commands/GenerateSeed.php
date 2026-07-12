@@ -2,35 +2,35 @@
 
 namespace App\Console\Commands;
 
-use App\Modules\Battle\Domain\Enums\BossMechanicType;
-use App\Modules\Quest\Domain\Enums\QuestRewardType;
-use App\Modules\Share\Domain\Enums\ItemEffectType;
-use App\Modules\Share\Domain\Enums\ItemEffectValueType;
-use App\Modules\Quest\Domain\Enums\QuestType;
-use App\Modules\Share\Domain\Enums\ShareItemSlot;
-use App\Modules\Share\Domain\Enums\ShareItemStatType;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Models\Experience;
+use App\Models\Skill;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
+use App\Modules\Quest\Domain\Enums\QuestRewardType;
+use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
-use App\Models\Skill;
-use App\Modules\Item\Infrastructure\Persistence\Models\Item;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
@@ -191,13 +191,17 @@ class GenerateSeed extends Command
 
     protected function createRace()
     {
+        // У каждой расы прирост стат за уровень в сумме даёт ровно 5 очков
+        // (отдельно от 5 «свободных» очков игрока) — выносливость встроена
+        // в этот же бюджет, а не добавлена поверх него.
         $race = new Race;
         $race->name = 'Человек';
-        $race->strength = 1;
-        $race->agility = 1;
-        $race->intuition = 1;
-        $race->wisdom = 1;
-        $race->intelligence = 1;
+        $race->strength = 0.8;
+        $race->agility = 0.8;
+        $race->intuition = 0.8;
+        $race->wisdom = 0.8;
+        $race->intelligence = 0.8;
+        $race->endurance = 1;
         $race->free_stats = 5;
         $race->save();
 
@@ -205,42 +209,46 @@ class GenerateSeed extends Command
 
         $race = new Race;
         $race->name = 'Эльф';
-        $race->strength = 0.7;
-        $race->agility = 0.3;
-        $race->intuition = 0.2;
-        $race->wisdom = 0.8;
-        $race->intelligence = 3;
+        $race->strength = 0.63;
+        $race->agility = 0.27;
+        $race->intuition = 0.18;
+        $race->wisdom = 0.72;
+        $race->intelligence = 2.7;
+        $race->endurance = 0.5;
         $race->free_stats = 5;
         $race->save();
 
         $race = new Race;
         $race->name = 'Темный эльф';
-        $race->strength = 0.7;
-        $race->agility = 0.2;
-        $race->intuition = 3;
-        $race->wisdom = 0.6;
-        $race->intelligence = 0.5;
+        $race->strength = 0.63;
+        $race->agility = 0.18;
+        $race->intuition = 2.7;
+        $race->wisdom = 0.54;
+        $race->intelligence = 0.45;
+        $race->endurance = 0.5;
         $race->free_stats = 5;
         $race->save();
         $this->defaultRace = $race;
 
         $race = new Race;
         $race->name = 'Дварф';
-        $race->strength = 3;
-        $race->agility = 0.5;
-        $race->intuition = 0.5;
-        $race->wisdom = 0.5;
-        $race->intelligence = 0.5;
+        $race->strength = 2.1;
+        $race->agility = 0.35;
+        $race->intuition = 0.35;
+        $race->wisdom = 0.35;
+        $race->intelligence = 0.35;
+        $race->endurance = 1.5;
         $race->free_stats = 5;
         $race->save();
 
         $race = new Race;
         $race->name = 'Хоббит';
-        $race->strength = 0.7;
-        $race->agility = 3;
-        $race->intuition = 0.2;
-        $race->wisdom = 0.5;
-        $race->intelligence = 0.6;
+        $race->strength = 0.59;
+        $race->agility = 2.52;
+        $race->intuition = 0.17;
+        $race->wisdom = 0.42;
+        $race->intelligence = 0.5;
+        $race->endurance = 0.8;
         $race->free_stats = 5;
         $race->save();
 

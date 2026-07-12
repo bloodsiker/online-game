@@ -49,6 +49,12 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    <label class="col-form-label">Выносливость</label>
+                                    <input type="number" step="0.01" class="form-control" name="endurance" value="{{ $race->endurance }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
                                     <label class="col-form-label">Своб. характеристики</label>
                                     <input type="number" class="form-control" name="free_stats" value="{{ $race->free_stats }}">
                                 </div>

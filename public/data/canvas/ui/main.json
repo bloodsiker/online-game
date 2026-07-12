@@ -558,6 +558,15 @@
 	"sourceSize": {"w":41,"h":41},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"right/character_portrait_image.png":
+{
+	"frame": {"x":63,"y":496,"w":58,"h":63},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":43,"h":44},
+	"sourceSize": {"w":58,"h":63},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "right/mail_image.png":
 {
 	"frame": {"x":103,"y":169,"w":40,"h":38},
@@ -1033,7 +1042,7 @@
   "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
   "sourceSize": { "w": 22, "h": 22 },
   "pivot": { "x": 0.5, "y": 0.5 }
-}}, 
+}},
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",

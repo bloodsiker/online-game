@@ -42,7 +42,7 @@ class CharacterController extends Controller
         $data = $request->toArray();
         $player = Auth::user()->player;
 
-        $statKeys = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom'];
+        $statKeys = ['strength', 'intuition', 'agility', 'intelligence', 'wisdom', 'endurance'];
         $stats = array_map('intval', array_intersect_key($data, array_flip($statKeys)));
 
         try {
@@ -66,6 +66,7 @@ class CharacterController extends Controller
                 'agility' => $result->agility,
                 'intelligence' => $result->intelligence,
                 'wisdom' => $result->wisdom,
+                'endurance' => $result->endurance,
             ]);
         }
 

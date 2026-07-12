@@ -93,12 +93,14 @@
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Состав клана</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">Данжи</a>
+    <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} return false;">Карты</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('friends') }}', true); return false;">Друзья</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">Рейтинг</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">Премиум</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">События</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('post') }}', true); return false;">Почта</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('fights') }}', true); return false;">Бои</a>
     <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} return false;">Инфопортал</a>
 </div>
 
@@ -117,12 +119,14 @@
         m_clan_member: function () { menuGo(false, '{{ route('clan.member') }}', true); },
         m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
         m_dungeon:     function () { menuGo(false, '{{ route('dungeon.index') }}', true); },
+        m_maps:        function () { try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} },
         m_friends:     function () { menuGo(false, '{{ route('friends') }}', true); },
         m_rating:      function () { menuGo(true,  '{{ route('rating') }}', true); },
         m_referral:    function () { menuGo(false, '{{ route('referral') }}', true); },
         m_premium:     function () { menuGo(false, '{{ route('premium.shop') }}', true); },
         m_events:      function () { menuGo(false, '{{ route('events') }}', true); },
         m_post:        function () { menuGo(false, '{{ route('post') }}', true); },
+        m_fights:      function () { menuGo(false, '{{ route('fights') }}', true); },
         m_infoportal:  function () { try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} }
     };
 
@@ -134,8 +138,8 @@
     // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 2)
     var buttonIds = {
         location: 1, character: 2, backpack: 3, clan: 2, clan_member: 2,
-        quests: 4, dungeon: 5, friends: 2, rating: 6, referral: 2, premium: 7,
-        events: 8, post: 9, infoportal: 10
+        quests: 4, dungeon: 5, maps: 6, friends: 2, rating: 7, referral: 2, premium: 8,
+        events: 9, post: 10, fights: 11, infoportal: 12
     };
 
     // Мигание кнопки из родителя:
@@ -170,18 +174,24 @@
         C.isMobile = canvas.isMobile();
         C.initLang('ru');
 
-        // Иконки почты нет в наборе top/ атласа — подменяем на иконку
-        // из правой панели прода (right/mail_image)
+        // Иконок почты и квестов нет в наборе top/ атласа — подменяем на иконки
+        // из правой панели (right/mail_image, right/quest_image), они уже есть в этом же атласе
         var getImage = canvas.ResourceLoader.getImage;
+        var topIconOverrides = {
+            'top/post': 'right/mail_image',
+            'top/quest': 'right/quest_image',
+            'top/char_portrait': 'right/character_portrait_image',
+        };
         canvas.ResourceLoader.getImage = function (atlas, frame) {
-            if (frame === 'top/post') {
-                return getImage.call(canvas.ResourceLoader, 'ui', 'right/mail_image');
+            if (topIconOverrides[frame]) {
+                return getImage.call(canvas.ResourceLoader, 'ui', topIconOverrides[frame]);
             }
             return getImage.apply(canvas.ResourceLoader, arguments);
         };
 
         // В атласе иконки двух размеров (57x59 и 45x51 — прод использовал мелкие
-        // только в подменю); растягиваем иконку до подложки item_back
+        // только в подменю); растягиваем иконку до подложки item_back.
+        // Якорь ставим в центр — нужно для пульсации иконки (масштаб от центра, не от угла).
         var ItemView = canvas.app.topMenu.view.ItemView;
         var itemViewInit = ItemView.prototype.init;
         ItemView.prototype.init = function () {
@@ -189,8 +199,43 @@
             if (!this.isSmall && this.image) {
                 this.image.width = 57;
                 this.image.height = 59;
-                this.image.position.set(6, 0);
+                this.image.anchor.set(0.5, 0.5);
+                this.image.position.set(6 + 57 / 2, 0 + 59 / 2);
+                // У разных иконок в атласе разный исходный размер текстуры,
+                // поэтому вычисленный выше scale — не обязательно 1. Запоминаем
+                // его как «базовый», чтобы пульсация отталкивалась именно от него.
+                this.image.baseScaleX = this.image.scale.x;
+                this.image.baseScaleY = this.image.scale.y;
+                // Иконка почты (right/mail_image) в состоянии покоя слишком крупная — уменьшаем
+                if (this.data.pict === 'post') {
+                    this.image.baseScaleX *= 0.85;
+                    this.image.baseScaleY *= 0.85;
+                }
+                if (this.data.pict === 'quest') {
+                    this.image.baseScaleX *= 0.90;
+                    this.image.baseScaleY *= 0.90;
+                }
+                if (this.data.pict === 'inst') {
+                    this.image.baseScaleX *= 0.95;
+                    this.image.baseScaleY *= 0.95;
+                }
             }
+            // Иконка «Персонаж» в подменю (right/character_portrait_image) в исходнике
+            // крупнее подложки item_back_small (43x42) — вписываем и центрируем её,
+            // как остальные мелкие иконки подменю.
+            if (this.isSmall && this.image && this.data.pict === 'char_portrait') {
+                this.image.width = 43;
+                this.image.height = 42;
+                this.image.anchor.set(0.5, 0.5);
+                this.image.position.set(8 + 43 / 2, 8 + 42 / 2 - 2);
+            }
+        };
+
+        // У почты убираем стандартную золотую мигающую обводку — оставляем только пульсацию иконки
+        var itemViewStartBlink = ItemView.prototype.startBlink;
+        ItemView.prototype.startBlink = function () {
+            if (this.data.pict === 'post') return;
+            itemViewStartBlink.call(this);
         };
 
         // Ряд иконок центрируется по ширине канваса (движок прижимает его влево)
@@ -200,8 +245,28 @@
             this.main.x = Math.round((this.par.width - this.main.view.items.length * 55) / 2);
         };
 
+        // Пульсация иконки мигающего пункта (увеличение/уменьшение) — эффект «пришло новое»
+        var PULSE_BASE_SCALE = 1.1;
+        var PULSE_AMPLITUDE = 0.08;
+        var PULSE_SPEED = 0.004;
+        canvas.EventManager.addEventListener(canvas.app.topMenu.Event.ENTER_FRAME, null, function () {
+            var model = canvas.app.topMenu.model;
+            if (!model || !window.top_mnu) return;
+            var items = window.top_mnu.main.view.items;
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (!item.image || item.image.baseScaleX === undefined) continue;
+                var base = item.image.baseScaleX;
+                if (model.blinkIds.indexOf(item.data.id) >= 0) {
+                    item.image.scale.set(base * (PULSE_BASE_SCALE + PULSE_AMPLITUDE * Math.sin(Date.now() * PULSE_SPEED)));
+                } else if (item.image.scale.x !== base) {
+                    item.image.scale.set(base);
+                }
+            }
+        });
+
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта',
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои',
             dragDropItems: '0',
             configXml: '/data/locale/ru/topMenu.xml',
             blink: '',

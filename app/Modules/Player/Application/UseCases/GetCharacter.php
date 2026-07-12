@@ -46,6 +46,7 @@ class GetCharacter
             baseAgility: (int) $player->getAgility(),
             baseIntelligence: (int) $player->getIntelligence(),
             baseWisdom: (int) $player->getMud(),
+            baseEndurance: (int) $player->getEndurance(),
             stats: $stats,
             skills: $skills,
         );

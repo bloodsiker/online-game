@@ -37,4 +37,14 @@ enum CombatClass: string
             self::CRIT => self::TANK,
         };
     }
+
+    /** Класс, который имеет преимущество над данным (обратное ребро треугольника) */
+    public function beatenBy(): self
+    {
+        return match ($this) {
+            self::DODGE => self::TANK,
+            self::CRIT => self::DODGE,
+            self::TANK => self::CRIT,
+        };
+    }
 }

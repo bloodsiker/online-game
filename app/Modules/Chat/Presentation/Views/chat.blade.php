@@ -60,7 +60,7 @@
         .chat-user:hover  { color: #990000; }
         .player-link      { color: #990000; font-weight: bold; }
         .player-link:hover { text-decoration: underline; }
-        .chat-clan-icon   { vertical-align: middle; margin-right: 2px; }
+        .chat-clan-icon   { vertical-align: middle;}
         .chat-level       { color: #666; font-weight: normal; }
 
         /* Clan channel */
@@ -124,6 +124,7 @@
                                 <img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt="">
                             @endif
                             <span class="prv-name">{{ $msg->sender_name }}</span>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
+                            <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                             »
                             <span class="prv-name">{{ $msg->target_name ?? '?' }}</span> {!! $msg->content !!}
 
@@ -136,7 +137,9 @@
                                data-uid="{{ $msg->sender_id }}"
                                data-name="{{ $msg->sender_name }}"
                                onclick="chatPlayerClick({{ $msg->sender_id }}, '{{ addslashes($msg->sender_name) }}'); return false;"
-                            >{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif {!! $msg->content !!}
+                            >{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
+                            <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                            {!! $msg->content !!}
                         @endif
                     </div>
                 @endforeach
@@ -153,6 +156,7 @@
     var pollUrl   = '{{ route('chat.messages') }}';
     var ignoreUrl = '{{ route('chat.ignore.add') }}';
     var csrfToken = '{{ csrf_token() }}';
+    var lastMessageId = getLastMessageId();
 
     function scrollToBottom() {
         window.scrollTo(0, document.body.scrollHeight);
@@ -183,6 +187,17 @@
         return ' <small class="chat-level">[' + parseInt(msg.sender_level, 10) + ']</small>';
     }
 
+    function playerInfoIconHtml(userId) {
+        return '<a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo(' + parseInt(userId, 10) + '); return false;">'
+             + '<img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>';
+    }
+
+    // Иконка информации о персонаже возле ника — открывает карточку игрока в отдельном окне
+    function chatOpenUserInfo(userId) {
+        window.open('{{ url('/info/u') }}/' + userId, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        return false;
+    }
+
     function buildMessageHtml(msg) {
         // Time — clickable for private messages
         var timeHtml;
@@ -208,6 +223,7 @@
             html += clanIconHtml(msg)
                   + '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'
                   + levelHtml(msg)
+                  + ' ' + playerInfoIconHtml(msg.sender_id)
                   + ' » '
                   + '<span class="prv-name">' + escapeHtml(msg.target_name || '?') + '</span>'
                   + '&nbsp;' +msg.content;
@@ -215,7 +231,7 @@
             html += clanIconHtml(msg)
                   + '<a href="#" class="player-link n" data-uid="' + msg.sender_id + '" data-name="' + safeAttr(msg.sender_name) + '" '
                   + 'onclick="chatPlayerClick(' + msg.sender_id + ', \'' + safeAttr(msg.sender_name) + '\'); return false;">'
-                  + escapeHtml(msg.sender_name) + '</a>' + levelHtml(msg) + ' ' + msg.content;
+                  + escapeHtml(msg.sender_name) + '</a>' + levelHtml(msg) + ' ' + playerInfoIconHtml(msg.sender_id) + ' ' + msg.content;
         }
 
         return html;
@@ -251,6 +267,23 @@
         return div;
     }
 
+    function getLastMessageId() {
+        var lastId = 0;
+        document.querySelectorAll('#content [data-id]').forEach(function (el) {
+            var id = parseInt(el.getAttribute('data-id'), 10) || 0;
+            if (id > lastId) lastId = id;
+        });
+        return lastId;
+    }
+
+    function trimMessages(maxMessages) {
+        var nodes = document.querySelectorAll('#content [data-id]');
+        var removeCount = nodes.length - maxMessages;
+        for (var i = 0; i < removeCount; i++) {
+            nodes[i].remove();
+        }
+    }
+
     function syncMessages(serverMessages) {
         var content = document.getElementById('content');
         var atBottom = (window.innerHeight + window.pageYOffset) >= document.body.scrollHeight - 80;
@@ -279,19 +312,58 @@
             }
         });
 
+        lastMessageId = getLastMessageId();
+        trimMessages(120);
         if (added && atBottom) scrollToBottom();
     }
 
-    function fetchMessages(onDone) {
-        fetch(pollUrl + '?channel=' + channel, { headers: { 'X-CSRF-TOKEN': csrfToken } })
+    function appendMessages(serverMessages) {
+        var content = document.getElementById('content');
+        var atBottom = (window.innerHeight + window.pageYOffset) >= document.body.scrollHeight - 80;
+        var domIds = {};
+        var added = false;
+
+        content.querySelectorAll('[data-id]').forEach(function (el) {
+            domIds[parseInt(el.getAttribute('data-id'), 10)] = true;
+        });
+
+        serverMessages.forEach(function (msg) {
+            if (!domIds[msg.id]) {
+                insertSorted(content, buildDiv(msg), msg.id);
+                domIds[msg.id] = true;
+                added = true;
+            }
+            if (msg.id > lastMessageId) lastMessageId = msg.id;
+        });
+
+        trimMessages(120);
+        if (added && atBottom) scrollToBottom();
+    }
+
+    function fetchMessages(onDone, incremental) {
+        var url = pollUrl + '?channel=' + encodeURIComponent(channel);
+        if (incremental && lastMessageId > 0) {
+            url += '&after_id=' + encodeURIComponent(lastMessageId);
+        }
+
+        fetch(url, { headers: { 'X-CSRF-TOKEN': csrfToken } })
             .then(function (r) { return r.json(); })
-            .then(function (data) { syncMessages(data); if (onDone) onDone(); })
+            .then(function (data) {
+                if (incremental) {
+                    appendMessages(data);
+                } else {
+                    syncMessages(data);
+                }
+                if (onDone) onDone();
+            })
             .catch(function () {});
     }
 
-    function poll() { fetchMessages(null); }
+    function poll() { fetchMessages(null, true); }
+    function fullSync() { fetchMessages(null, false); }
 
-    setInterval(poll, 5000);
+    setInterval(poll, 2000);
+    setInterval(fullSync, 30000);
 
     // Switch channel without reloading the iframe
     window.addEventListener('message', function (event) {
@@ -301,8 +373,9 @@
 
         channel = newChannel;
         document.getElementById('content').innerHTML = '';
+        lastMessageId = 0;
 
-        fetchMessages(scrollToBottom);
+        fetchMessages(scrollToBottom, false);
     });
 
     // Click on player name → insert prv[NAME] or to[NAME] prefix into the message input
