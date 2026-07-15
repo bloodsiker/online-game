@@ -49,7 +49,10 @@ readonly class AttackService
             }
 
             if ($hit->isDodge()) {
-                $result->log('<p>Вы атакуете неудачно... Враг <b class="color-green">увернулся</b></p>');
+                $result->log(sprintf(
+                    '<p>Вы атакуете неудачно... %s <b class="color-green">увернулся</b></p>',
+                    $locMonster->monster->name
+                ));
 
                 continue;
             }
@@ -116,13 +119,15 @@ readonly class AttackService
 
             $result->log($hit->isCritical()
                 ? sprintf(
-                    '<p>Вы ударили врага %s... <b class="color-red">нанесен критический урон!</b> <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
+                    '<p>Вы ударили %s оружием %s... <b class="color-red">нанесен критический урон!</b> <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
+                    $locMonster->monster->name,
                     $hit->getWeaponName(),
                     $damage,
                     $exp
                 )
                 : sprintf(
-                    '<p>Вы ударили врага %s! <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
+                    '<p>Вы ударили %s оружием %s! <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
+                    $locMonster->monster->name,
                     $hit->getWeaponName(),
                     $damage,
                     $exp

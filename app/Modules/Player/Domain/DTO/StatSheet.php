@@ -49,6 +49,15 @@ class StatSheet implements FightHitInterface
 
     public int $freeStats = 0;
 
+    /** Блок щитом: шанс срабатывания, % */
+    public int $blockChance = 0;
+
+    /** Блок щитом: фиксированное поглощение+отражение урона при срабатывании */
+    public int $blockFlat = 0;
+
+    /** Блок щитом: процент урона, поглощаемый+отражаемый при срабатывании */
+    public int $blockPercent = 0;
+
     public CombatClass $combatClass = CombatClass::TANK;
 
     /** @var StatModifier[] */
@@ -149,6 +158,21 @@ class StatSheet implements FightHitInterface
     public function getLevel(): int
     {
         return $this->level;
+    }
+
+    public function getBlockChance(): int
+    {
+        return $this->blockChance;
+    }
+
+    public function getBlockFlat(): int
+    {
+        return $this->blockFlat;
+    }
+
+    public function getBlockPercent(): int
+    {
+        return $this->blockPercent;
     }
 
     // Stat getters (used in views and combat strategies)

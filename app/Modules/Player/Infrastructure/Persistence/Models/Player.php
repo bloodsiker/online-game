@@ -36,7 +36,7 @@ class Player extends Model
 
     public const REGEN_INTERVAL = 5;
 
-    public const FULL_REGEN_TIME = 300;
+    public const FULL_REGEN_TIME = 900;
 
     protected $casts = [
         'last_regen_at' => 'datetime',

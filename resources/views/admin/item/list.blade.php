@@ -36,7 +36,7 @@
                                     </td>
                                     <td><a href="{{ route('admin.item.info', $item->id) }}">{{ $item->name }}</a></td>
                                     <td><span class="badge badge-info">{{ $item->getTypeName() }}</span></td>
-                                    <td><span style="color:{{ $item->rarity->color() }};font-weight:bold;">{{ $item->rarity->label() }}</span></td>
+                                    <td><span class="badge" style="background-color:{{ $item->rarity->color() }};color:#fff;">{{ $item->rarity->label() }}</span></td>
                                     <td>
                                         <a href="{{ route('admin.item.info', $item->id) }}" class="btn btn-xs btn-primary">Изменить</a>
                                     </td>

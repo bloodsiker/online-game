@@ -24,7 +24,7 @@ readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInt
                 diamond: '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description,
+                desc: $itemInfo->description ?? '',
                 store: false,
                 nogive: true,
                 noweight: true,

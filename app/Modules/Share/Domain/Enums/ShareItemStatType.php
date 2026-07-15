@@ -21,6 +21,9 @@ enum ShareItemStatType: string
     case HP_MAX = 'hp_max';
     case CRIT_DAMAGE = 'crit_damage';
     case ENDURANCE = 'endurance';
+    case BLOCK_CHANCE = 'block_chance';
+    case BLOCK_FLAT = 'block_flat';
+    case BLOCK_PERCENT = 'block_percent';
 
     public function label(): string
     {
@@ -40,6 +43,9 @@ enum ShareItemStatType: string
             self::HP_MAX => 'Уровень жизни',
             self::CRIT_DAMAGE => 'Сила крит. удара',
             self::ENDURANCE => 'Выносливость',
+            self::BLOCK_CHANCE => 'Шанс блока щитом, %',
+            self::BLOCK_FLAT => 'Блок щитом (фикс.)',
+            self::BLOCK_PERCENT => 'Блок щитом, %',
         };
     }
 }

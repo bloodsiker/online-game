@@ -7,6 +7,8 @@ namespace App\Modules\Backpack\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Application\UseCases\GetBackpack;
 use App\Modules\Backpack\Application\UseCases\UpdateOrder;
+use App\Services\ItemTooltip\ItemTooltipCollector;
+use App\Services\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,10 +26,29 @@ class BackpackController extends Controller
         return view('backpack::index');
     }
 
-    public function equip(): View
+    public function equip(ItemTooltipCollector $tooltipCollector): View
     {
+        $playerEquip = Auth::user()->player->playerEquip;
+        $equippedItems = collect([
+            $playerEquip->helmetSlot,
+            $playerEquip->handLeft,
+            $playerEquip->handRight,
+            $playerEquip->armorSlot,
+            $playerEquip->chainArmorSlot,
+            $playerEquip->cloakSlot,
+            $playerEquip->shoesSlot,
+            $playerEquip->glovesSlot,
+            $playerEquip->beltFirstSlot,
+            $playerEquip->beltSecondSlot,
+            $playerEquip->bagFirstSlot,
+            $playerEquip->bagSecondSlot,
+        ])->filter();
+
+        $tooltipCollector->collectFrom(new ItemModelTooltipStrategy($equippedItems));
+
         return view('backpack::equip', [
-            'playerEquip' => Auth::user()->player->playerEquip,
+            'playerEquip' => $playerEquip,
+            'itemTooltipScript' => $tooltipCollector->renderScript(),
         ]);
     }
 

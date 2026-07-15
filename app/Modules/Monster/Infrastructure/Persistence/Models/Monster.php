@@ -139,4 +139,20 @@ class Monster extends Model implements FightHitInterface
     {
         return max(1, (int) $this->lvl);
     }
+
+    // Блок щитом — пока только у игроков; мобы не блокируют
+    public function getBlockChance(): int
+    {
+        return 0;
+    }
+
+    public function getBlockFlat(): int
+    {
+        return 0;
+    }
+
+    public function getBlockPercent(): int
+    {
+        return 0;
+    }
 }

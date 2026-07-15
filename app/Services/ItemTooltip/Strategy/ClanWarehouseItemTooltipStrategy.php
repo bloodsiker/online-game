@@ -26,7 +26,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 diamond: '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description,
+                desc: $itemInfo->description ?? '',
                 store: false,
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,

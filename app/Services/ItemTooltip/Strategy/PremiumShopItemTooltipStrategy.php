@@ -29,7 +29,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                     : '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description,
+                desc: $itemInfo->description ?? '',
                 store: true,
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,

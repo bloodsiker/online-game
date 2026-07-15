@@ -52,7 +52,7 @@ class ClanQuestSeeder extends Seeder
                 ],
                 'rewards' => [
                     ['type' => 'clan_points', 'amount' => 500],
-                    ['type' => 'exp',         'amount' => 1000],
+                    ['type' => 'exp',         'amount' => 250],
                 ],
             ],
 
@@ -78,7 +78,7 @@ class ClanQuestSeeder extends Seeder
                 ],
                 'rewards' => [
                     ['type' => 'clan_points', 'amount' => 1000],
-                    ['type' => 'exp',         'amount' => 2000],
+                    ['type' => 'exp',         'amount' => 500],
                     ['type' => 'money',       'amount' => 200],
                 ],
             ],
@@ -105,7 +105,7 @@ class ClanQuestSeeder extends Seeder
                 ],
                 'rewards' => [
                     ['type' => 'clan_points', 'amount' => 2000],
-                    ['type' => 'exp',         'amount' => 5000],
+                    ['type' => 'exp',         'amount' => 1250],
                     ['type' => 'money',       'amount' => 500],
                 ],
             ],
@@ -139,7 +139,7 @@ class ClanQuestSeeder extends Seeder
                 ],
                 'rewards' => [
                     ['type' => 'clan_points', 'amount' => 3000],
-                    ['type' => 'exp',         'amount' => 10000],
+                    ['type' => 'exp',         'amount' => 2500],
                     ['type' => 'money',       'amount' => 1000],
                 ],
             ],
@@ -173,7 +173,7 @@ class ClanQuestSeeder extends Seeder
                 ],
                 'rewards' => [
                     ['type' => 'clan_points', 'amount' => 2500],
-                    ['type' => 'exp',         'amount' => 8000],
+                    ['type' => 'exp',         'amount' => 2000],
                     ['type' => 'money',       'amount' => 800],
                 ],
             ],

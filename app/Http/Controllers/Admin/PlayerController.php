@@ -63,7 +63,7 @@ class PlayerController extends Controller
         $shareItem = ShareItem::findOrFail((int) $request->input('share_item_id'));
         $count = max(1, (int) $request->input('count', 1));
 
-        $backpackService->addItemByShareItem($player->user, $shareItem, $count);
+        $backpackService->giveItemsByShareItem($player->user, $shareItem, $count);
 
         return redirect()->back()->with('success', 'Предмет добавлен в рюкзак.');
     }

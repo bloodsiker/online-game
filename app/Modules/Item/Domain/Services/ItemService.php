@@ -176,6 +176,23 @@ class ItemService
         $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
+            if ($playerEquip->handLeft?->itemInfo?->is_two_hand) {
+                return 'Слот занят двуручным оружием';
+            }
+
+            if ($shareItem->is_two_hand) {
+                if ($playerEquip->hand_left || $playerEquip->hand_right) {
+                    return 'Нужны обе свободные руки';
+                }
+
+                $playerEquip->hand_left = $itemId;
+                $playerEquip->save();
+                $backpackItem->equipped = 1;
+                $backpackItem->save();
+
+                return null;
+            }
+
             if ($typeItem === ShareItemType::WEAPON && $playerEquip->hand_left && $playerEquip->hand_right) {
                 return 'Слот занят';
             }

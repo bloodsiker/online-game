@@ -31,6 +31,10 @@
             font-size: 11px;
         }
 
+        .avatar-frame {
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -263,6 +267,17 @@
     // Ініціалізація
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('cooldownBar').style.width = '100%';
+
+        document.querySelector('.avatar-frame')?.addEventListener('click', () => {
+            const characterUrl = '{{ route('character') }}';
+
+            if (window.parent && typeof window.parent.sendDataToGame === 'function') {
+                window.parent.sendDataToGame(characterUrl);
+                return;
+            }
+
+            window.location.href = characterUrl;
+        });
 
         @foreach($page->activeEffects as $effect)
         @if($effect->duration > 0)

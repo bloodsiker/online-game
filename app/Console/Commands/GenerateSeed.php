@@ -9,6 +9,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -36,6 +37,7 @@ use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\ExperienceCurve;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -71,6 +73,18 @@ class GenerateSeed extends Command
     protected $monster1 = null;
 
     protected $monster2 = null;
+
+    protected $monster3 = null;
+
+    protected $monster4 = null;
+
+    protected $monster5 = null;
+
+    protected $monster6 = null;
+
+    protected $monster7 = null;
+
+    protected $monster8 = null;
 
     protected $boss = null;
 
@@ -121,60 +135,19 @@ class GenerateSeed extends Command
         $this->call('db:seed', ['--class' => 'BuffSkillSeeder']);
     }
 
+    /**
+     * Таблица опыта строится по формуле (см. \App\Services\ExperienceCurve),
+     * а не вбивается вручную — раньше шаг между уровнями рос произвольно
+     * и обрывался на 50 уровне. Планируется 100 уровней сейчас, до 1000 в будущем.
+     */
     public function createExp()
     {
-        DB::table('experiences')->insert([
-            ['lvl' => 1, 'exp' => 0, 'exp_diff' => 100],
-            ['lvl' => 2, 'exp' => 100, 'exp_diff' => 200],
-            ['lvl' => 3, 'exp' => 300, 'exp_diff' => 300],
-            ['lvl' => 4, 'exp' => 600, 'exp_diff' => 400],
-            ['lvl' => 5, 'exp' => 1000, 'exp_diff' => 500],
-            ['lvl' => 6, 'exp' => 1500, 'exp_diff' => 1000],
-            ['lvl' => 7, 'exp' => 2500, 'exp_diff' => 1500],
-            ['lvl' => 8, 'exp' => 4000, 'exp_diff' => 2500],
-            ['lvl' => 9, 'exp' => 6500, 'exp_diff' => 4000],
-            ['lvl' => 10, 'exp' => 10500, 'exp_diff' => 6000],
-            ['lvl' => 11, 'exp' => 16500, 'exp_diff' => 7000],
-            ['lvl' => 12, 'exp' => 23500, 'exp_diff' => 8000],
-            ['lvl' => 13, 'exp' => 31500, 'exp_diff' => 9000],
-            ['lvl' => 14, 'exp' => 40500, 'exp_diff' => 10000],
-            ['lvl' => 15, 'exp' => 50500, 'exp_diff' => 12000],
-            ['lvl' => 16, 'exp' => 62500, 'exp_diff' => 14000],
-            ['lvl' => 17, 'exp' => 76500, 'exp_diff' => 16000],
-            ['lvl' => 18, 'exp' => 92500, 'exp_diff' => 18000],
-            ['lvl' => 19, 'exp' => 110500, 'exp_diff' => 20000],
-            ['lvl' => 20, 'exp' => 130500, 'exp_diff' => 23000],
-            ['lvl' => 21, 'exp' => 153500, 'exp_diff' => 26000],
-            ['lvl' => 22, 'exp' => 179500, 'exp_diff' => 29000],
-            ['lvl' => 23, 'exp' => 208500, 'exp_diff' => 32000],
-            ['lvl' => 24, 'exp' => 240500, 'exp_diff' => 35000],
-            ['lvl' => 25, 'exp' => 275500, 'exp_diff' => 38000],
-            ['lvl' => 26, 'exp' => 313500, 'exp_diff' => 42000],
-            ['lvl' => 27, 'exp' => 355500, 'exp_diff' => 46000],
-            ['lvl' => 28, 'exp' => 401500, 'exp_diff' => 50000],
-            ['lvl' => 29, 'exp' => 451500, 'exp_diff' => 55000],
-            ['lvl' => 30, 'exp' => 506500, 'exp_diff' => 60000],
-            ['lvl' => 31, 'exp' => 566500, 'exp_diff' => 66000],
-            ['lvl' => 32, 'exp' => 632500, 'exp_diff' => 72000],
-            ['lvl' => 33, 'exp' => 704500, 'exp_diff' => 78000],
-            ['lvl' => 34, 'exp' => 782500, 'exp_diff' => 85000],
-            ['lvl' => 35, 'exp' => 867500, 'exp_diff' => 92000],
-            ['lvl' => 36, 'exp' => 959500, 'exp_diff' => 100000],
-            ['lvl' => 37, 'exp' => 1059500, 'exp_diff' => 110000],
-            ['lvl' => 38, 'exp' => 1169500, 'exp_diff' => 120000],
-            ['lvl' => 39, 'exp' => 1289500, 'exp_diff' => 130000],
-            ['lvl' => 40, 'exp' => 1419500, 'exp_diff' => 145000],
-            ['lvl' => 41, 'exp' => 1564500, 'exp_diff' => 160000],
-            ['lvl' => 42, 'exp' => 1724500, 'exp_diff' => 175000],
-            ['lvl' => 43, 'exp' => 1899500, 'exp_diff' => 190000],
-            ['lvl' => 44, 'exp' => 2089500, 'exp_diff' => 205000],
-            ['lvl' => 45, 'exp' => 2294500, 'exp_diff' => 225000],
-            ['lvl' => 46, 'exp' => 2519500, 'exp_diff' => 245000],
-            ['lvl' => 47, 'exp' => 2764500, 'exp_diff' => 265000],
-            ['lvl' => 48, 'exp' => 3029500, 'exp_diff' => 290000],
-            ['lvl' => 49, 'exp' => 3319500, 'exp_diff' => 320000],
-            ['lvl' => 50, 'exp' => 3639500, 'exp_diff' => 350000],
-        ]);
+        $rows = [];
+        foreach (ExperienceCurve::table(100) as $lvl => $row) {
+            $rows[] = ['lvl' => $lvl, 'exp' => $row['exp'], 'exp_diff' => $row['exp_diff']];
+        }
+
+        DB::table('experiences')->insert($rows);
     }
 
     protected function createLocation()
@@ -503,43 +476,144 @@ class GenerateSeed extends Command
         $this->info('Create Effects success');
     }
 
+    /**
+     * Стартовые мобы калиброваны формулами MonsterStatFormulas (см. класс и
+     * /admin/docs/battle) — уровень + «профиль вида» (множитель HP, целевая
+     * % митигации брони, % шанса уворота/крита, % урона от условного HP
+     * игрока того же уровня, множитель опыта), а не значения на глаз.
+     */
     protected function createMonster()
     {
-        $monster = new Monster;
-        $monster->name = 'Мышь';
-        $monster->lvl = 1;
-        $monster->hp = 10;
-        $monster->armor = 0;
-        $monster->dodge = 0;
-        $monster->critical = 0;
-        $monster->min_dmg = 1;
-        $monster->max_dmg = 2;
-        $monster->aggression = 50;
-        $monster->min_money = 7;
-        $monster->max_money = 12;
-        $monster->exp = 40;
-        $monster->save();
+        $this->monster1 = $this->createBalancedMonster(
+            name: 'Мышь',
+            level: 1,
+            hpMultiplier: 1.0,
+            armorMitigation: 0.00,
+            dodgePercent: 5,
+            critPercent: 5,
+            dmgPercentOfPlayerHp: 8,
+            expMultiplier: 1.0,
+            aggression: 50,
+        );
 
-        $this->monster1 = $monster;
+        $this->monster2 = $this->createBalancedMonster(
+            name: 'Летучая мышь',
+            level: 2,
+            hpMultiplier: 1.3,
+            armorMitigation: 0.05,
+            dodgePercent: 8,
+            critPercent: 5,
+            dmgPercentOfPlayerHp: 10,
+            expMultiplier: 1.1,
+            aggression: 70,
+        );
 
-        $monster2 = new Monster;
-        $monster2->name = 'Летучая мышь';
-        $monster2->lvl = 1;
-        $monster2->hp = 15;
-        $monster2->armor = 1;
-        $monster2->dodge = 1;
-        $monster2->critical = 0;
-        $monster2->min_dmg = 1;
-        $monster2->max_dmg = 3;
-        $monster2->aggression = 70;
-        $monster2->min_money = 8;
-        $monster2->max_money = 14;
-        $monster2->exp = 45;
-        $monster2->save();
+        $this->monster3 = $this->createBalancedMonster(
+            name: 'Волк',
+            level: 4,
+            hpMultiplier: 1.8,
+            armorMitigation: 0.12,
+            dodgePercent: 14,
+            critPercent: 16,
+            dmgPercentOfPlayerHp: 13,
+            expMultiplier: 1.3,
+            aggression: 85,
+        );
 
-        $this->monster2 = $monster2;
+        $this->monster4 = $this->createBalancedMonster(
+            name: 'Медведь',
+            level: 7,
+            hpMultiplier: 1.7,
+            armorMitigation: 0.21,
+            dodgePercent: 7,
+            critPercent: 10,
+            dmgPercentOfPlayerHp: 13,
+            expMultiplier: 1.6,
+            aggression: 60,
+        );
+
+        $this->monster5 = $this->createBalancedMonster(
+            name: 'Кабан',
+            level: 10,
+            hpMultiplier: 1.65,
+            armorMitigation: 0.127,
+            dodgePercent: 6,
+            critPercent: 6,
+            dmgPercentOfPlayerHp: 11,
+            expMultiplier: 1.4,
+            aggression: 90,
+        );
+
+        $this->monster6 = $this->createBalancedMonster(
+            name: 'Разбойник',
+            level: 13,
+            hpMultiplier: 1.32,
+            armorMitigation: 0.074,
+            dodgePercent: 14,
+            critPercent: 16,
+            dmgPercentOfPlayerHp: 11,
+            expMultiplier: 1.3,
+            aggression: 75,
+        );
+
+        $this->monster7 = $this->createBalancedMonster(
+            name: 'Тролль',
+            level: 16,
+            hpMultiplier: 1.73,
+            armorMitigation: 0.175,
+            dodgePercent: 5,
+            critPercent: 5,
+            dmgPercentOfPlayerHp: 11,
+            expMultiplier: 1.7,
+            aggression: 70,
+        );
+
+        $this->monster8 = $this->createBalancedMonster(
+            name: 'Огр',
+            level: 20,
+            hpMultiplier: 1.54,
+            armorMitigation: 0.145,
+            dodgePercent: 5,
+            critPercent: 6,
+            dmgPercentOfPlayerHp: 12.5,
+            expMultiplier: 1.9,
+            aggression: 65,
+        );
 
         $this->info('Create Monster success');
+    }
+
+    protected function createBalancedMonster(
+        string $name,
+        int $level,
+        float $hpMultiplier,
+        float $armorMitigation,
+        float $dodgePercent,
+        float $critPercent,
+        float $dmgPercentOfPlayerHp,
+        float $expMultiplier,
+        int $aggression,
+    ): Monster {
+        [$minDmg, $maxDmg] = MonsterStatFormulas::damageRange($level, $dmgPercentOfPlayerHp);
+        $exp = MonsterStatFormulas::expReward($level, $expMultiplier);
+        [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp);
+
+        $monster = new Monster;
+        $monster->name = $name;
+        $monster->lvl = $level;
+        $monster->hp = MonsterStatFormulas::hp($level, $hpMultiplier);
+        $monster->armor = MonsterStatFormulas::armorForMitigation($level, $armorMitigation);
+        $monster->dodge = MonsterStatFormulas::rawStatForChance($level, $dodgePercent);
+        $monster->critical = MonsterStatFormulas::rawStatForChance($level, $critPercent);
+        $monster->min_dmg = $minDmg;
+        $monster->max_dmg = $maxDmg;
+        $monster->aggression = $aggression;
+        $monster->min_money = $minMoney;
+        $monster->max_money = $maxMoney;
+        $monster->exp = $exp;
+        $monster->save();
+
+        return $monster;
     }
 
     protected function createBoss()
@@ -847,6 +921,12 @@ class GenerateSeed extends Command
         $this->location1->monsters()->attach($this->monster1->id);
         $this->location2->monsters()->attach($this->monster1->id);
         $this->location2->monsters()->attach($this->monster2->id);
+        $this->location2->monsters()->attach($this->monster3->id);
+        $this->location2->monsters()->attach($this->monster4->id);
+        $this->location2->monsters()->attach($this->monster5->id);
+        $this->location2->monsters()->attach($this->monster6->id);
+        $this->location2->monsters()->attach($this->monster7->id);
+        $this->location2->monsters()->attach($this->monster8->id);
         $this->location3->monsters()->attach($this->boss->id);
         $this->location3->monsters()->attach($this->boss2->id);
         $this->location3->monsters()->attach($this->boss3->id);
@@ -1637,7 +1717,7 @@ class GenerateSeed extends Command
 
         $quest1->rewards()->saveMany([
             new QuestReward(['type' => QuestRewardType::MONEY, 'amount' => 10000]),
-            new QuestReward(['type' => QuestRewardType::EXP, 'amount' => 1000]),
+            new QuestReward(['type' => QuestRewardType::EXP, 'amount' => 250]),
         ]);
 
         $questObjective = new QuestObjective;

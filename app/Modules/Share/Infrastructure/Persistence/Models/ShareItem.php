@@ -11,6 +11,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,9 +50,19 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class ShareItem extends Model
 {
+    /** Единственное место для дефолтной иконки — если у предмета нет своей картинки. Замена картинки — правка только здесь. */
+    public const DEFAULT_IMAGE = '/img/bg/empty_slot.gif';
+
     public function scopeByGroup($query, string $group)
     {
         return $query->whereIn('type', ShareItemType::values(ShareItemType::group($group)));
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value !== null && $value !== '' ? $value : self::DEFAULT_IMAGE,
+        );
     }
 
     protected $attributes = [

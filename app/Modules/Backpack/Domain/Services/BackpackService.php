@@ -116,6 +116,17 @@ class BackpackService
 
     public function addItemByShareItem(User $user, ShareItem $shareItem, int $quantity = 1): Backpack
     {
+        $quantity = max(1, $quantity);
+
+        if (! $shareItem->type->isStackable()) {
+            $created = [];
+            for ($i = 0; $i < $quantity; $i++) {
+                $created[] = $this->createBackpackItemByShareItem($user, $shareItem);
+            }
+
+            return $created[0];
+        }
+
         $backpackItem = $this->getItem($user, $shareItem);
 
         if ($backpackItem) {
@@ -124,16 +135,7 @@ class BackpackService
             return $backpackItem->fresh();
         }
 
-        $item = Item::create([
-            'share_item_id' => $shareItem->id,
-        ]);
-
-        $user->backpack()->attach($item->id, [
-            'equipped' => 0,
-            'count' => $quantity,
-        ]);
-
-        return $this->getItemById($user, $item->id);
+        return $this->createBackpackItemByShareItem($user, $shareItem, $quantity);
     }
 
     /**
@@ -153,12 +155,24 @@ class BackpackService
 
         $created = [];
         for ($i = 0; $i < $quantity; $i++) {
-            $item = Item::create(['share_item_id' => $shareItem->id]);
-            $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
-            $created[] = $this->getItemById($user, $item->id);
+            $created[] = $this->createBackpackItemByShareItem($user, $shareItem);
         }
 
         return $created;
+    }
+
+    private function createBackpackItemByShareItem(User $user, ShareItem $shareItem, int $count = 1): Backpack
+    {
+        $item = Item::create([
+            'share_item_id' => $shareItem->id,
+        ]);
+
+        $user->backpack()->attach($item->id, [
+            'equipped' => 0,
+            'count' => $count,
+        ]);
+
+        return $this->getItemById($user, $item->id);
     }
 
     public function addItem(User $user, int $itemId, int $quantity = 1, array $attributes = []): Backpack

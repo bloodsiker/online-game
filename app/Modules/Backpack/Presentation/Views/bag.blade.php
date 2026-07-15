@@ -129,20 +129,22 @@
             font-size: 11px;
         }
         .item-put-off {
-            border: 1px solid #f59530;
+            border: 0;
             font-size: 12px;
             position: absolute;
-            padding-bottom: 1px;
+            padding: 0;
             top: 18px;
-            left: 0;
+            left: -5px;
             text-align: center;
-            background: #f7d675;
-            width: 50px;
+            background: url({{ asset('img/bg/backpack/slot_button.png') }}) center center / 100% 100% no-repeat;
+            width: 60px;
+            height: 13px;
+            line-height: 13px;
             text-decoration: none;
             display: none;
         }
         .item-put-off:hover {
-            background: #fbbf7f;
+            filter: brightness(1.08);
         }
         td.item-hero {
             position: relative

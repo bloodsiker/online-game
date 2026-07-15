@@ -29,7 +29,7 @@ class MonsterOnLocation extends Model
 
     const REGEN_INTERVAL = 5;   // seconds between regen ticks
 
-    const FULL_REGEN_TIME = 600; // seconds for full HP recovery
+    const FULL_REGEN_TIME = 1200; // seconds for full HP recovery
 
     protected $table = 'monster_on_locations';
 

@@ -12,6 +12,9 @@ final class FightHitDTO
 {
     protected int $damage;
 
+    /** Урон, погашенный блоком щита и отражённый обратно атакующему (0 — блок не сработал) */
+    protected int $reflectedDamage = 0;
+
     protected bool $dodge = false;
 
     protected bool $critical = false;
@@ -46,6 +49,18 @@ final class FightHitDTO
     public function setDamage(int $damage): self
     {
         $this->damage = $damage;
+
+        return $this;
+    }
+
+    public function getReflectedDamage(): int
+    {
+        return $this->reflectedDamage;
+    }
+
+    public function setReflectedDamage(int $reflectedDamage): self
+    {
+        $this->reflectedDamage = $reflectedDamage;
 
         return $this;
     }

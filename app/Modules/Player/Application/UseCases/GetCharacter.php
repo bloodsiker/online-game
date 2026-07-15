@@ -25,6 +25,7 @@ class GetCharacter
                 level: $s->lvl,
                 exp: $s->exp,
                 expUp: $s->exp_up,
+                expDiff: $s->exp_diff,
             ))
             ->all();
 

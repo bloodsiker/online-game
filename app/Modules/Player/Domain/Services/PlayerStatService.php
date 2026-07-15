@@ -95,6 +95,10 @@ class PlayerStatService
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
             'crit_damage' => RecalculatePlayerModification::CRIT_DAMAGE_BASE
                 + RecalculatePlayerModification::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
+            // Блок щитом — целиком от предметов (щит), базы своей нет
+            'block_chance' => 0.0,
+            'block_flat' => 0.0,
+            'block_percent' => 0.0,
         ];
 
         // Сила усиливает урон оружия процентом — от итоговой силы, с мягким потолком
@@ -128,6 +132,9 @@ class PlayerStatService
         $sheet->rightMaxDmg = $computed['right_max_dmg'];
         $sheet->magicAttack = $computed['magic_attack'];
         $sheet->critDamage = $computed['crit_damage'];
+        $sheet->blockChance = $computed['block_chance'];
+        $sheet->blockFlat = $computed['block_flat'];
+        $sheet->blockPercent = $computed['block_percent'];
         $sheet->level = max(1, (int) $player->lvl);
         $sheet->combatClass = $this->determineCombatClass($player);
 
@@ -207,6 +214,9 @@ class PlayerStatService
                     ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
                     ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
                     ShareItemStatType::ENDURANCE => 'endurance',
+                    ShareItemStatType::BLOCK_CHANCE => 'block_chance',
+                    ShareItemStatType::BLOCK_FLAT => 'block_flat',
+                    ShareItemStatType::BLOCK_PERCENT => 'block_percent',
                     default => null,
                 };
 

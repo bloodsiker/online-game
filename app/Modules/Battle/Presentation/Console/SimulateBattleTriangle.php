@@ -312,4 +312,20 @@ class SimFighter implements FightHitInterface
         return (int) round(RecalculatePlayerModification::CRIT_DAMAGE_BASE
             + RecalculatePlayerModification::critDamageBonus((float) $this->intuition, $this->level));
     }
+
+    // Синтетические билды симулятора щит не носят — блок всегда 0
+    public function getBlockChance(): int
+    {
+        return 0;
+    }
+
+    public function getBlockFlat(): int
+    {
+        return 0;
+    }
+
+    public function getBlockPercent(): int
+    {
+        return 0;
+    }
 }

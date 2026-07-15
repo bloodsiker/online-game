@@ -3,6 +3,7 @@
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\DTO\AttackResultDTO;
+use App\DTO\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
@@ -39,6 +40,29 @@ readonly class MonsterAttackService
             : sprintf('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage());
 
         $result->log($msg);
+
+        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
+    }
+
+    /**
+     * Блок щита: если сработал (HitCalculator::applyShieldBlock), отражённый
+     * урон снимается с HP моба — FightOrchestrator сам проверит hp_now<=0
+     * и обработает смерть моба тем же путём, что и обычный удар игрока.
+     */
+    private function applyShieldBlockReflect(FightHitDTO $hit, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    {
+        $reflected = $hit->getReflectedDamage();
+
+        if ($reflected <= 0) {
+            return;
+        }
+
+        $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflected);
+
+        $result->log(sprintf(
+            '<p><b class="color-reflect">🛡 Щит заблокировал удар и отразил %d урона обратно!</b></p>',
+            $reflected
+        ));
     }
 
     /**
@@ -150,6 +174,8 @@ readonly class MonsterAttackService
             );
 
         $result->log($msg);
+
+        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
     }
 
     private function executeBossSpecialSkill(
@@ -223,6 +249,8 @@ readonly class MonsterAttackService
             );
 
         $result->log($msg);
+
+        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
 
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);

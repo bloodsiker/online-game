@@ -30,4 +30,15 @@ interface FightHitInterface
      * чтобы баланс не разваливался с ростом стат.
      */
     public function getLevel(): int;
+
+    /**
+     * Блок щитом (защитника): шанс срабатывания, %; при срабатывании часть
+     * входящего урона (flat + percent от урона) полностью гасится И
+     * отражается атакующему — см. HitCalculator::applyShieldBlock.
+     */
+    public function getBlockChance(): int;
+
+    public function getBlockFlat(): int;
+
+    public function getBlockPercent(): int;
 }

@@ -87,7 +87,7 @@ class QuestSeeder extends Seeder
             QuestReward::create([
                 'quest_id' => $quest1->id,
                 'type' => 'exp',
-                'amount' => 200,
+                'amount' => 50,
             ]);
         }
 
@@ -119,7 +119,7 @@ class QuestSeeder extends Seeder
         }
 
         if ($quest2->rewards->isEmpty()) {
-            QuestReward::create(['quest_id' => $quest2->id, 'type' => 'exp',   'amount' => 500]);
+            QuestReward::create(['quest_id' => $quest2->id, 'type' => 'exp',   'amount' => 125]);
             QuestReward::create(['quest_id' => $quest2->id, 'type' => 'money', 'amount' => 50]);
         }
 
@@ -159,7 +159,7 @@ class QuestSeeder extends Seeder
         }
 
         if ($quest3->rewards->isEmpty()) {
-            QuestReward::create(['quest_id' => $quest3->id, 'type' => 'exp',  'amount' => 800]);
+            QuestReward::create(['quest_id' => $quest3->id, 'type' => 'exp',  'amount' => 200]);
             QuestReward::create(['quest_id' => $quest3->id, 'type' => 'item', 'amount' => 2, 'share_item_id' => 1]); // 2x Коготь медведя
         }
 
@@ -192,7 +192,7 @@ class QuestSeeder extends Seeder
         }
 
         if ($quest4->rewards->isEmpty()) {
-            QuestReward::create(['quest_id' => $quest4->id, 'type' => 'exp',   'amount' => 1000]);
+            QuestReward::create(['quest_id' => $quest4->id, 'type' => 'exp',   'amount' => 250]);
             QuestReward::create([
                 'quest_id' => $quest4->id,
                 'type' => 'location_access',
@@ -229,7 +229,7 @@ class QuestSeeder extends Seeder
         }
 
         if ($quest5->rewards->isEmpty()) {
-            QuestReward::create(['quest_id' => $quest5->id, 'type' => 'exp',   'amount' => 300]);
+            QuestReward::create(['quest_id' => $quest5->id, 'type' => 'exp',   'amount' => 75]);
             QuestReward::create(['quest_id' => $quest5->id, 'type' => 'money', 'amount' => 100]);
         }
 
@@ -310,7 +310,7 @@ class QuestSeeder extends Seeder
         }
 
         if ($quest6->rewards()->doesntExist()) {
-            QuestReward::create(['quest_id' => $quest6->id, 'type' => 'exp',   'amount' => 2000]);
+            QuestReward::create(['quest_id' => $quest6->id, 'type' => 'exp',   'amount' => 500]);
             QuestReward::create(['quest_id' => $quest6->id, 'type' => 'money', 'amount' => 300]);
             QuestReward::create(['quest_id' => $quest6->id, 'type' => 'item',  'amount' => 2, 'share_item_id' => 1]); // 2x Коготь медведя
         }
