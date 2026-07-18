@@ -229,6 +229,54 @@
                                             @endforeach
                                         @endif
 
+                                        @if($dialogueStartNode)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">{{ $dialogueStartNode->title }}</td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Поговорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}';" style="width:90px">
+                                                    </b></b>
+                                                </td>
+                                            </tr>
+                                        @endif
+
+                                        @if($isClanRegistrar ?? false)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('clan') }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">Регистрация клана</td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Говорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('clan') }}';" style="width:90px">
+                                                    </b></b>
+                                                </td>
+                                            </tr>
+                                        @endif
+
+                                        @foreach($reputationShops ?? [] as $reputationShop)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('reputation.shop', ['id' => $reputationShop->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_store.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">Магазин репутации «{{ $reputationShop->name }}»</td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('reputation.shop', ['id' => $reputationShop->id]) }}';" style="width:60px">
+                                                    </b></b>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
                                         @foreach($quests as $quest)
                                             <tr class="bg_l"
                                                 onclick="location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}'"
@@ -236,7 +284,7 @@
                                                 <td class="brd2-top brd2-bt" width="1%">
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
                                                 </td>
-                                                <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif{{ $quest->title }}</td>
+                                                <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif @if($quest->is_feat ?? false)<b style="color:#7a4e00;">⚔ Подвиг:</b> @endif{{ $quest->title }}</td>
                                                 <td class="brd2-top brd2-bt" align="right" onclick="event.stopPropagation()">
                                                     <b class="butt2 pointer"><b>
                                                         <input value="Взять" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
@@ -309,13 +357,22 @@
                                             </tr>
                                         @endforeach
 
-                                        <tr class="bg_l"
-                                            onclick="location.href='{{ route('location') }}'"
-                                            onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                            <td class="brd2-top brd2-bt" width="1%" height="28"></td>
-                                            <td class="brd2-top brd2-bt">« Завершить разговор</td>
-                                            <td class="brd2-top brd2-bt" align="right"></td>
-                                        </tr>
+                                        @php
+                                            $hasAnything = $npc->structures->count()
+                                                || $dialogueStartNode
+                                                || ($isClanRegistrar ?? false)
+                                                || collect($reputationShops ?? [])->count()
+                                                || $quests->count()
+                                                || $questsOnCooldown->count()
+                                                || $questsInProgress->count();
+                                        @endphp
+                                        @unless($hasAnything)
+                                            <tr class="bg_l">
+                                                <td class="brd2-top brd2-bt" colspan="3" align="center" style="padding: 10px; color:#7a1c00; font-weight: bold;">
+                                                    Квестов нет
+                                                </td>
+                                            </tr>
+                                        @endunless
                                         </tbody>
                                     </table>
                                 </td>
@@ -330,7 +387,7 @@
                         </table>
                     </td>
 
-                    <td width="16"><img src="images/d.gif" width="16" height="1"></td>
+                    <td width="16"><img src="{{ asset('img/icon/d.gif') }}" width="16" height="1"></td>
 
                     <td valign="top" width="202" height="100%">
                         <table width="240" border="0" cellspacing="0" cellpadding="0">
@@ -357,7 +414,7 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                                    <img src="{{ asset($npc->image) }}" alt="Эрдинг" width="190"
+                                    <img src="{{ asset($npc->image) }}" alt="{{ $npc->name }}" width="190"
                                          height="171"><br>
                                     <div class="p2v">
                                         {!! $npc->description !!}
@@ -372,7 +429,6 @@
                             </tr>
                             </tbody>
                         </table>
-
                     </td>
                 </tr>
                 </tbody>

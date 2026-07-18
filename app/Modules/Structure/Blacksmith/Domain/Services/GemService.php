@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemGem;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GemService
 {
-    public const MAX_SOCKETS = 3;
+    public const MAX_SOCKETS = 4;
 
     /**
      * Insert gem into item socket.
@@ -103,28 +103,73 @@ class GemService
     }
 
     /**
-     * Open a new socket on an item (requires socket kit from backpack).
+     * Устанавливает оправу на предмет. Количество открытых сокетов —
+     * случайное число в диапазоне редкости оправы (см.
+     * MountRarityConfig::socketRange(), редкость берётся из стандартного
+     * share_items.rarity), плюс стоимость установки в монетах.
+     *
+     * Если на предмете уже есть сокеты, новую оправу можно поставить поверх
+     * ради апгрейда — но это риск: оправа и монеты расходуются в любом
+     * случае, а socket_count меняется только если выпавшее число сокетов
+     * не меньше текущего (иначе результат — впустую потраченные ресурсы,
+     * существующие сокеты и камни в них не трогаются).
      */
-    public function openSocket(User $user, Item $item, Backpack $kitSlot): array
+    public function openSocket(User $user, Item $item, Backpack $mountSlot): array
     {
-        if ($item->socket_count >= self::MAX_SOCKETS) {
-            return ['success' => false, 'message' => 'Достигнуто максимальное количество сокетов.'];
+        $mountInfo = $mountSlot->item->itemInfo;
+
+        if ($mountInfo->type !== ShareItemType::MOUNT) {
+            return ['success' => false, 'message' => 'Выбранный предмет не является оправой.'];
         }
 
-        if ($kitSlot->count > 1) {
-            $kitSlot->count -= 1;
-            $kitSlot->save();
-        } else {
-            $kitSlot->delete();
-            $kitSlot->item->delete();
+        $rarity = $mountInfo->rarity;
+        $cost = MountRarityConfig::openCost($rarity);
+
+        if ($user->money < $cost) {
+            return ['success' => false, 'message' => sprintf('Недостаточно монет. Нужно: %d', $cost)];
         }
 
-        $item->socket_count += 1;
+        [$min, $max] = MountRarityConfig::socketRange($rarity);
+        $rolledCount = min(random_int($min, $max), self::MAX_SOCKETS);
+
+        $this->consumeFromBackpack($mountSlot);
+        $user->money -= $cost;
+        $user->save();
+
+        if ($rolledCount < $item->socket_count) {
+            return [
+                'success' => false,
+                'message' => sprintf(
+                    'Оправа «%s» не улучшила предмет (выпало %d сокет(ов), уже открыто %d). Оправа и монеты потрачены впустую.',
+                    $mountInfo->name,
+                    $rolledCount,
+                    $item->socket_count
+                ),
+            ];
+        }
+
+        $item->socket_count = $rolledCount;
         $item->save();
 
         return [
             'success' => true,
-            'message' => sprintf('Сокет открыт. Теперь у предмета %d сокет(а/ов).', $item->socket_count),
+            'message' => sprintf(
+                'Оправа «%s» установлена. Открыто сокетов: %d. Потрачено: %d монет.',
+                $mountInfo->name,
+                $rolledCount,
+                $cost
+            ),
         ];
+    }
+
+    private function consumeFromBackpack(Backpack $slot): void
+    {
+        if ($slot->count > 1) {
+            $slot->count -= 1;
+            $slot->save();
+        } else {
+            $slot->delete();
+            $slot->item->delete();
+        }
     }
 }

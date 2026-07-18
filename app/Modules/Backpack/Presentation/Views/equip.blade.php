@@ -140,7 +140,7 @@
             background: url({{ asset('img/bg/backpack/slot_button.png') }}) center center / 100% 100% no-repeat;
             width: 50px;
             height: 13px;
-            line-height: 12px;
+            line-height: 11px;
             text-decoration: none;
             display: none;
             font-weight: 600;

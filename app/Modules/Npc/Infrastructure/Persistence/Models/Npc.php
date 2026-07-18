@@ -37,4 +37,14 @@ class Npc extends Model
     {
         return $this->hasMany(Structure::class, 'npc_id')->with(['actions']);
     }
+
+    public function dialogueNodes(): HasMany
+    {
+        return $this->hasMany(NpcDialogueNode::class, 'npc_id')->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function activeDialogueNodes(): HasMany
+    {
+        return $this->dialogueNodes()->where('is_active', true);
+    }
 }

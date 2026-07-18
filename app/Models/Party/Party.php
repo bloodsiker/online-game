@@ -6,6 +6,7 @@ namespace App\Models\Party;
 
 use App\Enums\PartyStatus;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $max_players
  * @property PartyStatus $status
  * @property-read User           $leader
- * @property-read \Illuminate\Database\Eloquent\Collection<PartyMember> $members
+ * @property-read Collection<PartyMember> $members
  */
 class Party extends Model
 {
@@ -37,9 +38,9 @@ class Party extends Model
         return $this->hasMany(PartyMember::class);
     }
 
-    public function isLeader(User $user): bool
+    public function isLeader(int $userId): bool
     {
-        return $this->leader_user_id === $user->id;
+        return (int) $this->leader_user_id === $userId;
     }
 
     public function isFull(): bool

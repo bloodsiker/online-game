@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;
 use App\Modules\Structure\Auction\Application\UseCases\CancelLot;
@@ -55,9 +55,10 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $auctionSlots = $this->getAuctionLots->execute($auction->id);
 
-        return view('auction::list', compact('auction', 'user', 'auctionSlots'));
+        return view('auction::list', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange'));
     }
 
     public function myLot(int $id): mixed
@@ -69,9 +70,10 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $auctionSlots = $this->getAuctionLots->execute($auction->id, $user->id);
 
-        return view('auction::list_my_lot', compact('auction', 'user', 'auctionSlots'));
+        return view('auction::list_my_lot', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange'));
     }
 
     public function myLotEdit(int $id, int $slotId): mixed
@@ -83,9 +85,10 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $itemEdit = $this->getLotForEdit->execute($slotId, $user->id);
 
-        return view('auction::edit_lot', compact('auction', 'user', 'itemEdit'));
+        return view('auction::edit_lot', compact('auction', 'user', 'itemEdit', 'commissionShop', 'exchange'));
     }
 
     public function myLotCancel(int $id, int $slotId): RedirectResponse
@@ -120,9 +123,10 @@ class AuctionController extends Controller
                 ->first();
         }
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $itemsToSell = $this->getSellableItems->execute($user->id);
 
-        return view('auction::new_lot', compact('auction', 'user', 'itemsToSell', 'selectedItem'));
+        return view('auction::new_lot', compact('auction', 'user', 'itemsToSell', 'selectedItem', 'commissionShop', 'exchange'));
     }
 
     public function newLotSave(Request $request, int $id): RedirectResponse
@@ -194,6 +198,7 @@ class AuctionController extends Controller
             countMax: $request->filled('filter.count_max') ? (int) $request->input('filter.count_max') : null,
         );
 
+        [$commissionShop, $exchangeStructure] = $this->resolveSiblingStructures($auction);
         $orders = $this->getExchangeOrders->execute($auction->id, $user->id, $filter);
         $filterRaw = $request->input('filter', []);
 
@@ -202,6 +207,8 @@ class AuctionController extends Controller
             'user' => $user,
             'orders' => $orders,
             'filter' => $filterRaw,
+            'commissionShop' => $commissionShop,
+            'exchange' => $exchangeStructure,
         ]);
     }
 
@@ -210,9 +217,10 @@ class AuctionController extends Controller
         $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $orders = $this->getMyOrders->execute($auction->id, $user->id);
 
-        return view('auction::my_orders', compact('auction', 'user', 'orders'));
+        return view('auction::my_orders', compact('auction', 'user', 'orders', 'commissionShop', 'exchange'));
     }
 
     public function newOrder(Request $request, int $id): mixed
@@ -227,9 +235,10 @@ class AuctionController extends Controller
                 ->first();
         }
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $shareItems = ShareItem::where('is_sell', 1)->orderBy('name')->get();
 
-        return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem'));
+        return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem', 'commissionShop', 'exchange'));
     }
 
     public function newOrderSave(Request $request, int $id): RedirectResponse
@@ -287,9 +296,10 @@ class AuctionController extends Controller
         $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $claims = $this->getClaims->execute($auction->id, $user->id);
 
-        return view('auction::claims', compact('auction', 'user', 'claims'));
+        return view('auction::claims', compact('auction', 'user', 'claims', 'commissionShop', 'exchange'));
     }
 
     public function claimTake(int $id, int $claimId): RedirectResponse
@@ -310,5 +320,27 @@ class AuctionController extends Controller
         session()->flash('message', $message);
 
         return redirect()->back();
+    }
+
+    /**
+     * Коммисионный магазин (лоты) и Биржа (заявки) — две отдельные структуры
+     * на одной локации. По любой из них находим обе, чтобы вкладки-навигация
+     * могли вести на правильный id независимо от того, на какой странице
+     * сейчас находится игрок. Если соседняя структура не найдена — используем
+     * саму структуру-якорь, чтобы не ронять страницу.
+     *
+     * @return array{0: Structure, 1: Structure}
+     */
+    private function resolveSiblingStructures(Structure $anchor): array
+    {
+        $commissionShop = $anchor->isAuction()
+            ? $anchor
+            : Structure::where('location_id', $anchor->location_id)->where('type', Structure::TYPE_AUCTION)->first() ?? $anchor;
+
+        $exchange = $anchor->isAuctionExchange()
+            ? $anchor
+            : Structure::where('location_id', $anchor->location_id)->where('type', Structure::TYPE_AUCTION_EXCHANGE)->first() ?? $anchor;
+
+        return [$commissionShop, $exchange];
     }
 }

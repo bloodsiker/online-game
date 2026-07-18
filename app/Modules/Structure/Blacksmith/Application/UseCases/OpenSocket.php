@@ -27,18 +27,18 @@ class OpenSocket
             return new BlacksmithActionResultDTO(false, 'Предмет не найден.');
         }
 
-        $kitSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, (int) $data->kitId, [
-            ShareItemType::SOCKET_KIT->value,
+        $mountSlot = $this->inventoryRepository->findOwnedSlotByTypes($data->user, (int) $data->mountId, [
+            ShareItemType::MOUNT->value,
         ]);
 
-        if ($kitSlot === null) {
-            return new BlacksmithActionResultDTO(false, 'Набор для открытия сокета не найден.');
+        if ($mountSlot === null) {
+            return new BlacksmithActionResultDTO(false, 'Оправа не найдена.');
         }
 
         $result = $this->transactionManager->run(fn () => $this->gemService->openSocket(
             $data->user,
             $itemSlot->item,
-            $kitSlot,
+            $mountSlot,
         ));
 
         return new BlacksmithActionResultDTO($result['success'], $result['message'], $result['success']);

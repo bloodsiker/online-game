@@ -44,7 +44,7 @@ class ReputationController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $reputation->load(['npc', 'tiers.quests.quest', 'shopItems.item']);
+        $reputation->load(['npc', 'tiers.quests.quest', 'tiers.featQuest', 'shopItems.item']);
 
         return view('admin.reputation.info', compact('reputation'));
     }
@@ -53,13 +53,17 @@ class ReputationController extends Controller
     {
         ReputationTier::create([
             'reputation_id' => $reputation->id,
-            'min_points' => (int) $request->input('min_points', 0),
-            'max_points' => (int) $request->input('max_points', 0),
-            'medal_name' => $request->input('medal_name'),
-            'medal_icon' => $request->input('medal_icon'),
+            ...$this->tierData($request),
         ]);
 
         return redirect()->back()->with('success', 'Уровень добавлен.');
+    }
+
+    public function updateTier(Request $request, Reputation $reputation, ReputationTier $tier): RedirectResponse
+    {
+        $tier->update($this->tierData($request));
+
+        return redirect()->back()->with('success', 'Уровень обновлён.');
     }
 
     public function deleteTier(Reputation $reputation, ReputationTier $tier): RedirectResponse
@@ -109,6 +113,21 @@ class ReputationController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+
+    /** @return array<string, mixed> */
+    private function tierData(Request $request): array
+    {
+        return [
+            'min_points' => (int) $request->input('min_points', 0),
+            // Пустое значение = открытый верхний тир (без потолка)
+            'max_points' => $request->filled('max_points') ? (int) $request->input('max_points') : null,
+            'medal_name' => $request->input('medal_name') ?: null,
+            'medal_icon' => $request->input('medal_icon') ?: null,
+            // Подвиг: квест (или финальный квест цепочки), без которого медаль не выдаётся
+            'feat_quest_id' => $request->input('feat_quest_id') ?: null,
+            'feat_description' => $request->input('feat_description') ?: null,
+        ];
+    }
 
     private function fillReputation(Reputation $reputation, Request $request): void
     {

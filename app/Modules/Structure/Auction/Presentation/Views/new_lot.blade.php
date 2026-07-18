@@ -155,63 +155,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-                <tbody>
-                @php
-                    $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-                    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-                    $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-                    $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-                    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-                    $btnRight2 = 'img/bg/btn/btn-right2.gif';
-                @endphp
-                <tr height="21">
-                    <td width="19"><img id="left_1" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="100" id="tab_1" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_1" href="{{ route('auction', ['id' => $auction->id]) }}" title="Купить товар" class="btn_1">Купить товар</a>
-                    </td>
-                    <td width="19"><img id="right_1" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img id="left_2" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="80" id="tab_2" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_2" href="{{ route('auction.my_lot', ['id' => $auction->id]) }}" title="Мои лоты" class="btn_1">Мои лоты</a></td>
-                    <td width="19"><img id="right_2" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img id="left_2" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-                    <td width="80" id="tab_2" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_2" href="{{ route('auction.new_lot', ['id' => $auction->id]) }}" title="Новый лот" class="btn_2">Новый лот</a></td>
-                    <td width="19"><img id="right_2" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="60" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.exchange', ['id' => $auction->id]) }}" title="Биржа" class="btn_1">Биржа</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="85" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.my_orders', ['id' => $auction->id]) }}" title="Мои заявки" class="btn_1">Мои заявки</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="90" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.new_order', ['id' => $auction->id]) }}" title="Новая заявка" class="btn_1">Новая заявка</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.claims', ['id' => $auction->id]) }}" title="Получить товары" class="btn_1">Получить</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td></td>
-
-                    <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
-                    <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-                </tr>
-                </tbody>
-            </table>
+            @include('auction::_tabs', ['activeTab' => 'new_lot'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -249,7 +193,7 @@
                                             res = Math.ceil(res);
                                             res = res.toFixed(0);
                                             res = (isNaN(res) || res <= 0) ? 0 : res;
-                                            document.getElementById('commission').innerHTML = (res * 1.0).toFixed(0) + '&nbsp;<img src="https://fun-dwar.com//images/m_game2.gif">';
+                                            document.getElementById('commission').innerHTML = (res * 1.0).toFixed(0) + '&nbsp;<img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">';
                                         }
 
                                         document.addEventListener('DOMContentLoaded', function () {
@@ -307,7 +251,7 @@
                                                                        maxlength="9" class="dbgl2 brd b small"
                                                                        oninput="recalculate()"
                                                                        onkeyup="setTimeout('recalculate()', 10)">&nbsp;
-                                                                <img src="https://fun-dwar.com//images/m_game2.gif">
+                                                                <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                                                             </td>
                                                         </tr>
                                                         <tr class="bg_l">
@@ -327,7 +271,7 @@
                                                             <td height="28" class="brd2-top brd2 b" align="right">
                                                                 <span id="commission">
                                                                     @if($cost)
-                                                                        {{ ceil($cost * 2 / 100) }}&nbsp;<img src="https://fun-dwar.com//images/m_game2.gif">
+                                                                        {{ ceil($cost * 2 / 100) }}&nbsp;<img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                                                                     @endif
                                                                 </span>
                                                             </td>
@@ -404,7 +348,7 @@
                                                         <td nowrap=""><b>Вместимость:</b> <b class="redd">7/20</b></td>
                                                         <td align="right" nowrap="">
                                                             <b>Деньги:</b>
-                                                            &nbsp;<b class="redd"><span title="Серебряный"><img src="https://fun-dwar.com//images/m_game2.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ number_format($user->money, 0, '', ' ') }} </b>
+                                                            &nbsp;<b class="redd"><span title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
                                                             &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Рубин"><img src="https://fun-dwar.com//images/m_rub.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;676.96 </b>
                                                             &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="https://fun-dwar.com//images/m_dmd.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;3.82 </b>
                                                         </td>
@@ -449,7 +393,7 @@
                                                                                    onclick="showArtifactInfo(22195638,false);return false;"
                                                                                    style="color:#666666" class="b">{{ $slot->item->itemInfo->name }}</a><br>
                                                                                 <span title="Тип предмета">
-                                                                                    <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $slot->item->itemInfo->getTypeName() }}
+                                                                                    <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $slot->item->itemInfo->getTypeName() }}
                                                                                 </span>
                                                                             </td>
                                                                             <td nowrap="">{{ $slot->count }}</td>

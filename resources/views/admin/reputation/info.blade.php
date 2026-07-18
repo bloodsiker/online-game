@@ -88,13 +88,25 @@
                                                         <img src="{{ $tier->medal_icon }}" style="width:24px;height:24px;object-fit:contain;margin-right:6px;vertical-align:middle;" alt="">
                                                     @endif
                                                     <strong>{{ $tier->medal_name ?: 'Без названия' }}</strong>
-                                                    <span class="text-muted ms-2">{{ number_format($tier->min_points) }} – {{ number_format($tier->max_points) }} очков</span>
+                                                    <span class="text-muted ms-2">{{ number_format($tier->min_points) }} – {{ $tier->max_points !== null ? number_format($tier->max_points) : '∞' }} очков</span>
                                                 </div>
-                                                <a href="{{ route('admin.reputation.tier.delete', [$reputation->id, $tier->id]) }}"
-                                                   class="btn btn-xs btn-danger"
-                                                   onclick="return confirm('Удалить уровень со всеми квестами?')">Удалить</a>
+                                                <div>
+                                                    <a class="modal-with-zoom-anim btn btn-xs btn-primary" href="#modalTierEdit{{ $tier->id }}">Изменить</a>
+                                                    <a href="{{ route('admin.reputation.tier.delete', [$reputation->id, $tier->id]) }}"
+                                                       class="btn btn-xs btn-danger"
+                                                       onclick="return confirm('Удалить уровень со всеми квестами?')">Удалить</a>
+                                                </div>
                                             </div>
                                             <div class="card-body py-2">
+                                                @if($tier->feat_quest_id)
+                                                    <p class="mb-2 small">
+                                                        <span class="badge badge-warning">⚔ Подвиг</span>
+                                                        <a href="{{ route('admin.quest.info', $tier->feat_quest_id) }}">[{{ $tier->feat_quest_id }}] {{ $tier->featQuest?->title ?? '—' }}</a>
+                                                        @if($tier->feat_description)
+                                                            <br><span class="text-muted">{{ $tier->feat_description }}</span>
+                                                        @endif
+                                                    </p>
+                                                @endif
                                                 <p class="mb-2 small text-muted">Квесты этого уровня:</p>
                                                 <table class="table table-sm table-bordered mb-2">
                                                     <thead>
@@ -126,6 +138,59 @@
                                                     <button class="btn btn-sm btn-outline-primary">Добавить квест</button>
                                                 </form>
                                             </div>
+                                        </div>
+
+                                        {{-- Модалка: изменить уровень --}}
+                                        <div id="modalTierEdit{{ $tier->id }}" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+                                            <section class="card">
+                                                <form action="{{ route('admin.reputation.tier.update', [$reputation->id, $tier->id]) }}" method="post">
+                                                    <header class="card-header"><h2 class="card-title">Изменить уровень «{{ $tier->medal_name ?: $tier->min_points.'+' }}»</h2></header>
+                                                    <div class="card-body">
+                                                        {{ csrf_field() }}
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-group mb-2">
+                                                                    <label>Мин. очков</label>
+                                                                    <input type="number" class="form-control" name="min_points" value="{{ $tier->min_points }}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group mb-2">
+                                                                    <label>Макс. очков <small class="text-muted">(пусто = без потолка)</small></label>
+                                                                    <input type="number" class="form-control" name="max_points" value="{{ $tier->max_points }}">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>Название медали</label>
+                                                            <input type="text" class="form-control" name="medal_name" value="{{ $tier->medal_name }}">
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>Иконка медали (URL)</label>
+                                                            <input type="text" class="form-control" name="medal_icon" value="{{ $tier->medal_icon }}">
+                                                        </div>
+                                                        <hr>
+                                                        <div class="form-group mb-2">
+                                                            <label>⚔ Квест-подвиг <small class="text-muted">(без него медаль не выдаётся; для цепочки — финальный квест)</small></label>
+                                                            <select class="form-control tier-feat-select" name="feat_quest_id" data-modal="#modalTierEdit{{ $tier->id }}">
+                                                                @if($tier->featQuest)
+                                                                    <option value="{{ $tier->featQuest->id }}" selected>[{{ $tier->featQuest->id }}] {{ $tier->featQuest->title }}</option>
+                                                                @endif
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
+                                                            <textarea class="form-control" name="feat_description" rows="2">{{ $tier->feat_description }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <footer class="card-footer">
+                                                        <div class="col-md-12 text-end">
+                                                            <button class="btn btn-primary">Сохранить</button>
+                                                            <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                                                        </div>
+                                                    </footer>
+                                                </form>
+                                            </section>
                                         </div>
                                     @empty
                                         <p class="text-muted">Уровни не добавлены.</p>
@@ -217,6 +282,15 @@
                     <div class="form-group mb-2">
                         <label>Иконка медали (URL)</label>
                         <input type="text" class="form-control" name="medal_icon">
+                    </div>
+                    <hr>
+                    <div class="form-group mb-2">
+                        <label>⚔ Квест-подвиг <small class="text-muted">(без него медаль не выдаётся; для цепочки — финальный квест)</small></label>
+                        <select class="form-control tier-feat-select" name="feat_quest_id" data-modal="#modalTier"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
+                        <textarea class="form-control" name="feat_description" rows="2"></textarea>
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -331,6 +405,28 @@
         $(this).select2({
             theme: 'bootstrap',
             placeholder: 'Выберите квест',
+            allowClear: true,
+            ajax: {
+                url: '{{ route('admin.api.quests') }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (p) { return { q: p.term, page: p.page || 1 }; },
+                processResults: function (data, p) {
+                    p.page = p.page || 1;
+                    return { results: data.results, pagination: { more: data.pagination.more } };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
+    });
+
+    // Feat quest selects (in add/edit tier modals)
+    $('.tier-feat-select').each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            dropdownParent: $($(this).data('modal')),
+            placeholder: 'Без подвига',
             allowClear: true,
             ajax: {
                 url: '{{ route('admin.api.quests') }}',

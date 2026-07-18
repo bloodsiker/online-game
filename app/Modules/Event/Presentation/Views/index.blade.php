@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>События</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    {!! $itemTooltipScript ?? '' !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
     <style>
         html, body { height: 100%; margin: 0; font-family: Tahoma, Arial, sans-serif; font-size: 11px; }
 
@@ -107,6 +109,8 @@
     </style>
 </head>
 <body leftmargin="0" rightmargin="0">
+
+<div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0; top: 0"></div>
 
 @php
     $tabs = [

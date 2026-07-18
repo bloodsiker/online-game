@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Clan\Domain\Enums\ClanLogAction;
+use App\Modules\Clan\Domain\Models\Clan;
+use App\Modules\Clan\Domain\Models\ClanLog;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
-use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
-use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Backpack\Domain\Services\BackpackService;
-use App\Modules\Clan\Domain\Enums\ClanLogAction;
-use App\Modules\Clan\Domain\Models\ClanLog;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
@@ -22,8 +22,11 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
-use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Reputation\Application\Services\ReputationService;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -350,7 +353,7 @@ class QuestController extends Controller
             foreach ($progress->quest->objectives->where('type', 'deliver') as $objective) {
                 $shareItem = ShareItem::find($objective->target_id);
                 if ($shareItem) {
-                    $acceptorUser = \App\Modules\User\Infrastructure\Persistence\Models\User::find($progress->user_id);
+                    $acceptorUser = User::find($progress->user_id);
                     if ($acceptorUser) {
                         $this->backpackService->removeItemByShareItem($acceptorUser, $shareItem, $objective->required_amount);
                     }
@@ -873,7 +876,7 @@ class QuestController extends Controller
         return implode(' | ', array_filter($parts));
     }
 
-    private function giveClanPoints(\App\Modules\Clan\Domain\Models\Clan $clan, int $amount, $user): void
+    private function giveClanPoints(Clan $clan, int $amount, $user): void
     {
         $clan->increment('points', $amount);
         $user->clanMembership?->increment('points', $amount);
@@ -934,9 +937,12 @@ class QuestController extends Controller
         if (! $reward->reputation_id) {
             return;
         }
-        $reputation = \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation::find($reward->reputation_id);
+        $reputation = Reputation::find($reward->reputation_id);
         if ($reputation) {
-            $this->reputationService->addPoints($player, $reputation, (int) $reward->amount);
+            // 2-дневный кулдаун касается только квестов из пула тира;
+            // подвиги (feat) и прочие квесты с наградой репутацией его не трогают
+            $touchCooldown = $reward->quest?->reputationTierQuests()->exists() ?? false;
+            $this->reputationService->addPoints($player, $reputation, (int) $reward->amount, $touchCooldown);
         }
     }
 }

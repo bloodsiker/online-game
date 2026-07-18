@@ -82,63 +82,7 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
-                <tbody>
-                @php
-                    $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-                    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-                    $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-                    $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-                    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-                    $btnRight2 = 'img/bg/btn/btn-right2.gif';
-                @endphp
-                <tr height="21">
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="100" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction', ['id' => $auction->id]) }}" title="Купить товар" class="btn_1">Купить товар</a>
-                    </td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="80" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.my_lot', ['id' => $auction->id]) }}" title="Мои лоты" class="btn_1">Мои лоты</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="80" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.new_lot', ['id' => $auction->id]) }}" title="Новый лот" class="btn_1">Новый лот</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="60" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.exchange', ['id' => $auction->id]) }}" title="Биржа" class="btn_1">Биржа</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-                    <td width="85" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.my_orders', ['id' => $auction->id]) }}" title="Мои заявки" class="btn_2">Мои заявки</a></td>
-                    <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="90" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.new_order', ['id' => $auction->id]) }}" title="Новая заявка" class="btn_1">Новая заявка</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="70" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('auction.claims', ['id' => $auction->id]) }}" title="Получить товары" class="btn_1">Получить</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-
-                    <td></td>
-
-                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-                    <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                        <a href="{{ route('location') }}" title="Выход" class="btn_1">Выход</a></td>
-                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
-                </tr>
-                </tbody>
-            </table>
+            @include('auction::_tabs', ['activeTab' => 'my_orders'])
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -196,17 +140,17 @@
                         <td align="left">
                             <b class="b">{{ $order->shareItem->name }}</b><br>
                             <span title="Тип предмета">
-                                <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $order->shareItem->getTypeName() }}
+                                <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $order->shareItem->getTypeName() }}
                             </span>
                         </td>
                         <td nowrap=""><b>{{ $order->count }} шт.</b></td>
                         <td nowrap="">
-                            <span title="Золотой"><img src="https://fun-dwar.com//images/m_game2.gif" border="0" width="11" height="11" align="absmiddle"></span>
-                            {{ number_format($order->price, 0, ',', ' ') }}
+                            <span title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
+                            {{ format_money($order->price) }}
                         </td>
                         <td nowrap="">
-                            <span title="Золотой"><img src="https://fun-dwar.com//images/m_game2.gif" border="0" width="11" height="11" align="absmiddle"></span>
-                            {{ number_format($order->count * $order->price, 0, ',', ' ') }}
+                            <span title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
+                            {{ format_money($order->count * $order->price) }}
                         </td>
                         <td nowrap="">
                             <b class="butt2 pointer"><b><input value="отменить" type="submit" class="cancel-btn" data-href="{{ route('auction.order.cancel', ['id' => $auction->id, 'orderId' => $order->id]) }}"></b></b>

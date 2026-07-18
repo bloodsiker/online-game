@@ -178,6 +178,7 @@ class LocationPageViewMapper
             $structure->isBank() => route('bank', ['id' => $structure->id]),
             $structure->isClanBank() => route('clan.treasury', ['id' => $structure->id]),
             $structure->isAuction() => route('auction', ['id' => $structure->id]),
+            $structure->isAuctionExchange() => route('auction.exchange', ['id' => $structure->id]),
             $structure->isBlacksmith() => route('blacksmith', ['id' => $structure->id]),
             $structure->isHeal() => route('heal', ['id' => $structure->id]),
             default => null,
@@ -196,8 +197,17 @@ class LocationPageViewMapper
                 ? route('clan.warehouse.take', ['id' => $structure->id])
                 : route('warehouse.take_item', ['id' => $structure->id]),
             'auction_buy' => route('auction', ['id' => $structure->id]),
+            'auction_sell' => route('auction.new_lot', ['id' => $structure->id]),
             'auction_my_lot' => route('auction.my_lot', ['id' => $structure->id]),
+            'auction_exchange' => route('auction.exchange', ['id' => $structure->id]),
+            'auction_my_orders' => route('auction.my_orders', ['id' => $structure->id]),
+            'auction_new_order' => route('auction.new_order', ['id' => $structure->id]),
+            'auction_claims' => route('auction.claims', ['id' => $structure->id]),
             'kraft_item' => route('blacksmith', ['id' => $structure->id]),
+            'break_item' => route('blacksmith.break', ['id' => $structure->id]),
+            'upgrade_item' => route('blacksmith.upgrade', ['id' => $structure->id]),
+            'gem_item' => route('blacksmith.gems', ['id' => $structure->id]),
+            'rune_item' => route('blacksmith.runes', ['id' => $structure->id]),
             default => $structure->isHeal() ? route('heal', ['id' => $structure->id]) : null,
         };
     }

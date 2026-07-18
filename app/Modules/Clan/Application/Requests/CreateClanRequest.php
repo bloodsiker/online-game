@@ -45,7 +45,13 @@ class CreateClanRequest extends FormRequest
 
     private function validateClanName(Validator $validator): void
     {
-        $name = $this->input('name', '');
+        // Пустое поле глобальный middleware ConvertEmptyStringsToNull делает null,
+        // поэтому приводим к строке, чтобы preg_match не падал с TypeError.
+        $name = (string) ($this->input('name') ?? '');
+
+        if ($name === '') {
+            return; // ошибку об обязательности добавит правило name.required
+        }
 
         $hasCyrillic = (bool) preg_match('/[а-яёА-ЯЁ]/u', $name);
         $hasLatin = (bool) preg_match('/[a-zA-Z]/', $name);

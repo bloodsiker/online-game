@@ -32,10 +32,16 @@
                             <span>Карты</span>
                         </a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.npc', 'admin.npc.*') ? 'nav-active' : '' }}">
+                    <li class="{{ request()->routeIs('admin.npc', 'admin.npc.create', 'admin.npc.info') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.npc') }}">
                             <i class="bx bx-map" aria-hidden="true"></i>
                             <span>НПС</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.npc.dialogues', 'admin.npc.dialogue.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.npc.dialogues') }}">
+                            <i class="bx bx-conversation" aria-hidden="true"></i>
+                            <span>Диалоги НПС</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.skills', 'admin.skill.*') ? 'nav-active' : '' }}">
@@ -145,6 +151,12 @@
                                 <a class="nav-link" href="{{ route('admin.event.activities') }}">Активности</a>
                             </li>
                         </ul>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.news', 'admin.news.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.news') }}">
+                            <i class="bx bx-news" aria-hidden="true"></i>
+                            <span>Новости</span>
+                        </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.post.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.post.send') }}">

@@ -124,4 +124,15 @@ final class BackpackDTO
     {
         return $this->items->get('recipe');
     }
+
+    /** Камни (самоцветы) и оправы показываются одним разделом «Камни» */
+    public function hasGems(): bool
+    {
+        return $this->items->has('gem') || $this->items->has('mount');
+    }
+
+    public function getGems(): Collection
+    {
+        return $this->items->get('gem', collect())->merge($this->items->get('mount', collect()));
+    }
 }

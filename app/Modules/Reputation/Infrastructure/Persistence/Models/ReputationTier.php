@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Infrastructure\Persistence\Models;
 
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ class ReputationTier extends Model
 {
     protected $table = 'reputation_tiers';
 
-    protected $fillable = ['reputation_id', 'min_points', 'max_points', 'medal_name', 'medal_icon'];
+    protected $fillable = ['reputation_id', 'min_points', 'max_points', 'medal_name', 'medal_icon', 'feat_quest_id', 'feat_description'];
 
     protected $casts = [
         'min_points' => 'integer',
@@ -22,6 +23,11 @@ class ReputationTier extends Model
     public function reputation(): BelongsTo
     {
         return $this->belongsTo(Reputation::class, 'reputation_id');
+    }
+
+    public function featQuest(): BelongsTo
+    {
+        return $this->belongsTo(Quest::class, 'feat_quest_id');
     }
 
     public function quests(): HasMany

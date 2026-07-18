@@ -4,152 +4,140 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\Blacksmith\Domain\Services\MountRarityConfig;
 use Illuminate\Database\Seeder;
 
 /**
- * Gems and Socket Kit seeder.
+ * Gems and Mount seeder.
  *
- * Gem tiers: Малый (Small), Обычный (Regular), Большой (Large), Совершенный (Perfect)
+ * MOUNT (Оправа) — разово устанавливается на предмет и открывает случайное
+ * число сокетов в диапазоне редкости (см. MountRarityConfig::socketRange(),
+ * редкость — стандартный share_items.rarity) за плату в монетах
+ * (MountRarityConfig::openCost()).
  *
- * Types:
- *  - Рубин        → +dmg (attack flat)
- *  - Сапфир       → +mp_max
- *  - Изумруд      → +hp_max
- *  - Топаз        → +agility
- *  - Аметист      → +strength
- *  - Алмаз        → +armor (flat)
- *  - Оникс        → +critical
- *  - Опал         → +dodge
- *  - Цитрин       → +intelligence
- *  - Аквамарин    → +int (магическая атака)
- *
- * SOCKET_KIT — набор для открытия нового сокета на предмете.
+ * Самоцветы (seedGemstones) — плоский +N к одной из пяти первичных
+ * характеристик (PlayerStatKey), картинки лежат в public/img/resource/stones/.
  */
 class GemSeeder extends Seeder
 {
+    private const GEMSTONE_DESCRIPTION = 'Один из волшебных самоцветов мира. Можно инкрустировать в предметы с сокетами.';
+
+    /** [prefix|null, значение бонуса, редкость] — порядок и соответствие редкости заданы заказчиком */
+    private const GEMSTONE_TIERS = [
+        ['prefix' => 'Малый', 'value' => 1, 'rarity' => ItemRarity::COMMON],
+        ['prefix' => null, 'value' => 2, 'rarity' => ItemRarity::UNCOMMON],
+        ['prefix' => 'Великий', 'value' => 3, 'rarity' => ItemRarity::RARE],
+        ['prefix' => 'Большой', 'value' => 4, 'rarity' => ItemRarity::EPIC],
+        ['prefix' => 'Абсолютный', 'value' => 5, 'rarity' => ItemRarity::LEGENDARY],
+    ];
+
+    /** stat — ключ PlayerStatKey, suffix — родительный падеж для имени, label — для описания */
+    private const GEMSTONE_STATS = [
+        ['stat' => 'strength', 'suffix' => 'силы', 'label' => 'сила'],
+        ['stat' => 'wisdom', 'suffix' => 'мудрости', 'label' => 'мудрость'],
+        ['stat' => 'agility', 'suffix' => 'ловкости', 'label' => 'ловкость'],
+        ['stat' => 'intuition', 'suffix' => 'интуиции', 'label' => 'интуиция'],
+        ['stat' => 'intelligence', 'suffix' => 'интеллекта', 'label' => 'интеллект'],
+    ];
+
+    /** Точное соответствие "[префикс]_[характеристика]" → переименованный (транслит, нижний регистр) файл в public/img/resource/stones/ */
+    private const GEMSTONE_IMAGES = [
+        'Малый_силы' => 'malyy_samotsvet_sily.gif',
+        'Малый_мудрости' => 'malyy_samotsvet_mudrosti.gif',
+        'Малый_ловкости' => 'malyy_samotsvet_lovkosti.gif',
+        'Малый_интуиции' => 'malyy_samotsvet_intuitsii.gif',
+        'Малый_интеллекта' => 'malyy_samotsvet_intellekta.gif',
+        '_силы' => 'samotsvet_sily.gif',
+        '_мудрости' => 'samotsvet_mudrosti.gif',
+        '_ловкости' => 'samotsvet_lovkosti.gif',
+        '_интуиции' => 'samotsvet_intuitsii.gif',
+        '_интеллекта' => 'samotsvet_intellekta.gif',
+        'Великий_силы' => 'velikiy_samotsvet_sily.gif',
+        'Великий_мудрости' => 'velikiy_samotsvet_mudrosti.gif',
+        'Великий_ловкости' => 'velikiy_samotsvet_lovkosti.gif',
+        'Великий_интуиции' => 'velikiy_samotsvet_intuitsii.gif',
+        'Великий_интеллекта' => 'velikiy_samotsvet_intellekta.gif',
+        'Большой_силы' => 'bolshoy_samotsvet_sily.gif',
+        'Большой_мудрости' => 'bolshoy_samotsvet_mudrosti.gif',
+        'Большой_ловкости' => 'bolshoy_samotsvet_lovkosti.gif',
+        'Большой_интуиции' => 'bolshoy_samotsvet_intuitsii.gif',
+        'Большой_интеллекта' => 'bolshoy_samotsvet_intellekta.gif',
+        'Абсолютный_силы' => 'absolyutnyy_samotsvet_sily.gif',
+        'Абсолютный_мудрости' => 'absolyutnyy_samotsvet_mudrosti.gif',
+        'Абсолютный_ловкости' => 'absolyutnyy_samotsvet_lovkosti.gif',
+        'Абсолютный_интуиции' => 'absolyutnyy_samotsvet_intuitsii.gif',
+        'Абсолютный_интеллекта' => 'absolyutnyy_samotsvet_intellekta.gif',
+    ];
+
     public function run(): void
     {
-        $this->seedGems();
-        $this->seedSocketKit();
+        $this->seedMounts();
+        $this->seedGemstones();
     }
 
-    private function seedGems(): void
+    /** Картинки оправ (транслит, нижний регистр) в public/img/resource/sokets/ */
+    private const MOUNT_IMAGES = [
+        'common' => 'obychnaya_zazubrennaya_oprava.gif',
+        'uncommon' => 'neobychnaya_zazubrennaya_oprava.gif',
+        'rare' => 'redkaya_zazubrennaya_oprava.gif',
+        'epic' => 'epicheskaya_zazubrennaya_oprava.gif',
+    ];
+
+    private function seedMounts(): void
     {
-        $tiers = [
-            ['prefix' => 'Малый',       'mult' => 1],
-            ['prefix' => 'Обычный',     'mult' => 2],
-            ['prefix' => 'Большой',     'mult' => 3],
-            ['prefix' => 'Совершенный', 'mult' => 5],
+        $prices = [
+            ItemRarity::COMMON->value => 1000,
+            ItemRarity::UNCOMMON->value => 3000,
+            ItemRarity::RARE->value => 8000,
+            ItemRarity::EPIC->value => 20000,
         ];
 
-        // Base stat definitions per gem type
-        // stat matches keys in PlayerStatService::buildSheet()
-        $gemTypes = [
-            [
-                'name'  => 'Рубин',
-                'desc'  => 'Увеличивает урон оружия.',
-                'image' => 'img/items/gems/ruby.png',
-                'stats' => [
-                    ['stat' => 'left_min_dmg',  'value' => 3,  'is_percent' => false],
-                    ['stat' => 'left_max_dmg',  'value' => 3,  'is_percent' => false],
-                    ['stat' => 'right_min_dmg', 'value' => 3,  'is_percent' => false],
-                    ['stat' => 'right_max_dmg', 'value' => 3,  'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Сапфир',
-                'desc'  => 'Увеличивает максимальное количество маны.',
-                'image' => 'img/items/gems/sapphire.png',
-                'stats' => [
-                    ['stat' => 'mp_max', 'value' => 20, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Изумруд',
-                'desc'  => 'Увеличивает максимальное количество здоровья.',
-                'image' => 'img/items/gems/emerald.png',
-                'stats' => [
-                    ['stat' => 'hp_max', 'value' => 30, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Топаз',
-                'desc'  => 'Увеличивает ловкость.',
-                'image' => 'img/items/gems/topaz.png',
-                'stats' => [
-                    ['stat' => 'agility', 'value' => 3, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Аметист',
-                'desc'  => 'Увеличивает силу.',
-                'image' => 'img/items/gems/amethyst.png',
-                'stats' => [
-                    ['stat' => 'strength', 'value' => 3, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Алмаз',
-                'desc'  => 'Увеличивает защиту.',
-                'image' => 'img/items/gems/diamond.png',
-                'stats' => [
-                    ['stat' => 'armor', 'value' => 10, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Оникс',
-                'desc'  => 'Увеличивает шанс критического удара.',
-                'image' => 'img/items/gems/onyx.png',
-                'stats' => [
-                    ['stat' => 'critical', 'value' => 2, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Опал',
-                'desc'  => 'Увеличивает уклонение.',
-                'image' => 'img/items/gems/opal.png',
-                'stats' => [
-                    ['stat' => 'dodge', 'value' => 2, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Цитрин',
-                'desc'  => 'Увеличивает интеллект (магическая защита).',
-                'image' => 'img/items/gems/citrine.png',
-                'stats' => [
-                    ['stat' => 'intelligence', 'value' => 3, 'is_percent' => false],
-                ],
-            ],
-            [
-                'name'  => 'Аквамарин',
-                'desc'  => 'Увеличивает магическую силу (INT).',
-                'image' => 'img/items/gems/aquamarine.png',
-                'stats' => [
-                    ['stat' => 'int', 'value' => 3, 'is_percent' => false],
-                ],
-            ],
-        ];
+        foreach (MountRarityConfig::supportedRarities() as $rarity) {
+            [$min, $max] = MountRarityConfig::socketRange($rarity);
 
-        foreach ($gemTypes as $gemDef) {
-            foreach ($tiers as $tier) {
-                $mult  = $tier['mult'];
-                $name  = $tier['prefix'].' '.$gemDef['name'];
+            ShareItem::firstOrCreate(
+                [
+                    'type' => ShareItemType::MOUNT->value,
+                    'name' => MountRarityConfig::label($rarity).' зазубренная оправа',
+                ],
+                [
+                    'description' => sprintf(
+                        'Разово устанавливается на предмет и открывает %d-%d сокет(ов). Стоимость установки у кузнеца: %d монет.',
+                        $min,
+                        $max,
+                        MountRarityConfig::openCost($rarity)
+                    ),
+                    'image' => '/img/resource/sokets/'.self::MOUNT_IMAGES[$rarity->value],
+                    'rarity' => $rarity->value,
+                    'price' => $prices[$rarity->value],
+                    'is_sell' => true,
+                    'is_active' => true,
+                    'is_weight' => false,
+                ]
+            );
+        }
 
-                // Scale stats by tier multiplier
-                $scaledStats = array_map(function (array $s) use ($mult): array {
-                    return [
-                        'stat'       => $s['stat'],
-                        'value'      => $s['value'] * $mult,
-                        'is_percent' => $s['is_percent'],
-                    ];
-                }, $gemDef['stats']);
+        $this->command->info('Mounts seeded: '.count(MountRarityConfig::supportedRarities()).' rarities.');
+    }
 
-                $statsText = implode(', ', array_map(
-                    fn ($s) => '+'.$s['value'].($s['is_percent'] ? '%' : '').' '.$s['stat'],
-                    $scaledStats
-                ));
+    private function seedGemstones(): void
+    {
+        $count = 0;
+
+        foreach (self::GEMSTONE_STATS as $statDef) {
+            foreach (self::GEMSTONE_TIERS as $tier) {
+                $prefix = $tier['prefix'];
+                $value = $tier['value'];
+
+                $name = $prefix !== null
+                    ? "{$prefix} самоцвет {$statDef['suffix']}"
+                    : "Самоцвет {$statDef['suffix']}";
+
+                $imageKey = ($prefix ?? '').'_'.$statDef['suffix'];
+                $image = self::GEMSTONE_IMAGES[$imageKey];
 
                 ShareItem::firstOrCreate(
                     [
@@ -157,38 +145,23 @@ class GemSeeder extends Seeder
                         'name' => $name,
                     ],
                     [
-                        'description' => $gemDef['desc'].' '.$statsText,
-                        'image'       => $gemDef['image'],
-                        'gem_stats'   => $scaledStats,
-                        'price'       => 500 * $mult,
-                        'is_sell'     => true,
-                        'is_active'   => true,
-                        'is_weight'   => false,
+                        'description' => self::GEMSTONE_DESCRIPTION." +{$value} {$statDef['label']}",
+                        'image' => '/img/resource/stones/'.$image,
+                        'gem_stats' => [
+                            ['stat' => $statDef['stat'], 'value' => $value, 'is_percent' => false],
+                        ],
+                        'rarity' => $tier['rarity']->value,
+                        'price' => 500 * $value,
+                        'is_sell' => true,
+                        'is_active' => true,
+                        'is_weight' => false,
                     ]
                 );
+
+                $count++;
             }
         }
 
-        $this->command->info('Gems seeded: '.count($gemTypes).' types × 4 tiers = '.(count($gemTypes) * 4).' items.');
-    }
-
-    private function seedSocketKit(): void
-    {
-        ShareItem::firstOrCreate(
-            [
-                'type' => ShareItemType::SOCKET_KIT->value,
-                'name' => 'Набор кузнеца для сокета',
-            ],
-            [
-                'description' => 'Позволяет открыть дополнительный сокет в предмете. Максимум 3 сокета на предмет.',
-                'image'       => 'img/items/gems/socket_kit.png',
-                'price'       => 5000,
-                'is_sell'     => true,
-                'is_active'   => true,
-                'is_weight'   => false,
-            ]
-        );
-
-        $this->command->info('Socket kit seeded.');
+        $this->command->info('Gemstones seeded: '.count(self::GEMSTONE_STATS).' stats × '.count(self::GEMSTONE_TIERS)." tiers = {$count} items.");
     }
 }

@@ -69,10 +69,13 @@ Route::middleware(['updateLastOnline'])->group(function () {
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');
 
 // Party routes
+Route::get('/who/party', [PartyController::class, 'frame'])->name('who.party');
 Route::get('/party', [PartyController::class, 'show'])->name('party.show');
 Route::post('/party/create', [PartyController::class, 'create'])->name('party.create');
 Route::post('/party/invite', [PartyController::class, 'invite'])->name('party.invite');
+Route::post('/party/{partyId}/kick', [PartyController::class, 'kick'])->name('party.kick');
 Route::post('/party/{partyId}/leave', [PartyController::class, 'leave'])->name('party.leave');
 Route::delete('/party/{partyId}', [PartyController::class, 'disband'])->name('party.disband');
 
+Route::post('/news/{news}/comment', [MainController::class, 'comment'])->name('news.comment');
 Route::get('/', [MainController::class, 'index'])->name('index');

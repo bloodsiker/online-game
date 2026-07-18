@@ -22,7 +22,7 @@ class GetGemsPage
             blacksmith: $this->readRepository->findStructureOrFail($blacksmithId),
             items: $this->readRepository->getSocketableItems($user),
             gems: $this->readRepository->getGems($user),
-            socketKits: $this->readRepository->getSocketKits($user),
+            mounts: $this->readRepository->getMounts($user),
         );
     }
 }

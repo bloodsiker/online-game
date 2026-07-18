@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ItemRarity;
+use App\Http\Controllers\Controller;
+use App\Models\Skill;
+use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
-use App\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Http\Controllers\Controller;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
-use App\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Http\RedirectResponse;
@@ -26,11 +27,35 @@ use Illuminate\View\View;
 
 class ItemController extends Controller
 {
-    public function list(): View
+    public function list(Request $request): View
     {
-        $listItems = ShareItem::orderByDesc('id')->get();
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'type' => (string) $request->query('type', ''),
+            'rarity' => (string) $request->query('rarity', ''),
+            'slot' => (string) $request->query('slot', ''),
+        ];
 
-        return view('admin.item.list', compact('listItems'));
+        $listItems = ShareItem::query()
+            ->when($filters['q'] !== '', function ($query) use ($filters): void {
+                $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', $search)
+                        ->orWhere('description', 'like', $search);
+                });
+            })
+            ->when(ShareItemType::tryFrom($filters['type']) !== null, fn ($query) => $query->where('type', $filters['type']))
+            ->when(ItemRarity::tryFrom($filters['rarity']) !== null, fn ($query) => $query->where('rarity', $filters['rarity']))
+            ->when(ShareItemSlot::tryFrom($filters['slot']) !== null, fn ($query) => $query->where('slot', $filters['slot']))
+            ->orderByDesc('id')
+            ->paginate(50)
+            ->withQueryString();
+
+        $types = ShareItemType::cases();
+        $rarities = ItemRarity::cases();
+        $slots = ShareItemSlot::cases();
+
+        return view('admin.item.list', compact('listItems', 'filters', 'types', 'rarities', 'slots'));
     }
 
     public function create(): View
@@ -71,8 +96,8 @@ class ItemController extends Controller
         $skills = Skill::orderBy('name')->get();
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
-        $requirementTypes = \App\Modules\Share\Domain\Enums\ShareItemRequirementType::cases();
-        $playerStatKeys = \App\Modules\Player\Domain\Enums\PlayerStatKey::cases();
+        $requirementTypes = ShareItemRequirementType::cases();
+        $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
         return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));

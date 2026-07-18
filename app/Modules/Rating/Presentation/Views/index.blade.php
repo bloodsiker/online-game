@@ -194,24 +194,31 @@
                             </thead>
                             <tbody>
                             @foreach($page->entries as $entry)
+                                @php
+                                    $userNameJs = \Illuminate\Support\Js::from($entry->userName);
+                                @endphp
                                 <tr class="{{ $loop->even ? 'bg_l' : '' }}" id="pr-{{ $entry->userId }}" data-name="{{ mb_strtolower($entry->userName) }}">
                                     <td class="rating-nowrap" align="center"><span class="user-rating-red">{{ $entry->position }}</span></td>
                                     <td>
                                         <span class="user-rating-red">
-                                            <a href="#" onclick="userPrvTag('хаирман');return false;" title="Приватное сообщение">
+                                            <a href="#" onclick="userPrvTag({{ $userNameJs }});return false;" title="Приватное сообщение">
                                                 <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
                                             </a>
-                                            @if($entry->hasClan)
-                                                <a href="#" onclick="showClanInfo('2_1');return false;" title="Alliance">
-                                                    <img src="{{ asset('img/resource/tmp_clan.gif') }}" border="0" width="13" height="13" align="absmiddle">
-                                                </a>
+                                            @if($entry->hasClan && $entry->clanIconUrl)
+                                                <img src="{{ $entry->clanIconUrl }}"
+                                                     border="0"
+                                                     width="13"
+                                                     height="13"
+                                                     align="absmiddle"
+                                                     title="{{ $entry->clanName }}"
+                                                     alt="{{ $entry->clanName }}">
                                             @endif
                                             <a>
-                                                <b onclick="userToTag('хаирман');return false;" title="Персональное сообщение" style="cursor:hand">
+                                                <b onclick="userToTag({{ $userNameJs }});return false;" title="Персональное сообщение" style="cursor:hand">
                                                     <b class="kser0" title="">{{ $entry->userName }}&nbsp;[{{ $entry->level }}]</b>
                                                 </b>
                                             </a>
-                                            <a href="#" onclick="showUserInfo('%D1%85%D0%B0%D0%B8%D1%80%D0%BC%D0%B0%D0%BD', 'https://feo-dwar.com/');return false;" title="Информация о персонаже">
+                                            <a href="#" onclick="showRatingUserInfo({{ $entry->userId }});return false;" title="Информация о персонаже">
                                                 <img src="{{ asset('img/icon/player_info.gif') }}" border="0" align="absmiddle">
                                             </a>
                                         </span>
@@ -286,8 +293,48 @@
     var searchUrl = '{{ route('rating.search') }}';
     var ratingType = '{{ $page->type }}';
     var currentPage = {{ $page->pagination['currentPage'] }};
+    var userInfoUrlBase = '{{ url('/info/u') }}/';
 
     function gebi(id) { return document.getElementById(id); }
+    function ratingChatActionFrame() {
+        var parents = [];
+        try { parents.push(window.parent); } catch (e) {}
+        try { if (window.top !== window.parent) parents.push(window.top); } catch (e) {}
+
+        for (var i = 0; i < parents.length; i++) {
+            try {
+                var bottomFrame = parents[i].document.getElementById('bottom-frame');
+                if (bottomFrame && bottomFrame.contentWindow) return bottomFrame.contentWindow;
+
+                var chatFrame = parents[i].document.getElementById('chat-frame');
+                if (chatFrame && chatFrame.contentDocument) {
+                    bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
+                    if (bottomFrame && bottomFrame.contentWindow) return bottomFrame.contentWindow;
+                }
+            } catch (e) {}
+        }
+
+        return null;
+    }
+    function ratingInsertChatTag(type, name) {
+        var actionFrame = ratingChatActionFrame();
+        if (actionFrame) {
+            actionFrame.postMessage({ type: type, name: name }, '*');
+        }
+
+        return false;
+    }
+    function userPrvTag(name) {
+        return ratingInsertChatTag('insertPrivate', name);
+    }
+    function userToTag(name) {
+        return ratingInsertChatTag('insertName', name);
+    }
+    function showRatingUserInfo(userId) {
+        window.open(userInfoUrlBase + userId, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+
+        return false;
+    }
     function highlightRow(row) {
         var prev = document.querySelector('.bg_l3');
         if (prev) prev.classList.remove('bg_l3');

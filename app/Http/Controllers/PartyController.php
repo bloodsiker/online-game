@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\PartyService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,16 @@ class PartyController extends Controller
         private readonly PartyService $partyService,
     ) {}
 
+    /** Панель группы внутри who-frame. */
+    public function frame(): View
+    {
+        return view('party.frame', [
+            'party' => $this->partyService->getMyParty(),
+            'maxSize' => PartyService::MAX_SIZE,
+            'myUserId' => (int) auth()->id(),
+        ]);
+    }
+
     public function show(): JsonResponse
     {
         $party = $this->partyService->getMyParty();
@@ -26,29 +37,45 @@ class PartyController extends Controller
     public function create(Request $request): RedirectResponse
     {
         try {
-            $party = $this->partyService->createParty(
-                maxSize: (int) $request->input('max_size', 4),
+            $this->partyService->createParty(
+                maxSize: (int) $request->input('max_size', PartyService::MAX_SIZE),
             );
 
-            return back()->with('success', 'Группа создана.');
+            return $this->backToFrame();
         } catch (RuntimeException $e) {
-            return back()->withErrors(['party' => $e->getMessage()]);
+            return $this->backToFrame(error: $e->getMessage());
         }
     }
 
     public function invite(Request $request): RedirectResponse
     {
-        $request->validate(['party_id' => 'required|integer', 'user_id' => 'required|integer']);
+        $request->validate([
+            'party_id' => 'required|integer',
+            'name' => 'required|string|max:50',
+        ]);
 
         try {
-            $this->partyService->invite(
+            $this->partyService->inviteByName(
                 partyId: (int) $request->input('party_id'),
-                targetUserId: (int) $request->input('user_id'),
+                name: (string) $request->input('name'),
             );
 
-            return back()->with('success', 'Игрок приглашён.');
+            return $this->backToFrame();
         } catch (RuntimeException $e) {
-            return back()->withErrors(['party' => $e->getMessage()]);
+            return $this->backToFrame(error: $e->getMessage());
+        }
+    }
+
+    public function kick(Request $request, int $partyId): RedirectResponse
+    {
+        $request->validate(['user_id' => 'required|integer']);
+
+        try {
+            $this->partyService->kick($partyId, (int) $request->input('user_id'));
+
+            return $this->backToFrame('Игрок исключён из группы.');
+        } catch (RuntimeException $e) {
+            return $this->backToFrame(error: $e->getMessage());
         }
     }
 
@@ -57,9 +84,9 @@ class PartyController extends Controller
         try {
             $this->partyService->leave($partyId);
 
-            return back()->with('success', 'Вы покинули группу.');
+            return $this->backToFrame('Вы покинули группу.');
         } catch (RuntimeException $e) {
-            return back()->withErrors(['party' => $e->getMessage()]);
+            return $this->backToFrame(error: $e->getMessage());
         }
     }
 
@@ -68,9 +95,24 @@ class PartyController extends Controller
         try {
             $this->partyService->disband($partyId);
 
-            return back()->with('success', 'Группа распущена.');
+            return $this->backToFrame();
         } catch (RuntimeException $e) {
-            return back()->withErrors(['party' => $e->getMessage()]);
+            return $this->backToFrame(error: $e->getMessage());
         }
+    }
+
+    private function backToFrame(?string $success = null, ?string $error = null): RedirectResponse
+    {
+        $redirect = redirect()->route('who.party');
+
+        if ($success !== null) {
+            $redirect->with('party_success', $success);
+        }
+
+        if ($error !== null) {
+            $redirect->with('party_error', $error);
+        }
+
+        return $redirect;
     }
 }

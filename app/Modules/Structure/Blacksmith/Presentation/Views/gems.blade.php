@@ -40,9 +40,7 @@
         .socket-slot.filled { border-color: #559922; background: #f0f8ea; cursor: default; }
         .socket-slot img.gem-img { width: 30px; height: 30px; }
         .socket-empty-icon {
-            width: 30px; height: 30px; border: 2px dashed #c8a060; border-radius: 3px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: #c8a060; background: #fff;
+            width: 30px; height: 30px;background: #fff url('/img/bg/empty_slot.gif') center center / cover no-repeat;
         }
         .socket-label { flex: 1; }
         .socket-remove-btn {
@@ -204,21 +202,21 @@
                             </tbody>
                         </table>
 
-                        {{-- Socket kits --}}
-                        @if(count($socketKits) > 0)
+                        {{-- Mounts (оправы) --}}
+                        @if(count($mounts) > 0)
                         <table class="coll brd2-all" width="100%" border="0">
                             <thead>
                             <tr class="bg_l" height="17">
-                                <td class="p6h brd2" colspan="2" align="center"><b>Набор для сокета</b></td>
+                                <td class="p6h brd2" colspan="2" align="center"><b>Оправа</b></td>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="gem-row selected" id="kit-none-row" onclick="selectKit(null, this)">
+                            <tr class="gem-row selected" id="mount-none-row" onclick="selectMount(null, this)">
                                 <td colspan="2" style="color:#888;">— отменить выбор —</td>
                             </tr>
-                            @foreach($socketKits as $slot)
-                                <tr class="gem-row" data-kit-id="{{ $slot['id'] }}"
-                                    onclick="selectKit({{ $slot['id'] }}, this)">
+                            @foreach($mounts as $slot)
+                                <tr class="gem-row" data-mount-id="{{ $slot['id'] }}"
+                                    onclick="selectMount({{ $slot['id'] }}, this)">
                                     <td width="44">
                                         <img src="{{ $slot['image'] }}" width="40" height="40"
                                              data-id="{{ $slot['id'] }}"
@@ -230,6 +228,10 @@
                                         @if($slot['count'] > 1)
                                             <span style="color:#888;">({{ $slot['count'] }})</span>
                                         @endif
+                                        <br>
+                                        <span class="gem-stats-hint">
+                                            {{ $slot['rarity'] }}: {{ $slot['socketMin'] }}-{{ $slot['socketMax'] }} сокет(ов), {{ $slot['openCost'] }} монет
+                                        </span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -257,8 +259,8 @@
 
             <form id="open-socket-form" action="{{ route('blacksmith.gems.open_socket', ['id' => $blacksmith->id]) }}" method="post" style="display:none;">
                 @csrf
-                <input type="hidden" name="item_id" id="fs-item-id">
-                <input type="hidden" name="kit_id"  id="fs-kit-id">
+                <input type="hidden" name="item_id"  id="fs-item-id">
+                <input type="hidden" name="mount_id" id="fs-mount-id">
             </form>
 
         </td>
@@ -277,14 +279,14 @@
 <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 
 <script>
-const ITEMS_DATA = @json($items);
-const GEMS_DATA  = @json($gems);
-const KITS_DATA  = @json($socketKits);
+const ITEMS_DATA  = @json($items);
+const GEMS_DATA   = @json($gems);
+const MOUNTS_DATA = @json($mounts);
 const MAX_SOCKETS = {{ \App\Modules\Structure\Blacksmith\Domain\Services\GemService::MAX_SOCKETS }};
 
 let selectedItemId   = parseInt(localStorage.getItem('gem_selected_item') || '0');
 let selectedGemId    = 0;
-let selectedKitId    = 0;
+let selectedMountId  = 0;
 let selectedSocketIndex = -1;
 
 function selectItem(itemId) {
@@ -307,9 +309,9 @@ function selectGem(gemId, el) {
     renderGemPanel();
 }
 
-function selectKit(kitId, el) {
-    selectedKitId = kitId;
-    document.querySelectorAll('.gem-row[data-kit-id], #kit-none-row').forEach(r => r.classList.remove('selected'));
+function selectMount(mountId, el) {
+    selectedMountId = mountId;
+    document.querySelectorAll('.gem-row[data-mount-id], #mount-none-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
     renderGemPanel();
 }
@@ -329,17 +331,17 @@ function renderGemPanel() {
 
     // Item header
     html += `<div style="margin-bottom:6px;">`;
-    html += `<img src="${item.img}" width="50" height="50" style="border:1px solid #c8a060;"><br>`;
+    html += `<img src="${item.image}" width="50" height="50" style="border:1px solid #c8a060;"><br>`;
     html += `<b>${item.name}</b><br>`;
-    html += `<span style="color:#888;">Сокетов: ${item.socket_count} / ${MAX_SOCKETS}</span>`;
+    html += `<span style="color:#888;">${item.socketCount === 0 ? 'Нет сокетов' : 'Сокетов: ' + item.socketCount}</span>`;
     html += `</div>`;
 
     // Socket slots
-    if (item.socket_count === 0) {
+    if (item.socketCount === 0) {
         html += `<div style="color:#888; margin:8px 0;">Нет сокетов</div>`;
     } else {
         html += `<div class="socket-list">`;
-        for (let i = 0; i < item.socket_count; i++) {
+        for (let i = 0; i < item.socketCount; i++) {
             const filled = item.gems.find(g => g.socket_index === i);
             if (filled) {
                 html += `<div class="socket-slot filled">`;
@@ -350,7 +352,7 @@ function renderGemPanel() {
             } else {
                 const isActive = selectedSocketIndex === i;
                 html += `<div class="socket-slot${isActive ? ' active' : ''}" onclick="selectSocket(${i})">`;
-                html += `<div class="socket-empty-icon">◇</div>`;
+                html += `<div class="socket-empty-icon"></div>`;
                 html += `<span class="socket-label" style="color:#888;">Сокет ${i+1} — пустой</span>`;
                 html += `</div>`;
             }
@@ -359,13 +361,13 @@ function renderGemPanel() {
     }
 
     // Insert button
-    if (item.socket_count > 0) {
+    if (item.socketCount > 0) {
         const canInsert = gem && selectedSocketIndex >= 0 && !item.gems.find(g => g.socket_index === selectedSocketIndex);
         if (gem && selectedSocketIndex >= 0) {
             if (canInsert) {
                 html += `<div style="margin-top:8px;">`;
                 html += `<div style="margin-bottom:4px; color:#333;">`;
-                html += `<img src="${gem.img}" width="24" height="24" style="vertical-align:middle; margin-right:4px;">${gem.name} → Сокет ${selectedSocketIndex+1}`;
+                html += `<img src="${gem.image}" width="24" height="24" style="vertical-align:middle; margin-right:4px;">${gem.name} → Сокет ${selectedSocketIndex+1}`;
                 html += `</div>`;
                 html += `<span class="butt1 pointer"><span><input value="Вставить камень" type="button" onclick="doInsert()" class="grnn"></span></span>`;
                 html += `</div>`;
@@ -379,10 +381,18 @@ function renderGemPanel() {
         }
     }
 
-    // Open socket button
-    if (item.socket_count < MAX_SOCKETS && selectedKitId) {
+    // Mount button — можно ставить повторно поверх существующих сокетов (апгрейд),
+    // но это риск: оправа и золото расходуются даже если ролл окажется хуже текущего.
+    if (selectedMountId) {
+        const mount = MOUNTS_DATA.find(m => m.id === selectedMountId);
         html += `<div style="margin-top:10px; border-top:1px solid #e8c899; padding-top:8px;">`;
-        html += `<span class="butt1 pointer"><span><input value="Открыть сокет" type="button" onclick="doOpenSocket()" class="grnn"></span></span>`;
+        if (mount) {
+            html += `<div style="margin-bottom:4px; color:#333;">Оправа «${mount.rarity}»: ${mount.socketMin}-${mount.socketMax} сокет(ов) за ${mount.openCost} монет</div>`;
+            if (item.socketCount > 0) {
+                html += `<div style="margin-bottom:4px; color:#c05030; font-size:10px;">Уже открыто ${item.socketCount} сокет(ов). Если выпадет меньше — оправа и золото будут потрачены впустую.</div>`;
+            }
+        }
+        html += `<span class="butt1 pointer"><span><input value="${item.socketCount > 0 ? 'Улучшить оправу' : 'Установить оправу'}" type="button" onclick="doOpenSocket()" class="grnn"></span></span>`;
         html += `</div>`;
     }
 
@@ -409,9 +419,9 @@ function doRemove(itemId, socketIndex) {
 }
 
 function doOpenSocket() {
-    if (!selectedItemId || !selectedKitId) return;
-    document.getElementById('fs-item-id').value = selectedItemId;
-    document.getElementById('fs-kit-id').value  = selectedKitId;
+    if (!selectedItemId || !selectedMountId) return;
+    document.getElementById('fs-item-id').value   = selectedItemId;
+    document.getElementById('fs-mount-id').value  = selectedMountId;
     document.getElementById('open-socket-form').submit();
 }
 

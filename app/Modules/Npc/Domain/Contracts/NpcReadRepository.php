@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Npc\Domain\Contracts;
 
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use Illuminate\Support\Collection;
 
 interface NpcReadRepository
@@ -28,4 +29,6 @@ interface NpcReadRepository
     public function getNpcReputations(int $npcId): Collection;
 
     public function getInProgressQuestPlayers(int $playerId, array $questIds): Collection;
+
+    public function getStartDialogueNode(int $npcId): ?NpcDialogueNode;
 }

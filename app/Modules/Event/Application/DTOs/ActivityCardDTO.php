@@ -8,6 +8,7 @@ final readonly class ActivityCardDTO
 {
     public function __construct(
         public string $title,
+        public int $rewardItemId,
         public string $icon,
         public int $iconCount,
         public int $progressCurrent,

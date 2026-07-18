@@ -26,7 +26,7 @@ class GetReputationPage
         $canTake = $this->reputationService->canTakeQuest($player, $reputation);
         $activeQuest = $this->reputationService->getActiveQuest($player, $reputation);
         $cooldownDiff = $this->reputationService->getCooldownDiff($player, $reputation);
-        $earnedMedals = $this->reputationService->getEarnedMedals($reputation, $pr->points);
+        $earnedMedals = $this->reputationService->getEarnedMedals($reputation, $pr->points, $player);
 
         $progressMap = [];
         if ($activeQuest) {

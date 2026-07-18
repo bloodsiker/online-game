@@ -221,6 +221,7 @@
 <body class="b-page  b-page--home b-page--theme-home">
 <div id="artifact_alt" style="left:0px;top:0px;width:300px; display:none; position:absolute; z-index: 1001;" onmouseover="this.style.display='none';"></div>
 <script language="javascript" type="text/javascript">var art_alt = new Array();</script>
+{!! $newsItemTooltipScript ?? '' !!}
 <script>
     var temp_effects = {};
     var strings = {
@@ -554,6 +555,129 @@
                 <div class="b-index__content u-style-bg-gradient">
 
                     <div id="post-list">
+                        @if(isset($selectedNews) && $selectedNews)
+                            <div class="b-news-item">
+                                <div class="b-post__container">
+                                    <article class="b-post b-post--index">
+                                        <div class="b-post__header">
+                                            <h2 class="b-post__footer">
+                                                <a class="b-post__title-link c-red" href="{{ route('index', ['n' => $selectedNews->id]) }}">
+                                                    <b>{{ $selectedNews->title }}</b>
+                                                </a>
+                                            </h2>
+                                        </div>
+                                    </article>
+                                </div>
+                                <article class="b-post b-post--index">
+                                    <div class="b-post__container">
+                                        <div class="b-post__content js-content">
+                                            {!! $selectedNews->rendered_description ?? $selectedNews->description !!}
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="b-post__footer">
+                                        <div class="b-post__more">
+                                            <a href="{{ route('index') }}" class="b-link b-link--default">к списку новостей</a>
+                                        </div>
+                                        <div class="b-post__comments">
+                                            <a class="b-link b-link--default" href="{{ route('index', ['n' => $selectedNews->id]) }}">
+                                                <span class="b-icon b-icon--quant">{{ $selectedNews->visibleComments->count() }}</span>коментувати
+                                            </a>
+                                            <span align="right"
+                                                  style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
+                                                <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | Переглядів:
+                                                <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
+                                                <b style='color:green;'>{{ $selectedNews->views_count }}</b>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                @if($selectedNews->allow_comments)
+                                    <div class="b-post__container" style="padding: 8px 12px;">
+                                        @auth
+                                            <form method="post" action="{{ route('news.comment', $selectedNews->id) }}">
+                                                {{ csrf_field() }}
+                                                <textarea name="message" rows="3" style="width: 100%; box-sizing: border-box;" required></textarea>
+                                                <div style="text-align: right; margin-top: 6px;">
+                                                    <button type="submit">Добавить комментарий</button>
+                                                </div>
+                                            </form>
+                                        @else
+                                            <div style="color:#8a5a2b;">Комментарии доступны после входа в игру.</div>
+                                        @endauth
+                                    </div>
+                                @endif
+
+                                @if($selectedNews->visibleComments->isNotEmpty())
+                                    <div class="b-post__container" style="padding: 8px 12px;">
+                                        @foreach($selectedNews->visibleComments as $comment)
+                                            <div style="border-top: 1px solid #d7b787; padding: 6px 0;">
+                                                <b style="color:#7a3010;">{{ $comment->user?->player?->name ?? $comment->user?->name ?? 'Игрок' }}</b>
+                                                <span style="color:#8a8a8a; font-size: 10px;">{{ $comment->created_at?->format('d.m.Y H:i') }}</span>
+                                                <div>{{ $comment->message }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="b-divider-2">
+                                <div class="b-divider-2__l"><div class="b-divider-2__l-inner"></div></div>
+                                <div class="b-divider-2__r"><div class="b-divider-2__r-inner"></div></div>
+                                <div class="b-divider-2__c"></div>
+                            </div>
+                        @endif
+
+                        @if(isset($newsPosts) && $newsPosts->isNotEmpty())
+                            @foreach($newsPosts as $newsPost)
+                                @if(!$selectedNews || $selectedNews->id !== $newsPost->id)
+                                    <div class="b-news-item">
+                                        <div class="b-post__container">
+                                            <article class="b-post b-post--index">
+                                                <div class="b-post__header">
+                                                    <h2 class="b-post__footer">
+                                                        <a class="b-post__title-link c-red" href="{{ route('index', ['n' => $newsPost->id]) }}">
+                                                            <b>{{ $newsPost->title }}</b>
+                                                        </a>
+                                                    </h2>
+                                                </div>
+                                            </article>
+                                        </div>
+                                        <article class="b-post b-post--index">
+                                            <div class="b-post__container">
+                                                <div class="b-post__content js-content">
+                                                    {!! $newsPost->rendered_description ?? $newsPost->description !!}
+                                                    <div class="clear"></div>
+                                                </div>
+                                            </div>
+                                            <div class="b-post__footer">
+                                                <div class="b-post__more">
+                                                    <a href="{{ route('index', ['n' => $newsPost->id]) }}" class="b-link b-link--default">детальніше</a>
+                                                </div>
+                                                <div class="b-post__comments">
+                                                    <a class="b-link b-link--default" href="{{ route('index', ['n' => $newsPost->id]) }}">
+                                                        <span class="b-icon b-icon--quant">{{ $newsPost->visible_comments_count }}</span>коментувати
+                                                    </a>
+                                                    <span align="right"
+                                                          style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
+                                                        <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | Переглядів:
+                                                        <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
+                                                        <b style='color:green;'>{{ $newsPost->views_count }}</b>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </article>
+                                        <br>
+                                    </div>
+                                    <div class="b-divider-2">
+                                        <div class="b-divider-2__l"><div class="b-divider-2__l-inner"></div></div>
+                                        <div class="b-divider-2__r"><div class="b-divider-2__r-inner"></div></div>
+                                        <div class="b-divider-2__c"></div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
+
                         <div class="b-news-item">
                             <div class="b-news-footer" style="padding: 11px 2px 11px 1px;">
                                 <span class="b-news-footer__t"></span>
@@ -1387,4 +1511,3 @@
 
 </body>
 </html>
-

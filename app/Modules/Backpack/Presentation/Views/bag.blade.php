@@ -1373,6 +1373,55 @@
                                                                                 </tr>
                                                                                 </tbody>
                                                                             </table>
+                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                            <br>
+                                                        @endif
+
+                                                        @if($data->hasGems())
+                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
+                                                                <div align="center">
+                                                                    <table border="0" cellspacing="0" cellpadding="0"
+                                                                           style="margin: 0 auto;">
+                                                                        <tbody>
+                                                                        <tr height="22">
+                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">Камни</td>
+                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                                                                        </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                                <br>
+                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
+                                                                    @foreach($data->getGems() as $item)
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
+
+
+                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td data-id="{{ $item->item->id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        &nbsp;
+                                                                                        @if($item->count > 1)
+                                                                                            <div class="bpdig">
+                                                                                                {{ $item->count }}
+                                                                                            </div>
+                                                                                        @endif
+                                                                                        <span
+                                                                                            style="position: absolute;right: -1px;top: 41px;"
+                                                                                            onmouseover="showItemInfo(this,event,2)"
+                                                                                            onmouseout="showItemInfo(this,event,0)"
+                                                                                            valign="bottom">
+                                                                                        </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>

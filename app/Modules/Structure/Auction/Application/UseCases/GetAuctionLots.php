@@ -13,7 +13,7 @@ class GetAuctionLots
     public function execute(int $structureId, ?int $userId = null): Collection
     {
         $query = Auction::where('structure_id', $structureId)
-            ->with(['item.itemInfo', 'user.player']);
+            ->with(['item.itemInfo', 'user.player', 'user.clanMembership.clan']);
 
         if ($userId !== null) {
             $query->where('user_id', $userId);

@@ -21,7 +21,7 @@ use Illuminate\Database\Seeder;
  * Экипировка по тирам:
  *
  * ТИР1 (1-20): 9 предметов (по одному на слот) + 1 доп. апгрейд меча на 10
- * уровне («Кожаный клинок», см. TIER1_WEAPON_UPGRADE_LEVEL) — итого 10.
+ * уровне («Полуторный меч», см. TIER1_WEAPON_UPGRADE_LEVEL) — итого 10.
  * ОДИНАКОВЫЕ для всех игроков (без вариантов по классу, это появляется
  * только в Тире2), все одного материала «Кожаный» (см. TIER1_MATERIAL_INDEX).
  * Слоты по-прежнему открываются постепенно на тех же чекпоинтах, что и мобы
@@ -105,6 +105,15 @@ class StarterEquipmentSeeder extends Seeder
         'chain_armor' => [20, 'кольчуга', 'f', ShareItemSlot::CHAIN_ARMOR, ShareItemType::ARMOR, PlayerStatKey::STRENGTH],
     ];
 
+    /**
+     * Явные имена вместо композиции «материал + существительное» — только для
+     * стартового меча (без этого был бы «Кожаный меч», как у остальных
+     * Тир1-слотов).
+     */
+    private const NAME_OVERRIDES = [
+        'weapon' => 'Тесак Головореза',
+    ];
+
     /** Чекпоинты Тира2 — паттерн Тира1 (1,2,4,7,10,13,16,20), пропорционально растянутый на 20-50 */
     private const TIER2_LEVEL_CHECKPOINTS = [20, 22, 25, 29, 34, 39, 44, 50];
 
@@ -129,11 +138,100 @@ class StarterEquipmentSeeder extends Seeder
 
     /**
      * variantKey => [суффикс имени, стата-гейт требования (под класс), вторичная стата предмета].
+     *
+     * У Танка вторичная стата — ВЫНОСЛИВОСТЬ (не броня): раньше секонд-стата
+     * тоже была ARMOR, из-за чего предмет показывал два ОТДЕЛЬНЫХ ряда
+     * «Броня» в статах — неинформативно и выглядит как баг. Выносливость даёт
+     * ту же величину бюджета (см. armorPerSlot), но отдельной, осмысленной
+     * статой (+HP — живучесть, а не удвоение брони) — и уже полностью
+     * подключена в PlayerStatService (primary-стат, HP_PER_ENDURANCE), в
+     * отличие от Силы, которой потребовалась бы новая проводка (ShareItemStatType
+     * не имеет кейса STRENGTH).
      */
     private const TIER2_VARIANTS = [
-        'tank' => ['воина', PlayerStatKey::STRENGTH, ShareItemStatType::ARMOR],
+        'tank' => ['воина', PlayerStatKey::STRENGTH, ShareItemStatType::ENDURANCE],
         'dodge' => ['ловкости', PlayerStatKey::AGILITY, ShareItemStatType::DODGE],
         'crit' => ['охотника', PlayerStatKey::INTUITION, ShareItemStatType::CRITICAL],
+    ];
+
+    /**
+     * Явные имена для брони Уворот-варианта (вместо композиции
+     * «материал + существительное + ловкости») — тематический сет «Сумеречный».
+     * Оружие (меч) сюда не входит — остаётся «{материал} меч ловкости».
+     */
+    private const DODGE_ARMOR_NAME_OVERRIDES = [
+        'helmet' => 'Сумеречная маска',
+        'shoulder' => 'Сумеречные наплечники',
+        'forearm' => 'Сумеречные перчатки',
+        'armor' => 'Сумеречная броня',
+        'legging' => 'Сумеречные поножи',
+        'shoes' => 'Сумеречные сапоги',
+        'chain_armor' => 'Сумеречная кольчуга',
+    ];
+
+    /** Картинки для брони Уворот-варианта (тот же сет «Сумеречный») */
+    private const DODGE_ARMOR_IMAGE_OVERRIDES = [
+        'helmet' => '/img/resource/sumerechniy/start_lovk_9.gif',
+        'shoulder' => '/img/resource/sumerechniy/start_lovk_5.gif',
+        'forearm' => '/img/resource/sumerechniy/start_lovk_8.gif',
+        'armor' => '/img/resource/sumerechniy/start_lovk_1.gif',
+        'legging' => '/img/resource/sumerechniy/start_lovk_2.gif',
+        'shoes' => '/img/resource/sumerechniy/start_lovk_3.gif',
+        'chain_armor' => '/img/resource/sumerechniy/start_lovk_7.gif',
+    ];
+
+    /**
+     * Явные имена для брони Крит-варианта (вместо композиции
+     * «материал + существительное + охотника») — тематический сет «Палач».
+     * Оружие (двуручный топор) сюда не входит — см. TIER2_AXE_NAME.
+     */
+    private const CRIT_ARMOR_NAME_OVERRIDES = [
+        'helmet' => 'Маска палача',
+        'shoulder' => 'Наплечники палача',
+        'forearm' => 'Наручи палача',
+        'armor' => 'Жилет палача',
+        'legging' => 'Поножи палача',
+        'shoes' => 'Сапоги палача',
+        'chain_armor' => 'Рубаха палача',
+    ];
+
+    /** Картинки для брони Крит-варианта (тот же сет «Палач») */
+    private const CRIT_ARMOR_IMAGE_OVERRIDES = [
+        'helmet' => '/img/resource/palach/start_krit_8.gif',
+        'shoulder' => '/img/resource/palach/start_krit_6.gif',
+        'forearm' => '/img/resource/palach/start_krit_7.gif',
+        'armor' => '/img/resource/palach/start_krit_1.gif',
+        'legging' => '/img/resource/palach/start_krit_2.gif',
+        'shoes' => '/img/resource/palach/start_krit_5.gif',
+        'chain_armor' => '/img/resource/palach/start_krit_4.gif',
+    ];
+
+    /**
+     * Явные имена для брони и щита Танк-варианта (вместо композиции
+     * «материал + существительное + воина») — тематический сет «Мамонт».
+     * Оружие (кастет) сюда не входит — см. TIER2_TANK_WEAPON_NAME.
+     */
+    private const TANK_ARMOR_NAME_OVERRIDES = [
+        'helmet' => 'Шлем «Мамонт»',
+        'shoulder' => 'Наплечники «Мамонт»',
+        'forearm' => 'Рукавицы «Мамонт»',
+        'armor' => 'Нагрудник «Мамонт»',
+        'legging' => 'Поножи «Мамонт»',
+        'shoes' => 'Сапоги «Мамонт»',
+        'chain_armor' => 'Кольчуга «Мамонт»',
+        'shield' => 'Щит «Мамонт»',
+    ];
+
+    /** Картинки для брони и щита Танк-варианта (тот же сет «Мамонт») */
+    private const TANK_ARMOR_IMAGE_OVERRIDES = [
+        'helmet' => '/img/resource/mamont/start_tank_9.gif',
+        'shoulder' => '/img/resource/mamont/start_tank_7.gif',
+        'forearm' => '/img/resource/mamont/start_tank_8.gif',
+        'armor' => '/img/resource/mamont/start_tank_1.gif',
+        'legging' => '/img/resource/mamont/start_tank_2.gif',
+        'shoes' => '/img/resource/mamont/start_tank_6.gif',
+        'chain_armor' => '/img/resource/mamont/start_tank_5.gif',
+        'shield' => '/img/resource/mamont/start_tank_4.gif',
     ];
 
     /**
@@ -142,13 +240,17 @@ class StarterEquipmentSeeder extends Seeder
      * 2 удара за раунд — см. DualWieldStrategy), Крит — двуручный топор
      * (1 удар, но сильнее, взамен утраченной руки под щит).
      *
-     * Раз Уворот получает вдвое больше ударов за раунд, урон КАЖДОГО меча
-     * снижен вдвое, чтобы суммарный урон за раунд был соизмерим с Танком/
-     * Критом (первая прикидка — battle:simulate-pve не умеет моделировать
-     * дуал-вилд/двуручное оружие, точную настройку нужно будет проверять
-     * отдельно, когда симулятор научится считать несколько ударов за раунд).
+     * Было 0.5 (простое «поделить урон пополам») — при реальной проверке на
+     * новых мобах 20-50 (см. game:create мобов 20-50) вскрылась системная
+     * проблема: Уворот не вкладывает в силу → броня в разы ниже Танка
+     * (~121 против ~269 на 50 lvl), и шанс уворота (~34%) не компенсирует
+     * настолько бОльшую долю урона, что проходит по оставшимся попаданиям —
+     * винрейт против Ледяного великана/Молодого дракона падал до 21-46% даже
+     * с каноничным распределением стат (0.2/0.5/0.1/0.2). 0.75 закрывает это
+     * на всех 7 новых мобах (96-100%) — проверено реальным шмотом+статами,
+     * не только формулой.
      */
-    private const DUAL_WIELD_DAMAGE_SHARE = 0.5;
+    private const DUAL_WIELD_DAMAGE_SHARE = 0.75;
 
     /** Двуручное оружие бьёт заметно сильнее одноручного — компенсирует потерю щита/второй руки */
     private const TWO_HAND_DAMAGE_MULTIPLIER = 1.6;
@@ -169,8 +271,24 @@ class StarterEquipmentSeeder extends Seeder
         'chain_armor' => '/img/resource/set_leather/leather_chain_armor.png',
     ];
 
-    /** Картинка для двуручного топора Тир2-Крит (тот же набор set_leather) */
-    private const TIER2_AXE_IMAGE = '/img/resource/set_leather/leather__topor.gif';
+    /** Картинка для двуручного топора Тир2-Крит («Топор палача») */
+    private const TIER2_AXE_IMAGE = '/img/resource/palach/start_krit_3.gif';
+
+    /** Оружие Тир2-Танк («Кастет «Мамонт»») и Тир2-Уворот («Сумеречный Дайто») */
+    private const TIER2_TANK_WEAPON_NAME = 'Кастет «Мамонт»';
+
+    private const TIER2_TANK_WEAPON_IMAGE = '/img/resource/mamont/start_tank_3.gif';
+
+    private const TIER2_DODGE_SWORD_NAME = 'Сумеречный Дайто';
+
+    private const TIER2_DODGE_SWORD_IMAGE = '/img/resource/sumerechniy/start_lovk_6.gif';
+
+    /**
+     * Явное имя вместо композиции «материал + существительное + суффикс» —
+     * единственный двуручный топор Тир2-Крит (открывается один раз на
+     * чекпоинте 20, других чекпоинтов у оружия в Тир2 нет).
+     */
+    private const TIER2_AXE_NAME = 'Топор палача';
 
     /**
      * Блок щитом: часть входящего урона (flat + percent от урона) гасится
@@ -202,21 +320,21 @@ class StarterEquipmentSeeder extends Seeder
      */
     private const TIER1_WEAPON_UPGRADE_LEVEL = 10;
 
-    private const TIER1_WEAPON_UPGRADE_NAME = 'Кожаный клинок';
+    private const TIER1_WEAPON_UPGRADE_NAME = 'Полуторный меч';
 
     private const TIER1_WEAPON_UPGRADE_IMAGE = '/img/resource/set_leather/leather_sword_universal.gif';
 
     /** Оба меча Тира1 качают навык «Рубящее оружие» (id=3, см. Skill::all()) */
     private const TIER1_WEAPON_SKILL_ID = 3;
 
-    /** Стартовое оружие («Кожаный меч») даёт 1 опыт навыка за удар */
+    /** Стартовое оружие («Тесак Головореза») даёт 1 опыт навыка за удар */
     private const TIER1_SKILL_EXP_STARTER = 1;
 
-    /** Всё, что дальше стартового меча (Кожаный клинок, Тир2), даёт 2 опыта навыка за удар */
+    /** Всё, что дальше стартового меча (Полуторный меч, Тир2), даёт 2 опыта навыка за удар */
     private const TIER1_SKILL_EXP_ADVANCED = 2;
 
     /**
-     * Требование навыка для «Кожаный клинок»: специально ВЫШЕ, чем навык,
+     * Требование навыка для «Полуторный меч»: специально ВЫШЕ, чем навык,
      * который естественно накапливается к 10 уровню персонажа (~14 при
      * BASE_EXP=18 навыка, на СТАРТОВОМ мече — 1 опыт/удар, см.
      * SkillLevelRequirementSeeder) — гонка «докачай навык на мобах послабее»
@@ -233,7 +351,7 @@ class StarterEquipmentSeeder extends Seeder
         foreach (self::SLOTS as $slotKey => [$unlockLevel, $noun, $gender, $slot, $type, $stat]) {
             $tierIndex = self::TIER1_MATERIAL_INDEX;
 
-            if ($this->createItem($noun, $gender, $tierIndex, $unlockLevel, $slot, $type, $stat, self::TIER1_IMAGES[$slotKey])) {
+            if ($this->createItem($noun, $gender, $tierIndex, $unlockLevel, $slot, $type, $stat, self::TIER1_IMAGES[$slotKey], self::NAME_OVERRIDES[$slotKey] ?? null)) {
                 $created++;
             }
         }
@@ -299,13 +417,14 @@ class StarterEquipmentSeeder extends Seeder
         ShareItemType $type,
         PlayerStatKey $stat,
         ?string $image = null,
+        ?string $nameOverride = null,
     ): bool {
         $material = match ($gender) {
             'm' => self::MATERIAL_M[$tierIndex],
             'f' => self::MATERIAL_F[$tierIndex],
             'pl' => self::MATERIAL_PL[$tierIndex],
         };
-        $name = $material.' '.$noun;
+        $name = $nameOverride ?? $material.' '.$noun;
 
         // Стартовый набор весь «Обычный» — редкость выше появится позже через дроп
         // (Необычный) и крафт/апгрейд (остальные), не как отдельный сид.
@@ -374,9 +493,24 @@ class StarterEquipmentSeeder extends Seeder
                     continue;
                 }
 
-                [$variantNoun, $isTwoHand, $damageMultiplier, $image] = $this->weaponVariantOverride($slotKey, $variantKey, $noun);
+                [$variantNoun, $isTwoHand, $damageMultiplier, $image, $nameOverride] = $this->weaponVariantOverride($slotKey, $variantKey, $noun);
 
-                if ($this->createTier2Item($variantNoun, $gender, $tierIndex, $level, $slot, $type, $suffix, $gateStat, $secondaryStat, $isTwoHand, $damageMultiplier, $image)) {
+                if ($variantKey === 'dodge' && isset(self::DODGE_ARMOR_NAME_OVERRIDES[$slotKey])) {
+                    $nameOverride = self::DODGE_ARMOR_NAME_OVERRIDES[$slotKey];
+                    $image = self::DODGE_ARMOR_IMAGE_OVERRIDES[$slotKey];
+                }
+
+                if ($variantKey === 'crit' && isset(self::CRIT_ARMOR_NAME_OVERRIDES[$slotKey])) {
+                    $nameOverride = self::CRIT_ARMOR_NAME_OVERRIDES[$slotKey];
+                    $image = self::CRIT_ARMOR_IMAGE_OVERRIDES[$slotKey];
+                }
+
+                if ($variantKey === 'tank' && isset(self::TANK_ARMOR_NAME_OVERRIDES[$slotKey])) {
+                    $nameOverride = self::TANK_ARMOR_NAME_OVERRIDES[$slotKey];
+                    $image = self::TANK_ARMOR_IMAGE_OVERRIDES[$slotKey];
+                }
+
+                if ($this->createTier2Item($variantNoun, $gender, $tierIndex, $level, $slot, $type, $suffix, $gateStat, $secondaryStat, $isTwoHand, $damageMultiplier, $image, $nameOverride)) {
                     $created++;
                 }
             }
@@ -385,17 +519,18 @@ class StarterEquipmentSeeder extends Seeder
         return $created;
     }
 
-    /** @return array{0: string, 1: bool, 2: float, 3: ?string} */
+    /** @return array{0: string, 1: bool, 2: float, 3: ?string, 4: ?string} */
     private function weaponVariantOverride(string $slotKey, string $variantKey, string $defaultNoun): array
     {
         if ($slotKey !== 'weapon') {
-            return [$defaultNoun, false, 1.0, null];
+            return [$defaultNoun, false, 1.0, null, null];
         }
 
         return match ($variantKey) {
-            'dodge' => [$defaultNoun, false, self::DUAL_WIELD_DAMAGE_SHARE, null],
-            'crit' => ['топор двуручный', true, self::TWO_HAND_DAMAGE_MULTIPLIER, self::TIER2_AXE_IMAGE],
-            default => [$defaultNoun, false, 1.0, null],
+            'tank' => [$defaultNoun, false, 1.0, self::TIER2_TANK_WEAPON_IMAGE, self::TIER2_TANK_WEAPON_NAME],
+            'dodge' => [$defaultNoun, false, self::DUAL_WIELD_DAMAGE_SHARE, self::TIER2_DODGE_SWORD_IMAGE, self::TIER2_DODGE_SWORD_NAME],
+            'crit' => ['топор двуручный', true, self::TWO_HAND_DAMAGE_MULTIPLIER, self::TIER2_AXE_IMAGE, self::TIER2_AXE_NAME],
+            default => [$defaultNoun, false, 1.0, null, null],
         };
     }
 
@@ -412,13 +547,14 @@ class StarterEquipmentSeeder extends Seeder
         bool $isTwoHand = false,
         float $damageMultiplier = 1.0,
         ?string $image = null,
+        ?string $nameOverride = null,
     ): bool {
         $material = match ($gender) {
             'm' => self::TIER2_MATERIAL_M[$tierIndex],
             'f' => self::TIER2_MATERIAL_F[$tierIndex],
             'pl' => self::TIER2_MATERIAL_PL[$tierIndex],
         };
-        $name = "{$material} {$noun} {$variantSuffix}";
+        $name = $nameOverride ?? "{$material} {$noun} {$variantSuffix}";
 
         $item = ShareItem::firstOrCreate(
             ['name' => $name],
@@ -450,8 +586,8 @@ class StarterEquipmentSeeder extends Seeder
             ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => ShareItemStatType::ARMOR, 'value' => $armorPerSlot, 'value_type' => ItemEffectValueType::FLAT]);
         }
 
-        // Вторичная стата под класс варианта: Танк удваивает броню (ещё один ARMOR),
-        // Уворот/Крит добавляют свою стату той же величины поверх базовой брони/урона.
+        // Вторичная стата под класс варианта: Танк — выносливость (+HP), Уворот/Крит —
+        // свои статы той же величины поверх базовой брони/урона.
         ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => $secondaryStat, 'value' => $armorPerSlot, 'value_type' => ItemEffectValueType::FLAT]);
 
         if ($type === ShareItemType::SHIELD) {

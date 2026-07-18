@@ -527,7 +527,7 @@
                     <div id="l39" class="s2box br bl bb">
                         <s id="z39">0</s><a name="39"></a>
                         <em>39</em>
-                        <cite>Коммисионный магазин</cite>
+                        <cite>Площадь торгов</cite>
                     </div>
                 </div>
             </div>
@@ -881,7 +881,9 @@
             <div class="a1" style="">
                 <div id="u29">
                     <div id="l29" class="s2box bl bt bb">
-                        <s id="z29">0</s><a name="29"></a>29
+                        <s id="z29">0</s><a name="29"></a>
+                        <em>29</em>
+                        <cite>Регистрационная палата</cite>
                     </div>
                 </div>
             </div>
@@ -985,7 +987,7 @@
                     <div id="l47" class="s2box br bl bt">
                         <s id="z47">0</s><a name="47"></a>
                         <em>47</em>
-                        <cite>Хранилище</cite>
+                        <cite>Складской двор</cite>
                     </div>
                 </div>
             </div>
@@ -1064,7 +1066,7 @@
                     <div id="l46" class="s2box bl bb">
                         <s id="z46">0</s><a name="46"></a>
                         <em>46</em>
-                        <cite>Банк</cite>
+                        <cite>Банковский двор</cite>
                     </div>
                 </div>
             </div>

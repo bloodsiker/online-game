@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('share_items', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'belt', 'bag', 'potion', 'eat', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone', 'gem','socket_kit','rune','rune_key'])->default('resource');
+            $table->enum('type', ['resource', 'weapon', 'shield', 'armor', 'belt', 'bag', 'potion', 'eat', 'key', 'quest', 'artifact', 'recipe', 'chest', 'scroll', 'stone', 'gem', 'mount', 'rune', 'rune_key'])->default('resource');
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
@@ -67,7 +67,7 @@ return new class extends Migration
             $table->integer('additional_attack')->default(0);
             $table->integer('count_use')->default(0);
             $table->boolean('is_open')->default(false);
-            $table->unsignedTinyInteger('socket_count')->default(0);  // Сокеты на конкретном предмете (0–3)
+            $table->unsignedTinyInteger('socket_count')->default(0);  // Сокеты на конкретном предмете (0–4)
             $table->timestamps();
         });
 

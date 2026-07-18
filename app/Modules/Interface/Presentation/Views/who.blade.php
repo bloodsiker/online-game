@@ -74,11 +74,16 @@
             width: 13px;
             height: 13px;
             vertical-align: middle;
+            margin-right: 3px;
         }
         .clan-tag {
             font-size: 11px;
             color: #5B4736;
             margin-left: 2px;
+            margin-right: 3px;
+        }
+        .info-icon-link {
+            margin-left: 3px;
         }
         .prv-btn {
             cursor: pointer;
@@ -116,7 +121,7 @@
                            class="pnick {{ $user->isOnline ? '' : 'user_offline' }}"
                            data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                            title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
-                        <a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                        <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                     </span>
                 </div>
             @endforeach
@@ -141,7 +146,7 @@
                     <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                        class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                        title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
-                    <a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                    <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                 </div>
             @endforeach
         </td>
@@ -207,7 +212,7 @@
                 +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(\'' + u.name.replace(/'/g, "\\'") + '\')" alt="Приват"> '
                 +     clan
                 +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" data-uid="' + u.id + '" data-name="' + u.name.replace(/"/g, '&quot;') + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
-                +     '<a href="#" title="Информация о персонаже" onclick="whoOpenUserInfo(' + u.id + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
+                +     '<a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo(' + u.id + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
                 +   '</span>'
                 + '</div>';
         });

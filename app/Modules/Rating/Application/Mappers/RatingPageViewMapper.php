@@ -11,6 +11,7 @@ use App\Modules\Rating\Application\DTOs\RatingMenuItemDTO;
 use App\Modules\Rating\Application\DTOs\RatingPageDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 
 class RatingPageViewMapper
 {
@@ -49,13 +50,17 @@ class RatingPageViewMapper
                     $rowValue = $isSkillRating
                         ? $item->lvl
                         : (int) data_get($item, $menu[$type]['column']);
+                    $clan = $rowPlayer->user->clanMembership?->clan;
 
                     return new RatingEntryDTO(
                         position: $players->firstItem() + $index,
                         userId: $rowPlayer->user->id,
                         userName: $rowPlayer->user->name,
                         level: (int) $rowPlayer->lvl,
-                        hasClan: $rowPlayer->user->clanMembership !== null,
+                        hasClan: $clan !== null,
+                        clanId: $clan?->id,
+                        clanName: $clan?->name,
+                        clanIconUrl: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
                         value: $rowValue,
                     );
                 }

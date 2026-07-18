@@ -12,6 +12,9 @@ final readonly class RatingEntryDTO
         public string $userName,
         public int $level,
         public bool $hasClan,
+        public ?int $clanId,
+        public ?string $clanName,
+        public ?string $clanIconUrl,
         public int $value,
     ) {}
 }

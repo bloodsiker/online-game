@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Infrastructure\Persistence\Models;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +40,8 @@ class Structure extends Model
 
     public const TYPE_EXCHANGE = 'exchange';
 
+    public const TYPE_AUCTION_EXCHANGE = 'auction_exchange';
+
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
         self::TYPE_AUCTION => 'Аукцион',
@@ -50,6 +52,7 @@ class Structure extends Model
         self::TYPE_CLAN_BANK => 'Клановая казна',
         self::TYPE_BLACKSMITH => 'Кузня',
         self::TYPE_EXCHANGE => 'Обмен',
+        self::TYPE_AUCTION_EXCHANGE => 'Биржа',
     ];
 
     protected $with = ['location'];
@@ -122,6 +125,11 @@ class Structure extends Model
     public function isAuction(): bool
     {
         return $this->type === self::TYPE_AUCTION;
+    }
+
+    public function isAuctionExchange(): bool
+    {
+        return $this->type === self::TYPE_AUCTION_EXCHANGE;
     }
 
     public function isHeal(): bool

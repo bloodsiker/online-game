@@ -348,13 +348,13 @@ function renderPanel() {
     let html = '';
 
     html += `<div style="text-align:center; margin-bottom:6px;">`;
-    html += `<img src="${item.img}" width="44" height="44" style="border:1px solid #c8a060;"><br>`;
+    html += `<img src="${item.image}" width="44" height="44" style="border:1px solid #c8a060;"><br>`;
     html += `<b>${item.name}</b><br>`;
-    html += `<span style="color:#888;">Рунных слотов: ${item.rune_slot_count}/${MAX_SLOTS}</span>`;
+    html += `<span style="color:#888;">Рунных слотов: ${item.runeSlotCount}/${MAX_SLOTS}</span>`;
     html += `</div>`;
 
     // Рунные слоты
-    for (let i = 0; i < item.rune_slot_count; i++) {
+    for (let i = 0; i < item.runeSlotCount; i++) {
         const filled = item.runes.find(r => r.slot_index === i);
         if (filled) {
             html += renderFilledSlot(item, filled, i);
@@ -366,12 +366,12 @@ function renderPanel() {
         }
     }
 
-    if (item.rune_slot_count === 0) {
+    if (item.runeSlotCount === 0) {
         html += `<div style="color:#888; text-align:center; padding:8px;">Нет рунных слотов</div>`;
     }
 
     // Вплавление: показываем если выбрана пустая ячейка и руна
-    if (selectedSlotIdx >= 0 && selectedSlotIdx < item.rune_slot_count) {
+    if (selectedSlotIdx >= 0 && selectedSlotIdx < item.runeSlotCount) {
         const slotFilled = item.runes.find(r => r.slot_index === selectedSlotIdx);
         if (!slotFilled && rune) {
             html += renderImbueSection(item, rune);
@@ -379,7 +379,7 @@ function renderPanel() {
     }
 
     // Открытие слота
-    if (item.rune_slot_count < MAX_SLOTS && selectedKeyId) {
+    if (item.runeSlotCount < MAX_SLOTS && selectedKeyId) {
         html += `<div class="reroll-section" style="text-align:center;">`;
         html += `<span class="butt1 pointer"><span><input value="Открыть рунный слот" type="button" onclick="doOpenSlot()" class="grnn"></span></span>`;
         html += `</div>`;
@@ -432,7 +432,7 @@ function renderFilledSlot(item, filled, i) {
 function renderImbueSection(item, rune) {
     let html = `<div style="margin-top:8px; border-top:1px solid #e8c899; padding-top:8px;">`;
     html += `<div style="margin-bottom:4px;">`;
-    html += `<img src="${rune.img}" width="24" height="24" style="vertical-align:middle; margin-right:4px;">`;
+    html += `<img src="${rune.image}" width="24" height="24" style="vertical-align:middle; margin-right:4px;">`;
     html += `<span class="${RARITY_CLASS[rune.rarity]}">${rune.rarity_label}</span> ${rune.name} → Слот ${selectedSlotIdx+1}`;
     html += `</div>`;
 

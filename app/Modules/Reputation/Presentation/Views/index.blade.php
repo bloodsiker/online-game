@@ -175,13 +175,18 @@
                                     <td class="brd2-top brd2-bt" colspan="3" style="padding: 5px 10px;">
                                         <b style="font-size:11px; color:#461C0B;">Медали:</b><br>
                                         @foreach($tiersWithMedals as $tier)
-                                            @if($page->pr->points >= $tier->min_points)
-                                                <span class="medal-earned" title="Получена при {{ $tier->min_points }} очках">
+                                            @php $isEarned = $page->earnedMedals->contains('id', $tier->id); @endphp
+                                            @if($isEarned)
+                                                <span class="medal-earned" title="Получена при {{ $tier->min_points }} очках{{ $tier->feat_quest_id ? ' и выполненном подвиге' : '' }}">
                                                     @if($tier->medal_icon)🏅 @endif{{ $tier->medal_name }}
                                                 </span>
+                                            @elseif($tier->feat_quest_id && $page->pr->points >= $tier->min_points)
+                                                <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
+                                                    ⚔ {{ $tier->medal_name }} — требуется подвиг
+                                                </span>
                                             @else
-                                                <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках">
-                                                    🔒 {{ $tier->medal_name }} ({{ $tier->min_points }})
+                                                <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках{{ $tier->feat_quest_id ? '. Подвиг: ' . ($tier->feat_description ?? '') : '' }}">
+                                                    🔒 {{ $tier->medal_name }} ({{ $tier->min_points }}@if($tier->feat_quest_id) + подвиг @endif)
                                                 </span>
                                             @endif
                                         @endforeach

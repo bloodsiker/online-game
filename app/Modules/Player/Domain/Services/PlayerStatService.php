@@ -230,15 +230,26 @@ class PlayerStatService
                 }
             }
 
-            // Upgrade bonus: each +1 on an armor slot adds 5% to armor
+            // Upgrade bonus: each +1 on an armor slot adds 5% to THIS item's own armor value
+            // (flat, not percent — a percent modifier here would pool with every other
+            // equipped armor piece's upgrade bonus onto the single shared 'armor' stat,
+            // see applyModifiers(), making the total scale with slot count instead of gear).
             $upgradeLvl = $item->upgrade_lvl ?? 0;
             if ($upgradeLvl > 0 && in_array($item->itemInfo->slot, $armorSlots, true)) {
-                $modifiers[] = new StatModifier(
-                    stat: 'armor',
-                    value: (float) ($upgradeLvl * 5),
-                    isPercent: true,
-                    source: sprintf('upgrade:+%d %s', $upgradeLvl, $item->itemInfo->name),
-                );
+                $itemArmorFlat = 0.0;
+                foreach ($item->itemInfo->stats as $stat) {
+                    if ($stat->stat_type === ShareItemStatType::ARMOR && $stat->value_type !== ItemEffectValueType::PERCENT) {
+                        $itemArmorFlat += $stat->value;
+                    }
+                }
+                if ($itemArmorFlat > 0) {
+                    $modifiers[] = new StatModifier(
+                        stat: 'armor',
+                        value: $itemArmorFlat * $upgradeLvl * 0.05,
+                        isPercent: false,
+                        source: sprintf('upgrade:+%d %s', $upgradeLvl, $item->itemInfo->name),
+                    );
+                }
             }
 
             // Gem bonuses from socketed gems

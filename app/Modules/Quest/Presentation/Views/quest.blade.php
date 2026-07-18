@@ -338,7 +338,7 @@
                         </table>
                     </td>
 
-                    <td width="16"><img src="images/d.gif" width="16" height="1"></td>
+                    <td width="16"><img src="{{ asset('img/icon/d.gif') }}" width="16" height="1"></td>
 
                     <td valign="top" width="202" height="100%">
                         <table width="240" border="0" cellspacing="0" cellpadding="0">
@@ -365,13 +365,11 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                                    <img src="{{ asset('img/npc/stareyshina.jpg') }}" alt="Эрдинг" width="190"
-                                         height="171"><br>
-                                    <div class="p2v">Глубокий шрам, навсегда изменивший лицо молодого воина, придает его
-                                        облику еще больше суровости. Немногословный и категоричный в принятии решений
-                                        Эрдинг не ведает, что такое страх, являясь неизменным защитником своего народа и
-                                        Руменгильда.
-                                    </div>
+                                    @if($npc->image)
+                                        <img src="{{ asset($npc->image) }}" alt="{{ $npc->name }}" width="190"
+                                             height="171"><br>
+                                    @endif
+                                    <div class="p2v">{!! $npc->description !!}</div>
                                 </td>
                                 <td class="tbl-shp-sides rs">&nbsp;</td>
                             </tr>

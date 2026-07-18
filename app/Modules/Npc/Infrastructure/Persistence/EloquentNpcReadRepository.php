@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Infrastructure\Persistence;
 
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
-use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use Illuminate\Support\Collection;
 
 class EloquentNpcReadRepository implements NpcReadRepository
@@ -97,7 +98,7 @@ class EloquentNpcReadRepository implements NpcReadRepository
 
     public function getNpcReputations(int $npcId): Collection
     {
-        return Reputation::with('tiers.quests.quest')
+        return Reputation::with('tiers.quests.quest', 'shopItems')
             ->where('npc_id', $npcId)
             ->get();
     }
@@ -109,5 +110,15 @@ class EloquentNpcReadRepository implements NpcReadRepository
             ->whereIn('quest_id', $questIds)
             ->with('objectives.questObjective', 'quest', 'currentStage.objectives')
             ->get();
+    }
+
+    public function getStartDialogueNode(int $npcId): ?NpcDialogueNode
+    {
+        return NpcDialogueNode::where('npc_id', $npcId)
+            ->where('is_active', true)
+            ->orderByDesc('is_start')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
     }
 }

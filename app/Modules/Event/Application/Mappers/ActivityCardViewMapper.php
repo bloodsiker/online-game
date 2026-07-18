@@ -14,6 +14,7 @@ class ActivityCardViewMapper
     {
         return new ActivityCardDTO(
             title: $activity->title,
+            rewardItemId: $activity->reward_share_item_id,
             icon: ltrim($activity->rewardItem->image ?? '', '/'),
             iconCount: $activity->reward_item_amount,
             progressCurrent: min($progress, $activity->required_count),

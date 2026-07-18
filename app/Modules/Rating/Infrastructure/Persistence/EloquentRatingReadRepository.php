@@ -20,7 +20,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
 
     public function paginateLevelRating(int $perPage): LengthAwarePaginator
     {
-        return Player::with(['user.clanMembership'])
+        return Player::with(['user.clanMembership.clan'])
             ->orderByDesc('lvl')
             ->orderByDesc('exp')
             ->paginate($perPage)
@@ -29,7 +29,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
 
     public function paginateVictoriesRating(int $perPage): LengthAwarePaginator
     {
-        return Player::with(['user.clanMembership'])
+        return Player::with(['user.clanMembership.clan'])
             ->orderByDesc('victory')
             ->paginate($perPage)
             ->withQueryString();
@@ -37,7 +37,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
 
     public function paginateDeathsRating(int $perPage): LengthAwarePaginator
     {
-        return Player::with(['user.clanMembership'])
+        return Player::with(['user.clanMembership.clan'])
             ->orderByDesc('death')
             ->paginate($perPage)
             ->withQueryString();
@@ -45,7 +45,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
 
     public function paginateWealthRating(int $perPage): LengthAwarePaginator
     {
-        return Player::with(['user.clanMembership'])
+        return Player::with(['user.clanMembership.clan'])
             ->join('users', 'players.user_id', '=', 'users.id')
             ->orderByDesc('users.money')
             ->select('players.*')
@@ -55,7 +55,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
 
     public function paginateSkillRating(int $skillId, int $perPage): LengthAwarePaginator
     {
-        return PlayerSkill::with('player.user.clanMembership')
+        return PlayerSkill::with('player.user.clanMembership.clan')
             ->where('skill_id', $skillId)
             ->orderByDesc('lvl')
             ->orderByDesc('exp')

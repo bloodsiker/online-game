@@ -22,7 +22,7 @@ enum ShareItemType: string
     case SCROLL = 'scroll';
     case GIFT = 'gift';
     case GEM = 'gem';
-    case SOCKET_KIT = 'socket_kit';
+    case MOUNT = 'mount';
     case RUNE = 'rune';
     case RUNE_KEY = 'rune_key';
 
@@ -69,7 +69,7 @@ enum ShareItemType: string
             self::EAT => 'Еда',
             self::GIFT => 'Подарок',
             self::GEM => 'Камень',
-            self::SOCKET_KIT => 'Набор для сокета',
+            self::MOUNT => 'Оправа',
             self::RUNE => 'Руна',
             self::RUNE_KEY => 'Рунный ключ',
         };
@@ -88,6 +88,8 @@ enum ShareItemType: string
                 self::RESOURCE,
                 self::RECIPE,
                 self::SCROLL,
+                self::GEM,
+                self::MOUNT,
             ],
             'key' => [self::KEY],
             'quest' => [self::QUEST],

@@ -11,6 +11,7 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\InsertGem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\OpenSocket;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RemoveGem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class GemController extends Controller
         private readonly OpenSocket $openSocket,
     ) {}
 
-    public function index(Request $request, int $id): \Illuminate\Contracts\View\View
+    public function index(Request $request, int $id): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -35,7 +36,7 @@ class GemController extends Controller
             'user' => $user,
             'items' => $page->items,
             'gems' => $page->gems,
-            'socketKits' => $page->socketKits,
+            'mounts' => $page->mounts,
             'itemTooltipScript' => $page->itemTooltipScript,
         ]);
     }
@@ -47,7 +48,7 @@ class GemController extends Controller
         $request->validate([
             'item_id' => 'required|integer',
             'gem_id' => 'required|integer',
-            'socket_index' => 'required|integer|min:0|max:2',
+            'socket_index' => 'required|integer|min:0|max:3',
         ]);
 
         $result = $this->insertGem->execute(new GemActionDTO(
@@ -69,7 +70,7 @@ class GemController extends Controller
 
         $request->validate([
             'item_id' => 'required|integer',
-            'socket_index' => 'required|integer|min:0|max:2',
+            'socket_index' => 'required|integer|min:0|max:3',
         ]);
 
         $result = $this->removeGem->execute(new GemActionDTO(
@@ -90,13 +91,13 @@ class GemController extends Controller
 
         $request->validate([
             'item_id' => 'required|integer',
-            'kit_id' => 'required|integer',
+            'mount_id' => 'required|integer',
         ]);
 
         $result = $this->openSocket->execute(new GemActionDTO(
             user: $user,
             itemId: $request->integer('item_id'),
-            kitId: $request->integer('kit_id'),
+            mountId: $request->integer('mount_id'),
         ));
 
         session()->flash('message', $result->message);

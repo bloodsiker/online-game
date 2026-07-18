@@ -16,7 +16,7 @@ class GetExchangeOrders
     {
         $query = AuctionOrder::where('structure_id', $structureId)
             ->where('user_id', '!=', $userId)
-            ->with(['shareItem', 'user']);
+            ->with(['shareItem', 'user.player', 'user.clanMembership.clan']);
 
         if ($filter->matching) {
             $userShareItemIds = Backpack::select('items.share_item_id')

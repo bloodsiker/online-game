@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Application\Services;
 
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
@@ -100,11 +101,13 @@ class ReputationService
         });
     }
 
-    public function addPoints(Player $player, Reputation $reputation, int $amount): PlayerReputation
+    public function addPoints(Player $player, Reputation $reputation, int $amount, bool $touchCooldown = true): PlayerReputation
     {
         $pr = $this->getOrCreate($player, $reputation);
         $pr->increment('points', $amount);
-        $pr->update(['last_completed_at' => now()]);
+        if ($touchCooldown) {
+            $pr->update(['last_completed_at' => now()]);
+        }
         $pr->refresh();
 
         return $pr;
@@ -128,11 +131,72 @@ class ReputationService
         return $availableAt->locale('ru')->diffForHumans(now(), true, false, 2);
     }
 
-    public function getEarnedMedals(Reputation $reputation, int $points): Collection
+    /**
+     * Медаль тира получена, если набраны очки тира И (если у тира задан
+     * подвиг) выполнен квест-подвиг (feat_quest_id — финальный квест цепочки).
+     */
+    public function getEarnedMedals(Reputation $reputation, int $points, Player $player): Collection
     {
         return $reputation->tiers
-            ->filter(fn ($t) => $t->medal_name && $points >= $t->min_points)
+            ->filter(fn ($t) => $t->medal_name
+                && $points >= $t->min_points
+                && $this->isFeatCompleted($player, $t))
             ->sortBy('min_points')
             ->values();
+    }
+
+    public function isFeatCompleted(Player $player, ReputationTier $tier): bool
+    {
+        if (! $tier->feat_quest_id) {
+            return true;
+        }
+
+        return QuestPlayer::where('player_id', $player->id)
+            ->where('quest_id', $tier->feat_quest_id)
+            ->where('status', QuestPlayerStatus::COMPLETED)
+            ->exists();
+    }
+
+    /**
+     * Следующий доступный квест-подвиг для игрока по этой репутации.
+     * Берётся самый ранний тир, где очки набраны, а подвиг ещё не выполнен.
+     * Для цепочки идём от финального квеста назад по after_quest_id и
+     * предлагаем первый невыполненный; если он уже взят — не предлагаем.
+     */
+    public function getAvailableFeatQuest(Player $player, Reputation $reputation, int $points): ?Quest
+    {
+        $tier = $reputation->tiers
+            ->filter(fn ($t) => $t->feat_quest_id
+                && $points >= $t->min_points
+                && ! $this->isFeatCompleted($player, $t))
+            ->sortBy('min_points')
+            ->first();
+
+        if (! $tier) {
+            return null;
+        }
+
+        // Разворачиваем цепочку: финальный квест -> ... -> первый
+        $chain = [];
+        $quest = $tier->featQuest;
+        while ($quest) {
+            array_unshift($chain, $quest);
+            $quest = $quest->afterQuest;
+        }
+
+        foreach ($chain as $quest) {
+            $qp = QuestPlayer::where('player_id', $player->id)
+                ->where('quest_id', $quest->id)
+                ->first();
+
+            if (! $qp) {
+                return $quest; // ещё не брал — предлагаем
+            }
+            if ($qp->status !== QuestPlayerStatus::COMPLETED) {
+                return null; // взят и в процессе — не предлагаем повторно
+            }
+        }
+
+        return null;
     }
 }

@@ -23,7 +23,23 @@ class EloquentReputationReadRepository implements ReputationReadRepository
 
     public function findReputationForShopOrFail(int $id): Reputation
     {
-        return Reputation::with('shopItems.item', 'shopItems.requirements.item', 'npc')->findOrFail($id);
+        return Reputation::with([
+            'shopItems.item',
+            'shopItems.requirements.item',
+            'categories' => fn ($q) => $q->where('is_active', true)->orderBy('id'),
+            'npc',
+        ])->findOrFail($id);
+    }
+
+    /** Товары магазина репутации в указанной категории (или без категории, если $categoryId === null). */
+    public function getShopItemsByCategory(int $reputationId, ?int $categoryId): Collection
+    {
+        return ReputationShopItem::where('reputation_id', $reputationId)
+            ->when($categoryId !== null, fn ($q) => $q->where('share_structure_category_id', $categoryId))
+            ->when($categoryId === null, fn ($q) => $q->whereNull('share_structure_category_id'))
+            ->with('item', 'requirements.item')
+            ->orderBy('sort_order')
+            ->get();
     }
 
     public function findShopItemOrFail(int $reputationId, int $itemId): ReputationShopItem

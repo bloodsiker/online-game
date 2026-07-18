@@ -14,6 +14,8 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
+use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
@@ -85,6 +87,20 @@ class GenerateSeed extends Command
     protected $monster7 = null;
 
     protected $monster8 = null;
+
+    protected $monster9 = null;
+
+    protected $monster10 = null;
+
+    protected $monster11 = null;
+
+    protected $monster12 = null;
+
+    protected $monster13 = null;
+
+    protected $monster14 = null;
+
+    protected $monster15 = null;
 
     protected $boss = null;
 
@@ -580,6 +596,93 @@ class GenerateSeed extends Command
             aggression: 65,
         );
 
+        // Тир2 (20-50) — чекпоинты совпадают со StarterEquipmentSeeder::TIER2_LEVEL_CHECKPOINTS.
+        // Параметры зеркалят App\Console\Commands\RecalibrateLeveling::MONSTERS (единый источник
+        // правды) — все 7 прошли battle:simulate-pve с первого раза (95-100% на всех архетипах).
+        $this->monster9 = $this->createBalancedMonster(
+            name: 'Циклоп',
+            level: 22,
+            hpMultiplier: 1.5,
+            armorMitigation: 0.13,
+            dodgePercent: 3,
+            critPercent: 3,
+            dmgPercentOfPlayerHp: 12,
+            expMultiplier: 1.5,
+            aggression: 90,
+        );
+
+        $this->monster10 = $this->createBalancedMonster(
+            name: 'Химера',
+            level: 25,
+            hpMultiplier: 1.3,
+            armorMitigation: 0.09,
+            dodgePercent: 8,
+            critPercent: 18,
+            dmgPercentOfPlayerHp: 11,
+            expMultiplier: 1.6,
+            aggression: 80,
+        );
+
+        $this->monster11 = $this->createBalancedMonster(
+            name: 'Горгулья',
+            level: 29,
+            hpMultiplier: 1.35,
+            armorMitigation: 0.16,
+            dodgePercent: 16,
+            critPercent: 4,
+            dmgPercentOfPlayerHp: 10.5,
+            expMultiplier: 1.7,
+            aggression: 60,
+        );
+
+        $this->monster12 = $this->createBalancedMonster(
+            name: 'Мантикора',
+            level: 34,
+            hpMultiplier: 1.3,
+            armorMitigation: 0.09,
+            dodgePercent: 14,
+            critPercent: 15,
+            dmgPercentOfPlayerHp: 10.5,
+            expMultiplier: 1.8,
+            aggression: 75,
+        );
+
+        $this->monster13 = $this->createBalancedMonster(
+            name: 'Виверна',
+            level: 39,
+            hpMultiplier: 1.25,
+            armorMitigation: 0.08,
+            dodgePercent: 20,
+            critPercent: 6,
+            dmgPercentOfPlayerHp: 10,
+            expMultiplier: 1.85,
+            aggression: 70,
+        );
+
+        $this->monster14 = $this->createBalancedMonster(
+            name: 'Ледяной великан',
+            level: 44,
+            hpMultiplier: 1.45,
+            armorMitigation: 0.14,
+            dodgePercent: 3,
+            critPercent: 3,
+            dmgPercentOfPlayerHp: 11,
+            expMultiplier: 1.9,
+            aggression: 90,
+        );
+
+        $this->monster15 = $this->createBalancedMonster(
+            name: 'Молодой дракон',
+            level: 50,
+            hpMultiplier: 1.35,
+            armorMitigation: 0.12,
+            dodgePercent: 8,
+            critPercent: 12,
+            dmgPercentOfPlayerHp: 10.5,
+            expMultiplier: 2.0,
+            aggression: 70,
+        );
+
         $this->info('Create Monster success');
     }
 
@@ -927,6 +1030,13 @@ class GenerateSeed extends Command
         $this->location2->monsters()->attach($this->monster6->id);
         $this->location2->monsters()->attach($this->monster7->id);
         $this->location2->monsters()->attach($this->monster8->id);
+        $this->location2->monsters()->attach($this->monster9->id);
+        $this->location2->monsters()->attach($this->monster10->id);
+        $this->location2->monsters()->attach($this->monster11->id);
+        $this->location2->monsters()->attach($this->monster12->id);
+        $this->location2->monsters()->attach($this->monster13->id);
+        $this->location2->monsters()->attach($this->monster14->id);
+        $this->location2->monsters()->attach($this->monster15->id);
         $this->location3->monsters()->attach($this->boss->id);
         $this->location3->monsters()->attach($this->boss2->id);
         $this->location3->monsters()->attach($this->boss3->id);
@@ -1504,6 +1614,48 @@ class GenerateSeed extends Command
         $action9->alias = 'auction_my_lot';
         $action9->name = 'Мои лоты';
         $action9->save();
+
+        // Разделы кузни (kraft_item уже создан выше как action6)
+        $action10 = new ShareAction;
+        $action10->alias = 'break_item';
+        $action10->name = 'Разбить предмет';
+        $action10->save();
+
+        $action11 = new ShareAction;
+        $action11->alias = 'upgrade_item';
+        $action11->name = 'Заточка';
+        $action11->save();
+
+        $action12 = new ShareAction;
+        $action12->alias = 'gem_item';
+        $action12->name = 'Камни';
+        $action12->save();
+
+        $action13 = new ShareAction;
+        $action13->alias = 'rune_item';
+        $action13->name = 'Руны';
+        $action13->save();
+
+        // Разделы биржи (структура Structure::TYPE_AUCTION_EXCHANGE)
+        $action14 = new ShareAction;
+        $action14->alias = 'auction_exchange';
+        $action14->name = 'Продать';
+        $action14->save();
+
+        $action15 = new ShareAction;
+        $action15->alias = 'auction_my_orders';
+        $action15->name = 'Мои заявки';
+        $action15->save();
+
+        $action16 = new ShareAction;
+        $action16->alias = 'auction_new_order';
+        $action16->name = 'Новая заявка';
+        $action16->save();
+
+        $action17 = new ShareAction;
+        $action17->alias = 'auction_claims';
+        $action17->name = 'Получить';
+        $action17->save();
     }
 
     public function createShareShopCategory()
@@ -1640,18 +1792,29 @@ class GenerateSeed extends Command
         $shop5->location_id = $locationHeal->id;
         $shop5->save();
 
-        $shop5->actions()->attach(6);
+        // Все разделы кузни: kraft(6), break(10), upgrade(11), gems(12), runes(13)
+        $shop5->actions()->attach([6, 10, 11, 12, 13]);
 
         $locationHeal = Location::find(39);
         $auction = new Structure;
         $auction->type = Structure::TYPE_AUCTION;
-        $auction->name = 'Комисионный магазин';
+        $auction->name = 'Комиссионный магазин';
         $auction->location_id = $locationHeal->id;
         $auction->save();
 
         $auction->actions()->attach(7);
         $auction->actions()->attach(8);
         $auction->actions()->attach(9);
+
+        // Биржа — отдельная структура на той же локации (заявки на покупку, эскроу, получение)
+        $exchangeAuction = new Structure;
+        $exchangeAuction->type = Structure::TYPE_AUCTION_EXCHANGE;
+        $exchangeAuction->name = 'Биржа';
+        $exchangeAuction->location_id = $locationHeal->id;
+        $exchangeAuction->save();
+
+        // Разделы биржи: exchange(14), my_orders(15), new_order(16), claims(17)
+        $exchangeAuction->actions()->attach([14, 15, 16, 17]);
 
         $item = Item::find(1);
         $auctionObj = new Auction;
@@ -1816,5 +1979,127 @@ class GenerateSeed extends Command
             ['name' => 'Воевода Гидвер'],
             ['location_id' => 4, 'description' => 'Дока военного искусства, тактик и стратег, он посвятил свою жизнь развитию военного дела и обучению молодых солдат его премудростям.', 'image' => '/img/npc/voevoda.jpg']
         );
+
+        // Архивариус Вудугри — регистратор кланов (кнопка «Говорить» ведёт на страницу клана)
+        Npc::firstOrCreate(
+            ['name' => 'Архивариус Вудугри'],
+            [
+                'location_id' => 29,
+                'description' => 'Архивариус Вудугри — архивариус Регистрационной палаты, лицо, уполномоченное регистрировать кланы расы древних и хранить их архивы.',
+                'image' => '/img/npc/arhivarius.jpg',
+            ]
+        );
+
+        $bankNpc = Npc::firstOrCreate(
+            ['name' => 'Борин Златоключ'],
+            [
+                'location_id' => 46,
+                'description' => 'Борин Златоключ — строгий хранитель городского банка и клановой казны. Он привык считать не слова, а монеты, ведет книги вкладов без единой помарки и знает, кому доверены личные сундуки, а кому — богатства целого клана. У его стойки можно сохранить ценности, проверить запасы и передать имущество туда, где оно будет надежнее, чем в дорожной сумке.',
+                'image' => '/img/npc/bank.jpg',
+            ]
+        );
+
+        $bankNode = fn (string $title, string $text, bool $isStart = false, int $sort = 0) => NpcDialogueNode::updateOrCreate(
+            ['npc_id' => $bankNpc->id, 'title' => $title],
+            ['description' => $text, 'is_start' => $isStart, 'is_active' => true, 'sort_order' => $sort]
+        );
+
+        $bankGreeting = $bankNode(
+            'Борин Златоключ',
+            'Добро пожаловать в Банковский двор. Здесь не машут мечами и не торгуются на крике — здесь считают, хранят и отвечают за каждую монету. Я Борин Златоключ. Запомни главное: и городской банк, и клановая казна работают только с деньгами. Вещи, ресурсы и снаряжение сюда не принимаются.',
+            true
+        );
+
+        $personalBank = $bankNode(
+            'Городской банк',
+            'Городской банк хранит твои личные деньги. Можно положить монеты на счет, забрать их обратно, проверить баланс и держать запас отдельно от того, что носишь с собой. Это не склад и не хранилище предметов: броню, оружие, ресурсы и прочие вещи банк не принимает.',
+            false,
+            1
+        );
+
+        $clanBank = $bankNode(
+            'Клановая казна',
+            'Клановая казна хранит общие деньги братства. Сюда участники могут вносить монеты для нужд клана, а доступ к снятию зависит от прав, выданных руководством. Казна не принимает предметы и ресурсы — только деньги, чтобы казначеи ясно видели, сколько средств у клана на общие цели.',
+            false,
+            2
+        );
+
+        $bankAdvice = $bankNode(
+            'Советы хранителя',
+            'Не путай назначение мест хранения. Личные монеты держи в городском банке, чтобы не таскать весь запас с собой. Деньги клана вноси в клановую казну, если они нужны для общих расходов. А предметы, ресурсы и снаряжение ищи где хранить в других местах — банковские книги считают только монеты.',
+            false,
+            3
+        );
+
+        $bankOption = fn (NpcDialogueNode $from, NpcDialogueNode $to, string $text, int $sort = 0) => NpcDialogueOption::updateOrCreate(
+            ['npc_dialogue_node_id' => $from->id, 'button_text' => $text],
+            ['to_node_id' => $to->id, 'is_active' => true, 'sort_order' => $sort]
+        );
+
+        $bankOption($bankGreeting, $personalBank, 'Что можно делать в банке?');
+        $bankOption($bankGreeting, $clanBank, 'Что такое клановая казна?', 1);
+        $bankOption($bankGreeting, $bankAdvice, 'Как лучше хранить деньги?', 2);
+        $bankOption($personalBank, $bankAdvice, 'Что стоит держать в банке?');
+        $bankOption($clanBank, $bankAdvice, 'Как не смешивать личные и клановые деньги?');
+
+        $tradeNpc = Npc::firstOrCreate(
+            ['name' => 'Гринт Медяш'],
+            [
+                'location_id' => 39,
+                'description' => 'Гринт Медяш — гном-брокер Площади торгов, который знает цену каждой вещи еще до того, как владелец успеет назвать сумму. Он следит за комиссионными сделками, присматривает за заявками на бирже и с хриплой усмешкой подсказывает путникам, где выгоднее продать трофей или найти редкую покупку.',
+                'image' => '/img/npc/npc_gnom.jpg',
+            ]
+        );
+
+        $node = fn (string $title, string $text, bool $isStart = false, int $sort = 0) => NpcDialogueNode::updateOrCreate(
+            ['npc_id' => $tradeNpc->id, 'title' => $title],
+            ['description' => $text, 'is_start' => $isStart, 'is_active' => true, 'sort_order' => $sort]
+        );
+
+        $greeting = $node(
+            'Гринт Медяш',
+            'Хо-хо, свежий взгляд на старые прилавки! Я Гринт Медяш, смотритель сделок на Площади торгов. Здесь два дома рядом: комиссионный магазин для готовых лотов и биржа для заявок. Хочешь понять, куда идти с добычей?',
+            true
+        );
+
+        $auctionInfo = $node(
+            'Комиссионный магазин',
+            'В комиссионном магазине игроки выставляют свои вещи на продажу. Видишь подходящий лот — покупаешь сразу по назначенной цене. Хочешь продать свое — выставляешь предмет, указываешь цену и ждешь покупателя. Это место для тех, кто уже знает, за сколько готов расстаться с вещью.',
+            false,
+            1
+        );
+
+        $auctionSelling = $node(
+            'Продажа и покупка лотов',
+            'Для покупки смотри список лотов, сравнивай цену и свойства предмета. Для продажи выбирай вещь из рюкзака, ставь количество и цену. Не жадничай: слишком дорогой лот будет пылиться, слишком дешевый купят раньше, чем ты успеешь передумать. Следи за редкостью, уровнем предмета и спросом на экипировку.',
+            false,
+            2
+        );
+
+        $exchangeInfo = $node(
+            'Биржа заявок',
+            'Биржа работает иначе. Там игроки создают заявки на покупку: какой предмет нужен, сколько штук и по какой цене. Если у тебя есть такой товар, ты можешь закрыть заявку и сразу получить оплату. Это удобно, когда покупатель ищет конкретный ресурс или вещь, а продавец не хочет ждать, пока кто-то заметит его лот.',
+            false,
+            3
+        );
+
+        $advice = $node(
+            'Советы торговца',
+            'Комиссионный магазин хорош для редких вещей и экипировки с понятной ценой. Биржа хороша для ходовых ресурсов и предметов, которые часто скупают пачками. Перед сделкой смотри не только цену, но и количество, свойства предмета и то, как быстро тебе нужны монеты. Терпеливый торговец богатеет чаще вспыльчивого.',
+            false,
+            4
+        );
+
+        $option = fn (NpcDialogueNode $from, NpcDialogueNode $to, string $text, int $sort = 0) => NpcDialogueOption::updateOrCreate(
+            ['npc_dialogue_node_id' => $from->id, 'button_text' => $text],
+            ['to_node_id' => $to->id, 'is_active' => true, 'sort_order' => $sort]
+        );
+
+        $option($greeting, $auctionInfo, 'Что можно делать в комиссионном магазине?');
+        $option($greeting, $exchangeInfo, 'Чем биржа отличается от аукциона?', 1);
+        $option($greeting, $advice, 'Дай совет по торговле.', 2);
+        $option($auctionInfo, $auctionSelling, 'Как правильно покупать и продавать лоты?');
+        $option($auctionSelling, $exchangeInfo, 'А если я хочу продать по заявке?');
+        $option($exchangeInfo, $advice, 'Когда лучше пользоваться биржей?');
     }
 }

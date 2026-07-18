@@ -40,7 +40,7 @@ interface BlacksmithReadRepository
     public function getGems(User $user): Collection;
 
     /** @return Collection<int, mixed> */
-    public function getSocketKits(User $user): Collection;
+    public function getMounts(User $user): Collection;
 
     /** @return Collection<int, mixed> */
     public function getImbueableItems(User $user): Collection;

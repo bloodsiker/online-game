@@ -42,7 +42,11 @@
                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
                             <tr>
                                 <td width="60" valign="top">
-                                    <div class="user-rewards__item-pic" style="display:inline-block;">
+                                    <div class="user-rewards__item-pic"
+                                         data-id="{{ $activity->rewardItemId }}"
+                                         onmouseover="showItemInfo(this,event,2)"
+                                         onmouseout="showItemInfo(this,event,0)"
+                                         style="display:inline-block;">
                                         <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                background="{{ asset($activity->icon) }}">
                                             <tr>

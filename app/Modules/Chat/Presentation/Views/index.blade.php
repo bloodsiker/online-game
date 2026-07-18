@@ -411,6 +411,8 @@
                                                         if (!whoFrame) return;
                                                         if (type === 'online') {
                                                             whoFrame.src = '{{ route('who') }}';
+                                                        } else if (type === 'party') {
+                                                            whoFrame.src = '{{ route('who.party') }}';
                                                         } else if (type === 'friends') {
                                                             whoFrame.src = '{{ route('who.friends') }}';
                                                         } else if (type === 'clan') {
@@ -475,6 +477,11 @@
                                         <li class="online selected" data-type="online" title="Список персонажей на локации" onclick="chatFrameSelect('online');">
                                             <span class="icon"><img src="{{ asset('img/bg/chat/cht-area-icon.png') }}" alt="Локация"></span>
                                             <span class="title">Локация</span>
+                                        </li>
+                                        <li class="party" data-type="party"
+                                            title="Группа" onclick="chatFrameSelect('party');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Группа"></span>
+                                            <span class="title">Группа</span>
                                         </li>
                                         <li class="friends" data-type="friends"
                                             title="Список друзей" onclick="chatFrameSelect('friends');">

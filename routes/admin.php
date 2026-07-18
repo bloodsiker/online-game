@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\MonsterController;
+use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\NpcController;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\QuestController;
@@ -22,6 +23,15 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/news', [NewsController::class, 'list'])->name('news');
+Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+Route::post('/news/create', [NewsController::class, 'store'])->name('news.store');
+Route::post('/news/upload-image', [NewsController::class, 'uploadImage'])->name('news.upload-image');
+Route::match(['GET', 'POST'], '/news/{news}', [NewsController::class, 'info'])->name('news.info');
+Route::get('/news/{news}/delete', [NewsController::class, 'delete'])->name('news.delete');
+Route::get('/news/{news}/comment/{comment}/toggle', [NewsController::class, 'toggleComment'])->name('news.comment.toggle');
+Route::get('/news/{news}/comment/{comment}/delete', [NewsController::class, 'deleteComment'])->name('news.comment.delete');
 
 Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
 Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
@@ -94,6 +104,13 @@ Route::get('/races', [RaceController::class, 'list'])->name('race');
 
 Route::match(['GET', 'POST'], '/npc/create', [NpcController::class, 'create'])->name('npc.create');
 Route::get('/npc/list', [NpcController::class, 'list'])->name('npc');
+Route::get('/npc/dialogues', [NpcController::class, 'dialogues'])->name('npc.dialogues');
+Route::post('/npc/{npc}/dialogue/node', [NpcController::class, 'addDialogueNode'])->name('npc.dialogue.node.add');
+Route::post('/npc/{npc}/dialogue/node/{node}', [NpcController::class, 'updateDialogueNode'])->name('npc.dialogue.node.update');
+Route::get('/npc/{npc}/dialogue/node/{node}/delete', [NpcController::class, 'deleteDialogueNode'])->name('npc.dialogue.node.delete');
+Route::post('/npc/{npc}/dialogue/node/{node}/option', [NpcController::class, 'addDialogueOption'])->name('npc.dialogue.option.add');
+Route::post('/npc/{npc}/dialogue/node/{node}/option/{option}', [NpcController::class, 'updateDialogueOption'])->name('npc.dialogue.option.update');
+Route::get('/npc/{npc}/dialogue/node/{node}/option/{option}/delete', [NpcController::class, 'deleteDialogueOption'])->name('npc.dialogue.option.delete');
 Route::match(['GET', 'POST'], '/npc/{npc}', [NpcController::class, 'info'])->name('npc.info');
 
 Route::match(['GET', 'POST'], '/skill/create', [SkillController::class, 'create'])->name('skill.create');
@@ -115,6 +132,7 @@ Route::get('/reputations', [ReputationController::class, 'list'])->name('reputat
 Route::match(['GET', 'POST'], '/reputation/create', [ReputationController::class, 'create'])->name('reputation.create');
 Route::match(['GET', 'POST'], '/reputation/{reputation}', [ReputationController::class, 'info'])->name('reputation.info');
 Route::post('/reputation/{reputation}/tier', [ReputationController::class, 'addTier'])->name('reputation.tier.add');
+Route::post('/reputation/{reputation}/tier/{tier}/update', [ReputationController::class, 'updateTier'])->name('reputation.tier.update');
 Route::get('/reputation/{reputation}/tier/{tier}/delete', [ReputationController::class, 'deleteTier'])->name('reputation.tier.delete');
 Route::post('/reputation/{reputation}/tier/{tier}/quest', [ReputationController::class, 'addTierQuest'])->name('reputation.tier.quest.add');
 Route::get('/reputation/{reputation}/tier/{tier}/quest/{tierQuest}/delete', [ReputationController::class, 'deleteTierQuest'])->name('reputation.tier.quest.delete');

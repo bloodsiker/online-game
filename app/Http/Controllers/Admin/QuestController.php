@@ -4,24 +4,57 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
-use App\Http\Controllers\Controller;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class QuestController extends Controller
 {
-    public function list()
+    public function list(Request $request)
     {
-        $quests = Quest::withCount(['objectives', 'rewards'])
-            ->orderByDesc('id')
-            ->get();
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'type' => (string) $request->query('type', ''),
+            'is_active' => (string) $request->query('is_active', ''),
+            'is_finish' => (string) $request->query('is_finish', ''),
+            'repeatable' => (string) $request->query('repeatable', ''),
+            'start_npc_id' => (int) $request->query('start_npc_id', 0),
+            'complete_npc_id' => (int) $request->query('complete_npc_id', 0),
+        ];
 
-        return view('admin.quest.list', compact('quests'));
+        $quests = Quest::query()
+            ->with(['startNpc', 'completeNpc'])
+            ->withCount(['objectives', 'rewards'])
+            ->when($filters['q'] !== '', function ($query) use ($filters): void {
+                $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
+                $query->where(function ($query) use ($search): void {
+                    $query->where('title', 'like', $search)
+                        ->orWhere('description', 'like', $search);
+                });
+            })
+            ->when(QuestType::tryFrom($filters['type']) !== null, fn ($query) => $query->where('type', $filters['type']))
+            ->when(in_array($filters['is_active'], ['0', '1'], true), fn ($query) => $query->where('is_active', (int) $filters['is_active']))
+            ->when(in_array($filters['is_finish'], ['0', '1'], true), fn ($query) => $query->where('is_finish', (int) $filters['is_finish']))
+            ->when($filters['repeatable'] === 'yes', fn ($query) => $query->whereNotNull('reset_period'))
+            ->when($filters['repeatable'] === 'no', fn ($query) => $query->whereNull('reset_period'))
+            ->when($filters['start_npc_id'] > 0, fn ($query) => $query->where('start_npc_id', $filters['start_npc_id']))
+            ->when($filters['complete_npc_id'] > 0, fn ($query) => $query->where('complete_npc_id', $filters['complete_npc_id']))
+            ->orderByDesc('id')
+            ->paginate(50)
+            ->withQueryString();
+
+        $questTypes = QuestType::cases();
+        $selectedStartNpc = $filters['start_npc_id'] > 0 ? Npc::find($filters['start_npc_id']) : null;
+        $selectedCompleteNpc = $filters['complete_npc_id'] > 0 ? Npc::find($filters['complete_npc_id']) : null;
+
+        return view('admin.quest.list', compact('quests', 'filters', 'questTypes', 'selectedStartNpc', 'selectedCompleteNpc'));
     }
 
     public function create(Request $request): mixed
@@ -49,11 +82,12 @@ class QuestController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
+        $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
         $questTypes = QuestType::cases();
         $rewardTypes = QuestRewardType::cases();
+        $reputations = Reputation::orderBy('name')->get();
 
-        return view('admin.quest.info', compact('quest', 'questTypes', 'rewardTypes'));
+        return view('admin.quest.info', compact('quest', 'questTypes', 'rewardTypes', 'reputations'));
     }
 
     public function addObjective(Request $request, Quest $quest): RedirectResponse
@@ -87,6 +121,7 @@ class QuestController extends Controller
             'amount' => (int) $request->input('amount', 0),
             'share_item_id' => $request->input('share_item_id') ?: null,
             'location_id' => $request->input('location_id') ?: null,
+            'reputation_id' => $request->input('reputation_id') ?: null,
         ]);
 
         return redirect()->back()->with('success', 'Награда добавлена.');

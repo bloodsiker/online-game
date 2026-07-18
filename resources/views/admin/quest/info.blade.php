@@ -211,6 +211,8 @@
                                                             {{ $reward->itemInfo->name }}
                                                         @elseif($reward->location)
                                                             {{ $reward->location->name }}
+                                                        @elseif($reward->reputation)
+                                                            {{ $reward->reputation->name }}
                                                         @else
                                                             —
                                                         @endif
@@ -332,6 +334,15 @@
                         <label>Локация <small class="text-muted">(для типа location_access)</small></label>
                         <select id="reward-location-select" name="location_id" class="form-control"></select>
                     </div>
+                    <div class="form-group mb-2" id="reward-reputation-row">
+                        <label>Репутация <small class="text-muted">(для типа reputation_points)</small></label>
+                        <select name="reputation_id" class="form-control">
+                            <option value="">— не выбрана —</option>
+                            @foreach($reputations as $rep)
+                                <option value="{{ $rep->id }}">[{{ $rep->id }}] {{ $rep->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <footer class="card-footer">
                     <div class="col-md-12 text-end">
@@ -449,6 +460,7 @@
         var val = $(this).val();
         $('#reward-item-row').toggle(val === 'item');
         $('#reward-location-row').toggle(val === 'location_access');
+        $('#reward-reputation-row').toggle(val === 'reputation_points');
     }).trigger('change');
 </script>
 @endpush

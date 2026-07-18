@@ -62,8 +62,10 @@
         .online-status { color: #4C9A50 !important; font-weight: 700; }
         a { color: #955c4a; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .hero-itm { padding: 1px; width: 50px; height: 50px; border: 0; }
+        .hero-itm { display: block; padding: 0; width: 50px; height: 50px; border: 0; }
         .hero-itm.equipped { background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); }
+        td.item-hero { position: relative; line-height: 0; }
+        .equip-grid { border-collapse: separate; border-spacing: 2px; }
         .medal_bg td { text-align: center; vertical-align: middle; background-repeat: no-repeat; height: 53px; }
         .medal_bg_c { background: url({{ asset('img/medal/medal_c.gif') }}) top center; width: 45px; }
         .medal_bg_c img { width: 35px; height: 35px; border: 0; vertical-align: middle; }
@@ -170,116 +172,83 @@
 
                                             @php
                                                 $equip = $user->player->playerEquip;
-                                                $itemTooltipAttrs = static fn ($item): string => $item === null
-                                                    ? ''
-                                                    : 'data-id="'.(int) $item->id.'" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"';
+                                                $emptySlotImage = asset('img/bg/empty_slot.gif');
+                                                $slotAttrs = static fn ($item): string => $item === null
+                                                    ? 'class="item-hero"'
+                                                    : 'class="item-hero" data-id="'.(int) $item->id.'" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"';
+                                                $slotImage = static fn ($item): string => $item === null
+                                                    ? $emptySlotImage
+                                                    : $item->itemInfo->image;
                                             @endphp
-                                            <table cellspacing="0" cellpadding="0" border="0" align="center">
+                                            <table class="equip-grid" cellspacing="0" cellpadding="0" border="0" align="center">
                                                 <tbody>
                                                 <tr>
-                                                    <td>
-                                                        @if($equip?->helmet)
-                                                            <img src="{{ $equip->helmetSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->helmetSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->helmetSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->helmetSlot) }}" class="hero-itm @if($equip?->helmetSlot) equipped @endif" id="i2n1">
                                                     </td>
-                                                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                                                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                                                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
-                                                    <td><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm" id="i3n1"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm" id="i3n2"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm" id="i3n3"></td>
+                                                    <td class="item-hero"><img src="{{ $emptySlotImage }}" class="hero-itm" id="i10n1"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>
-                                                        @if($equip?->handLeft)
-                                                            <img src="{{ $equip->handLeft->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->handLeft) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->handLeft) !!}>
+                                                        <img src="{{ $slotImage($equip?->handLeft) }}" class="hero-itm @if($equip?->handLeft) equipped @endif" id="i4n1">
                                                     </td>
                                                     <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
                                                         <img src="{{ asset('img/avatar/dark_elf.jpg') }}" width="130" height="170" border="0" hspace="0" vspace="0">
                                                     </td>
-                                                    <td>
-                                                        @if($equip?->handRight)
-                                                            <img src="{{ $equip->handRight->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->handRight) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->handRight) !!}>
+                                                        <img src="{{ $slotImage($equip?->handRight) }}" class="hero-itm @if($equip?->handRight) equipped @endif" id="i4n1">
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>
-                                                        @if($equip?->armor)
-                                                            <img src="{{ $equip->armorSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->armorSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->armorSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->armorSlot) }}" class="hero-itm @if($equip?->armorSlot) equipped @endif" id="i4n1">
                                                     </td>
-                                                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>
-                                                        @if($equip?->chain_armor)
-                                                            <img src="{{ $equip->chainArmorSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->chainArmorSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->chainArmorSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->chainArmorSlot) }}" class="hero-itm @if($equip?->chainArmorSlot) equipped @endif" id="i4n1">
                                                     </td>
-                                                    <td>
-                                                        @if($equip?->cloak)
-                                                            <img src="{{ $equip->cloakSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->cloakSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->cloakSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->cloakSlot) }}" class="hero-itm @if($equip?->cloakSlot) equipped @endif" id="i4n1">
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>
-                                                        @if($equip?->shoes)
-                                                            <img src="{{ $equip->shoesSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->shoesSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->shoesSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->shoesSlot) }}" class="hero-itm @if($equip?->shoesSlot) equipped @endif" id="i4n1">
                                                     </td>
-                                                    <td>
-                                                        @if($equip?->gloves)
-                                                            <img src="{{ $equip->glovesSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->glovesSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->glovesSlot) !!}>
+                                                        <img src="{{ $slotImage($equip?->glovesSlot) }}" class="hero-itm @if($equip?->glovesSlot) equipped @endif" id="i4n1">
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td align="center">
-                                                        @if($equip?->belt_first)
-                                                            <img src="{{ $equip->beltFirstSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->beltFirstSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
+                                                    <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                            <table class="equip-grid" cellspacing="0" cellpadding="0" border="0" align="center">
+                                                <tbody>
+                                                <tr>
+                                                    <td align="center" width="30"></td>
+                                                    <td {!! $slotAttrs($equip?->beltFirstSlot) !!} align="center">
+                                                        <img src="{{ $slotImage($equip?->beltFirstSlot) }}" class="hero-itm @if($equip?->beltFirstSlot) equipped @endif">
                                                     </td>
-                                                    <td align="center">
-                                                        @if($equip?->belt_second)
-                                                            <img src="{{ $equip->beltSecondSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->beltSecondSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->beltSecondSlot) !!} align="center">
+                                                        <img src="{{ $slotImage($equip?->beltSecondSlot) }}" class="hero-itm @if($equip?->beltSecondSlot) equipped @endif">
                                                     </td>
-                                                    <td align="center">
-                                                        @if($equip?->bag_first)
-                                                            <img src="{{ $equip->bagFirstSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->bagFirstSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->bagFirstSlot) !!} align="center">
+                                                        <img src="{{ $slotImage($equip?->bagFirstSlot) }}" class="hero-itm @if($equip?->bagFirstSlot) equipped @endif">
                                                     </td>
-                                                    <td align="center">
-                                                        @if($equip?->bag_second)
-                                                            <img src="{{ $equip->bagSecondSlot->itemInfo->image }}" class="hero-itm equipped" {!! $itemTooltipAttrs($equip->bagSecondSlot) !!}>
-                                                        @else
-                                                            <img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm">
-                                                        @endif
+                                                    <td {!! $slotAttrs($equip?->bagSecondSlot) !!} align="center">
+                                                        <img src="{{ $slotImage($equip?->bagSecondSlot) }}" class="hero-itm @if($equip?->bagSecondSlot) equipped @endif">
                                                     </td>
-                                                    <td align="center"><img src="{{ asset('img/bg/backpack/empty-slot.jpg') }}" class="hero-itm"></td>
                                                 </tr>
                                                 </tbody>
                                             </table>

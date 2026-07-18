@@ -35,7 +35,8 @@ class PartyRepository extends AbstractRepository
         $party = Party::create([
             'leader_user_id' => $leaderId,
             'status' => PartyStatus::OPEN,
-            'max_size' => $maxSize,
+            'max_players' => $maxSize,
+            'invite_code' => bin2hex(random_bytes(6)),
         ]);
 
         PartyMember::create([

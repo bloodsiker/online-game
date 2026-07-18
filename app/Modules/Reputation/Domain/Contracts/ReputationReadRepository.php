@@ -16,5 +16,7 @@ interface ReputationReadRepository
 
     public function findReputationForShopOrFail(int $id): Reputation;
 
+    public function getShopItemsByCategory(int $reputationId, ?int $categoryId): Collection;
+
     public function findShopItemOrFail(int $reputationId, int $itemId): ReputationShopItem;
 }

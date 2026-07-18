@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Application\UseCases;
 
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Npc\Application\DTOs\NpcPageDTO;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
-use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Modules\Reputation\Application\Services\ReputationService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetNpcPage
 {
@@ -87,6 +87,13 @@ class GetNpcPage
             $pr = $this->reputationService->getOrCreate($player, $reputation);
             $tier = $this->reputationService->getCurrentTier($reputation, $pr->points);
 
+            // Подвиг (feat) предлагается независимо от кулдауна ежедневных заданий
+            $featQuest = $this->reputationService->getAvailableFeatQuest($player, $reputation, $pr->points);
+            if ($featQuest && ! in_array((int) $featQuest->id, array_map('intval', $inProgressQuestIds), true)) {
+                $featQuest->is_feat = true;
+                $quests->push($featQuest);
+            }
+
             if (! $tier || $tier->quests->isEmpty()) {
                 continue;
             }
@@ -143,6 +150,9 @@ class GetNpcPage
         $message = session('quest_error') ?? session('quest_success');
         $messageType = session()->has('quest_success') ? 'success' : 'error';
 
+        // Репутации этого НПС, у которых есть магазин — для ссылки на страницу магазина
+        $reputationShops = $reputations->filter(fn ($reputation) => $reputation->shopItems->isNotEmpty())->values();
+
         return new NpcPageDTO(
             npc: $npc,
             quests: $quests,
@@ -151,6 +161,9 @@ class GetNpcPage
             message: $message,
             messageType: $messageType,
             player: $player,
+            dialogueStartNode: $this->readRepository->getStartDialogueNode($npc->id),
+            reputationShops: $reputationShops,
+            isClanRegistrar: $npc->name === config('game.clan_registrar_npc_name'),
         );
     }
 }

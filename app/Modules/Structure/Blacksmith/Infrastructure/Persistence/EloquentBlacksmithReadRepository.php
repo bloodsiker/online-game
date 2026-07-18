@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Infrastructure\Persistence;
 
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -142,7 +142,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->get();
     }
 
-    public function getSocketKits(User $user): Collection
+    public function getMounts(User $user): Collection
     {
         return Backpack::select('backpacks.*')
             ->with(['item'])
@@ -150,7 +150,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.type', ShareItemType::SOCKET_KIT->value)
+            ->where('share_items.type', ShareItemType::MOUNT->value)
             ->get();
     }
 

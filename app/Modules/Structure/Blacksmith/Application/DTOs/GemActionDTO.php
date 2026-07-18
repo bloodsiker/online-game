@@ -12,7 +12,7 @@ final readonly class GemActionDTO
         public User $user,
         public int $itemId,
         public ?int $gemId = null,
-        public ?int $kitId = null,
+        public ?int $mountId = null,
         public ?int $socketIndex = null,
     ) {}
 }
