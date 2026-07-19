@@ -52,13 +52,14 @@ final class UserController
 
         return array_values(array_filter([
             $equip->helmetSlot,
+            $equip->shoulderSlot,
+            $equip->forearmSlot,
             $equip->handLeft,
             $equip->handRight,
             $equip->armorSlot,
+            $equip->leggingSlot,
             $equip->chainArmorSlot,
-            $equip->cloakSlot,
             $equip->shoesSlot,
-            $equip->glovesSlot,
             $equip->beltFirstSlot,
             $equip->beltSecondSlot,
             $equip->bagFirstSlot,

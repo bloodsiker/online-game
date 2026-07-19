@@ -43,8 +43,28 @@
         .lvl-badge { color: #2255aa; font-weight: bold; }
         .lvl-max { color: #888; }
 
-        /* Upgrade panel */
-        .upgrade-panel { padding: 10px; }
+        /* Золотистая пергаментная рамка (common-corners/tb/lr + common-bg) — как на странице «Камни» */
+        .gp-frame-tl, .gp-frame-tr, .gp-frame-bl, .gp-frame-br {
+            background: url('/img/bg/common-corners.png') no-repeat;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-t, .gp-frame-b {
+            background: url('/img/bg/common-tb.png') repeat-x;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-l, .gp-frame-r {
+            background: url('/img/bg/common-lr.png') repeat-y;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-tl { background-position: 0 0; }
+        .gp-frame-tr { background-position: 100% 0; }
+        .gp-frame-bl { background-position: 0 100%; }
+        .gp-frame-br { background-position: 100% 100%; }
+        .gp-frame-t { background-position: 0 0; }
+        .gp-frame-b { background-position: 0 100%; }
+        .gp-frame-l { background-position: 0 0; }
+        .gp-frame-r { background-position: 100% 0; }
+        .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
         .upgrade-chance-bar { height: 10px; background: #ddd; border: 1px solid #b08060; margin: 3px 0; }
         .upgrade-chance-fill { height: 100%; background: #55aa33; }
         .upgrade-chance-fill.medium { background: #ddaa00; }
@@ -109,129 +129,214 @@
                     <tr valign="top">
 
                         {{-- Left: item list --}}
-                        <td width="35%">
-                            <table class="coll brd2-all" width="100%" border="0">
-                                <thead>
-                                <tr class="bg_l" height="17">
-                                    <td class="p6h brd2" colspan="2" align="center"><b>Предметы для заточки</b></td>
+                        <td width="31%">
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                <tbody>
+                                <tr height="22">
+                                    <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                    <td align="center" class="tbl-usi-hdr mbg">Предметы для заточки</td>
+                                    <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                 </tr>
-                                </thead>
-                                <tbody id="item-list">
-                                @forelse($items as $slot)
-                                    <tr class="item-row" data-item-id="{{ $slot['id'] }}"
-                                        data-name="{{ $slot['name'] }}"
-                                        data-level="{{ $slot['level'] }}"
-                                        data-pity="{{ $slot['pity'] }}"
-                                        data-img="{{ $slot['image'] }}">
-                                        <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $slot['image'] }}" width="40" height="40"
-                                                 data-id="{{ $slot['id'] }}"
-                                                 onmouseover="showItemInfo(this,event,2)"
-                                                 onmouseout="showItemInfo(this,event,0)">
-                                        </td>
-                                        <td style="padding:3px 4px;">
-                                            {{ $slot['name'] }}
-                                            @if($slot['level'] > 0)
-                                                <span class="lvl-badge">+{{ $slot['level'] }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет предметов для заточки</td></tr>
-                                @endforelse
                                 </tbody>
+                            </table>
+
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-tl"></td>
+                                    <td height="10" class="gp-frame-t"></td>
+                                    <td width="8" height="10" class="gp-frame-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                    <td class="gp-frame-bg">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tbody id="item-list">
+                                            @forelse($items as $slot)
+                                                <tr class="item-row" data-item-id="{{ $slot['id'] }}"
+                                                    data-name="{{ $slot['name'] }}"
+                                                    data-level="{{ $slot['level'] }}"
+                                                    data-pity="{{ $slot['pity'] }}"
+                                                    data-img="{{ $slot['image'] }}">
+                                                    <td width="30" style="padding:3px 4px;">
+                                                        <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                             data-id="{{ $slot['id'] }}"
+                                                             onmouseover="showItemInfo(this,event,2)"
+                                                             onmouseout="showItemInfo(this,event,0)">
+                                                    </td>
+                                                    <td style="padding:3px 4px;">
+                                                        {{ $slot['name'] }}
+                                                        @if($slot['level'] > 0)
+                                                            <span class="lvl-badge">+{{ $slot['level'] }}</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет предметов для заточки</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-bl"></td>
+                                    <td height="10" class="gp-frame-b"></td>
+                                    <td width="8" height="10" class="gp-frame-br"></td>
+                                </tr>
                             </table>
                         </td>
 
                         <td width="10">&nbsp;</td>
 
                         {{-- Center: upgrade panel --}}
-                        <td width="30%">
-                            <table class="coll brd2-all" width="100%" border="0">
-                                <thead>
-                                <tr class="bg_l" height="17">
-                                    <td class="p6h brd2" align="center"><b>Заточка</b></td>
-                                </tr>
-                                </thead>
+                        <td width="31%">
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                                 <tbody>
-                                <tr>
-                                    <td class="upgrade-panel" align="center" id="upgrade-panel-content">
-                                        <span style="color:#888;">Выберите предмет</span>
-                                    </td>
+                                <tr height="22">
+                                    <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                    <td align="center" class="tbl-usi-hdr mbg">Заточка</td>
+                                    <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                 </tr>
                                 </tbody>
+                            </table>
+
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-tl"></td>
+                                    <td height="10" class="gp-frame-t"></td>
+                                    <td width="8" height="10" class="gp-frame-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                    <td class="gp-frame-bg" align="center" id="upgrade-panel-content">
+                                        <span style="color:#888;">Выберите предмет</span>
+                                    </td>
+                                    <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-bl"></td>
+                                    <td height="10" class="gp-frame-b"></td>
+                                    <td width="8" height="10" class="gp-frame-br"></td>
+                                </tr>
                             </table>
                         </td>
 
                         <td width="10">&nbsp;</td>
 
                         {{-- Right: scroll lists --}}
-                        <td width="25%">
+                        <td width="31%">
                             {{-- Base scrolls (required) --}}
-                            <table class="coll brd2-all" width="100%" border="0" style="margin-bottom:6px;">
-                                <thead>
-                                <tr class="bg_l" height="17">
-                                    <td class="p6h brd2" colspan="2" align="center"><b>Свиток заточки</b> <span style="color:#c00;">*</span></td>
-                                </tr>
-                                </thead>
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                                 <tbody>
-                                @forelse($baseScrolls as $scroll)
-                                    <tr class="scroll-row base-scroll-row"
-                                        data-scroll-id="{{ $scroll['id'] }}"
-                                        onclick="selectBaseScroll({{ $scroll['id'] }}, this)">
-                                        <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $scroll['image'] }}" width="40" height="40"
-                                                 data-id="{{ $scroll['id'] }}"
-                                                 onmouseover="showItemInfo(this,event,2)"
-                                                 onmouseout="showItemInfo(this,event,0)">
-                                        </td>
-                                        <td style="padding:3px 4px;">
-                                            {{ $scroll['name'] }}
-                                            @if($scroll['count'] > 1)
-                                                <span style="color:#888;">({{ $scroll['count'] }})</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="2" style="padding:6px; color:#c00; text-align:center;">Нет свитков</td></tr>
-                                @endforelse
+                                <tr height="22">
+                                    <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                    <td align="center" class="tbl-usi-hdr mbg">Свиток заточки *</td>
+                                    <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                                </tr>
                                 </tbody>
                             </table>
 
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:6px;">
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-tl"></td>
+                                    <td height="10" class="gp-frame-t"></td>
+                                    <td width="8" height="10" class="gp-frame-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                    <td class="gp-frame-bg">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tbody>
+                                            @forelse($baseScrolls as $scroll)
+                                                <tr class="scroll-row base-scroll-row"
+                                                    data-scroll-id="{{ $scroll['id'] }}"
+                                                    onclick="selectBaseScroll({{ $scroll['id'] }}, this)">
+                                                    <td width="30" style="padding:3px 4px;">
+                                                        <img src="{{ $scroll['image'] }}" width="40" height="40"
+                                                             data-id="{{ $scroll['id'] }}"
+                                                             onmouseover="showItemInfo(this,event,2)"
+                                                             onmouseout="showItemInfo(this,event,0)">
+                                                    </td>
+                                                    <td style="padding:3px 4px;">
+                                                        {{ $scroll['name'] }}
+                                                        @if($scroll['count'] > 1)
+                                                            <span style="color:#888;">({{ $scroll['count'] }})</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="2" style="padding:6px; color:#c00; text-align:center;">Нет свитков</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-bl"></td>
+                                    <td height="10" class="gp-frame-b"></td>
+                                    <td width="8" height="10" class="gp-frame-br"></td>
+                                </tr>
+                            </table>
+
                             {{-- Bonus scrolls (optional) --}}
-                            <table class="coll brd2-all" width="100%" border="0">
-                                <thead>
-                                <tr class="bg_l" height="17">
-                                    <td class="p6h brd2" colspan="2" align="center"><b>Доп. свиток</b></td>
-                                </tr>
-                                </thead>
+                            <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                                 <tbody>
-                                <tr class="scroll-row bonus-scroll-row selected" id="bonus-scroll-none-row"
-                                    onclick="selectBonusScroll(null, this)">
-                                    <td width="30" style="padding:3px 4px;"></td>
-                                    <td style="padding:3px 4px; color:#888;">— без доп. свитка —</td>
+                                <tr height="22">
+                                    <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                    <td align="center" class="tbl-usi-hdr mbg">Доп. свиток</td>
+                                    <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                 </tr>
-                                @foreach($bonusScrolls as $scroll)
-                                    <tr class="scroll-row bonus-scroll-row"
-                                        data-scroll-id="{{ $scroll['id'] }}"
-                                        data-scroll-bonus="{{ $scroll['bonusType'] }}"
-                                        onclick="selectBonusScroll({{ $scroll['id'] }}, this)">
-                                        <td width="30" style="padding:3px 4px;">
-                                            <img src="{{ $scroll['image'] }}" width="40" height="40"
-                                                 data-id="{{ $scroll['id'] }}"
-                                                 onmouseover="showItemInfo(this,event,2)"
-                                                 onmouseout="showItemInfo(this,event,0)">
-                                        </td>
-                                        <td style="padding:3px 4px;">
-                                            {{ $scroll['name'] }}
-                                            @if($scroll['count'] > 1)
-                                                <span style="color:#888;">({{ $scroll['count'] }})</span>
-                                            @endif
-                                            <br><span style="color:#666; font-size:10px;">{{ $scroll['description'] }}</span>
-                                        </td>
-                                    </tr>
-                                @endforeach
                                 </tbody>
+                            </table>
+
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-tl"></td>
+                                    <td height="10" class="gp-frame-t"></td>
+                                    <td width="8" height="10" class="gp-frame-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                    <td class="gp-frame-bg">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tbody>
+                                            <tr class="bonus-scroll-row" id="bonus-scroll-none-row"
+                                                style="display:none;" onclick="selectBonusScroll(null, this)">
+                                                <td colspan="2" align="center" style="padding:4px;">
+                                                    <span class="butt1 pointer"><span><input value="Без доп. свитка" type="button" class="grnn"></span></span>
+                                                </td>
+                                            </tr>
+                                            @foreach($bonusScrolls as $scroll)
+                                                <tr class="scroll-row bonus-scroll-row"
+                                                    data-scroll-id="{{ $scroll['id'] }}"
+                                                    data-scroll-bonus="{{ $scroll['bonusType'] }}"
+                                                    onclick="selectBonusScroll({{ $scroll['id'] }}, this)">
+                                                    <td width="30" style="padding:3px 4px;">
+                                                        <img src="{{ $scroll['image'] }}" width="40" height="40"
+                                                             data-id="{{ $scroll['id'] }}"
+                                                             onmouseover="showItemInfo(this,event,2)"
+                                                             onmouseout="showItemInfo(this,event,0)">
+                                                    </td>
+                                                    <td style="padding:3px 4px;">
+                                                        {{ $scroll['name'] }}
+                                                        @if($scroll['count'] > 1)
+                                                            <span style="color:#888;">({{ $scroll['count'] }})</span>
+                                                        @endif
+                                                        <br><span style="color:#666; font-size:10px;">{{ $scroll['description'] }}</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                </tr>
+                                <tr>
+                                    <td width="8" height="10" class="gp-frame-bl"></td>
+                                    <td height="10" class="gp-frame-b"></td>
+                                    <td width="8" height="10" class="gp-frame-br"></td>
+                                </tr>
                             </table>
                         </td>
 
@@ -300,6 +405,7 @@
         el.classList.add('selected');
         selectedBonusScrollId = scrollId;
         document.getElementById('selected-bonus-scroll-id').value = scrollId ?? '';
+        document.getElementById('bonus-scroll-none-row').style.display = scrollId ? '' : 'none';
         luckyActive = el.dataset.scrollBonus === 'lucky';
         if (selectedItemId) renderUpgradePanel(selectedItemId);
     }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
@@ -26,7 +26,7 @@ use Illuminate\Database\Seeder;
  *    Reward: exp + item (Коготь медведя, share_item_id=1)
  *
  * 4. "Путь к катакомбам" (one_time, after=3)
- *    Multi-objective: Kill 3 dragons (monster_id=3) + deliver share_item_id=23 (Кристалл)
+ *    Multi-objective: Kill 3 dragons (monster_id=3) + deliver share_item_id=26 (Кристалл)
  *    Complete at: Вестник (NPC 2, at location 4)
  *    Reward: exp + location_access to locked location 102 (Тропа Заблудших, map 2)
  *
@@ -40,7 +40,7 @@ use Illuminate\Database\Seeder;
  *    Stage 2 — "Охота за трофеями" (complete at NPC2 "Вестник"):
  *      Collect 5 claws from bats (monster_id=2, type=collect, drop_chance=60%)
  *    Stage 3 — "Доставка реликвии" (complete at NPC1 "Глава города"):
- *      Deliver Кристалл x1 (share_item_id=23) — given on stage start, taken on complete
+ *      Deliver Кристалл x1 (share_item_id=26) — given on stage start, taken on complete
  *    Reward: 2000 exp + 300 money + 2x Коготь медведя (share_item_id=1)
  */
 class QuestSeeder extends Seeder
@@ -180,12 +180,12 @@ class QuestSeeder extends Seeder
         );
 
         if ($quest4->objectives->isEmpty()) {
-            // Deliver a Кристалл (share_item_id=23) — given to player on quest accept, taken on complete
+            // Deliver a Кристалл (share_item_id=26) — given to player on quest accept, taken on complete
             QuestObjective::create([
                 'quest_id' => $quest4->id,
                 'type' => 'deliver',
                 'target_type' => 'item',
-                'target_id' => 23, // Кристалл
+                'target_id' => 26, // Кристалл
                 'required_amount' => 1,
                 'description' => 'Доставить Кристалл Вестнику',
             ]);
@@ -303,7 +303,7 @@ class QuestSeeder extends Seeder
                 'stage_id' => $stage3->id,
                 'type' => 'deliver',
                 'target_type' => 'item',
-                'target_id' => 23, // Кристалл
+                'target_id' => 26, // Кристалл
                 'required_amount' => 1,
                 'description' => 'Доставить Кристалл',
             ]);

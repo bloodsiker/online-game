@@ -140,15 +140,21 @@ class ItemController extends Controller
 
     public function info(int $id): mixed
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         return view('item::info', [
-            'page' => $this->getItemInfoPage->execute($id),
+            'page' => $this->getItemInfoPage->execute($id, $user->player),
         ]);
     }
 
     public function infoByShareItem(int $id): mixed
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         return view('item::info', [
-            'page' => $this->getItemInfoPage->executeByShareItemId($id),
+            'page' => $this->getItemInfoPage->executeByShareItemId($id, $user->player),
         ]);
     }
 
@@ -194,13 +200,13 @@ class ItemController extends Controller
         $stats = $this->statService->resolve($player);
 
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'removed' => $removed,
-            'count'   => $newCount,
-            'hp_now'  => $player->hp_now,
-            'hp_max'  => $stats->getHpMax(),
-            'mp_now'  => $player->mp_now,
-            'mp_max'  => $stats->getMpMax(),
+            'count' => $newCount,
+            'hp_now' => $player->hp_now,
+            'hp_max' => $stats->getHpMax(),
+            'mp_now' => $player->mp_now,
+            'mp_max' => $stats->getMpMax(),
         ]);
     }
 }

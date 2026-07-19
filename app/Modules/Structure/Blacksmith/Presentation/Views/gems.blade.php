@@ -26,7 +26,28 @@
         .item-row.selected, .gem-row.selected { background: #ffe0a0; font-weight: bold; }
         .item-row td, .gem-row td { padding: 3px 4px; }
 
-        .gem-panel { padding: 10px; }
+        /* Золотистая пергаментная рамка для панели сокетов (common-corners/tb/lr + common-bg) */
+        .gp-frame-tl, .gp-frame-tr, .gp-frame-bl, .gp-frame-br {
+            background: url('/img/bg/common-corners.png') no-repeat;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-t, .gp-frame-b {
+            background: url('/img/bg/common-tb.png') repeat-x;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-l, .gp-frame-r {
+            background: url('/img/bg/common-lr.png') repeat-y;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-tl { background-position: 0 0; }
+        .gp-frame-tr { background-position: 100% 0; }
+        .gp-frame-bl { background-position: 0 100%; }
+        .gp-frame-br { background-position: 100% 100%; }
+        .gp-frame-t { background-position: 0 0; }
+        .gp-frame-b { background-position: 0 100%; }
+        .gp-frame-l { background-position: 0 0; }
+        .gp-frame-r { background-position: 100% 0; }
+        .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
 
         /* Socket visualization */
         .socket-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
@@ -94,148 +115,236 @@
                 <tr valign="top">
 
                     {{-- Left: socketable items --}}
-                    <td width="35%">
-                        <table class="coll brd2-all" width="100%" border="0">
-                            <thead>
-                            <tr class="bg_l" height="17">
-                                <td class="p6h brd2" colspan="2" align="center"><b>Предметы</b></td>
-                            </tr>
-                            </thead>
+                    <td width="31%">
+                        <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                             <tbody>
-                            @forelse($items as $slot)
-                                @php $socketCount = $slot['socketCount']; @endphp
-                                <tr class="item-row" data-item-id="{{ $slot['id'] }}"
-                                    onclick="selectItem({{ $slot['id'] }})">
-                                    <td width="44">
-                                        <img src="{{ $slot['image'] }}" width="40" height="40"
-                                             data-id="{{ $slot['id'] }}"
-                                             onmouseover="showItemInfo(this,event,2)"
-                                             onmouseout="showItemInfo(this,event,0)">
-                                    </td>
-                                    <td>
-                                        {{ $slot['name'] }}
-                                        @if($slot['upgradeLevel'] > 0)
-                                            <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
-                                        @endif
-                                        <br>
-                                        <span style="color:#888;">
-                                            @if($socketCount === 0)
-                                                Нет сокетов
-                                            @else
-                                                {{ $socketCount }} сокет{{ $socketCount === 1 ? '' : ($socketCount < 5 ? 'а' : 'ов') }}
-                                                / {{ $slot['gemsCount'] }} заполнен
-                                            @endif
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет предметов</td></tr>
-                            @endforelse
+                            <tr height="22">
+                                <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                <td align="center" class="tbl-usi-hdr mbg">Предметы</td>
+                                <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                            </tr>
                             </tbody>
+                        </table>
+
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-tl"></td>
+                                <td height="10" class="gp-frame-t"></td>
+                                <td width="8" height="10" class="gp-frame-tr"></td>
+                            </tr>
+                            <tr>
+                                <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                <td class="gp-frame-bg">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tbody>
+                                        @forelse($items as $slot)
+                                            @php $socketCount = $slot['socketCount']; @endphp
+                                            <tr class="item-row" data-item-id="{{ $slot['id'] }}"
+                                                onclick="selectItem({{ $slot['id'] }})">
+                                                <td width="44">
+                                                    <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                         data-id="{{ $slot['id'] }}"
+                                                         onmouseover="showItemInfo(this,event,2)"
+                                                         onmouseout="showItemInfo(this,event,0)">
+                                                </td>
+                                                <td>
+                                                    {{ $slot['name'] }}
+                                                    @if($slot['upgradeLevel'] > 0)
+                                                        <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
+                                                    @endif
+                                                    <br>
+                                                    <span style="color:#888;">
+                                                        @if($socketCount === 0)
+                                                            Нет сокетов
+                                                        @else
+                                                            {{ $socketCount }} сокет{{ $socketCount === 1 ? '' : ($socketCount < 5 ? 'а' : 'ов') }}
+                                                            / {{ $slot['gemsCount'] }} заполнен
+                                                        @endif
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет предметов</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                            </tr>
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-bl"></td>
+                                <td height="10" class="gp-frame-b"></td>
+                                <td width="8" height="10" class="gp-frame-br"></td>
+                            </tr>
                         </table>
                     </td>
 
                     <td width="10">&nbsp;</td>
 
                     {{-- Center: socket panel --}}
-                    <td width="30%">
-                        <table class="coll brd2-all" width="100%" border="0">
-                            <thead>
-                            <tr class="bg_l" height="17">
-                                <td class="p6h brd2" align="center"><b>Сокеты</b></td>
-                            </tr>
-                            </thead>
+                    <td width="31%">
+                        <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                             <tbody>
-                            <tr>
-                                <td class="gem-panel" align="center" id="gem-panel-content">
-                                    <span style="color:#888;">Выберите предмет</span>
-                                </td>
+                            <tr height="22">
+                                <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                <td align="center" class="tbl-usi-hdr mbg">Сокеты</td>
+                                <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                             </tr>
                             </tbody>
+                        </table>
+
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-tl"></td>
+                                <td height="10" class="gp-frame-t"></td>
+                                <td width="8" height="10" class="gp-frame-tr"></td>
+                            </tr>
+                            <tr>
+                                <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                <td class="gp-frame-bg" align="center" id="gem-panel-content">
+                                    <span style="color:#888;">Выберите предмет</span>
+                                </td>
+                                <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                            </tr>
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-bl"></td>
+                                <td height="10" class="gp-frame-b"></td>
+                                <td width="8" height="10" class="gp-frame-br"></td>
+                            </tr>
                         </table>
                     </td>
 
                     <td width="10">&nbsp;</td>
 
                     {{-- Right: gems + socket kits --}}
-                    <td width="25%">
+                    <td width="31%">
                         {{-- Gems inventory --}}
-                        <table class="coll brd2-all" width="100%" border="0" style="margin-bottom:6px;">
-                            <thead>
-                            <tr class="bg_l" height="17">
-                                <td class="p6h brd2" colspan="2" align="center"><b>Камни</b></td>
-                            </tr>
-                            </thead>
+                        <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                             <tbody>
-                            <tr class="gem-row selected" id="gem-none-row" onclick="selectGem(null, this)">
-                                <td colspan="2" style="color:#888;">— отменить выбор —</td>
+                            <tr height="22">
+                                <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                <td align="center" class="tbl-usi-hdr mbg">Камни</td>
+                                <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                             </tr>
-                            @forelse($gems as $slot)
-                                <tr class="gem-row" data-gem-id="{{ $slot['id'] }}"
-                                    onclick="selectGem({{ $slot['id'] }}, this)">
-                                    <td width="44">
-                                        <img src="{{ $slot['image'] }}" width="40" height="40"
-                                             data-id="{{ $slot['id'] }}"
-                                             onmouseover="showItemInfo(this,event,2)"
-                                             onmouseout="showItemInfo(this,event,0)">
-                                    </td>
-                                    <td>
-                                        {{ $slot['name'] }}
-                                        @if($slot['count'] > 1)
-                                            <span style="color:#888;">({{ $slot['count'] }})</span>
-                                        @endif
-                                        @php $stats = $slot['stats'] ?? []; @endphp
-                                        @if(count($stats))
-                                            <br>
-                                            @foreach($stats as $st)
-                                                <span class="gem-stats-hint">
-                                                    +{{ $st['value'] }}{{ ($st['is_percent'] ?? false) ? '%' : '' }}
-                                                    {{ $st['stat'] ?? '' }}
-                                                </span>
-                                            @endforeach
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет камней</td></tr>
-                            @endforelse
                             </tbody>
+                        </table>
+
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:6px;">
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-tl"></td>
+                                <td height="10" class="gp-frame-t"></td>
+                                <td width="8" height="10" class="gp-frame-tr"></td>
+                            </tr>
+                            <tr>
+                                <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                <td class="gp-frame-bg">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tbody>
+                                        <tr class="selected" id="gem-none-row" style="display:none;" onclick="selectGem(null, this)">
+                                            <td colspan="2" align="center" style="padding:4px;">
+                                                <span class="butt1 pointer"><span><input value="Отменить выбор" type="button" class="grnn"></span></span>
+                                            </td>
+                                        </tr>
+                                        @forelse($gems as $slot)
+                                            <tr class="gem-row" data-gem-id="{{ $slot['id'] }}"
+                                                onclick="selectGem({{ $slot['id'] }}, this)">
+                                                <td width="44">
+                                                    <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                         data-id="{{ $slot['id'] }}"
+                                                         onmouseover="showItemInfo(this,event,2)"
+                                                         onmouseout="showItemInfo(this,event,0)">
+                                                </td>
+                                                <td>
+                                                    {{ $slot['name'] }}
+                                                    @if($slot['count'] > 1)
+                                                        <span style="color:#888;">({{ $slot['count'] }})</span>
+                                                    @endif
+                                                    @php $stats = $slot['stats'] ?? []; @endphp
+                                                    @if(count($stats))
+                                                        <br>
+                                                        @foreach($stats as $st)
+                                                            <span class="gem-stats-hint">
+                                                                +{{ $st['value'] }}{{ ($st['is_percent'] ?? false) ? '%' : '' }}
+                                                                {{ $st['stat'] ?? '' }}
+                                                            </span>
+                                                        @endforeach
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет камней</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                            </tr>
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-bl"></td>
+                                <td height="10" class="gp-frame-b"></td>
+                                <td width="8" height="10" class="gp-frame-br"></td>
+                            </tr>
                         </table>
 
                         {{-- Mounts (оправы) --}}
                         @if(count($mounts) > 0)
-                        <table class="coll brd2-all" width="100%" border="0">
-                            <thead>
-                            <tr class="bg_l" height="17">
-                                <td class="p6h brd2" colspan="2" align="center"><b>Оправа</b></td>
-                            </tr>
-                            </thead>
+                        <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                             <tbody>
-                            <tr class="gem-row selected" id="mount-none-row" onclick="selectMount(null, this)">
-                                <td colspan="2" style="color:#888;">— отменить выбор —</td>
+                            <tr height="22">
+                                <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                <td align="center" class="tbl-usi-hdr mbg">Оправа</td>
+                                <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                             </tr>
-                            @foreach($mounts as $slot)
-                                <tr class="gem-row" data-mount-id="{{ $slot['id'] }}"
-                                    onclick="selectMount({{ $slot['id'] }}, this)">
-                                    <td width="44">
-                                        <img src="{{ $slot['image'] }}" width="40" height="40"
-                                             data-id="{{ $slot['id'] }}"
-                                             onmouseover="showItemInfo(this,event,2)"
-                                             onmouseout="showItemInfo(this,event,0)">
-                                    </td>
-                                    <td>
-                                        {{ $slot['name'] }}
-                                        @if($slot['count'] > 1)
-                                            <span style="color:#888;">({{ $slot['count'] }})</span>
-                                        @endif
-                                        <br>
-                                        <span class="gem-stats-hint">
-                                            {{ $slot['rarity'] }}: {{ $slot['socketMin'] }}-{{ $slot['socketMax'] }} сокет(ов), {{ $slot['openCost'] }} монет
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
                             </tbody>
+                        </table>
+
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-tl"></td>
+                                <td height="10" class="gp-frame-t"></td>
+                                <td width="8" height="10" class="gp-frame-tr"></td>
+                            </tr>
+                            <tr>
+                                <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                                <td class="gp-frame-bg">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tbody>
+                                        <tr id="mount-none-row" style="display:none;" onclick="selectMount(null, this)">
+                                            <td colspan="2" align="center" style="padding:4px;">
+                                                <span class="butt1 pointer"><span><input value="Отменить выбор" type="button" class="grnn"></span></span>
+                                            </td>
+                                        </tr>
+                                        @foreach($mounts as $slot)
+                                            <tr class="gem-row" data-mount-id="{{ $slot['id'] }}"
+                                                onclick="selectMount({{ $slot['id'] }}, this)">
+                                                <td width="44">
+                                                    <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                         data-id="{{ $slot['id'] }}"
+                                                         onmouseover="showItemInfo(this,event,2)"
+                                                         onmouseout="showItemInfo(this,event,0)">
+                                                </td>
+                                                <td>
+                                                    {{ $slot['name'] }}
+                                                    @if($slot['count'] > 1)
+                                                        <span style="color:#888;">({{ $slot['count'] }})</span>
+                                                    @endif
+                                                    <br>
+                                                    <span class="gem-stats-hint">
+                                                        {{ $slot['rarity'] }}: {{ $slot['socketMin'] }}-{{ $slot['socketMax'] }} сокет(ов), {{ $slot['openCost'] }} монет
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                            </tr>
+                            <tr>
+                                <td width="8" height="10" class="gp-frame-bl"></td>
+                                <td height="10" class="gp-frame-b"></td>
+                                <td width="8" height="10" class="gp-frame-br"></td>
+                            </tr>
                         </table>
                         @endif
                     </td>
@@ -306,6 +415,7 @@ function selectGem(gemId, el) {
     selectedGemId = gemId;
     document.querySelectorAll('.gem-row[data-gem-id], #gem-none-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
+    document.getElementById('gem-none-row').style.display = gemId ? '' : 'none';
     renderGemPanel();
 }
 
@@ -313,6 +423,7 @@ function selectMount(mountId, el) {
     selectedMountId = mountId;
     document.querySelectorAll('.gem-row[data-mount-id], #mount-none-row').forEach(r => r.classList.remove('selected'));
     el.classList.add('selected');
+    document.getElementById('mount-none-row').style.display = mountId ? '' : 'none';
     renderGemPanel();
 }
 

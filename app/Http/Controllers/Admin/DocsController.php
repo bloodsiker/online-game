@@ -23,4 +23,9 @@ class DocsController extends Controller
     {
         return view('admin.docs.battle');
     }
+
+    public function runesGems(): View
+    {
+        return view('admin.docs.runes-gems');
+    }
 }

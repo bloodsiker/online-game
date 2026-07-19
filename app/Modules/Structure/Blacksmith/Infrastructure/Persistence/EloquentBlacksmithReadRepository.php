@@ -23,7 +23,8 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
 
     public function findCrystalOrFail(): ShareItem
     {
-        return ShareItem::findOrFail(23);
+        // id=23 — «Свиток защиты» (отдельный предмет для Заточки), Кристалл — id=26
+        return ShareItem::findOrFail(26);
     }
 
     public function getCraftRecipes(User $user): Collection

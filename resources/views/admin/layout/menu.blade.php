@@ -125,6 +125,9 @@
                             <li class="{{ request()->routeIs('admin.docs.battle') ? 'nav-active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.docs.battle') }}">Боевой треугольник</a>
                             </li>
+                            <li class="{{ request()->routeIs('admin.docs.runes-gems') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.docs.runes-gems') }}">Руны и камни</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="{{ request()->routeIs('admin.referral.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">

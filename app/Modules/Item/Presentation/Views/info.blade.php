@@ -209,14 +209,20 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endforeach
 
-                                                                            @foreach ($page->requirements as $req)
-                                                                                @if ($req['label'] !== 'Уровень персонажа')
+                                                                            @if (count($page->requirements) > 0)
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Требования:</b></td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                                @foreach ($page->requirements as $req)
+                                                                                    @php $reqColor = $req['met'] ? '#8b4a00' : '#ff0000'; @endphp
                                                                                     <tr>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom redd b" colspan="2">Требуется {{ $req['label'] }}: {{ $req['value'] }}</td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="color: {{ $reqColor }};">{{ $req['label'] }}</td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="color: {{ $reqColor }}; font-weight: bold; padding-right: 3px;">{{ $req['value'] }}</td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp
-                                                                                @endif
-                                                                            @endforeach
+                                                                                @endforeach
+                                                                            @endif
 
                                                                             @if ($page->noGive)
                                                                                 <tr>

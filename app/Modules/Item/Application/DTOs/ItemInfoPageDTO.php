@@ -8,7 +8,7 @@ final readonly class ItemInfoPageDTO
 {
     /**
      * @param  list<array{title: string, value: string}>  $stats
-     * @param  list<array{label: string, value: int}>  $requirements
+     * @param  list<array{label: string, value: int, met: bool}>  $requirements
      */
     public function __construct(
         public int $itemId,

@@ -24,7 +24,28 @@
         .item-row.selected, .rune-row.selected { background: #ffe0a0; font-weight: bold; }
         .item-row td, .rune-row td { padding: 3px 4px; }
 
-        .rune-panel { padding: 8px; }
+        /* Золотистая пергаментная рамка (common-corners/tb/lr + common-bg) — как на странице «Камни» */
+        .gp-frame-tl, .gp-frame-tr, .gp-frame-bl, .gp-frame-br {
+            background: url('/img/bg/common-corners.png') no-repeat;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-t, .gp-frame-b {
+            background: url('/img/bg/common-tb.png') repeat-x;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-l, .gp-frame-r {
+            background: url('/img/bg/common-lr.png') repeat-y;
+            font-size: 0; line-height: 0;
+        }
+        .gp-frame-tl { background-position: 0 0; }
+        .gp-frame-tr { background-position: 100% 0; }
+        .gp-frame-bl { background-position: 0 100%; }
+        .gp-frame-br { background-position: 100% 100%; }
+        .gp-frame-t { background-position: 0 0; }
+        .gp-frame-b { background-position: 0 100%; }
+        .gp-frame-l { background-position: 0 0; }
+        .gp-frame-r { background-position: 100% 0; }
+        .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
 
         /* Рунные слоты */
         .rune-slot {
@@ -108,115 +129,213 @@
         <tr valign="top">
 
             {{-- Левая колонка: предметы --}}
-            <td width="33%">
-                <table class="coll brd2-all" width="100%" border="0">
-                    <thead><tr class="bg_l" height="17">
-                        <td class="p6h brd2" colspan="2" align="center"><b>Оружие и щиты</b></td>
-                    </tr></thead>
+            <td width="31%">
+                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                     <tbody>
-                    @forelse($items as $slot)
-                        <tr class="item-row" data-item-id="{{ $slot['id'] }}" onclick="selectItem({{ $slot['id'] }})">
-                            <td width="44">
-                                <img src="{{ $slot['image'] }}" width="40" height="40"
-                                     data-id="{{ $slot['id'] }}"
-                                     onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
-                            </td>
-                            <td>
-                                {{ $slot['name'] }}
-                                @if($slot['upgradeLevel'] > 0)
-                                    <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
-                                @endif
-                                <br>
-                                <span style="color:#888;">
-                                    @php $sc = $slot['runeSlotCount']; @endphp
-                                    @if($sc === 0) Нет слотов
-                                    @else {{ $sc }} слот{{ $sc === 1 ? '' : ($sc < 5 ? 'а' : 'ов') }} / {{ count($slot['runes']) }} занят
-                                    @endif
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет оружия / щитов</td></tr>
-                    @endforelse
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Оружие и щиты</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                    </tr>
                     </tbody>
+                </table>
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-tl"></td>
+                        <td height="10" class="gp-frame-t"></td>
+                        <td width="8" height="10" class="gp-frame-tr"></td>
+                    </tr>
+                    <tr>
+                        <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                        <td class="gp-frame-bg">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                @forelse($items as $slot)
+                                    <tr class="item-row" data-item-id="{{ $slot['id'] }}" onclick="selectItem({{ $slot['id'] }})">
+                                        <td width="44">
+                                            <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                 data-id="{{ $slot['id'] }}"
+                                                 onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                        </td>
+                                        <td>
+                                            {{ $slot['name'] }}
+                                            @if($slot['upgradeLevel'] > 0)
+                                                <span style="color:#2255aa; font-weight:bold;">+{{ $slot['upgradeLevel'] }}</span>
+                                            @endif
+                                            <br>
+                                            <span style="color:#888;">
+                                                @php $sc = $slot['runeSlotCount']; @endphp
+                                                @if($sc === 0) Нет слотов
+                                                @else {{ $sc }} слот{{ $sc === 1 ? '' : ($sc < 5 ? 'а' : 'ов') }} / {{ count($slot['runes']) }} занят
+                                                @endif
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" style="padding:8px; color:#888; text-align:center;">Нет оружия / щитов</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                    </tr>
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-bl"></td>
+                        <td height="10" class="gp-frame-b"></td>
+                        <td width="8" height="10" class="gp-frame-br"></td>
+                    </tr>
                 </table>
             </td>
 
-            <td width="8">&nbsp;</td>
+            <td width="10">&nbsp;</td>
 
             {{-- Центр: рунная панель --}}
-            <td width="34%">
-                <table class="coll brd2-all" width="100%" border="0">
-                    <thead><tr class="bg_l" height="17">
-                        <td class="p6h brd2" align="center"><b>Вплавление рун</b></td>
-                    </tr></thead>
-                    <tbody><tr>
-                        <td class="rune-panel" id="rune-panel-content">
+            <td width="31%">
+                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                    <tbody>
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Вплавление рун</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-tl"></td>
+                        <td height="10" class="gp-frame-t"></td>
+                        <td width="8" height="10" class="gp-frame-tr"></td>
+                    </tr>
+                    <tr>
+                        <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                        <td class="gp-frame-bg" align="center" id="rune-panel-content">
                             <span style="color:#888;">Выберите предмет</span>
                         </td>
-                    </tr></tbody>
+                        <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                    </tr>
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-bl"></td>
+                        <td height="10" class="gp-frame-b"></td>
+                        <td width="8" height="10" class="gp-frame-br"></td>
+                    </tr>
                 </table>
             </td>
 
-            <td width="8">&nbsp;</td>
+            <td width="10">&nbsp;</td>
 
             {{-- Правая колонка: руны + ключи --}}
-            <td width="25%">
-                <table class="coll brd2-all" width="100%" border="0" style="margin-bottom:6px;">
-                    <thead><tr class="bg_l" height="17">
-                        <td class="p6h brd2" colspan="2" align="center"><b>Руны</b></td>
-                    </tr></thead>
+            <td width="31%">
+                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
                     <tbody>
-                    <tr class="rune-row selected" id="rune-none-row" onclick="selectRune(null, this)">
-                        <td colspan="2" style="color:#888;">— без руны —</td>
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Руны</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
-                    @forelse($runes as $slot)
-                        <tr class="rune-row" data-rune-id="{{ $slot['id'] }}" onclick="selectRune({{ $slot['id'] }}, this)">
-                            <td width="44">
-                                <img src="{{ $slot['image'] }}" width="40" height="40"
-                                     data-id="{{ $slot['id'] }}"
-                                     onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
-                            </td>
-                            <td>
-                                <span class="rarity-{{ $slot['rarity'] ?? 'common' }}">{{ $slot['rarity_label'] }}</span><br>
-                                {{ $slot['name'] }}
-                                @if($slot['count'] > 1)
-                                    <span style="color:#888;">({{ $slot['count'] }})</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет рун</td></tr>
-                    @endforelse
                     </tbody>
                 </table>
 
-                <table class="coll brd2-all" width="100%" border="0">
-                    <thead><tr class="bg_l" height="17">
-                        <td class="p6h brd2" colspan="2" align="center"><b>Рунные ключи</b></td>
-                    </tr></thead>
-                    <tbody>
-                    <tr class="rune-row selected" id="key-none-row" onclick="selectKey(null, this)">
-                        <td colspan="2" style="color:#888;">— без ключа —</td>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:6px;">
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-tl"></td>
+                        <td height="10" class="gp-frame-t"></td>
+                        <td width="8" height="10" class="gp-frame-tr"></td>
                     </tr>
-                    @forelse($runeKeys as $slot)
-                        <tr class="rune-row" data-key-id="{{ $slot['id'] }}" onclick="selectKey({{ $slot['id'] }}, this)">
-                            <td width="44">
-                                <img src="{{ $slot['image'] }}" width="40" height="40"
-                                     data-id="{{ $slot['id'] }}"
-                                     onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
-                            </td>
-                            <td>
-                                {{ $slot['name'] }}
-                                @if($slot['count'] > 1)
-                                    <span style="color:#888;">({{ $slot['count'] }})</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет ключей</td></tr>
-                    @endforelse
+                    <tr>
+                        <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                        <td class="gp-frame-bg">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                <tr id="rune-none-row" onclick="selectRune(null, this)">
+                                    <td colspan="2" align="center" style="padding:4px;">
+                                        <span class="butt1 pointer"><span><input value="Без руны" type="button" class="grnn"></span></span>
+                                    </td>
+                                </tr>
+                                @forelse($runes as $slot)
+                                    <tr class="rune-row" data-rune-id="{{ $slot['id'] }}" onclick="selectRune({{ $slot['id'] }}, this)">
+                                        <td width="44">
+                                            <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                 data-id="{{ $slot['id'] }}"
+                                                 onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                        </td>
+                                        <td>
+                                            <span class="rarity-{{ $slot['rarity'] ?? 'common' }}">{{ $slot['rarity_label'] }}</span><br>
+                                            {{ $slot['name'] }}
+                                            @if($slot['count'] > 1)
+                                                <span style="color:#888;">({{ $slot['count'] }})</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет рун</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                    </tr>
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-bl"></td>
+                        <td height="10" class="gp-frame-b"></td>
+                        <td width="8" height="10" class="gp-frame-br"></td>
+                    </tr>
+                </table>
+
+                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                    <tbody>
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Рунные ключи</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                    </tr>
                     </tbody>
+                </table>
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-tl"></td>
+                        <td height="10" class="gp-frame-t"></td>
+                        <td width="8" height="10" class="gp-frame-tr"></td>
+                    </tr>
+                    <tr>
+                        <td width="8" class="gp-frame-l"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                        <td class="gp-frame-bg">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                <tr id="key-none-row" onclick="selectKey(null, this)">
+                                    <td colspan="2" align="center" style="padding:4px;">
+                                        <span class="butt1 pointer"><span><input value="Без ключа" type="button" class="grnn"></span></span>
+                                    </td>
+                                </tr>
+                                @forelse($runeKeys as $slot)
+                                    <tr class="rune-row" data-key-id="{{ $slot['id'] }}" onclick="selectKey({{ $slot['id'] }}, this)">
+                                        <td width="44">
+                                            <img src="{{ $slot['image'] }}" width="40" height="40"
+                                                 data-id="{{ $slot['id'] }}"
+                                                 onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                        </td>
+                                        <td>
+                                            {{ $slot['name'] }}
+                                            @if($slot['count'] > 1)
+                                                <span style="color:#888;">({{ $slot['count'] }})</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" style="padding:6px; color:#888; text-align:center;">Нет ключей</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </td>
+                        <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
+                    </tr>
+                    <tr>
+                        <td width="8" height="10" class="gp-frame-bl"></td>
+                        <td height="10" class="gp-frame-b"></td>
+                        <td width="8" height="10" class="gp-frame-br"></td>
+                    </tr>
                 </table>
             </td>
 

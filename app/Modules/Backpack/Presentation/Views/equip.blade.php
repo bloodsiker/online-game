@@ -191,7 +191,9 @@
             <table class="equip-grid" cellspacing="0" cellpadding="0" border="0">
                 <tbody>
                 <tr>
-                    <td class="item-hero"
+                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    <td class="item-hero" align="center"
                         @if($playerEquip->helmet) data-id="{{ $playerEquip->helmetSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->helmet)
                             <img src="{{ $playerEquip->helmetSlot->itemInfo->image }}" class="hero-itm" id="i2n1" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
@@ -199,12 +201,32 @@
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
-
                     </td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i3n1"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i3n2"></td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i3n3"></td>
-                    <td><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i10n1"></td>
+                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                </tr>
+                <tr>
+                    <td class="item-hero"
+                        @if($playerEquip->shoulder) data-id="{{ $playerEquip->shoulderSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->shoulder)
+                            <img src="{{ $playerEquip->shoulderSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->shoulderSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                        @endif
+                    </td>
+                    <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
+                        <img src="https://game.elders.com.ua/img/avatar/dark_elf.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
+                    </td>
+                    <td class="item-hero"
+                        @if($playerEquip->forearm) data-id="{{ $playerEquip->forearmSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->forearm)
+                            <img src="{{ $playerEquip->forearmSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->forearmSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <td class="item-hero"
@@ -215,9 +237,6 @@
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
-                    </td>
-                    <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
-                        <img src="https://game.elders.com.ua/img/avatar/dark_elf.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
                     </td>
                     <td class="item-hero"
                         @if($playerEquip->handRight) data-id="{{ $playerEquip->handRight->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
@@ -239,7 +258,15 @@
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
+                    <td class="item-hero"
+                        @if($playerEquip->legging) data-id="{{ $playerEquip->leggingSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->legging)
+                            <img src="{{ $playerEquip->leggingSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->leggingSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        @else
+                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <td class="item-hero"
@@ -252,17 +279,6 @@
                         @endif
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->cloak) data-id="{{ $playerEquip->cloakSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->cloak)
-                            <img src="{{ $playerEquip->cloakSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->cloakSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
-                        @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="item-hero"
                         @if($playerEquip->shoes) data-id="{{ $playerEquip->shoesSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->shoes)
                             <img src="{{ $playerEquip->shoesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
@@ -271,17 +287,9 @@
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td class="item-hero"
-                        @if($playerEquip->gloves) data-id="{{ $playerEquip->glovesSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->gloves)
-                            <img src="{{ $playerEquip->glovesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->glovesSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
-                        @else
-                            <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
-                        @endif
-                    </td>
                 </tr>
                 <tr>
+                    {{-- Резерв под будущие кольца --}}
                     <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
                     <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
                     <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>

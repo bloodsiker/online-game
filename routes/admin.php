@@ -36,6 +36,7 @@ Route::get('/news/{news}/comment/{comment}/delete', [NewsController::class, 'del
 Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
 Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
 Route::get('/docs/battle', [DocsController::class, 'battle'])->name('docs.battle');
+Route::get('/docs/runes-gems', [DocsController::class, 'runesGems'])->name('docs.runes-gems');
 
 Route::get('/dungeons', [DungeonController::class, 'list'])->name('dungeons');
 Route::match(['GET', 'POST'], '/dungeon/{dungeon}', [DungeonController::class, 'info'])->name('dungeon.info');
