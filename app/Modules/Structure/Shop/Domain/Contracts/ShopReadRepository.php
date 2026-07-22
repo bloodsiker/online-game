@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Domain\Contracts;
 
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
@@ -17,9 +16,7 @@ interface ShopReadRepository
     /**
      * @return Collection<int, ShopItem>
      */
-    public function getShopItems(int $structureId): Collection;
-
-    public function findShareItem(int $shareItemId): ?ShareItem;
+    public function getShopItems(int $structureId, ?int $categoryId = null): Collection;
 
     public function findResourceBackpackItem(int $userId, int $shareItemId): ?Backpack;
 

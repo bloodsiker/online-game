@@ -667,7 +667,7 @@
                     <div id="l16" class="s2box bt br bb">
                         <s id="z16">0</s><a name="16"></a>
                         <em>16</em>
-                        <cite>Магазин оружия</cite>
+                        <cite>Магазин снаряжения</cite>
                     </div>
                 </div>
             </div>
@@ -775,11 +775,16 @@
                     <div id="l6" class="s2box bl br bt">
                         <s id="z6">0</s><a name="6"></a>
                         <em>6</em>
-                        <cite>Целительный фонтан</cite>
+                        <cite>Источник жизни</cite>
+                        <br>
+                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => 'Hj7Kl0tEr2A'], request()->except(['s']))) }}#819">
+                            <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
+                        </a>
                     </div>
                 </div>
             </div>
         </td>
+
         <td width="48" height="48">
             <div class="a1" style="">
                 <div id="u12">
@@ -939,7 +944,7 @@
                     <div id="l18" class="s2box br bt bb">
                         <s id="z18">0</s><a name="18"></a>
                         <em>18</em>
-                        <cite>Магазин брони</cite>
+                        <cite>Торговая лавка</cite>
                     </div>
                 </div>
             </div>
@@ -1023,9 +1028,7 @@
             <div class="a1" style="">
                 <div id="u51">
                     <div id="l51" class="s2box br bl bt">
-                        <s id="z51">0</s><a name="51"></a>
-                        <em>51</em>
-                        <cite>Торговая лавка</cite>
+                        <s id="z51">0</s><a name="51"></a>51
                     </div>
                 </div>
             </div>

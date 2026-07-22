@@ -153,7 +153,47 @@ class BattleEffectService
         $result->log(sprintf(
             '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%d ходов)</p>',
             $type->emoji(),
-            ucfirst($type->value),
+            $type->label(),
+            $stacks
+        ));
+    }
+
+    /**
+     * Apply a custom effect (например, пассивка «Оглушение» от руны) к монстру.
+     */
+    public function applyCustomEffectToMonster(
+        ActiveEffectType $type,
+        float $value,
+        int $stacks,
+        MonsterOnLocation $locMonster,
+        Battle $battle,
+        AttackResultDTO $result
+    ): void {
+        $existing = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
+            ->where('type', $type)
+            ->first();
+
+        if ($existing) {
+            $existing->stacks = max($existing->stacks, $stacks);
+            $existing->save();
+
+            return;
+        }
+
+        MonsterActiveEffect::create([
+            'location_monster_id' => $locMonster->id,
+            'battle_id' => $battle->id,
+            'type' => $type,
+            'applied_at' => now(),
+            'stacks' => $stacks,
+            'current_value' => $value,
+        ]);
+
+        $result->log(sprintf(
+            '<p class="color-debuff">%s %s получает эффект: <b>%s</b> (%d ход(а))</p>',
+            $type->emoji(),
+            $locMonster->monster->name,
+            $type->label(),
             $stacks
         ));
     }
@@ -194,7 +234,7 @@ class BattleEffectService
                 $result->log(sprintf(
                     '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
                     $effect->type->emoji(),
-                    ucfirst($effect->type->value),
+                    $effect->type->label(),
                     $damage
                 ));
 
@@ -266,7 +306,7 @@ class BattleEffectService
                 $result->log(sprintf(
                     '<p class="color-debuff">%s <b>%s</b> от вашего заклинания наносит %s %d урона!</p>',
                     $effect->type->emoji(),
-                    ucfirst($effect->type->value),
+                    $effect->type->label(),
                     $locMonster->monster->name,
                     $damage
                 ));
@@ -277,7 +317,7 @@ class BattleEffectService
                     $result->log(sprintf(
                         '<p class="color-info">%s Эффект <b>%s</b> на %s рассеялся.</p>',
                         $effect->type->emoji(),
-                        ucfirst($effect->type->value),
+                        $effect->type->label(),
                         $locMonster->monster->name
                     ));
                     $effect->delete();

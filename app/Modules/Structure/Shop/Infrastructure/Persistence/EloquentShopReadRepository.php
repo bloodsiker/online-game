@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Infrastructure\Persistence;
 
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
@@ -18,17 +17,13 @@ class EloquentShopReadRepository implements ShopReadRepository
         return Structure::findOrFail($id);
     }
 
-    public function getShopItems(int $structureId): Collection
+    public function getShopItems(int $structureId, ?int $categoryId = null): Collection
     {
         return ShopItem::with(['item', 'requirements.item'])
             ->where('structure_id', $structureId)
+            ->when($categoryId !== null, fn ($query) => $query->where('share_structure_category_id', $categoryId))
             ->orderByDesc('sort_order')
             ->get();
-    }
-
-    public function findShareItem(int $shareItemId): ?ShareItem
-    {
-        return ShareItem::find($shareItemId);
     }
 
     public function findResourceBackpackItem(int $userId, int $shareItemId): ?Backpack

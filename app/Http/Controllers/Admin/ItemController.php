@@ -23,6 +23,8 @@ use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
 class ItemController extends Controller
@@ -177,11 +179,9 @@ class ItemController extends Controller
         $item->name = $request->input('name');
         $item->type = $type;
         $item->description = $request->input('description');
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = $file->getClientOriginalName();
-            $file->move(public_path('img/resource'), $filename);
-            $item->image = 'img/resource/'.$filename;
+        $image = $request->file('image');
+        if ($image instanceof UploadedFile) {
+            $item->image = $this->storeItemImage($image);
         } elseif ($request->filled('image')) {
             $item->image = $request->input('image');
         }
@@ -218,6 +218,17 @@ class ItemController extends Controller
             $pool = $request->input('rune_stat_pool', []);
             $item->rune_stat_pool = count($pool) > 0 ? $pool : null;
         }
+    }
+
+    private function storeItemImage(UploadedFile $file): string
+    {
+        $directory = 'img/resource/'.now()->format('Y/m');
+        $filename = $file->hashName();
+
+        File::ensureDirectoryExists(public_path($directory));
+        $file->move(public_path($directory), $filename);
+
+        return '/'.$directory.'/'.$filename;
     }
 
     public function addRequirement(Request $request, ShareItem $item): RedirectResponse

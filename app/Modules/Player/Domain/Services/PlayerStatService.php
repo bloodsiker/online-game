@@ -118,6 +118,9 @@ class PlayerStatService
         $sheet->strength = $computed['strength'];
         $sheet->intuition = $computed['intuition'];
         $sheet->agility = $computed['agility'];
+        $sheet->baseStrength = (int) $primaryBase['strength'];
+        $sheet->baseAgility = (int) $primaryBase['agility'];
+        $sheet->baseIntuition = (int) $primaryBase['intuition'];
         $sheet->wisdom = $computed['wisdom'];
         $sheet->intelligence = $computed['intelligence'];
         $sheet->endurance = $computed['endurance'];
@@ -201,6 +204,14 @@ class PlayerStatService
         foreach ($allSlots as $item) {
             $source = 'equipment:'.$item->itemInfo->name;
 
+            // Камень/руна с общим статом 'attack' усиливает урон только того
+            // оружия, в котором физически стоит — не обе руки разом.
+            $weaponSide = match ($item->id) {
+                optional($equip->handLeft)->id => 'left',
+                optional($equip->handRight)->id => 'right',
+                default => null,
+            };
+
             foreach ($item->itemInfo->stats as $stat) {
                 $mappedStat = match ($stat->stat_type) {
                     ShareItemStatType::ARMOR => 'armor',
@@ -259,7 +270,7 @@ class PlayerStatService
                     if (! is_array($entry)) {
                         continue;
                     }
-                    array_push($modifiers, ...$this->modifiersFromEntry($entry, 'gem:'.$itemGem->gemInfo->name));
+                    array_push($modifiers, ...$this->equipmentStatModifiers($entry, 'gem:'.$itemGem->gemInfo->name, $weaponSide));
                 }
             }
 
@@ -269,7 +280,7 @@ class PlayerStatService
                     if (! is_array($entry)) {
                         continue;
                     }
-                    array_push($modifiers, ...$this->modifiersFromEntry($entry, 'rune:'.$itemRune->runeInfo->name));
+                    array_push($modifiers, ...$this->equipmentStatModifiers($entry, 'rune:'.$itemRune->runeInfo->name, $weaponSide));
                 }
             }
         }
@@ -424,6 +435,35 @@ class PlayerStatService
         }
 
         return [new StatModifier($type, $value, $isPct, $source)];
+    }
+
+    /**
+     * Как modifiersFromEntry(), но для гема/руны, физически вставленной в
+     * конкретный слот руки (см. fromEquipment()): общий стат 'attack' бьёт
+     * только по этой руке, а не по обеим сразу, как это происходит для
+     * баффов/эффектов без привязки к предмету.
+     *
+     * @return StatModifier[]
+     */
+    private function equipmentStatModifiers(array $entry, string $source, ?string $weaponSide): array
+    {
+        $type = $entry['type'] ?? $entry['stat'] ?? null;
+
+        if (! $type) {
+            return [];
+        }
+
+        if ($weaponSide !== null && $this->normalizeStatKey($type) === 'attack') {
+            $value = (float) ($entry['value'] ?? 0);
+            $isPct = (bool) ($entry['is_percent'] ?? false);
+
+            return [
+                new StatModifier($weaponSide.'_min_dmg', $value, $isPct, $source),
+                new StatModifier($weaponSide.'_max_dmg', $value, $isPct, $source),
+            ];
+        }
+
+        return $this->modifiersFromEntry($entry, $source);
     }
 
     /**

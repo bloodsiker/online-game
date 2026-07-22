@@ -341,6 +341,32 @@ let renderItemInfo = (id) => {
             bg = !bg;
         }
     }
+    if (a.gems && a.gems.length > 0) {
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#3300ff;">Камни:</b></td></tr>';
+        bg = !bg;
+        for (i in a.gems) {
+            var gemColor = a.gems[i].color || '#3300ff';
+            if (a.gems[i].header) {
+                content += '<tr class="skill_list b ' + (bg ? 'list_dark' : '') + '"><td colspan="2" style="color:' + gemColor + ';">' + a.gems[i].title + '</td></tr>';
+            } else {
+                content += '<tr class="skill_list b ' + (bg ? 'list_dark' : '') + '"><td style="padding-left:10px;">' + a.gems[i].title + '</td><td align="right" style="color:#BA0000;">' + a.gems[i].value + '</td></tr>';
+            }
+            bg = !bg;
+        }
+    }
+    if (a.runes && a.runes.length > 0) {
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#990099;">Руны:</b></td></tr>';
+        bg = !bg;
+        for (i in a.runes) {
+            var runeColor = a.runes[i].color || '#990099';
+            if (a.runes[i].header) {
+                content += '<tr class="skill_list b ' + (bg ? 'list_dark' : '') + '"><td colspan="2" style="color:' + runeColor + ';">' + a.runes[i].title + '</td></tr>';
+            } else {
+                content += '<tr class="skill_list b ' + (bg ? 'list_dark' : '') + '"><td style="padding-left:10px;">' + a.runes[i].title + '</td><td align="right" style="color:#BA0000;">' + a.runes[i].value + '</td></tr>';
+            }
+            bg = !bg;
+        }
+    }
     if (a.exp && a.exp != undefined) {
         content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td>' + a.exp.title + '</td><td class="grnn b" align="right">' + a.exp.value + '</td></tr>';
         bg = !bg;

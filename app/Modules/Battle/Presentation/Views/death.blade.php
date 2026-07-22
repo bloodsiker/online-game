@@ -95,6 +95,8 @@
 
             {!! $round->action !!}
 
+            {!! $fightDTO->getSideLog() !!}
+
             <p><font color="red">Внимание!</font>  Есть всего 30 минут, пока действует Возрождение! Сферы <font color="#009900">многоразовые</font></p>
             <p>Теперь вы находитесь здесь: <b>{{ $player->user->currentLocation->name }}</b></p>
 

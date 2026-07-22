@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Blacksmith\Application\DTOs\GemActionDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetGemsPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\InsertGem;
@@ -23,6 +24,7 @@ class GemController extends Controller
         private readonly InsertGem $insertGem,
         private readonly RemoveGem $removeGem,
         private readonly OpenSocket $openSocket,
+        private readonly PlayerStatService $statService,
     ) {}
 
     public function index(Request $request, int $id): View
@@ -31,6 +33,13 @@ class GemController extends Controller
         $user = Auth::user();
         $page = $this->getGemsPage->execute($user, $id);
 
+        $player = $user->player;
+        $sheet = $this->statService->resolve($player);
+        $hpMp = [
+            'hp' => ['current' => $player->hp_now, 'max' => $sheet->getHpMax()],
+            'mp' => ['current' => $player->mp_now, 'max' => $sheet->getMpMax()],
+        ];
+
         return view('blacksmith::gems', [
             'blacksmith' => $page->blacksmith,
             'user' => $user,
@@ -38,6 +47,7 @@ class GemController extends Controller
             'gems' => $page->gems,
             'mounts' => $page->mounts,
             'itemTooltipScript' => $page->itemTooltipScript,
+            'hpMp' => $hpMp,
         ]);
     }
 

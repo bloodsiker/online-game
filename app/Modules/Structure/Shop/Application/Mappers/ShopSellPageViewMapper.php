@@ -8,15 +8,25 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellPageDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use Illuminate\Support\Collection;
 
 class ShopSellPageViewMapper
 {
+    public function __construct(
+        private readonly ItemTooltipCollector $collector,
+    ) {}
+
     /**
      * @param  Collection<int, Backpack>  $items
      */
     public function map(User $user, int $shopId, Collection $items): ShopSellPageDTO
     {
+        $itemTooltipScript = $this->collector
+            ->collectFrom(new BackpackItemTooltipStrategy($items))
+            ->renderScript();
+
         return new ShopSellPageDTO(
             shopId: $shopId,
             money: (int) $user->money,
@@ -28,11 +38,13 @@ class ShopSellPageViewMapper
                     count: (int) $item->count,
                     image: (string) $item->item->itemInfo->image,
                     name: (string) $item->item->itemInfo->name,
+                    color: $item->item->itemInfo->rarity?->color() ?? '#666666',
                     typeName: (string) $item->item->itemInfo->getTypeName(),
                     sellPrice: (int) round($item->item->itemInfo->price / 2),
                     infoUrl: route('items.info', ['id' => $item->item->id]),
                 )
             )->all(),
+            itemTooltipScript: $itemTooltipScript,
         );
     }
 }

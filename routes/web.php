@@ -17,6 +17,7 @@ Route::get('/dd', [HomeController::class, 'gebug'])->name('gebug');
 Route::get('/map', [HomeController::class, 'map'])->name('map');
 Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
+Route::get('/map4', [HomeController::class, 'map4'])->name('map4');
 Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);

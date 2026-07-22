@@ -46,6 +46,7 @@ readonly class PlayerDeathService
             ->setIsPlayerDead(true)
             ->setBattleRound($round)
             ->setAttackedMonster($attackedMonster)
-            ->setPlayer($player->refresh());
+            ->setPlayer($player->refresh())
+            ->setSideLog($result->getSideLog());
     }
 }

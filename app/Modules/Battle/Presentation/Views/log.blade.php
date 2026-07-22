@@ -72,6 +72,7 @@
         .color-green  { color: green; }
         .color-info   { color: #129df0; }
         .color-purple { color: purple; }
+        .color-buff   { color: #16a085; font-weight: bold; }
         .color-boss   { color: #ff4444; font-weight: bold; }
         .color-shield { color: #4da6ff; }
         .color-damage { color: #e74c3c; }

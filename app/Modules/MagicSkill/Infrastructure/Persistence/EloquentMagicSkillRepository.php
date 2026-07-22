@@ -7,16 +7,23 @@ namespace App\Modules\MagicSkill\Infrastructure\Persistence;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 
 class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSkillWriteRepository
 {
+    public function __construct(
+        private readonly PlayerRunePassiveService $runePassiveService,
+    ) {}
+
     public function getPlayerPageData(Player $player): array
     {
         $player->loadMissing([
             'user',
             'magicSkills.skillEffects',
+            'playerEquip',
         ]);
 
         [$passiveSkills, $activeSkills] = $player->magicSkills->partition(
@@ -36,7 +43,25 @@ class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSki
             'passiveSkills' => $passiveSkills->values(),
             'activeSkills' => $activeSkills->values(),
             'allyTargets' => $allyTargets,
+            'runePassives' => $this->collectRunePassives($player),
         ];
+    }
+
+    /**
+     * Пассивки вплавленных рун — показываем игроку рядом с пассивными
+     * навыками, чтобы было видно, что реально влияет на бой. Данные те же,
+     * что читает боевая логика (PlayerRunePassiveService), просто размечены
+     * для отображения (label/description вместо type/value).
+     */
+    private function collectRunePassives(Player $player): Collection
+    {
+        return collect($this->runePassiveService->resolve($player))
+            ->map(fn (array $p) => [
+                'itemName' => $p['itemName'],
+                'runeName' => $p['runeName'],
+                'label' => $p['type']->label(),
+                'description' => $p['type']->description($p['value']),
+            ]);
     }
 
     public function findOwnedSkill(Player $player, int $skillId): ?MagicSkill

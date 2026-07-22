@@ -42,7 +42,7 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Тип</label>
                                                 <select class="form-control" name="type" data-plugin-selectTwo>
-                                                    @foreach(App\Models\Structure::TYPES as $key => $label)
+                                                    @foreach(\App\Modules\Structure\Infrastructure\Persistence\Models\Structure::TYPES as $key => $label)
                                                         <option value="{{ $key }}" @selected($structure->type === $key)>{{ $label }}</option>
                                                     @endforeach
                                                 </select>
@@ -76,54 +76,63 @@
                                 </form>
                             </div>
 
-                            {{-- МАГАЗИН --}}
-                            <div id="tab-shop" class="tab-pane">
-                                <div class="pt-3">
-                                    <div class="mb-3">
-                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalShop">Добавить предмет</a>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-bordered mb-none">
-                                            <thead>
-                                            <tr>
-                                                <th width="45"></th>
-                                                <th>Название</th>
-                                                <th width="120">Цена (монеты)</th>
-                                                <th width="120">Цена (алмазы)</th>
-                                                <th width="100">Сортировка</th>
-                                                <th width="70"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @forelse($structure->shopItems as $shopItem)
-                                                <tr style="vertical-align: middle">
-                                                    <td>
-                                                        @if($shopItem->item?->image)
-                                                            <img src="{{ $shopItem->item->image }}" width="36" alt="">
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <a href="{{ route('admin.item.info', $shopItem->item->id) }}" target="_blank">
-                                                            {{ $shopItem->item?->name ?? '—' }}
-                                                        </a>
-                                                    </td>
-                                                    <td>{{ number_format($shopItem->price, 0, '', ' ') }}</td>
-                                                    <td>{{ number_format($shopItem->diamond, 0, '', ' ') }}</td>
-                                                    <td>{{ $shopItem->sort_order }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.structure.info.shop_delete_item', [$structure->id, $shopItem->share_item_id]) }}"
-                                                           class="btn btn-xs btn-danger"
-                                                           onclick="return confirm('Удалить?')">Удалить</a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="6" class="text-center text-muted">Нет предметов</td></tr>
-                                            @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+	                            {{-- МАГАЗИН --}}
+	                            <div id="tab-shop" class="tab-pane">
+	                                <div class="pt-3">
+	                                    <div class="mb-3">
+	                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalShop">Добавить предмет</a>
+	                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-success" href="#modalCategory">Добавить категорию</a>
+	                                    </div>
+	                                    @php
+	                                        $attachedCategoryIds = $structure->categories->pluck('id')->all();
+	                                        $orphanCategories = $structure->shopItems
+	                                            ->filter(fn ($shopItem) => $shopItem->category && ! in_array($shopItem->category->id, $attachedCategoryIds, true))
+	                                            ->pluck('category')
+	                                            ->unique('id')
+	                                            ->sortBy('name')
+	                                            ->values();
+	                                        $categoryBlocks = $structure->categories->sortBy('name')->values()->concat($orphanCategories);
+	                                        $uncategorizedItems = $structure->shopItems->filter(fn ($shopItem) => $shopItem->share_structure_category_id === null);
+	                                    @endphp
+
+	                                    @if($structure->shopItems->isEmpty() && $categoryBlocks->isEmpty())
+	                                        <div class="alert alert-default text-center text-muted mb-0">Нет предметов</div>
+	                                    @else
+	                                        @foreach($categoryBlocks as $category)
+	                                            @php
+	                                                $categoryItems = $structure->shopItems
+	                                                    ->filter(fn ($shopItem) => (int) $shopItem->share_structure_category_id === (int) $category->id)
+	                                                    ->sortByDesc('sort_order');
+	                                            @endphp
+	                                            <section class="card mb-3">
+	                                                <header class="card-header py-2">
+	                                                    <h2 class="card-title" style="font-size: 14px;">
+	                                                        {{ $category->name }}
+	                                                        <span class="badge badge-primary">{{ $categoryItems->count() }}</span>
+	                                                    </h2>
+	                                                </header>
+	                                                <div class="card-body p-0">
+	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $categoryItems, 'structure' => $structure])
+	                                                </div>
+	                                            </section>
+	                                        @endforeach
+
+	                                        @if($uncategorizedItems->isNotEmpty())
+	                                            <section class="card mb-3">
+	                                                <header class="card-header py-2">
+	                                                    <h2 class="card-title" style="font-size: 14px;">
+	                                                        Без категории
+	                                                        <span class="badge badge-primary">{{ $uncategorizedItems->count() }}</span>
+	                                                    </h2>
+	                                                </header>
+	                                                <div class="card-body p-0">
+	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $uncategorizedItems->sortByDesc('sort_order'), 'structure' => $structure])
+	                                                </div>
+	                                            </section>
+	                                        @endif
+	                                    @endif
+	                                </div>
+	                            </div>
 
                             {{-- ДЕЙСТВИЯ --}}
                             <div id="tab-actions" class="tab-pane">
@@ -167,10 +176,38 @@
                 </div>
             </section>
         </div>
-    </div>
+	    </div>
 
-    {{-- Модалка: добавить предмет в магазин --}}
-    <div id="modalShop" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+	    {{-- Модалка: добавить категорию магазина --}}
+	    <div id="modalCategory" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+	        <section class="card">
+	            <form action="{{ route('admin.structure.info.category', $structure->id) }}" method="post">
+	                <header class="card-header"><h2 class="card-title">Добавить категорию магазина</h2></header>
+	                <div class="card-body">
+	                    {{ csrf_field() }}
+	                    <div class="form-group mb-2">
+	                        <label>Категория</label>
+	                        <select name="share_structure_category_id" class="form-control" data-plugin-selectTwo
+	                                data-plugin-options='{ "placeholder": "Выберите категорию", "allowClear": true }'>
+	                            <option value=""></option>
+	                            @foreach($allCategories as $category)
+	                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+	                            @endforeach
+	                        </select>
+	                    </div>
+	                </div>
+	                <footer class="card-footer">
+	                    <div class="col-md-12 text-end">
+	                        <button class="btn btn-primary">Добавить</button>
+	                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+	                    </div>
+	                </footer>
+	            </form>
+	        </section>
+	    </div>
+
+	    {{-- Модалка: добавить предмет в магазин --}}
+	    <div id="modalShop" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
             <form action="{{ route('admin.structure.info.shop', $structure->id) }}" method="post">
                 <header class="card-header"><h2 class="card-title">Добавить предмет в магазин</h2></header>
@@ -179,6 +216,16 @@
                     <div class="form-group mb-2">
                         <label>Предмет</label>
                         <select id="shop-item-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Категория</label>
+                        <select name="share_structure_category_id" class="form-control" data-plugin-selectTwo
+                                data-plugin-options='{ "placeholder": "Без категории", "allowClear": true }'>
+                            <option value=""></option>
+                            @foreach($allCategories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="row">
                         <div class="col-md-4">

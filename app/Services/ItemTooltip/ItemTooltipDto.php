@@ -21,6 +21,8 @@ final class ItemTooltipDto
         public bool $nosell,
         public array $stats = [],        // характеристики предмета: [{title, value}]
         public array $requirements = [], // требования для надевания: [{title, value}]
+        public array $gems = [],         // установленные камни: [{title, value}]
+        public array $runes = [],        // установленные руны: [{title, value}]
     ) {}
 
     public function toArray(): array
@@ -42,6 +44,8 @@ final class ItemTooltipDto
             'nosell' => $this->nosell ? 'Предмет нельзя сдать в скупку' : '',
             'desc' => $this->desc,
             'requirements' => $this->requirements,
+            'gems' => $this->gems,
+            'runes' => $this->runes,
         ];
     }
 }

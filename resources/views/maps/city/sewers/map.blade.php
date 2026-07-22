@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Город Нейрин
+                                            Канализация
                                         </div>
                                     </div>
                                 </div>
@@ -322,7 +322,7 @@
                                                                 <tr>
                                                                     <td class="tbl-usi_left">&nbsp;</td>
                                                                     <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px; text-align: justify;">
-                                                                        @include('maps.city.frame')
+                                                                        @include('maps.city.sewers.frame')
                                                                     </td>
                                                                     <td class="tbl-usi_right">&nbsp;</td>
                                                                 </tr>

@@ -12,6 +12,7 @@ final readonly class ShopSellItemDTO
         public int $count,
         public string $image,
         public string $name,
+        public string $color,
         public string $typeName,
         public int $sellPrice,
         public string $infoUrl,

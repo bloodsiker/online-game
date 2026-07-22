@@ -149,7 +149,8 @@ readonly class FightOrchestrator
                 ->setBattle($finishDTO->battle ?? $battle)
                 ->setBattleRound($battleRound)
                 ->setAttackedMonster($attackedMonster)
-                ->setPlayer($player->refresh());
+                ->setPlayer($player->refresh())
+                ->setSideLog($fullLog->getSideLog());
         });
     }
 
@@ -175,21 +176,21 @@ readonly class FightOrchestrator
     ): void {
         if ($playerLog->getLog() !== '') {
             BattleRoundHit::create([
-                'battle_round_id'  => $round->id,
+                'battle_round_id' => $round->id,
                 'participant_type' => 'user',
-                'participant_id'   => $userId,
-                'hp_after'         => $playerHpAfter,
-                'action'           => $playerLog->getLog(),
+                'participant_id' => $userId,
+                'hp_after' => $playerHpAfter,
+                'action' => $playerLog->getLog(),
             ]);
         }
 
         if ($monsterLog->getLog() !== '') {
             BattleRoundHit::create([
-                'battle_round_id'  => $round->id,
+                'battle_round_id' => $round->id,
                 'participant_type' => 'monster',
-                'participant_id'   => $monsterId,
-                'hp_after'         => $monsterHpAfter,
-                'action'           => $monsterLog->getLog(),
+                'participant_id' => $monsterId,
+                'hp_after' => $monsterHpAfter,
+                'action' => $monsterLog->getLog(),
             ]);
         }
     }

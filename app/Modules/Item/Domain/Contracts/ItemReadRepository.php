@@ -13,8 +13,6 @@ interface ItemReadRepository
 {
     public function findItem(int $id): ?Item;
 
-    public function findItemByShareItemId(int $shareItemId): ?Item;
-
     public function findChestWithItems(int $id): ?Item;
 
     /**

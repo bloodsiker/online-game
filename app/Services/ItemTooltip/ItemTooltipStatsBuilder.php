@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\ItemTooltip;
 
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -93,5 +94,94 @@ final class ItemTooltipStatsBuilder
         }
 
         return $reqs;
+    }
+
+    /**
+     * Установленные в сокеты камни (item_gems). Каждый камень — заголовочная
+     * строка (header) с его именем (ссылка на карточку камня в справочнике),
+     * дальше каждая характеристика отдельной строкой (не одной строкой через запятую).
+     * Цвет строк — цвет редкости самого камня (ItemRarity::color()), а не
+     * фиксированный цвет секции.
+     *
+     * @return array<int, array{title: string, value: string, header?: bool, url?: string, color: string}>
+     */
+    public static function buildGems(Item $item): array
+    {
+        $rows = [];
+
+        foreach ($item->gems as $gem) {
+            $color = $gem->gemInfo->rarity->color();
+            $rows[] = [
+                'title' => $gem->gemInfo->name,
+                'value' => '',
+                'header' => true,
+                'url' => route('items.info.share', ['id' => $gem->gemInfo->id]),
+                'color' => $color,
+            ];
+            array_push($rows, ...self::formatStatEntries($gem->gemInfo->gem_stats ?? [], $color));
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Вплавленные в слоты руны (item_runes) — прокрученные статы и пассивка,
+     * тем же построчным форматом и цветом редкости, что и камни.
+     *
+     * @return array<int, array{title: string, value: string, header?: bool, url?: string, color: string}>
+     */
+    public static function buildRunes(Item $item): array
+    {
+        $rows = [];
+
+        foreach ($item->runes as $rune) {
+            $color = $rune->runeInfo->rarity->color();
+            $rows[] = [
+                'title' => $rune->runeInfo->name,
+                'value' => '',
+                'header' => true,
+                'url' => route('items.info.share', ['id' => $rune->runeInfo->id]),
+                'color' => $color,
+            ];
+            array_push($rows, ...self::formatStatEntries($rune->stats ?? [], $color));
+
+            if ($rune->passive_skill) {
+                $rows[] = ['title' => 'Пассивка', 'value' => $rune->passive_skill['description'], 'color' => $color];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $entries
+     * @return array<int, array{title: string, value: string, color: string}>
+     */
+    private static function formatStatEntries(array $entries, string $color): array
+    {
+        $rows = [];
+
+        foreach ($entries as $entry) {
+            $key = $entry['type'] ?? $entry['stat'] ?? null;
+
+            if (! $key) {
+                continue;
+            }
+
+            $valueStr = ($entry['is_percent'] ?? false) ? ($entry['value'] ?? 0).'%' : (string) ($entry['value'] ?? 0);
+            $rows[] = ['title' => self::statLabel($key), 'value' => '+'.$valueStr, 'color' => $color];
+        }
+
+        return $rows;
+    }
+
+    private static function statLabel(string $key): string
+    {
+        return ShareItemStatType::tryFrom($key)?->label() ?? match ($key) {
+            'attack' => 'Атака',
+            'strength' => 'Сила',
+            'mp_max' => 'Уровень маны',
+            default => ucfirst($key),
+        };
     }
 }

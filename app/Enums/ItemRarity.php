@@ -11,6 +11,7 @@ enum ItemRarity: string
     case RARE = 'rare';
     case EPIC = 'epic';
     case LEGENDARY = 'legendary';
+    case HEROIC = 'heroic';
 
     public function color(): string
     {
@@ -20,6 +21,7 @@ enum ItemRarity: string
             self::RARE => '#3300ff',
             self::EPIC => '#990099',
             self::LEGENDARY => '#ff0000',
+            self::HEROIC => '#e09100',
         };
     }
 
@@ -31,6 +33,7 @@ enum ItemRarity: string
             self::RARE => 'Редкий',
             self::EPIC => 'Эпический',
             self::LEGENDARY => 'Легендарный',
+            self::HEROIC => 'Героический',
         };
     }
 }

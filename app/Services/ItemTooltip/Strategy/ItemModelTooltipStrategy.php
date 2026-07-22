@@ -21,6 +21,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
         foreach ($this->items as $item) {
             $itemInfo = $item->itemInfo;
             $itemInfo->loadMissing('requirements.skill');
+            $item->loadMissing(['gems.gemInfo', 'runes.runeInfo']);
             $upgradeLvl = $item->upgrade_lvl ?? 0;
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
@@ -43,6 +44,8 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
                 nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
+                gems: ItemTooltipStatsBuilder::buildGems($item),
+                runes: ItemTooltipStatsBuilder::buildRunes($item),
             ));
         }
     }

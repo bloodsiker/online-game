@@ -9,6 +9,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
@@ -16,13 +17,54 @@ class ItemInfoPageViewMapper
 {
     public function map(Item $item, ?Player $viewer = null): ItemInfoPageDTO
     {
-        $shareItem = $item->itemInfo;
-        $shareItem->loadMissing('stats', 'effects', 'requirements.skill');
-
         $name = (string) $item->getName();
         if ($item->upgrade_lvl > 0) {
             $name .= ' +'.$item->upgrade_lvl;
         }
+
+        $item->loadMissing(['gems.gemInfo', 'runes.runeInfo']);
+
+        return $this->build(
+            shareItem: $item->itemInfo,
+            name: $name,
+            itemId: (int) $item->id,
+            viewer: $viewer,
+            handOverUrl: route('items.hand_over', ['id' => $item->id]),
+            dropUrl: route('items.drop', ['id' => $item->id]),
+            gems: ItemTooltipStatsBuilder::buildGems($item),
+            runes: ItemTooltipStatsBuilder::buildRunes($item),
+        );
+    }
+
+    /**
+     * Каталожный просмотр по share_item_id (например, товар в магазине) —
+     * без конкретного экземпляра Item, поэтому без уровня заточки и без
+     * действий над предметом (передать/выбросить), которые применимы только
+     * к реально принадлежащему игроку экземпляру.
+     */
+    public function mapFromShareItem(ShareItem $shareItem, ?Player $viewer = null): ItemInfoPageDTO
+    {
+        return $this->build(
+            shareItem: $shareItem,
+            name: (string) $shareItem->name,
+            itemId: 0,
+            viewer: $viewer,
+            handOverUrl: '',
+            dropUrl: '',
+        );
+    }
+
+    private function build(
+        ShareItem $shareItem,
+        string $name,
+        int $itemId,
+        ?Player $viewer,
+        string $handOverUrl,
+        string $dropUrl,
+        array $gems = [],
+        array $runes = [],
+    ): ItemInfoPageDTO {
+        $shareItem->loadMissing('stats', 'effects', 'requirements.skill');
 
         $requirements = [];
         foreach ($shareItem->requirements as $requirement) {
@@ -34,7 +76,7 @@ class ItemInfoPageViewMapper
         }
 
         return new ItemInfoPageDTO(
-            itemId: (int) $item->id,
+            itemId: $itemId,
             shareItemId: (int) $shareItem->id,
             name: $name,
             color: $shareItem->rarity?->color() ?? '#333333',
@@ -47,10 +89,12 @@ class ItemInfoPageViewMapper
             noSell: ! $shareItem->is_sell,
             stats: ItemTooltipStatsBuilder::build($shareItem),
             requirements: $requirements,
-            handOverUrl: route('items.hand_over', ['id' => $item->id]),
-            dropUrl: route('items.drop', ['id' => $item->id]),
+            handOverUrl: $handOverUrl,
+            dropUrl: $dropUrl,
             sameItemsUrl: route('backpack', ['sid' => $shareItem->id]),
             backpackUrl: route('backpack'),
+            gems: $gems,
+            runes: $runes,
         );
     }
 

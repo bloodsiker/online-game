@@ -89,8 +89,7 @@
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('location') }}'); return false;">Перемещение</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">Персонаж</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">Вещи</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan') }}', true); return false;">Клан</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Состав клана</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Клан</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">Данжи</a>
     <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} return false;">Карты</a>
@@ -115,8 +114,7 @@
         m_location:    function () { menuGo(true,  '{{ route('location') }}'); },
         m_character:   function () { menuGo(true,  '{{ route('character') }}', true); },
         m_backpack:    function () { menuGo(false, '{{ route('backpack') }}', true); },
-        m_clan:        function () { menuGo(false, '{{ route('clan') }}', true); },
-        m_clan_member: function () { menuGo(false, '{{ route('clan.member') }}', true); },
+        m_clan:        function () { menuGo(false, '{{ route('clan.member') }}', true); },
         m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
         m_dungeon:     function () { menuGo(false, '{{ route('dungeon.index') }}', true); },
         m_maps:        function () { try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} },
@@ -137,7 +135,7 @@
 
     // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 2)
     var buttonIds = {
-        location: 1, character: 2, backpack: 3, clan: 2, clan_member: 2,
+        location: 1, character: 2, backpack: 3, clan: 2,
         quests: 4, dungeon: 5, maps: 6, friends: 2, rating: 7, referral: 2, premium: 8,
         events: 9, post: 10, fights: 11, infoportal: 12
     };

@@ -389,6 +389,33 @@
                                                             </tbody>
                                                         </table>
 
+                                                        <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+                                                        <table class="coll w100 p10h p2v brd2-all">
+                                                            <tbody>
+                                                            <tr class="bg_l">
+                                                                <td class="brd2-top brd2-bt b">Здоровье</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $user->player->hp_now }} / {{ $stats->getHpMax() }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="brd2-top brd2-bt b">Мана</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $user->player->mp_now }} / {{ $stats->getMpMax() }}</td>
+                                                            </tr>
+                                                            <tr class="bg_l">
+                                                                <td class="brd2-top brd2-bt b">Броня</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getArmor() }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="brd2-top brd2-bt b">Критический удар</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getCritical() }}</td>
+                                                            </tr>
+                                                            <tr class="bg_l">
+                                                                <td class="brd2-top brd2-bt b">Уворот</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getDodge() }}</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+
                                                         @if($user->clanMembership)
                                                             <div style="height:10px;font-size:1px;">&nbsp;</div>
                                                             <table class="coll w100 p10h p2v brd2-all">

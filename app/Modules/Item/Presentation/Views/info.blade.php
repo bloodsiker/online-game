@@ -224,7 +224,51 @@
                                                                                 @endforeach
                                                                             @endif
 
-                                                                            @if ($page->noGive)
+                                                                            @if (count($page->gems) > 0)
+                                                                <tr>
+                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#3300ff;">Камни:</b></td>
+                                                                </tr>
+                                                                @php $light = ! $light; @endphp
+                                                                @foreach ($page->gems as $gem)
+                                                                    @if (!empty($gem['header']))
+                                                                        <tr>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2" style="color:{{ $gem['color'] }};">
+                                                                                <b><a href="{{ $gem['url'] }}" onclick="window.open('{{ $gem['url'] }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;" style="color:{{ $gem['color'] }};">{{ $gem['title'] }}</a></b>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @else
+                                                                        <tr>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ $gem['title'] }}</b></td>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">{{ $gem['value'] }}</b></td>
+                                                                        </tr>
+                                                                    @endif
+                                                                    @php $light = ! $light; @endphp
+                                                                @endforeach
+                                                            @endif
+
+                                                            @if (count($page->runes) > 0)
+                                                                <tr>
+                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#990099;">Руны:</b></td>
+                                                                </tr>
+                                                                @php $light = ! $light; @endphp
+                                                                @foreach ($page->runes as $rune)
+                                                                    @if (!empty($rune['header']))
+                                                                        <tr>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2" style="color:{{ $rune['color'] }};">
+                                                                                <b><a href="{{ $rune['url'] }}" onclick="window.open('{{ $rune['url'] }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;" style="color:{{ $rune['color'] }};">{{ $rune['title'] }}</a></b>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @else
+                                                                        <tr>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ $rune['title'] }}</b></td>
+                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">{{ $rune['value'] }}</b></td>
+                                                                        </tr>
+                                                                    @endif
+                                                                    @php $light = ! $light; @endphp
+                                                                @endforeach
+                                                            @endif
+
+                                                            @if ($page->noGive)
                                                                                 <tr>
                                                                                     <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom redd b" colspan="2">Предмет нельзя передать!</td>
                                                                                 </tr>
@@ -245,7 +289,7 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
-                                                                            @if ($page->stats === [] && $page->requirements === [] && ! $page->noGive && ! $page->noWeight && ! $page->description)
+                                                                            @if ($page->stats === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description)
                                                                                 <tr>
                                                                                     <td class="tbl-sts_bg-light" colspan="2">Обычный предмет без особых свойств.</td>
                                                                                 </tr>

@@ -36,7 +36,8 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
             $hit
                 ->setWeaponName($activeWeapon->itemInfo->name)
                 ->setSkill($activeWeapon->itemInfo->skill)
-                ->setWeapon($activeWeapon->itemInfo),
+                ->setWeapon($activeWeapon->itemInfo)
+                ->setHandSide($itemInfoLeft ? 'left' : 'right'),
         ];
     }
 }

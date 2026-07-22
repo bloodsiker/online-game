@@ -81,6 +81,8 @@ Route::get('/monsters', [MonsterController::class, 'list'])->name('monsters');
 
 Route::get('/structure/{structure}/shop/delete_item/{item}', [StructureController::class, 'infoShopDeleteItem'])->name('structure.info.shop_delete_item');
 Route::post('/structure/{structure}/shop', [StructureController::class, 'infoShop'])->name('structure.info.shop');
+Route::post('/structure/{structure}/shop/{shopItem}', [StructureController::class, 'infoShopUpdate'])->name('structure.info.shop_update');
+Route::post('/structure/{structure}/category', [StructureController::class, 'infoCategory'])->name('structure.info.category');
 Route::get('/structure/{structure}/action/{action}', [StructureController::class, 'infoActionDelete'])->name('structure.info.action_delete');
 Route::post('/structure/{structure}/action', [StructureController::class, 'infoAction'])->name('structure.info.action');
 Route::match(['GET', 'POST'], '/structure/{structure}', [StructureController::class, 'info'])->name('structure.info');

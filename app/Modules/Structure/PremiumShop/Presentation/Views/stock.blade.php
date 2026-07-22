@@ -191,7 +191,11 @@
                                                                 <tr>
                                                                     <td data-id="{{ $item->share_item_id }}"
                                                                         onmouseover="showItemInfo(this,event,2)"
-                                                                        onmouseout="showItemInfo(this,event,0)">
+                                                                        onmouseout="showItemInfo(this,event,0)"
+                                                                        @if($item->share_item_id)
+                                                                            onclick="window.open('{{ route('items.info.share', ['id' => $item->share_item_id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                                            style="cursor: pointer;"
+                                                                        @endif>
                                                                         @if($item->count > 0)
                                                                             <div class="bpdig">{{ $item->count }}</div>
                                                                         @endif

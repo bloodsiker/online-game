@@ -64,10 +64,12 @@
         .rune-remove-btn:hover { background: #ffe0d0; }
 
         /* Статы руны */
-        .rune-stat { display: flex; justify-content: space-between; padding: 1px 0; }
+        .rune-stat { display: flex; justify-content: space-between; padding: 1px 3px; border-radius: 2px; }
         .rune-stat-name { color: #555; }
         .rune-stat-val { font-weight: bold; color: #334; }
         .rune-stat-locked { color: #cc8800; font-size: 10px; cursor: pointer; }
+        .rune-stat.is-locked { background: #fff3d6; border: 1px solid #e0b04d; }
+        .rune-stat.is-locked .rune-stat-name { color: #8b5a00; font-weight: bold; }
         .rune-passive { margin-top: 4px; padding: 3px 5px; background: #f0e8ff; border: 1px solid #9933cc; border-radius: 2px; color: #550077; font-size: 10px; }
 
         /* Режим вплавления */
@@ -370,6 +372,35 @@
             <input type="hidden" name="key_id"  id="fs-key-id">
         </form>
 
+        {{-- Подтверждение удаления руны --}}
+        <div id="rune-remove-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:9999; align-items:center; justify-content:center;">
+            <div class="popup_global_container" style="width:280px;">
+                <div class="popup-top-left">
+                    <div class="popup-top-right">
+                        <div class="popup-top-center">
+                            <div class="popup_global_title">Удаление руны</div>
+                        </div>
+                    </div>
+                    <div class="popup_global_close_btn" onclick="closeRuneRemoveConfirm()"></div>
+                </div>
+                <div class="popup-left-center">
+                    <div class="popup-right-center">
+                        <div class="popup_global_content" style="padding:20px; text-align:center;">
+                            <div class="redd" style="margin-bottom:14px;">Удалить руну? Руна будет уничтожена безвозвратно.</div>
+                            <b class="butt1 pointer"><b><input value="Удалить" type="button" onclick="confirmRuneRemove()" class="redd" style="width:100px;"></b></b>
+                            &nbsp;
+                            <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeRuneRemoveConfirm()" style="width:100px;"></b></b>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-left-bottom">
+                    <div class="popup-right-bottom">
+                        <div class="popup-bottom-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </td>
     <td class="tbl-shp-sides rs">&nbsp;</td>
 </tr>
@@ -522,7 +553,7 @@ function renderFilledSlot(item, filled, i) {
     filled.stats.forEach((stat, si) => {
         const isLocked = locked.has(si);
         const label    = STAT_LABELS[stat.type] || stat.type;
-        html += `<div class="rune-stat">`;
+        html += `<div class="rune-stat${isLocked ? ' is-locked' : ''}">`;
         html += `<span class="rune-stat-name">${label}</span>`;
         html += `<span>`;
         html += `<span class="rune-stat-val">+${stat.value}${stat.is_percent ? '%' : ''}</span>&nbsp;`;
@@ -568,7 +599,7 @@ function renderImbueSection(item, rune) {
 }
 
 function computeRerollCost(filled, lockedCount) {
-    const baseCosts = { common: 100, rare: 300, epic: 800, legendary: 2000 };
+    const baseCosts = { common: 100, uncommon: 200, rare: 300, epic: 800, legendary: 2000, heroic: 5000 };
     const base = baseCosts[filled.rarity] || 100;
     const cost = Math.round(base * Math.pow(filled.reroll_count + 1, 1.5));
     return cost + lockedCount * Math.round(base * 0.5);
@@ -582,9 +613,22 @@ function doImbue() {
     document.getElementById('imbue-form').submit();
 }
 
+let _pendingRuneRemove = null;
+
 function doRemove(itemId, slotIdx) {
-    document.getElementById('fr-item-id').value    = itemId;
-    document.getElementById('fr-slot-index').value = slotIdx;
+    _pendingRuneRemove = { itemId, slotIdx };
+    document.getElementById('rune-remove-overlay').style.display = 'flex';
+}
+
+function closeRuneRemoveConfirm() {
+    _pendingRuneRemove = null;
+    document.getElementById('rune-remove-overlay').style.display = 'none';
+}
+
+function confirmRuneRemove() {
+    if (!_pendingRuneRemove) return;
+    document.getElementById('fr-item-id').value    = _pendingRuneRemove.itemId;
+    document.getElementById('fr-slot-index').value = _pendingRuneRemove.slotIdx;
     document.getElementById('remove-form').submit();
 }
 
@@ -619,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     @if(session('rune_success'))
         if (window.parent && window.parent.sendToFrame) {
-            window.parent.sendToFrame('character-frame', {});
+            window.parent.sendToFrame('character-frame', @json($hpMp));
         }
     @endif
 });

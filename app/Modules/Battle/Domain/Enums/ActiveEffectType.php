@@ -40,4 +40,15 @@ enum ActiveEffectType: string
             self::REGEN => '💚',
         };
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::STUN => 'Оглушение',
+            self::POISON => 'Отравление',
+            self::BLEED => 'Кровотечение',
+            self::BURN => 'Ожог',
+            self::REGEN => 'Регенерация',
+        };
+    }
 }

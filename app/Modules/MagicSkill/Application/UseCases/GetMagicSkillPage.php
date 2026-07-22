@@ -21,6 +21,7 @@ class GetMagicSkillPage
             'passiveSkills' => $passiveSkills,
             'activeSkills' => $activeSkills,
             'allyTargets' => $allyTargets,
+            'runePassives' => $runePassives,
         ] = $this->repository->getPlayerPageData($player);
 
         return new MagicSkillPageDTO(
@@ -30,6 +31,7 @@ class GetMagicSkillPage
             passiveSkills: $passiveSkills,
             activeSkills: $activeSkills,
             allyTargets: $allyTargets,
+            runePassives: $runePassives,
         );
     }
 }

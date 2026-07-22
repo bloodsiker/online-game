@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Structure\Shop\Application\UseCases\BuyItem;
+use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\Structure\Shop\Application\UseCases\GetBuyPage;
 use App\Modules\Structure\Shop\Application\UseCases\GetSellPage;
+use App\Modules\Structure\Shop\Application\UseCases\PurchaseCart;
 use App\Modules\Structure\Shop\Application\UseCases\SellItems;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -17,33 +18,63 @@ use Illuminate\Support\Facades\Auth;
 class ShopController extends Controller
 {
     public function __construct(
-        private readonly BuyItem $buyItem,
         private readonly SellItems $sellItems,
         private readonly GetBuyPage $getBuyPage,
         private readonly GetSellPage $getSellPage,
+        private readonly ShopCartService $shopCartService,
+        private readonly PurchaseCart $purchaseCart,
     ) {}
 
-    public function index(int $id): mixed
+    public function index(Request $request, int $id): mixed
     {
         /** @var User $user */
         $user = Auth::user();
 
         return view('shop::buy', [
-            'page' => $this->getBuyPage->execute($user, $id),
+            'page' => $this->getBuyPage->execute($user, $id, $request->integer('category_id') ?: null),
         ]);
     }
 
-    public function buyItem(Request $request, int $id, int $itemId): RedirectResponse
+    public function addCart(Request $request, int $id): RedirectResponse
     {
         /** @var User $user */
         $user = Auth::user();
-        $result = $this->buyItem->execute(
-            user: $user,
-            shareItemId: $itemId,
-            count: $request->integer('count', 1),
+        $this->shopCartService->addItem(
+            $user,
+            $request->integer('shop_item_id'),
+            $request->integer('quantity', 1),
         );
 
-        session()->flash('message', $result->message);
+        return redirect()->back();
+    }
+
+    public function deleteCart(int $id, int $cartId): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $this->shopCartService->removeItem($user, $cartId);
+
+        return redirect()->back();
+    }
+
+    public function clearCart(int $id): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $this->shopCartService->clearCart($user, $id);
+
+        return redirect()->back();
+    }
+
+    public function purchase(int $id): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $result = $this->purchaseCart->execute($user, $id);
+
+        if (! $result->ok) {
+            session()->flash('message', $result->message);
+        }
 
         return redirect()->back();
     }

@@ -17,5 +17,6 @@ class MagicSkillPageDTO
         public readonly Collection $passiveSkills,
         public readonly Collection $activeSkills,
         public readonly Collection $allyTargets,
+        public readonly Collection $runePassives,
     ) {}
 }

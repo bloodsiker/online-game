@@ -8,6 +8,7 @@ use App\Modules\Item\Application\DTOs\ItemInfoPageDTO;
 use App\Modules\Item\Application\Mappers\ItemInfoPageViewMapper;
 use App\Modules\Item\Domain\Contracts\ItemReadRepository;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 class GetItemInfoPage
 {
@@ -24,11 +25,15 @@ class GetItemInfoPage
         return $this->mapper->map($item, $viewer);
     }
 
+    /**
+     * Каталожный просмотр (по ShareItem, без привязки к конкретному
+     * экземпляру) — используется, например, для товаров в магазине.
+     */
     public function executeByShareItemId(int $shareItemId, ?Player $viewer = null): ItemInfoPageDTO
     {
-        $item = $this->readRepository->findItemByShareItemId($shareItemId);
-        abort_if($item === null, 404);
+        $shareItem = ShareItem::find($shareItemId);
+        abort_if($shareItem === null, 404);
 
-        return $this->mapper->map($item, $viewer);
+        return $this->mapper->mapFromShareItem($shareItem, $viewer);
     }
 }

@@ -19,6 +19,9 @@ final class FightDTO
 
     protected bool $isPlayerDead = false;
 
+    /** Разовые уведомления (квесты и т.п.) — не сохраняются в БД, см. AttackResultDTO::getSideLog() */
+    protected string $sideLog = '';
+
     public function getBattle(): Battle
     {
         return $this->battle;
@@ -75,6 +78,18 @@ final class FightDTO
     public function setIsPlayerDead(bool $isPlayerDead): self
     {
         $this->isPlayerDead = $isPlayerDead;
+
+        return $this;
+    }
+
+    public function getSideLog(): string
+    {
+        return $this->sideLog;
+    }
+
+    public function setSideLog(string $sideLog): self
+    {
+        $this->sideLog = $sideLog;
 
         return $this;
     }

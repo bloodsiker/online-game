@@ -5,12 +5,15 @@ namespace App\Modules\Battle\Application\Services\Combat;
 use App\DTO\AttackResultDTO;
 use App\DTO\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
+use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 
 readonly class MonsterAttackService
 {
@@ -19,6 +22,8 @@ readonly class MonsterAttackService
         private BossPhaseService $bossPhaseService,
         private BattleEffectService $effectService,
         private PlayerStatService $statService,
+        private PlayerRunePassiveService $runePassiveService,
+        private RandomizerInterface $random,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -33,6 +38,8 @@ readonly class MonsterAttackService
             return;
         }
 
+        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $msg = $hit->isCritical()
@@ -42,6 +49,44 @@ readonly class MonsterAttackService
         $result->log($msg);
 
         $this->applyShieldBlockReflect($hit, $locationMonster, $result);
+    }
+
+    /**
+     * Защитные пассивки рун при получении удара: «Щит» (шанс полностью
+     * заблокировать атаку — тогда «Отражение» уже нечего отражать) и
+     * «Отражение» (% полученного урона снимается с HP моба). Отдельно от
+     * applyShieldBlockReflect() — там речь о статах предмета-щита
+     * (block_chance/flat/percent), это про руны.
+     */
+    private function applyDefensiveRunePassives(Player $player, FightHitDTO $hit, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    {
+        $passives = $this->runePassiveService->resolve($player);
+
+        if ($passives === []) {
+            return;
+        }
+
+        $shield = $this->runePassiveService->totalValue($passives, RunePassiveType::SHIELD);
+        if ($shield > 0 && $this->random->chance($shield)) {
+            $hit->setDamage(0);
+
+            $result->log('<p><b class="color-reflect">🛡 Руна полностью заблокировала атаку!</b></p>');
+
+            return;
+        }
+
+        $reflect = $this->runePassiveService->totalValue($passives, RunePassiveType::REFLECT);
+        if ($reflect > 0 && $hit->getDamage() > 0) {
+            $reflectedDamage = max(1, (int) round($hit->getDamage() * $reflect / 100));
+            $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflectedDamage);
+
+            $result->log(sprintf(
+                '<p><b class="color-reflect">🔁 Руна отражает %d%% урона назад! %s получает %d урона!</b></p>',
+                $reflect,
+                $locationMonster->monster->name,
+                $reflectedDamage
+            ));
+        }
     }
 
     /**
@@ -153,6 +198,8 @@ readonly class MonsterAttackService
             return;
         }
 
+        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $modifierText = $totalModifier > 0
@@ -225,6 +272,8 @@ readonly class MonsterAttackService
 
             return;
         }
+
+        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
 
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 

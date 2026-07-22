@@ -360,6 +360,7 @@
     @endif
     @if (session()->has('equip_changed'))
         try { window.parent.reloadBag(); } catch(e) {}
+        try { window.top.sendToFrame('character-frame', @json($hpMp)); } catch(e) {}
     @endif
 
     document.addEventListener('keydown', function(event) {

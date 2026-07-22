@@ -95,6 +95,16 @@ final class BackpackDTO
         return $this->items->get('potion');
     }
 
+    public function hasFood(): bool
+    {
+        return $this->items->has('eat');
+    }
+
+    public function getFood(): Collection
+    {
+        return $this->items->get('eat');
+    }
+
     public function hasResource(): bool
     {
         return $this->items->has('resource');
@@ -133,6 +143,17 @@ final class BackpackDTO
 
     public function getGems(): Collection
     {
-        return $this->items->get('gem', collect())->merge($this->items->get('mount', collect()));
+        return $this->items->get('gem', new Collection)->merge($this->items->get('mount', new Collection));
+    }
+
+    /** Руны и рунные ключи показываются одним разделом «Руны» */
+    public function hasRunes(): bool
+    {
+        return $this->items->has('rune') || $this->items->has('rune_key');
+    }
+
+    public function getRunes(): Collection
+    {
+        return $this->items->get('rune', new Collection)->merge($this->items->get('rune_key', new Collection));
     }
 }

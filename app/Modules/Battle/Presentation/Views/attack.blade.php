@@ -45,6 +45,10 @@
         .color-purple {
             color: purple;
         }
+        .color-buff {
+            color: #16a085;
+            font-weight: bold;
+        }
 
         .color-boss {
             color: #ff4444;
@@ -341,6 +345,9 @@
                 <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="/info/?mid=491678816" target="_blank">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
 
                 {!! $round->action !!}
+
+                {{-- Разовые уведомления (прогресс квестов и т.п.) — только сейчас, не сохраняются и не всплывают в истории боя --}}
+                {!! $fightDTO->getSideLog() !!}
 
                 @if($battle->status->isFinish())
                     <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemRune;
+use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -134,11 +135,20 @@ class RuneService
         }
 
         $oldStats = $itemRune->stats;
-        $newStats = $this->rollStats($itemRune->runeInfo, false);
+
+        // Типы залоченных статов не должны повторно выпасть в незалоченных слотах.
+        $lockedTypes = [];
+        foreach ($lockedIndices as $idx) {
+            if (isset($oldStats[$idx]['type'])) {
+                $lockedTypes[] = $oldStats[$idx]['type'];
+            }
+        }
+
+        $newStats = $this->rollStats($itemRune->runeInfo, false, $lockedTypes);
 
         $merged = [];
         foreach ($newStats as $i => $newStat) {
-            if (isset($lockedIndices[$i]) && isset($oldStats[$i])) {
+            if (in_array($i, $lockedIndices, true) && isset($oldStats[$i])) {
                 $merged[] = array_merge($oldStats[$i], ['locked' => true]);
             } else {
                 $merged[] = array_merge($newStat, ['locked' => false]);
@@ -146,7 +156,7 @@ class RuneService
         }
 
         foreach ($oldStats as $i => $oldStat) {
-            if ($i >= count($newStats) && in_array($i, $lockedIndices, true) && isset($merged[$i])) {
+            if ($i >= count($newStats) && in_array($i, $lockedIndices, true)) {
                 $merged[$i] = array_merge($oldStat, ['locked' => true]);
             }
         }
@@ -196,7 +206,11 @@ class RuneService
         return $cost;
     }
 
-    private function rollStats(\App\Modules\Share\Infrastructure\Persistence\Models\ShareItem $runeInfo, bool $riskMode): array
+    /**
+     * @param  string[]  $excludeTypes  Типы статов, которые нельзя катать повторно
+     *                                  (уже зафиксированы залоченными слотами при реролле).
+     */
+    private function rollStats(ShareItem $runeInfo, bool $riskMode, array $excludeTypes = []): array
     {
         /** @var RuneRarity $rarity */
         $rarity = $runeInfo->rune_rarity;
@@ -205,6 +219,7 @@ class RuneService
         $rangeLow = $riskMode ? 0.75 : 0.0;
 
         $pool = $runeInfo->rune_stat_pool ?? array_keys(self::STAT_POOL);
+        $pool = array_values(array_diff($pool, $excludeTypes));
 
         [$min, $max] = $rarity->statCount();
         $count = random_int($min, $max);

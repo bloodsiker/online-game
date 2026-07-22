@@ -8,10 +8,13 @@
     <style>
         * {
             font-family: Tahoma, Geneva, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
         }
         .b {
             font-weight: 700;
+        }
+        a {
+            text-decoration: none;
         }
 
         .bg {
@@ -123,21 +126,33 @@
             font-weight: 700;
             font-size: 11px;
         }
+        .store-list-item {
+            width: 340px;
+            height: 90px;
+            border: 1px solid #DB9F73;
+            border-radius: 5px;
+            background-image: url(/img/bg/tbl-usi_bg.gif);
+            background-repeat: repeat;
+        }
     </style>
+
+    {!! $playerStatsScript !!}
+    {!! $page->itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@php
+    $btnLeft1 = 'img/bg/btn/btn-left1.gif';
+    $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
+    $btnRight1 = 'img/bg/btn/btn-right1.gif';
+
+    $btnLeft2 = 'img/bg/btn/btn-left2.gif';
+    $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
+    $btnRight2 = 'img/bg/btn/btn-right2.gif';
+@endphp
 <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
-    @php
-        $btnLeft1 = 'img/bg/btn/btn-left1.gif';
-        $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
-        $btnRight1 = 'img/bg/btn/btn-right1.gif';
-
-        $btnLeft2 = 'img/bg/btn/btn-left2.gif';
-        $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
-        $btnRight2 = 'img/bg/btn/btn-right2.gif';
-    @endphp
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
@@ -154,112 +169,262 @@
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
+            <a id="center_4" href="{{ route('location') }}" title="Выход" class="btn_1">Выход</a></td>
         <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
     </tbody>
 </table>
 
-<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+@if(count($page->categories) > 0)
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+        <tbody>
+        <tr height="21">
+            @foreach($page->categories as $category)
+                @php $active = $page->activeCategoryId === $category['id']; @endphp
+                <td width="19"><img src="{{ asset($active ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
+                <td width="60" align="center" style="background: url({{ asset($active ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0 2px 6px;">
+                    <a href="{{ route('shop', ['id' => $page->shopId, 'category_id' => $category['id']]) }}" class="{{ $active ? 'btn_2' : 'btn_1' }}">{{ $category['name'] }}</a>
+                </td>
+                <td width="19"><img src="{{ asset($active ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
+            @endforeach
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+@endif
+
+<br>
+<table class="coll w100" height="100%">
     <tbody>
-    <tr height="22">
-        <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
-        <td class="tbl-shp-sml tt" valign="top" align="left"></td>
-        <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
-    </tr>
     <tr>
-        <td class="tbl-shp-sides ls">&nbsp;</td>
-        <td class="tbl-usi_bg" valign="top" align="left" style="padding: 10 6 10 6">
-
-            <table class="w100" border="0" width="100%">
+        <td valign="top" height="100%">
+                        @if(count($page->items) > 0)
+                            @foreach($page->items as $item)
+                                <form method="post" action="{{ route('shop.add_cart', ['id' => $page->shopId]) }}" style="margin: 3px; display: inline-block;">
+                                    @csrf
+                                    <table border="0" cellspacing="0" cellpadding="0" id="item_list" class="store-list-item">
+                                        <tbody>
+                                        <tr>
+                                            <td align="left" width="60" valign="top">
+                                                <div style="margin: 8px; background: url('{{ $item->image }}'); background-size: cover; width: 50px; height: 50px;">
+                                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index:10;">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td data-id="{{ $item->itemId }}" style="cursor:pointer;"
+                                                                onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                                onclick="window.open('{{ $item->infoUrl }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                                valign="bottom">
+                                                                &nbsp;
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                            <td valign="top" style="padding: 5px; width: 100%;">
+                                                <input type="hidden" name="shop_item_id" value="{{ $item->shopItemId }}">
+                                                <table class="w100 coll" border="0">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td colspan="3">
+                                                            <a href="{{ $item->infoUrl }}"
+                                                               onclick="window.open('{{ $item->infoUrl }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                               style="color:{{ $item->color }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;"
+                                                               class="b">{{ $item->name }}</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td nowrap="" title="Тип предмета">
+                                                            <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="b" title="Цена" style="padding-top: 13px;" valign="top">
+                                                            @if($item->price)
+                                                                <div title="Монеты">
+                                                                    <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle">
+                                                                    &nbsp;{{ format_money($item->price) }}
+                                                                </div>
+                                                            @endif
+                                                            @if($item->diamond)
+                                                                <div title="Бриллиант">
+                                                                    <img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle">
+                                                                    &nbsp;{{ format_money($item->diamond) }}
+                                                                </div>
+                                                            @endif
+                                                        </td>
+                                                        <td align="center" valign="top" style="padding-top: 16px; width: 60px;">
+                                                            <div class="cart-amount-sell-price">
+                                                                <span class="cart-amount-input-cont">
+                                                                    <span class="b-input">
+                                                                        <span class="b-input__inner">
+                                                                            <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
+                                                                            <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
+                                                                            <input type="text" name="quantity" data-id="{{ $item->shopItemId }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td align="center" valign="top" style="padding-top: 16px; width: 80px;">
+                                                            <b class="butt2 pointer "><b>
+                                                                    <input value="В корзину" type="submit" onclick="if(document._submit)return false;document._submit=true;" style="width:63px">
+                                                                </b>
+                                                            </b>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+                            @endforeach
+                        @else
+                            <div align="center" style="color: #49382D"><b>В этой категории товаров нет!</b></div>
+                        @endif
+        </td>
+        <td width="10"></td>
+        <td valign="top" width="35%">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
-                <tr height="5">
-                    <td align="left" width="33%" nowrap=""></td>
-                </tr>
-                </tbody>
-            </table>
-
-            <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
-                <tbody>
-                <tr class="bg_l">
-                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->money) }} </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->diamonds) }} </b>
+                <tr height="22">
+                    <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+                    <td class="tbl-shp-sml tt" valign="top" align="center">
+                        <table border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                            <tr height="22">
+                                <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                <td align="center" class="tbl-usi-hdr mbg">Ваша корзина</td>
+                                <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </td>
+                    <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
                 </tr>
-                </tbody>
-            </table>
+                <tr>
+                    <td class="tbl-shp-sides ls">&nbsp;</td>
+                    <td class="tbl-usi_bg" valign="top" align="center" style="padding: 6px 4px">
+                                    <form method="post" action="{{ route('shop.purchase', ['id' => $page->shopId]) }}" id="action_form">
+                                        @csrf
+                                        @if($page->cart->getItems()->count())
+                                            <table class="coll w100 p10h p4v brd2">
+                                                <colgroup>
+                                                    <col>
+                                                    <col>
+                                                    <col>
+                                                    <col width="1%">
+                                                </colgroup>
+                                                <tbody>
+                                                @foreach($page->cart->getItems() as $cartItem)
+                                                    <tr class="bg_l">
+                                                        <td>
+                                                            <a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
+                                                               onclick="window.open('{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                               style="color:{{ $cartItem->shopItem->item->rarity?->color() ?? '#666666' }};"
+                                                               class="b">{{ $cartItem->shopItem->item->name }}</a>
+                                                        </td>
+                                                        <td class="b red" align="center">
+                                                            @if($cartItem->shopItem->diamond)
+                                                                <span title="Бриллиант">
+                                                                    <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
+                                                                </span>&nbsp;{{ format_money($cartItem->shopItem->diamond * $cartItem->quantity) }}
+                                                                <br>
+                                                            @endif
+                                                            @if($cartItem->shopItem->price)
+                                                                <span title="Монет">
+                                                                    <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
+                                                                </span>&nbsp;{{ format_money($cartItem->shopItem->price * $cartItem->quantity) }}
+                                                                <br>
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $cartItem->quantity }} шт</td>
+                                                        <td>
+                                                            <a href="{{ route('shop.delete_cart', ['id' => $page->shopId, 'cartId' => $cartItem->id]) }}" title="Удалить">
+                                                                <img src="{{ asset('img/icon/tbl-shp_x.gif') }}" alt="delete" width="11" height="13" border="0">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
+                                        @else
+                                            <b>Корзина пуста!</b>
+                                            <br>
+                                        @endif
 
-            <br>
-
-
-            <table class="coll w100 brd2-all" border="0" id="item_list">
-                <colgroup>
-                    <col width="50">
-                    <col class="p6h">
-                    <col class="p6h" align="center" width="80">
-                    <col class="p6h" align="center" width="80">
-                    <col class="p6h" align="center" width="110">
-                </colgroup>
-                <tbody>
-                <tr height="17" class="bg_l">
-                    <td class="brd2-top brd2" align="center"></td>
-                    <td class="brd2-top brd2" align="center">Товар</td>
-                    <td class="brd2-top brd2" align="center">Цена</td>
-                    <td class="brd2-top brd2" align="center">Кол-во</td>
-                    <td class="brd2-top brd2" align="center">Купить</td>
-                </tr>
-                @foreach($page->items as $item)
-                    <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
-                        <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                            <img src="{{ $item->image }}" style="width: 100%" alt="">
-                        </td>
-                        <td align="left" >
-                            <a href="{{ $item->infoUrl }}"
-                               onclick="showArtifactInfo(22195638,false);return false;"
-                               style="color:#666666" class="b">{{ $item->name }}</a><br>
-                            <span title="Тип предмета">
-                                <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->typeName }}
-                            </span>
-                        </td>
-                        <td nowrap="">
-                            {{ format_money($item->price, 0, ',') }}
-                            <img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle" alt="">
-                        </td>
-                        <td nowrap="">
-                            <div class="cart-amount-sell-price">
-                                <span class="cart-amount-input-cont">
-                                    <span class="b-input">
-                                        <span class="b-input__inner">
-                                            <span class="arrow left left-disabled" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
-                                            <span class="arrow right" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
-                                            <input type="text" data-id="{{ $item->shareItemId }}" value="1" class="cart_amount_sell_input count_buy" autocomplete="off">
+                                        <br>
+                                        <table class="coll w100 p10h p4v brd2-all">
+                                            <colgroup>
+                                                <col>
+                                                <col width="30%">
+                                            </colgroup>
+                                            <tbody>
+                                            @if($page->cart->getItems()->count())
+                                                <tr>
+                                                    <td class="brd2-top brd2-bt"><b>На общую сумму:</b></td>
+                                                    <td class="brd2-top brd2-bt b red">
+                                                        @if($page->cart->getTotalDiamond())
+                                                            <span title="Бриллиант">
+                                                                <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
+                                                            </span>&nbsp;{{ format_money($page->cart->getTotalDiamond()) }}<br>
+                                                        @endif
+                                                        @if($page->cart->getTotalPrice())
+                                                            <span title="Монет">
+                                                                <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
+                                                            </span>&nbsp;{{ format_money($page->cart->getTotalPrice()) }}<br>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            <tr class="bg_l">
+                                                <td class="brd2-top brd2-bt"><b>У Вас денег:</b></td>
+                                                <td class="brd2-top brd2-bt b red">
+                                                    <span title="Бриллиант">
+                                                        <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
+                                                    </span>&nbsp;{{ format_money($page->diamonds) }}
+                                                    <br>
+                                                    <span title="Серебряный">
+                                                        <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
+                                                    </span>&nbsp;{{ format_money($page->money) }}
+                                                    <br>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <br>
+                                        <span class="butt1 pointer ">
+                                            <span>
+                                                <input value="Оплатить товар" type="submit" onclick="if(document._submit)return false;document._submit=true;" class="grnn">
+                                            </span>
                                         </span>
-                                    </span>
-                                </span>
-                            </div>
-                        </td>
-                        <td nowrap="">
-                            <b class="butt2 pointer"><b><input value="купить" type="submit" class="buy-item" data-id="{{ $item->shareItemId }}" data-href="{{ $item->buyUrl }}"></b></b>
-                        </td>
-                    </tr>
-                @endforeach
-                <tr height="17" class="bg_l">
-                    <td class="brd2-top brd2" align="center"></td>
-                    <td class="brd2-top brd2" align="center">Товар</td>
-                    <td class="brd2-top brd2" align="center">Цена</td>
-                    <td class="brd2-top brd2" align="center">Кол-во</td>
-                    <td class="brd2-top brd2" align="center">Купить</td>
+                                        <br>
+                                        <span class="butt1 pointer ">
+                                            <span>
+                                                <input value="Очистить корзину" type="button" onclick="location.href='{{ route('shop.clear_cart', ['id' => $page->shopId]) }}';" class="redd">
+                                            </span>
+                                        </span>
+                                        <br>
+                                    </form>
+
+                                    <br>
+                                    <div class="p10h p2v brd2-all bg_l" align="left">
+                                        В магазине Вы можете приобрести необходимую Вам экипировку, снадобья и прочие предметы,
+                                        которые помогут Вашему персонажу.
+                                    </div>
+                    </td>
+                    <td class="tbl-shp-sides rs">&nbsp;</td>
+                </tr>
+                <tr height="18">
+                    <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+                    <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+                    <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
                 </tr>
                 </tbody>
             </table>
         </td>
-        <td class="tbl-shp-sides rs">&nbsp;</td>
-    </tr>
-    <tr height="18">
-        <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
-        <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
-        <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
     </tr>
     </tbody>
 </table>
@@ -356,26 +521,9 @@
         });
     });
 
-    // document.removeEventListener('keydown', handleKeydown);
-
     function sendDataToGame(url) {
         window.parent.postMessage({ url: url }, '*');
     }
-
-    document.querySelectorAll('.buy-item').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const href = this.getAttribute('data-href');
-            const itemId = this.getAttribute('data-id');
-            const inputElement = document.querySelector('.count_buy[data-id="' + itemId + '"]');
-            if (href) {
-                let countBuy = 1
-                if (inputElement) {
-                    countBuy = inputElement.value;
-                }
-                window.location.href = href + '?count=' + countBuy;  // Переход по URL
-            }
-        });
-    });
 
     let money = parseInt('{{ $page->money }}');
     let diamond = parseInt('{{ $page->diamonds }}');

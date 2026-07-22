@@ -15,6 +15,17 @@ class StatSheet implements FightHitInterface
 
     public int $agility = 0;
 
+    /**
+     * «Родные» первичные статы игрока без учёта бонусов экипировки/камней/рун —
+     * используются только для определения боевого класса (см. combatClassShares()),
+     * чтобы временный +agility с руны не превращал крит-билд в «Гибрид».
+     */
+    public int $baseStrength = 0;
+
+    public int $baseAgility = 0;
+
+    public int $baseIntuition = 0;
+
     public int $wisdom = 0;
 
     public int $intelligence = 0;
@@ -138,9 +149,9 @@ class StatSheet implements FightHitInterface
     /** @return array<string, float> */
     private function combatClassShares(): array
     {
-        $str = (float) $this->strength;
-        $agil = (float) $this->agility;
-        $int = (float) $this->intuition;
+        $str = (float) $this->baseStrength;
+        $agil = (float) $this->baseAgility;
+        $int = (float) $this->baseIntuition;
         $total = max(1.0, $str + $agil + $int);
 
         return [

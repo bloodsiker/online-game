@@ -2,10 +2,10 @@
 
 namespace App\DTO;
 
+use App\Models\Skill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Models\Skill;
 use Illuminate\Support\Collection;
 
 final class FightHitDTO
@@ -22,6 +22,13 @@ final class FightHitDTO
     protected ?ShareItem $weapon = null;
 
     protected string $weaponName;
+
+    /**
+     * 'left'/'right' — какой физический слот руки нанёс этот хит (для рун:
+     * пассивка привязана к конкретному предмету, а не ко всем ударам сразу).
+     * null — хит не от оружия в руке (кулак, магический скилл).
+     */
+    protected ?string $handSide = null;
 
     protected ?Skill $skill = null;
 
@@ -121,6 +128,18 @@ final class FightHitDTO
     public function setWeaponName(string $weaponName): self
     {
         $this->weaponName = $weaponName;
+
+        return $this;
+    }
+
+    public function getHandSide(): ?string
+    {
+        return $this->handSide;
+    }
+
+    public function setHandSide(?string $handSide): self
+    {
+        $this->handSide = $handSide;
 
         return $this;
     }

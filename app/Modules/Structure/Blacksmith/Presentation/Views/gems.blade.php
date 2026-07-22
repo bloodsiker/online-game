@@ -372,6 +372,35 @@
                 <input type="hidden" name="mount_id" id="fs-mount-id">
             </form>
 
+            {{-- Подтверждение извлечения камня --}}
+            <div id="gem-remove-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:9999; align-items:center; justify-content:center;">
+                <div class="popup_global_container" style="width:280px;">
+                    <div class="popup-top-left">
+                        <div class="popup-top-right">
+                            <div class="popup-top-center">
+                                <div class="popup_global_title">Извлечение камня</div>
+                            </div>
+                        </div>
+                        <div class="popup_global_close_btn" onclick="closeGemRemoveConfirm()"></div>
+                    </div>
+                    <div class="popup-left-center">
+                        <div class="popup-right-center">
+                            <div class="popup_global_content" style="padding:20px; text-align:center;">
+                                <div class="redd" style="margin-bottom:14px;">Извлечь камень из сокета? Камень вернётся в рюкзак.</div>
+                                <b class="butt1 pointer"><b><input value="Извлечь" type="button" onclick="confirmGemRemove()" class="redd" style="width:100px;"></b></b>
+                                &nbsp;
+                                <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeGemRemoveConfirm()" style="width:100px;"></b></b>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="popup-left-bottom">
+                        <div class="popup-right-bottom">
+                            <div class="popup-bottom-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </td>
         <td class="tbl-shp-sides rs">&nbsp;</td>
     </tr>
@@ -523,9 +552,22 @@ function doInsert() {
     document.getElementById('insert-form').submit();
 }
 
+let _pendingGemRemove = null;
+
 function doRemove(itemId, socketIndex) {
-    document.getElementById('fr-item-id').value      = itemId;
-    document.getElementById('fr-socket-index').value = socketIndex;
+    _pendingGemRemove = { itemId, socketIndex };
+    document.getElementById('gem-remove-overlay').style.display = 'flex';
+}
+
+function closeGemRemoveConfirm() {
+    _pendingGemRemove = null;
+    document.getElementById('gem-remove-overlay').style.display = 'none';
+}
+
+function confirmGemRemove() {
+    if (!_pendingGemRemove) return;
+    document.getElementById('fr-item-id').value      = _pendingGemRemove.itemId;
+    document.getElementById('fr-socket-index').value = _pendingGemRemove.socketIndex;
     document.getElementById('remove-form').submit();
 }
 
@@ -552,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // After insert/remove — refresh character frame
     @if(session('gem_success'))
         if (window.parent && window.parent.sendToFrame) {
-            window.parent.sendToFrame('character-frame', {});
+            window.parent.sendToFrame('character-frame', @json($hpMp));
         }
     @endif
 });

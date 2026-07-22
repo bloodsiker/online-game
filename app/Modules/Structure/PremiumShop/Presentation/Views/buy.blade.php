@@ -203,7 +203,12 @@
                                                            style="position: absolute; z-index:10;">
                                                         <tbody>
                                                         <tr>
-                                                            <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                            <td data-id="{{ $item->item->id }}"
+                                                                onmouseover="showItemInfo(this,event,2)"
+                                                                onmouseout="showItemInfo(this,event,0)"
+                                                                onclick="window.open('{{ route('items.info.share', ['id' => $item->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                                style="cursor: pointer;"
+                                                                valign="bottom">
                                                                 &nbsp;
                                                             </td>
                                                         </tr>
@@ -218,8 +223,8 @@
                                                     <tbody>
                                                     <tr>
                                                         <td colspan="3">
-                                                            <a href="#"
-                                                               onclick="showArtifactInfo(false,8365);return false;"
+                                                            <a href="{{ route('items.info.share', ['id' => $item->item->id]) }}"
+                                                               onclick="window.open('{{ route('items.info.share', ['id' => $item->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
                                                                style="color:#ff0000; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;"
                                                                class="b">{{ $item->item->name }}</a>
                                                         </td>

@@ -4,34 +4,64 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\Mappers;
 
+use App\DTO\ShopCartDTO;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyPageDTO;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\ItemTooltip\ItemTooltipCollector;
+use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use Illuminate\Support\Collection;
 
 class ShopBuyPageViewMapper
 {
+    public function __construct(
+        private readonly ItemTooltipCollector $collector,
+    ) {}
+
     /**
      * @param  Collection<int, ShopItem>  $shopItems
+     * @param  Collection<int, ShareStructureCategory>  $categories
      */
-    public function map(User $user, int $shopId, Collection $shopItems): ShopBuyPageDTO
-    {
+    public function map(
+        User $user,
+        int $shopId,
+        Collection $shopItems,
+        Collection $categories,
+        ?int $activeCategoryId,
+        ShopCartDTO $cart,
+    ): ShopBuyPageDTO {
+        $itemTooltipScript = $this->collector
+            ->collectFrom(new PremiumShopItemTooltipStrategy($shopItems))
+            ->renderScript();
+
         return new ShopBuyPageDTO(
             shopId: $shopId,
             money: (int) $user->money,
             diamonds: (int) $user->diamond,
             items: $shopItems->map(
                 static fn (ShopItem $item): ShopBuyItemDTO => new ShopBuyItemDTO(
-                    shareItemId: (int) $item->item->id,
+                    shopItemId: (int) $item->id,
+                    itemId: (int) $item->item->id,
                     name: (string) $item->item->name,
+                    color: $item->item->rarity?->color() ?? '#666666',
                     image: (string) $item->item->image,
                     typeName: (string) $item->item->getTypeName(),
                     price: (int) $item->price,
-                    infoUrl: route('items.info', ['id' => $item->item->id]),
-                    buyUrl: route('shop.buy_item', ['id' => $shopId, 'itemId' => $item->item->id]),
+                    diamond: (int) $item->diamond,
+                    infoUrl: route('items.info.share', ['id' => $item->item->id]),
                 )
             )->all(),
+            categories: $categories->map(
+                static fn (ShareStructureCategory $category): array => [
+                    'id' => (int) $category->id,
+                    'name' => (string) $category->name,
+                ]
+            )->all(),
+            activeCategoryId: $activeCategoryId,
+            cart: $cart,
+            itemTooltipScript: $itemTooltipScript,
         );
     }
 }

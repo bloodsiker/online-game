@@ -7,12 +7,14 @@ namespace App\Modules\Structure\Shop\Application\DTOs;
 final readonly class ShopBuyItemDTO
 {
     public function __construct(
-        public int $shareItemId,
+        public int $shopItemId,
+        public int $itemId,
         public string $name,
+        public string $color,
         public string $image,
         public string $typeName,
         public int $price,
+        public int $diamond,
         public string $infoUrl,
-        public string $buyUrl,
     ) {}
 }

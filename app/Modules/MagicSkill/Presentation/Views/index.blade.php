@@ -481,6 +481,33 @@
                             </div>
                         @endif
 
+                        {{-- Пассивки от рун --}}
+                        <div class="section-header" style="margin-top: 4px;">
+                            <span>Пассивки от рун</span>
+                            <span class="section-count">{{ $page->runePassives->count() }}</span>
+                        </div>
+
+                        @if($page->runePassives->isEmpty())
+                            <div class="empty-state">Нет активных пассивок от рун</div>
+                        @else
+                            <div class="passive-list">
+                                @foreach($page->runePassives as $runePassive)
+                                    <div class="passive-card">
+                                        <div class="passive-icon"></div>
+                                        <div>
+                                            <div>
+                                                <span class="passive-name">{{ $runePassive['label'] }}</span>
+                                                <span class="passive-desc">{{ $runePassive['description'] }}</span>
+                                            </div>
+                                            <div class="passive-effects">
+                                                <span class="effect-badge">{{ $runePassive['runeName'] }} ({{ $runePassive['itemName'] }})</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
                 </tr>

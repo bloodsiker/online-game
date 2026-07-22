@@ -45,6 +45,10 @@
         .color-purple {
             color: purple;
         }
+        .color-buff {
+            color: #16a085;
+            font-weight: bold;
+        }
 
         .color-boss {
             color: #ff4444;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Blacksmith\Application\DTOs\RuneActionDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetRunesPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\ImbueRune;
@@ -12,6 +13,7 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\OpenRuneSlot;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RemoveRune;
 use App\Modules\Structure\Blacksmith\Application\UseCases\RerollRune;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,13 +26,21 @@ class RuneController extends Controller
         private readonly RemoveRune $removeRune,
         private readonly RerollRune $rerollRune,
         private readonly OpenRuneSlot $openRuneSlot,
+        private readonly PlayerStatService $statService,
     ) {}
 
-    public function index(Request $request, int $id): \Illuminate\Contracts\View\View
+    public function index(Request $request, int $id): View
     {
         /** @var User $user */
         $user = Auth::user();
         $page = $this->getRunesPage->execute($user, $id);
+
+        $player = $user->player;
+        $sheet = $this->statService->resolve($player);
+        $hpMp = [
+            'hp' => ['current' => $player->hp_now, 'max' => $sheet->getHpMax()],
+            'mp' => ['current' => $player->mp_now, 'max' => $sheet->getMpMax()],
+        ];
 
         return view('blacksmith::runes', [
             'blacksmith' => $page->blacksmith,
@@ -39,6 +49,7 @@ class RuneController extends Controller
             'runes' => $page->runes,
             'runeKeys' => $page->runeKeys,
             'itemTooltipScript' => $page->itemTooltipScript,
+            'hpMp' => $hpMp,
         ]);
     }
 

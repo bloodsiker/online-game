@@ -110,7 +110,7 @@ class HomeController extends Controller
 
     public function map()
     {
-        return view('maps.city.map');
+        return view('maps.city.main.map');
     }
 
     public function map2()
@@ -121,6 +121,11 @@ class HomeController extends Controller
     public function map3()
     {
         return view('maps.catacomb_sacrifice.map');
+    }
+
+    public function map4()
+    {
+        return view('maps.city.sewers.map');
     }
 
     public function clear()

@@ -124,6 +124,8 @@
             font-size: 11px;
         }
     </style>
+    {!! $page->itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
@@ -235,13 +237,20 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
+                            <td class="brd2-top brd2"
+                                data-id="{{ $item->itemId }}"
+                                onmouseover="showItemInfo(this,event,2)"
+                                onmouseout="showItemInfo(this,event,0)"
+                                onclick="window.open('{{ $item->infoUrl }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                style="padding: 0; cursor: pointer;"
+                                width="50"
+                                height="50">
                                 <img src="{{ $item->image }}" style="width: 100%" alt="">
                             </td>
                             <td align="left" >
                                 <a href="{{ $item->infoUrl }}"
-                                   onclick="showArtifactInfo(22195638,false);return false;"
-                                   style="color:#666666" class="b">{{ $item->name }}</a>
+                                   onclick="window.open('{{ $item->infoUrl }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                   style="color:{{ $item->color }}" class="b">{{ $item->name }}</a>
                                 <br>
                                 <span title="Тип предмета">
                                     <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->typeName }}

@@ -14,5 +14,6 @@ final readonly class ShopSellPageDTO
         public int $money,
         public int $diamonds,
         public array $items,
+        public string $itemTooltipScript,
     ) {}
 }

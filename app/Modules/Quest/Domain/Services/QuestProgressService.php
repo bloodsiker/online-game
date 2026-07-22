@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Domain\Services;
 
 use App\DTO\AttackResultDTO;
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 
 class QuestProgressService
@@ -74,7 +74,7 @@ class QuestProgressService
                         : sprintf("<p style='margin:2px 0;'><span style='background:#f5c6c6; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>✅ <b style='color:#7b1a1a;'>%s</b> — все уничтожены для квеста!</span></p>", $monsterName);
                 }
 
-                $result->log($msg);
+                $result->logSide($msg);
             }
         }
 
@@ -147,7 +147,7 @@ class QuestProgressService
                     : sprintf("<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>✅ 🏰 [Клан] <b style='color:#5a3e00;'>%s</b> — все уничтожены!</span></p>", $monsterName);
             }
 
-            $result->log($msg);
+            $result->logSide($msg);
         }
     }
 }

@@ -31,7 +31,8 @@ class DualWieldStrategy implements AttackStrategyInterface
         $hits[] = $leftHit
             ->setWeaponName($this->leftWeapon->name)
             ->setSkill($this->leftWeapon->skill)
-            ->setWeapon($this->leftWeapon);
+            ->setWeapon($this->leftWeapon)
+            ->setHandSide('left');
 
         // Правая рука
         $rightHit = $this->hitCalc->hit(
@@ -43,7 +44,8 @@ class DualWieldStrategy implements AttackStrategyInterface
         $hits[] = $rightHit
             ->setWeaponName($this->rightWeapon->name)
             ->setSkill($this->rightWeapon->skill)
-            ->setWeapon($this->rightWeapon);
+            ->setWeapon($this->rightWeapon)
+            ->setHandSide('right');
 
         return $hits;
     }
