@@ -9,6 +9,7 @@ use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestDialogue;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
@@ -82,7 +83,7 @@ class QuestController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
+        $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'dialogues', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
         $questTypes = QuestType::cases();
         $rewardTypes = QuestRewardType::cases();
         $reputations = Reputation::orderBy('name')->get();
@@ -132,6 +133,36 @@ class QuestController extends Controller
         $reward->delete();
 
         return redirect()->back()->with('success', 'Награда удалена.');
+    }
+
+    public function addDialogue(Request $request, Quest $quest): RedirectResponse
+    {
+        QuestDialogue::create([
+            'quest_id' => $quest->id,
+            'order' => (int) $request->input('order', $quest->dialogues()->max('order') + 1),
+            'description' => $request->input('description'),
+            'reply_text' => $request->input('reply_text') ?: 'Далее',
+        ]);
+
+        return redirect()->back()->with('success', 'Реплика добавлена.');
+    }
+
+    public function updateDialogue(Request $request, Quest $quest, QuestDialogue $dialogue): RedirectResponse
+    {
+        $dialogue->update([
+            'order' => (int) $request->input('order', $dialogue->order),
+            'description' => $request->input('description'),
+            'reply_text' => $request->input('reply_text') ?: 'Далее',
+        ]);
+
+        return redirect()->back()->with('success', 'Реплика сохранена.');
+    }
+
+    public function deleteDialogue(Quest $quest, QuestDialogue $dialogue): RedirectResponse
+    {
+        $dialogue->delete();
+
+        return redirect()->back()->with('success', 'Реплика удалена.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────

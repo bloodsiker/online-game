@@ -166,6 +166,8 @@ class BackpackService
         $item = Item::create([
             'share_item_id' => $shareItem->id,
         ]);
+        $item->count_use = $shareItem->count_use;
+        $item->save();
 
         $user->backpack()->attach($item->id, [
             'equipped' => 0,

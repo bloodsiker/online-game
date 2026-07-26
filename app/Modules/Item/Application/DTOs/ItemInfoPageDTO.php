@@ -24,6 +24,7 @@ final readonly class ItemInfoPageDTO
         public bool $noGive,
         public bool $noWeight,
         public bool $noSell,
+        public ?string $gateLocations,
         public array $stats,
         public array $requirements,
         public string $handOverUrl,

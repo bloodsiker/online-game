@@ -16,6 +16,7 @@ use App\Modules\Item\Application\UseCases\HandOverToUser;
 use App\Modules\Item\Application\UseCases\OpenChest;
 use App\Modules\Item\Application\UseCases\PickUpInChest;
 use App\Modules\Item\Application\UseCases\UnequipItem;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemEffect\ItemEffectStrategyFactory;
@@ -172,6 +173,51 @@ class ItemController extends Controller
 
         if (! $backpack) {
             return response()->json(['status' => 'error', 'message' => 'Предмет не найден.'], 422);
+        }
+
+        $gate = LocationGate::where('share_item_id', $backpack->item->share_item_id)
+            ->where('mode', 'teleport_use')
+            ->where('from_location_id', $user->location_id)
+            ->first();
+
+        if ($gate !== null) {
+            $user->prev_location_id = $user->location_id;
+            $user->location_id = $gate->to_location_id;
+            $user->save();
+
+            $removed = false;
+            $newCount = $backpack->count;
+            if ($gate->consume_item) {
+                $maxUses = (int) $backpack->item->itemInfo->count_use;
+
+                if ($maxUses > 0) {
+                    $item = $backpack->item;
+                    $item->count_use = max(0, $item->count_use - 1);
+
+                    if ($item->count_use <= 0) {
+                        $backpack->delete();
+                        $removed = true;
+                        $newCount = 0;
+                    } else {
+                        $item->save();
+                        $newCount = $item->count_use;
+                    }
+                } elseif ($backpack->count <= 1) {
+                    $backpack->delete();
+                    $removed = true;
+                    $newCount = 0;
+                } else {
+                    $backpack->decrement('count');
+                    $newCount = $backpack->count;
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'removed' => $removed,
+                'count' => $newCount,
+                'teleport_url' => route('location'),
+            ]);
         }
 
         $stats = $this->statService->resolve($player);

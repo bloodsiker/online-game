@@ -155,6 +155,87 @@
         </div>
     </form>
 
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header"><h2 class="card-title">Мобы на локации</h2></header>
+                <div class="card-body">
+                    <div class="right mb-3">
+                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddMonster">Добавить моба</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-none">
+                            <thead>
+                            <tr>
+                                <th width="50">ID</th>
+                                <th>Монстр</th>
+                                <th width="60">Ур.</th>
+                                <th width="160">Агрессия (override)</th>
+                                <th width="70"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @forelse($location->monsters as $monster)
+                                <tr style="vertical-align: middle">
+                                    <td class="text-center">{{ $monster->id }}</td>
+                                    <td><a href="{{ route('admin.monster.info', $monster->id) }}">{{ $monster->name }}</a></td>
+                                    <td class="text-center">{{ $monster->lvl }}</td>
+                                    <td>
+                                        <form action="{{ route('admin.location.monster.aggression', ['location' => $location->id, 'monster' => $monster->id]) }}" method="post" class="d-flex gap-1">
+                                            @csrf
+                                            <input type="number" name="aggression" min="0" max="100"
+                                                   value="{{ $monster->pivot->aggression ?? '' }}"
+                                                   placeholder="из монстра"
+                                                   class="form-control form-control-sm" style="width:100px">
+                                            <button class="btn btn-xs btn-secondary">✓</button>
+                                        </form>
+                                    </td>
+                                    <td><a href="{{ route('admin.location.monster.delete', ['location' => $location->id, 'monster' => $monster->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a></td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="text-center text-muted">Мобы не назначены</td></tr>
+                            @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="modalAddMonster" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.location.monster.add', $location->id) }}" method="post">
+                <header class="card-header">
+                    <h2 class="card-title">Добавить моба</h2>
+                </header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label class="control-label">Монстр</label>
+                        <select id="monster_id" name="monster_id" data-plugin-selectTwo class="form-control populate placeholder" data-plugin-options='{ "placeholder": "Выберите монстра", "allowClear": true }'>
+                            @foreach($monsters as $m)
+                                <option value="{{ $m->id }}">[{{ $m->lvl }} ур.] {{ $m->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="control-label">Агрессия (0–100, пусто = из монстра)</label>
+                        <input type="number" name="aggression" min="0" max="100" class="form-control" placeholder="По умолчанию из монстра">
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="row">
+                        <div class="col-md-12 text-end">
+                            <button class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
 @push('footer_scripts')
 <script>
     var locationAjax = {

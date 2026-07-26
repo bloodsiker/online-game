@@ -233,7 +233,7 @@
 <table width="833" cellspacing="1" cellpadding="0" id="m0" class="maptable">
     <tbody>
     <tr style=" @if(request()->has('hide')) display: none; @endif">
-        <th colspan="17" class="t0" align="left" style="padding:5px;font-size:14px;"></th>
+        <th colspan="13" class="t0" align="left" style="padding:5px;font-size:14px;"></th>
     </tr>
     <tr>
         <td width="48" height="48"></td>
@@ -245,13 +245,15 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u100">
-                    <div id="l100" class="s2box bl br">
-                        <s id="z100">0</s>
-                        <em>100</em>
-                        <cite>Городские ворота</cite>
-                        <a href="?m=MjAwMA#2000" class="anorth">↑</a>
+            <div class="a819" style="">
+                <div id="u819">
+                    <div id="l819" class="s2box br bl bt">
+                        <s id="z819">0</s>
+                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#6">
+                            <img src="{{ asset('img/icon/up.gif') }}" hspace="0" vspace="2" border="0" width="26" height="7">
+                        </a>
+                        <br>
+                        819
                     </div>
                 </div>
             </div>
@@ -262,984 +264,6 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u99">
-                    <div id="l99" class="s2box bt bl">
-                        <s id="z99">0</s>99
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u98">
-                    <div id="l98" class="s2box">
-                        <s id="z3513">0</s><a name="98"></a>98
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u75">
-                    <div id="l75" class="s2box bt br">
-                        <s id="z75">0</s><a name="75"></a>75
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u68">
-                    <div id="l68" class="s2box bt bl">
-                        <s id="z68">0</s><a name="68"></a>68
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u69">
-                    <div id="l69" class="s2box bt bb">
-                        <s id="z69">0</s><a name="69"></a>69
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u70">
-                    <div id="l70" class="s2box bt bb">
-                        <s id="z70">0</s><a name="70"></a>70
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u71">
-                    <div id="l71" class="s2box bb bt">
-                        <s id="z71">0</s><a name="71"></a>71
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u72">
-                    <div id="l72" class="s2box bt bb">
-                        <s id="z72">0</s><a name="72"></a>72
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u73">
-                    <div id="l73" class="s2box bb">
-                        <s id="z73">0</s><a name="73"></a>73
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u97">
-                    <div id="l97" class="s2box">
-                        <s id="z97">0</s><a name="97"></a>97
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u74">
-                    <div id="l74" class="s2box bb">
-                        <s id="z74">0</s><a name="74"></a>74
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u76">
-                    <div id="l76" class="s2box bb bt">
-                        <s id="z76">0</s><a name="76"></a>76
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u77">
-                    <div id="l77" class="s2box bb bt">
-                        <s id="z77">0</s><a name="77"></a>77
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u78">
-                    <div id="l78" class="s2box bb bt">
-                        <s id="z78">0</s><a name="78"></a>78
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u79">
-                    <div id="l79" class="s2box bb bt">
-                        <s id="z79">0</s><a name="79"></a>79
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u80">
-                    <div id="l80" class="s2box br bt">
-                        <s id="z80">0</s><a name="80"></a>80
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u67">
-                    <div id="l67" class="s2box bl br">
-                        <s id="z67">0</s><a name="67"></a>67
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u38">
-                    <div id="l38" class="s2box bl bt">
-                        <s id="z38">0</s><a name="38"></a>38
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u37">
-                    <div id="l37" class="s2box br bt">
-                        <s id="z37">0</s><a name="37"></a>37
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u96">
-                    <div id="l96" class="s2box bl br">
-                        <s id="z96">0</s><a name="96"></a>96
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u41">
-                    <div id="l41" class="s2box bl bt">
-                        <s id="z41">0</s><a name="41"></a>41
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u42">
-                    <div id="l42" class="s2box br bt">
-                        <s id="z42">0</s><a name="42"></a>42
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u81">
-                    <div id="l81" class="an s2box br bl">
-                        <s id="z81">0</s><a name="81"></a>81
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u66">
-                    <div id="l66" class="s2box br bl">
-                        <s id="z66">0</s><a name="66"></a>66
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u39">
-                    <div id="l39" class="s2box br bl bb">
-                        <s id="z39">0</s><a name="39"></a>
-                        <em>39</em>
-                        <cite>Площадь торгов</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u36">
-                    <div id="l36" class="s2box br bl">
-                        <s id="z36">0</s><a name="36"></a>36
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u95">
-                    <div id="l95" class="s2box bl br">
-                        <s id="z95">0</s><a name="95"></a>95
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u40">
-                    <div id="l40" class="s2box bl br">
-                        <s id="z40">0</s><a name="40"></a>40
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u43">
-                    <div id="l43" class="s2box br bl bb">
-                        <s id="z43">0</s><a name="43"></a>43
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u82">
-                    <div id="l82" class="s2box br bl">
-                        <s id="z82">0</s><a name="82"></a>82
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u64">
-                    <div id="l64" class="s2box bt bl">
-                        <s id="z64">0</s><a name="64"></a>64
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u65">
-                    <div id="l65" class="s2box br">
-                        <s id="z65">0</s><a name="65"></a>65
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u27">
-                    <div id="l27" class="s2box bl bt bb">
-                        <s id="z27">0</s><a name="27"></a>
-                        <em>27</em>
-                        <cite>Кузня</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u26">
-                    <div id="l26" class="s2box bt br">
-                        <s id="z26">0</s><a name="26"></a>26
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u8">
-                    <div id="l8" class="s2box bl">
-                        <s id="z8">0</s><a name="8"></a>8
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u7">
-                    <div id="l7" class="s2box bb">
-                        <s id="z7">0</s><a name="7"></a>7
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u13">
-                    <div id="l13" class="s2box br">
-                        <s id="z13">0</s><a name="13"></a>13
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u15">
-                    <div id="l15" class="s2box bt bl">
-                        <s id="z15">0</s><a name="15"></a>15
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u16">
-                    <div id="l16" class="s2box bt br bb">
-                        <s id="z16">0</s><a name="16"></a>
-                        <em>16</em>
-                        <cite>Магазин снаряжения</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u83">
-                    <div id="l83" class="s2box bl">
-                        <s id="z83">0</s><a name="83"></a>83
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u84">
-                    <div id="l84" class="s2box br bt">
-                        <s id="z84">0</s><a name="84"></a>84
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u35">
-                    <div id="l35" class="s2box bb bt">
-                        <s id="z35">0</s><a name="35"></a>
-                        <em>35</em>
-                        <cite>Городские ворота</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u34">
-                    <div id="l34" class="s2box">
-                        <s id="z34">0</s><a name="34"></a>34
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u33">
-                    <div id="l33" class="s2box">
-                        <s id="z33">0</s><a name="33"></a>33
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u32">
-                    <div id="l32" class="s2box bb bt">
-                        <s id="z32">0</s><a name="32"></a>32
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u31">
-                    <div id="l31" class="s2box bb bt">
-                        <s id="z31">0</s><a name="31"></a>31
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u30">
-                    <div id="l30" class="s2box bb bt">
-                        <s id="z30">0</s><a name="27"></a>30
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u25">
-                    <div id="l25" class="s2box">
-                        <s id="z25">0</s><a name="25"></a>25
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u9">
-                    <div id="l9" class="s2box br">
-                        <s id="z9">0</s><a name="9"></a>9
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u6">
-                    <div id="l6" class="s2box bl br bt">
-                        <s id="z6">0</s><a name="6"></a>
-                        <em>6</em>
-                        <cite>Городское сердце</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u12">
-                    <div id="l12" class="s2box bl">
-                        <s id="z12">0</s><a name="12"></a>12
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u14">
-                    <div id="l14" class="s2box">
-                        <s id="z14">0</s><a name="15"></a>14
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u19">
-                    <div id="l19" class="s2box bb bt">
-                        <s id="z19">0</s><a name="19"></a>19
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u20">
-                    <div id="l20" class="s2box bb bt">
-                        <s id="z20">0</s><a name="20"></a>20
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u21">
-                    <div id="l21" class="s2box bb bt">
-                        <s id="z21">0</s><a name="21"></a>21
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u22">
-                    <div id="l22" class="s2box">
-                        <s id="z22">0</s><a name="22"></a>22
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u23">
-                    <div id="l23" class="s2box">
-                        <s id="z23">0</s><a name="23"></a>23
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u24">
-                    <div id="l24" class="s2box bt bb">
-                        <s id="z24">0</s><a name="24"></a>
-                        <em>24</em>
-                        <cite>Городские ворота</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u63">
-                    <div id="l63" class="s2box bb bl">
-                        <s id="z63">0</s><a name="63"></a>63
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u62">
-                    <div id="l62" class="s2box br">
-                        <s id="z62">0</s><a name="62"></a>62
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u29">
-                    <div id="l29" class="s2box bl bt bb">
-                        <s id="z29">0</s><a name="29"></a>
-                        <em>29</em>
-                        <cite>Регистрационная палата</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u28">
-                    <div id="l28" class="s2box bb br">
-                        <s id="z28">0</s><a name="28"></a>28
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u10">
-                    <div id="l10" class="s2box bl">
-                        <s id="z10">0</s><a name="10"></a>10
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u5">
-                    <div id="l5" class="s2box">
-                        <s id="z5">0</s><a name="5"></a>5
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u11">
-                    <div id="l11" class="s2box br">
-                        <s id="z11">0</s><a name="11"></a>11
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u17">
-                    <div id="l17" class="s2box bb bl">
-                        <s id="z17">0</s><a name="17"></a>17
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u18">
-                    <div id="l18" class="s2box br bt bb">
-                        <s id="z18">0</s><a name="18"></a>
-                        <em>18</em>
-                        <cite>Торговая лавка</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u86">
-                    <div id="l86" class="s2box bl">
-                        <s id="z86">0</s><a name="86"></a>86
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u85">
-                    <div id="l85" class="s2box br bb">
-                        <s id="z85">0</s><a name="85"></a>85
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u61">
-                    <div id="l61" class="s2box br bl">
-                        <s id="z61">0</s><a name="61"></a>61
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u47">
-                    <div id="l47" class="s2box br bl bt">
-                        <s id="z47">0</s><a name="47"></a>
-                        <em>47</em>
-                        <cite>Складской двор</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u44">
-                    <div id="l44" class="s2box br bl">
-                        <s id="z44">0</s><a name="44"></a>44
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u4">
-                    <div id="l4" class="s2box bl br">
-                        <s id="z4">0</s><a name="4"></a>4
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u48">
-                    <div id="l48" class="s2box bl br">
-                        <s id="z48">0</s><a name="48"></a>48
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u51">
-                    <div id="l51" class="s2box br bl bt">
-                        <s id="z51">0</s><a name="51"></a>51
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u87">
-                    <div id="l87" class="s2box br bl">
-                        <s id="z87">0</s><a name="87"></a>87
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u60">
-                    <div id="l60" class="s2box bl br">
-                        <s id="z60">0</s><a name="60"></a>60
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u46">
-                    <div id="l46" class="s2box bl bb">
-                        <s id="z46">0</s><a name="46"></a>
-                        <em>46</em>
-                        <cite>Банковский двор</cite>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u45">
-                    <div id="l45" class="s2box br bb">
-                        <s id="z45">0</s><a name="45"></a>45
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u3">
-                    <div id="l3" class="s2box bl br">
-                        <s id="z3">0</s><a name="3"></a>3
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u49">
-                    <div id="l49" class="s2box bl bb">
-                        <s id="z49">0</s><a name="49"></a>49
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u50">
-                    <div id="l50" class="s2box br bb">
-                        <s id="z50">0</s><a name="50"></a>50
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u88">
-                    <div id="l88" class="an s2box br bl">
-                        <s id="z88">0</s><a name="88"></a>88
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-    </tr>
-    <tr>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u59">
-                    <div id="l59" class="s2box bb bl">
-                        <s id="z59">0</s><a name="59"></a>59
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u58">
-                    <div id="l58" class="s2box bt bb">
-                        <s id="z58">0</s><a name="58"></a>58
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u57">
-                    <div id="l57" class="s2box bt bb">
-                        <s id="z57">0</s><a name="57"></a>57
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u56">
-                    <div id="l56" class="s2box bb bt">
-                        <s id="z56">0</s><a name="56"></a>56
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u55">
-                    <div id="l55" class="s2box bt bb">
-                        <s id="z55">0</s><a name="55"></a>55
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u54">
-                    <div id="l54" class="s2box bt">
-                        <s id="z54">0</s><a name="54"></a>54
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u2">
-                    <div id="l2" class="s2box">
-                        <s id="z2">0</s><a name="2"></a>2
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u94">
-                    <div id="l94" class="s2box bt">
-                        <s id="z94">0</s><a name="94"></a>94
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u93">
-                    <div id="l93" class="s2box bb bt">
-                        <s id="z93">0</s><a name="93"></a>93
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u92">
-                    <div id="l92" class="s2box bb bt">
-                        <s id="z92">0</s><a name="92"></a>92
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u91">
-                    <div id="l91" class="s2box bb bt">
-                        <s id="z91">0</s><a name="91"></a>91
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u90">
-                    <div id="l90" class="s2box bb bt">
-                        <s id="z90">0</s><a name="90"></a>90
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u89">
-                    <div id="l89" class="s2box br bb">
-                        <s id="z89">0</s><a name="89"></a>89
-                    </div>
-                </div>
-            </div>
-        </td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
     </tr>
@@ -1252,28 +276,28 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u53">
-                    <div id="l53" class="s2box bb bl">
-                        <s id="z53">0</s>53
+            <div class="a819" style="">
+                <div id="u820">
+                    <div id="l820" class="s2box bt bl">
+                        <s id="z820">0</s>820
                     </div>
                 </div>
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u1">
-                    <div id="l1" class="s2box">
-                        <s id="z1">0</s><a name="1"></a>1
+            <div class="a819" style="">
+                <div id="u821">
+                    <div id="l821" class="s2box">
+                        <s id="z821">0</s><a name="821"></a>821
                     </div>
                 </div>
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u52">
-                    <div id="l52" class="s2box bb br">
-                        <s id="z52">0</s><a name="52"></a>52
+            <div class="a819" style="">
+                <div id="u822">
+                    <div id="l822" class="s2box bt br">
+                        <s id="z822">0</s><a name="822"></a>822
                     </div>
                 </div>
             </div>
@@ -1282,6 +306,542 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u828">
+                    <div id="l828" class="s2box bt bl">
+                        <s id="z828">0</s>828
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u827">
+                    <div id="l827" class="s2box bt bb">
+                        <s id="z827">0</s>827
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u826">
+                    <div id="l826" class="s2box bt bb">
+                        <s id="z826">0</s>826
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u825">
+                    <div id="l825" class="s2box bt bb">
+                        <s id="z825">0</s>825
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u824">
+                    <div id="l824" class="s2box bb">
+                        <s id="z824">0</s>824
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u823">
+                    <div id="l823" class="s2box bb">
+                        <s id="z823">0</s><a name="823"></a>823
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u838">
+                    <div id="l838" class="s2box bb">
+                        <s id="z838">0</s><a name="838"></a>838
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u839">
+                    <div id="l839" class="s2box bt bb">
+                        <s id="z839">0</s>839
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u840">
+                    <div id="l840" class="s2box bt bb">
+                        <s id="z840">0</s>840
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u841">
+                    <div id="l841" class="s2box bt bb">
+                        <s id="z841">0</s>841
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u842">
+                    <div id="l842" class="s2box br bt">
+                        <s id="z842">0</s>842
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u829">
+                    <div id="l829" class="s2box br bl">
+                        <s id="z829">0</s>829
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u843">
+                    <div id="l843" class="s2box br bl">
+                        <s id="z843">0</s>843
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u830">
+                    <div id="l830" class="s2box br bl">
+                        <s id="z830">0</s>830
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u864">
+                    <div id="l864" class="s2box bt bl">
+                        <s id="z864">0</s>864
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u862">
+                    <div id="l862" class="s2box bt">
+                        <s id="z862">0</s>862
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u860">
+                    <div id="l860" class="s2box bt">
+                        <s id="z860">0</s>860
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u859">
+                    <div id="l859" class="s2box bt">
+                        <s id="z859">0</s>859
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u857">
+                    <div id="l857" class="s2box bt br">
+                        <s id="z857">0</s>857
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u844">
+                    <div id="l844" class="s2box br bl">
+                        <s id="z844">0</s>844
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u831">
+                    <div id="l831" class="s2box br bl">
+                        <s id="z831">0</s>831
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u865">
+                    <div id="l865" class="s2box bl">
+                        <s id="z865">0</s>865
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u863">
+                    <div id="l863" class="s2box bb br">
+                        <s id="z863">0</s>863
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u861">
+                    <div id="l861" class="s2box bl br">
+                        <s id="z861">0</s>861
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u858">
+                    <div id="l858" class="s2box bl bb">
+                        <s id="z858">0</s>858
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u856">
+                    <div id="l856" class="s2box br">
+                        <s id="z856">0</s>856
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u845">
+                    <div id="l845" class="s2box br bl">
+                        <s id="z845">0</s>845
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u833">
+                    <div id="l833" class="s2box bt bb bl">
+                        <s id="z833">0</s>833
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u832">
+                    <div id="l832" class="s2box">
+                        <s id="z832">0</s>832
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u836">
+                    <div id="l836" class="s2box bt bb">
+                        <s id="z836">0</s>836
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u837">
+                    <div id="l837" class="s2box bt bb">
+                        <s id="z837">0</s>837
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u866">
+                    <div id="l866" class="s2box">
+                        <s id="z866">0</s>866
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u869">
+                    <div id="l869" class="s2box bb bt">
+                        <s id="z869">0</s>869
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u870">
+                    <div id="l870" class="s2box">
+                        <s id="z870">0</s>870
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u855">
+                    <div id="l855" class="s2box bt bb">
+                        <s id="z855">0</s>855
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u852">
+                    <div id="l852" class="s2box">
+                        <s id="z852">0</s>852
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u851">
+                    <div id="l851" class="s2box bt bb">
+                        <s id="z851">0</s>851
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u850">
+                    <div id="l850" class="s2box bt bb">
+                        <s id="z850">0</s>850
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u846">
+                    <div id="l846" class="s2box">
+                        <s id="z846">0</s>846
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u847">
+                    <div id="l847" class="s2box bt bb br">
+                        <s id="z847">0</s>847
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u834">
+                    <div id="l834" class="s2box br bl">
+                        <s id="z834">0</s>834
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u867">
+                    <div id="l867" class="s2box bl bb">
+                        <s id="z867">0</s>867
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u868">
+                    <div id="l868" class="s2box bb br bt">
+                        <s id="z868">0</s>868
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u871">
+                    <div id="l871" class="s2box bl br">
+                        <s id="z871">0</s>871
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u854">
+                    <div id="l854" class="s2box bl bb bt">
+                        <s id="z854">0</s>854
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u853">
+                    <div id="l853" class="s2box br bb">
+                        <s id="z853">0</s>853
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u848">
+                    <div id="l848" class="s2box br bl">
+                        <s id="z848">0</s>848
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u835">
+                    <div id="l835" class="s2box br bl bb">
+                        <s id="z835">0</s>835
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u872">
+                    <div id="l872" class="s2box br bl bb">
+                        <s id="z872">0</s>872
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u849">
+                    <div id="l849" class="s2box br bl bb">
+                        <s id="z849">0</s>849
+                    </div>
+                </div>
+            </div>
+        </td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
@@ -1294,16 +854,115 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u877">
+                    <div id="l877" class="s2box bt bl bb">
+                        <s id="z877">0</s>877
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u876">
+                    <div id="l876" class="s2box br bt">
+                        <s id="z876">0</s>876
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u873">
+                    <div id="l873" class="s2box br bl bt">
+                        <s id="z873">0</s>873
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u879">
+                    <div id="l879" class="s2box bl bt">
+                        <s id="z879">0</s>879
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u880">
+                    <div id="l880" class="s2box br bt bb">
+                        <s id="z880">0</s>880
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a1" style="">
-                <div id="u101">
-                    <div id="l101" class="s2box bl br">
-                        <s id="z101">0</s>
-                        <em>101</em>
-                        <cite>Городские ворота</cite>
-                        <a href="{{ route('on_map', array_merge(['s' => 'Gh865Vpo'], request()->except(['s']))) }}#102" class="asouth">↓</a>
+            <div class="a819" style="">
+                <div id="u875">
+                    <div id="l875" class="s2box bl bb">
+                        <s id="z875">0</s>875
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u874">
+                    <div id="l874" class="s2box">
+                        <s id="z874">0</s>874
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u878">
+                    <div id="l878" class="s2box br bb">
+                        <s id="z878">0</s>878
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+    <tr>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u881">
+                    <div id="l881" class="s2box bl br">
+                        <s id="z881">0</s>881
                     </div>
                 </div>
             </div>
@@ -1318,7 +977,35 @@
         <td width="48" height="48"></td>
     </tr>
     <tr>
-        <th colspan="17" class="t0" align="left" style="padding:5px;font-size:14px;"></th>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a819" style="">
+                <div id="u882">
+                    <div id="l882" class="s2box bl br bb">
+                        <s id="z882">0</s>882
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+        <td width="48" height="48"></td>
+    </tr>
+
+    <tr>
+        <th colspan="13" class="t0" align="left" style="padding:5px;font-size:14px;"></th>
     </tr>
     </tbody>
 </table>
@@ -1327,8 +1014,9 @@
     var zbmin = 0;
 </script>
 <style>
-    .a1 {
-        background-color: rgba(255, 247, 205, 0.6);
+    .a819 {
+        /*background-color: rgba(255, 247, 205, 0.6);*/
+        background-color: rgba(169, 245, 195, 0.6);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;

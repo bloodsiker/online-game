@@ -18,6 +18,7 @@ use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestDialogue;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
@@ -90,7 +91,7 @@ class QuestController extends Controller
 
     public function quest($id, Request $request)
     {
-        $quest = Quest::with('rewards.itemInfo', 'rewards.location', 'rewards.reputation')->find($id);
+        $quest = Quest::with('rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'dialogues')->find($id);
         $npc = Npc::find($request->integer('npc'));
         $user = Auth::user();
         $player = $user->player;
@@ -142,9 +143,12 @@ class QuestController extends Controller
                 ->where('status', QuestPlayerStatus::IN_PROGRESS)
                 ->exists();
 
+            [$dialoguePage, $dialogueNextUrl, $showObjectives] = $this->resolveDialoguePage($quest, $inProgress, $request, $npc?->id);
+
             return view('quest::quest', compact(
                 'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
-                'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept'
+                'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
+                'dialoguePage', 'dialogueNextUrl', 'showObjectives'
             ));
         }
 
@@ -187,10 +191,44 @@ class QuestController extends Controller
         $isAcceptor = false;
         $canAccept = true;
 
+        [$dialoguePage, $dialogueNextUrl, $showObjectives] = $this->resolveDialoguePage($quest, $inProgress, $request, $npc?->id);
+
         return view('quest::quest', compact(
             'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
-            'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept'
+            'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
+            'dialoguePage', 'dialogueNextUrl', 'showObjectives'
         ));
+    }
+
+    /**
+     * До принятия — реплики показываются по одной, цели скрыты кроме последней (не спойлерим раньше времени).
+     * После принятия — если реплики есть, для контекста просто показываем последнюю (без пагинации/кнопки —
+     * та часть шаблона, где используется $nextUrl, рендерится только пока квест не принят); если реплик
+     * нет — ничего не меняем, шаблон сам возьмёт $quest->description.
+     *
+     * @return array{0: ?QuestDialogue, 1: ?string, 2: bool}
+     */
+    private function resolveDialoguePage(Quest $quest, bool $inProgress, Request $request, ?int $npcId): array
+    {
+        $dialogues = $quest->dialogues;
+
+        if ($dialogues->isEmpty()) {
+            return [null, null, true];
+        }
+
+        if ($inProgress) {
+            return [$dialogues->last(), null, true];
+        }
+
+        $page = max(1, min($dialogues->count(), $request->integer('page', 1)));
+        $currentDialogue = $dialogues->get($page - 1);
+        $isLast = $page >= $dialogues->count();
+
+        $nextUrl = $isLast
+            ? route('quest.take', ['id' => $quest->id, 'npc' => $npcId])
+            : route('quest', ['id' => $quest->id, 'npc' => $npcId, 'page' => $page + 1]);
+
+        return [$currentDialogue, $nextUrl, $isLast];
     }
 
     public function takeClan($id, Request $request)

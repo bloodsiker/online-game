@@ -25,6 +25,11 @@
                                     Награды <span class="badge badge-primary">{{ $quest->rewards->count() }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-dialogues" href="#tab-dialogues" data-bs-toggle="tab">
+                                    Диалог <span class="badge badge-primary">{{ $quest->dialogues->count() }}</span>
+                                </a>
+                            </li>
                         </ul>
 
                         <div class="tab-content">
@@ -233,11 +238,78 @@
                                 </div>
                             </div>
 
+                            {{-- ДИАЛОГ --}}
+                            <div id="tab-dialogues" class="tab-pane">
+                                <div class="pt-3">
+                                    <p class="text-muted">Реплики показываются по одной на странице квеста до его принятия (по порядку). Текст ответа — это кнопка, по клику на которую игрок переходит к следующей реплике; на последней реплике клик по ней принимает квест. Если реплик нет — показывается обычное описание квеста.</p>
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalDialogue">Добавить реплику</a>
+                                    </div>
+                                    @foreach($quest->dialogues as $dialogue)
+                                        <form action="{{ route('admin.quest.dialogue.update', [$quest->id, $dialogue->id]) }}" method="post" class="mb-3">
+                                            {{ csrf_field() }}
+                                            <div class="row">
+                                                <div class="col-md-1">
+                                                    <label class="col-form-label">Порядок</label>
+                                                    <input type="number" min="1" class="form-control" name="order" value="{{ $dialogue->order }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Текст реплики</label>
+                                                    <textarea class="form-control" name="description" rows="3">{{ $dialogue->description }}</textarea>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Текст ответа (кнопка)</label>
+                                                    <input type="text" class="form-control" name="reply_text" value="{{ $dialogue->reply_text }}">
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end" style="gap:6px;">
+                                                    <button class="btn btn-primary btn-sm">Сохранить</button>
+                                                    <a href="{{ route('admin.quest.dialogue.delete', [$quest->id, $dialogue->id]) }}"
+                                                       class="btn btn-danger btn-sm"
+                                                       onclick="return confirm('Удалить реплику?')">Удалить</a>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endforeach
+                                    @if($quest->dialogues->isEmpty())
+                                        <p class="text-center text-muted">Реплик пока нет</p>
+                                    @endif
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </section>
         </div>
+    </div>
+
+    <div id="modalDialogue" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.quest.dialogue.add', $quest->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить реплику</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label class="col-form-label">Порядок</label>
+                        <input type="number" min="1" class="form-control" name="order" value="{{ $quest->dialogues->max('order') + 1 }}">
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="col-form-label">Текст реплики</label>
+                        <textarea class="form-control" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="col-form-label">Текст ответа (кнопка)</label>
+                        <input type="text" class="form-control" name="reply_text" value="Далее">
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="text-end">
+                        <button class="btn btn-primary">Сохранить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
     </div>
 
     {{-- Модалка: добавить задание --}}

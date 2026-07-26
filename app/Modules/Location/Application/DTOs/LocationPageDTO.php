@@ -11,6 +11,7 @@ final readonly class LocationPageDTO
      * @param  list<LocationNpcDTO>  $npcs
      * @param  array<string, LocationMoveDirectionDTO>  $moves
      * @param  list<LocationStructureDTO>  $structures
+     * @param  list<LocationStructureActionDTO>  $gateActions
      */
     public function __construct(
         public int $locationId,
@@ -25,6 +26,7 @@ final readonly class LocationPageDTO
         public int $itemsOnLocationCount,
         public string $takeItemsUrl,
         public array $structures,
+        public array $gateActions,
         public string $locationUsersJson,
         public LocationPlayerFrameDTO $playerFrame,
         public bool $hasClanMembership,

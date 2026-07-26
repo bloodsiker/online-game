@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
-use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Quest\Domain\Enums\QuestType;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,6 +74,11 @@ class Quest extends Model
         return $this->hasMany(QuestObjective::class, 'quest_id');
     }
 
+    public function dialogues(): HasMany
+    {
+        return $this->hasMany(QuestDialogue::class, 'quest_id')->orderBy('order');
+    }
+
     public function rewards(): HasMany
     {
         return $this->hasMany(QuestReward::class, 'quest_id');
@@ -85,7 +91,7 @@ class Quest extends Model
 
     public function reputationTierQuests(): HasMany
     {
-        return $this->hasMany(\App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest::class, 'quest_id');
+        return $this->hasMany(ReputationTierQuest::class, 'quest_id');
     }
 
     public function getTypeLabel(): string

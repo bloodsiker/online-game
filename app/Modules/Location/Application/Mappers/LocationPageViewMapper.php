@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\Mappers;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Location\Application\DTOs\LocationDungeonSessionDTO;
 use App\Modules\Location\Application\DTOs\LocationMonsterDTO;
 use App\Modules\Location\Application\DTOs\LocationMoveDirectionDTO;
@@ -13,6 +14,7 @@ use App\Modules\Location\Application\DTOs\LocationPlayerFrameDTO;
 use App\Modules\Location\Application\DTOs\LocationStructureActionDTO;
 use App\Modules\Location\Application\DTOs\LocationStructureDTO;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
@@ -21,6 +23,10 @@ use Illuminate\Support\Facades\Storage;
 
 class LocationPageViewMapper
 {
+    public function __construct(
+        private readonly BackpackService $backpackService,
+    ) {}
+
     public function map(
         User $user,
         Location $location,
@@ -59,6 +65,7 @@ class LocationPageViewMapper
             itemsOnLocationCount: $itemsOnLocationCount,
             takeItemsUrl: route('take_items'),
             structures: $this->mapStructures($location, $user),
+            gateActions: $this->mapGateActions($location, $user),
             locationUsersJson: $this->mapLocationUsersJson($locationUsers),
             playerFrame: new LocationPlayerFrameDTO(
                 hpCurrent: (int) $user->player->hp_now,
@@ -123,6 +130,36 @@ class LocationPageViewMapper
             label: $label,
             elementId: $elementId,
         );
+    }
+
+    /**
+     * @return list<LocationStructureActionDTO>
+     */
+    private function mapGateActions(Location $location, User $user): array
+    {
+        $actions = [];
+
+        $gates = LocationGate::where('from_location_id', $location->id)
+            ->where('mode', 'presence_pass')
+            ->with('shareItem')
+            ->get();
+
+        foreach ($gates as $gate) {
+            if ($gate->shareItem === null) {
+                continue;
+            }
+
+            if ($this->backpackService->getItem($user, $gate->shareItem) === null) {
+                continue;
+            }
+
+            $actions[] = new LocationStructureActionDTO(
+                label: $gate->button_label ?? 'Пройти',
+                url: route('gate-pass', ['gateId' => $gate->id]),
+            );
+        }
+
+        return $actions;
     }
 
     /**

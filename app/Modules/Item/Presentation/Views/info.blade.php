@@ -289,7 +289,14 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
-                                                                            @if ($page->stats === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description)
+                                                                            @if ($page->gateLocations)
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">Открывает переход: {{ $page->gateLocations }}</td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                            @endif
+
+                                                                            @if ($page->stats === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
                                                                                 <tr>
                                                                                     <td class="tbl-sts_bg-light" colspan="2">Обычный предмет без особых свойств.</td>
                                                                                 </tr>

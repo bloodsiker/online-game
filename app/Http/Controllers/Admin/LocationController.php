@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -40,9 +42,39 @@ class LocationController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $location->load(['map', 'northSide', 'southSide', 'eastSide', 'westSide', 'upSide', 'downSide']);
+        $location->load(['map', 'northSide', 'southSide', 'eastSide', 'westSide', 'upSide', 'downSide', 'monsters']);
+        $monsters = Monster::orderBy('name')->get();
 
-        return view('admin.location.info', compact('location'));
+        return view('admin.location.info', compact('location', 'monsters'));
+    }
+
+    public function addMonster(Request $request, Location $location): RedirectResponse
+    {
+        $aggression = $request->input('aggression');
+
+        $location->monsters()->attach($request->input('monster_id'), [
+            'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Моб добавлен.');
+    }
+
+    public function updateMonsterAggression(Request $request, Location $location, Monster $monster): RedirectResponse
+    {
+        $aggression = $request->input('aggression');
+
+        $location->monsters()->updateExistingPivot($monster->id, [
+            'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
+        ]);
+
+        return redirect()->back()->with('success', 'Агрессия обновлена.');
+    }
+
+    public function deleteMonster(Location $location, Monster $monster): RedirectResponse
+    {
+        $location->monsters()->detach($monster->id);
+
+        return redirect()->back()->with('success', 'Моб удалён.');
     }
 
     private function fillLocation(Location $location, Request $request): void

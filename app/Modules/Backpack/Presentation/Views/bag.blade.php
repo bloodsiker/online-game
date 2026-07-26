@@ -2054,6 +2054,11 @@
                 }
             }
 
+            if (data.teleport_url) {
+                try { window.top.toLocation(data.teleport_url); } catch(e) { window.top.location.href = data.teleport_url; }
+                return;
+            }
+
             // Отправляем HP/MP в character-frame
             var hpMp = {
                 hp: { current: data.hp_now, max: data.hp_max },

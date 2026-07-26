@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\DTO\MoveResultDTO;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 final readonly class PlayerMovementService
@@ -22,7 +23,7 @@ final readonly class PlayerMovementService
     {
         $location = $user->currentLocation;
 
-        if (!$location->$direction) {
+        if (! $location->$direction) {
             return MoveResultDTO::blocked('Нельзя идти в этом направлении');
         }
 
@@ -53,6 +54,17 @@ final readonly class PlayerMovementService
 
             if ($gate !== null) {
                 $blocked = $this->checkGate($gate, $user);
+                if ($blocked !== null) {
+                    return MoveResultDTO::blocked($blocked);
+                }
+            }
+
+            $locationGate = LocationGate::where('from_location_id', $location->id)
+                ->where('to_location_id', $destLocation->id)
+                ->first();
+
+            if ($locationGate !== null) {
+                $blocked = $this->checkLocationGate($locationGate, $user);
                 if ($blocked !== null) {
                     return MoveResultDTO::blocked($blocked);
                 }
@@ -110,6 +122,25 @@ final readonly class PlayerMovementService
         $hasItem = $this->backpackService->getItem($user, $shareItem) !== null;
         if (! $hasItem) {
             return 'Проход заблокирован. Нужен ключ от босса.';
+        }
+
+        return null;
+    }
+
+    private function checkLocationGate(LocationGate $gate, User $user): ?string
+    {
+        if ($gate->mode === 'teleport_use') {
+            return 'Проход закрыт. Нужно использовать ключ из инвентаря.';
+        }
+
+        $shareItem = ShareItem::find($gate->share_item_id);
+        if ($shareItem === null) {
+            return null;
+        }
+
+        $hasItem = $this->backpackService->getItem($user, $shareItem) !== null;
+        if (! $hasItem) {
+            return 'Проход закрыт. Нужен специальный предмет.';
         }
 
         return null;

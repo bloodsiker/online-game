@@ -194,6 +194,10 @@
                                             <td width="1%">
                                                 @if($inProgress && $canComplete)
                                                     <img src="{{ asset('img/icon/qst_start_m.gif') }}" width="46" height="28">
+                                                @elseif($quest->isMain() && ! $inProgress)
+                                                    <img src="{{ asset('img/icon/qst_main_start.gif') }}" width="46" height="28">
+                                                @elseif($quest->isMain())
+                                                    <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="filter: invert(13%) sepia(94%) saturate(7471%) hue-rotate(3deg) brightness(95%) contrast(119%);">
                                                 @else
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
                                                 @endif
@@ -220,7 +224,7 @@
                                         @endif
                                         <tr class=" fs-12">
                                             <td class="ajustify" colspan="3">
-                                                {!! $quest->description !!}
+                                                {!! $dialoguePage ? $dialoguePage->description : $quest->description !!}
                                             </td>
                                         </tr>
 
@@ -239,51 +243,65 @@
                                                 </tr>
                                             @endif
                                         @endif
-                                        @foreach($visibleObjectives as $objective)
-                                            @php
-                                                $done  = $progressMap[$objective->id] ?? 0;
-                                                $need  = $objective->required_amount ?? 1;
-                                                $objComplete = $inProgress && $done >= $need;
-                                            @endphp
-                                            <tr class="bg_l brd2-all fs-12">
-                                                <td width="1%">
-                                                    <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
-                                                </td>
-                                                <td class="b" colspan="2">
-                                                    <span class="brown">{{ $loop->first ? 'Ваша цель:' : 'А также:' }}</span>
-                                                    <span class="{{ $objComplete ? 'greenn' : 'redd' }}">{{ $objective->description ?? '' }}</span>
-                                                    @if($inProgress)
-                                                        @if($need > 1)
-                                                            <span style="color:{{ $objComplete ? '#339900' : '#666' }}; font-weight:bold;">
-                                                                ({{ $done }}/{{ $need }})
-                                                            </span>
-                                                        @elseif($objComplete)
-                                                            <span style="color:#339900; font-weight:bold;">✓</span>
+                                        @if($showObjectives ?? true)
+                                            @foreach($visibleObjectives as $objective)
+                                                @php
+                                                    $done  = $progressMap[$objective->id] ?? 0;
+                                                    $need  = $objective->required_amount ?? 1;
+                                                    $objComplete = $inProgress && $done >= $need;
+                                                @endphp
+                                                <tr class="bg_l brd2-all fs-12">
+                                                    <td width="1%">
+                                                        <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
+                                                    </td>
+                                                    <td class="b" colspan="2">
+                                                        <span class="brown">{{ $loop->first ? 'Ваша цель:' : 'А также:' }}</span>
+                                                        <span class="{{ $objComplete ? 'greenn' : 'redd' }}">{{ $objective->description ?? '' }}</span>
+                                                        @if($inProgress)
+                                                            @if($need > 1)
+                                                                <span style="color:{{ $objComplete ? '#339900' : '#666' }}; font-weight:bold;">
+                                                                    ({{ $done }}/{{ $need }})
+                                                                </span>
+                                                            @elseif($objComplete)
+                                                                <span style="color:#339900; font-weight:bold;">✓</span>
+                                                            @endif
+                                                        @else
+                                                            @if($need > 1)
+                                                                <span style="color:#666;">({{ $need }} шт.)</span>
+                                                            @endif
                                                         @endif
-                                                    @else
-                                                        @if($need > 1)
-                                                            <span style="color:#666;">({{ $need }} шт.)</span>
+                                                        @if($objective->map_id && $objective->map)
+                                                            <span style="color:#666;">— {{ $objective->map->name }}</span>
                                                         @endif
-                                                    @endif
-                                                    @if($objective->map_id && $objective->map)
-                                                        <span style="color:#666;">— {{ $objective->map->name }}</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
 
                                         @if(!$inProgress)
-                                            <tr>
-                                                <td colspan="3" align="center">
-                                                    @if($quest->isClan() && !($canAccept ?? true))
+                                            @if($quest->isClan() && !($canAccept ?? true))
+                                                <tr>
+                                                    <td colspan="3" align="center">
                                                         <span style="color:#888; font-style:italic;">У вас уже есть активный клановый квест</span>
-                                                    @else
+                                                    </td>
+                                                </tr>
+                                            @elseif($dialoguePage)
+                                                {{-- Реплика — вариант ответа блоком, как в диалоге с НПС (на последней сама ведёт к принятию квеста) --}}
+                                                <tr class="bg_l brd2-all fs-12 pointer"
+                                                    onclick="location.href='{{ $dialogueNextUrl }}'"
+                                                    onmouseover="this.className += ' bg_l2';" onmouseout="this.className = this.className.split(' bg_l2').join('');">
+                                                    <td width="1%"><img src="{{ asset('img/icon/qst_talk.gif') }}" alt=""></td>
+                                                    <td class="ajustify" colspan="2"><b>{{ $dialoguePage->reply_text }}</b></td>
+                                                </tr>
+                                            @else
+                                                <tr>
+                                                    <td colspan="3" align="center">
                                                         <span class="butt1 pointer">
                                                             <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
                                                         </span>
-                                                    @endif
-                                                </td>
-                                            </tr>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         @elseif($canComplete)
                                             @foreach($quest->rewards as $reward)
                                                 @php

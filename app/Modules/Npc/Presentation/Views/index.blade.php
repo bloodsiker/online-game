@@ -282,7 +282,7 @@
                                                 onclick="location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}'"
                                                 onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
                                                 <td class="brd2-top brd2-bt" width="1%">
-                                                    <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28">
+                                                    <img src="{{ asset($quest->type->isMain() ? 'img/icon/qst_main_start.gif' : 'img/icon/qst_start.gif') }}" width="46" height="28">
                                                 </td>
                                                 <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif @if($quest->is_feat ?? false)<b style="color:#7a4e00;">⚔ Подвиг:</b> @endif{{ $quest->title }}</td>
                                                 <td class="brd2-top brd2-bt" align="right" onclick="event.stopPropagation()">

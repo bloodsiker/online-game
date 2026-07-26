@@ -32,6 +32,12 @@
                             <span>Карты</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.location-gates', 'admin.location-gate.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.location-gates') }}">
+                            <i class="bx bx-key" aria-hidden="true"></i>
+                            <span>Врата локаций</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.npc', 'admin.npc.create', 'admin.npc.info') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.npc') }}">
                             <i class="bx bx-map" aria-hidden="true"></i>

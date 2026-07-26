@@ -179,6 +179,15 @@
                                             </a> »
                                         </td>
                                     </tr>
+                                    @if($page->gateActions !== [])
+                                        <tr>
+                                            <td colspan="3" style="padding:0px 0px 4px 0px">
+                                                @foreach($page->gateActions as $gateAction)
+                                                    <a href="{{ $gateAction->url }}" target="game">{{ $gateAction->label }}</a>@if(! $loop->last)<br>@endif
+                                                @endforeach
+                                            </td>
+                                        </tr>
+                                    @endif
                                     </tbody>
                                 </table>
                             </td>

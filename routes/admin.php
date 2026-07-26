@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\LocationGateController;
 use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\MonsterController;
 use App\Http\Controllers\Admin\NewsController;
@@ -96,6 +97,14 @@ Route::get('/maps', [MapController::class, 'list'])->name('maps');
 Route::match(['GET', 'POST'], '/location/create', [LocationController::class, 'create'])->name('location.create');
 Route::match(['GET', 'POST'], '/location/{location}', [LocationController::class, 'info'])->name('location.info');
 Route::get('/locations', [LocationController::class, 'list'])->name('locations');
+Route::post('/location/{location}/monster', [LocationController::class, 'addMonster'])->name('location.monster.add');
+Route::post('/location/{location}/monster/{monster}/aggression', [LocationController::class, 'updateMonsterAggression'])->name('location.monster.aggression');
+Route::get('/location/{location}/monster/{monster}/delete', [LocationController::class, 'deleteMonster'])->name('location.monster.delete');
+
+Route::get('/location-gates', [LocationGateController::class, 'list'])->name('location-gates');
+Route::match(['GET', 'POST'], '/location-gate/create', [LocationGateController::class, 'create'])->name('location-gate.create');
+Route::match(['GET', 'POST'], '/location-gate/{locationGate}', [LocationGateController::class, 'info'])->name('location-gate.info');
+Route::get('/location-gate/{locationGate}/delete', [LocationGateController::class, 'delete'])->name('location-gate.delete');
 
 Route::match(['GET', 'POST'], '/action/create', [ActionController::class, 'create'])->name('action.create');
 Route::match(['GET', 'POST'], '/action/{action}', [ActionController::class, 'info'])->name('action.info');
@@ -127,6 +136,9 @@ Route::post('/quest/{quest}/objective', [QuestController::class, 'addObjective']
 Route::get('/quest/{quest}/objective/{objective}/delete', [QuestController::class, 'deleteObjective'])->name('quest.objective.delete');
 Route::post('/quest/{quest}/reward', [QuestController::class, 'addReward'])->name('quest.reward.add');
 Route::get('/quest/{quest}/reward/{reward}/delete', [QuestController::class, 'deleteReward'])->name('quest.reward.delete');
+Route::post('/quest/{quest}/dialogue', [QuestController::class, 'addDialogue'])->name('quest.dialogue.add');
+Route::post('/quest/{quest}/dialogue/{dialogue}', [QuestController::class, 'updateDialogue'])->name('quest.dialogue.update');
+Route::get('/quest/{quest}/dialogue/{dialogue}/delete', [QuestController::class, 'deleteDialogue'])->name('quest.dialogue.delete');
 
 Route::get('/clans', [ClanController::class, 'list'])->name('clans');
 Route::get('/clan/{clan}', [ClanController::class, 'info'])->name('clan.info');

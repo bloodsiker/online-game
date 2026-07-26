@@ -6,6 +6,7 @@ namespace App\Modules\Item\Application\Mappers;
 
 use App\Modules\Item\Application\DTOs\ItemInfoPageDTO;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
@@ -87,6 +88,7 @@ class ItemInfoPageViewMapper
             noGive: ! $shareItem->is_sell,
             noWeight: ! $shareItem->is_weight,
             noSell: ! $shareItem->is_sell,
+            gateLocations: $this->buildGateLocations((int) $shareItem->id),
             stats: ItemTooltipStatsBuilder::build($shareItem),
             requirements: $requirements,
             handOverUrl: $handOverUrl,
@@ -96,6 +98,36 @@ class ItemInfoPageViewMapper
             gems: $gems,
             runes: $runes,
         );
+    }
+
+    private function buildGateLocations(int $shareItemId): ?string
+    {
+        $gates = LocationGate::where('share_item_id', $shareItemId)
+            ->with(['fromLocation', 'toLocation'])
+            ->get();
+
+        if ($gates->isEmpty()) {
+            return null;
+        }
+
+        $pairs = [];
+        foreach ($gates as $gate) {
+            $ids = [$gate->from_location_id, $gate->to_location_id];
+            sort($ids);
+            $key = implode('-', $ids);
+
+            if (isset($pairs[$key])) {
+                continue;
+            }
+
+            $pairs[$key] = sprintf(
+                '%s ↔ %s',
+                $gate->fromLocation?->name ?: 'Локация #'.$gate->from_location_id,
+                $gate->toLocation?->name ?: 'Локация #'.$gate->to_location_id,
+            );
+        }
+
+        return implode(', ', $pairs);
     }
 
     private function isRequirementMet(?Player $viewer, ShareItemRequirement $requirement): bool

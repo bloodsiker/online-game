@@ -244,7 +244,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a511" style="">
+            <div class="a608" style="">
                 <div id="u608">
                     <div id="l608" class="s2box bt bl">
                         <s id="z608">0</s>608
