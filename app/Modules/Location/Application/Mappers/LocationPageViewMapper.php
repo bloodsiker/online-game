@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\Mappers;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Location\Application\DTOs\LocationDungeonSessionDTO;
 use App\Modules\Location\Application\DTOs\LocationMonsterDTO;
 use App\Modules\Location\Application\DTOs\LocationMoveDirectionDTO;
@@ -23,10 +22,6 @@ use Illuminate\Support\Facades\Storage;
 
 class LocationPageViewMapper
 {
-    public function __construct(
-        private readonly BackpackService $backpackService,
-    ) {}
-
     public function map(
         User $user,
         Location $location,
@@ -41,6 +36,7 @@ class LocationPageViewMapper
             locationId: $location->id,
             name: (string) $location->name,
             description: (string) $location->description,
+            image: $location->image,
             dungeonSession: $this->mapDungeonSession($dungeonSession, $location->id),
             hasBattle: $battleId !== null,
             battleUrl: $battleId !== null ? route('fight', ['id' => $battleId]) : null,
@@ -65,7 +61,7 @@ class LocationPageViewMapper
             itemsOnLocationCount: $itemsOnLocationCount,
             takeItemsUrl: route('take_items'),
             structures: $this->mapStructures($location, $user),
-            gateActions: $this->mapGateActions($location, $user),
+            gateActions: $this->mapGateActions($location),
             locationUsersJson: $this->mapLocationUsersJson($locationUsers),
             playerFrame: new LocationPlayerFrameDTO(
                 hpCurrent: (int) $user->player->hp_now,
@@ -135,7 +131,7 @@ class LocationPageViewMapper
     /**
      * @return list<LocationStructureActionDTO>
      */
-    private function mapGateActions(Location $location, User $user): array
+    private function mapGateActions(Location $location): array
     {
         $actions = [];
 
@@ -146,10 +142,6 @@ class LocationPageViewMapper
 
         foreach ($gates as $gate) {
             if ($gate->shareItem === null) {
-                continue;
-            }
-
-            if ($this->backpackService->getItem($user, $gate->shareItem) === null) {
                 continue;
             }
 

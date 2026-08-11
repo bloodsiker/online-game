@@ -9,6 +9,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
 
 class LocationController extends Controller
@@ -92,5 +93,14 @@ class LocationController extends Controller
         $location->count_monster = (int) $request->input('count_monster', 0);
         $location->percent_respawn_monster = (int) $request->input('percent_respawn_monster', 0);
         $location->time_not_attack = (int) $request->input('time_not_attack', 0);
+
+        if ($request->hasFile('image')) {
+            $location->image = $this->storeImage($request->file('image'));
+        }
+    }
+
+    private function storeImage(UploadedFile $file): string
+    {
+        return '/storage/'.$file->store('locations', 'public');
     }
 }

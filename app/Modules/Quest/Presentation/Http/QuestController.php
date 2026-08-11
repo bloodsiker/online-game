@@ -55,7 +55,7 @@ class QuestController extends Controller
             if ($clanMembership) {
                 $clanQuests = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
                     ->orderByDesc('id')
-                    ->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'objectives.questObjective', 'user')
+                    ->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'objectives.questObjective', 'user')
                     ->paginate(20)
                     ->withQueryString();
                 $clanQuestProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
@@ -82,7 +82,7 @@ class QuestController extends Controller
                 ->whereHas('quest', fn ($q) => $q->whereNotIn('type', [QuestType::REPEATABLE, QuestType::CLAN]));
         }
 
-        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives')->paginate(20)->withQueryString();
+        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues')->paginate(20)->withQueryString();
         $questIds = $quests->pluck('id')->implode(',');
 
         return view('quest::list', compact('quests', 'questIds', 'tab')

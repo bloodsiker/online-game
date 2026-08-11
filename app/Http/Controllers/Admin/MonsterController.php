@@ -9,19 +9,41 @@ use App\Http\Controllers\Controller;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
 
 class MonsterController extends Controller
 {
-    public function list(): View
+    public function list(Request $request): View
     {
-        $listMonsters = Monster::orderByDesc('id')->get();
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'level_from' => $request->query('level_from'),
+            'level_to' => $request->query('level_to'),
+            'is_boss' => (string) $request->query('is_boss', ''),
+        ];
 
-        return view('admin.monster.list', compact('listMonsters'));
+        $listMonsters = Monster::query()
+            ->when($filters['q'] !== '', function ($query) use ($filters): void {
+                $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
+                $query->where(function ($query) use ($search): void {
+                    $query->where('name', 'like', $search)
+                        ->orWhere('description', 'like', $search);
+                });
+            })
+            ->when(is_numeric($filters['level_from']), fn ($query) => $query->where('lvl', '>=', (int) $filters['level_from']))
+            ->when(is_numeric($filters['level_to']), fn ($query) => $query->where('lvl', '<=', (int) $filters['level_to']))
+            ->when(in_array($filters['is_boss'], ['0', '1'], true), fn ($query) => $query->where('is_boss', (int) $filters['is_boss']))
+            ->orderByDesc('id')
+            ->paginate(50)
+            ->withQueryString();
+
+        return view('admin.monster.list', compact('listMonsters', 'filters'));
     }
 
     public function create(Request $request): mixed
@@ -49,12 +71,13 @@ class MonsterController extends Controller
 
         $monster->load(['items', 'locations.map']);
         if ($monster->is_boss) {
-            $monster->load(['phases', 'mechanics']);
+            $monster->load(['phases', 'mechanics', 'summonPool']);
         }
 
         $mechanicTypes = BossMechanicType::cases();
+        $allMonsters = Monster::orderBy('name')->get();
 
-        return view('admin.monster.info', compact('monster', 'mechanicTypes'));
+        return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters'));
     }
 
     public function infoDrop(Request $request, Monster $monster): RedirectResponse
@@ -205,6 +228,26 @@ class MonsterController extends Controller
         return redirect()->back()->with('success', $mechanic->is_active ? 'Механика включена.' : 'Механика отключена.');
     }
 
+    // ── Пул призыва (кого может призвать этот босс) ─────────────────────────────
+
+    public function addSummonPool(Request $request, Monster $monster): RedirectResponse
+    {
+        MonsterSummonPool::create([
+            'monster_id' => $monster->id,
+            'minion_monster_id' => (int) $request->input('minion_monster_id'),
+            'weight' => max(1, (int) $request->input('weight', 1)),
+        ]);
+
+        return redirect()->back()->with('success', 'Моб добавлен в пул призыва.');
+    }
+
+    public function deleteSummonPool(Monster $monster, MonsterSummonPool $summonPool): RedirectResponse
+    {
+        $summonPool->delete();
+
+        return redirect()->back()->with('success', 'Моб удалён из пула призыва.');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
 
     private function fillMonster(Monster $monster, Request $request): void
@@ -223,12 +266,17 @@ class MonsterController extends Controller
         $monster->min_money = (int) $request->input('min_money', 0);
         $monster->max_money = (int) $request->input('max_money', 0);
         $monster->is_boss = (bool) $request->input('is_boss', false);
+        $monster->respawn_min_minutes = $request->filled('respawn_min_minutes') ? (int) $request->input('respawn_min_minutes') : null;
+        $monster->respawn_max_minutes = $request->filled('respawn_max_minutes') ? (int) $request->input('respawn_max_minutes') : null;
+        $monster->respawn_at = $request->filled('respawn_at') ? $request->input('respawn_at') : null;
 
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = $file->getClientOriginalName();
-            $file->move(public_path('img/resource'), $filename);
-            $monster->image = 'img/resource/'.$filename;
+            $monster->image = $this->storeImage($request->file('image'));
         }
+    }
+
+    private function storeImage(UploadedFile $file): string
+    {
+        return '/storage/'.$file->store('monsters', 'public');
     }
 }

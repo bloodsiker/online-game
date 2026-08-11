@@ -83,6 +83,10 @@ class ItemService
 
     public function handOver(User $user, Item $item, User $toUser): ?string
     {
+        if (! $item->itemInfo->is_give) {
+            return 'Этот предмет нельзя передать другому игроку.';
+        }
+
         if ($user->location_id !== $toUser->location_id) {
             return sprintf('Персонаж %s не находиться рядом возле вас', $toUser->name);
         }

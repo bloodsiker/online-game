@@ -328,10 +328,12 @@
     <tr valign="top">
         @if($battle)
             <td>
-                @if($battle->status->isActive())
+                @if($battle->status->isActive() && $randomAttackedMonster)
                     <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
                     @include('battle::partials.action_panel')
+                @elseif($battle->status->isActive())
+                    <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
                 @endif
 
                 @if($battle->status->isFinish())

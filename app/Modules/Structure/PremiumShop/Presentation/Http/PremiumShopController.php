@@ -9,14 +9,15 @@ use App\Modules\Structure\Bank\Infrastructure\Persistence\Models\BankStock;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
+use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
-use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class PremiumShopController extends Controller
 {
@@ -29,7 +30,7 @@ class PremiumShopController extends Controller
         private readonly GetShopItems $getShopItems,
     ) {}
 
-    public function index(Request $request): \Illuminate\View\View
+    public function index(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -42,6 +43,11 @@ class PremiumShopController extends Controller
         $cart = $this->shopCartService->getCart($user, $shop->id);
 
         $this->collector->collectFrom(new PremiumShopItemTooltipStrategy($items));
+        // Товары в корзине могут принадлежать другой категории, чем сейчас открыта —
+        // без этого тултип на названии в корзине не найдёт данные и не покажется.
+        $this->collector->collectFrom(new PremiumShopItemTooltipStrategy(
+            $cart->getItems()->map(fn ($cartItem) => $cartItem->shopItem)
+        ));
         $itemTooltipScript = $this->collector->renderScript();
 
         return view('premium_shop::buy', compact('user', 'shop', 'activeCategoryId', 'items', 'cart', 'itemTooltipScript'));
@@ -91,7 +97,7 @@ class PremiumShopController extends Controller
         return redirect()->back();
     }
 
-    public function topup(): \Illuminate\View\View
+    public function topup(): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -133,10 +139,10 @@ class PremiumShopController extends Controller
         }
 
         return view('premium_shop::stock', [
-            'user'              => $user,
-            'stock'             => $stock,
-            'userTotal'         => $userTotal,
-            'reachedTierIndex'  => $reachedTierIndex,
+            'user' => $user,
+            'stock' => $stock,
+            'userTotal' => $userTotal,
+            'reachedTierIndex' => $reachedTierIndex,
             'itemTooltipScript' => $itemTooltipScript,
         ]);
     }

@@ -24,7 +24,6 @@ use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
 class ItemController extends Controller
@@ -194,6 +193,7 @@ class ItemController extends Controller
         $item->is_active = (bool) $request->input('is_active', true);
         $item->is_heal = (bool) $request->input('is_heal', false);
         $item->is_sell = (bool) $request->input('is_sell', true);
+        $item->is_give = (bool) $request->input('is_give', true);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
@@ -222,13 +222,7 @@ class ItemController extends Controller
 
     private function storeItemImage(UploadedFile $file): string
     {
-        $directory = 'img/resource/'.now()->format('Y/m');
-        $filename = $file->hashName();
-
-        File::ensureDirectoryExists(public_path($directory));
-        $file->move(public_path($directory), $filename);
-
-        return '/'.$directory.'/'.$filename;
+        return '/storage/'.$file->store('items', 'public');
     }
 
     public function addRequirement(Request $request, ShareItem $item): RedirectResponse

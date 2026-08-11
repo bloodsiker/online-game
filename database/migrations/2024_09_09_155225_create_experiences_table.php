@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
             $table->integer('lvl');
-            $table->integer('exp');
-            $table->integer('exp_diff');
+            $table->bigInteger('exp');
+            $table->bigInteger('exp_diff');
             $table->timestamps();
         });
     }

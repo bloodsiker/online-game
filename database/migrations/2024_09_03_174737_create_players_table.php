@@ -28,9 +28,9 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('race_id');
             $table->integer('lvl')->default(1);
-            $table->integer('exp')->default(0);
-            $table->integer('exp_up');
-            $table->integer('exp_diff');
+            $table->bigInteger('exp')->default(0);
+            $table->bigInteger('exp_up');
+            $table->bigInteger('exp_diff');
             $table->float('strength', 2);
             $table->float('agility', 2);
             $table->float('intuition', 2);

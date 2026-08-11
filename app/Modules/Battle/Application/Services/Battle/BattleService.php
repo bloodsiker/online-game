@@ -22,6 +22,7 @@ class BattleService
         private readonly MonsterOnLocationRepository $monsterOnLocationRepository,
         private readonly GetActiveDungeonSession $getActiveDungeonSession,
         private readonly AdvanceSurvivalWave $advanceSurvivalWave,
+        private readonly BossRespawnService $bossRespawnService,
     ) {}
 
     public function battleOnLocation(Location $location): ?Battle
@@ -54,6 +55,8 @@ class BattleService
                 $this->battleRepository->createBattleRound($battle, $action, $user);
             }
         } else {
+            $this->bossRespawnService->respawnIfDue($location, $dungeonSessionId);
+
             $monsterQuery = MonsterOnLocation::with(['monster'])
                 ->where('location_id', $location->id)
                 ->where('active', 1);
@@ -95,10 +98,11 @@ class BattleService
 
                     $maxAddableMonsters = $location->count_monster - $currentMonsterCount;
 
-                    if ($maxAddableMonsters > 0) {
+                    $availableMonsterOnLocations = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss());
+
+                    if ($maxAddableMonsters > 0 && $availableMonsterOnLocations->isNotEmpty()) {
                         $numberToAdd = mt_rand(1, $maxAddableMonsters);
 
-                        $availableMonsterOnLocations = $location->monsters;
                         $monstersToAdd = collect();
                         for ($i = 1; $i <= $numberToAdd; $i++) {
                             $monstersToAdd->add($availableMonsterOnLocations->random());

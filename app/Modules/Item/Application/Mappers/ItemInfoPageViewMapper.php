@@ -85,7 +85,7 @@ class ItemInfoPageViewMapper
             typeName: (string) $shareItem->getTypeName(),
             price: (int) $shareItem->price,
             description: $shareItem->description,
-            noGive: ! $shareItem->is_sell,
+            noGive: ! $shareItem->is_give,
             noWeight: ! $shareItem->is_weight,
             noSell: ! $shareItem->is_sell,
             gateLocations: $this->buildGateLocations((int) $shareItem->id),

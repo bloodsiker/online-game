@@ -285,7 +285,13 @@
                                                 <tr class="bg_l" id="quest_{{ $cp->id }}">
                                                     <td></td>
                                                     <td colspan="2">
-                                                        <div class="ajustify b">{!! $cp->quest->description !!}</div>
+                                                        @if($cp->quest->dialogues->isNotEmpty())
+                                                            @foreach($cp->quest->dialogues as $dialogue)
+                                                                <div class="ajustify b" style="margin-bottom:4px;">{!! $dialogue->description !!}</div>
+                                                            @endforeach
+                                                        @else
+                                                            <div class="ajustify b">{!! $cp->quest->description !!}</div>
+                                                        @endif
                                                         @php
                                                             $stages = $cp->quest->stages;
                                                             $hasStages = $stages->isNotEmpty();
@@ -395,7 +401,13 @@
                                             <tr class="bg_l" id="quest_{{ $quest->id }}">
                                                 <td></td>
                                                 <td colspan="2">
-                                                    <div class="ajustify b">{!! $quest->quest->description !!}</div>
+                                                    @if($quest->quest->dialogues->isNotEmpty())
+                                                        @foreach($quest->quest->dialogues as $dialogue)
+                                                            <div class="ajustify b" style="margin-bottom:4px;">{!! $dialogue->description !!}</div>
+                                                        @endforeach
+                                                    @else
+                                                        <div class="ajustify b">{!! $quest->quest->description !!}</div>
+                                                    @endif
                                                     <img src="images/d.gif" width="1" height="6"><br>
                                                     @php
                                                         $stages = $quest->quest->stages;
@@ -427,7 +439,7 @@
                                                                     @foreach($stageObjs as $obj)
                                                                         @php $objDone = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
                                                                         <div class="b" style="{{ $isDone ? 'color:#999;' : 'color:#8B0000;' }}">
-                                                                            <span>{{ $loop->first ? 'Цель:' : '&nbsp;' }}</span>
+                                                                            @if($loop->first)<span>Цель:</span>@endif
                                                                             {{ $obj->questObjective->description }}
                                                                             ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
                                                                         </div>
@@ -442,7 +454,7 @@
                                                                 @foreach($stageObjectives as $obj)
                                                                     @php $objDone = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
                                                                     <div class="redd b">
-                                                                        <span>{{ $loop->first ? 'Текущая цель:' : '&nbsp;' }}</span>
+                                                                        @if($loop->first)<span>Текущая цель:</span>@endif
                                                                         {{ $obj->questObjective->description }}
                                                                         ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
                                                                     </div>

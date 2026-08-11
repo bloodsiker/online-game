@@ -156,6 +156,13 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Можно передать игроку</label>
+                                                <select class="form-control" name="is_give">
+                                                    <option value="1" @selected($item->is_give)>Да</option>
+                                                    <option value="0" @selected(!$item->is_give)>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Имеет вес</label>
                                                 <select class="form-control" name="is_weight">
                                                     <option value="1" @selected($item->is_weight)>Да</option>

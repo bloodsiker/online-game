@@ -34,8 +34,11 @@ class BossMechanicsService
 
         foreach ($mechanics as $mechanicModel) {
             try {
-                // Перевіряємо чи механіка вже спрацювала в цьому бою
-                if ($this->wasMechanicTriggered($battle, $mechanicModel->id)) {
+                // Механіки без cooldown_turns — одноразові (як і раніше): спрацювала раз за бій — і все.
+                // Механіки з cooldown_turns у config можуть спрацьовувати повторно — за це відповідає
+                // canTrigger() нижче (перевіряє mechanic_data[last_turn] + cooldown_turns).
+                $isRepeatable = isset($mechanicModel->config['cooldown_turns']);
+                if (! $isRepeatable && $this->wasMechanicTriggered($battle, $mechanicModel->id)) {
                     continue;
                 }
 

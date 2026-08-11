@@ -17,6 +17,7 @@ final readonly class LocationPageDTO
         public int $locationId,
         public string $name,
         public string $description,
+        public ?string $image,
         public ?LocationDungeonSessionDTO $dungeonSession,
         public bool $hasBattle,
         public ?string $battleUrl,

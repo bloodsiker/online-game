@@ -196,10 +196,10 @@
                                         <tbody>
                                         <tr>
                                             <td align="left" width="60" valign="top">
-                                                <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover;  width: 50px; height: 50px;">
+                                                <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover;  width: 60px; height: 60px;">
                                                     <div class="art-item-bg">
                                                     </div>
-                                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                            style="position: absolute; z-index:10;">
                                                         <tbody>
                                                         <tr>
@@ -407,7 +407,7 @@
                                     <tbody>
                                     @foreach($cart->getItems() as $cartItem)
                                         <tr class="bg_l">
-                                            <td><a href="#" onclick="showArtifactInfo(false, );return false;" class="redd b">{{ $cartItem->shopItem->item->name }}</a></td>
+                                            <td><a href="#" data-id="{{ $cartItem->shopItem->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" onclick="showArtifactInfo(false, );return false;" class="redd b">{{ $cartItem->shopItem->item->name }}</a></td>
                                             <td class="b red" align="center">
 {{--                                                <div style="padding-top:5px;" art_id="15629">--}}
 {{--                                                    <img style="cursor: pointer;" height="15" width="15" src="{{ asset('img/resource/q_gorst.gif') }}" art_id="15629"--}}

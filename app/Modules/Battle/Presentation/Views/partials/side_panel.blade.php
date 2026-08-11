@@ -23,9 +23,9 @@
                 {{-- Противники --}}
                 <div class="bp-sec bp-sec-enemy">Противники ({{ $battle->detailsWithMonsters->count() }})</div>
                 @foreach($battle->detailsWithMonsters as $details)
-                    @if($details->status->isLife())
+                    @if($details->status->isLife() && $details->locationMonster)
                         @php
-                            $isTarget = $randomAttackedMonster->locationMonster->id === $details->locationMonster->id;
+                            $isTarget = $randomAttackedMonster?->locationMonster?->id === $details->locationMonster->id;
                             $hpPct    = $details->locationMonster->hp_max > 0
                                 ? round(($details->locationMonster->hp_now / $details->locationMonster->hp_max) * 100)
                                 : 0;

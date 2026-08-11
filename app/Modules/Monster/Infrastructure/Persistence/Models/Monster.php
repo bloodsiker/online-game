@@ -21,7 +21,7 @@ class Monster extends Model implements FightHitInterface
 
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
-        'exp', 'min_money', 'max_money', 'is_boss',
+        'exp', 'min_money', 'max_money', 'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
     protected $attributes = [
@@ -30,6 +30,7 @@ class Monster extends Model implements FightHitInterface
 
     protected $casts = [
         'is_boss' => 'boolean',
+        'respawn_at' => 'datetime',
     ];
 
     public function locations(): BelongsToMany
@@ -60,6 +61,11 @@ class Monster extends Model implements FightHitInterface
         return $this->hasMany(BossPhase::class)->orderBy('phase_number');
     }
 
+    public function summonPool(): HasMany
+    {
+        return $this->hasMany(MonsterSummonPool::class, 'monster_id')->with('minionMonster');
+    }
+
     public function getActiveMechanics(): Collection
     {
         return $this->mechanics()
@@ -71,6 +77,36 @@ class Monster extends Model implements FightHitInterface
     public function isBoss(): bool
     {
         return $this->is_boss;
+    }
+
+    /**
+     * Планує респаун боса після смерті: now() + рандом(min, max) хвилин.
+     * Якщо задано лише min (max порожній) — фіксований респаун.
+     */
+    public function scheduleRespawn(): void
+    {
+        $min = $this->respawn_min_minutes ?? 0;
+        $max = $this->respawn_max_minutes ?? $min;
+
+        if ($min <= 0 && $max <= 0) {
+            return;
+        }
+
+        $minutes = $max > $min ? random_int($min, $max) : $min;
+
+        $this->respawn_at = now()->addMinutes($minutes);
+        $this->save();
+    }
+
+    public function canRespawnNow(): bool
+    {
+        return $this->respawn_at !== null && $this->respawn_at->isPast();
+    }
+
+    public function clearRespawn(): void
+    {
+        $this->respawn_at = null;
+        $this->save();
     }
 
     public function getDodge(): int

@@ -25,6 +25,7 @@ enum ShareItemType: string
     case MOUNT = 'mount';
     case RUNE = 'rune';
     case RUNE_KEY = 'rune_key';
+    case MISC = 'misc';
 
     /**
      * Экипировка занимает слоты и адресуется по конкретному item_id,
@@ -72,6 +73,7 @@ enum ShareItemType: string
             self::MOUNT => 'Оправа',
             self::RUNE => 'Руна',
             self::RUNE_KEY => 'Рунный ключ',
+            self::MISC => 'Разное',
         };
     }
 
@@ -98,6 +100,7 @@ enum ShareItemType: string
             'quest' => [self::QUEST],
             'artifact' => [self::ARTIFACT],
             'gift' => [self::GIFT],
+            'misc' => [self::MISC],
             default => self::group('main'),
         };
     }

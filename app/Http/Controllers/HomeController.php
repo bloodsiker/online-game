@@ -115,7 +115,7 @@ class HomeController extends Controller
 
     public function map2()
     {
-        return view('maps.subcity.map');
+        return view('maps.subcity.main.map');
     }
 
     public function map3()
@@ -126,6 +126,11 @@ class HomeController extends Controller
     public function map4()
     {
         return view('maps.city.sewers.map');
+    }
+
+    public function map5()
+    {
+        return view('maps.subcity.zabytiy_kurgan.map');
     }
 
     public function clear()

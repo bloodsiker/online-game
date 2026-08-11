@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-08-11T09:10:32.165081+00:00",
+  "nodes": {
+    "app_models_experience_experience": {
+      "code_fingerprint": "a014fe6d112117e6a10f8461072d3fc9019ed0eabb004647d9c97be9b40cf0e3",
+      "label": "Experience",
+      "last": "2026-08-11T07:35:02.031560+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-11T07:35:02.031560+00:00",
+          "outcome": "useful",
+          "q": "я планирую игру на года и буду расширять уровни до 1000+"
+        },
+        {
+          "date": "2026-08-11T07:30:07.445210+00:00",
+          "outcome": "useful",
+          "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
+        }
+      ],
+      "score": 1.996859012,
+      "source_file": "app/Models/Experience.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_battle_application_services_combat_attackservice_attackservice": {
+      "code_fingerprint": "73f8cf88d02a329aac9faddf478add1418f79c70c297c8ae3bca268be67261fe",
+      "label": "AttackService",
+      "last": "2026-08-11T07:30:07.445210+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-11T07:30:07.445210+00:00",
+          "outcome": "useful",
+          "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
+        },
+        {
+          "date": "2026-08-11T06:58:30.425384+00:00",
+          "outcome": "useful",
+          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
+        }
+      ],
+      "score": 1.996274007,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/AttackService.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_battle_application_services_combat_fightorchestrator_fightorchestrator": {
+      "code_fingerprint": "747c2b37c1b7b976552a11bccb191d0a2e9ef164cd974978cd2855f41b98aa08",
+      "label": "FightOrchestrator",
+      "last": "2026-08-11T07:23:26.999909+00:00",
+      "neg": 1,
+      "provenance": [
+        {
+          "date": "2026-08-11T07:23:26.999909+00:00",
+          "outcome": "corrected",
+          "q": "ты использовал немного не тех мобов, для прокачки используй локацию Канализация и Шепчущий Лес"
+        },
+        {
+          "date": "2026-08-11T06:58:30.425384+00:00",
+          "outcome": "useful",
+          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
+        },
+        {
+          "date": "2026-07-11T07:10:29.532777+00:00",
+          "outcome": "useful",
+          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+        }
+      ],
+      "score": 0.487240386,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/FightOrchestrator.php",
+      "status": "contested",
+      "uses": 2,
+      "verdict": "useful"
+    },
+    "app_modules_battle_application_services_combat_hitcalculator_hitcalculator": {
+      "code_fingerprint": "cd673b7b015c5c9b0326f0a63e2c5e3098e29697b096bc49c8698349cdd2b786",
+      "label": "HitCalculator",
+      "last": "2026-07-11T07:10:29.532777+00:00",
+      "provenance": [
+        {
+          "date": "2026-07-11T07:10:29.532777+00:00",
+          "outcome": "useful",
+          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+        }
+      ],
+      "score": 0.48763983,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/HitCalculator.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_battle_application_services_combat_monsterattackservice_monsterattackservice": {
+      "code_fingerprint": "f62abb1f7ee01b555f77132d9e1bb3ae58f96694d6f4b58dcab3257e8a3cdc42",
+      "label": "MonsterAttackService",
+      "last": "2026-08-11T06:58:30.425384+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-11T06:58:30.425384+00:00",
+          "outcome": "useful",
+          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
+        },
+        {
+          "date": "2026-07-11T07:10:29.532777+00:00",
+          "outcome": "useful",
+          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+        }
+      ],
+      "score": 1.485523657,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/MonsterAttackService.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_player_domain_services_playerstatservice_playerstatservice": {
+      "code_fingerprint": "447e3c2d05b5fbd71906341b07084ef4d8f8f82ed92222931a4b0845c9c00f43",
+      "label": "PlayerStatService",
+      "last": "2026-08-11T06:58:30.425384+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-11T06:58:30.425384+00:00",
+          "outcome": "useful",
+          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
+        },
+        {
+          "date": "2026-07-11T07:10:29.532777+00:00",
+          "outcome": "useful",
+          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+        }
+      ],
+      "score": 1.485523657,
+      "source_file": "app/Modules/Player/Domain/Services/PlayerStatService.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_player_infrastructure_persistence_models_player_player": {
+      "code_fingerprint": "28a85e36526c74973e0f5c24459028f2f067dae49fb5ae3e5c1168bfb32eb74f",
+      "label": "Player",
+      "last": "2026-08-11T07:35:02.031560+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-11T07:35:02.031560+00:00",
+          "outcome": "useful",
+          "q": "я планирую игру на года и буду расширять уровни до 1000+"
+        },
+        {
+          "date": "2026-08-11T07:30:07.445210+00:00",
+          "outcome": "useful",
+          "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
+        },
+        {
+          "date": "2026-07-11T07:10:29.532777+00:00",
+          "outcome": "useful",
+          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+        }
+      ],
+      "score": 2.484498842,
+      "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/Player.php",
+      "status": "preferred",
+      "uses": 3
+    }
+  },
+  "version": 1
+}

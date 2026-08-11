@@ -778,6 +778,10 @@
                 <div id="u418">
                     <div id="l418" class="s2box bt bb br">
                         <s id="z418">0</s>418
+                        <br>
+                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => 'Kj9u18NJl3'], request()->except(['s']))) }}#883">
+                            <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
+                        </a>
                     </div>
                 </div>
             </div>

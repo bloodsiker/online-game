@@ -80,9 +80,34 @@
                             <div class="bg-l"><div class="bg-r"><div class="bg-inner"><div class="bg-inner-l"><div class="bg-inner-r"><div class="bg-inner-t"><div class="bg-inner-b">
                             <div class="common-content">
 
-                                <div style="text-align:center;margin-bottom:8px;">
-                                    <img src="https://fun-dwar.com/images/data/bots/skelet.jpg" width="490" height="450" alt="{{ $page->monster->name }}" border="0">
-                                </div>
+                                @php
+                                    $monsterImage = $page->monster->image
+                                        ? (\Illuminate\Support\Str::startsWith($page->monster->image, ['http://', 'https://'])
+                                            ? $page->monster->image
+                                            : asset(ltrim($page->monster->image, '/')))
+                                        : 'https://fun-dwar.com/images/data/bots/skelet.jpg';
+                                @endphp
+                                <table width="490" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
+                                    <tbody>
+                                    <tr height="22">
+                                        <td width="20" align="right" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}" width="20" height="22" alt></td>
+                                        <td class="tbl-shp_sml-top" valign="top" align="center">&nbsp;</td>
+                                        <td width="20" align="left" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}" width="20" height="22" alt></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-usi_left">&nbsp;</td>
+                                        <td class="tbl-usi_bg" align="center" valign="middle" style="padding:4px;">
+                                            <img src="{{ $monsterImage }}" width="100%" alt="{{ $page->monster->name }}" border="0" style="display:block;width:100%;height:auto;">
+                                        </td>
+                                        <td class="tbl-usi_right">&nbsp;</td>
+                                    </tr>
+                                    <tr height="18">
+                                        <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt></td>
+                                        <td class="tbl-shp_sml-bottom" valign="top" align="center">&nbsp;</td>
+                                        <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
 
                                 @if($page->monster->description)
                                 <table width="490" border="0" cellspacing="0" cellpadding="0" class="mrg-top">

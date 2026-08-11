@@ -17,6 +17,7 @@
         .location-description { margin-top: 15px; margin-bottom: 10px; }
         .battle-description { margin-top: 15px; }
         .side-move { margin-top: 30px; }
+        .side-move::after { content: ""; display: block; clear: both; }
         .color-red { color: red; }
         .bg { background-color: #000; background-image: url({{ asset('img/bg/bg.gif') }}); background-attachment: fixed; background-position: 0 5px; }
         .tbl-sts_top { background-image: url({{ asset('img/bg/tbl-sts_top.gif') }}); background-repeat: repeat-x; background-position: bottom; height: 19px; }
@@ -33,6 +34,27 @@
         .tbl-sts_left { background-image: url({{ asset('img/bg/tbl-sts_left.gif') }}); background-repeat: repeat-y; width: 19px; background-position: right; }
         .tbl-sts_right { background-image: url({{ asset('img/bg/tbl-sts_right.gif') }}); background-repeat: repeat-y; width: 19px; }
         .bgg { background-image: url({{ asset('img/bg/bgg.gif') }}); }
+        .location-frame-top { background-image: url({{ asset('img/bg/info/tbl-shp_sml-top.gif') }}); background-repeat: repeat-x; height: 22px; font-size: 1px; }
+        .location-frame-left { background-image: url({{ asset('img/bg/info/tbl-usi_left.gif') }}); background-repeat: repeat-y; background-position: right; width: 20px; }
+        .location-frame-bg { background-image: url({{ asset('img/bg/info/tbl-usi_bg.gif') }}); background-repeat: repeat; }
+        .location-frame-right { background-image: url({{ asset('img/bg/info/tbl-usi_right.gif') }}); background-repeat: repeat-y; width: 20px; }
+        .location-frame-bottom { background-image: url({{ asset('img/bg/info/tbl-shp_sml-bottom.gif') }}); background-repeat: repeat-x; height: 18px; font-size: 1px; }
+        span.butt1 a.button, span.butt1.disabled a.button {
+            height: 38px;
+            display: inline-block;
+            line-height: 35px;
+            border: 0;
+            color: #f8dea4 !important;
+            cursor: pointer;
+            font-family: Tahoma;
+            font-size: 11px !important;
+            font-weight: 700;
+            text-decoration: none;
+            margin: 0 33px;
+            background: transparent url({{ asset('img/bg/btn/tbl-btn2_center.png') }}) center top repeat-x;
+            padding-bottom: 3px;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -45,7 +67,32 @@
                 <b><a href="" class="location-name">{{ $page->name }}</a></b> <span>({{ $page->locationId }})</span>
             </div>
 
-            <div class="location-description">{{ $page->description }}</div>
+            <div style="overflow:hidden;">
+                @if($page->image)
+                    <table width="420" border="0" cellspacing="0" cellpadding="0" style="float:right; margin:0 0 8px 10px;">
+                        <tbody>
+                        <tr height="22">
+                            <td width="20" align="right" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}" width="20" height="22" alt="" style="display:block;"></td>
+                            <td class="location-frame-top" valign="top" align="center">&nbsp;</td>
+                            <td width="20" align="left" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}" width="20" height="22" alt="" style="display:block;"></td>
+                        </tr>
+                        <tr>
+                            <td class="location-frame-left">&nbsp;</td>
+                            <td class="location-frame-bg" align="center" valign="middle" style="padding:4px;">
+                                <img src="{{ $page->image }}" width="100%" alt="{{ $page->name }}" style="display:block;width:100%;height:auto;">
+                            </td>
+                            <td class="location-frame-right">&nbsp;</td>
+                        </tr>
+                        <tr height="18">
+                            <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt="" style="display:block;"></td>
+                            <td class="location-frame-bottom" valign="top" align="center">&nbsp;</td>
+                            <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt="" style="display:block;"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                @endif
+
+                <div class="location-description">{{ $page->description }}</div>
 
             @if($page->dungeonSession !== null)
                 <div style="background:#ffe8b0; border:1px solid #c90; padding:4px 6px; margin-bottom:6px; font-size:11px;">
@@ -115,7 +162,7 @@
                 @endforeach
 
                 <div class="side-move">
-                    <table width="100%" cellspacing="0" cellpadding="0" align="left" border="0">
+                    <table cellspacing="0" cellpadding="0" align="left" border="0">
                         <tbody>
                         <tr>
                             <td width="250px" style="vertical-align: top">
@@ -179,20 +226,11 @@
                                             </a> »
                                         </td>
                                     </tr>
-                                    @if($page->gateActions !== [])
-                                        <tr>
-                                            <td colspan="3" style="padding:0px 0px 4px 0px">
-                                                @foreach($page->gateActions as $gateAction)
-                                                    <a href="{{ $gateAction->url }}" target="game">{{ $gateAction->label }}</a>@if(! $loop->last)<br>@endif
-                                                @endforeach
-                                            </td>
-                                        </tr>
-                                    @endif
                                     </tbody>
                                 </table>
                             </td>
                             <td style="vertical-align: top">
-                                @if($page->structures !== [])
+                                @if($page->structures !== [] || $page->gateActions !== [])
                                     <table border="0" cellspacing="0" cellpadding="0">
                                         <tbody>
                                         <tr height="22">
@@ -203,6 +241,11 @@
                                         <tr>
                                             <td class="tbl-shp-sides ls">&nbsp;</td>
                                             <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 14px 0">
+                                                @foreach($page->gateActions as $gateAction)
+                                                    <div class="structures" style="margin: 5px">
+                                                        <span class="butt1 pointer"><span><a href="{{ $gateAction->url }}" target="game" class="button">{{ $gateAction->label }}</a></span></span>
+                                                    </div>
+                                                @endforeach
                                                 @foreach($page->structures as $structure)
                                                     <div class="structures" style="margin: 5px">
                                                         <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ $structure->entryUrl }}" type="submit">{{ $structure->name }}</button></span></span>
@@ -232,6 +275,7 @@
                     </table>
                 </div>
             @endif
+            </div>
         </td>
     </tr>
     </tbody>
@@ -337,6 +381,10 @@
     let lvl = parseInt('{{ $page->playerFrame->level }}');
 
     parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
+
+    @if(session('message'))
+        try { window.parent.showErrorIframe('{{ session('message') }}'); } catch (e) {}
+    @endif
 </script>
 </body>
 </html>

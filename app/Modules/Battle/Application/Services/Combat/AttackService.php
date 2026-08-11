@@ -481,6 +481,10 @@ readonly class AttackService
         $attackedMonster->status = 0;
         $attackedMonster->save();
 
+        if ($locationMonster->monster->isBoss()) {
+            $locationMonster->monster->scheduleRespawn();
+        }
+
         MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
 
         $this->dropService->dropMoney($player->user, $locationMonster, $result);

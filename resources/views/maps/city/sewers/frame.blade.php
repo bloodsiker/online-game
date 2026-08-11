@@ -230,7 +230,7 @@
     }
 </style>
 
-<table width="833" cellspacing="1" cellpadding="0" id="m0" class="maptable">
+<table width="843" cellspacing="1" cellpadding="0" id="m0" class="maptable">
     <tbody>
     <tr style=" @if(request()->has('hide')) display: none; @endif">
         <th colspan="13" class="t0" align="left" style="padding:5px;font-size:14px;"></th>

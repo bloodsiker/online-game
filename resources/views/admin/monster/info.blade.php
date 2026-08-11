@@ -36,6 +36,11 @@
                                     Механики <span class="badge badge-danger">{{ $monster->mechanics?->count() ?? 0 }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-summon-pool" href="#tab-summon-pool" data-bs-toggle="tab">
+                                    Пул призыва <span class="badge badge-info">{{ $monster->summonPool?->count() ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                         </ul>
 
@@ -66,12 +71,12 @@
                                                 @if($monster->image)
                                                     <div class="mb-1">
                                                         <img id="monster-preview" src="{{ $monster->image }}" alt=""
-                                                             style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
+                                                             style="width:300px;height:300px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
                                                         <small class="text-muted d-block">{{ $monster->image }}</small>
                                                     </div>
                                                 @else
                                                     <img id="monster-preview" src="" alt=""
-                                                         style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                                         style="width:300px;height:300px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
                                                 @endif
                                                 <input type="file" class="form-control mt-1" name="image" id="monster-image" accept="image/*">
                                             </div>
@@ -82,6 +87,19 @@
                                                     <option value="1" @selected($monster->is_boss)>Да</option>
                                                 </select>
                                             </div>
+                                            @if($monster->is_boss)
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Респаун, мин. (от / до)</label>
+                                                    <div class="d-flex gap-1">
+                                                        <input type="number" class="form-control" name="respawn_min_minutes" min="0" value="{{ $monster->respawn_min_minutes }}" placeholder="от">
+                                                        <input type="number" class="form-control" name="respawn_max_minutes" min="0" value="{{ $monster->respawn_max_minutes }}" placeholder="до (пусто = фикс.)">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Следующий респаун (можно поменять вручную)</label>
+                                                    <input type="datetime-local" class="form-control" name="respawn_at" value="{{ $monster->respawn_at?->format('Y-m-d\TH:i') }}">
+                                                </div>
+                                            @endif
                                         </div>
 
                                         <div class="col-lg-4">
@@ -206,8 +224,16 @@
                                             @forelse($monster->locations as $location)
                                                 <tr style="vertical-align: middle">
                                                     <td>{{ $location->id }}</td>
-                                                    <td>[{{ $location->id }}] {{ $location->name }}</td>
-                                                    <td>{{ $location->map?->name ?? '—' }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.location.info', $location->id) }}">[{{ $location->id }}] {{ $location->name }}</a>
+                                                    </td>
+                                                    <td>
+                                                        @if($location->map)
+                                                            <a href="{{ route('admin.map.info', $location->map->id) }}">{{ $location->map->name }}</a>
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
                                                     <td>
                                                         <div class="d-flex gap-1 align-items-center">
                                                             <input type="number" min="0" max="100"
@@ -380,6 +406,50 @@
                                 </div>
                             </div>
 
+                            <div id="tab-summon-pool" class="tab-pane">
+                                <div class="pt-3">
+                                    <p class="text-muted">Кого может призвать этот босс механикой «Вызов миньонов» (SUMMON_MINIONS). Сколько именно
+                                        призывать за раз — задаётся в config самой механики (count или min_count/max_count).</p>
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalSummonPool">Добавить моба в пул</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th>Моб</th>
+                                                <th width="120">Вес (шанс)</th>
+                                                <th width="100"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->summonPool ?? [] as $entry)
+                                                <tr style="vertical-align: middle">
+                                                    <td>
+                                                        @if($entry->minionMonster)
+                                                            <a href="{{ route('admin.monster.info', $entry->minionMonster->id) }}">
+                                                                {{ $entry->minionMonster->name }} (ур. {{ $entry->minionMonster->lvl }})
+                                                            </a>
+                                                        @else
+                                                            <span class="text-muted">— моб удалён —</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $entry->weight }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.monster.boss.summon-pool.delete', [$monster->id, $entry->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Убрать моба из пула призыва?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="3" class="text-center text-muted">Пул пуст — механика «Вызов миньонов» не сработает.</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                             @endif
 
                         </div>
@@ -387,6 +457,36 @@
                 </div>
             </section>
         </div>
+    </div>
+
+    {{-- Модалка: добавить моба в пул призыва --}}
+    <div id="modalSummonPool" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.monster.boss.summon-pool.add', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить моба в пул призыва</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Моб</label>
+                        <select name="minion_monster_id" class="form-control" required>
+                            @foreach($allMonsters ?? [] as $m)
+                                <option value="{{ $m->id }}">{{ $m->name }} (ур. {{ $m->lvl }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Вес (относительный шанс выбора при призыве)</label>
+                        <input type="number" min="1" class="form-control" name="weight" value="1">
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
     </div>
 
     {{-- Модалка: добавить дроп --}}

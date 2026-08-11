@@ -31,7 +31,7 @@
                                 <div class="form-group">
                                     <label class="col-form-label">Изображение</label>
                                     <div class="mb-1">
-                                        <img id="monster-preview" src="" alt="" style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                        <img id="monster-preview" src="" alt="" style="width:300px;height:300px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
                                     </div>
                                     <input type="file" class="form-control" name="image" id="monster-image" accept="image/*">
                                 </div>

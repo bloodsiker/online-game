@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Город Нейрин
+                                            Забытый Курган
                                         </div>
                                     </div>
                                 </div>
@@ -306,40 +306,39 @@
                                                 <div class="bg-inner-t">
                                                     <div class="bg-inner-b">
                                                         <div class="common-content">
-                                                            <div class="container-map" style="max-width: 1200px; overflow: scroll">
-                                                                <table border="0" cellspacing="0" cellpadding="0" class="mrg-top">
-                                                                    <tbody>
-                                                                    <tr height="22">
-                                                                        <td width="20" align="right" valign="bottom"><img
-                                                                                src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}"
-                                                                                width="20" height="22" alt></td>
-                                                                        <td class="tbl-shp_sml-top" valign="top" align="center"></td>
-                                                                        <td width="20" align="left" valign="bottom"><img
-                                                                                src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}"
-                                                                                width="20" height="22" alt></td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tbl-usi_left">&nbsp;</td>
-                                                                        <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px; text-align: justify;">
-                                                                            @include('maps.subcity.frame')
-                                                                        </td>
-                                                                        <td class="tbl-usi_right">&nbsp;</td>
-                                                                    </tr>
-                                                                    <tr height="18">
-                                                                        <td width="20" align="right" valign="top"><img
-                                                                                src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}"
-                                                                                width="20" height="18" alt></td>
-                                                                        <td class="tbl-shp_sml-bottom" valign="top"
-                                                                            align="center">&nbsp;
-                                                                        </td>
-                                                                        <td width="20" align="left" valign="top"><img
-                                                                                src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}"
-                                                                                width="20" height="18" alt></td>
-                                                                    </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
 
+                                                            <table width="490" border="0" cellspacing="0"
+                                                                   cellpadding="0" class="mrg-top">
+                                                                <tbody>
+                                                                <tr height="22">
+                                                                    <td width="20" align="right" valign="bottom"><img
+                                                                            src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}"
+                                                                            width="20" height="22" alt></td>
+                                                                    <td class="tbl-shp_sml-top" valign="top" align="center"></td>
+                                                                    <td width="20" align="left" valign="bottom"><img
+                                                                            src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}"
+                                                                            width="20" height="22" alt></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="tbl-usi_left">&nbsp;</td>
+                                                                    <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px; text-align: justify;">
+                                                                        @include('maps.subcity.zabytiy_kurgan.frame')
+                                                                    </td>
+                                                                    <td class="tbl-usi_right">&nbsp;</td>
+                                                                </tr>
+                                                                <tr height="18">
+                                                                    <td width="20" align="right" valign="top"><img
+                                                                            src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}"
+                                                                            width="20" height="18" alt></td>
+                                                                    <td class="tbl-shp_sml-bottom" valign="top"
+                                                                        align="center">&nbsp;
+                                                                    </td>
+                                                                    <td width="20" align="left" valign="top"><img
+                                                                            src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}"
+                                                                            width="20" height="18" alt></td>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
                                                             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
                                                                 <tbody>
                                                                 <tr>
@@ -377,35 +376,13 @@
                                                                                         <tbody>
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3493,2)"
-                                                                                          onmouseover="mark_l(3493,1)"
-                                                                                          onmouseout="mark_l(3493,0)"><span
-                                                                                            class="listloc">3493</span> <span
+                                                                                    <span class="line-align" onclick="mark_l(883,2)"
+                                                                                          onmouseover="mark_l(883,1)"
+                                                                                          onmouseout="mark_l(883,0)"><span
+                                                                                            class="listloc">883</span> <span
                                                                                             style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MzcwMQ#3494">Домик охотника</a> <span
-                                                                                            class="listloc">3494</span></span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class>
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3571,2)"
-                                                                                          onmouseover="mark_l(3571,1)"
-                                                                                          onmouseout="mark_l(3571,0)"><span
-                                                                                            class="listloc">3571</span> <span
-                                                                                            style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MjAwMA#2000">Эльфийский лес</a> <span
-                                                                                            class="listloc">2000</span></span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3503,2)"
-                                                                                          onmouseover="mark_l(3503,1)"
-                                                                                          onmouseout="mark_l(3503,0)"><span
-                                                                                            class="listloc">3503</span> <span
-                                                                                            style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MjAxMQ#1430">Холмы хоббитов</a> <span
-                                                                                            class="listloc">1430</span></span>
+                                                                                            href="{{ route('on_map', array_merge(['s' => 'Gh865Vpo'], request()->except(['s']))) }}#418">Шепчущий Лес</a> <span
+                                                                                            class="listloc">418</span></span>
                                                                                             </td>
                                                                                         </tr>
                                                                                         </tbody>
@@ -460,23 +437,12 @@
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
                                                                                                 <span class="line-align"
-                                                                                                      style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
-                                                                                                      onclick="area_click(1)"
-                                                                                                      onmouseover="area_show(1,1)"
-                                                                                                      onmouseout="area_show(1,0)"><span
-                                                                                                        class="a1 listloc"
-                                                                                                        style="">&nbsp;</span> - Город Нейрин</span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class>
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                                <span class="line-align"
-                                                                                                      style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
-                                                                                                      onclick="area_click(3028)"
-                                                                                                      onmouseover="area_show(3028,1)"
-                                                                                                      onmouseout="area_show(3028,0)"><span
-                                                                                                        class="a3028 listloc"
-                                                                                                        style="">&nbsp;</span> - Пастбища</span>
+                                                                                                    style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
+                                                                                                    onclick="area_click(883)"
+                                                                                                    onmouseover="area_show(883,1)"
+                                                                                                    onmouseout="area_show(883,0)"><span
+                                                                                                        class="a883 listloc"
+                                                                                                        style="">&nbsp;</span> - Забытый Курган</span>
                                                                                             </td>
                                                                                         </tr>
                                                                                         <tr class="bg_l">

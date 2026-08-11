@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('monsters', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->integer('lvl');
             $table->integer('hp');
             $table->integer('armor');

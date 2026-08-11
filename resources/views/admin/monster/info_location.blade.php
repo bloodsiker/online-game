@@ -38,9 +38,9 @@
                                         <tr style="vertical-align: middle">
                                             <td class="text-center">{{ $location->id }}</td>
                                             <td>
-                                                <a href="">[{{ $location->map->name }}]</a>
+                                                <a href="{{ route('admin.map.info', $location->map->id) }}">[{{ $location->map->name }}]</a>
                                                 &nbsp;
-                                                <a href="" target="_blank">{{ $location->name }} [{{ $location->id }}]</a>
+                                                <a href="{{ route('admin.location.info', $location->id) }}">{{ $location->name }} [{{ $location->id }}]</a>
                                             </td>
                                             <td>
                                                 <form action="{{ route('admin.monster.info.location.aggression', ['monster' => $monster->id, 'location' => $location->id]) }}" method="post" class="d-flex gap-1">
@@ -104,5 +104,4 @@
         </section>
     </div>
 @endsection
-
 

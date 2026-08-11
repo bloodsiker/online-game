@@ -6,7 +6,7 @@
 
 @section('body')
 
-    <form action="{{ route('admin.location.info', $location->id) }}" method="post">
+    <form action="{{ route('admin.location.info', $location->id) }}" method="post" enctype="multipart/form-data">
         {{ csrf_field() }}
         <div class="row">
 
@@ -22,6 +22,20 @@
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="5">{{ $location->description }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Изображение</label>
+                            @if($location->image)
+                                <div class="mb-1">
+                                    <img id="location-preview" src="{{ $location->image }}" alt=""
+                                         style="width:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
+                                    <small class="text-muted d-block">{{ $location->image }}</small>
+                                </div>
+                            @else
+                                <img id="location-preview" src="" alt=""
+                                     style="width:90px;height:135px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                            @endif
+                            <input type="file" class="form-control mt-1" name="image" id="location-image" accept="image/*">
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Карта</label>
@@ -238,6 +252,14 @@
 
 @push('footer_scripts')
 <script>
+    document.getElementById('location-image').addEventListener('change', function () {
+        const preview = document.getElementById('location-preview');
+        if (this.files[0]) {
+            preview.src = URL.createObjectURL(this.files[0]);
+            preview.style.display = 'block';
+        }
+    });
+
     var locationAjax = {
         url: '{{ route('admin.api.locations') }}',
         dataType: 'json',

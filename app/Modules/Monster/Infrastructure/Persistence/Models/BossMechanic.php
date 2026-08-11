@@ -47,7 +47,9 @@ class BossMechanic extends Model
             );
         }
 
-        return new $class($this);
+        // Через контейнер, а не new — щоб механіки могли отримувати додаткові
+        // залежності (репозиторії тощо) поза єдиним параметром $mechanic.
+        return app($class, ['mechanic' => $this]);
     }
 
     /**

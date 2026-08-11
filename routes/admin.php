@@ -77,6 +77,8 @@ Route::post('/monster/{monster}/mechanic', [MonsterController::class, 'addMechan
 Route::post('/monster/{monster}/mechanic/{mechanic}', [MonsterController::class, 'updateMechanic'])->name('monster.boss.mechanic.update');
 Route::get('/monster/{monster}/mechanic/{mechanic}/delete', [MonsterController::class, 'deleteMechanic'])->name('monster.boss.mechanic.delete');
 Route::get('/monster/{monster}/mechanic/{mechanic}/toggle', [MonsterController::class, 'toggleMechanic'])->name('monster.boss.mechanic.toggle');
+Route::post('/monster/{monster}/summon-pool', [MonsterController::class, 'addSummonPool'])->name('monster.boss.summon-pool.add');
+Route::get('/monster/{monster}/summon-pool/{summonPool}/delete', [MonsterController::class, 'deleteSummonPool'])->name('monster.boss.summon-pool.delete');
 Route::match(['GET', 'POST'], '/monster/{monster}', [MonsterController::class, 'info'])->name('monster.info');
 Route::get('/monsters', [MonsterController::class, 'list'])->name('monsters');
 

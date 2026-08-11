@@ -287,6 +287,11 @@
                                 </td>
                                 <td width="19"><img id="right_1" src="{{ asset($data->getGroup() === 'main' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
+                                <td width="19"><img id="left_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
+                                <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                    <a id="center_misc" href="{{ route('backpack', ['group' => 'misc']) }}" title="Разное" class="{{ $data->getGroup() === 'misc' ? 'btn_2' : 'btn_1' }}">Разное</a></td>
+                                <td width="19"><img id="right_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
+
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'key' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
                                     <a id="center_2" href="{{ route('backpack', ['group' => 'key']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'key' ? 'btn_2' : 'btn_1' }}">Ключи</a></td>
@@ -468,7 +473,7 @@
                                             @endif
                                         @endif
 
-                                        @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift')
+                                        @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift' || $data->getGroup() === 'misc')
                                             @foreach($data->getBackpack() as $item)
                                                 <tr class="{{ $loop->index % 2 == 0 ? 'l0' : 'l1' }}">
                                                     <td class="itm" data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Repositories\MonsterOnLocationRepository;
@@ -12,10 +13,13 @@ readonly class MonsterSpawner
     public function __construct(
         private MonsterOnLocationRepository $monsterRepo,
         private AggressionChecker $aggressionChecker,
+        private BossRespawnService $bossRespawnService,
     ) {}
 
     public function spawnAndGetAggressive(Location $location, ?int $dungeonSessionId = null): Collection
     {
+        $this->bossRespawnService->respawnIfDue($location, $dungeonSessionId);
+
         if (! $this->canRespawn($location)) {
             return collect();
         }
@@ -67,7 +71,11 @@ readonly class MonsterSpawner
         }
 
         $toAdd = mt_rand(1, $maxAdd);
-        $available = $location->monsters;
+        $available = $location->monsters->reject(fn (Monster $monster) => $monster->isBoss());
+
+        if ($available->isEmpty()) {
+            return collect();
+        }
 
         $spawned = collect();
         for ($i = 0; $i < $toAdd; $i++) {
