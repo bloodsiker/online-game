@@ -24,5 +24,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SurvivalArenaSeeder::class);
         $this->call(BuffSkillSeeder::class);
         $this->call(EventActivitySeeder::class);
+        $this->call(HighTierEquipmentSeeder::class);
     }
 }
