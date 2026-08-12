@@ -15,6 +15,14 @@ final class FightHitDTO
     /** Урон, погашенный блоком щита и отражённый обратно атакующему (0 — блок не сработал) */
     protected int $reflectedDamage = 0;
 
+    /**
+     * Сработал ли блок щита. Отдельный флаг, а не «reflectedDamage > 0»:
+     * applyShieldBlock() гасит максимум damage-1, поэтому на удар в 1 урон
+     * блок срабатывает, но гасит 0 — по отражению такой блок неотличим от
+     * его отсутствия, а навык «Владение щитом» должен его засчитать.
+     */
+    protected bool $blocked = false;
+
     protected bool $dodge = false;
 
     protected bool $critical = false;
@@ -68,6 +76,18 @@ final class FightHitDTO
     public function setReflectedDamage(int $reflectedDamage): self
     {
         $this->reflectedDamage = $reflectedDamage;
+
+        return $this;
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->blocked;
+    }
+
+    public function setBlocked(bool $blocked): self
+    {
+        $this->blocked = $blocked;
 
         return $this;
     }

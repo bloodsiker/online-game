@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\ItemRarity;
+use App\Models\Skill;
 use App\Modules\Item\Domain\Services\EquipmentStatFormulas;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
@@ -77,6 +78,24 @@ class HighTierEquipmentSeeder extends Seeder
     private const WEAPON_SKILL_ID = 3;
 
     private const WEAPON_SKILL_EXP = 2;
+
+    /**
+     * Щит качает «Владение щитом» — навык начисляется ЗА УСПЕШНЫЙ БЛОК, а не
+     * за удар (см. MonsterAttackService::gainShieldSkill). Ищется по имени, а
+     * не по id: навык создаётся либо GenerateSeed на пустой базе, либо
+     * миграцией add_shield_mastery_skill на живой.
+     */
+    private const SHIELD_SKILL_NAME = 'Владение щитом';
+
+    /** Опыт за блок выше оружейного (2): блок срабатывает лишь в block_chance случаев */
+    private const SHIELD_SKILL_EXP = 7;
+
+    /**
+     * Гейт по навыку = 1.8 × уровня предмета — тот же коэффициент, что у
+     * единственного оружейного гейта («Полуторный меч»: предмет 10 lvl,
+     * требует 18 навыка). round(58 × 1.8) = 104.
+     */
+    private const SHIELD_SKILL_REQUIREMENT = 104;
 
     /**
      * Множители урона по стилю боя — те же константы, что в Тире2
@@ -220,8 +239,12 @@ class HighTierEquipmentSeeder extends Seeder
                 'is_two_hand' => $isTwoHand ? 1 : 0,
                 // Картинки не задаются: ассетов для Тира3 нет, проставляются отдельно
                 'image' => null,
-                'skill_id' => $isWeapon ? self::WEAPON_SKILL_ID : null,
-                'skill_exp' => $isWeapon ? self::WEAPON_SKILL_EXP : null,
+                'skill_id' => $this->skillIdFor($type),
+                'skill_exp' => match ($type) {
+                    ShareItemType::WEAPON => self::WEAPON_SKILL_EXP,
+                    ShareItemType::SHIELD => self::SHIELD_SKILL_EXP,
+                    default => null,
+                },
             ]
         );
 
@@ -239,6 +262,17 @@ class HighTierEquipmentSeeder extends Seeder
 
         if ($type === ShareItemType::SHIELD) {
             $this->addShieldBlockStats($item->id);
+
+            $skillId = $this->skillIdFor($type);
+
+            if ($skillId !== null) {
+                ShareItemRequirement::create([
+                    'share_item_id' => $item->id,
+                    'type' => ShareItemRequirementType::SKILL,
+                    'skill_id' => $skillId,
+                    'min_value' => self::SHIELD_SKILL_REQUIREMENT,
+                ]);
+            }
         }
 
         // Вторичная стата под архетип — той же величины, что броня слота (как в Тире2)
@@ -271,6 +305,16 @@ class HighTierEquipmentSeeder extends Seeder
 
         $this->addStat(itemId: $itemId, statType: ShareItemStatType::ATTACK_MIN, value: $min);
         $this->addStat(itemId: $itemId, statType: ShareItemStatType::ATTACK_MAX, value: $max);
+    }
+
+    /** Навык предмета по типу; щит — поиском по имени, см. SHIELD_SKILL_NAME */
+    private function skillIdFor(ShareItemType $type): ?int
+    {
+        return match ($type) {
+            ShareItemType::WEAPON => self::WEAPON_SKILL_ID,
+            ShareItemType::SHIELD => Skill::where('name', self::SHIELD_SKILL_NAME)->value('id'),
+            default => null,
+        };
     }
 
     private function addShieldBlockStats(int $itemId): void

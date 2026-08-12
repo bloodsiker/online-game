@@ -69,9 +69,9 @@ readonly class HitCalculator
         $final = $damage * ($armorConstant / ($armorConstant + $this->effectiveArmor($attacker, $defender, $isCrit)));
         $final = max(1, (int) round($final));
 
-        [$final, $reflected] = $this->applyShieldBlock($defender, $final);
+        [$final, $reflected, $blocked] = $this->applyShieldBlock($defender, $final);
 
-        return $dto->setDamage($final)->setReflectedDamage($reflected);
+        return $dto->setDamage($final)->setReflectedDamage($reflected)->setBlocked($blocked);
     }
 
     /**
@@ -79,18 +79,18 @@ readonly class HitCalculator
      * (flat + percent от урона) гасится ПОЛНОСТЬЮ и в том же объёме
      * отражается атакующему — см. StarterEquipmentSeeder / обсуждение баланса щита.
      *
-     * @return array{0: int, 1: int} [итоговый урон защитнику, отражённый урон атакующему]
+     * @return array{0: int, 1: int, 2: bool} [итоговый урон защитнику, отражённый урон атакующему, сработал ли блок]
      */
     private function applyShieldBlock(FightHitInterface $defender, int $damage): array
     {
         if ($defender->getBlockChance() <= 0 || ! $this->random->chance((float) $defender->getBlockChance())) {
-            return [$damage, 0];
+            return [$damage, 0, false];
         }
 
         // Не даём блоку срезать урон до 0 — хотя бы 1 всегда проходит
         $absorbed = min($damage - 1, $defender->getBlockFlat() + (int) round($damage * $defender->getBlockPercent() / 100));
 
-        return [$damage - $absorbed, $absorbed];
+        return [$damage - $absorbed, $absorbed, true];
     }
 
     /**

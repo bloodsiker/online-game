@@ -13,7 +13,10 @@ use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Services\PlayerSkillService;
 
 readonly class MonsterAttackService
 {
@@ -24,6 +27,7 @@ readonly class MonsterAttackService
         private PlayerStatService $statService,
         private PlayerRunePassiveService $runePassiveService,
         private RandomizerInterface $random,
+        private PlayerSkillService $playerSkillService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -48,7 +52,7 @@ readonly class MonsterAttackService
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
+        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
     }
 
     /**
@@ -93,9 +97,14 @@ readonly class MonsterAttackService
      * Блок щита: если сработал (HitCalculator::applyShieldBlock), отражённый
      * урон снимается с HP моба — FightOrchestrator сам проверит hp_now<=0
      * и обработает смерть моба тем же путём, что и обычный удар игрока.
+     * Заодно единственная точка, где блок засчитывается в навык щита.
      */
-    private function applyShieldBlockReflect(FightHitDTO $hit, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    private function applyShieldBlockReflect(Player $player, FightHitDTO $hit, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
+        // До проверки отражения: блок мог сработать, но погасить 0 урона
+        // (см. FightHitDTO::$blocked) — навык такой блок всё равно засчитывает
+        $this->gainShieldSkill($player, $hit);
+
         $reflected = $hit->getReflectedDamage();
 
         if ($reflected <= 0) {
@@ -108,6 +117,53 @@ readonly class MonsterAttackService
             '<p><b class="color-reflect">🛡 Щит заблокировал удар и отразил %d урона обратно!</b></p>',
             $reflected
         ));
+    }
+
+    /**
+     * Навык щита («Владение щитом») качается ЗА УСПЕШНЫЙ БЛОК, а не за каждый
+     * удар — в отличие от оружейных навыков, которые начисляются в
+     * AttackService на каждом попадании игрока. Поэтому у щитов
+     * share_items.skill_exp заметно выше, чем у оружия: блок срабатывает лишь
+     * в части раундов (block_chance), и без компенсации навык качался бы в
+     * несколько раз медленнее оружейного.
+     *
+     * Навык берётся с самого предмета-щита (skill_id/skill_exp), а не по
+     * захардкоженному id — так же, как оружие передаёт свой навык через
+     * FightHitDTO::getWeapon().
+     */
+    private function gainShieldSkill(Player $player, FightHitDTO $hit): void
+    {
+        if (! $hit->isBlocked()) {
+            return;
+        }
+
+        $shield = $this->equippedShield($player);
+
+        if (! $shield) {
+            return;
+        }
+
+        $this->playerSkillService->gainExperienceSkill($player, $shield->skill, $shield);
+    }
+
+    /** Щит может быть в любой руке — ищем предмет типа SHIELD среди обеих */
+    private function equippedShield(Player $player): ?ShareItem
+    {
+        $equip = $player->playerEquip;
+
+        if (! $equip) {
+            return null;
+        }
+
+        foreach ([$equip->handLeft, $equip->handRight] as $item) {
+            $info = $item?->itemInfo;
+
+            if ($info && $info->type === ShareItemType::SHIELD) {
+                return $info;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -222,7 +278,7 @@ readonly class MonsterAttackService
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
+        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
     }
 
     private function executeBossSpecialSkill(
@@ -299,7 +355,7 @@ readonly class MonsterAttackService
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($hit, $locationMonster, $result);
+        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
 
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);

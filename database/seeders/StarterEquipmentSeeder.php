@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\ItemRarity;
+use App\Models\Skill;
 use App\Modules\Item\Domain\Services\EquipmentStatFormulas;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
@@ -327,6 +328,24 @@ class StarterEquipmentSeeder extends Seeder
     /** Оба меча Тира1 качают навык «Рубящее оружие» (id=3, см. Skill::all()) */
     private const TIER1_WEAPON_SKILL_ID = 3;
 
+    /**
+     * Щиты качают «Владение щитом» — отдельный навык, который начисляется
+     * ЗА УСПЕШНЫЙ БЛОК, а не за каждый удар (см. MonsterAttackService::
+     * gainShieldSkill). Ищется по имени, а не по id: навык создаётся либо
+     * GenerateSeed::createSkills() на пустой базе, либо миграцией
+     * add_shield_mastery_skill на живой — id в этих двух путях может разойтись.
+     */
+    private const SHIELD_SKILL_NAME = 'Владение щитом';
+
+    /**
+     * Опыт за блок выше оружейного (2), потому что блок срабатывает лишь в
+     * block_chance случаев: 7 × 0.27 ≈ 1.9 за раунд — паритет с оружием.
+     */
+    private const SHIELD_SKILL_EXP = 7;
+
+    /** Гейт по навыку только у Тир2-щита; Тир1-щит (16 lvl) свободен, иначе навык негде начать качать */
+    private const TIER2_SHIELD_SKILL_REQUIREMENT = 79;
+
     /** Стартовое оружие («Тесак Головореза») даёт 1 опыт навыка за удар */
     private const TIER1_SKILL_EXP_STARTER = 1;
 
@@ -439,8 +458,12 @@ class StarterEquipmentSeeder extends Seeder
                 'price' => (int) round(50 * $level ** 1.5),
                 'is_two_hand' => 0,
                 'image' => $image,
-                'skill_id' => $type === ShareItemType::WEAPON ? self::TIER1_WEAPON_SKILL_ID : null,
-                'skill_exp' => $type === ShareItemType::WEAPON ? self::TIER1_SKILL_EXP_STARTER : null,
+                'skill_id' => $this->skillIdFor($type),
+                'skill_exp' => match ($type) {
+                    ShareItemType::WEAPON => self::TIER1_SKILL_EXP_STARTER,
+                    ShareItemType::SHIELD => self::SHIELD_SKILL_EXP,
+                    default => null,
+                },
             ]
         );
 
@@ -469,6 +492,20 @@ class StarterEquipmentSeeder extends Seeder
         ]);
 
         return true;
+    }
+
+    /**
+     * Навык предмета по его типу. Щит ищется по имени навыка, а не по константе-id:
+     * «Владение щитом» создаётся либо GenerateSeed на пустой базе, либо миграцией
+     * add_shield_mastery_skill на живой, и id в этих путях может разойтись.
+     */
+    private function skillIdFor(ShareItemType $type): ?int
+    {
+        return match ($type) {
+            ShareItemType::WEAPON => self::TIER1_WEAPON_SKILL_ID,
+            ShareItemType::SHIELD => Skill::where('name', self::SHIELD_SKILL_NAME)->value('id'),
+            default => null,
+        };
     }
 
     private function addShieldBlockStats(int $itemId): void
@@ -565,8 +602,12 @@ class StarterEquipmentSeeder extends Seeder
                 'price' => (int) round(80 * $level ** 1.5),
                 'is_two_hand' => $isTwoHand ? 1 : 0,
                 'image' => $image,
-                'skill_id' => $type === ShareItemType::WEAPON ? self::TIER1_WEAPON_SKILL_ID : null,
-                'skill_exp' => $type === ShareItemType::WEAPON ? self::TIER1_SKILL_EXP_ADVANCED : null,
+                'skill_id' => $this->skillIdFor($type),
+                'skill_exp' => match ($type) {
+                    ShareItemType::WEAPON => self::TIER1_SKILL_EXP_ADVANCED,
+                    ShareItemType::SHIELD => self::SHIELD_SKILL_EXP,
+                    default => null,
+                },
             ]
         );
 
@@ -594,6 +635,17 @@ class StarterEquipmentSeeder extends Seeder
             // Тир2-щит существует только у Танка (см. weaponVariantOverride) — те же откалиброванные
             // числа Тира1, ПЕРЕПРОВЕРИТЬ симуляцией отдельно, когда появятся мобы 20-50 уровня.
             $this->addShieldBlockStats($item->id);
+
+            $skillId = $this->skillIdFor($type);
+
+            if ($skillId !== null) {
+                ShareItemRequirement::create([
+                    'share_item_id' => $item->id,
+                    'type' => ShareItemRequirementType::SKILL,
+                    'skill_id' => $skillId,
+                    'min_value' => self::TIER2_SHIELD_SKILL_REQUIREMENT,
+                ]);
+            }
         }
 
         ShareItemRequirement::create(['share_item_id' => $item->id, 'type' => ShareItemRequirementType::LEVEL, 'min_value' => $level]);

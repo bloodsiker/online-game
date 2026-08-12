@@ -1068,6 +1068,13 @@ class GenerateSeed extends Command
         $skill2->save();
 
         $this->skill2 = $skill2;
+
+        // Качается за успешный блок, а не за удар — см. MonsterAttackService::gainShieldSkill.
+        // На живых базах этот же навык добавляет миграция add_shield_mastery_skill.
+        $skill3 = new Skill;
+        $skill3->name = 'Владение щитом';
+        $skill3->type = 'combat';
+        $skill3->save();
     }
 
     public function createShareActions()
