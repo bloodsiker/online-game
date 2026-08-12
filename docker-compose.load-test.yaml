@@ -1,0 +1,4 @@
+services:
+  php-www:
+    environment:
+      DB_DATABASE: game_load_test

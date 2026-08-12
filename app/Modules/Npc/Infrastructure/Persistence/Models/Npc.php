@@ -7,6 +7,7 @@ namespace App\Modules\Npc\Infrastructure\Persistence\Models;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,11 @@ class Npc extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'description', 'image', 'location_id'];
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
 
     public function location(): BelongsTo
     {

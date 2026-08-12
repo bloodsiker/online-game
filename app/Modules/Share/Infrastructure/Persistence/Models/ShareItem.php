@@ -61,7 +61,7 @@ class ShareItem extends Model
     protected function image(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value !== null && $value !== '' ? $value : self::DEFAULT_IMAGE,
+            get: fn (?string $value) => $value !== null && $value !== '' ? resolve_storage_image_url($value) : self::DEFAULT_IMAGE,
         );
     }
 

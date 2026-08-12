@@ -170,7 +170,7 @@
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 2px;">
                                     @if($npc->image)
-                                        <img src="{{ asset($npc->image) }}" alt="{{ $npc->name }}" width="190" height="171"><br>
+                                        <img src="{{ $npc->image }}" alt="{{ $npc->name }}" width="190" height="171"><br>
                                     @endif
                                     <div class="p2v" style="padding: 4px 6px;">{!! $npc->description !!}</div>
                                 </td>

@@ -32,7 +32,7 @@
                             <label class="col-form-label">Изображение</label>
                             @if($npc->image)
                                 <div class="mb-1">
-                                    <img id="npc-preview" src="{{ Storage::url($npc->image) }}" alt=""
+                                    <img id="npc-preview" src="{{ $npc->image }}" alt=""
                                          style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
                                 </div>
                             @else

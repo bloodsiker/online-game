@@ -32,7 +32,7 @@
                                     <td>{{ $npc->id }}</td>
                                     <td>
                                         @if($npc->image)
-                                            <img src="{{ Storage::url($npc->image) }}" style="width:36px;height:36px;object-fit:contain;" alt="">
+                                            <img src="{{ $npc->image }}" style="width:36px;height:36px;object-fit:contain;" alt="">
                                         @endif
                                     </td>
                                     <td>

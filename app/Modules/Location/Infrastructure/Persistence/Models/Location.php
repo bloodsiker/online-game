@@ -11,6 +11,7 @@ use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,11 @@ class Location extends Model
         return [
             'last_respawn_monster_at' => 'datetime',
         ];
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
     }
 
     public function northSide(): BelongsTo

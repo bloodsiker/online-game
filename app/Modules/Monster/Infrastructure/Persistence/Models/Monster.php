@@ -9,6 +9,7 @@ use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,11 @@ class Monster extends Model implements FightHitInterface
         'is_boss' => 'boolean',
         'respawn_at' => 'datetime',
     ];
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
 
     public function locations(): BelongsToMany
     {

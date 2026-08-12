@@ -101,6 +101,6 @@ class LocationController extends Controller
 
     private function storeImage(UploadedFile $file): string
     {
-        return '/storage/'.$file->store('locations', 'public');
+        return $file->store('locations', 'public');
     }
 }

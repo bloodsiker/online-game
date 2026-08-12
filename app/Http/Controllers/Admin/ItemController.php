@@ -222,7 +222,7 @@ class ItemController extends Controller
 
     private function storeItemImage(UploadedFile $file): string
     {
-        return '/storage/'.$file->store('items', 'public');
+        return $file->store('items', 'public');
     }
 
     public function addRequirement(Request $request, ShareItem $item): RedirectResponse

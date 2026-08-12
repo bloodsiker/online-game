@@ -414,7 +414,7 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                                    <img src="{{ asset($npc->image) }}" alt="{{ $npc->name }}" width="190"
+                                    <img src="{{ $npc->image }}" alt="{{ $npc->name }}" width="190"
                                          height="171"><br>
                                     <div class="p2v">
                                         {!! $npc->description !!}

@@ -277,6 +277,6 @@ class MonsterController extends Controller
 
     private function storeImage(UploadedFile $file): string
     {
-        return '/storage/'.$file->store('monsters', 'public');
+        return $file->store('monsters', 'public');
     }
 }

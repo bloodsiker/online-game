@@ -334,7 +334,7 @@
         <td width="48" height="48">
             <div class="a883" style="">
                 <div id="u904">
-                    <div id="l904" class="s2box bt br">
+                    <div id="l904" class="s2box bt br bb">
                         <s id="z904">0</s>904
                     </div>
                 </div>
