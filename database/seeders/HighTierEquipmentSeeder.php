@@ -31,7 +31,8 @@ use Illuminate\Database\Seeder;
  * одноручное+щит / дуал-вилд / двуручное, с теми же множителями урона.
  *
  * Раскладка — ОДНА волна: 8 слотов на сет, по одному примерно на каждые
- * 5 уровней (55,60,65,70,75,80,85,90), итого 24 предмета. Альтернативы (две
+ * 5 уровней (55,60,65,70,75,80,85,90), плюс щит у Танка на 58 — итого
+ * 25 предметов. Альтернативы (две
  * ступени 50-70/70-90 или полные комплекты каждые 10 уровней) отклонены:
  * вещь устаревала бы быстрее, чем окупается заточка (+15 даёт ×1.75, а рост
  * брони за все 40 уровней — ×1.83), то есть заточка обесценивалась бы.
@@ -64,6 +65,14 @@ class HighTierEquipmentSeeder extends Seeder
     /** Оружие открывается первым и единственный раз за волну — как в Тире2 */
     private const WEAPON_LEVEL = 55;
 
+    /**
+     * Щит идёт следующим шагом после оружия, а не одновременно с ним: обе руки
+     * Танка не должны обновляться одним рывком. Уровень намеренно вне шага в
+     * 5 (55,60,65…) — свой чекпоинт между оружием и нагрудником, как и в
+     * Тире2, где шаг между чекпоинтами тоже неровный (20,22,25,29,34…).
+     */
+    private const SHIELD_LEVEL = 58;
+
     /** Всё оружие качает «Рубящее оружие» (id=3), 2 опыта за удар — как в Тире2 */
     private const WEAPON_SKILL_ID = 3;
 
@@ -82,9 +91,30 @@ class HighTierEquipmentSeeder extends Seeder
     /** Доля уровня, которую предмет требует по гейт-стате — как в Тире2 */
     private const STAT_REQUIREMENT_SHARE = 0.6;
 
+    /**
+     * Щит существует только у Танка: «Призрачный» дерётся двумя клинками
+     * (вторая рука занята), «Жнец» — двуручной косой. Так же и в Тире2.
+     */
+    private const SHIELD_SET_KEY = 'titan';
+
+    /**
+     * Блок щитом (см. HitCalculator::applyShieldBlock) — те же числа, что в
+     * Тире1/Тире2, СОЗНАТЕЛЬНО без масштабирования по уровню. Порог шанса очень
+     * резкий (20% → 30-40% смертей, 33% → ~5-8%, см. StarterEquipmentSeeder::
+     * SHIELD_BLOCK_CHANCE), поэтому менять его можно только повторной
+     * симуляцией, а не экстраполяцией — а мобов выше 50 уровня для симуляции
+     * пока нет. Тир2 по той же причине унаследовал числа Тира1 без правок.
+     */
+    private const SHIELD_BLOCK_CHANCE = 27;
+
+    private const SHIELD_BLOCK_FLAT = 10;
+
+    private const SHIELD_BLOCK_PERCENT = 50;
+
     /** slotKey => [уровень открытия, слот, тип] */
     private const SLOTS = [
         'weapon' => [self::WEAPON_LEVEL, ShareItemSlot::HAND, ShareItemType::WEAPON],
+        'shield' => [self::SHIELD_LEVEL, ShareItemSlot::HAND, ShareItemType::SHIELD],
         'armor' => [60, ShareItemSlot::ARMOR, ShareItemType::ARMOR],
         'shoes' => [65, ShareItemSlot::SHOES, ShareItemType::ARMOR],
         'forearm' => [70, ShareItemSlot::FOREARM, ShareItemType::ARMOR],
@@ -109,6 +139,7 @@ class HighTierEquipmentSeeder extends Seeder
     private const NAMES = [
         'titan' => [
             'weapon' => 'Молот «Титан»',
+            'shield' => 'Щит «Титан»',
             'armor' => 'Нагрудник «Титан»',
             'shoes' => 'Сапоги «Титан»',
             'forearm' => 'Наручи «Титан»',
@@ -145,6 +176,10 @@ class HighTierEquipmentSeeder extends Seeder
 
         foreach (self::SETS as $setKey => [$secondaryStat, $gateStat, $isTwoHand, $damageMultiplier]) {
             foreach (self::SLOTS as $slotKey => [$level, $slot, $type]) {
+                if ($slotKey === 'shield' && $setKey !== self::SHIELD_SET_KEY) {
+                    continue;
+                }
+
                 $isWeapon = $type === ShareItemType::WEAPON;
 
                 $created += (int) $this->createItem(
@@ -202,6 +237,10 @@ class HighTierEquipmentSeeder extends Seeder
             $this->addStat(itemId: $item->id, statType: ShareItemStatType::ARMOR, value: $statValue);
         }
 
+        if ($type === ShareItemType::SHIELD) {
+            $this->addShieldBlockStats($item->id);
+        }
+
         // Вторичная стата под архетип — той же величины, что броня слота (как в Тире2)
         $this->addStat(itemId: $item->id, statType: $secondaryStat, value: $statValue);
 
@@ -232,6 +271,13 @@ class HighTierEquipmentSeeder extends Seeder
 
         $this->addStat(itemId: $itemId, statType: ShareItemStatType::ATTACK_MIN, value: $min);
         $this->addStat(itemId: $itemId, statType: ShareItemStatType::ATTACK_MAX, value: $max);
+    }
+
+    private function addShieldBlockStats(int $itemId): void
+    {
+        $this->addStat(itemId: $itemId, statType: ShareItemStatType::BLOCK_CHANCE, value: self::SHIELD_BLOCK_CHANCE);
+        $this->addStat(itemId: $itemId, statType: ShareItemStatType::BLOCK_FLAT, value: self::SHIELD_BLOCK_FLAT);
+        $this->addStat(itemId: $itemId, statType: ShareItemStatType::BLOCK_PERCENT, value: self::SHIELD_BLOCK_PERCENT);
     }
 
     private function addStat(int $itemId, ShareItemStatType $statType, int $value): void
