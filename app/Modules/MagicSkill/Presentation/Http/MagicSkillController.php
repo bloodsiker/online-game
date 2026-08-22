@@ -65,7 +65,7 @@ class MagicSkillController extends Controller
         return response()->json($result->toArray(), $result->httpCode);
     }
 
-    public function learnFromBook(Request $request, int $item): JsonResponse
+    public function learnFromBook(int $item): JsonResponse
     {
         $result = $this->learnMagicSkillFromBook->execute(Auth::user(), $item);
 

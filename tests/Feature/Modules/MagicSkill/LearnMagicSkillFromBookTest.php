@@ -175,6 +175,64 @@ class LearnMagicSkillFromBookTest extends TestCase
         );
     }
 
+    /**
+     * Регрессия на находку код-ревью Задачи 8: до фикса alreadyLearned проверялся
+     * только один раз, до транзакции. Проигравший гонки за уникальный индекс
+     * player_magic_skills(player_id, magic_skill_id) падал необработанным
+     * QueryException (сырой 500), хотя книга и откатывалась. Симулируем гонку:
+     * подсаживаемся на первый SELECT по player_magic_skills (это и есть
+     * pre-check alreadyLearned) и вставляем конкурирующую строку прямо в этот
+     * момент — ровно между pre-check'ом и INSERT'ом внутри транзакции.
+     */
+    public function test_race_shaped_double_learn_returns_graceful_error_not_a_raw_exception(): void
+    {
+        DB::table('magic_skill_requirements')->insert([
+            'magic_skill_id' => self::MAGIC_SKILL_ID,
+            'type' => 'level',
+            'min_value' => 5,
+        ]);
+
+        $itemId = $this->giveBook(count: 1);
+
+        $raceWinnerInserted = false;
+        DB::listen(function ($query) use (&$raceWinnerInserted): void {
+            if ($raceWinnerInserted || ! str_contains($query->sql, 'player_magic_skills')) {
+                return;
+            }
+
+            $raceWinnerInserted = true;
+
+            DB::table('player_magic_skills')->insert([
+                'player_id' => 1,
+                'magic_skill_id' => self::MAGIC_SKILL_ID,
+                'is_equipped' => false,
+                'cooldown_end_at' => null,
+                'sort_order' => 0,
+            ]);
+        });
+
+        $useCase = $this->makeUseCase();
+        $user = User::findOrFail(1);
+
+        $result = $useCase->execute($user, self::SHARE_ITEM_ID);
+
+        $this->assertFalse($result->ok, 'the race loser must not report success');
+        $this->assertStringContainsString('уже изучено', $result->message);
+        $this->assertSame(
+            1,
+            DB::table('backpacks')->where('item_id', $itemId)->value('count'),
+            'the race loser must not consume the book — the transaction must roll back'
+        );
+        $this->assertSame(
+            1,
+            DB::table('player_magic_skills')
+                ->where('player_id', 1)
+                ->where('magic_skill_id', self::MAGIC_SKILL_ID)
+                ->count(),
+            'exactly one player_magic_skills row (the simulated race winner), no duplicate'
+        );
+    }
+
     private function giveBook(int $count): int
     {
         $itemId = DB::table('items')->insertGetId([

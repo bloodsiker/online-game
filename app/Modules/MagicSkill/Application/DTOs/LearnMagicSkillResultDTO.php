@@ -12,6 +12,7 @@ class LearnMagicSkillResultDTO
         public readonly int $httpCode = 200,
     ) {}
 
+    /** @return array{ok: bool, message: string} */
     public function toArray(): array
     {
         return ['ok' => $this->ok, 'message' => $this->message];
