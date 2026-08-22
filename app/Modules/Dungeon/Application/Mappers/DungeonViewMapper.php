@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Dungeon\Application\Mappers;
 
-use App\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Application\DTOs\ActiveDungeonSessionDTO;
 use App\Modules\Dungeon\Application\DTOs\DungeonIndexPageDTO;
 use App\Modules\Dungeon\Application\DTOs\DungeonShowPageDTO;
 use App\Modules\Dungeon\Application\DTOs\DungeonViewDTO;
+use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use Illuminate\Support\Collection;

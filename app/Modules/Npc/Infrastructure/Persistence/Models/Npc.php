@@ -12,12 +12,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Npc extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'image', 'location_id'];
+    protected $fillable = ['name', 'description', 'image', 'location_id', 'hide_location'];
+
+    protected $casts = [
+        'hide_location' => 'boolean',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Npc $npc): void {
+            $npc->uuid ??= (string) Str::uuid();
+        });
+    }
 
     protected function image(): Attribute
     {

@@ -381,7 +381,7 @@
                                                                                           onmouseout="mark_l(819,0)"><span
                                                                                             class="listloc">819</span> <span
                                                                                             style="font-size:18px;">→</span> <a
-                                                                                            href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#6">Город Нейрин</a> <span
+                                                                                            href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#6">Город</a> <span
                                                                                             class="listloc">6</span></span>
                                                                                             </td>
                                                                                         </tr>
@@ -445,15 +445,17 @@
                                                                                                         style="">&nbsp;</span> - Канализация</span>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @auth
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                                <a href="/i/map.php" class="line-align"><span
+                                                                                                <span class="line-align"><span
                                                                                                         style="margin-top:6px;display:inline-block;"><span
                                                                                                             class="ulocation"><span
                                                                                                                 class="listloc"
-                                                                                                                id="lid">135</span></span> - Вы здесь</span></a>
+                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @endauth
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>

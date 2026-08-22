@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Http\Controllers\Controller;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -22,13 +23,21 @@ class MonsterController extends Controller
     public function list(Request $request): View
     {
         $filters = [
+            'monster_name' => trim((string) $request->query('monster_name', '')),
             'q' => trim((string) $request->query('q', '')),
             'level_from' => $request->query('level_from'),
             'level_to' => $request->query('level_to'),
             'is_boss' => (string) $request->query('is_boss', ''),
         ];
 
+        $monsterNames = Monster::query()
+            ->select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->pluck('name');
+
         $listMonsters = Monster::query()
+            ->when($filters['monster_name'] !== '', fn ($query) => $query->where('name', $filters['monster_name']))
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
                 $query->where(function ($query) use ($search): void {
@@ -43,7 +52,7 @@ class MonsterController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        return view('admin.monster.list', compact('listMonsters', 'filters'));
+        return view('admin.monster.list', compact('listMonsters', 'monsterNames', 'filters'));
     }
 
     public function create(Request $request): mixed
@@ -128,7 +137,7 @@ class MonsterController extends Controller
         return redirect()->back()->with('success', 'Локация добавлена.');
     }
 
-    public function updateLocation(Request $request, Monster $monster, Location $location): \Illuminate\Http\JsonResponse
+    public function updateLocation(Request $request, Monster $monster, Location $location): JsonResponse
     {
         $aggression = $request->input('aggression');
 
@@ -271,7 +280,12 @@ class MonsterController extends Controller
         $monster->respawn_at = $request->filled('respawn_at') ? $request->input('respawn_at') : null;
 
         if ($request->hasFile('image')) {
+            $oldImage = $monster->getRawOriginal('image');
             $monster->image = $this->storeImage($request->file('image'));
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($monster->getRawOriginal('image'));
+            $monster->image = null;
         }
     }
 

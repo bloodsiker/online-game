@@ -40,10 +40,10 @@ class NpcController extends Controller
         ]);
     }
 
-    public function info(int $id)
+    public function info(string $uuid)
     {
         return view('npc::info', [
-            'page' => $this->getNpcInfoPage->execute($id),
+            'page' => $this->getNpcInfoPage->execute($uuid),
         ]);
     }
 

@@ -13,6 +13,10 @@
                     <form action="{{ route('admin.npc.info', $npc->id) }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="form-group">
+                            <label class="col-form-label">UUID</label>
+                            <input type="text" class="form-control" value="{{ $npc->uuid }}" readonly>
+                        </div>
+                        <div class="form-group">
                             <label class="col-form-label">Имя</label>
                             <input type="text" class="form-control" name="name" value="{{ $npc->name }}">
                         </div>
@@ -23,6 +27,10 @@
                                     <option value="{{ $npc->location->id }}" selected>[{{ $npc->location->id }}] {{ $npc->location->name }}</option>
                                 @endif
                             </select>
+                        </div>
+                        <div class="checkbox-custom checkbox-default">
+                            <input type="checkbox" id="hide-location" name="hide_location" value="1" @checked($npc->hide_location)>
+                            <label for="hide-location">Скрывать местоположение в информации об НПС</label>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
@@ -42,6 +50,12 @@
                                 </div>
                             @endif
                             <input type="file" class="form-control mt-1" name="image" id="npc-image" accept="image/*">
+                            @if($npc->getRawOriginal('image'))
+                                <div class="checkbox-custom checkbox-danger mt-1">
+                                    <input type="checkbox" id="npc-delete-image" name="delete_image" value="1">
+                                    <label for="npc-delete-image">Удалить картинку</label>
+                                </div>
+                            @endif
                         </div>
                         <div class="mt-3">
                             <button class="btn btn-primary">Сохранить</button>
@@ -83,6 +97,64 @@
                             <button class="btn btn-primary">Добавить ветку</button>
                         </div>
                     </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="row mt-4" id="quests">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Квесты этого НПС</h2>
+                </header>
+                <div class="card-body">
+                    @php
+                        $questRows = $npc->startQuests
+                            ->map(fn ($quest) => ['quest' => $quest, 'role' => 'Начинает'])
+                            ->concat($npc->completeQuests->map(fn ($quest) => ['quest' => $quest, 'role' => 'Принимает']))
+                            ->sortBy(fn ($row) => $row['quest']->id);
+                    @endphp
+                    @if($questRows->isEmpty())
+                        <div class="text-muted">Этот НПС не участвует ни в одном квесте.</div>
+                    @else
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                <tr>
+                                    <th width="60">ID</th>
+                                    <th>Название</th>
+                                    <th width="120">Роль</th>
+                                    <th width="140">Тип</th>
+                                    <th width="100">Активен</th>
+                                    <th width="90"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($questRows as $row)
+                                    <tr>
+                                        <td>{{ $row['quest']->id }}</td>
+                                        <td>{{ $row['quest']->title }}</td>
+                                        <td>
+                                            <span class="badge {{ $row['role'] === 'Начинает' ? 'badge-success' : 'badge-info' }}">{{ $row['role'] }}</span>
+                                        </td>
+                                        <td>{{ $row['quest']->getTypeLabel() }}</td>
+                                        <td class="text-center">
+                                            @if($row['quest']->is_active)
+                                                <span class="badge badge-success">да</span>
+                                            @else
+                                                <span class="badge badge-secondary">нет</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('admin.quest.info', $row['quest']->id) }}" class="btn btn-primary btn-xs">Открыть</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </section>
         </div>

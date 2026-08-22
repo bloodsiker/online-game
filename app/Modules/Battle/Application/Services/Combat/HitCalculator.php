@@ -2,7 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\FightHitDTO;
+use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;

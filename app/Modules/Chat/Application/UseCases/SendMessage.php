@@ -23,6 +23,7 @@ class SendMessage
      *   prv[NAME] - text   → private message to NAME
      *   to[NAME] - text    → public mention in current channel
      *   [[item_ID]]        → item shortcode
+     *   [[share_item_ID]]  → shared item shortcode
      */
     public function execute(User $sender, string $raw, ChatChannel $defaultChannel): ChatMessage
     {

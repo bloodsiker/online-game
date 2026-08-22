@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Console\Seeders;
 
-use App\Enums\ItemRarity;
 use App\Models\Skill;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
@@ -233,7 +233,6 @@ class ItemsSeeder
         $sItem3->name = 'Сухой паек';
         $sItem3->description = 'Сухой паек';
         $sItem3->count_use = 10;
-        $sItem3->is_heal = 1;
         $sItem3->image = 'https://skazanie.com/img-item/53e82794f638.jpg';
         $sItem3->save();
 

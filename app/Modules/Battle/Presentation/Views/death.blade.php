@@ -131,20 +131,6 @@
 </script>
 
 <script>
-    function deathDebuff() {
-        const curses = [
-            { id: 'death' + Date.now(), name: 'Возрождеие', duration: 1800 },
-        ];
-        const curse = curses[Math.floor(Math.random() * curses.length)];
-
-        parent.sendToFrame('character-frame', { curse });
-    }
-
-    deathDebuff();
-</script>
-
-
-<script>
     let hp = {
         current: parseInt('{{ $player->hp_now }}'),
         max: parseInt('{{ $playerDecorator->getHpMax() }}')

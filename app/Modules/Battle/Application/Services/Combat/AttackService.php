@@ -2,9 +2,8 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\AttackResultDTO;
-use App\DTO\FightHitDTO;
-use App\Events\PlayerLeveledUp;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
@@ -15,12 +14,14 @@ use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 use App\Services\DropService;
+use App\Services\ExperienceService;
 use App\Services\PlayerSkillService;
 
 readonly class AttackService
@@ -29,6 +30,7 @@ readonly class AttackService
         private AttackStrategyResolver $resolver,
         private QuestProgressService $questService,
         private EventActivityProgressService $eventActivityProgressService,
+        private ExperienceService $experienceService,
         private PlayerSkillService $playerSkillService,
         private DropService $dropService,
         private BossShieldService $shieldService,
@@ -488,7 +490,9 @@ readonly class AttackService
         MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
 
         $this->dropService->dropMoney($player->user, $locationMonster, $result);
-        $this->questService->progressKillAndCollect($player, $locationMonster, $result);
+        foreach ($this->questService->progressKillAndCollect($player, $locationMonster) as $message) {
+            $result->logSide($message);
+        }
         $this->eventActivityProgressService->progressKill($player, $locationMonster);
     }
 
@@ -511,6 +515,8 @@ readonly class AttackService
         $levelDifference = $player->lvl - $monster->lvl;
         $levelMultiplier = min(2.0, max(0.01, 1 - 0.05 * $levelDifference));
 
-        return (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier));
+        $baseExperience = (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier));
+
+        return $this->experienceService->calculateGain($player, $baseExperience);
     }
 }

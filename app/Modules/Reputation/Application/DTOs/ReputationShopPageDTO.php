@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Application\DTOs;
 
-use App\DTO\ShopCartDTO;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
@@ -18,7 +17,7 @@ final readonly class ReputationShopPageDTO
         public Collection $categories,
         public ?int $activeCategoryId,
         public Collection $items,
-        public ShopCartDTO $cart,
+        public ReputationShopCartDTO $cart,
         public ?string $message,
         public string $messageType,
         public Player $player,

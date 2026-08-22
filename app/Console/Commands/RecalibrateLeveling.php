@@ -36,18 +36,27 @@ class RecalibrateLeveling extends Command
         'Кабан' => ['level' => 10, 'hpMultiplier' => 1.65, 'armorMitigation' => 0.127, 'dodgePercent' => 6, 'critPercent' => 6, 'dmgPercent' => 11, 'expMultiplier' => 1.4, 'aggression' => 90],
         'Разбойник' => ['level' => 13, 'hpMultiplier' => 1.32, 'armorMitigation' => 0.074, 'dodgePercent' => 14, 'critPercent' => 16, 'dmgPercent' => 11, 'expMultiplier' => 1.3, 'aggression' => 75],
         'Тролль' => ['level' => 16, 'hpMultiplier' => 1.73, 'armorMitigation' => 0.175, 'dodgePercent' => 5, 'critPercent' => 5, 'dmgPercent' => 11, 'expMultiplier' => 1.7, 'aggression' => 70],
-        'Огр' => ['level' => 20, 'hpMultiplier' => 1.54, 'armorMitigation' => 0.145, 'dodgePercent' => 5, 'critPercent' => 6, 'dmgPercent' => 12.5, 'expMultiplier' => 1.9, 'aggression' => 65],
+        // expMultiplier у Огра и всего Тир2 (20-50) снижен до 1.0 — раньше 1.5-2.0
+        // считались «бонусом за сложность», но ExperienceCurve::killsPerLevel()
+        // рассчитывает норму убийств, ПРЕДПОЛАГАЯ множитель ровно 1.0 (см.
+        // referenceMonsterExp). На «Заросшей дороге» (25-36 lvl) это давало
+        // прокачку в 1.44x быстрее задуманного темпа — тот же перекос был и
+        // здесь, просто до реальных 20-50 мобов раньше не доходил живой фарм
+        // (см. обсуждение 2026-08-14). hpMultiplier/armorMitigation/dmgPercent
+        // НЕ трогаем — они калибруют боевую сложность (симуляцией проверено),
+        // это отдельная ось от награды опытом.
+        'Огр' => ['level' => 20, 'hpMultiplier' => 1.54, 'armorMitigation' => 0.145, 'dodgePercent' => 5, 'critPercent' => 6, 'dmgPercent' => 12.5, 'expMultiplier' => 1.0, 'aggression' => 65],
         // Тир2 (20-50) — чекпоинты совпадают со StarterEquipmentSeeder::TIER2_LEVEL_CHECKPOINTS.
         // Все 7 прошли синтетическую проверку battle:simulate-pve с первого раза (95-100% на всех
         // архетипах) — hpMultiplier/armorMitigation/dmgPercent продолжают плавный спад от Огра,
         // чтобы не наступить на «ловушку танка» (см. докблок класса и /admin/docs/battle).
-        'Циклоп' => ['level' => 22, 'hpMultiplier' => 1.5, 'armorMitigation' => 0.13, 'dodgePercent' => 3, 'critPercent' => 3, 'dmgPercent' => 12, 'expMultiplier' => 1.5, 'aggression' => 90],
-        'Химера' => ['level' => 25, 'hpMultiplier' => 1.3, 'armorMitigation' => 0.09, 'dodgePercent' => 8, 'critPercent' => 18, 'dmgPercent' => 11, 'expMultiplier' => 1.6, 'aggression' => 80],
-        'Горгулья' => ['level' => 29, 'hpMultiplier' => 1.35, 'armorMitigation' => 0.16, 'dodgePercent' => 16, 'critPercent' => 4, 'dmgPercent' => 10.5, 'expMultiplier' => 1.7, 'aggression' => 60],
-        'Мантикора' => ['level' => 34, 'hpMultiplier' => 1.3, 'armorMitigation' => 0.09, 'dodgePercent' => 14, 'critPercent' => 15, 'dmgPercent' => 10.5, 'expMultiplier' => 1.8, 'aggression' => 75],
-        'Виверна' => ['level' => 39, 'hpMultiplier' => 1.25, 'armorMitigation' => 0.08, 'dodgePercent' => 20, 'critPercent' => 6, 'dmgPercent' => 10, 'expMultiplier' => 1.85, 'aggression' => 70],
-        'Ледяной великан' => ['level' => 44, 'hpMultiplier' => 1.45, 'armorMitigation' => 0.14, 'dodgePercent' => 3, 'critPercent' => 3, 'dmgPercent' => 11, 'expMultiplier' => 1.9, 'aggression' => 90],
-        'Молодой дракон' => ['level' => 50, 'hpMultiplier' => 1.35, 'armorMitigation' => 0.12, 'dodgePercent' => 8, 'critPercent' => 12, 'dmgPercent' => 10.5, 'expMultiplier' => 2.0, 'aggression' => 70],
+        'Циклоп' => ['level' => 22, 'hpMultiplier' => 1.5, 'armorMitigation' => 0.13, 'dodgePercent' => 3, 'critPercent' => 3, 'dmgPercent' => 12, 'expMultiplier' => 1.0, 'aggression' => 90],
+        'Химера' => ['level' => 25, 'hpMultiplier' => 1.3, 'armorMitigation' => 0.09, 'dodgePercent' => 8, 'critPercent' => 18, 'dmgPercent' => 11, 'expMultiplier' => 1.0, 'aggression' => 80],
+        'Горгулья' => ['level' => 29, 'hpMultiplier' => 1.35, 'armorMitigation' => 0.16, 'dodgePercent' => 16, 'critPercent' => 4, 'dmgPercent' => 10.5, 'expMultiplier' => 1.0, 'aggression' => 60],
+        'Мантикора' => ['level' => 34, 'hpMultiplier' => 1.3, 'armorMitigation' => 0.09, 'dodgePercent' => 14, 'critPercent' => 15, 'dmgPercent' => 10.5, 'expMultiplier' => 1.0, 'aggression' => 75],
+        'Виверна' => ['level' => 39, 'hpMultiplier' => 1.25, 'armorMitigation' => 0.08, 'dodgePercent' => 20, 'critPercent' => 6, 'dmgPercent' => 10, 'expMultiplier' => 1.0, 'aggression' => 70],
+        'Ледяной великан' => ['level' => 44, 'hpMultiplier' => 1.45, 'armorMitigation' => 0.14, 'dodgePercent' => 3, 'critPercent' => 3, 'dmgPercent' => 11, 'expMultiplier' => 1.0, 'aggression' => 90],
+        'Молодой дракон' => ['level' => 50, 'hpMultiplier' => 1.35, 'armorMitigation' => 0.12, 'dodgePercent' => 8, 'critPercent' => 12, 'dmgPercent' => 10.5, 'expMultiplier' => 1.0, 'aggression' => 70],
     ];
 
     public function handle(): int

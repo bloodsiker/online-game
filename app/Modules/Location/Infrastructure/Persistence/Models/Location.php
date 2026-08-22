@@ -6,10 +6,10 @@ namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
 use App\Models\Map;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
-use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -68,7 +68,7 @@ class Location extends Model
     {
         return $this->belongsToMany(Item::class, 'item_on_locations', 'location_id', 'item_id')
             ->with('itemInfo')
-            ->withPivot(['count', 'dungeon_session_id']);
+            ->withPivot(['count', 'dungeon_session_id', 'expires_at']);
     }
 
     public function map(): BelongsTo

@@ -18,6 +18,15 @@ class GetMonsterInfoPage
         $monster = $this->readRepository->findByLocationMonsterId($locationMonsterId);
         abort_if($monster === null, 404);
 
-        return new MonsterInfoPageDTO($monster);
+        $habitatMaps = $monster->locations
+            ->pluck('map')
+            ->filter()
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        return new MonsterInfoPageDTO($monster, $habitatMaps);
     }
 }

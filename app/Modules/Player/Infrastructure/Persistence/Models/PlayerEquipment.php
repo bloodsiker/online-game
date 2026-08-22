@@ -13,6 +13,25 @@ class PlayerEquipment extends Model
 {
     use HasFactory;
 
+    /** @var array<string, string> relation name => database column */
+    public const ITEM_SLOT_RELATIONS = [
+        'handLeft' => 'hand_left',
+        'handRight' => 'hand_right',
+        'helmetSlot' => 'helmet',
+        'shoulderSlot' => 'shoulder',
+        'forearmSlot' => 'forearm',
+        'armorSlot' => 'armor',
+        'leggingSlot' => 'legging',
+        'chainArmorSlot' => 'chain_armor',
+        'cloakSlot' => 'cloak',
+        'shoesSlot' => 'shoes',
+        'glovesSlot' => 'gloves',
+        'beltFirstSlot' => 'belt_first',
+        'beltSecondSlot' => 'belt_second',
+        'bagFirstSlot' => 'bag_first',
+        'bagSecondSlot' => 'bag_second',
+    ];
+
     protected $table = 'player_equipments';
 
     public function player(): BelongsTo

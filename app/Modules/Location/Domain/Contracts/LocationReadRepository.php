@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Location\Domain\Contracts;
 
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 
@@ -26,6 +27,13 @@ interface LocationReadRepository
     public function getLocationUsers(int $locationId): Collection;
 
     public function findDungeonSessionByUserId(int $userId): ?DungeonSession;
+
+    public function findTeleportUseGate(int $shareItemId, int $fromLocationId): ?LocationGate;
+
+    /** @return list<int> */
+    public function getTeleportUseShareItemIds(int $fromLocationId): array;
+
+    public function countItemsOnLocation(User $user, int $locationId): int;
 
     /**
      * @return Collection<int, ItemOnLocation>

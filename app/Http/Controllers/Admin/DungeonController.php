@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\DungeonDeathBehavior;
 use App\Http\Controllers\Controller;
+use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\RedirectResponse;

@@ -6,6 +6,7 @@ namespace App\Services\ItemTooltip;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
@@ -18,7 +19,7 @@ final class ItemTooltipStatsBuilder
     /**
      * @return array<int, array{title: string, value: string}>
      */
-    public static function build(ShareItem $item): array
+    public static function build(ShareItem $item, int $upgradeLvl = 0): array
     {
         $stats = [];
 
@@ -31,6 +32,12 @@ final class ItemTooltipStatsBuilder
         if ($item->is_two_hand) {
             $stats[] = ['title' => 'Тип', 'value' => 'Двуручное'];
         }
+
+        // Бонус заточки: +5% за уровень, так же как считает PlayerStatService::fromEquipment()
+        // (оружие — к урону, слоты брони — к своей броне). Другие слоты заточка не усиливает.
+        $upgradeMultiplier = 1 + ($upgradeLvl * 5 / 100);
+        $isWeaponSlot = $item->slot === ShareItemSlot::HAND;
+        $isArmorSlot = $item->slot !== null && in_array($item->slot, ShareItemSlot::armorSlots(), true);
 
         // Пассивные статы из share_item_stats
         // attack_min и attack_max объединяем в одну строку "X – Y"
@@ -49,11 +56,21 @@ final class ItemTooltipStatsBuilder
                 continue;
             }
 
-            $valueStr = $stat->isPercent() ? $stat->value.'%' : (string) $stat->value;
+            $value = $stat->value;
+            if ($upgradeLvl > 0 && $isArmorSlot && $stat->stat_type === ShareItemStatType::ARMOR && ! $stat->isPercent()) {
+                $value = floor($value * $upgradeMultiplier);
+            }
+
+            $valueStr = $stat->isPercent() ? $value.'%' : (string) $value;
             $stats[] = ['title' => $stat->stat_type->label(), 'value' => '+'.$valueStr];
         }
 
         if ($attackMin !== null || $attackMax !== null) {
+            if ($upgradeLvl > 0 && $isWeaponSlot) {
+                $attackMin = $attackMin !== null ? floor($attackMin * $upgradeMultiplier) : null;
+                $attackMax = $attackMax !== null ? floor($attackMax * $upgradeMultiplier) : null;
+            }
+
             $stats[] = [
                 'title' => 'Атака',
                 'value' => '+'.($attackMin ?? 0).' .. +'.($attackMax ?? 0),

@@ -12,4 +12,5 @@ enum ChatMessageType: string
     case Mention = 'mention';
     case Information = 'information';
     case Quest = 'quest';
+    case QuestItem = 'quest_item';
 }

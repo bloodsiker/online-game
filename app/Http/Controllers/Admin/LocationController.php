@@ -95,7 +95,12 @@ class LocationController extends Controller
         $location->time_not_attack = (int) $request->input('time_not_attack', 0);
 
         if ($request->hasFile('image')) {
+            $oldImage = $location->getRawOriginal('image');
             $location->image = $this->storeImage($request->file('image'));
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($location->getRawOriginal('image'));
+            $location->image = null;
         }
     }
 

@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Modules\Dungeon\Application\Services;
 
-use App\Enums\DungeonCooldownType;
-use App\Enums\DungeonDeathBehavior;
-use App\Enums\DungeonRewardType;
 use App\Models\Party\Party;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Domain\Contracts\DungeonCooldownRepository;
 use App\Modules\Dungeon\Domain\Contracts\DungeonSessionRepository;
 use App\Modules\Dungeon\Domain\Contracts\TransactionManager;
+use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
+use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
+use App\Modules\Dungeon\Domain\Enums\DungeonRewardType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\ExperienceService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -28,6 +29,7 @@ class DungeonCoordinator
         private readonly DungeonCooldownRepository $cooldownRepository,
         private readonly DungeonSessionRepository $sessionRepository,
         private readonly BackpackService $backpackService,
+        private readonly ExperienceService $experienceService,
         private readonly TransactionManager $transactionManager,
     ) {}
 
@@ -307,7 +309,7 @@ class DungeonCoordinator
                     $targetUser->save();
                 }),
                 DungeonRewardType::EXPERIENCE => tap($player, function ($targetPlayer) use ($amount) {
-                    $targetPlayer->exp += $amount;
+                    $targetPlayer->exp += $this->experienceService->calculateGain($targetPlayer, $amount);
                     $targetPlayer->save();
                 }),
                 DungeonRewardType::ITEM => $this->backpackService->addItemByShareItem($user, $reward->shareItem, $amount),

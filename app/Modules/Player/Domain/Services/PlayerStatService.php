@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Listeners\RecalculatePlayerModification;
 use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\DTO\StatModifier;
@@ -19,6 +18,13 @@ use App\Modules\Share\Domain\Enums\ShareItemStatType;
 
 class PlayerStatService
 {
+    /** @var array<string, StatSheet> */
+    private array $resolvedSheets = [];
+
+    public function __construct(
+        private readonly PlayerEquipmentLoader $equipmentLoader,
+    ) {}
+
     /**
      * Scale hp_now/mp_now proportionally when equipped passive skills change.
      * Call before and after the skill change: pass old max and new max.
@@ -42,6 +48,13 @@ class PlayerStatService
      */
     public function resolve(Player $player): StatSheet
     {
+        $cacheKey = $this->cacheKey($player);
+        if (isset($this->resolvedSheets[$cacheKey])) {
+            return $this->resolvedSheets[$cacheKey];
+        }
+
+        $this->equipmentLoader->load($player);
+
         $modifiers = [
             ...$this->fromEquipment($player),
             ...$this->fromPassiveSkills($player),
@@ -49,7 +62,29 @@ class PlayerStatService
             ...$this->fromActiveEffects($player),
         ];
 
-        return $this->buildSheet($player, $modifiers);
+        return $this->resolvedSheets[$cacheKey] = $this->buildSheet($player, $modifiers);
+    }
+
+    public function invalidate(Player|int|null $player = null): void
+    {
+        if ($player === null) {
+            $this->resolvedSheets = [];
+
+            return;
+        }
+
+        $cacheKey = $player instanceof Player
+            ? $this->cacheKey($player)
+            : 'player:'.$player;
+
+        unset($this->resolvedSheets[$cacheKey]);
+    }
+
+    private function cacheKey(Player $player): string
+    {
+        return $player->getKey() !== null
+            ? 'player:'.$player->getKey()
+            : 'object:'.spl_object_id($player);
     }
 
     // -------------------------------------------------------------------------
@@ -78,23 +113,23 @@ class PlayerStatService
 
         // ── Проход 2: производные от итоговых первичных ─────────────────────
         $derivedBase = [
-            'dodge' => (float) max(0, ($primary['agility'] - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY),
-            'critical' => (float) max(0, ($primary['intuition'] - 1) * RecalculatePlayerModification::CRITICAL_PER_INT),
-            'armor' => (float) max(0, ($primary['strength'] - 1) * RecalculatePlayerModification::ARMOR_PER_STR),
+            'dodge' => (float) max(0, ($primary['agility'] - 1) * PlayerStatFormulas::DODGE_PER_AGILITY),
+            'critical' => (float) max(0, ($primary['intuition'] - 1) * PlayerStatFormulas::CRITICAL_PER_INT),
+            'armor' => (float) max(0, ($primary['strength'] - 1) * PlayerStatFormulas::ARMOR_PER_STR),
             // Как и броня от силы — от итоговой выносливости (с учётом шмота/баффов),
             // а не от «сырого» hp_max: иначе +выносливость с предмета не давала бы HP.
-            'hp_max' => (float) (RecalculatePlayerModification::DEFAULT_HP
-                + RecalculatePlayerModification::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
-                + RecalculatePlayerModification::HP_PER_ENDURANCE * max(0, $primary['endurance'] - 1)),
+            'hp_max' => (float) (PlayerStatFormulas::DEFAULT_HP
+                + PlayerStatFormulas::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
+                + PlayerStatFormulas::HP_PER_ENDURANCE * max(0, $primary['endurance'] - 1)),
             'mp_max' => (float) $player->mp_max,
             'left_min_dmg' => (float) $player->min_dmg,
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
-            'magic_attack' => (float) $player->intel,
+            'magic_attack' => (float) $primary['intelligence'],
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
-            'crit_damage' => RecalculatePlayerModification::CRIT_DAMAGE_BASE
-                + RecalculatePlayerModification::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
+            'crit_damage' => PlayerStatFormulas::CRIT_DAMAGE_BASE
+                + PlayerStatFormulas::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
             // Блок щитом — целиком от предметов (щит), базы своей нет
             'block_chance' => 0.0,
             'block_flat' => 0.0,
@@ -102,7 +137,7 @@ class PlayerStatService
         ];
 
         // Сила усиливает урон оружия процентом — от итоговой силы, с мягким потолком
-        $strengthDmgPct = RecalculatePlayerModification::strengthDamagePercent(
+        $strengthDmgPct = PlayerStatFormulas::strengthDamagePercent(
             (float) $primary['strength'],
             max(1, (int) $player->lvl),
         );
@@ -183,7 +218,7 @@ class PlayerStatService
     private function fromEquipment(Player $player): array
     {
         $modifiers = [];
-        $equip = $player->playerEquip;
+        $equip = $this->equipmentLoader->load($player);
 
         if (! $equip) {
             return $modifiers;

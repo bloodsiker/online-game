@@ -34,6 +34,25 @@ class PurchaseCart
         }
 
         DB::transaction(function () use ($user, $cart, $shopId): void {
+            $stackableShareItemIds = $cart->getItems()
+                ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
+                ->filter(static fn ($shareItem): bool => $shareItem->type->isStackable())
+                ->pluck('id')
+                ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
+                ->unique()
+                ->values()
+                ->all();
+            $existingStacks = $stackableShareItemIds === []
+                ? collect()
+                : Backpack::query()
+                    ->select('backpacks.*')
+                    ->addSelect('items.share_item_id as stack_share_item_id')
+                    ->join('items', 'backpacks.item_id', '=', 'items.id')
+                    ->where('backpacks.user_id', $user->id)
+                    ->whereIn('items.share_item_id', $stackableShareItemIds)
+                    ->get()
+                    ->keyBy('stack_share_item_id');
+
             foreach ($cart->getItems() as $itemInCart) {
                 $shareItem = $itemInCart->shopItem->item;
 
@@ -50,11 +69,8 @@ class PurchaseCart
                     continue;
                 }
 
-                $existing = Backpack::select('backpacks.*')
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('backpacks.user_id', $user->id)
-                    ->where('items.share_item_id', $shareItem->id)
-                    ->first();
+                $shareItemId = (int) $shareItem->id;
+                $existing = $existingStacks->get($shareItemId);
 
                 if ($existing instanceof Backpack) {
                     $existing->count += $itemInCart->quantity;
@@ -65,7 +81,12 @@ class PurchaseCart
                     $item->count_use = $shareItem->count_use;
                     $item->save();
 
-                    $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => $itemInCart->quantity]);
+                    $createdBackpackItem = Backpack::create([
+                        'user_id' => $user->id,
+                        'item_id' => $item->id,
+                        'count' => $itemInCart->quantity,
+                    ]);
+                    $existingStacks->put($shareItemId, $createdBackpackItem);
                 }
             }
 

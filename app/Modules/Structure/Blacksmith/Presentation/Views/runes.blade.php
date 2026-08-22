@@ -425,7 +425,7 @@ const MAX_SLOTS  = {{ \App\Modules\Structure\Blacksmith\Domain\Services\RuneServ
 const STAT_LABELS = {
     attack: 'Атака', armor: 'Защита', hp_max: 'Макс. HP', mp_max: 'Макс. MP',
     strength: 'Сила', agility: 'Ловкость', intelligence: 'Интеллект',
-    critical: 'Крит. удар', dodge: 'Уклонение',
+    critical: 'Крит. удар', dodge: 'Уворот',
     left_min_dmg: 'Мин. урон (Л)', left_max_dmg: 'Макс. урон (Л)',
     right_min_dmg: 'Мин. урон (П)', right_max_dmg: 'Макс. урон (П)',
 };

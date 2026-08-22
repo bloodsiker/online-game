@@ -18,9 +18,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->integer('count_use')->default(0);
-            $table->boolean('is_heal')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
+            $table->boolean('is_give')->default(true);
+            $table->boolean('is_droppable')->default(true)->comment('Можно ли игроку выбросить предмет из рюкзака');
             $table->boolean('is_slot_usable')->default(false);
             $table->boolean('is_weight')->default(true);
             $table->integer('price')->default(0);

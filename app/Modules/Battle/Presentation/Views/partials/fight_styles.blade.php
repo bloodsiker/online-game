@@ -5,6 +5,14 @@
     .fight-window .tbl-usi_bg { min-width: 208px; }
     .fight-body { padding: 8px 6px 10px; }
 
+    .battle-layout { table-layout: fixed; }
+    /*.battle-col-actions { width: 32%; }*/
+    .battle-col-participants { width: 30%; }
+    .battle-col-log {
+        width: 38%;
+        overflow-wrap: anywhere;
+    }
+
     .fight-act { margin-bottom: 2px; text-align: center; white-space: nowrap; }
     .fight-act button { width: 158px; white-space: nowrap; }
     .fight-act-flee { margin-top: 8px; }
@@ -75,6 +83,19 @@
         padding-left: 3px;
     }
     .bp-target-arrow { color: #BA0000; font-size: 10px; margin-right: 2px; }
+    .bp-target-image {
+        display: block;
+        margin: 5px auto;
+        text-align: center;
+    }
+    .bp-target-image img {
+        display: inline-block;
+        width: 100%;
+        object-fit: contain;
+        border: 1px solid #9e6c50;
+        background: rgba(255, 255, 255, .2);
+        box-sizing: border-box;
+    }
 
     .bp-unit-name a { color: #5a1f00; }
     .bp-unit-name a:hover { color: #8b2f00; }

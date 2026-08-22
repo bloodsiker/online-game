@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
-use App\DTO\FightHitDTO;
+use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 

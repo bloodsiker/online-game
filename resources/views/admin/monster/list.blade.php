@@ -16,7 +16,20 @@
 
                     <form method="get" action="{{ route('admin.monsters') }}" class="mb-3">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Монстр</label>
+                                    <select id="filter-monster" name="monster_name" class="form-control">
+                                        <option value="">Все монстры</option>
+                                        @foreach($monsterNames as $monsterName)
+                                            <option value="{{ $monsterName }}" @selected($filters['monster_name'] === $monsterName)>
+                                                {{ $monsterName }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Поиск</label>
                                     <input type="text"
@@ -46,7 +59,7 @@
                                            min="1">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="col-form-label">Тип</label>
                                     <select name="is_boss" class="form-control">
@@ -128,3 +141,16 @@
     </div>
 
 @endsection
+
+@push('footer_scripts')
+<script>
+    $(function () {
+        $('#filter-monster').select2({
+            theme: 'bootstrap',
+            placeholder: 'Все монстры',
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+@endpush

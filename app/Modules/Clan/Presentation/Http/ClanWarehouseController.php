@@ -13,6 +13,7 @@ use App\Modules\Clan\Domain\Models\ClanWarehouse;
 use App\Modules\Clan\Domain\Models\ClanWarehouseLog;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\ClanWarehouseItemTooltipStrategy;
 use App\Services\ItemTooltip\Strategy\WarehouseLogItemTooltipStrategy;
@@ -27,7 +28,7 @@ class ClanWarehouseController extends Controller
 
     public function put(Request $request, int $id): mixed
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
@@ -73,6 +74,24 @@ class ClanWarehouseController extends Controller
                 ->where('equipped', 0)
                 ->get();
 
+            $stackableItemIds = $items
+                ->filter(static fn (Backpack $backpack): bool => in_array(
+                    $backpack->item->itemInfo->type,
+                    [ShareItemType::RESOURCE, ShareItemType::POTION],
+                    true,
+                ))
+                ->pluck('item_id')
+                ->map(static fn (mixed $itemId): int => (int) $itemId)
+                ->all();
+            $existingWarehouseItems = $stackableItemIds === []
+                ? collect()
+                : ClanWarehouse::query()
+                    ->where('clan_id', $clan->id)
+                    ->where('structure_id', $clanWarehouse->id)
+                    ->whereIn('item_id', $stackableItemIds)
+                    ->get()
+                    ->keyBy('item_id');
+
             $countLeft = $clan->warehouse_capacity - $countInWarehouse;
             $logData = [];
 
@@ -86,25 +105,29 @@ class ClanWarehouseController extends Controller
                 $wantCount = (int) ($putCount['count'] ?? $item->count);
                 $actualCount = min($wantCount, $item->count);
 
-                $existing = null;
-                if ($item->item->itemInfo->type === ShareItemType::RESOURCE || $item->item->itemInfo->type === ShareItemType::POTION) {
-                    $existing = ClanWarehouse::where('clan_id', $clan->id)
-                        ->where('structure_id', $clanWarehouse->id)
-                        ->where('item_id', $item->item_id)
-                        ->first();
-                }
+                $isStackable = in_array(
+                    $item->item->itemInfo->type,
+                    [ShareItemType::RESOURCE, ShareItemType::POTION],
+                    true,
+                );
+                $existing = $isStackable
+                    ? $existingWarehouseItems->get((int) $item->item_id)
+                    : null;
 
                 if ($existing) {
                     $existing->count += $actualCount;
                     $existing->save();
                 } else {
-                    ClanWarehouse::create([
+                    $createdWarehouseItem = ClanWarehouse::create([
                         'clan_id' => $clan->id,
                         'structure_id' => $clanWarehouse->id,
                         'depositor_user_id' => $user->id,
                         'item_id' => $item->item_id,
                         'count' => $actualCount,
                     ]);
+                    if ($isStackable) {
+                        $existingWarehouseItems->put((int) $item->item_id, $createdWarehouseItem);
+                    }
                     $countLeft--;
                     $countInWarehouse++;
                 }
@@ -151,7 +174,7 @@ class ClanWarehouseController extends Controller
 
     public function take(Request $request, int $id): mixed
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 
@@ -194,30 +217,56 @@ class ClanWarehouseController extends Controller
                 ->whereIn('id', array_keys($takeItems))
                 ->get();
 
+            $stackableShareItemIds = $items
+                ->filter(static fn (ClanWarehouse $warehouseItem): bool => in_array(
+                    $warehouseItem->item->itemInfo->type,
+                    [ShareItemType::RESOURCE, ShareItemType::POTION],
+                    true,
+                ))
+                ->pluck('item.share_item_id')
+                ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
+                ->unique()
+                ->values()
+                ->all();
+            $existingBackpackItems = $stackableShareItemIds === []
+                ? collect()
+                : Backpack::query()
+                    ->select('backpacks.*')
+                    ->addSelect('items.share_item_id as stack_share_item_id')
+                    ->join('items', 'backpacks.item_id', '=', 'items.id')
+                    ->where('backpacks.user_id', $user->id)
+                    ->whereIn('items.share_item_id', $stackableShareItemIds)
+                    ->get()
+                    ->keyBy('stack_share_item_id');
+
             $logData = [];
 
             foreach ($items as $wItem) {
                 $wantCount = (int) ($takeItems[$wItem->id]['count'] ?? $wItem->count);
                 $actualCount = min($wantCount, $wItem->count);
 
-                $existing = null;
-                if ($wItem->item->itemInfo->type === ShareItemType::RESOURCE || $wItem->item->itemInfo->type === ShareItemType::POTION) {
-                    $existing = Backpack::select('backpacks.*')
-                        ->join('items', 'backpacks.item_id', '=', 'items.id')
-                        ->where('items.share_item_id', $wItem->item->share_item_id)
-                        ->where('backpacks.user_id', $user->id)
-                        ->first();
-                }
+                $isStackable = in_array(
+                    $wItem->item->itemInfo->type,
+                    [ShareItemType::RESOURCE, ShareItemType::POTION],
+                    true,
+                );
+                $shareItemId = (int) $wItem->item->share_item_id;
+                $existing = $isStackable
+                    ? $existingBackpackItems->get($shareItemId)
+                    : null;
 
                 if ($existing) {
                     $existing->count += $actualCount;
                     $existing->save();
                 } else {
-                    Backpack::create([
+                    $createdBackpackItem = Backpack::create([
                         'user_id' => $user->id,
                         'item_id' => $wItem->item_id,
                         'count' => $actualCount,
                     ]);
+                    if ($isStackable) {
+                        $existingBackpackItems->put($shareItemId, $createdBackpackItem);
+                    }
                 }
 
                 if ($wItem->count <= $actualCount) {
@@ -262,7 +311,7 @@ class ClanWarehouseController extends Controller
 
     public function logs(int $id): mixed
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $clanWarehouse = Structure::findOrFail($id);
 

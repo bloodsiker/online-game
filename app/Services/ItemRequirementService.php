@@ -20,14 +20,24 @@ class ItemRequirementService
     {
         $item->loadMissing('requirements.skill');
 
+        $requiredSkillIds = $item->requirements
+            ->where('type', ShareItemRequirementType::SKILL)
+            ->pluck('skill_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $skillLevels = $requiredSkillIds->isEmpty()
+            ? collect()
+            : PlayerSkill::where('player_id', $player->id)
+                ->whereIn('skill_id', $requiredSkillIds)
+                ->pluck('lvl', 'skill_id');
+
         foreach ($item->requirements as $req) {
             $met = match ($req->type) {
                 ShareItemRequirementType::LEVEL => $player->lvl >= $req->min_value,
                 ShareItemRequirementType::STAT => $this->checkStat($player, (string) $req->stat_key, $req->min_value),
-                ShareItemRequirementType::SKILL => PlayerSkill::where('player_id', $player->id)
-                    ->where('skill_id', $req->skill_id)
-                    ->where('lvl', '>=', $req->min_value)
-                    ->exists(),
+                ShareItemRequirementType::SKILL => (int) $skillLevels->get($req->skill_id, 0) >= $req->min_value,
             };
 
             if (! $met) {

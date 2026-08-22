@@ -11,3 +11,6 @@ Route::get('/who', [InterfaceController::class, 'who'])->name('who');
 Route::get('/hero', [InterfaceController::class, 'hero'])->name('hero');
 Route::get('/game', [InterfaceController::class, 'game'])->name('game');
 Route::get('/interface', [InterfaceController::class, 'interface'])->name('interface');
+Route::post('/player/heartbeat', [InterfaceController::class, 'heartbeat'])
+    ->middleware(['auth', 'throttle:12,1'])
+    ->name('player.heartbeat');

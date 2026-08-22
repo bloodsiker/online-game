@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Structure\Blacksmith;
 
-use App\Models\Item\Item;
-use App\Models\Share\ShareItem;
-use App\Models\User;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use PHPUnit\Framework\TestCase;
 
 class UpgradeServiceTest extends TestCase

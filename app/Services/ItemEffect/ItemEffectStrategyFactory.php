@@ -27,6 +27,6 @@ class ItemEffectStrategyFactory
             throw new \InvalidArgumentException("No strategy found for effect type: {$type->value}");
         }
 
-        return new $strategyClass;
+        return app($strategyClass);
     }
 }

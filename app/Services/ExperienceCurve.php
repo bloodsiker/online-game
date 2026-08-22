@@ -14,44 +14,53 @@ namespace App\Services;
  * Опыт с моба растёт как level^1.5 (см. MonsterStatFormulas::expReward,
  * тот же коэффициент — единый источник правды).
  *
- * killsPerLevel(L) — три сегмента, подобранные под целевой темп «~1.5 месяца
- * до 100 уровня, ~8 лет до 1000-го» (при грубом ориентире ~2ч активного гринда
- * в день):
- *   1-20    — быстрый вход для новичка, почти не меняется (15 → 21 убийство);
- *   20-100  — экспоненциальный разгон 21 → 1870 («стена» от лёгкого фарма
- *             к настоящей игре);
- *   100-1000 — пологое эндгейм-плато 1870 → 3000 (дальше каждый уровень
- *             ощутимо, но не взрывообразно тяжелее предыдущего).
+ * killsPerLevel(L) — три сегмента:
+ *   1-20     — быстрый вход для новичка, почти не меняется (15 → 21 убийство);
+ *   21-100   — НАМЕРЕННЫЙ СКАЧОК сразу после 20 lvl (21 → 100 убийств за один
+ *              уровень), дальше экспоненциальный разгон 100 → 9000. Раньше
+ *              разгон стартовал плавно от 21 и к 100 lvl доходил лишь до 1870 —
+ *              реальный фарм на «Заросшей дороге» (25-36 lvl) показал прокачку
+ *              в 1.44x быстрее, чем предполагала кривая (см. обсуждение
+ *              2026-08-14: игрок на 29 lvl почти взял уровень за одну карту).
+ *              Явное требование: «до 20 не долго, дальше — не менее 100
+ *              убийств на уровень». Скачок специально резкий (не сглаженная
+ *              кривая через границу 20/21) — это и есть стена между
+ *              «быстрым стартом» и «настоящей игрой».
+ *   100-1000 — пологое эндгейм-плато 9000 → 14440 (тот же коэффициент роста
+ *             ~1.6x, что и в прежней версии этого сегмента, просто
+ *             пересчитан от новой точки старта).
  * За пределами 1000 формула продолжает третий сегмент (то же уравнение,
  * t продолжает расти выше 1) — не обрывается, но нужно калибровать заново,
  * если мир реально дорастёт до таких уровней.
  *
- * ВАЖНО: при этой кривой cumulative exp переполняет int32 уже около 165
- * уровня (было ~450-500 при прежней линейной кривой) — таблица сейчас
- * сгенерирована только до 100 (безопасно, ~244 млн), расширять дальше
- * нельзя без миграции experiences.exp/exp_diff и players.exp/exp_up/exp_diff
- * в bigInteger.
+ * experiences.exp/exp_diff и players.exp/exp_up/exp_diff — уже bigint (не
+ * int32), переполнение не грозит: cumulative exp на 1000 lvl ~10^11,
+ * bigint потолок ~9.2×10^18.
  */
 final class ExperienceCurve
 {
     private const MONSTER_EXP_COEFFICIENT = 10.0;
 
-    // Сегмент 1: быстрый старт (1-20) — как и раньше, почти без изменений
+    // Сегмент 1: быстрый старт (1-20) — не менялся
     private const EARLY_BASE = 15;
 
     private const EARLY_GROWTH = 3; // +1 убийство за каждые 3 уровня
 
     private const EARLY_END_LEVEL = 20;
 
-    // Сегмент 2: разгон (20-100) — экспоненциальный рост до «стены»
+    // Сегмент 2: разгон (21-100) — старт со скачка, дальше экспонента до «стены»
+    private const RAMP_START_LEVEL = 21;
+
+    private const RAMP_START_VALUE = 100.0;
+
     private const RAMP_END_LEVEL = 100;
 
-    private const RAMP_END_VALUE = 1870.0;
+    private const RAMP_END_VALUE = 9000.0;
 
     // Сегмент 3: эндгейм-плато (100-1000) — пологий, но непрерывный рост
     private const ENDGAME_END_LEVEL = 1000;
 
-    private const ENDGAME_END_VALUE = 3000.0;
+    private const ENDGAME_END_VALUE = 14440.0;
 
     /** «Опыт за убийство типового моба своего уровня» — тот же ориентир, что и MonsterStatFormulas::expReward с множителем 1.0. */
     public static function referenceMonsterExp(int $level): int
@@ -65,11 +74,9 @@ final class ExperienceCurve
             return self::EARLY_BASE + intdiv($level, self::EARLY_GROWTH);
         }
 
-        $earlyEndValue = self::EARLY_BASE + intdiv(self::EARLY_END_LEVEL, self::EARLY_GROWTH);
-
         if ($level <= self::RAMP_END_LEVEL) {
             return (int) round(self::interpolateExponential(
-                $level, self::EARLY_END_LEVEL, self::RAMP_END_LEVEL, $earlyEndValue, self::RAMP_END_VALUE
+                $level, self::RAMP_START_LEVEL, self::RAMP_END_LEVEL, self::RAMP_START_VALUE, self::RAMP_END_VALUE
             ));
         }
 

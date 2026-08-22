@@ -56,7 +56,7 @@ class NpcController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $npc->load(['dialogueNodes.options.toNode']);
+        $npc->load(['dialogueNodes.options.toNode', 'startQuests', 'completeQuests']);
 
         return view('admin.npc.info', compact('npc'));
     }
@@ -162,9 +162,15 @@ class NpcController extends Controller
         $npc->name = $request->input('name');
         $npc->description = $request->input('description');
         $npc->location_id = $request->input('location_id') ?: null;
+        $npc->hide_location = (bool) $request->input('hide_location', false);
 
         if ($request->hasFile('image')) {
+            $oldImage = $npc->getRawOriginal('image');
             $npc->image = $request->file('image')->store('npc', 'public');
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($npc->getRawOriginal('image'));
+            $npc->image = null;
         }
     }
 

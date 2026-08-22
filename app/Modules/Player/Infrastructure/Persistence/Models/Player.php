@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
+ * @property float $experience_multiplier
  * @property-read User $user
  * @property-read Race $race
  * @property-read PlayerEquipment $playerEquip
@@ -39,7 +40,12 @@ class Player extends Model
     public const FULL_REGEN_TIME = 900;
 
     protected $casts = [
+        'experience_multiplier' => 'float',
         'last_regen_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'experience_multiplier' => 1.0,
     ];
 
     public function user(): BelongsTo

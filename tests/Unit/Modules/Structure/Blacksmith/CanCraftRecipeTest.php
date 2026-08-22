@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Structure\Blacksmith;
 
-use App\Models\Share\ShareItem;
-use App\Models\Share\ShareRecipe;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Blacksmith\Domain\Policies\CanCraftRecipe;
 use PHPUnit\Framework\TestCase;
 

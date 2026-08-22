@@ -44,7 +44,7 @@
                                 <div class="row pt-3">
                                     <div class="col-md-2 text-center">
                                         @if($clan->icon)
-                                            <img src="{{ $clan->icon }}" style="width:80px;height:80px;object-fit:contain;" alt="">
+                                            <img src="{{ resolve_storage_image_url($clan->icon) }}" style="width:80px;height:80px;object-fit:contain;" alt="{{ $clan->name }}">
                                         @endif
                                     </div>
                                     <div class="col-md-5">

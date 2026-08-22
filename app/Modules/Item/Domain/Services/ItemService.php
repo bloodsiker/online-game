@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Domain\Services;
 
-use App\Modules\Share\Domain\Enums\ShareItemSlot;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Item\Domain\Enums\ItemActionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Share\Domain\Enums\ShareItemSlot;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\HotbarService;
 use App\Services\ItemRequirementService;
@@ -23,13 +25,17 @@ class ItemService
         private readonly BackpackService $backpackService,
         private readonly HotbarService $hotbarService,
         private readonly ItemRequirementService $requirementService,
+        private readonly QuestProgressService $questProgressService,
+        private readonly ItemActionLogger $itemActionLogger,
     ) {}
 
     public function pickUpFromLocation(User $user, int $itemId): string
     {
         return DB::transaction(function () use ($user, $itemId) {
             $location = $user->currentLocation;
-            $query = ItemOnLocation::where('location_id', $location->id)->where('item_id', $itemId);
+            $query = ItemOnLocation::visible()
+                ->where('location_id', $location->id)
+                ->where('item_id', $itemId);
 
             if ($location->dungeon_id !== null) {
                 $session = DungeonSession::where('user_id', $user->id)->first();
@@ -59,26 +65,52 @@ class ItemService
         });
     }
 
-    public function drop(User $user, int $itemId, int $qty): void
+    public function drop(User $user, int $itemId, int $qty): ?string
     {
-        $backpackItem = Backpack::where('user_id', $user->id)
+        $backpackItem = Backpack::with('item.itemInfo')
+            ->where('user_id', $user->id)
             ->where('item_id', $itemId)
             ->first();
 
         if (! $backpackItem) {
-            return;
+            return null;
+        }
+
+        $item = $backpackItem->item;
+        if (! $item->itemInfo->is_droppable) {
+            return 'Этот предмет нельзя выбросить.';
         }
 
         $qty = max(1, min($qty, $backpackItem->count));
+        $isQuestItem = $item->itemInfo->type === ShareItemType::QUEST;
+        $fullyRemoved = $qty >= $backpackItem->count;
 
-        if ($qty >= $backpackItem->count) {
+        if ($fullyRemoved) {
             $backpackItem->delete();
         } else {
             $backpackItem->count -= $qty;
             $backpackItem->save();
         }
 
-        $user->currentLocation->itemsOnLocation()->attach($itemId, ['count' => $qty]);
+        $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::DROP, $qty);
+
+        // Квестовые предметы не выпадают на землю — они безвозвратно уничтожаются
+        if ($isQuestItem) {
+            $this->questProgressService->decreaseCollectProgress($user->player, $item->share_item_id, $qty);
+
+            if ($fullyRemoved) {
+                $item->delete();
+            }
+
+            return null;
+        }
+
+        $user->currentLocation->itemsOnLocation()->attach($itemId, [
+            'count' => $qty,
+            'expires_at' => $item->itemInfo->groundExpiresAt(),
+        ]);
+
+        return null;
     }
 
     public function handOver(User $user, Item $item, User $toUser): ?string
@@ -110,6 +142,8 @@ class ItemService
             'user_id' => $toUser->id,
             'count' => 1,
         ]);
+
+        $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::GIVE, 1, null, $toUser);
 
         return null;
     }

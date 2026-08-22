@@ -320,7 +320,7 @@
                                                         <img src="{{ asset('img/icon/reward_icon_orange.png') }}" alt="">
                                                     </td>
                                                     <td class="b" colspan="2">
-                                                        <span class="brown">{{ $loop->first ? 'Награда:' : 'А также:' }}</span>
+                                                        <span class="brown">Награда:</span>
                                                         <span class="greenn">{{ $rewardText }}</span>
                                                     </td>
                                                 </tr>

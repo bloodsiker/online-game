@@ -43,7 +43,7 @@ class MoveToLocation
             $this->readRepository->getMonstersOnLocation($location->id),
             $this->readRepository->getLocationUsers($location->id),
             $this->getActiveDungeonSession->execute($user->id),
-            $this->readRepository->getItemsOnLocation($user, $location->id)->count(),
+            $this->readRepository->countItemsOnLocation($user, $location->id),
         );
     }
 }

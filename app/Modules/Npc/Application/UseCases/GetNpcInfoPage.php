@@ -13,10 +13,10 @@ class GetNpcInfoPage
         private readonly NpcReadRepository $readRepository,
     ) {}
 
-    public function execute(int $npcId): NpcInfoPageDTO
+    public function execute(string $uuid): NpcInfoPageDTO
     {
         return new NpcInfoPageDTO(
-            $this->readRepository->findNpcOrFail($npcId),
+            $this->readRepository->findNpcOrFail($uuid),
         );
     }
 }

@@ -31,7 +31,7 @@
                                     <td>{{ $clan->id }}</td>
                                     <td>
                                         @if($clan->icon)
-                                            <img src="{{ $clan->icon }}" style="width:32px;height:32px;object-fit:contain;" alt="">
+                                            <img src="{{ resolve_storage_image_url($clan->icon) }}" style="width:32px;height:32px;object-fit:contain;" alt="{{ $clan->name }}">
                                         @endif
                                     </td>
                                     <td><a href="{{ route('admin.clan.info', $clan->id) }}">{{ $clan->name }}</a></td>

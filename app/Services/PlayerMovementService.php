@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\DTO\MoveResultDTO;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Location\Application\DTOs\MoveResultDTO;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Domain\Services\PlayerEquipmentLoader;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -17,6 +18,7 @@ final readonly class PlayerMovementService
 {
     public function __construct(
         private BackpackService $backpackService,
+        private PlayerEquipmentLoader $equipmentLoader,
     ) {}
 
     public function move(User $user, string $direction): MoveResultDTO
@@ -27,6 +29,7 @@ final readonly class PlayerMovementService
             return MoveResultDTO::blocked('Нельзя идти в этом направлении');
         }
 
+        $this->equipmentLoader->load($user->player);
         $backpackUsed = $this->backpackService->getCountableItemsCount($user);
 
         if ($backpackUsed > $user->getBagCount()) {

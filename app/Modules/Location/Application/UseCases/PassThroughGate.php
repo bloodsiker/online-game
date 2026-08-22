@@ -32,7 +32,8 @@ class PassThroughGate
         if ($gate === null || $gate->mode !== 'presence_pass' || $gate->from_location_id !== $user->location_id) {
             session()->flash('message', 'Проход недоступен.');
         } elseif ($gate->shareItem === null || $this->backpackService->getItem($user, $gate->shareItem) === null) {
-            session()->flash('message', 'Проход закрыт. Нужен специальный предмет.');
+            $itemName = $gate->shareItem?->name ?? 'специальный предмет';
+            session()->flash('message', "Проход закрыт. Нужен предмет: {$itemName}.");
         } else {
             $user->prev_location_id = $user->location_id;
             $user->location_id = $gate->to_location_id;
@@ -50,7 +51,7 @@ class PassThroughGate
             $this->readRepository->getMonstersOnLocation($location->id),
             $this->readRepository->getLocationUsers($location->id),
             $this->getActiveDungeonSession->execute($user->id),
-            $this->readRepository->getItemsOnLocation($user, $location->id)->count(),
+            $this->readRepository->countItemsOnLocation($user, $location->id),
         );
     }
 }

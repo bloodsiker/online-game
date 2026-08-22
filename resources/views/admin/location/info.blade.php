@@ -36,6 +36,12 @@
                                      style="width:90px;height:135px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
                             @endif
                             <input type="file" class="form-control mt-1" name="image" id="location-image" accept="image/*">
+                            @if($location->getRawOriginal('image'))
+                                <div class="checkbox-custom checkbox-danger mt-1">
+                                    <input type="checkbox" id="location-delete-image" name="delete_image" value="1">
+                                    <label for="location-delete-image">Удалить картинку</label>
+                                </div>
+                            @endif
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Карта</label>

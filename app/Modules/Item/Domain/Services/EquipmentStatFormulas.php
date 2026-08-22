@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Domain\Services;
 
-use App\Listeners\RecalculatePlayerModification;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 
 /**
  * Формулы стат снаряжения по уровню чекпоинта — тот же принцип, что и
@@ -70,7 +70,7 @@ final class EquipmentStatFormulas
     public static function armorPerSlot(int $level, int $totalSlots = 9): int
     {
         $str = self::typicalTankStrength($level);
-        $totalArmor = self::ARMOR_BUDGET_SHARE * max(0, $str - 1) * RecalculatePlayerModification::ARMOR_PER_STR;
+        $totalArmor = self::ARMOR_BUDGET_SHARE * max(0, $str - 1) * PlayerStatFormulas::ARMOR_PER_STR;
 
         return max(1, (int) round($totalArmor / $totalSlots));
     }

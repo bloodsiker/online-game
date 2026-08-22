@@ -79,6 +79,12 @@
                                                          style="width:300px;height:300px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
                                                 @endif
                                                 <input type="file" class="form-control mt-1" name="image" id="monster-image" accept="image/*">
+                                                @if($monster->getRawOriginal('image'))
+                                                    <div class="checkbox-custom checkbox-danger mt-1">
+                                                        <input type="checkbox" id="monster-delete-image" name="delete_image" value="1">
+                                                        <label for="monster-delete-image">Удалить картинку</label>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Босс</label>
@@ -166,6 +172,11 @@
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalDrop">Добавить предмет</a>
                                     </div>
+                                    @foreach($monster->items as $item)
+                                        <form id="drop-update-{{ $item->id }}" action="{{ route('admin.monster.info.drop.update', [$monster->id, $item->id]) }}" method="post">
+                                            {{ csrf_field() }}
+                                        </form>
+                                    @endforeach
                                     <div class="table-responsive">
                                         <table class="table table-hover table-bordered mb-none">
                                             <thead>
@@ -174,9 +185,9 @@
                                                 <th width="45"></th>
                                                 <th>Название</th>
                                                 <th width="100">Шанс (%)</th>
-                                                <th width="110">Кол-во</th>
+                                                <th width="140">Кол-во (мин – макс)</th>
                                                 <th width="100">Цена</th>
-                                                <th width="70"></th>
+                                                <th width="120"></th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -185,10 +196,21 @@
                                                     <td>{{ $item->id }}</td>
                                                     <td><img src="{{ $item->image }}" width="36" alt=""></td>
                                                     <td><a href="{{ route('admin.item.info', $item->id) }}" target="_blank">{{ $item->name }}</a></td>
-                                                    <td>{{ $item->pivot->drop_chance }}</td>
-                                                    <td>{{ $item->pivot->min_count }} – {{ $item->pivot->max_count }}</td>
-                                                    <td>{{ number_format($item->price, 0, '', ' ') }}</td>
                                                     <td>
+                                                        <input form="drop-update-{{ $item->id }}" type="number" step="0.01" min="0" max="100"
+                                                               class="form-control form-control-sm" name="drop_chance" value="{{ $item->pivot->drop_chance }}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex" style="gap:4px;">
+                                                            <input form="drop-update-{{ $item->id }}" type="number" min="1"
+                                                                   class="form-control form-control-sm" name="min_count" value="{{ $item->pivot->min_count }}">
+                                                            <input form="drop-update-{{ $item->id }}" type="number" min="1"
+                                                                   class="form-control form-control-sm" name="max_count" value="{{ $item->pivot->max_count }}">
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ number_format($item->price, 0, '', ' ') }}</td>
+                                                    <td style="white-space:nowrap;">
+                                                        <button form="drop-update-{{ $item->id }}" class="btn btn-xs btn-primary">Сохранить</button>
                                                         <a href="{{ route('admin.monster.info.drop.delete_item', [$monster->id, $item->id]) }}"
                                                            class="btn btn-xs btn-danger"
                                                            onclick="return confirm('Удалить?')">Удалить</a>

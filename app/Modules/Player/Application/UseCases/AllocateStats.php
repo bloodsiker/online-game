@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Application\UseCases;
 
-use App\Events\PlayerChangeStat;
 use App\Modules\Player\Application\DTOs\AllocateStatsResultDTO;
+use App\Modules\Player\Domain\Events\PlayerChangeStat;
 use App\Modules\Player\Domain\Repositories\PlayerRepositoryInterface;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 

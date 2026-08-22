@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle\Presentation\Console;
 
-use App\Listeners\RecalculatePlayerModification;
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 use Illuminate\Console\Command;
 
 /**
@@ -59,7 +59,7 @@ class SimulateBattleTriangle extends Command
 
         $hpPerEnd = $this->option('hp-per-end') !== null
             ? (float) $this->option('hp-per-end')
-            : (float) RecalculatePlayerModification::HP_PER_ENDURANCE;
+            : (float) PlayerStatFormulas::HP_PER_ENDURANCE;
 
         $this->info(sprintf(
             'Дуэли: %d боёв на пару, бюджет стат: %d (~%d уровень), билды: %s, HP: %s',
@@ -69,9 +69,9 @@ class SimulateBattleTriangle extends Command
             $hpMode === 'game' ? 'танк/уворот/крит + выносливость' : ($this->option('realistic') ? 'реалистичные' : 'чистые'),
             match ($hpMode) {
                 'strength' => '10 + 3×сила (устаревшая формула)',
-                'level' => sprintf('10 + %d×(уровень−1), без выносливости', RecalculatePlayerModification::HP_PER_LEVEL),
+                'level' => sprintf('10 + %d×(уровень−1), без выносливости', PlayerStatFormulas::HP_PER_LEVEL),
                 'mixed' => '10 + 10×(уровень−1) + 1×сила',
-                'game' => sprintf('10 + %d×(уровень−1) + %s×выносливость (боевая формула)', RecalculatePlayerModification::HP_PER_LEVEL, $hpPerEnd),
+                'game' => sprintf('10 + %d×(уровень−1) + %s×выносливость (боевая формула)', PlayerStatFormulas::HP_PER_LEVEL, $hpPerEnd),
                 default => (string) $hp,
             },
         ));
@@ -150,14 +150,14 @@ class SimulateBattleTriangle extends Command
     {
         $hpPerEnd = $this->option('hp-per-end') !== null
             ? (float) $this->option('hp-per-end')
-            : (float) RecalculatePlayerModification::HP_PER_ENDURANCE;
+            : (float) PlayerStatFormulas::HP_PER_ENDURANCE;
 
         return match ($mode) {
             'strength' => $fighter->legacyStrengthHp(),
-            'level' => RecalculatePlayerModification::DEFAULT_HP + RecalculatePlayerModification::HP_PER_LEVEL * ($level - 1),
+            'level' => PlayerStatFormulas::DEFAULT_HP + PlayerStatFormulas::HP_PER_LEVEL * ($level - 1),
             'mixed' => 10 + 10 * ($level - 1) + max(0, $fighter->strength - 1),
-            'game' => RecalculatePlayerModification::DEFAULT_HP
-                + RecalculatePlayerModification::HP_PER_LEVEL * ($level - 1)
+            'game' => PlayerStatFormulas::DEFAULT_HP
+                + PlayerStatFormulas::HP_PER_LEVEL * ($level - 1)
                 + (int) round($hpPerEnd * max(0, $fighter->endurance - 1)),
             default => $fixed,
         };
@@ -250,21 +250,21 @@ class SimFighter implements FightHitInterface
 
     private function strengthMultiplier(): float
     {
-        return 1 + RecalculatePlayerModification::strengthDamagePercent((float) $this->strength, $this->level) / 100;
+        return 1 + PlayerStatFormulas::strengthDamagePercent((float) $this->strength, $this->level) / 100;
     }
 
     /** HP по устаревшей формуле (10 + 3×сила) — только для сравнения «как было» */
     public function legacyStrengthHp(): int
     {
-        return RecalculatePlayerModification::DEFAULT_HP + 3 * max(0, $this->strength - 1);
+        return PlayerStatFormulas::DEFAULT_HP + 3 * max(0, $this->strength - 1);
     }
 
     /** HP по актуальной боевой формуле: уровень + выносливость */
     public function realHp(): int
     {
-        return RecalculatePlayerModification::DEFAULT_HP
-            + RecalculatePlayerModification::HP_PER_LEVEL * max(0, $this->level - 1)
-            + RecalculatePlayerModification::HP_PER_ENDURANCE * max(0, $this->endurance - 1);
+        return PlayerStatFormulas::DEFAULT_HP
+            + PlayerStatFormulas::HP_PER_LEVEL * max(0, $this->level - 1)
+            + PlayerStatFormulas::HP_PER_ENDURANCE * max(0, $this->endurance - 1);
     }
 
     public function getLevel(): int
@@ -274,17 +274,22 @@ class SimFighter implements FightHitInterface
 
     public function getCritical(): int
     {
-        return max(0, ($this->intuition - 1) * RecalculatePlayerModification::CRITICAL_PER_INT);
+        return max(0, ($this->intuition - 1) * PlayerStatFormulas::CRITICAL_PER_INT);
     }
 
     public function getDodge(): int
     {
-        return max(0, ($this->agility - 1) * RecalculatePlayerModification::DODGE_PER_AGILITY);
+        return max(0, ($this->agility - 1) * PlayerStatFormulas::DODGE_PER_AGILITY);
     }
 
     public function getArmor(): int
     {
-        return max(0, ($this->strength - 1) * RecalculatePlayerModification::ARMOR_PER_STR);
+        return max(0, ($this->strength - 1) * PlayerStatFormulas::ARMOR_PER_STR);
+    }
+
+    public function getIntelligence(): int
+    {
+        return 0;
     }
 
     public function getCombatClass(): CombatClass
@@ -309,8 +314,8 @@ class SimFighter implements FightHitInterface
 
     public function getCritDamage(): int
     {
-        return (int) round(RecalculatePlayerModification::CRIT_DAMAGE_BASE
-            + RecalculatePlayerModification::critDamageBonus((float) $this->intuition, $this->level));
+        return (int) round(PlayerStatFormulas::CRIT_DAMAGE_BASE
+            + PlayerStatFormulas::critDamageBonus((float) $this->intuition, $this->level));
     }
 
     // Синтетические билды симулятора щит не носят — блок всегда 0

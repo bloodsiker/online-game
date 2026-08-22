@@ -25,7 +25,8 @@ class EloquentItemReadRepository implements ItemReadRepository
 
     public function getLocationItems(User $user): Collection
     {
-        $query = ItemOnLocation::with(['item', 'item.itemInfo'])
+        $query = ItemOnLocation::visible()
+            ->with(['item', 'item.itemInfo'])
             ->where('location_id', $user->location_id);
 
         $dungeonSessionId = null;

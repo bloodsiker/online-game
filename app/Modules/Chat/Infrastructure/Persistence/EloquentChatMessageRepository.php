@@ -102,7 +102,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                 ->orWhere(fn ($q2) => $q2
                     ->where('channel', ChatChannel::Main->value)
                     ->where('target_user_id', $user->id)
-                    ->whereIn('type', [ChatMessageType::Information->value, ChatMessageType::Quest->value])
+                    ->whereIn('type', [ChatMessageType::Information->value, ChatMessageType::Quest->value, ChatMessageType::QuestItem->value])
                     ->where('created_at', '>=', Carbon::now()->subMinutes(10))
                 )
                 ->orWhere($privateClause)

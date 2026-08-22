@@ -10,21 +10,27 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetOnMapPage
 {
+    /** Карта id=1 — folder='city/main' (см. таблицу maps); используется как запасной вид */
+    private const DEFAULT_VIEW = 'maps.city.main.frame';
+
     public function __construct(
         private readonly InterfaceReadRepository $readRepository,
     ) {}
 
-    public function execute(?string $slug, User $user): OnMapPageDTO
+    public function execute(?string $slug, ?User $user): OnMapPageDTO
     {
         if ($slug !== null && $slug !== '') {
             $map = $this->readRepository->findMapBySlug($slug);
-            $view = $map ? sprintf('maps.%s.frame', $map->folder) : 'maps.city.frame';
-        } else {
+            $view = $map ? sprintf('maps.%s.frame', $map->folder) : self::DEFAULT_VIEW;
+        } elseif ($user !== null) {
             $view = sprintf('maps.%s.frame', $user->currentLocation->map->folder);
+        } else {
+            // Гость без ?s= (например, прямой заход на /on-map без слага) — карты не знаем, показываем город
+            $view = self::DEFAULT_VIEW;
         }
 
         if (! $this->readRepository->viewExists($view)) {
-            $view = 'maps.city.frame';
+            $view = self::DEFAULT_VIEW;
         }
 
         return new OnMapPageDTO($view);

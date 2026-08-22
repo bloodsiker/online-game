@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Interface\Infrastructure\Persistence;
 
 use App\Models\Map;
+use App\Modules\Battle\Domain\Enums\ActiveEffectType;
+use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -42,9 +44,25 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
 
     public function getPlayerActiveEffects(int $playerId): Collection
     {
+        $damageEffectTypes = collect(ActiveEffectType::cases())
+            ->filter(static fn (ActiveEffectType $type): bool => $type->isDoT())
+            ->map(static fn (ActiveEffectType $type): string => $type->value)
+            ->all();
+
         return PlayerActiveEffect::where('player_id', $playerId)
-            ->whereNull('battle_id')
-            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->where(function ($query) use ($damageEffectTypes): void {
+                $query->where(function ($timedQuery): void {
+                    $timedQuery->whereNull('battle_id')
+                        ->where(fn ($expiresQuery) => $expiresQuery
+                            ->whereNull('expires_at')
+                            ->orWhere('expires_at', '>', now()));
+                })->orWhere(function ($battleQuery) use ($damageEffectTypes): void {
+                    $battleQuery->whereNotNull('battle_id')
+                        ->whereIn('type', $damageEffectTypes)
+                        ->where('stacks', '>', 0)
+                        ->whereHas('battle', fn ($query) => $query->where('status', BattleStatus::ACTIVE));
+                });
+            })
             ->with('effect')
             ->get();
     }

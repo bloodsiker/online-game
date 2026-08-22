@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
-use App\Enums\ItemRarity;
 use App\Models\Skill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -27,9 +28,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $image
  * @property int $is_two_hand
  * @property int $count_use
- * @property bool $is_heal
+ * @property int|null $expire
  * @property bool $is_active
  * @property bool $is_sell
+ * @property bool $is_give
+ * @property bool $is_droppable
  * @property bool $is_slot_usable
  * @property bool $is_weight
  * @property int $price
@@ -67,10 +70,10 @@ class ShareItem extends Model
 
     protected $attributes = [
         'count_use' => 0,
-        'is_heal' => false,
         'is_active' => true,
         'is_sell' => true,
         'is_give' => true,
+        'is_droppable' => true,
         'is_slot_usable' => false,
         'is_weight' => true,
         'break_crystal' => 0,
@@ -82,8 +85,9 @@ class ShareItem extends Model
         'is_weight' => 'boolean',
         'is_sell' => 'boolean',
         'is_give' => 'boolean',
+        'is_droppable' => 'boolean',
         'is_active' => 'boolean',
-        'is_heal' => 'boolean',
+        'expire' => 'integer',
         'type' => ShareItemType::class,
         'slot' => ShareItemSlot::class,
         'upgrade_scroll_type' => UpgradeScrollType::class,
@@ -146,5 +150,12 @@ class ShareItem extends Model
         }
 
         return 0;
+    }
+
+    public function groundExpiresAt(): ?Carbon
+    {
+        return $this->expire === null
+            ? null
+            : now()->addMinutes($this->expire);
     }
 }

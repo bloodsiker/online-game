@@ -29,6 +29,7 @@ class BulkLetters
         }
 
         $letters = PostLetter::query()
+            ->with('shareItem')
             ->whereIn('id', $letterIds)
             ->where(fn ($q) => $q
                 ->where(fn ($q2) => $q2->where('recipient_user_id', $user->id)->whereNull('recipient_deleted_at'))

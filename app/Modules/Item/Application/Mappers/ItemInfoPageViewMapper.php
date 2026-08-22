@@ -34,6 +34,7 @@ class ItemInfoPageViewMapper
             dropUrl: route('items.drop', ['id' => $item->id]),
             gems: ItemTooltipStatsBuilder::buildGems($item),
             runes: ItemTooltipStatsBuilder::buildRunes($item),
+            upgradeLvl: $item->upgrade_lvl,
         );
     }
 
@@ -64,6 +65,7 @@ class ItemInfoPageViewMapper
         string $dropUrl,
         array $gems = [],
         array $runes = [],
+        int $upgradeLvl = 0,
     ): ItemInfoPageDTO {
         $shareItem->loadMissing('stats', 'effects', 'requirements.skill');
 
@@ -89,7 +91,7 @@ class ItemInfoPageViewMapper
             noWeight: ! $shareItem->is_weight,
             noSell: ! $shareItem->is_sell,
             gateLocations: $this->buildGateLocations((int) $shareItem->id),
-            stats: ItemTooltipStatsBuilder::build($shareItem),
+            stats: ItemTooltipStatsBuilder::build($shareItem, $upgradeLvl),
             requirements: $requirements,
             handOverUrl: $handOverUrl,
             dropUrl: $dropUrl,

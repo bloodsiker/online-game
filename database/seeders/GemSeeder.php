@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\ItemRarity;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Services\MountRarityConfig;

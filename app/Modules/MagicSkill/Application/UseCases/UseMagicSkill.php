@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\MagicSkill\Application\UseCases;
 
-use App\DTO\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\MagicSkill\Application\DTOs\MagicSkillActionResultDTO;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 
 class UseMagicSkill
 {

@@ -38,11 +38,16 @@
         @include('admin.layout.menu')
 
         <section role="main" class="content-body">
+            @php
+                $pageTitle = preg_replace(
+                    '/\s+/u',
+                    ' ',
+                    trim(html_entity_decode(strip_tags($__env->yieldContent('title')), ENT_QUOTES | ENT_HTML5, 'UTF-8'))
+                ) ?? '';
+            @endphp
             <header class="page-header">
-                <h2>@yield('title')</h2>
-{{--                <div class="pull-right" style="padding: 12px 10px;margin-right: 20px;">--}}
-{{--                    <a href="" class="btn btn-primary btn-xs">Add</a>--}}
-{{--                </div>--}}
+                <h2>{{ $pageTitle }}</h2>
+                @include('admin.layout.breadcrumbs', ['pageTitle' => $pageTitle])
             </header>
 
             @yield('body')

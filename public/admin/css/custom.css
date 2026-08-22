@@ -1,1 +1,64 @@
 /* Add here all your CSS customizations */
+
+.page-header .admin-breadcrumb-wrapper {
+    float: right;
+    padding-left: 20px;
+}
+
+.page-header .breadcrumbs.admin-breadcrumbs {
+    padding-right: 40px;
+}
+
+.page-header .admin-breadcrumbs a:hover,
+.page-header .admin-breadcrumbs a:focus {
+    color: #fff;
+}
+
+.page-header .admin-breadcrumbs .bx-arrow-back {
+    font-size: 16px;
+    margin-right: 4px;
+}
+
+.page-header .admin-breadcrumb-current span {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media only screen and (max-width: 767px) {
+    .page-header {
+        padding-right: 0;
+    }
+
+    .page-header h2 {
+        max-width: 58%;
+    }
+
+    .page-header .admin-breadcrumb-wrapper {
+        max-width: 42%;
+        padding-left: 8px;
+    }
+
+    .page-header .breadcrumbs.admin-breadcrumbs {
+        display: block;
+        padding-right: 16px;
+        white-space: nowrap;
+    }
+
+    .page-header .admin-breadcrumb-home,
+    .page-header .admin-breadcrumb-section,
+    .page-header .admin-breadcrumb-current {
+        display: none;
+    }
+
+    .page-header .admin-breadcrumb-parent {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .page-header .admin-breadcrumb-parent::after {
+        display: none;
+    }
+}

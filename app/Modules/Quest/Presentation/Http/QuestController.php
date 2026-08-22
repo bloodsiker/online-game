@@ -11,6 +11,7 @@ use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
@@ -26,8 +27,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\ExperienceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +38,7 @@ class QuestController extends Controller
     public function __construct(
         private readonly BackpackService $backpackService,
         private readonly ChatService $chatService,
+        private readonly ExperienceService $experienceService,
         private readonly ReputationService $reputationService,
     ) {}
 
@@ -55,12 +56,12 @@ class QuestController extends Controller
             if ($clanMembership) {
                 $clanQuests = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
                     ->orderByDesc('id')
-                    ->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'objectives.questObjective', 'user')
+                    ->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'objectives.questObjective', 'currentStage', 'user')
                     ->paginate(20)
                     ->withQueryString();
                 $clanQuestProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
                     ->where('status', QuestPlayerStatus::IN_PROGRESS)
-                    ->with('quest', 'objectives.questObjective')
+                    ->with('quest', 'objectives.questObjective', 'currentStage')
                     ->first();
             }
 
@@ -82,7 +83,7 @@ class QuestController extends Controller
                 ->whereHas('quest', fn ($q) => $q->whereNotIn('type', [QuestType::REPEATABLE, QuestType::CLAN]));
         }
 
-        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues')->paginate(20)->withQueryString();
+        $quests = $query->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'currentStage')->paginate(20)->withQueryString();
         $questIds = $quests->pluck('id')->implode(',');
 
         return view('quest::list', compact('quests', 'questIds', 'tab')
@@ -331,12 +332,12 @@ class QuestController extends Controller
         $questPlayer = QuestPlayer::where('player_id', $player->id)
             ->where('id', $id)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('quest.objectives')
+            ->with('quest.objectives.shareItem')
             ->firstOrFail();
 
         DB::transaction(function () use ($questPlayer, $player) {
             foreach ($questPlayer->quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
+                $shareItem = $objective->shareItem;
                 if ($shareItem) {
                     $this->backpackService->removeItemByShareItem($player->user, $shareItem, $objective->required_amount);
                 }
@@ -383,18 +384,15 @@ class QuestController extends Controller
         $progress = QuestClanProgress::where('clan_id', $clan->id)
             ->where('id', $id)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('quest')
+            ->with('quest.objectives.shareItem', 'user')
             ->firstOrFail();
 
         DB::transaction(function () use ($user, $clan, $progress) {
             // Remove deliver items from the acceptor's backpack
             foreach ($progress->quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
-                if ($shareItem) {
-                    $acceptorUser = User::find($progress->user_id);
-                    if ($acceptorUser) {
-                        $this->backpackService->removeItemByShareItem($acceptorUser, $shareItem, $objective->required_amount);
-                    }
+                $shareItem = $objective->shareItem;
+                if ($shareItem && $progress->user) {
+                    $this->backpackService->removeItemByShareItem($progress->user, $shareItem, $objective->required_amount);
                 }
             }
 
@@ -419,6 +417,8 @@ class QuestController extends Controller
         $user = Auth::user();
         $player = $user->player;
         $quest = Quest::findOrFail($id);
+        $quest->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
+        $hasStages = $quest->hasStages();
         $npcId = $request->integer('npc');
 
         $clanMembership = $user->clanMembership;
@@ -453,9 +453,10 @@ class QuestController extends Controller
             }
 
             $currentStage = $clanProgress->currentStage;
+            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
 
             foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
+                $shareItem = $objective->shareItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -466,7 +467,7 @@ class QuestController extends Controller
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = ShareItem::find($objective->share_item_id);
+                $shareItem = $objective->collectItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -475,13 +476,14 @@ class QuestController extends Controller
 
             $nextStage = QuestStage::where('quest_id', $quest->id)
                 ->where('order', '>', $currentStage->order)
+                ->with('objectives.shareItem')
                 ->orderBy('order')
                 ->first();
 
             if ($nextStage) {
                 DB::transaction(function () use ($user, $currentStage, $nextStage, $clanProgress) {
                     foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = ShareItem::find($objective->target_id);
+                        $shareItem = $objective->shareItem;
                         if ($shareItem) {
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
@@ -490,14 +492,14 @@ class QuestController extends Controller
                         if (! $objective->share_item_id) {
                             continue;
                         }
-                        $shareItem = ShareItem::find($objective->share_item_id);
+                        $shareItem = $objective->collectItem;
                         if ($shareItem) {
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
                     }
                     $clanProgress->update(['current_stage_id' => $nextStage->id]);
                     foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = ShareItem::find($objective->target_id);
+                        $shareItem = $objective->shareItem;
                         if ($shareItem) {
                             $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
@@ -509,7 +511,7 @@ class QuestController extends Controller
 
             DB::transaction(function () use ($user, $currentStage, $clanProgress) {
                 foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = ShareItem::find($objective->target_id);
+                    $shareItem = $objective->shareItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -518,7 +520,7 @@ class QuestController extends Controller
                     if (! $objective->share_item_id) {
                         continue;
                     }
-                    $shareItem = ShareItem::find($objective->share_item_id);
+                    $shareItem = $objective->collectItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -530,14 +532,14 @@ class QuestController extends Controller
         }
 
         // --- FINAL COMPLETION ---
-        if (! $quest->hasStages() && ! $clanProgress->isAllObjectivesComplete()) {
+        if (! $hasStages && ! $clanProgress->isAllObjectivesComplete()) {
             return redirect()->route('npc', ['id' => $npcId])
                 ->with('quest_error', 'Не все задания квеста выполнены.');
         }
 
-        if (! $quest->hasStages()) {
+        if (! $hasStages) {
             foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
+                $shareItem = $objective->shareItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -547,7 +549,7 @@ class QuestController extends Controller
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = ShareItem::find($objective->share_item_id);
+                $shareItem = $objective->collectItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -555,10 +557,10 @@ class QuestController extends Controller
             }
         }
 
-        DB::transaction(function () use ($user, $player, $quest, $clanProgress, $clan) {
-            if (! $quest->hasStages()) {
+        DB::transaction(function () use ($user, $player, $quest, $clanProgress, $clan, $hasStages) {
+            if (! $hasStages) {
                 foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = ShareItem::find($objective->target_id);
+                    $shareItem = $objective->shareItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -567,7 +569,7 @@ class QuestController extends Controller
                     if (! $objective->share_item_id) {
                         continue;
                     }
-                    $shareItem = ShareItem::find($objective->share_item_id);
+                    $shareItem = $objective->collectItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -714,6 +716,9 @@ class QuestController extends Controller
             return $this->completeClan($id, $request);
         }
 
+        $quest->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
+        $hasStages = $quest->hasStages();
+
         $questPlayer = QuestPlayer::where('player_id', $player->id)
             ->where('quest_id', $quest->id)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
@@ -733,10 +738,11 @@ class QuestController extends Controller
             }
 
             $currentStage = $questPlayer->currentStage;
+            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
 
             // Check deliver items for this stage
             foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
+                $shareItem = $objective->shareItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -748,7 +754,7 @@ class QuestController extends Controller
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = ShareItem::find($objective->share_item_id);
+                $shareItem = $objective->collectItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -757,6 +763,7 @@ class QuestController extends Controller
 
             $nextStage = QuestStage::where('quest_id', $quest->id)
                 ->where('order', '>', $currentStage->order)
+                ->with('objectives.shareItem')
                 ->orderBy('order')
                 ->first();
 
@@ -764,7 +771,7 @@ class QuestController extends Controller
                 DB::transaction(function () use ($user, $currentStage, $nextStage, $questPlayer) {
                     // Remove deliver items for completed stage
                     foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = ShareItem::find($objective->target_id);
+                        $shareItem = $objective->shareItem;
                         if ($shareItem) {
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
@@ -775,7 +782,7 @@ class QuestController extends Controller
                         if (! $objective->share_item_id) {
                             continue;
                         }
-                        $shareItem = ShareItem::find($objective->share_item_id);
+                        $shareItem = $objective->collectItem;
                         if ($shareItem) {
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
@@ -785,7 +792,7 @@ class QuestController extends Controller
 
                     // Give deliver items for the new stage
                     foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = ShareItem::find($objective->target_id);
+                        $shareItem = $objective->shareItem;
                         if ($shareItem) {
                             $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
@@ -799,7 +806,7 @@ class QuestController extends Controller
             // Last stage done — remove its deliver and collect items and fall through to quest completion
             DB::transaction(function () use ($user, $currentStage, $questPlayer) {
                 foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = ShareItem::find($objective->target_id);
+                    $shareItem = $objective->shareItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -808,7 +815,7 @@ class QuestController extends Controller
                     if (! $objective->share_item_id) {
                         continue;
                     }
-                    $shareItem = ShareItem::find($objective->share_item_id);
+                    $shareItem = $objective->collectItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -820,15 +827,15 @@ class QuestController extends Controller
         }
 
         // --- NON-STAGED QUEST or all stages done: final completion ---
-        if (! $quest->hasStages() && ! $questPlayer->isAllObjectivesComplete()) {
+        if (! $hasStages && ! $questPlayer->isAllObjectivesComplete()) {
             return redirect()->route('npc', ['id' => $npcId])
                 ->with('quest_error', 'Не все задания квеста выполнены.');
         }
 
         // Check deliver and collect items for non-staged quest
-        if (! $quest->hasStages()) {
+        if (! $hasStages) {
             foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = ShareItem::find($objective->target_id);
+                $shareItem = $objective->shareItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -838,7 +845,7 @@ class QuestController extends Controller
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = ShareItem::find($objective->share_item_id);
+                $shareItem = $objective->collectItem;
                 if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
@@ -846,11 +853,11 @@ class QuestController extends Controller
             }
         }
 
-        DB::transaction(function () use ($user, $player, $quest, $questPlayer) {
+        DB::transaction(function () use ($user, $player, $quest, $questPlayer, $hasStages) {
             // Remove deliver and collect items from backpack (non-staged only; staged already handled above)
-            if (! $quest->hasStages()) {
+            if (! $hasStages) {
                 foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = ShareItem::find($objective->target_id);
+                    $shareItem = $objective->shareItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -859,7 +866,7 @@ class QuestController extends Controller
                     if (! $objective->share_item_id) {
                         continue;
                     }
-                    $shareItem = ShareItem::find($objective->share_item_id);
+                    $shareItem = $objective->collectItem;
                     if ($shareItem) {
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
@@ -934,17 +941,23 @@ class QuestController extends Controller
             $objectives = $objectives->where('stage_id', $stageId);
         }
 
+        $objectives->loadMissing('shareItem');
+
         foreach ($objectives as $objective) {
-            $shareItem = ShareItem::find($objective->target_id);
+            $shareItem = $objective->shareItem;
             if ($shareItem) {
                 $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
             }
         }
     }
 
-    private function giveExp($player, int $amount): void
+    private function giveExp(Player $player, int $amount): void
     {
-        $player->increment('exp', $amount);
+        $experience = $this->experienceService->calculateGain($player, $amount);
+
+        if ($experience > 0) {
+            $player->increment('exp', $experience);
+        }
     }
 
     private function giveMoney($player, int $amount): void

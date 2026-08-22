@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\MagicSkill\Infrastructure\Persistence\Models;
 
+use App\Models\Skill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -18,7 +20,7 @@ class MagicSkill extends Model
     protected $table = 'magic_skills';
 
     protected $fillable = [
-        'name', 'slug', 'description', 'level', 'type', 'mana_cost',
+        'name', 'slug', 'description', 'level', 'skill_id', 'type', 'mana_cost',
         'min_damage', 'max_damage', 'base_healing', 'cooldown', 'target_type',
         'is_passive', 'effects',
     ];
@@ -49,6 +51,17 @@ class MagicSkill extends Model
     public function appliedEffects(): HasMany
     {
         return $this->hasMany(PlayerEffect::class, 'source_magic_skill_id');
+    }
+
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(MagicSkillRequirement::class);
+    }
+
+    /** Навык владения магией, качающийся за успешное применение этого заклинания (см. MagicAttackStrategy) */
+    public function skill(): BelongsTo
+    {
+        return $this->belongsTo(Skill::class);
     }
 
     public function isAttackSkill(): bool

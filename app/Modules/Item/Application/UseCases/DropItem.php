@@ -20,7 +20,10 @@ class DropItem
             return new ItemActionResultDTO(false);
         }
 
-        $this->itemService->drop($user, $itemId, $qty ?: PHP_INT_MAX);
+        $error = $this->itemService->drop($user, $itemId, $qty ?: PHP_INT_MAX);
+        if ($error !== null) {
+            return new ItemActionResultDTO(false, $error);
+        }
 
         return new ItemActionResultDTO(true);
     }

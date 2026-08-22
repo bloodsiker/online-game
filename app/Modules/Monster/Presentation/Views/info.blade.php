@@ -53,9 +53,59 @@
         .redd, .redd * { color: #ba0000 !important; }
         a { color: #955c4a; text-decoration: none; }
         a:hover { text-decoration: underline; }
+        #artifact_alt .aa-table {
+            border-radius: 30px 30px 0 0;
+            box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, 0.2);
+            font-size: 11px;
+        }
+        .aa-tl {
+            background: url(/img/bg/item_info/tbl-pop_corner-top-left.gif) no-repeat;
+            width: 14px;
+            height: 24px;
+        }
+        .aa-t {
+            background: url(/img/bg/item_info/tbl-pop_top.gif);
+            height: 24px;
+        }
+        .aa-tr {
+            background: url(/img/bg/item_info/tbl-pop_corner-top-right.gif) no-repeat;
+            width: 14px;
+            height: 24px;
+        }
+        .aa-l {
+            background: url(/img/bg/item_info/tbl-pop_left.gif) repeat-y;
+            width: 14px;
+        }
+        .aa-r {
+            background: url(/img/bg/item_info/tbl-pop_right.gif) repeat-y;
+            width: 14px;
+        }
+        .aa-bl {
+            background: url(/img/bg/item_info/tbl-pop_corner-bottom-left.gif) no-repeat;
+            width: 14px;
+            height: 5px;
+        }
+        .aa-b {
+            background: url(/img/bg/item_info/tbl-pop_bottom.gif) repeat-x;
+            height: 5px;
+        }
+        .aa-br {
+            background: url(/img/bg/item_info/tbl-pop_corner-bottom-right.gif) no-repeat;
+            width: 14px;
+            height: 5px;
+        }
+        .list_dark { background-color: #F4BB8A; }
+        .skill_list td { padding: 0 7px; }
+        .red, .red * { color: #d00000; }
     </style>
+    {!! $itemTooltipScript !!}
+    <script>
+        window.gebi = window.gebi || function (id) { return document.getElementById(id); };
+    </script>
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
+<div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
 <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
     <tbody>
     <tr>
@@ -182,7 +232,7 @@
                                                 @endif
                                                 @if($page->monster->dodge)
                                                 <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
-                                                    <td class="brd2-top brd2-bt b">Уклонение</td>
+                                                    <td class="brd2-top brd2-bt b">Уворот</td>
                                                     <td class="brd2-top brd2-bt b redd" align="right">{{ $page->monster->dodge }}</td>
                                                 </tr>
                                                 @endif
@@ -202,6 +252,12 @@
                                                 <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
                                                     <td class="brd2-top brd2-bt b">Денежная награда</td>
                                                     <td class="brd2-top brd2-bt b redd" align="right"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">&nbsp;{{ $page->monster->min_money }} .. <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">&nbsp;{{ $page->monster->max_money }}</td>
+                                                </tr>
+                                                @endif
+                                                @if($page->habitatMaps !== [])
+                                                <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
+                                                    <td class="brd2-top brd2-bt b">Карты обитания</td>
+                                                    <td class="brd2-top brd2-bt b redd" align="right">{{ implode(', ', $page->habitatMaps) }}</td>
                                                 </tr>
                                                 @endif
                                                 </tbody>
@@ -239,8 +295,11 @@
                                                 @foreach($page->monster->items as $item)
                                                 <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                                                     <td class="brd2-top brd2-bt b">
-                                                        <a href="{{ route('items.info.share', ['id' => $item->id]) }}"
+                                                        <a data-id="{{ (int) $item->id }}"
+                                                           href="{{ route('items.info.share', ['id' => $item->id]) }}"
                                                            style="color:{{ $item->rarity->color() }}"
+                                                           onmouseover="showItemInfo(this,event,2)"
+                                                           onmouseout="showItemInfo(this,event,0)"
                                                            onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
                                                             {{ $item->name }}
                                                         </a>

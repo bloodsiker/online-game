@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\ItemRarity;
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
@@ -173,6 +173,10 @@ class ItemController extends Controller
 
     private function fillItem(ShareItem $item, Request $request): void
     {
+        $request->validate([
+            'expire' => ['nullable', 'integer', 'min:1'],
+        ]);
+
         $type = ShareItemType::from($request->input('type'));
 
         $item->name = $request->input('name');
@@ -180,20 +184,26 @@ class ItemController extends Controller
         $item->description = $request->input('description');
         $image = $request->file('image');
         if ($image instanceof UploadedFile) {
+            $oldImage = $item->getRawOriginal('image');
             $item->image = $this->storeItemImage($image);
+            $this->deleteStorageImage($oldImage);
         } elseif ($request->filled('image')) {
             $item->image = $request->input('image');
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($item->getRawOriginal('image'));
+            $item->image = null;
         }
         $item->rarity = ItemRarity::from($request->input('rarity', ItemRarity::COMMON->value));
         $item->slot = $request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null;
         $item->price = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);
         $item->count_use = (int) $request->input('count_use', 0);
+        $item->expire = $request->filled('expire') ? (int) $request->input('expire') : null;
         $item->is_two_hand = (bool) $request->input('is_two_hand', false);
         $item->is_active = (bool) $request->input('is_active', true);
-        $item->is_heal = (bool) $request->input('is_heal', false);
         $item->is_sell = (bool) $request->input('is_sell', true);
         $item->is_give = (bool) $request->input('is_give', true);
+        $item->is_droppable = (bool) $request->input('is_droppable', true);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;

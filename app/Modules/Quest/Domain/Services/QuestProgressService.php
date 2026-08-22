@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Domain\Services;
 
-use App\DTO\AttackResultDTO;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 
 class QuestProgressService
@@ -17,8 +17,13 @@ class QuestProgressService
         private readonly BackpackService $backpackService,
     ) {}
 
-    public function progressKillAndCollect(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
+    /**
+     * @return list<string> One-time messages for the caller to display.
+     */
+    public function progressKillAndCollect(Player $player, MonsterOnLocation $locationMonster): array
     {
+        $messages = [];
+
         foreach ($player->questsInProgress()->with('objectives.questObjective')->get() as $questPlayer) {
             foreach ($questPlayer->objectives as $playerObj) {
                 $qo = $playerObj->questObjective;
@@ -31,7 +36,7 @@ class QuestProgressService
                     continue;
                 }
 
-                if ((int) $qo->target_id !== (int) $locationMonster->monster_id) {
+                if (! $qo->matchesMonster((int) $locationMonster->monster_id)) {
                     continue;
                 }
 
@@ -57,6 +62,7 @@ class QuestProgressService
                     $shareItem = $qo->collectItem;
                     if ($shareItem) {
                         $this->backpackService->addItemByShareItem($player->user, $shareItem, 1);
+                        QuestItemDropped::dispatch($player->user, (int) $shareItem->id);
                     }
                 }
 
@@ -74,13 +80,13 @@ class QuestProgressService
                         : sprintf("<p style='margin:2px 0;'><span style='background:#f5c6c6; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>✅ <b style='color:#7b1a1a;'>%s</b> — все уничтожены для квеста!</span></p>", $monsterName);
                 }
 
-                $result->logSide($msg);
+                $messages[] = $msg;
             }
         }
 
         $clanMembership = $player->user->clanMembership;
         if (! $clanMembership) {
-            return;
+            return $messages;
         }
 
         $clanProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
@@ -90,7 +96,7 @@ class QuestProgressService
             ->first();
 
         if (! $clanProgress) {
-            return;
+            return $messages;
         }
 
         foreach ($clanProgress->objectives as $clanObj) {
@@ -130,6 +136,7 @@ class QuestProgressService
                 $shareItem = $qo->collectItem;
                 if ($shareItem) {
                     $this->backpackService->addItemByShareItem($player->user, $shareItem, 1);
+                    QuestItemDropped::dispatch($player->user, (int) $shareItem->id);
                 }
             }
 
@@ -147,7 +154,63 @@ class QuestProgressService
                     : sprintf("<p style='margin:2px 0;'><span style='background:#fff3cd; border-left:3px solid #c8990a; padding:2px 6px; display:inline-block;'>✅ 🏰 [Клан] <b style='color:#5a3e00;'>%s</b> — все уничтожены!</span></p>", $monsterName);
             }
 
-            $result->logSide($msg);
+            $messages[] = $msg;
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Откатывает прогресс сбора для 'collect'-заданий при выбросе квестового
+     * предмета из рюкзака — иначе прогресс останется засчитан без предмета на руках.
+     */
+    public function decreaseCollectProgress(Player $player, int $shareItemId, int $qty): void
+    {
+        if ($qty <= 0) {
+            return;
+        }
+
+        foreach ($player->questsInProgress()->with('objectives.questObjective')->get() as $questPlayer) {
+            foreach ($questPlayer->objectives as $playerObj) {
+                $qo = $playerObj->questObjective;
+
+                if ($qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
+                    continue;
+                }
+
+                $decrease = min($qty, $playerObj->amount);
+                if ($decrease > 0) {
+                    $playerObj->decrement('amount', $decrease);
+                }
+            }
+        }
+
+        $clanMembership = $player->user->clanMembership;
+        if (! $clanMembership) {
+            return;
+        }
+
+        $clanProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
+            ->where('user_id', $player->user_id)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->with('objectives.questObjective')
+            ->first();
+
+        if (! $clanProgress) {
+            return;
+        }
+
+        foreach ($clanProgress->objectives as $clanObj) {
+            $qo = $clanObj->questObjective;
+
+            if ($qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
+                continue;
+            }
+
+            $decrease = min($qty, $clanObj->amount);
+            if ($decrease > 0) {
+                $clanObj->decrement('amount', $decrease);
+            }
         }
     }
 }

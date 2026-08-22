@@ -7,6 +7,7 @@ namespace App\Services\ItemTooltip\Strategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipRelationLoader;
 use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
@@ -18,10 +19,16 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
 
     public function collect(ItemTooltipCollector $collector): void
     {
-        foreach ($this->items as $item) {
+        $items = ItemTooltipRelationLoader::load($this->items, [
+            'itemInfo.stats',
+            'itemInfo.effects',
+            'itemInfo.requirements.skill',
+            'gems.gemInfo',
+            'runes.runeInfo',
+        ]);
+
+        foreach ($items as $item) {
             $itemInfo = $item->itemInfo;
-            $itemInfo->loadMissing('requirements.skill');
-            $item->loadMissing(['gems.gemInfo', 'runes.runeInfo']);
             $upgradeLvl = $item->upgrade_lvl ?? 0;
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
@@ -42,7 +49,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
-                stats: ItemTooltipStatsBuilder::build($itemInfo),
+                stats: ItemTooltipStatsBuilder::build($itemInfo, $upgradeLvl),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
                 gems: ItemTooltipStatsBuilder::buildGems($item),
                 runes: ItemTooltipStatsBuilder::buildRunes($item),

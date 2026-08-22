@@ -94,6 +94,12 @@
                                             </div>
 
                                             <div class="form-group">
+                                                <label class="col-form-label" for="expire">Срок жизни на локации, минут</label>
+                                                <input type="number" min="1" class="form-control" id="expire" name="expire" value="{{ old('expire') }}">
+                                                <small class="form-text text-muted">Оставьте пустым, чтобы предмет не исчезал.</small>
+                                            </div>
+
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="is_two_hand">Одна/Две руки</label>
                                                 <select class="form-control" name="is_two_hand" id="is_two_hand">
                                                     <option value="0" @selected(old('is_two_hand', '0') === '0')>Одна рука</option>
@@ -131,13 +137,6 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label" for="is_heal">Восстанавливающее</label>
-                                                <select class="form-control" name="is_heal" id="is_heal">
-                                                    <option value="0" @selected(old('is_heal', '0') === '0')>Нет</option>
-                                                    <option value="1" @selected(old('is_heal') === '1')>Да</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="col-form-label" for="is_sell">Можно продать</label>
                                                 <select class="form-control" name="is_sell" id="is_sell">
                                                     <option value="1" @selected(old('is_sell', '1') === '1')>Да</option>
@@ -149,6 +148,13 @@
                                                 <select class="form-control" name="is_give" id="is_give">
                                                     <option value="1" @selected(old('is_give', '1') === '1')>Да</option>
                                                     <option value="0" @selected(old('is_give') === '0')>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="is_droppable">Можно выбросить</label>
+                                                <select class="form-control" name="is_droppable" id="is_droppable">
+                                                    <option value="1" @selected(old('is_droppable', '1') === '1')>Да</option>
+                                                    <option value="0" @selected(old('is_droppable') === '0')>Нет</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -189,7 +195,7 @@
                                                     <li><code>agility</code> — Ловкость</li>
                                                     <li><code>intelligence</code> — Интеллект</li>
                                                     <li><code>critical</code> — Крит шанс (%)</li>
-                                                    <li><code>dodge</code> — Уклонение (%)</li>
+                                                    <li><code>dodge</code> — Уворот (%)</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -206,7 +212,7 @@
                                                         <option value="agility">Ловкость</option>
                                                         <option value="intelligence">Интеллект</option>
                                                         <option value="critical">Крит шанс</option>
-                                                        <option value="dodge">Уклонение</option>
+                                                        <option value="dodge">Уворот</option>
                                                     </select>
                                                     <input type="number" class="form-control gem-stat-value" placeholder="Значение" style="max-width: 120px">
                                                     <button type="button" class="btn btn-danger btn-sm gem-remove-row">✕</button>
@@ -249,7 +255,7 @@
                                                         'agility'       => 'Ловкость',
                                                         'intelligence'  => 'Интеллект',
                                                         'critical'      => 'Крит шанс',
-                                                        'dodge'         => 'Уклонение',
+                                                        'dodge'         => 'Уворот',
                                                     ];
                                                 @endphp
                                                 @foreach($runeStats as $key => $label)

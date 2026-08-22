@@ -10,6 +10,9 @@ interface FightHitInterface
 
     public function getDodge(): int;
 
+    /** Итоговый интеллект (с учётом экипировки) — масштабирует урон атакующих заклинаний, см. MagicAttackStrategy */
+    public function getIntelligence(): int;
+
     public function getArmor(): int;
 
     public function getCombatClass(): CombatClass;

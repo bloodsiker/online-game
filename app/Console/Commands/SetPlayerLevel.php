@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Events\PlayerLeveledUp;
+use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

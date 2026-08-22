@@ -12,6 +12,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class FightController extends Controller
@@ -41,9 +42,16 @@ class FightController extends Controller
             ->inRandomOrder()
             ->first();
 
+        $lastRound = $battle->status->isFinish()
+            ? BattleRound::with(['locationMonster.monster'])
+                ->where('battle_id', $battle->id)
+                ->orderByDesc('round_number')
+                ->first()
+            : null;
+
         $playerDecorator = $this->statService->resolve($player);
 
-        return view('battle::index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
+        return view('battle::index', compact('battle', 'randomAttackedMonster', 'lastRound', 'player', 'playerDecorator'));
     }
 
     public function attack(int $id, int $monsterId, int $action)
@@ -94,7 +102,7 @@ class FightController extends Controller
         return view('battle::index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
     }
 
-    public function log(int $id): \Illuminate\Contracts\View\View
+    public function log(int $id): View
     {
         $battle = Battle::with(['location'])->findOrFail($id);
         $rounds = BattleRound::with(['user.player', 'locationMonster.monster', 'hits'])

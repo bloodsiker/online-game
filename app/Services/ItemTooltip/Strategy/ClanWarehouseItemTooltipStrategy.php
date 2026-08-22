@@ -4,6 +4,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipRelationLoader;
 use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
@@ -12,13 +13,22 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
 
     public function collect(ItemTooltipCollector $collector): void
     {
-        foreach ($this->items as $warehouseItem) {
+        $warehouseItems = ItemTooltipRelationLoader::load($this->items, [
+            'item.itemInfo.stats',
+            'item.itemInfo.effects',
+        ]);
+
+        foreach ($warehouseItems as $warehouseItem) {
             $item = $warehouseItem->item;
             $itemInfo = $item->itemInfo;
+            $upgradeLvl = $item->upgrade_lvl ?? 0;
+            $title = $upgradeLvl > 0
+                ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
+                : $itemInfo->name;
 
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
-                title: $itemInfo->name,
+                title: $title,
                 color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),
@@ -31,7 +41,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
-                stats: ItemTooltipStatsBuilder::build($itemInfo),
+                stats: ItemTooltipStatsBuilder::build($itemInfo, $upgradeLvl),
             ));
         }
     }

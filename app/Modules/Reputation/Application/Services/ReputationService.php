@@ -137,10 +137,16 @@ class ReputationService
      */
     public function getEarnedMedals(Reputation $reputation, int $points, Player $player): Collection
     {
-        return $reputation->tiers
-            ->filter(fn ($t) => $t->medal_name
-                && $points >= $t->min_points
-                && $this->isFeatCompleted($player, $t))
+        $eligibleTiers = $reputation->tiers
+            ->filter(fn ($tier) => $tier->medal_name && $points >= $tier->min_points);
+
+        $completedFeatQuestIds = $this->completedQuestIds(
+            $player,
+            $eligibleTiers->pluck('feat_quest_id')->filter()
+        );
+
+        return $eligibleTiers
+            ->filter(fn ($tier) => ! $tier->feat_quest_id || $completedFeatQuestIds->has($tier->feat_quest_id))
             ->sortBy('min_points')
             ->values();
     }
@@ -165,10 +171,16 @@ class ReputationService
      */
     public function getAvailableFeatQuest(Player $player, Reputation $reputation, int $points): ?Quest
     {
-        $tier = $reputation->tiers
-            ->filter(fn ($t) => $t->feat_quest_id
-                && $points >= $t->min_points
-                && ! $this->isFeatCompleted($player, $t))
+        $eligibleTiers = $reputation->tiers
+            ->filter(fn ($tier) => $tier->feat_quest_id && $points >= $tier->min_points);
+
+        $completedFeatQuestIds = $this->completedQuestIds(
+            $player,
+            $eligibleTiers->pluck('feat_quest_id')
+        );
+
+        $tier = $eligibleTiers
+            ->filter(fn ($tier) => ! $completedFeatQuestIds->has($tier->feat_quest_id))
             ->sortBy('min_points')
             ->first();
 
@@ -184,10 +196,14 @@ class ReputationService
             $quest = $quest->afterQuest;
         }
 
+        $questProgress = QuestPlayer::where('player_id', $player->id)
+            ->whereIn('quest_id', collect($chain)->pluck('id'))
+            ->without(['objectives.questObjective', 'quest'])
+            ->get()
+            ->keyBy('quest_id');
+
         foreach ($chain as $quest) {
-            $qp = QuestPlayer::where('player_id', $player->id)
-                ->where('quest_id', $quest->id)
-                ->first();
+            $qp = $questProgress->get($quest->id);
 
             if (! $qp) {
                 return $quest; // ещё не брал — предлагаем
@@ -198,5 +214,20 @@ class ReputationService
         }
 
         return null;
+    }
+
+    private function completedQuestIds(Player $player, Collection $questIds): Collection
+    {
+        $questIds = $questIds->filter()->unique()->values();
+
+        if ($questIds->isEmpty()) {
+            return collect();
+        }
+
+        return QuestPlayer::where('player_id', $player->id)
+            ->whereIn('quest_id', $questIds)
+            ->where('status', QuestPlayerStatus::COMPLETED)
+            ->pluck('quest_id')
+            ->flip();
     }
 }

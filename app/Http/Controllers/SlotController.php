@@ -53,6 +53,7 @@ class SlotController extends Controller
         }
 
         $player->refresh();
+        $this->statService->invalidate($player);
         $newSheet = $this->statService->resolve($player);
         $this->statService->scaleHp($player, $oldSheet->getHpMax(), $newSheet->getHpMax(), $oldSheet->getMpMax(), $newSheet->getMpMax());
 

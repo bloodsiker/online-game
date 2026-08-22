@@ -339,15 +339,71 @@
         startEffectTimer(id, 'curse');
     }
 
+    // Сервер присылает полный актуальный список. Между heartbeat таймеры
+    // продолжают идти локально, а каждые 10 секунд состояние сверяется.
+    function synchronizeEffects(effects) {
+        const incomingBlessings = new Set();
+        const incomingCurses = new Set();
+
+        effects.forEach(effect => {
+            if (!effect || effect.duration <= 0) return;
+
+            const type = effect.is_curse ? 'curse' : 'blessing';
+            const target = type === 'curse' ? activeEffects.curses : activeEffects.blessings;
+            const incoming = type === 'curse' ? incomingCurses : incomingBlessings;
+            const existing = target.get(effect.id);
+            const durationMs = effect.duration * 1000;
+
+            incoming.add(effect.id);
+
+            if (existing) {
+                existing.name = effect.name;
+                existing.endTime = Date.now() + durationMs;
+                existing.duration = Math.max(existing.duration, durationMs);
+
+                const element = document.querySelector(`[data-effect-id="${effect.id}"]`);
+                if (element) {
+                    element.title = effect.name;
+                    const nameElement = element.querySelector('.effect-name');
+                    if (nameElement) nameElement.textContent = effect.name;
+                }
+
+                return;
+            }
+
+            if (type === 'curse') {
+                addCurse(effect.id, effect.name, effect.duration);
+            } else {
+                addBlessing(effect.id, effect.name, effect.duration);
+            }
+        });
+
+        [
+            [activeEffects.blessings, incomingBlessings],
+            [activeEffects.curses, incomingCurses],
+        ].forEach(([current, incoming]) => {
+            current.forEach((effect, id) => {
+                if (incoming.has(id)) return;
+
+                current.delete(id);
+                document.querySelector(`[data-effect-id="${id}"]`)?.remove();
+            });
+        });
+
+        updateSectionsVisibility();
+        renderBlessings();
+        renderCurses();
+    }
+
     // Видалити ефект
     function removeEffect(id, type) {
         const element = document.querySelector(`[data-effect-id="${id}"]`);
 
         if (element) {
             element.classList.add('removing');
-            setInterval(() => {
+            setTimeout(() => {
                 element.remove();
-            }, 300)
+            }, 300);
 
             setTimeout(() => {
                 if (type === 'blessing') {
@@ -460,8 +516,10 @@
 
     // Обработка полученных данных
     window.addEventListener('message', function(event) {
+        if (event.origin !== window.location.origin) return;
+
         // console.log('Получены данные в character:', event.data);
-        const { hp, mp, experience, lvl, blessing, curse, money, diamond } = event.data;
+        const { hp, mp, experience, lvl, blessing, curse, money, diamond, effects } = event.data;
 
         if (hp !== undefined) {
             const hpBar = document.getElementById('hpBar');
@@ -510,6 +568,10 @@
 
         if (curse !== undefined) {
             addCurse(curse.id, curse.name, curse.duration);
+        }
+
+        if (Array.isArray(effects)) {
+            synchronizeEffects(effects);
         }
     });
 </script>

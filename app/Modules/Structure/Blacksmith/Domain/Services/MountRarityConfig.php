@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Blacksmith\Domain\Services;
 
-use App\Enums\ItemRarity;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 
 /**
  * Правила «оправы» по стандартной редкости предмета (share_items.rarity) —

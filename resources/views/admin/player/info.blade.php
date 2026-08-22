@@ -46,6 +46,23 @@
                                                 <input type="number" class="form-control" name="exp" value="{{ $player->exp }}">
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Коэффициент опыта</label>
+                                                <input
+                                                    type="number"
+                                                    class="form-control @error('experience_multiplier') is-invalid @enderror"
+                                                    name="experience_multiplier"
+                                                    value="{{ old('experience_multiplier', $player->experience_multiplier) }}"
+                                                    min="0"
+                                                    max="9999.9999"
+                                                    step="0.0001"
+                                                    required
+                                                >
+                                                <small class="form-text text-muted">1.0 — обычный опыт, 1.5 — бонус 50%, 0.5 — штраф 50%.</small>
+                                                @error('experience_multiplier')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Свободные очки</label>
                                                 <input type="number" class="form-control" name="free_stats" value="{{ $player->free_stats }}">
                                             </div>
@@ -111,7 +128,7 @@
                                                 <input type="number" step="0.01" class="form-control" name="intelligence" value="{{ $player->intelligence }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Уклонение</label>
+                                                <label class="col-form-label">Уворот</label>
                                                 <input type="number" class="form-control" name="dodge" value="{{ $player->dodge }}">
                                             </div>
                                             <div class="form-group">

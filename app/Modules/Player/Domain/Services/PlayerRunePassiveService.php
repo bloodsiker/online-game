@@ -16,12 +16,16 @@ use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
  */
 class PlayerRunePassiveService
 {
+    public function __construct(
+        private readonly PlayerEquipmentLoader $equipmentLoader,
+    ) {}
+
     /**
      * @return list<array{type: RunePassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>
      */
     public function resolve(Player $player): array
     {
-        $equip = $player->playerEquip;
+        $equip = $this->equipmentLoader->load($player);
 
         if (! $equip) {
             return [];

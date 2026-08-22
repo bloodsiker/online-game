@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\DungeonCooldownType;
-use App\Enums\DungeonRewardType;
-use App\Enums\DungeonType;
+use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
+use App\Modules\Dungeon\Domain\Enums\DungeonRewardType;
+use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Seeder;

@@ -68,7 +68,7 @@ class GetLocationPage
                 $this->readRepository->getMonstersOnLocation($location->id),
                 $this->readRepository->getLocationUsers($location->id),
                 $dungeonSession,
-                $this->readRepository->getItemsOnLocation($user, $location->id)->count(),
+                $this->readRepository->countItemsOnLocation($user, $location->id),
             ),
         );
     }

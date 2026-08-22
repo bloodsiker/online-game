@@ -16,7 +16,7 @@ use App\Modules\Item\Application\UseCases\HandOverToUser;
 use App\Modules\Item\Application\UseCases\OpenChest;
 use App\Modules\Item\Application\UseCases\PickUpInChest;
 use App\Modules\Item\Application\UseCases\UnequipItem;
-use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
+use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\ItemEffect\ItemEffectStrategyFactory;
@@ -39,6 +39,7 @@ class ItemController extends Controller
         private readonly PickUpInChest $pickUpInChest,
         private readonly GetItemInfoPage $getItemInfoPage,
         private readonly PlayerStatService $statService,
+        private readonly LocationReadRepository $locationReadRepository,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -61,6 +62,9 @@ class ItemController extends Controller
             $request->integer('c'),
             $request->integer('qty', 0),
         );
+        if ($result->message !== '') {
+            session()->flash('message', $result->message);
+        }
 
         return redirect()->route('backpack');
     }
@@ -175,10 +179,10 @@ class ItemController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Предмет не найден.'], 422);
         }
 
-        $gate = LocationGate::where('share_item_id', $backpack->item->share_item_id)
-            ->where('mode', 'teleport_use')
-            ->where('from_location_id', $user->location_id)
-            ->first();
+        $gate = $this->locationReadRepository->findTeleportUseGate(
+            (int) $backpack->item->share_item_id,
+            (int) $user->location_id,
+        );
 
         if ($gate !== null) {
             $user->prev_location_id = $user->location_id;
@@ -188,28 +192,7 @@ class ItemController extends Controller
             $removed = false;
             $newCount = $backpack->count;
             if ($gate->consume_item) {
-                $maxUses = (int) $backpack->item->itemInfo->count_use;
-
-                if ($maxUses > 0) {
-                    $item = $backpack->item;
-                    $item->count_use = max(0, $item->count_use - 1);
-
-                    if ($item->count_use <= 0) {
-                        $backpack->delete();
-                        $removed = true;
-                        $newCount = 0;
-                    } else {
-                        $item->save();
-                        $newCount = $item->count_use;
-                    }
-                } elseif ($backpack->count <= 1) {
-                    $backpack->delete();
-                    $removed = true;
-                    $newCount = 0;
-                } else {
-                    $backpack->decrement('count');
-                    $newCount = $backpack->count;
-                }
+                ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
             }
 
             return response()->json([
@@ -220,11 +203,18 @@ class ItemController extends Controller
             ]);
         }
 
-        $stats = $this->statService->resolve($player);
-
         $instantEffects = $backpack->item->itemInfo->effects->filter(
             fn ($e) => $e->effect_type->isInstant()
         );
+
+        if ($instantEffects->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Этот предмет нельзя использовать здесь.',
+            ], 422);
+        }
+
+        $stats = $this->statService->resolve($player);
 
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
@@ -232,15 +222,7 @@ class ItemController extends Controller
             $strategy->apply($player, $effect, $stats->getHpMax(), $stats->getMpMax());
         }
 
-        $removed = false;
-        $newCount = 0;
-        if ($backpack->count <= 1) {
-            $backpack->delete();
-            $removed = true;
-        } else {
-            $backpack->decrement('count');
-            $newCount = $backpack->count;
-        }
+        ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
 
         $player->refresh();
         $stats = $this->statService->resolve($player);
@@ -254,5 +236,47 @@ class ItemController extends Controller
             'mp_now' => $player->mp_now,
             'mp_max' => $stats->getMpMax(),
         ]);
+    }
+
+    /** @return array{removed: bool, count: int} */
+    private function consumeBackpackItem(Backpack $backpack): array
+    {
+        $item = $backpack->item;
+        $configuredUses = max(0, (int) $item->itemInfo->count_use);
+
+        if ($configuredUses > 0) {
+            $currentUses = (int) $item->count_use > 0
+                ? (int) $item->count_use
+                : $configuredUses;
+            $item->count_use = $currentUses - 1;
+
+            if ($item->count_use > 0) {
+                $item->save();
+
+                return ['removed' => false, 'count' => (int) $item->count_use];
+            }
+
+            if ($backpack->count > 1) {
+                $backpack->decrement('count');
+                $item->count_use = $configuredUses;
+                $item->save();
+
+                return ['removed' => false, 'count' => $configuredUses];
+            }
+
+            $backpack->delete();
+
+            return ['removed' => true, 'count' => 0];
+        }
+
+        if ($backpack->count <= 1) {
+            $backpack->delete();
+
+            return ['removed' => true, 'count' => 0];
+        }
+
+        $backpack->decrement('count');
+
+        return ['removed' => false, 'count' => (int) $backpack->count];
     }
 }

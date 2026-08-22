@@ -40,6 +40,11 @@ class ChatService
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Quest);
     }
 
+    public function sendQuestItemDropToUser(User $user, string $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::QuestItem);
+    }
+
     public function sendSystem(string $message, ?int $mapId = null, ?int $clanId = null): ChatMessage
     {
         return $this->sendSystemMessage->toChannel($message, $mapId, $clanId);

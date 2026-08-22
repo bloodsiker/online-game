@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\PremiumShop\Application\UseCases;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\PremiumShop\Application\DTOs\PremiumShopResultDTO;
-use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseCart
@@ -31,13 +31,31 @@ class PurchaseCart
         }
 
         DB::transaction(function () use ($user, $cart, $shopId) {
+            $resourceShareItemIds = $cart->getItems()
+                ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
+                ->filter(static fn ($shareItem): bool => $shareItem->type === ShareItemType::RESOURCE)
+                ->pluck('id')
+                ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
+                ->unique()
+                ->values()
+                ->all();
+            $existingStacks = $resourceShareItemIds === []
+                ? collect()
+                : Backpack::query()
+                    ->select('backpacks.*')
+                    ->addSelect('items.share_item_id as stack_share_item_id')
+                    ->join('items', 'backpacks.item_id', '=', 'items.id')
+                    ->where('backpacks.user_id', $user->id)
+                    ->whereIn('items.share_item_id', $resourceShareItemIds)
+                    ->get()
+                    ->keyBy('stack_share_item_id');
+
             foreach ($cart->getItems() as $itemInCart) {
                 $shareItem = $itemInCart->shopItem->item;
-
-                $existing = Backpack::select('backpacks.*')
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('items.share_item_id', $shareItem->id)
-                    ->first();
+                $shareItemId = (int) $shareItem->id;
+                $existing = $shareItem->type === ShareItemType::RESOURCE
+                    ? $existingStacks->get($shareItemId)
+                    : null;
 
                 if ($existing instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
                     $existing->count += $itemInCart->quantity;
@@ -49,7 +67,14 @@ class PurchaseCart
                         $item->count_use = $shareItem->count_use;
                         $item->save();
 
-                        $user->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
+                        $createdBackpackItem = Backpack::create([
+                            'user_id' => $user->id,
+                            'item_id' => $item->id,
+                            'count' => 1,
+                        ]);
+                        if ($shareItem->type === ShareItemType::RESOURCE && ! $existingStacks->has($shareItemId)) {
+                            $existingStacks->put($shareItemId, $createdBackpackItem);
+                        }
                     }
                 }
             }

@@ -133,6 +133,21 @@ class HomeController extends Controller
         return view('maps.subcity.zabytiy_kurgan.map');
     }
 
+    public function map6()
+    {
+        return view('maps.subcity.overgrown_road.map');
+    }
+
+    public function map7()
+    {
+        return view('maps.subcity.watch_hills.map');
+    }
+
+    public function map8()
+    {
+        return view('maps.subcity.granite_pass.map');
+    }
+
     public function clear()
     {
         Artisan::call('cache:clear');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Domain\Services;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class MessageRenderer
@@ -95,12 +96,13 @@ class MessageRenderer
     /**
      * Escape user input and render shortcodes as safe HTML.
      *
-     * [[item_ID]]     → styled item name span
-     * [[user_ID]]     → player profile link
-     * [[money_N]]     → coin icon + amount
-     * [[diamond_N]]   → diamond icon + amount
-     * to[NAME]        → styled mention prefix
-     * :smile:         → smile image
+     * [[item_ID]]       → styled item instance name span
+     * [[share_item_ID]] → styled shared item name span
+     * [[user_ID]]       → player profile link
+     * [[money_N]]       → coin icon + amount
+     * [[diamond_N]]     → diamond icon + amount
+     * to[NAME]          → styled mention prefix
+     * :smile:           → smile image
      */
     public function render(string $message, bool $trusted = false): string
     {
@@ -126,6 +128,24 @@ class MessageRenderer
                 .' onclick="window.open(\''.$infoUrl.'\', \'\', \'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\'); return false;">'
                 .$name.'</span>';
         }, $escaped);
+
+        // Replace [[share_item_ID]] shortcodes
+        $rendered = preg_replace_callback('/\[\[share_item_(\d+)\]\]/', function ($matches) {
+            $item = ShareItem::find((int) $matches[1]);
+
+            if (! $item) {
+                return '<span class="chat-item-unknown" title="Предмет не найден">[???]</span>';
+            }
+
+            $name = e($item->name);
+            $color = e($item->rarity?->color() ?? '#666666');
+            $desc = e($item->description ?? '');
+            $infoUrl = route('items.info.share', ['id' => $item->id]);
+
+            return '<span class="chat-item" style="color:'.$color.'" title="'.$desc.'"'
+                .' onclick="window.open(\''.$infoUrl.'\', \'\', \'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\'); return false;">'
+                .$name.'</span>';
+        }, $rendered);
 
         // Replace [[user_ID]] shortcodes with profile links
         $rendered = preg_replace_callback('/\[\[user_(\d+)\]\]/', function ($matches) {

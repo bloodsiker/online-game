@@ -2,8 +2,8 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\AttackResultDTO;
-use App\DTO\FightHitDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;

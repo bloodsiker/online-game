@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Domain\Enums\ItemActionType;
+use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -12,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class SellToShop
 {
+    public function __construct(
+        private readonly ItemActionLogger $itemActionLogger,
+    ) {}
+
     /**
      * @param  array<int, array{selected: int, count: int}>  $checkedItems  keyed by item_id
      */
@@ -44,7 +50,15 @@ class SellToShop
             foreach ($items as $sellItem) {
                 $requested = (int) ($filtered[$sellItem->item_id]['count'] ?? 0);
                 $qty = min($requested, $sellItem->count);
-                $sum += (int) round($sellItem->item->itemInfo->price / 2) * $qty;
+
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                $money = (int) round($sellItem->item->itemInfo->price / 2) * $qty;
+                $sum += $money;
+
+                $this->itemActionLogger->log($user, $sellItem->item->itemInfo, $sellItem->item->upgrade_lvl, ItemActionType::SELL, $qty, $money);
 
                 if ($qty >= $sellItem->count) {
                     $idsToDelete[] = $sellItem->item_id;

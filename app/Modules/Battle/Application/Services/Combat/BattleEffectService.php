@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Domain\Services\PlayerTimedEffectService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 class BattleEffectService
 {
+    public function __construct(
+        private readonly PlayerStatService $statService,
+        private readonly PlayerTimedEffectService $timedEffectService,
+    ) {}
+
     /**
      * Apply an Effect model (from player magic skill) to the monster.
      * Uses effect->slug to resolve the ActiveEffectType.
@@ -59,7 +66,7 @@ class BattleEffectService
     /**
      * Apply an Effect model to a player.
      *
-     * In-battle ($battle set): duration = turns (stacks countdown each round).
+     * In-battle ($battle set): duration = real-time ticks.
      * Out-of-battle ($battle null): duration = seconds (expires_at based).
      */
     public function applyEffectToPlayer(
@@ -73,13 +80,20 @@ class BattleEffectService
 
         $existing = PlayerActiveEffect::where('player_id', $player->id)
             ->where('effect_id', $effect->id)
+            ->when(
+                $battle !== null,
+                fn ($query) => $query->where('battle_id', $battle->id),
+                fn ($query) => $query->whereNull('battle_id'),
+            )
             ->first();
 
         if ($battle !== null) {
-            // In-battle: turn-based stacks
+            // In-battle: stacks are consumed by real-time ticks.
             if ($existing) {
                 $existing->stacks = max($existing->stacks ?? 0, (int) $effect->duration);
+                $existing->last_tick_at = now();
                 $existing->save();
+                $this->statService->invalidate($player);
 
                 return;
             }
@@ -90,6 +104,7 @@ class BattleEffectService
                 'battle_id' => $battle->id,
                 'type' => $type,
                 'applied_at' => now(),
+                'last_tick_at' => now(),
                 'stacks' => (int) $effect->duration,
                 'current_value' => (float) $effect->value_per_tick,
             ]);
@@ -101,7 +116,9 @@ class BattleEffectService
 
             if ($existing) {
                 $existing->expires_at = $expiresAt;
+                $existing->last_tick_at = now();
                 $existing->save();
+                $this->statService->invalidate($player);
 
                 return;
             }
@@ -112,11 +129,14 @@ class BattleEffectService
                 'battle_id' => null,
                 'type' => $type,
                 'applied_at' => now(),
+                'last_tick_at' => now(),
                 'expires_at' => $expiresAt,
                 'stacks' => 0,
                 'current_value' => (float) $effect->value_per_tick,
             ]);
         }
+
+        $this->statService->invalidate($player);
     }
 
     /**
@@ -132,11 +152,14 @@ class BattleEffectService
     ): void {
         $existing = PlayerActiveEffect::where('player_id', $player->id)
             ->where('type', $type)
+            ->where('battle_id', $battle->id)
             ->first();
 
         if ($existing) {
             $existing->stacks = max($existing->stacks, $stacks);
+            $existing->last_tick_at = now();
             $existing->save();
+            $this->statService->invalidate($player);
 
             return;
         }
@@ -146,12 +169,15 @@ class BattleEffectService
             'battle_id' => $battle->id,
             'type' => $type,
             'applied_at' => now(),
+            'last_tick_at' => now(),
             'stacks' => $stacks,
             'current_value' => $value,
         ]);
 
+        $this->statService->invalidate($player);
+
         $result->log(sprintf(
-            '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%d ходов)</p>',
+            '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%d тиков)</p>',
             $type->emoji(),
             $type->label(),
             $stacks
@@ -204,9 +230,24 @@ class BattleEffectService
      */
     public function processPlayerEffects(Player $player, Battle $battle, AttackResultDTO $result): bool
     {
+        $tickResult = $this->timedEffectService->process($player, now());
+        foreach ($tickResult->effects as $processedEffect) {
+            $result->log(sprintf(
+                '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
+                $processedEffect['emoji'],
+                $processedEffect['label'],
+                $processedEffect['damage'],
+            ));
+        }
+
+        if ($tickResult->effectsChanged) {
+            $this->statService->invalidate($player);
+        }
+
         $effects = PlayerActiveEffect::where('player_id', $player->id)->get();
 
         $isStunned = false;
+        $statsChanged = false;
 
         foreach ($effects as $effect) {
             if ($effect->isStun()) {
@@ -215,6 +256,7 @@ class BattleEffectService
 
                 if ($effect->stacks <= 0) {
                     $result->log('<p class="color-info">💫 Вы больше не оглушены.</p>');
+                    $statsChanged = $statsChanged || $effect->effect_id !== null;
                     $effect->delete();
                 } else {
                     $result->log(sprintf(
@@ -228,19 +270,6 @@ class BattleEffectService
             }
 
             if ($effect->isDoT()) {
-                $damage = (int) $effect->current_value;
-                $player->hp_now = max(0, $player->hp_now - $damage);
-
-                $result->log(sprintf(
-                    '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
-                    $effect->type->emoji(),
-                    $effect->type->label(),
-                    $damage
-                ));
-
-                $effect->stacks--;
-                $effect->stacks <= 0 ? $effect->delete() : $effect->save();
-
                 continue;
             }
 
@@ -255,8 +284,17 @@ class BattleEffectService
                 ));
 
                 $effect->stacks--;
-                $effect->stacks <= 0 ? $effect->delete() : $effect->save();
+                if ($effect->stacks <= 0) {
+                    $statsChanged = $statsChanged || $effect->effect_id !== null;
+                    $effect->delete();
+                } else {
+                    $effect->save();
+                }
             }
+        }
+
+        if ($statsChanged) {
+            $this->statService->invalidate($player);
         }
 
         return $isStunned;
@@ -336,7 +374,15 @@ class BattleEffectService
      */
     public function cleanupBattleEffects(Battle $battle): void
     {
+        $playerIds = PlayerActiveEffect::where('battle_id', $battle->id)
+            ->distinct()
+            ->pluck('player_id');
+
         MonsterActiveEffect::where('battle_id', $battle->id)->delete();
         PlayerActiveEffect::where('battle_id', $battle->id)->delete();
+
+        foreach ($playerIds as $playerId) {
+            $this->statService->invalidate((int) $playerId);
+        }
     }
 }

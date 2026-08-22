@@ -130,6 +130,11 @@ class Monster extends Model implements FightHitInterface
         return $this->armor;
     }
 
+    public function getIntelligence(): int
+    {
+        return 0;
+    }
+
     /**
      * Класс монстра определяется доминирующей характеристикой.
      * Нормализуем через базовые значения, т.к. у монстров нет первичных стат.

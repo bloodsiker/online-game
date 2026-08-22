@@ -244,7 +244,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a608" style="">
+            <div class="a511" style="">
                 <div id="u608">
                     <div id="l608" class="s2box bt bl">
                         <s id="z608">0</s>608
@@ -3438,12 +3438,13 @@
     if (locInURL[1] !== undefined) {
         currLocId = locInURL[1];
     } else {
-        currLocId = {{ $user?->location_id }};
+        currLocId = {{ $user?->location_id ?? 0 }};
     }
 
     var lc = [], ma = [], prevlid = 0, prevlocation = 0, zcurrent;
-    if (document.getElementById('z' + currLocId).innerHTML != undefined) {
-        zcurrent = document.getElementById('z' + currLocId).innerHTML * 1;
+    var currentLocationElement = document.getElementById('z' + currLocId);
+    if (currentLocationElement !== null) {
+        zcurrent = currentLocationElement.innerHTML * 1;
         for (i = zbmin; i <= zbmax; i++) {
             n = i - zcurrent;
             document.getElementById('m' + (i - zbmin)).style.display = (n == 0 ? '' : 'none');

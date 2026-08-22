@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\Services;
 
-use App\DTO\ShopCartDTO;
+use App\Modules\Structure\Shop\Application\DTOs\ShopCartDTO;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopCart;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;

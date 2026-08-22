@@ -25,5 +25,10 @@ class DatabaseSeeder extends Seeder
         $this->call(BuffSkillSeeder::class);
         $this->call(EventActivitySeeder::class);
         $this->call(HighTierEquipmentSeeder::class);
+        $this->call(OvergrownRoadMonsterSeeder::class);
+        $this->call(OvergrownRoadMonsterPlacementSeeder::class);
+        $this->call(OvergrownRoadLocationSeeder::class);
+        $this->call(WatchHillsSeeder::class);
+        $this->call(GranitePassSeeder::class);
     }
 }

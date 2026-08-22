@@ -93,11 +93,17 @@ class QuestController extends Controller
 
     public function addObjective(Request $request, Quest $quest): RedirectResponse
     {
+        $targetIds = collect(explode(',', (string) $request->input('target_ids')))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter()
+            ->values();
+
         QuestObjective::create([
             'quest_id' => $quest->id,
             'type' => $request->input('type'),
             'target_type' => $request->input('target_type'),
-            'target_id' => $request->input('target_id') ?: null,
+            'target_id' => $request->input('target_id') ?: $targetIds->first(),
+            'target_ids' => $targetIds->count() > 1 ? $targetIds->all() : null,
             'share_item_id' => $request->input('share_item_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
             'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
@@ -105,6 +111,27 @@ class QuestController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Задание добавлено.');
+    }
+
+    public function updateObjective(Request $request, Quest $quest, QuestObjective $objective): RedirectResponse
+    {
+        $targetIds = collect(explode(',', (string) $request->input('target_ids')))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter()
+            ->values();
+
+        $objective->update([
+            'type' => $request->input('type'),
+            'target_type' => $request->input('target_type'),
+            'target_id' => $request->input('target_id') ?: $targetIds->first(),
+            'target_ids' => $targetIds->count() > 1 ? $targetIds->all() : null,
+            'share_item_id' => $request->input('share_item_id') ?: null,
+            'required_amount' => (int) $request->input('required_amount', 1),
+            'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
+            'description' => $request->input('description'),
+        ]);
+
+        return redirect()->back()->with('success', 'Задание сохранено.');
     }
 
     public function deleteObjective(Quest $quest, QuestObjective $objective): RedirectResponse
@@ -126,6 +153,19 @@ class QuestController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Награда добавлена.');
+    }
+
+    public function updateReward(Request $request, Quest $quest, QuestReward $reward): RedirectResponse
+    {
+        $reward->update([
+            'type' => $request->input('type'),
+            'amount' => (int) $request->input('amount', 0),
+            'share_item_id' => $request->input('share_item_id') ?: null,
+            'location_id' => $request->input('location_id') ?: null,
+            'reputation_id' => $request->input('reputation_id') ?: null,
+        ]);
+
+        return redirect()->back()->with('success', 'Награда сохранена.');
     }
 
     public function deleteReward(Quest $quest, QuestReward $reward): RedirectResponse

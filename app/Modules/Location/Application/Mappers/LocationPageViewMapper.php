@@ -53,7 +53,7 @@ class LocationPageViewMapper
                 static fn ($npc): LocationNpcDTO => new LocationNpcDTO(
                     id: (int) $npc->id,
                     name: (string) $npc->name,
-                    infoUrl: route('info.npc', ['id' => $npc->id]),
+                    infoUrl: route('info.npc', ['uuid' => $npc->uuid]),
                     talkUrl: route('npc', ['id' => $npc->id]),
                 )
             )->all(),

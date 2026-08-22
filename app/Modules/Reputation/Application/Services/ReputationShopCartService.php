@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Application\Services;
 
-use App\DTO\ShopCartDTO;
+use App\Modules\Reputation\Application\DTOs\ReputationShopCartDTO;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopCart;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -47,7 +47,7 @@ class ReputationShopCartService
     }
 
     /** Корзина только по товарам данной репутации. */
-    public function getCart(User $user, int $reputationId): ShopCartDTO
+    public function getCart(User $user, int $reputationId): ReputationShopCartDTO
     {
         $cartItems = ReputationShopCart::with(['shopItem', 'shopItem.item', 'shopItem.requirements.item'])
             ->join('reputation_shop_items', 'reputation_shop_items.id', '=', 'reputation_shop_carts.reputation_shop_item_id')
@@ -59,7 +59,7 @@ class ReputationShopCartService
         $totalPrice = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->price);
         $totalDiamond = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->diamond);
 
-        return new ShopCartDTO(items: $cartItems, totalDiamond: $totalDiamond, totalPrice: $totalPrice);
+        return new ReputationShopCartDTO(items: $cartItems, totalDiamond: $totalDiamond, totalPrice: $totalPrice);
     }
 
     /** Очистить корзину только для данной репутации. */

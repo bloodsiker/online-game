@@ -2,19 +2,18 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\AttackResultDTO;
-use App\Events\PlayerDied;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
-use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 readonly class PlayerDeathService
 {
-    public function __construct(private DungeonCoordinator $dungeonCoordinator) {}
+    public function __construct(
+        private PlayerDeathFinalizer $deathFinalizer,
+    ) {}
 
     public function handle(
         Player $player,
@@ -24,22 +23,10 @@ readonly class PlayerDeathService
         BattleDetail $attackedMonster,
         AttackResultDTO $result
     ): FightDTO {
-        event(new PlayerDied($player));
-
-        PlayerActiveEffect::where('player_id', $player->id)->delete();
-
-        $result->log('<p>Вы <font color="red"><b>проиграли</b></font>! Опыт -10%.</p>');
-
-        $dungeonDeathMessage = $this->dungeonCoordinator->handlePlayerDeath($player);
-        if ($dungeonDeathMessage !== null) {
-            $result->log('<p><b>'.$dungeonDeathMessage.'</b></p>');
-        }
+        $this->deathFinalizer->finalize($player, $attackedPlayer, $result);
 
         $round->action = $result->getLog();
         $round->save();
-
-        $attackedPlayer->status = 0;
-        $attackedPlayer->save();
 
         return (new FightDTO)
             ->setBattle($battle)

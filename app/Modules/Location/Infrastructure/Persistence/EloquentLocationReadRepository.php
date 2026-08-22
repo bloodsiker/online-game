@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Location\Infrastructure\Persistence;
 
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class EloquentLocationReadRepository implements LocationReadRepository
@@ -40,9 +42,43 @@ class EloquentLocationReadRepository implements LocationReadRepository
         return DungeonSession::with('dungeon')->where('user_id', $userId)->first();
     }
 
+    public function findTeleportUseGate(int $shareItemId, int $fromLocationId): ?LocationGate
+    {
+        return LocationGate::query()
+            ->where('share_item_id', $shareItemId)
+            ->where('mode', 'teleport_use')
+            ->where('from_location_id', $fromLocationId)
+            ->first();
+    }
+
+    public function getTeleportUseShareItemIds(int $fromLocationId): array
+    {
+        return LocationGate::query()
+            ->where('mode', 'teleport_use')
+            ->where('from_location_id', $fromLocationId)
+            ->distinct()
+            ->pluck('share_item_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
     public function getItemsOnLocation(User $user, int $locationId): Collection
     {
-        $query = ItemOnLocation::with(['item', 'item.itemInfo'])->where('location_id', $locationId);
+        return $this->visibleItemsOnLocationQuery($user, $locationId)
+            ->with(['item', 'item.itemInfo'])
+            ->get();
+    }
+
+    public function countItemsOnLocation(User $user, int $locationId): int
+    {
+        return $this->visibleItemsOnLocationQuery($user, $locationId)->count();
+    }
+
+    private function visibleItemsOnLocationQuery(User $user, int $locationId): Builder
+    {
+        $query = ItemOnLocation::visible()
+            ->where('location_id', $locationId);
 
         $dungeonSessionId = null;
         if ($user->currentLocation->dungeon_id !== null) {
@@ -56,6 +92,6 @@ class EloquentLocationReadRepository implements LocationReadRepository
             $query->whereNull('dungeon_session_id');
         }
 
-        return $query->get();
+        return $query;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\ItemEffect\Strategies;
 
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerItemBuff;
 use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
@@ -11,6 +12,10 @@ use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 class BuffDefenseStrategy implements ItemEffectStrategyInterface
 {
     private const DEFAULT_DURATION = 300; // 5 минут
+
+    public function __construct(
+        private readonly PlayerStatService $statService,
+    ) {}
 
     public function apply(Player $player, ItemEffectValue $effect, ?int $hpMax = null, ?int $mpMax = null): void
     {
@@ -23,5 +28,7 @@ class BuffDefenseStrategy implements ItemEffectStrategyInterface
             'value_type' => $effect->valueType,
             'expires_at' => now()->addSeconds($duration),
         ]);
+
+        $this->statService->invalidate($player);
     }
 }

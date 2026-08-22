@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('npcs', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->nullable();
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->boolean('hide_location')->default(false);
             $table->string('name');
             $table->text('description');
             $table->string('image')->nullable();
             $table->timestamps();
+
+            $table->unique('uuid');
         });
 
         Schema::table('structures', function (Blueprint $table) {
@@ -109,6 +113,6 @@ return new class extends Migration
         Schema::dropIfExists('quest_rewards');
         Schema::dropIfExists('quest_stages');
         Schema::dropIfExists('quests');
-        Schema::dropIfExists('nps');
+        Schema::dropIfExists('npcs');
     }
 };

@@ -26,25 +26,31 @@ readonly class BossRespawnService
 
     public function respawnIfDue(Location $location, ?int $dungeonSessionId): void
     {
-        $bosses = $location->monsters()->where('is_boss', true)->get();
+        $bosses = $location->monsters()
+            ->where('is_boss', true)
+            ->get()
+            ->filter(static fn ($boss): bool => $boss->canRespawnNow());
+
+        if ($bosses->isEmpty()) {
+            return;
+        }
+
+        $aliveBossIds = MonsterOnLocation::query()
+            ->where('location_id', $location->id)
+            ->whereIn('monster_id', $bosses->pluck('id'))
+            ->where('active', 1)
+            ->when($dungeonSessionId !== null, fn ($query) => $query->where('dungeon_session_id', $dungeonSessionId))
+            ->when($dungeonSessionId === null, fn ($query) => $query->whereNull('dungeon_session_id'))
+            ->pluck('monster_id')
+            ->mapWithKeys(static fn (mixed $monsterId): array => [(int) $monsterId => true]);
 
         foreach ($bosses as $boss) {
-            if (! $boss->canRespawnNow()) {
-                continue;
-            }
-
-            $alreadyAlive = MonsterOnLocation::where('location_id', $location->id)
-                ->where('monster_id', $boss->id)
-                ->where('active', 1)
-                ->when($dungeonSessionId !== null, fn ($q) => $q->where('dungeon_session_id', $dungeonSessionId))
-                ->when($dungeonSessionId === null, fn ($q) => $q->whereNull('dungeon_session_id'))
-                ->exists();
-
-            if ($alreadyAlive) {
+            if ($aliveBossIds->has((int) $boss->id)) {
                 continue;
             }
 
             $this->monsterRepo->createMonsterOnLocation($boss, $location, $dungeonSessionId);
+            $aliveBossIds->put((int) $boss->id, true);
             $boss->clearRespawn();
         }
     }

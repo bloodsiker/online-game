@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Listeners\RecalculatePlayerModification;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
 
@@ -24,9 +24,9 @@ class RecalculatePlayersHp extends Command
 
         Player::query()->with('user')->chunkById(200, function ($players) use ($dry): void {
             foreach ($players as $player) {
-                $newHpMax = RecalculatePlayerModification::DEFAULT_HP
-                    + RecalculatePlayerModification::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
-                    + RecalculatePlayerModification::HP_PER_ENDURANCE * max(0, $player->getEndurance() - 1);
+                $newHpMax = PlayerStatFormulas::DEFAULT_HP
+                    + PlayerStatFormulas::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
+                    + PlayerStatFormulas::HP_PER_ENDURANCE * max(0, $player->getEndurance() - 1);
 
                 $oldHpMax = (int) $player->hp_max;
                 $newHpNow = $oldHpMax > 0

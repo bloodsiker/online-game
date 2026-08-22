@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -24,8 +24,13 @@ class PlayerController extends Controller
     public function info(Request $request, Player $player): mixed
     {
         if ($request->isMethod('POST')) {
+            $validated = $request->validate([
+                'experience_multiplier' => ['required', 'numeric', 'min:0', 'max:9999.9999'],
+            ]);
+
             $player->lvl = (int) $request->input('lvl', 1);
             $player->exp = (int) $request->input('exp', 0);
+            $player->experience_multiplier = (float) $validated['experience_multiplier'];
             $player->hp_now = (int) $request->input('hp_now');
             $player->hp_max = (int) $request->input('hp_max');
             $player->mp_now = (int) $request->input('mp_now');

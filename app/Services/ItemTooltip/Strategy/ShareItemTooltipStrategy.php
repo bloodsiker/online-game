@@ -6,6 +6,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipRelationLoader;
 use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
@@ -14,8 +15,13 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
 
     public function collect(ItemTooltipCollector $collector): void
     {
-        foreach ($this->items as $shareItem) {
-            $shareItem->loadMissing('requirements.skill');
+        $shareItems = ItemTooltipRelationLoader::load($this->items, [
+            'stats',
+            'effects',
+            'requirements.skill',
+        ]);
+
+        foreach ($shareItems as $shareItem) {
             $collector->add(new ItemTooltipDto(
                 id: $shareItem->id,
                 title: $shareItem->name,

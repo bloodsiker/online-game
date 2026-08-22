@@ -124,7 +124,7 @@
                                                                             <tr>
                                                                                 <td rowspan="4" valign="top" align="center" width="60">
                                                                                     <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                           style="float: left; margin: 1px; {{ $page->image ? 'background: url('.$page->image.') no-repeat center;' : '' }}">
+                                                                                           style="float: left; margin: 1px; {{ $page->image ? 'background: url('.$page->image.') no-repeat center; background-size: cover;' : '' }}">
                                                                                         <tbody>
                                                                                         <tr>
                                                                                             <td title="{{ $page->name }}" valign="bottom">&nbsp;</td>

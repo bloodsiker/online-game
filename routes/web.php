@@ -19,6 +19,9 @@ Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
 Route::get('/map4', [HomeController::class, 'map4'])->name('map4');
 Route::get('/map5', [HomeController::class, 'map5'])->name('map5');
+Route::get('/map6', [HomeController::class, 'map6'])->name('map6');
+Route::get('/map7', [HomeController::class, 'map7'])->name('map7');
+Route::get('/map8', [HomeController::class, 'map8'])->name('map8');
 Route::get('/clear', [HomeController::class, 'clear'])->name('clear');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login')->withoutMiddleware([VerifyCsrfToken::class]);

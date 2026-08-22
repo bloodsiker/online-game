@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\ItemRarity;
 use App\Models\Skill;
 use App\Modules\Item\Domain\Services\EquipmentStatFormulas;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;

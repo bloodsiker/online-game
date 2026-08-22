@@ -56,10 +56,28 @@
                             <span>Навыки</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.magic_skills', 'admin.magic_skill.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.magic_skills') }}">
+                            <i class="bx bx-magic-wand" aria-hidden="true"></i>
+                            <span>Скиллы (магия)</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.effects', 'admin.effect.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.effects') }}">
+                            <i class="bx bx-flash" aria-hidden="true"></i>
+                            <span>Эффекты</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.items', 'admin.item.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.items') }}">
                             <i class="bx bx-package" aria-hidden="true"></i>
                             <span>Предметы</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.item_logs') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.item_logs') }}">
+                            <i class="bx bx-history" aria-hidden="true"></i>
+                            <span>Лог предметов</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.players', 'admin.player.*') ? 'nav-active' : '' }}">

@@ -83,6 +83,12 @@
                                                     @endif
                                                 </div>
                                                 <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                                                @if($item->getRawOriginal('image'))
+                                                    <div class="checkbox-custom checkbox-danger mt-1">
+                                                        <input type="checkbox" id="item-delete-image" name="delete_image" value="1">
+                                                        <label for="item-delete-image">Удалить картинку</label>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Описание</label>
@@ -102,6 +108,11 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Количество использований</label>
                                                 <input type="number" class="form-control" name="count_use" value="{{ $item->count_use }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="expire">Срок жизни на локации, минут</label>
+                                                <input type="number" min="1" class="form-control" id="expire" name="expire" value="{{ old('expire', $item->expire) }}">
+                                                <small class="form-text text-muted">Оставьте пустым, чтобы предмет не исчезал.</small>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Одна/Две руки</label>
@@ -142,13 +153,6 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Восстанавливающее</label>
-                                                <select class="form-control" name="is_heal">
-                                                    <option value="0" @selected(!$item->is_heal)>Нет</option>
-                                                    <option value="1" @selected($item->is_heal)>Да</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="col-form-label">Можно продать</label>
                                                 <select class="form-control" name="is_sell">
                                                     <option value="1" @selected($item->is_sell)>Да</option>
@@ -160,6 +164,13 @@
                                                 <select class="form-control" name="is_give">
                                                     <option value="1" @selected($item->is_give)>Да</option>
                                                     <option value="0" @selected(!$item->is_give)>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Можно выбросить</label>
+                                                <select class="form-control" name="is_droppable">
+                                                    <option value="1" @selected($item->is_droppable)>Да</option>
+                                                    <option value="0" @selected(!$item->is_droppable)>Нет</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -226,7 +237,7 @@
                                                 <p class="text-muted small">Отметьте статы, которые могут выпасть при вставке руны:</p>
                                                 <div class="row">
                                                     @php
-                                                        $runeStats = ['attack' => 'Атака', 'armor' => 'Защита', 'hp_max' => 'Макс HP', 'mp_max' => 'Макс MP', 'strength' => 'Сила', 'agility' => 'Ловкость', 'intelligence' => 'Интеллект', 'critical' => 'Крит шанс', 'dodge' => 'Уклонение'];
+                                                        $runeStats = ['attack' => 'Атака', 'armor' => 'Защита', 'hp_max' => 'Макс HP', 'mp_max' => 'Макс MP', 'strength' => 'Сила', 'agility' => 'Ловкость', 'intelligence' => 'Интеллект', 'critical' => 'Крит шанс', 'dodge' => 'Уворот'];
                                                         $currentPool = old('rune_stat_pool', $item->rune_stat_pool ?? []);
                                                     @endphp
                                                     @foreach($runeStats as $key => $label)
@@ -637,7 +648,7 @@
         <option value="hp_max">Макс HP</option><option value="mp_max">Макс MP</option>
         <option value="strength">Сила</option><option value="agility">Ловкость</option>
         <option value="intelligence">Интеллект</option><option value="critical">Крит шанс</option>
-        <option value="dodge">Уклонение</option>`;
+        <option value="dodge">Уворот</option>`;
 
     function makeGemRow(type, value) {
         const div = document.createElement('div');

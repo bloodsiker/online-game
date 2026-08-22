@@ -425,7 +425,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u233">
                     <div id="l233" class="s2box bl bt">
                         <s id="z233">0</s>233
@@ -434,7 +434,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u234">
                     <div id="l234" class="s2box bt bb">
                         <s id="z234">0</s>234
@@ -443,7 +443,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u235">
                     <div id="l235" class="s2box bt bb">
                         <s id="z235">0</s>235
@@ -452,7 +452,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u236">
                     <div id="l236" class="s2box bt br">
                         <s id="z236">0</s>236
@@ -616,7 +616,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u232">
                     <div id="l232" class="s2box bl br">
                         <s id="z232">0</s>232
@@ -625,7 +625,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u243">
                     <div id="l243" class="s2box bt bl">
                         <s id="z243">0</s>243
@@ -634,7 +634,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u244">
                     <div id="l244" class="s2box bt br">
                         <s id="z244">0</s>244
@@ -643,7 +643,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u237">
                     <div id="l237" class="s2box bl br">
                         <s id="z237">0</s>237
@@ -859,7 +859,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u231">
                     <div id="l231" class="s2box bl br">
                         <s id="z231">0</s>231
@@ -868,7 +868,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u242">
                     <div id="l242" class="s2box br bl">
                         <s id="z242">0</s>242
@@ -877,7 +877,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u245">
                     <div id="l245" class="s2box bl bb br">
                         <s id="z245">0</s>245
@@ -890,7 +890,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u238">
                     <div id="l238" class="s2box bl br">
                         <s id="z238">0</s>238
@@ -1126,7 +1126,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u230">
                     <div id="l230" class="s2box bl br">
                         <s id="z230">0</s>230
@@ -1135,7 +1135,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u241">
                     <div id="l241" class="s2box bb bl">
                         <s id="z241">0</s>241
@@ -1144,7 +1144,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u240">
                     <div id="l240" class="s2box bt bb">
                         <s id="z240">0</s>240
@@ -1153,7 +1153,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u239">
                     <div id="l239" class="s2box bb br">
                         <s id="z239">0</s>239
@@ -1405,7 +1405,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u229">
                     <div id="l229" class="s2box bl br">
                         <s id="z229">0</s>229
@@ -1636,7 +1636,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u228">
                     <div id="l228" class="s2box bl br">
                         <s id="z228">0</s>228
@@ -1867,7 +1867,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u227">
                     <div id="l227" class="s2box bl br">
                         <s id="z227">0</s>227
@@ -2082,7 +2082,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u226">
                     <div id="l226" class="s2box bl br">
                         <s id="z226">0</s>226
@@ -2289,7 +2289,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u225">
                     <div id="l225" class="s2box bl br">
                         <s id="z225">0</s>225
@@ -2472,7 +2472,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u224">
                     <div id="l224" class="s2box bl br">
                         <s id="z224">0</s>224
@@ -2559,7 +2559,7 @@
                 <div id="u510">
                     <div id="l510" class="s2box bl bb">
                         <s id="z510">0</s>510
-                        <a href="?m=MjAwMA#2000" class="aeast">→</a>
+                        <a href="{{ route('on_map', array_merge(['s' => 'Vr8Qm2Lp5Z'], request()->except(['s']))) }}#992" class="aeast">→</a>
                     </div>
                 </div>
             </div>
@@ -2568,7 +2568,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u223">
                     <div id="l223" class="s2box bl br">
                         <s id="z223">0</s>223
@@ -2658,7 +2658,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u312">
                     <div id="l312" class="s2box bl bt">
                         <s id="z312">0</s>312
@@ -2667,7 +2667,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u313">
                     <div id="l313" class="s2box bt bb">
                         <s id="z313">0</s>313
@@ -2676,7 +2676,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u314">
                     <div id="l314" class="s2box bt">
                         <s id="z314">0</s>314
@@ -2685,7 +2685,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u337">
                     <div id="l337" class="s2box bt bb">
                         <s id="z337">0</s>337
@@ -2694,7 +2694,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u338">
                     <div id="l338" class="s2box bt">
                         <s id="z338">0</s>338
@@ -2703,7 +2703,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u339">
                     <div id="l339" class="s2box bt bb">
                         <s id="z339">0</s>339
@@ -2712,7 +2712,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u340">
                     <div id="l340" class="s2box bt bb">
                         <s id="z340">0</s>340
@@ -2721,7 +2721,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u341">
                     <div id="l341" class="s2box bt bb">
                         <s id="z341">0</s>341
@@ -2730,7 +2730,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u342">
                     <div id="l342" class="s2box bt">
                         <s id="z342">0</s>342
@@ -2739,7 +2739,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u374">
                     <div id="l374" class="s2box bt bb">
                         <s id="z374">0</s>374
@@ -2748,7 +2748,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u375">
                     <div id="l375" class="s2box bt">
                         <s id="z375">0</s>375
@@ -2757,7 +2757,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u376">
                     <div id="l376" class="s2box bt bb">
                         <s id="z376">0</s>376
@@ -2766,7 +2766,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u377">
                     <div id="l377" class="s2box bt br">
                         <s id="z377">0</s>377
@@ -2783,7 +2783,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u222">
                     <div id="l222" class="s2box bl">
                         <s id="z222">0</s>222
@@ -2792,7 +2792,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u221">
                     <div id="l221" class="s2box bb bt">
                         <s id="z221">0</s>221
@@ -2801,7 +2801,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u220">
                     <div id="l220" class="s2box bb bt">
                         <s id="z220">0</s>220
@@ -2897,7 +2897,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u311">
                     <div id="l311" class="s2box bl br">
                         <s id="z311">0</s>311
@@ -2907,7 +2907,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u315">
                     <div id="l315" class="s2box bl br">
                         <s id="z315">0</s>315
@@ -2917,7 +2917,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u336">
                     <div id="l336" class="s2box bl br">
                         <s id="z336">0</s>336
@@ -2929,7 +2929,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u343">
                     <div id="l343" class="s2box bl br">
                         <s id="z343">0</s>343
@@ -2939,7 +2939,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u373">
                     <div id="l373" class="s2box bl br">
                         <s id="z373">0</s>373
@@ -2949,7 +2949,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u378">
                     <div id="l378" class="s2box bl br">
                         <s id="z378">0</s>378
@@ -2966,7 +2966,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u387">
                     <div id="l387" class="s2box bl br">
                         <s id="z387">0</s>387
@@ -3056,7 +3056,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u310">
                     <div id="l310" class="s2box bl br">
                         <s id="z310">0</s>310
@@ -3066,7 +3066,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u316">
                     <div id="l316" class="s2box bl br">
                         <s id="z316">0</s>316
@@ -3076,7 +3076,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u335">
                     <div id="l335" class="s2box bl">
                         <s id="z335">0</s>335
@@ -3085,7 +3085,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u347">
                     <div id="l347" class="s2box bt bb">
                         <s id="z347">0</s>347
@@ -3094,7 +3094,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u346">
                     <div id="l346" class="s2box bt">
                         <s id="z346">0</s>346
@@ -3103,7 +3103,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u345">
                     <div id="l345" class="s2box bt bb">
                         <s id="z345">0</s>345
@@ -3112,7 +3112,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u344">
                     <div id="l344" class="s2box br">
                         <s id="z344">0</s>344
@@ -3122,7 +3122,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u372">
                     <div id="l372" class="s2box bl br">
                         <s id="z372">0</s>372
@@ -3132,7 +3132,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u379">
                     <div id="l379" class="s2box bl br">
                         <s id="z379">0</s>379
@@ -3149,7 +3149,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u388">
                     <div id="l388" class="s2box bl br">
                         <s id="z388">0</s>388
@@ -3263,7 +3263,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u309">
                     <div id="l309" class="s2box bl br">
                         <s id="z309">0</s>309
@@ -3273,7 +3273,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u317">
                     <div id="l317" class="s2box bl br">
                         <s id="z317">0</s>317
@@ -3283,7 +3283,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u334">
                     <div id="l334" class="s2box bl br">
                         <s id="z334">0</s>334
@@ -3293,7 +3293,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u348">
                     <div id="l348" class="s2box br bl">
                         <s id="z348">0</s>348
@@ -3303,7 +3303,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u353">
                     <div id="l353" class="s2box br bl">
                         <s id="z353">0</s>353
@@ -3313,7 +3313,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u371">
                     <div id="l371" class="s2box bl br">
                         <s id="z371">0</s>371
@@ -3323,7 +3323,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u380">
                     <div id="l380" class="s2box bl br">
                         <s id="z380">0</s>380
@@ -3340,7 +3340,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u389">
                     <div id="l389" class="s2box bl bb">
                         <s id="z389">0</s>389
@@ -3349,7 +3349,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u390">
                     <div id="l390" class="s2box br bt">
                         <s id="z390">0</s>390
@@ -3470,7 +3470,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u308">
                     <div id="l308" class="s2box br">
                         <s id="z308">0</s>308
@@ -3480,7 +3480,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u318">
                     <div id="l318" class="s2box bl br">
                         <s id="z318">0</s>318
@@ -3490,7 +3490,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u333">
                     <div id="l333" class="s2box bl">
                         <s id="z333">0</s>333
@@ -3499,7 +3499,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u349">
                     <div id="l349" class="s2box bt bb">
                         <s id="z349">0</s>349
@@ -3508,7 +3508,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u350">
                     <div id="l350" class="s2box">
                         <s id="z350">0</s>350
@@ -3517,7 +3517,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u351">
                     <div id="l351" class="s2box bt bb">
                         <s id="z351">0</s>351
@@ -3526,7 +3526,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u354">
                     <div id="l354" class="s2box br">
                         <s id="z354">0</s>354
@@ -3536,7 +3536,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u370">
                     <div id="l370" class="s2box bl br">
                         <s id="z370">0</s>370
@@ -3546,7 +3546,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u381">
                     <div id="l381" class="s2box bl br">
                         <s id="z381">0</s>381
@@ -3564,7 +3564,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u391">
                     <div id="l391" class="s2box br bl">
                         <s id="z391">0</s>391
@@ -3685,7 +3685,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u327">
                     <div id="l327" class="s2box bl br">
                         <s id="z327">0</s>327
@@ -3695,7 +3695,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u319">
                     <div id="l319" class="s2box bl br">
                         <s id="z319">0</s>319
@@ -3705,7 +3705,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u332">
                     <div id="l332" class="s2box bl br">
                         <s id="z332">0</s>332
@@ -3715,7 +3715,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u352">
                     <div id="l352" class="s2box bl br">
                         <s id="z352">0</s>352
@@ -3725,7 +3725,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u355">
                     <div id="l355" class="s2box br bl">
                         <s id="z355">0</s>355
@@ -3735,7 +3735,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u369">
                     <div id="l369" class="s2box bl br">
                         <s id="z369">0</s>369
@@ -3745,7 +3745,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u382">
                     <div id="l382" class="s2box bl br">
                         <s id="z382">0</s>382
@@ -3763,7 +3763,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u392">
                     <div id="l392" class="s2box br bl">
                         <s id="z392">0</s>392
@@ -3860,7 +3860,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u326">
                     <div id="l326" class="s2box bl br">
                         <s id="z326">0</s>326
@@ -3870,7 +3870,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u320">
                     <div id="l320" class="s2box bl br">
                         <s id="z320">0</s>320
@@ -3880,7 +3880,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u331">
                     <div id="l331" class="s2box bl">
                         <s id="z331">0</s>331
@@ -3889,7 +3889,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u356">
                     <div id="l356" class="s2box bt bb">
                         <s id="z356">0</s>356
@@ -3898,7 +3898,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u357">
                     <div id="l357" class="s2box bb">
                         <s id="z357">0</s>357
@@ -3907,7 +3907,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u358">
                     <div id="l358" class="s2box bb bt">
                         <s id="z358">0</s>358
@@ -3916,7 +3916,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u359">
                     <div id="l359" class="s2box br">
                         <s id="z359">0</s>359
@@ -3926,7 +3926,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u368">
                     <div id="l368" class="s2box bl br">
                         <s id="z368">0</s>368
@@ -3936,7 +3936,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u383">
                     <div id="l383" class="s2box bl br">
                         <s id="z383">0</s>383
@@ -3954,7 +3954,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u393">
                     <div id="l393" class="s2box br bl">
                         <s id="z393">0</s>393
@@ -4051,7 +4051,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u325">
                     <div id="l325" class="s2box bl br">
                         <s id="z325">0</s>325
@@ -4061,7 +4061,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u321">
                     <div id="l321" class="s2box bl br">
                         <s id="z321">0</s>321
@@ -4071,7 +4071,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u330">
                     <div id="l330" class="s2box bl br">
                         <s id="z330">0</s>330
@@ -4083,7 +4083,7 @@
         <td width="48" height="48"></td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u360">
                     <div id="l360" class="s2box br bl">
                         <s id="z360">0</s>360
@@ -4093,7 +4093,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u367">
                     <div id="l367" class="s2box bl br">
                         <s id="z367">0</s>367
@@ -4103,7 +4103,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u384">
                     <div id="l384" class="s2box bl br">
                         <s id="z384">0</s>384
@@ -4120,7 +4120,7 @@
     <tr>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u395">
                     <div id="l395" class="s2box bt bb">
                         <s id="z395">0</s>395
@@ -4131,7 +4131,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a2" style="">
+            <div class="a4" style="">
                 <div id="u394">
                     <div id="l394" class="s2box br bb">
                         <s id="z394">0</s>394
@@ -4260,7 +4260,7 @@
         </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u324">
                     <div id="l324" class="s2box bl bb">
                         <s id="z324">0</s>324
@@ -4269,7 +4269,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u323">
                     <div id="l323" class="s2box bt bb">
                         <s id="z323">0</s>323
@@ -4278,7 +4278,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u322">
                     <div id="l322" class="s2box bb">
                         <s id="z322">0</s>322
@@ -4287,7 +4287,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u328">
                     <div id="l328" class="s2box bb bt">
                         <s id="z328">0</s>328
@@ -4296,7 +4296,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u329">
                     <div id="l329" class="s2box bb">
                         <s id="z329">0</s>329
@@ -4305,7 +4305,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u361">
                     <div id="l361" class="s2box bb bt">
                         <s id="z361">0</s>361
@@ -4314,7 +4314,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u362">
                     <div id="l362" class="s2box bb bt">
                         <s id="z362">0</s>362
@@ -4323,7 +4323,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u363">
                     <div id="l363" class="s2box bb bt">
                         <s id="z363">0</s>363
@@ -4332,7 +4332,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u364">
                     <div id="l364" class="s2box bb">
                         <s id="z364">0</s>364
@@ -4341,7 +4341,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4">
+            <div class="a5">
                 <div id="u365">
                     <div id="l365" class="s2box bb bt">
                         <s id="z365">0</s>365
@@ -4350,7 +4350,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u366">
                     <div id="l366" class="s2box bb">
                         <s id="z366">0</s>366
@@ -4359,7 +4359,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u386">
                     <div id="l386" class="s2box bb bt">
                         <s id="z386">0</s>386
@@ -4368,7 +4368,7 @@
             </div>
         </td>
         <td width="48" height="48">
-            <div class="a4" style="">
+            <div class="a5" style="">
                 <div id="u385">
                     <div id="l385" class="s2box bb br">
                         <s id="z385">0</s>385
@@ -4394,12 +4394,9 @@
     var zbmin = 0;
 </script>
 <style>
-    .a1 {
-        background-color: rgba(216, 216, 216, 0.6);
-        margin: 0px;
-        padding: 0px;
-        border-spacing: 0px;
-    }
+    /* Цвет области = id карты из таблицы maps: a2 Шепчущий Лес, a3 Опустевшая
+       Долина, a4 Ожившая окраина, a5 Заброшеное кладбище. Классы a1 и a3028
+       удалены — остались от исходной игры, ячеек с ними на карте нет. */
     .a2 {
         background-color: rgba(210, 240, 185, 0.6);
         margin: 0px;
@@ -4413,13 +4410,13 @@
         border-spacing: 0px;
     }
     .a4 {
-        background-color: rgba(206, 209, 253, 0.6);
+        background-color: rgba(245, 215, 180, 0.6);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;
     }
-    .a3028 {
-        background-color: rgba(233, 233, 233, 0.6);
+    .a5 {
+        background-color: rgba(206, 209, 253, 0.6);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;
@@ -4435,12 +4432,13 @@
     if (locInURL[1] !== undefined) {
         currLocId = locInURL[1];
     } else {
-        currLocId = {{ $user?->location_id }};
+        currLocId = {{ $user?->location_id ?? 0 }};
     }
 
     var lc = [], ma = [], prevlid = 0, prevlocation = 0, zcurrent;
-    if (document.getElementById('z' + currLocId).innerHTML != undefined) {
-        zcurrent = document.getElementById('z' + currLocId).innerHTML * 1;
+    var currentLocationElement = document.getElementById('z' + currLocId);
+    if (currentLocationElement !== null) {
+        zcurrent = currentLocationElement.innerHTML * 1;
         for (i = zbmin; i <= zbmax; i++) {
             n = i - zcurrent;
             document.getElementById('m' + (i - zbmin)).style.display = (n == 0 ? '' : 'none');

@@ -445,15 +445,17 @@
                                                                                                         style="">&nbsp;</span> - Забытый Курган</span>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @auth
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                                <a href="/i/map.php" class="line-align"><span
+                                                                                                <span class="line-align"><span
                                                                                                         style="margin-top:6px;display:inline-block;"><span
                                                                                                             class="ulocation"><span
                                                                                                                 class="listloc"
-                                                                                                                id="lid">135</span></span> - Вы здесь</span></a>
+                                                                                                                id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @endauth
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>

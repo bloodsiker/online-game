@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\DungeonCooldownType;
-use App\Enums\DungeonType;
+use App\Models\Map;
+use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
+use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
-use App\Models\Map;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

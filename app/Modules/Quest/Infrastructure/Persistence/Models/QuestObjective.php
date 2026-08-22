@@ -14,12 +14,29 @@ class QuestObjective extends Model
 {
     use HasFactory;
 
-    protected $casts = ['drop_chance' => 'float'];
+    protected $casts = [
+        'drop_chance' => 'float',
+        'target_ids' => 'array',
+    ];
 
     protected $fillable = [
-        'quest_id', 'stage_id', 'type', 'target_type', 'target_id',
+        'quest_id', 'stage_id', 'type', 'target_type', 'target_id', 'target_ids',
         'share_item_id', 'map_id', 'required_amount', 'drop_chance', 'description',
     ];
+
+    /**
+     * true — цель задания это ЛЮБОЙ из нескольких мобов (напр. несколько уровневых
+     * вариантов одного «семейного» имени: Костяной Часовой 35/36 ур.) — прогресс
+     * засчитывается суммарно по всем ним как за одну цель, а не по каждому отдельно.
+     */
+    public function matchesMonster(int $monsterId): bool
+    {
+        if (! empty($this->target_ids)) {
+            return in_array($monsterId, $this->target_ids, true);
+        }
+
+        return (int) $this->target_id === $monsterId;
+    }
 
     public function quest(): BelongsTo
     {

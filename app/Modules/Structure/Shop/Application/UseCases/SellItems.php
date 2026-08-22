@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
+use App\Modules\Item\Domain\Enums\ItemActionType;
+use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
@@ -16,6 +18,7 @@ class SellItems
         private readonly ShopReadRepository $readRepository,
         private readonly ShopInventoryRepository $inventoryRepository,
         private readonly TransactionManager $transactionManager,
+        private readonly ItemActionLogger $itemActionLogger,
     ) {}
 
     /**
@@ -46,13 +49,19 @@ class SellItems
                 }
 
                 if ($requested < $sellItem->count) {
-                    $total += (int) round($sellItem->item->itemInfo->price / 2) * $requested;
+                    $money = (int) round($sellItem->item->itemInfo->price / 2) * $requested;
+                    $total += $money;
                     $sellItem->count -= $requested;
                     $this->inventoryRepository->saveBackpackItem($sellItem);
+                    $qtySold = $requested;
                 } else {
-                    $total += (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
+                    $money = (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
+                    $total += $money;
+                    $qtySold = $sellItem->count;
                     $idsToDelete[] = (int) $sellItem->item_id;
                 }
+
+                $this->itemActionLogger->log($user, $sellItem->item->itemInfo, $sellItem->item->upgrade_lvl, ItemActionType::SELL, $qtySold, $money);
             }
 
             $user->money += $total;

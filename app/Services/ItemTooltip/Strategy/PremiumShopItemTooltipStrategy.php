@@ -4,6 +4,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipRelationLoader;
 use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
@@ -12,7 +13,12 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
 
     public function collect(ItemTooltipCollector $collector): void
     {
-        foreach ($this->items as $shopItem) {
+        $shopItems = ItemTooltipRelationLoader::load($this->items, [
+            'item.stats',
+            'item.effects',
+        ]);
+
+        foreach ($shopItems as $shopItem) {
             $itemInfo = $shopItem->item;
 
             $collector->add(new ItemTooltipDto(

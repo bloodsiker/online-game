@@ -42,7 +42,7 @@ class GetMessages
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
-        $trusted = in_array($msg->type, [ChatMessageType::System, ChatMessageType::Information, ChatMessageType::Quest]);
+        $trusted = in_array($msg->type, [ChatMessageType::System, ChatMessageType::Information, ChatMessageType::Quest, ChatMessageType::QuestItem]);
         $content = $this->renderer->render($msg->message, $trusted);
         $isOwn = $msg->user_id === $user->id;
 

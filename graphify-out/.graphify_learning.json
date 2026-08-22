@@ -1,6 +1,404 @@
 {
-  "generated_at": "2026-08-11T15:06:27.788584+00:00",
+  "generated_at": "2026-08-22T06:31:20.425620+00:00",
   "nodes": {
+    "admin_layout_menu": {
+      "code_fingerprint": "4130408564a703abeccbfac6fe517df28c626efd8e7d7537f8f8591207adfe2e",
+      "label": "admin.layout.menu",
+      "last": "2026-08-20T17:03:35.754507+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T17:03:35.754507+00:00",
+          "outcome": "useful",
+          "q": "сделай отступ с права а то заезжает сильно в край"
+        },
+        {
+          "date": "2026-08-20T16:13:01.946207+00:00",
+          "outcome": "useful",
+          "q": "нужно в админке сделать какой-то бредкрамб, что бы было удобно возвращаться на шаг назад"
+        }
+      ],
+      "score": 1.928372512,
+      "source_file": "resources/views/admin/layout/base.blade.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_dto_attackresultdto_attackresultdto": {
+      "code_fingerprint": "",
+      "label": "AttackResultDTO",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/DTO/AttackResultDTO.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_dto_fighthitdto_fighthitdto": {
+      "code_fingerprint": "",
+      "label": "FightHitDTO",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/DTO/FightHitDTO.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_dto_moveresultdto_moveresultdto": {
+      "code_fingerprint": "",
+      "label": "MoveResultDTO",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/DTO/MoveResultDTO.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_dto_shopcartdto_shopcartdto": {
+      "code_fingerprint": "",
+      "label": "ShopCartDTO",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/DTO/ShopCartDTO.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_events_playerchangestat_playerchangestat": {
+      "code_fingerprint": "",
+      "label": "PlayerChangeStat",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/Events/PlayerChangeStat.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_events_playerdied_playerdied": {
+      "code_fingerprint": "",
+      "label": "PlayerDied",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 3.874754846,
+      "source_file": "app/Events/PlayerDied.php",
+      "status": "preferred",
+      "uses": 4
+    },
+    "app_events_playerleveledup_playerleveledup": {
+      "code_fingerprint": "",
+      "label": "PlayerLeveledUp",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/Events/PlayerLeveledUp.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_events_userregistered_userregistered": {
+      "code_fingerprint": "",
+      "label": "UserRegistered",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-20T09:49:15.605557+00:00",
+          "outcome": "useful",
+          "q": "а App\\DTO можна перенести по модулям? і App\\Events"
+        }
+      ],
+      "score": 1.917117738,
+      "source_file": "app/Events/UserRegistered.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_http_controllers_controller_controller": {
+      "code_fingerprint": "bb078a0308d4cfc4c7c3725cfc0d3b55e6a1c0f93b170e21bdb46f337210d544",
+      "label": "Controller",
+      "last": "2026-08-20T07:29:37.177812+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T07:29:37.177812+00:00",
+          "outcome": "useful",
+          "q": "добавь коэффициент опыта в админке для игроков"
+        }
+      ],
+      "score": 0.955734888,
+      "source_file": "app/Http/Controllers/Controller.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_http_controllers_hotbarcontroller_hotbarcontroller": {
+      "code_fingerprint": "c233bafeb74c860f9a55689d00e2b1199258457aa0969efe0d4ca75d3ad87dad",
+      "label": "HotbarController",
+      "last": "2026-08-20T18:54:47.130441+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T18:54:47.130441+00:00",
+          "outcome": "useful",
+          "q": "где-то используеться свойство is_heal из share_item ?"
+        }
+      ],
+      "score": 0.966299761,
+      "source_file": "app/Http/Controllers/HotbarController.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_http_middleware_updatelastactivitymiddleware_updatelastactivitymiddleware": {
+      "code_fingerprint": "ad7e2ad3879427b91576abc4f29dd20f307d750983f586c22d3047ec90883de0",
+      "label": "UpdateLastActivityMiddleware",
+      "last": "2026-08-21T08:05:46.469041+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        },
+        {
+          "date": "2026-08-21T07:30:39.920062+00:00",
+          "outcome": "useful",
+          "q": "а как работает sessions.last_activity?"
+        },
+        {
+          "date": "2026-08-21T06:59:45.062666+00:00",
+          "outcome": "useful",
+          "q": "а как теперь трекаеться роследнее действие игрока?"
+        },
+        {
+          "date": "2026-08-20T19:08:28.704396+00:00",
+          "outcome": "useful",
+          "q": "Сколько SQL-запросов выполняется при передвижении по локациям и в обычном раунде боя, и создаёт ли это нагрузку на БД?"
+        }
+      ],
+      "score": 4.879046417,
+      "source_file": "app/Http/Middleware/UpdateLastActivityMiddleware.php",
+      "status": "preferred",
+      "uses": 5
+    },
+    "app_listeners_givestarterbonus_givestarterbonus": {
+      "code_fingerprint": "",
+      "label": "GiveStarterBonus",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Listeners/GiveStarterBonus.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_listeners_grantreferralreward_grantreferralreward": {
+      "code_fingerprint": "",
+      "label": "GrantReferralReward",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Listeners/GrantReferralReward.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_listeners_player_death_removeexpondeathlistener_removeexpondeathlistener": {
+      "code_fingerprint": "",
+      "label": "RemoveExpOnDeathListener",
+      "last": "2026-08-21T08:10:56.036572+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 2.870515069,
+      "source_file": "app/Listeners/Player/Death/RemoveExpOnDeathListener.php",
+      "status": "preferred",
+      "uses": 3
+    },
+    "app_listeners_recalculateplayermodification_recalculateplayermodification": {
+      "code_fingerprint": "",
+      "label": "RecalculatePlayerModification",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Listeners/RecalculatePlayerModification.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_listeners_recalculateplayerstats_recalculateplayerstats": {
+      "code_fingerprint": "",
+      "label": "RecalculatePlayerStats",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Listeners/RecalculatePlayerStats.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_listeners_sendlevelupsystemmessage_sendlevelupsystemmessage": {
+      "code_fingerprint": "",
+      "label": "SendLevelUpSystemMessage",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Listeners/SendLevelUpSystemMessage.php",
+      "status": "preferred",
+      "uses": 2
+    },
     "app_models_experience_experience": {
       "code_fingerprint": "a014fe6d112117e6a10f8461072d3fc9019ed0eabb004647d9c97be9b40cf0e3",
       "label": "Experience",
@@ -17,7 +415,7 @@
           "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
         }
       ],
-      "score": 1.9854877,
+      "score": 1.552669631,
       "source_file": "app/Models/Experience.php",
       "status": "preferred",
       "uses": 2
@@ -25,96 +423,278 @@
     "app_models_map_map": {
       "code_fingerprint": "f9612240984f700454054b1ef52eb66c8c132429ed4a268f052c5093e3fb31c9",
       "label": "Map",
-      "last": "2026-08-11T09:25:31.229742+00:00",
+      "last": "2026-08-20T18:42:21.229586+00:00",
       "provenance": [
+        {
+          "date": "2026-08-20T18:42:21.229586+00:00",
+          "outcome": "useful",
+          "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
+        },
         {
           "date": "2026-08-11T09:25:31.229742+00:00",
           "outcome": "useful",
           "q": "тепер додай в емуляцію ще локацію Забытый Курган"
         }
       ],
-      "score": 0.994544486,
+      "score": 1.743849965,
       "source_file": "app/Models/Map.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_models_party_party_party": {
+      "code_fingerprint": "fefed65dda5a98176c428c5dbd29dbdb25c9313038eaa838b92e7fb7f965c348",
+      "label": "Party",
+      "last": "2026-08-19T21:00:58.265354+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T21:00:58.265354+00:00",
+          "outcome": "useful",
+          "q": "переноси что нужно"
+        },
+        {
+          "date": "2026-08-19T20:54:24.075330+00:00",
+          "outcome": "useful",
+          "q": "а App\\Enums можно попереносить?"
+        }
+      ],
+      "score": 1.892186512,
+      "source_file": "app/Models/Party/Party.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_backpack_application_usecases_getbackpack_getbackpack": {
+      "code_fingerprint": "0757466df2fa996a2fb57a48e96b7b8614f88e92ca2e48ef3f962d994a263e23",
+      "label": "GetBackpack",
+      "last": "2026-08-20T11:25:07.997850+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:25:07.997850+00:00",
+          "outcome": "useful",
+          "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
+        },
+        {
+          "date": "2026-08-20T09:30:09.119519+00:00",
+          "outcome": "useful",
+          "q": "исправляй баг"
+        }
+      ],
+      "score": 1.916938305,
+      "source_file": "app/Modules/Backpack/Application/UseCases/GetBackpack.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_backpack_domain_models_backpack_backpack": {
+      "code_fingerprint": "8a57de8d2082416b8900513fd7ecbf02f0e877fb27cfa53a9d6e5a7674c81b23",
+      "label": "Backpack",
+      "last": "2026-08-21T06:35:23.013064+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        },
+        {
+          "date": "2026-08-21T05:18:28.621979+00:00",
+          "outcome": "useful",
+          "q": "больше нет проблем с n+1?"
+        },
+        {
+          "date": "2026-08-20T11:25:07.997850+00:00",
+          "outcome": "useful",
+          "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
+        },
+        {
+          "date": "2026-08-20T09:30:09.119519+00:00",
+          "outcome": "useful",
+          "q": "исправляй баг"
+        },
+        {
+          "date": "2026-08-20T09:12:01.375648+00:00",
+          "outcome": "useful",
+          "q": "проверь почему когда в рюкзаке нажимаю использовать предмет Ключ Снятого Караула или Печать Дозорного Ольгерта то они пропадают с рюкзака, если они должны либо открывать дверь и перемещать персонажа или не показывать кнопку Использовать"
+        }
+      ],
+      "score": 4.827486423,
+      "source_file": "app/Modules/Backpack/Domain/Models/Backpack.php",
+      "status": "preferred",
+      "uses": 5
+    },
+    "app_modules_backpack_domain_services_backpackservice_backpackservice": {
+      "code_fingerprint": "e420d3e63b103a8ed8291b1b776ae53596b6d64a4fbaf4f39cc2dc66cd575a0e",
+      "label": "BackpackService",
+      "last": "2026-08-20T09:18:54.310201+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T09:18:54.310201+00:00",
+          "outcome": "useful",
+          "q": "а какие ключи могу расходоваться? там вроде есть ключи с количеством использований"
+        },
+        {
+          "date": "2026-08-19T20:13:33.956390+00:00",
+          "outcome": "useful",
+          "q": "сделаешь это что бы ничего не поломать?"
+        },
+        {
+          "date": "2026-08-19T16:55:27.676481+00:00",
+          "outcome": "useful",
+          "q": "сам предмет выдавался через сервис прогресса квеста, минуя DropService разве это верно архитектурно?"
+        }
+      ],
+      "score": 2.845259359,
+      "source_file": "app/Modules/Backpack/Domain/Services/BackpackService.php",
+      "status": "preferred",
+      "uses": 3
+    },
+    "app_modules_backpack_domain_services_itemtooltip_backpackitemtooltipstrategy_backpackitemtooltipstrategy": {
+      "code_fingerprint": "7f7d218c5c2fa0f0ec820ad146b154bed3d75499522120f1766bbcdd5a257319",
+      "label": "BackpackItemTooltipStrategy",
+      "last": "2026-08-21T05:18:28.621979+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T05:18:28.621979+00:00",
+          "outcome": "useful",
+          "q": "больше нет проблем с n+1?"
+        }
+      ],
+      "score": 0.97601824,
+      "source_file": "app/Modules/Backpack/Domain/Services/ItemTooltip/BackpackItemTooltipStrategy.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_battle_application_services_battle_monsterspawner_monsterspawner": {
+      "code_fingerprint": "ea72ef7f63029f7f87ccc07bde3dc331fbef1841abfdf1c17950f6677b546803",
+      "label": "MonsterSpawner",
+      "last": "2026-08-21T04:39:10.117163+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:39:10.117163+00:00",
+          "outcome": "useful",
+          "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
+        }
+      ],
+      "score": 0.975402853,
+      "source_file": "app/Modules/Battle/Application/Services/Battle/MonsterSpawner.php",
       "status": "tentative",
       "uses": 1
     },
     "app_modules_battle_application_services_combat_attackservice_attackservice": {
-      "code_fingerprint": "73f8cf88d02a329aac9faddf478add1418f79c70c297c8ae3bca268be67261fe",
+      "code_fingerprint": "a477e49b118d00f34fe63c77c66aef44518910f8e80bf1d214b4650768b296c9",
       "label": "AttackService",
-      "last": "2026-08-11T07:30:07.445210+00:00",
+      "last": "2026-08-20T11:17:42.836082+00:00",
       "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-19T23:42:55.201997+00:00",
+          "outcome": "useful",
+          "q": "нужно в модель игрока добавить нове поле, коефициент опыта и всем задавать по дефолту 1.0 и учитывать этот коефициент при начислении опыта этот коевициент можно будет менять как в большую сторону так и в меньшу(премиум или штрафы)"
+        },
+        {
+          "date": "2026-08-19T16:55:27.676481+00:00",
+          "outcome": "useful",
+          "q": "сам предмет выдавался через сервис прогресса квеста, минуя DropService разве это верно архитектурно?"
+        },
+        {
+          "date": "2026-08-19T16:53:46.679011+00:00",
+          "outcome": "useful",
+          "q": "Сообщение о выпавшем квестовом предмете должно приходить в основной чат только игроку, который убил моба; после убийства виден лишь боковой лог о завершении сбора"
+        },
         {
           "date": "2026-08-11T07:30:07.445210+00:00",
           "outcome": "useful",
           "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
-        },
-        {
-          "date": "2026-08-11T06:58:30.425384+00:00",
-          "outcome": "useful",
-          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
         }
       ],
-      "score": 1.984906025,
+      "score": 5.344880012,
       "source_file": "app/Modules/Battle/Application/Services/Combat/AttackService.php",
+      "status": "preferred",
+      "uses": 6
+    },
+    "app_modules_battle_application_services_combat_battleeffectservice_battleeffectservice": {
+      "code_fingerprint": "047b1c854a82e8ea48c7abd51352e5e51478483750100a3888bd45bd08cf7239",
+      "label": "BattleEffectService",
+      "last": "2026-08-21T08:05:46.469041+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-20T19:36:06.830728+00:00",
+          "outcome": "useful",
+          "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
+        }
+      ],
+      "score": 1.945582428,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/BattleEffectService.php",
       "status": "preferred",
       "uses": 2
     },
     "app_modules_battle_application_services_combat_fightorchestrator_fightorchestrator": {
-      "code_fingerprint": "747c2b37c1b7b976552a11bccb191d0a2e9ef164cd974978cd2855f41b98aa08",
+      "code_fingerprint": "225d99cedb5526c1e68551e738cdd76c0cd823c2dfc792d643c6cf2d131b1fed",
       "label": "FightOrchestrator",
-      "last": "2026-08-11T13:22:23.056957+00:00",
+      "last": "2026-08-21T08:23:08.406060+00:00",
       "neg": 1,
       "provenance": [
         {
-          "date": "2026-08-11T13:22:23.056957+00:00",
+          "date": "2026-08-21T08:23:08.406060+00:00",
           "outcome": "useful",
-          "q": "а для такой игры лучше mysql posgres?"
+          "q": "делай"
         },
         {
-          "date": "2026-08-11T12:26:19.535131+00:00",
+          "date": "2026-08-21T08:10:56.036572+00:00",
           "outcome": "useful",
-          "q": "как оптимизировать PHP-FPM?"
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
         },
         {
-          "date": "2026-08-11T11:58:20.702548+00:00",
+          "date": "2026-08-21T08:05:46.469041+00:00",
           "outcome": "useful",
-          "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
         },
         {
-          "date": "2026-08-11T10:32:22.764316+00:00",
+          "date": "2026-08-20T19:33:28.413889+00:00",
           "outcome": "useful",
-          "q": "что ты можешь протестировать на моем окружении докера?"
+          "q": "делай оптимизацию \n- Загружать экипировку, характеристики предметов, камни и руны пакетно.\n- Рассчитывать `StatSheet` игрока один раз на HTTP-запрос и повторно использовать результат."
         },
         {
-          "date": "2026-08-11T10:22:55.204791+00:00",
+          "date": "2026-08-19T20:13:33.956390+00:00",
           "outcome": "useful",
-          "q": "как можно протестировать нагрузку приложения, на сервер? на браузер пользователя на базу данных?"
+          "q": "сделаешь это что бы ничего не поломать?"
         }
       ],
-      "score": 6.46283456,
+      "score": 11.787419661,
       "source_file": "app/Modules/Battle/Application/Services/Combat/FightOrchestrator.php",
       "status": "contested",
-      "uses": 8,
+      "uses": 15,
       "verdict": "useful"
     },
     "app_modules_battle_application_services_combat_hitcalculator_hitcalculator": {
-      "code_fingerprint": "cd673b7b015c5c9b0326f0a63e2c5e3098e29697b096bc49c8698349cdd2b786",
+      "code_fingerprint": "b2c5f5069bf9c440c05aa5f97a8a213c4879624a2b22aa0dd4128a9261642126",
       "label": "HitCalculator",
-      "last": "2026-07-11T07:10:29.532777+00:00",
+      "last": "2026-08-22T06:11:29.588000+00:00",
       "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        },
         {
           "date": "2026-07-11T07:10:29.532777+00:00",
           "outcome": "useful",
           "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
         }
       ],
-      "score": 0.484862916,
+      "score": 1.378848857,
       "source_file": "app/Modules/Battle/Application/Services/Combat/HitCalculator.php",
-      "status": "tentative",
-      "uses": 1
+      "status": "preferred",
+      "uses": 2
     },
     "app_modules_battle_application_services_combat_monsterattackservice_monsterattackservice": {
-      "code_fingerprint": "f62abb1f7ee01b555f77132d9e1bb3ae58f96694d6f4b58dcab3257e8a3cdc42",
+      "code_fingerprint": "5605b13737c6b7bc8e83855f81de3511b753bd9a2a99726a1c14dd13c2ff0805",
       "label": "MonsterAttackService",
       "last": "2026-08-11T06:58:30.425384+00:00",
       "provenance": [
@@ -129,16 +709,58 @@
           "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
         }
       ],
-      "score": 1.477064194,
+      "score": 1.155077777,
       "source_file": "app/Modules/Battle/Application/Services/Combat/MonsterAttackService.php",
       "status": "preferred",
       "uses": 2
     },
+    "app_modules_battle_application_services_combat_playerdeathservice_playerdeathservice": {
+      "code_fingerprint": "c7e2640519579f935ec9f27eb7d6a04f16748efe83033166d34f82fc85ea3c09",
+      "label": "PlayerDeathService",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        }
+      ],
+      "score": 1.957637108,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/PlayerDeathService.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_battle_application_services_combat_strategies_magicattackstrategy_magicattackstrategy": {
+      "code_fingerprint": "f3f6fe7f2697a454b94bc4bf6e95095ae1e63956a831f590684e7bc8bceb3f8f",
+      "label": "MagicAttackStrategy",
+      "last": "2026-08-22T06:11:29.588000+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        }
+      ],
+      "score": 0.999681599,
+      "source_file": "app/Modules/Battle/Application/Services/Combat/Strategies/MagicAttackStrategy.php",
+      "status": "tentative",
+      "uses": 1
+    },
     "app_modules_battle_infrastructure_persistence_models_battle_battle": {
       "code_fingerprint": "30668c8a87f029b22efe81206548f43165d5078afaab4308ab8fe3ad1562048d",
       "label": "Battle",
-      "last": "2026-08-11T13:58:28.893429+00:00",
+      "last": "2026-08-21T06:35:23.013064+00:00",
       "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        },
         {
           "date": "2026-08-11T13:58:28.893429+00:00",
           "outcome": "useful",
@@ -158,23 +780,49 @@
           "date": "2026-08-11T11:58:20.702548+00:00",
           "outcome": "useful",
           "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
-        },
-        {
-          "date": "2026-08-11T10:32:22.764316+00:00",
-          "outcome": "useful",
-          "q": "что ты можешь протестировать на моем окружении докера?"
         }
       ],
-      "score": 5.982734153,
+      "score": 5.65577646,
       "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/Battle.php",
       "status": "preferred",
-      "uses": 6
+      "uses": 7
+    },
+    "app_modules_battle_infrastructure_persistence_models_battledetail_battledetail": {
+      "code_fingerprint": "b8dbd6130470f629963c57ac17f706545cb1da65f74174ac96e30e3cc2218e70",
+      "label": "BattleDetail",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        }
+      ],
+      "score": 1.957637108,
+      "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/BattleDetail.php",
+      "status": "preferred",
+      "uses": 2
     },
     "app_modules_battle_infrastructure_persistence_models_battleround_battleround": {
       "code_fingerprint": "59122324e96b12587f221b522802125b9f29bd9aad92815e7a0244a5d114623f",
       "label": "BattleRound",
-      "last": "2026-08-11T13:58:28.893429+00:00",
+      "last": "2026-08-21T08:23:08.406060+00:00",
       "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
         {
           "date": "2026-08-11T13:58:28.893429+00:00",
           "outcome": "useful",
@@ -186,13 +834,13 @@
           "q": "а для такой игры лучше mysql posgres?"
         }
       ],
-      "score": 1.997241266,
+      "score": 3.519498136,
       "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/BattleRound.php",
       "status": "preferred",
-      "uses": 2
+      "uses": 4
     },
     "app_modules_battle_presentation_http_fightcontroller_fightcontroller": {
-      "code_fingerprint": "daa358f0f03a53c0b4ccf35a409909647e40f103d9fca5a3cabd3e23e867680d",
+      "code_fingerprint": "08569f109c7d938536febb02d820d1e991cb1d4b4ce4b172b2d6e9efc736592f",
       "label": "FightController",
       "last": "2026-08-11T13:58:28.893429+00:00",
       "provenance": [
@@ -222,102 +870,439 @@
           "q": "как можно протестировать нагрузку приложения, на сервер? на браузер пользователя на базу данных?"
         }
       ],
-      "score": 4.984402712,
+      "score": 3.897848736,
       "source_file": "app/Modules/Battle/Presentation/Http/FightController.php",
       "status": "preferred",
       "uses": 5
     },
-    "app_modules_location_infrastructure_persistence_models_location_location": {
-      "code_fingerprint": "5d9f865fa351cb8d704368800d707ef6b9114cb934a299a46eec33fe701e0298",
-      "label": "Location",
-      "last": "2026-08-11T11:58:20.702548+00:00",
+    "app_modules_chat_application_services_chatservice_chatservice": {
+      "code_fingerprint": "817e0d3ab3f07ea4f8b33f73e435d5536f9821bf2bb260e5bfb660987438c528",
+      "label": "ChatService",
+      "last": "2026-08-19T20:48:49.492515+00:00",
       "neg": 1,
       "provenance": [
         {
-          "date": "2026-08-11T11:58:20.702548+00:00",
+          "date": "2026-08-19T20:48:49.492515+00:00",
           "outcome": "useful",
-          "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
+          "q": "переноси"
         },
         {
-          "date": "2026-08-11T09:25:31.229742+00:00",
+          "date": "2026-08-19T20:40:34.800850+00:00",
           "outcome": "useful",
-          "q": "тепер додай в емуляцію ще локацію Забытый Курган"
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         },
         {
-          "date": "2026-08-11T07:23:26.999909+00:00",
+          "date": "2026-08-19T20:20:12.543777+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:18:15.431536+00:00",
           "outcome": "corrected",
-          "q": "ты использовал немного не тех мобов, для прокачки используй локацию Канализация и Шепчущий Лес"
+          "q": "а разве SendQuestItemDropMessage не должен быть в домене чата?"
+        },
+        {
+          "date": "2026-08-19T20:13:33.956390+00:00",
+          "outcome": "useful",
+          "q": "сделаешь это что бы ничего не поломать?"
         }
       ],
-      "score": 0.99893222,
-      "source_file": "app/Modules/Location/Infrastructure/Persistence/Models/Location.php",
+      "score": 5.663857823,
+      "source_file": "app/Modules/Chat/Application/Services/ChatService.php",
       "status": "contested",
-      "uses": 2,
+      "uses": 7,
       "verdict": "useful"
     },
-    "app_modules_monster_infrastructure_persistence_models_monster_monster": {
-      "code_fingerprint": "ef29c953d9ca9d0256f0e3a7516fb06c1cc38925391864d348ec301bdb6c127a",
-      "label": "Monster",
-      "last": "2026-08-11T11:58:20.702548+00:00",
+    "app_modules_chat_application_usecases_getmessages_getmessages": {
+      "code_fingerprint": "8cb0c219977c0a50d2b802218e9e9157bb57e2162b4ca1438b22846af258bcf6",
+      "label": "GetMessages",
+      "last": "2026-08-19T16:13:36.750603+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T16:13:36.750603+00:00",
+          "outcome": "useful",
+          "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
+        }
+      ],
+      "score": 0.941790791,
+      "source_file": "app/Modules/Chat/Application/UseCases/GetMessages.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_chat_chatserviceprovider_chatserviceprovider": {
+      "code_fingerprint": "de893b078904ac82bb4291f63927d6bea7092c7bcd3b61e77a08030013784582",
+      "label": "ChatServiceProvider",
+      "last": "2026-08-19T20:20:12.543777+00:00",
       "neg": 1,
       "provenance": [
         {
-          "date": "2026-08-11T11:58:20.702548+00:00",
+          "date": "2026-08-19T20:20:12.543777+00:00",
           "outcome": "useful",
-          "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
+          "q": "переноси"
         },
         {
-          "date": "2026-08-11T09:25:31.229742+00:00",
-          "outcome": "useful",
-          "q": "тепер додай в емуляцію ще локацію Забытый Курган"
-        },
-        {
-          "date": "2026-08-11T07:23:26.999909+00:00",
+          "date": "2026-08-19T20:18:15.431536+00:00",
           "outcome": "corrected",
-          "q": "ты использовал немного не тех мобов, для прокачки используй локацию Канализация и Шепчущий Лес"
+          "q": "а разве SendQuestItemDropMessage не должен быть в домене чата?"
         }
       ],
-      "score": 0.99893222,
-      "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/Monster.php",
+      "score": 2.9611e-05,
+      "source_file": "app/Modules/Chat/ChatServiceProvider.php",
       "status": "contested",
-      "uses": 2,
+      "uses": 1,
       "verdict": "useful"
     },
-    "app_modules_player_domain_services_playerstatservice_playerstatservice": {
-      "code_fingerprint": "447e3c2d05b5fbd71906341b07084ef4d8f8f82ed92222931a4b0845c9c00f43",
-      "label": "PlayerStatService",
-      "last": "2026-08-11T06:58:30.425384+00:00",
+    "app_modules_chat_domain_services_messagerenderer_messagerenderer": {
+      "code_fingerprint": "e60b179f3a55e5a52da28aa09fa923f18bf373e42a2303d93886a0c5e04e8387",
+      "label": "MessageRenderer",
+      "last": "2026-08-19T16:35:36.712913+00:00",
       "provenance": [
         {
-          "date": "2026-08-11T06:58:30.425384+00:00",
+          "date": "2026-08-19T16:35:36.712913+00:00",
           "outcome": "useful",
-          "q": "Провести живой прогон игры с 1 по 20 уровень на реальных мобах, распределять характеристики и надевать доступную экипировку; выдать винрейт, бои, раунды, золото и время с лечением предметами/фонтаном; сохранить скрипт для будущих тестов."
+          "q": "а сделай что бы шорт код отправлялся для квестовых предметов share_item_ID"
         },
         {
-          "date": "2026-07-11T07:10:29.532777+00:00",
+          "date": "2026-08-19T16:13:36.750603+00:00",
           "outcome": "useful",
-          "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
+          "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 1.477064194,
-      "source_file": "app/Modules/Player/Domain/Services/PlayerStatService.php",
+      "score": 1.883914075,
+      "source_file": "app/Modules/Chat/Domain/Services/MessageRenderer.php",
       "status": "preferred",
       "uses": 2
     },
-    "app_modules_player_infrastructure_persistence_models_player_player": {
-      "code_fingerprint": "28a85e36526c74973e0f5c24459028f2f067dae49fb5ae3e5c1168bfb32eb74f",
-      "label": "Player",
-      "last": "2026-08-11T13:22:23.056957+00:00",
+    "app_modules_chat_infrastructure_persistence_eloquentchatmessagerepository_eloquentchatmessagerepository": {
+      "code_fingerprint": "cd06a775ff24c07e92478a2b28bf08bb82a0e8fdc752fceeb41af8ca019d3710",
+      "label": "EloquentChatMessageRepository",
+      "last": "2026-08-19T16:53:46.679011+00:00",
       "provenance": [
         {
-          "date": "2026-08-11T13:22:23.056957+00:00",
+          "date": "2026-08-19T16:53:46.679011+00:00",
           "outcome": "useful",
-          "q": "а для такой игры лучше mysql posgres?"
+          "q": "Сообщение о выпавшем квестовом предмете должно приходить в основной чат только игроку, который убил моба; после убийства виден лишь боковой лог о завершении сбора"
         },
         {
-          "date": "2026-08-11T12:26:19.535131+00:00",
+          "date": "2026-08-19T16:13:36.750603+00:00",
           "outcome": "useful",
-          "q": "как оптимизировать PHP-FPM?"
+          "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
+        }
+      ],
+      "score": 1.884188722,
+      "source_file": "app/Modules/Chat/Infrastructure/Persistence/EloquentChatMessageRepository.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_chat_presentation_http_chatcontroller_chatcontroller": {
+      "code_fingerprint": "21277787d3238bb465f1e3cb52691f3fe0031c416050a20c452c0ee8fae6649d",
+      "label": "ChatController",
+      "last": "2026-08-21T07:37:25.363351+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        }
+      ],
+      "score": 0.978196596,
+      "source_file": "app/Modules/Chat/Presentation/Http/ChatController.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_clan_domain_models_clan_clan": {
+      "code_fingerprint": "839ec0c076773bfd8000f1dd0fad327ce46a53cf9b1c21ed0bbb3cadca134b30",
+      "label": "Clan",
+      "last": "2026-08-20T15:44:40.933022+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T15:44:40.933022+00:00",
+          "outcome": "useful",
+          "q": "поправь в админке в разделе http://localhost:85/admin/clans ототбражение иконки клана"
+        }
+      ],
+      "score": 0.963356824,
+      "source_file": "app/Modules/Clan/Domain/Models/Clan.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_clan_presentation_http_clanwarehousecontroller_clanwarehousecontroller": {
+      "code_fingerprint": "a6b9b35fbc032289a2abd79e6ff6856f38b2cd86d2f0beb7ffd8848cd1744502",
+      "label": "ClanWarehouseController",
+      "last": "2026-08-21T05:18:28.621979+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T05:18:28.621979+00:00",
+          "outcome": "useful",
+          "q": "больше нет проблем с n+1?"
+        }
+      ],
+      "score": 0.97601824,
+      "source_file": "app/Modules/Clan/Presentation/Http/ClanWarehouseController.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_dungeon_application_services_dungeoncoordinator_dungeoncoordinator": {
+      "code_fingerprint": "a87d43a2f90091bdabd29cee0b8258ae2623e877c0a9645d8eb0ee1c610fc585",
+      "label": "DungeonCoordinator",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
+        {
+          "date": "2026-08-20T09:18:54.310201+00:00",
+          "outcome": "useful",
+          "q": "а какие ключи могу расходоваться? там вроде есть ключи с количеством использований"
+        },
+        {
+          "date": "2026-08-19T23:42:55.201997+00:00",
+          "outcome": "useful",
+          "q": "нужно в модель игрока добавить нове поле, коефициент опыта и всем задавать по дефолту 1.0 и учитывать этот коефициент при начислении опыта этот коевициент можно будет менять как в большую сторону так и в меньшу(премиум или штрафы)"
+        },
+        {
+          "date": "2026-08-19T21:00:58.265354+00:00",
+          "outcome": "useful",
+          "q": "переноси что нужно"
+        }
+      ],
+      "score": 4.809797319,
+      "source_file": "app/Modules/Dungeon/Application/Services/DungeonCoordinator.php",
+      "status": "preferred",
+      "uses": 5
+    },
+    "app_modules_dungeon_infrastructure_persistence_models_dungeon_dungeon": {
+      "code_fingerprint": "1c30e7fa1406f2aa7fa62ea0263bb730e35f3d324f659f97c4f42c74c9f12a72",
+      "label": "Dungeon",
+      "last": "2026-08-19T21:00:58.265354+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T21:00:58.265354+00:00",
+          "outcome": "useful",
+          "q": "переноси что нужно"
+        },
+        {
+          "date": "2026-08-19T20:54:24.075330+00:00",
+          "outcome": "useful",
+          "q": "а App\\Enums можно попереносить?"
+        }
+      ],
+      "score": 1.892186512,
+      "source_file": "app/Modules/Dungeon/Infrastructure/Persistence/Models/Dungeon.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_interface_application_usecases_getheropage_getheropage": {
+      "code_fingerprint": "dda28a4beba50f043bbdb4113e6fa8dffdeb0794084177f4f25e91fbc8be1182",
+      "label": "GetHeroPage",
+      "last": "2026-08-21T08:05:46.469041+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        }
+      ],
+      "score": 1.956838281,
+      "source_file": "app/Modules/Interface/Application/UseCases/GetHeroPage.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_interface_presentation_http_interfacecontroller_interfacecontroller": {
+      "code_fingerprint": "fa523b566022e4710066416195218391ac208bb2db2e78c254b56f226da1f09b",
+      "label": "InterfaceController",
+      "last": "2026-08-21T08:05:46.469041+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        }
+      ],
+      "score": 1.956838281,
+      "source_file": "app/Modules/Interface/Presentation/Http/InterfaceController.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_item_application_usecases_dropitem_dropitem": {
+      "code_fingerprint": "ddfbdaf11abed613f6a2febd88edbf02efcd869dbeb557d215f4b1e7197d6973",
+      "label": "DropItem",
+      "last": "2026-08-20T11:25:07.997850+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:25:07.997850+00:00",
+          "outcome": "useful",
+          "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
+        }
+      ],
+      "score": 0.959353284,
+      "source_file": "app/Modules/Item/Application/UseCases/DropItem.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_item_domain_services_itemservice_itemservice": {
+      "code_fingerprint": "eafca8424a9a48128d3b81741fb59c097d9dce1f61f7cc52a1dff1df8122e780",
+      "label": "ItemService",
+      "last": "2026-08-20T11:25:07.997850+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:25:07.997850+00:00",
+          "outcome": "useful",
+          "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
+        }
+      ],
+      "score": 0.959353284,
+      "source_file": "app/Modules/Item/Domain/Services/ItemService.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_item_infrastructure_persistence_models_item_item": {
+      "code_fingerprint": "e720f1420911fe792a8f483de3e11904ca86805a1a4dfdf56d5b0b5f22bc3efc",
+      "label": "Item",
+      "last": "2026-08-21T04:50:10.920017+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:50:10.920017+00:00",
+          "outcome": "useful",
+          "q": "а характеристики предметов лучше вынести в редис?"
+        },
+        {
+          "date": "2026-08-20T19:36:06.830728+00:00",
+          "outcome": "useful",
+          "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
+        }
+      ],
+      "score": 1.942515975,
+      "source_file": "app/Modules/Item/Infrastructure/Persistence/Models/Item.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_location_application_mappers_locationpageviewmapper_locationpageviewmapper": {
+      "code_fingerprint": "e29243b9b87a6e64556b459ea00439be868d71681c41e44058de44b5222407fb",
+      "label": "LocationPageViewMapper",
+      "last": "2026-08-21T04:39:10.117163+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:39:10.117163+00:00",
+          "outcome": "useful",
+          "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
+        },
+        {
+          "date": "2026-08-20T19:15:27.711006+00:00",
+          "outcome": "useful",
+          "q": "а при переходе на локациях, немного запросов на проверку есть ли на локации нпс или здание или какой-то закрытый переход?"
+        },
+        {
+          "date": "2026-08-20T09:12:01.375648+00:00",
+          "outcome": "useful",
+          "q": "проверь почему когда в рюкзаке нажимаю использовать предмет Ключ Снятого Караула или Печать Дозорного Ольгерта то они пропадают с рюкзака, если они должны либо открывать дверь и перемещать персонажа или не показывать кнопку Использовать"
+        }
+      ],
+      "score": 2.899329757,
+      "source_file": "app/Modules/Location/Application/Mappers/LocationPageViewMapper.php",
+      "status": "preferred",
+      "uses": 3
+    },
+    "app_modules_location_application_usecases_getlocationpage_getlocationpage": {
+      "code_fingerprint": "b767ee6c92876a795c77f0b73ad3fc509f30dfa1de5879e9c36e0a2d50cada44",
+      "label": "GetLocationPage",
+      "last": "2026-08-21T04:47:23.021995+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:47:23.021995+00:00",
+          "outcome": "useful",
+          "q": "делай пока что только COUNT(*)"
+        }
+      ],
+      "score": 0.975531431,
+      "source_file": "app/Modules/Location/Application/UseCases/GetLocationPage.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_location_application_usecases_movetolocation_movetolocation": {
+      "code_fingerprint": "4c909f129757431edf2094187d6358475e26fe13324e330ccb7306bbd4184035",
+      "label": "MoveToLocation",
+      "last": "2026-08-21T04:47:23.021995+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:47:23.021995+00:00",
+          "outcome": "useful",
+          "q": "делай пока что только COUNT(*)"
+        }
+      ],
+      "score": 0.975531431,
+      "source_file": "app/Modules/Location/Application/UseCases/MoveToLocation.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_location_infrastructure_persistence_eloquentlocationreadrepository_eloquentlocationreadrepository": {
+      "code_fingerprint": "3f24ae5ef8f9e6dac20bfbe32223f6d0aed9b027f399af35af0b593298931ef2",
+      "label": "EloquentLocationReadRepository",
+      "last": "2026-08-21T04:47:23.021995+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:47:23.021995+00:00",
+          "outcome": "useful",
+          "q": "делай пока что только COUNT(*)"
+        },
+        {
+          "date": "2026-08-21T04:39:10.117163+00:00",
+          "outcome": "useful",
+          "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
+        },
+        {
+          "date": "2026-08-20T19:15:27.711006+00:00",
+          "outcome": "useful",
+          "q": "а при переходе на локациях, немного запросов на проверку есть ли на локации нпс или здание или какой-то закрытый переход?"
+        },
+        {
+          "date": "2026-08-20T09:30:09.119519+00:00",
+          "outcome": "useful",
+          "q": "исправляй баг"
+        }
+      ],
+      "score": 3.875139692,
+      "source_file": "app/Modules/Location/Infrastructure/Persistence/EloquentLocationReadRepository.php",
+      "status": "preferred",
+      "uses": 4
+    },
+    "app_modules_location_infrastructure_persistence_models_location_location": {
+      "code_fingerprint": "98f22f091d15d8ecd9e50fc82fb7e836398fe142b7ee0d6df03a6a32696ae8a5",
+      "label": "Location",
+      "last": "2026-08-21T04:39:10.117163+00:00",
+      "neg": 1,
+      "provenance": [
+        {
+          "date": "2026-08-21T04:39:10.117163+00:00",
+          "outcome": "useful",
+          "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
+        },
+        {
+          "date": "2026-08-20T19:15:27.711006+00:00",
+          "outcome": "useful",
+          "q": "а при переходе на локациях, немного запросов на проверку есть ли на локации нпс или здание или какой-то закрытый переход?"
+        },
+        {
+          "date": "2026-08-20T18:42:21.229586+00:00",
+          "outcome": "useful",
+          "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
         },
         {
           "date": "2026-08-11T11:58:20.702548+00:00",
@@ -325,68 +1310,618 @@
           "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
         },
         {
-          "date": "2026-08-11T10:32:22.764316+00:00",
+          "date": "2026-08-11T09:25:31.229742+00:00",
           "outcome": "useful",
-          "q": "что ты можешь протестировать на моем окружении докера?"
-        },
-        {
-          "date": "2026-08-11T10:22:55.204791+00:00",
-          "outcome": "useful",
-          "q": "как можно протестировать нагрузку приложения, на сервер? на браузер пользователя на базу данных?"
+          "q": "тепер додай в емуляцію ще локацію Забытый Курган"
         }
       ],
-      "score": 7.454174943,
+      "score": 3.689304454,
+      "source_file": "app/Modules/Location/Infrastructure/Persistence/Models/Location.php",
+      "status": "contested",
+      "uses": 5,
+      "verdict": "useful"
+    },
+    "app_modules_magicskill_infrastructure_persistence_models_magicskill_magicskill": {
+      "code_fingerprint": "533524c5d98700e245d3f002456f6581022d5db849dc57163d71eda2c929b2b3",
+      "label": "MagicSkill",
+      "last": "2026-08-22T06:11:29.588000+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        }
+      ],
+      "score": 0.999681599,
+      "source_file": "app/Modules/MagicSkill/Infrastructure/Persistence/Models/MagicSkill.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_monster_application_usecases_getmonsterinfopage_getmonsterinfopage": {
+      "code_fingerprint": "fc0ebfb04eed6e9a9a9871c8be06f16898f75f5a2c04929256566c0005f4495a",
+      "label": "GetMonsterInfoPage",
+      "last": "2026-08-20T18:42:21.229586+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T18:42:21.229586+00:00",
+          "outcome": "useful",
+          "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
+        }
+      ],
+      "score": 0.966107035,
+      "source_file": "app/Modules/Monster/Application/UseCases/GetMonsterInfoPage.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_monster_infrastructure_persistence_eloquentmonsterreadrepository_eloquentmonsterreadrepository": {
+      "code_fingerprint": "beaeb44cd00fc8ef9efb8e00ef6d53791d86eed3be233284f13c7e30e713bbc5",
+      "label": "EloquentMonsterReadRepository",
+      "last": "2026-08-20T18:42:21.229586+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T18:42:21.229586+00:00",
+          "outcome": "useful",
+          "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
+        }
+      ],
+      "score": 0.966107035,
+      "source_file": "app/Modules/Monster/Infrastructure/Persistence/EloquentMonsterReadRepository.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_monster_infrastructure_persistence_models_monster_monster": {
+      "code_fingerprint": "e8dd893fb19e869bae0f0b96c9ecbe42a5bb8d10e837551173fb9d6904da6e0f",
+      "label": "Monster",
+      "last": "2026-08-21T06:35:23.013064+00:00",
+      "neg": 2,
+      "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        },
+        {
+          "date": "2026-08-20T18:42:21.229586+00:00",
+          "outcome": "useful",
+          "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
+        },
+        {
+          "date": "2026-08-20T17:21:27.862641+00:00",
+          "outcome": "corrected",
+          "q": "не совсем то что я хотел, мне нужно после фильтра получать на странице всех монстров с таким именем"
+        },
+        {
+          "date": "2026-08-20T17:18:16.830366+00:00",
+          "outcome": "useful",
+          "q": "для админки http://localhost:85/admin/monsters добавь фильтр с випадающим списком монстрво, для списка групируй монстров по имени"
+        },
+        {
+          "date": "2026-08-11T11:58:20.702548+00:00",
+          "outcome": "useful",
+          "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
+        }
+      ],
+      "score": 2.724455286,
+      "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/Monster.php",
+      "status": "contested",
+      "uses": 5,
+      "verdict": "useful"
+    },
+    "app_modules_player_domain_dto_statsheet_statsheet": {
+      "code_fingerprint": "c9fedcf3fe86d1aba2f758145c7d077ed05bae9bf036f083b0b65057a3d98609",
+      "label": "StatSheet",
+      "last": "2026-08-22T06:11:29.588000+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        },
+        {
+          "date": "2026-08-20T19:36:06.830728+00:00",
+          "outcome": "useful",
+          "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
+        }
+      ],
+      "score": 1.966622342,
+      "source_file": "app/Modules/Player/Domain/DTO/StatSheet.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_player_domain_services_playerstatservice_playerstatservice": {
+      "code_fingerprint": "d99d88ff20fdc6ab648a4769475913737c1c606b85ab396d9fe5e70a3d145e30",
+      "label": "PlayerStatService",
+      "last": "2026-08-22T06:11:29.588000+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        },
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        },
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        },
+        {
+          "date": "2026-08-21T04:50:10.920017+00:00",
+          "outcome": "useful",
+          "q": "а характеристики предметов лучше вынести в редис?"
+        }
+      ],
+      "score": 9.890029139,
+      "source_file": "app/Modules/Player/Domain/Services/PlayerStatService.php",
+      "status": "preferred",
+      "uses": 11
+    },
+    "app_modules_player_infrastructure_persistence_models_player_player": {
+      "code_fingerprint": "e70ae32ea9f9dab29567d24710b767079973671ad26a73d6d78e56ac9ff396ae",
+      "label": "Player",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        },
+        {
+          "date": "2026-08-21T06:59:45.062666+00:00",
+          "outcome": "useful",
+          "q": "а как теперь трекаеться роследнее действие игрока?"
+        }
+      ],
+      "score": 12.625653964,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/Player.php",
       "status": "preferred",
-      "uses": 8
+      "uses": 15
+    },
+    "app_modules_player_infrastructure_persistence_models_playeractiveeffect_playeractiveeffect": {
+      "code_fingerprint": "5e7c6304424d5826c0dd7e1883d55256fdcb30edb170d0faa07a9e0dd9a84186",
+      "label": "PlayerActiveEffect",
+      "last": "2026-08-21T08:23:08.406060+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T08:23:08.406060+00:00",
+          "outcome": "useful",
+          "q": "делай"
+        },
+        {
+          "date": "2026-08-21T08:10:56.036572+00:00",
+          "outcome": "useful",
+          "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
+        },
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        }
+      ],
+      "score": 3.914475389,
+      "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerActiveEffect.php",
+      "status": "preferred",
+      "uses": 4
+    },
+    "app_modules_player_infrastructure_persistence_models_playerequipment_playerequipment": {
+      "code_fingerprint": "2c5ab153ded8ac9e2a43d37f0ad2dc8ecac56e88e05dc587a78bd55e34578373",
+      "label": "PlayerEquipment",
+      "last": "2026-08-20T19:36:06.830728+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T19:36:06.830728+00:00",
+          "outcome": "useful",
+          "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
+        },
+        {
+          "date": "2026-08-20T19:33:28.413889+00:00",
+          "outcome": "useful",
+          "q": "делай оптимизацию \n- Загружать экипировку, характеристики предметов, камни и руны пакетно.\n- Рассчитывать `StatSheet` игрока один раз на HTTP-запрос и повторно использовать результат."
+        },
+        {
+          "date": "2026-08-20T19:08:28.704396+00:00",
+          "outcome": "useful",
+          "q": "Сколько SQL-запросов выполняется при передвижении по локациям и в обычном раунде боя, и создаёт ли это нагрузку на БД?"
+        }
+      ],
+      "score": 2.900352608,
+      "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerEquipment.php",
+      "status": "preferred",
+      "uses": 3
+    },
+    "app_modules_player_infrastructure_persistence_models_playermagicskill_playermagicskill": {
+      "code_fingerprint": "1d0e2399f0c3152e6e33bf7a5aa340b1ee995c8d9c4a5b495b4a50efd2947347",
+      "label": "PlayerMagicSkill",
+      "last": "2026-08-22T06:11:29.588000+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-22T06:11:29.588000+00:00",
+          "outcome": "useful",
+          "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
+        }
+      ],
+      "score": 0.999681599,
+      "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerMagicSkill.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_quest_domain_services_questprogressservice_questprogressservice": {
+      "code_fingerprint": "b412a5f4f1f5b5ae6c471478381361d66cd11c7bccf1d166a361ed4c1a9c021d",
+      "label": "QuestProgressService",
+      "last": "2026-08-20T11:17:42.836082+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T11:17:42.836082+00:00",
+          "outcome": "useful",
+          "q": "делай рефакторинг только акуратно"
+        },
+        {
+          "date": "2026-08-19T20:13:33.956390+00:00",
+          "outcome": "useful",
+          "q": "сделаешь это что бы ничего не поломать?"
+        },
+        {
+          "date": "2026-08-19T16:55:27.676481+00:00",
+          "outcome": "useful",
+          "q": "сам предмет выдавался через сервис прогресса квеста, минуя DropService разве это верно архитектурно?"
+        },
+        {
+          "date": "2026-08-19T16:53:46.679011+00:00",
+          "outcome": "useful",
+          "q": "Сообщение о выпавшем квестовом предмете должно приходить в основной чат только игроку, который убил моба; после убийства виден лишь боковой лог о завершении сбора"
+        }
+      ],
+      "score": 3.789484141,
+      "source_file": "app/Modules/Quest/Domain/Services/QuestProgressService.php",
+      "status": "preferred",
+      "uses": 4
+    },
+    "app_modules_quest_infrastructure_persistence_models_quest_quest": {
+      "code_fingerprint": "ef085e0980fed14a26bcc94cfe04538aaeac2722580e75a5f91e8dbf8ef17054",
+      "label": "Quest",
+      "last": "2026-08-21T06:35:23.013064+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        }
+      ],
+      "score": 0.977223361,
+      "source_file": "app/Modules/Quest/Infrastructure/Persistence/Models/Quest.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_referral_application_usecases_grantreferralrewards_grantreferralrewards": {
+      "code_fingerprint": "088fe5a25a3c0cd3f64dcc800e616fe98441686beae35280fc6e23c22e8f92c6",
+      "label": "GrantReferralRewards",
+      "last": "2026-08-19T20:48:49.492515+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 1.891792365,
+      "source_file": "app/Modules/Referral/Application/UseCases/GrantReferralRewards.php",
+      "status": "preferred",
+      "uses": 2
+    },
+    "app_modules_reputation_infrastructure_persistence_models_reputation_reputation": {
+      "code_fingerprint": "d65710220284dde5f7a9e232fb9fc85ab614d31ae8e48a2043e73619964fcd05",
+      "label": "Reputation",
+      "last": "2026-08-21T06:35:23.013064+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        }
+      ],
+      "score": 0.977223361,
+      "source_file": "app/Modules/Reputation/Infrastructure/Persistence/Models/Reputation.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_share_infrastructure_persistence_models_shareitem_shareitem": {
+      "code_fingerprint": "9dd2a4c4ac250b335abf681ccf5b7a94e505ca5743e08ec62f31c1e3a8f5bc4c",
+      "label": "ShareItem",
+      "last": "2026-08-21T06:35:23.013064+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T06:35:23.013064+00:00",
+          "outcome": "useful",
+          "q": "исправляй по приоритетам"
+        },
+        {
+          "date": "2026-08-21T04:50:10.920017+00:00",
+          "outcome": "useful",
+          "q": "а характеристики предметов лучше вынести в редис?"
+        },
+        {
+          "date": "2026-08-20T18:57:25.886822+00:00",
+          "outcome": "useful",
+          "q": "удаляй с кода это свойсто а я уберу с базы"
+        },
+        {
+          "date": "2026-08-20T18:54:47.130441+00:00",
+          "outcome": "useful",
+          "q": "где-то используеться свойство is_heal из share_item ?"
+        },
+        {
+          "date": "2026-08-20T11:25:07.997850+00:00",
+          "outcome": "useful",
+          "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
+        }
+      ],
+      "score": 8.636514455,
+      "source_file": "app/Modules/Share/Infrastructure/Persistence/Models/ShareItem.php",
+      "status": "preferred",
+      "uses": 9
+    },
+    "app_modules_share_infrastructure_persistence_models_shareitemstat_shareitemstat": {
+      "code_fingerprint": "06057ce295d1078f29132971808f4f8d3dbee6de42c8e96fd1d3aef9c6b95fbe",
+      "label": "ShareItemStat",
+      "last": "2026-08-21T04:50:10.920017+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:50:10.920017+00:00",
+          "outcome": "useful",
+          "q": "а характеристики предметов лучше вынести в редис?"
+        }
+      ],
+      "score": 0.975575232,
+      "source_file": "app/Modules/Share/Infrastructure/Persistence/Models/ShareItemStat.php",
+      "status": "tentative",
+      "uses": 1
+    },
+    "app_modules_structure_blacksmith_domain_services_runeservice_runeservice": {
+      "code_fingerprint": "9d0da79e9d60ac6adfa2f493f006bf6f5c76cf4af728fc55e89b2fa9634e538d",
+      "label": "RuneService",
+      "last": "2026-08-20T09:18:54.310201+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T09:18:54.310201+00:00",
+          "outcome": "useful",
+          "q": "а какие ключи могу расходоваться? там вроде есть ключи с количеством использований"
+        }
+      ],
+      "score": 0.957412234,
+      "source_file": "app/Modules/Structure/Blacksmith/Domain/Services/RuneService.php",
+      "status": "tentative",
+      "uses": 1
     },
     "app_modules_user_infrastructure_persistence_models_user_user": {
       "code_fingerprint": "a2ced404dfd3d2d2d5ea42e895abba73a33f989b6534609046fd39cebae0141b",
       "label": "User",
-      "last": "2026-08-11T11:58:20.702548+00:00",
+      "last": "2026-08-21T08:05:46.469041+00:00",
       "provenance": [
+        {
+          "date": "2026-08-21T08:05:46.469041+00:00",
+          "outcome": "useful",
+          "q": "тогда делать каждые 10 сек и главная идея этого запроса каждые 10 сек, что когда на игроке дебаф - отравление, то что бы у него отнимались хп"
+        },
+        {
+          "date": "2026-08-21T07:37:25.363351+00:00",
+          "outcome": "useful",
+          "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
+        },
+        {
+          "date": "2026-08-21T07:30:39.920062+00:00",
+          "outcome": "useful",
+          "q": "а как работает sessions.last_activity?"
+        },
+        {
+          "date": "2026-08-21T06:59:45.062666+00:00",
+          "outcome": "useful",
+          "q": "а как теперь трекаеться роследнее действие игрока?"
+        },
         {
           "date": "2026-08-11T11:58:20.702548+00:00",
           "outcome": "useful",
           "q": "сделай копию бд и переключись на нее и сделай тесты и напиши отчет"
         }
       ],
-      "score": 0.996986182,
+      "score": 4.692186691,
       "source_file": "app/Modules/User/Infrastructure/Persistence/Models/User.php",
+      "status": "preferred",
+      "uses": 5
+    },
+    "app_repositories_partyrepository_partyrepository": {
+      "code_fingerprint": "4b9fbf441ac098fd3ae6102f0b86addfbcd70d760ad97398096560e5daafd59f",
+      "label": "PartyRepository",
+      "last": "2026-08-19T20:54:24.075330+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-19T20:54:24.075330+00:00",
+          "outcome": "useful",
+          "q": "а App\\Enums можно попереносить?"
+        }
+      ],
+      "score": 0.946043391,
+      "source_file": "app/Repositories/PartyRepository.php",
       "status": "tentative",
       "uses": 1
     },
-    "command": {
-      "code_fingerprint": "",
-      "label": "Command",
-      "last": "2026-08-11T14:06:18.703884+00:00",
+    "app_services_dropservice_dropservice": {
+      "code_fingerprint": "4da72d131ae2c504f3a562cf97559ad177ee0606eec5395a34528a8dba9c891e",
+      "label": "DropService",
+      "last": "2026-08-19T20:13:33.956390+00:00",
       "provenance": [
         {
-          "date": "2026-08-11T14:06:18.703884+00:00",
+          "date": "2026-08-19T20:13:33.956390+00:00",
           "outcome": "useful",
-          "q": "как переключить базу назад на продовскую? после твоих прогонов"
+          "q": "сделаешь это что бы ничего не поломать?"
+        },
+        {
+          "date": "2026-08-19T16:55:27.676481+00:00",
+          "outcome": "useful",
+          "q": "сам предмет выдавался через сервис прогресса квеста, минуя DropService разве это верно архитектурно?"
+        },
+        {
+          "date": "2026-08-19T16:53:46.679011+00:00",
+          "outcome": "useful",
+          "q": "Сообщение о выпавшем квестовом предмете должно приходить в основной чат только игроку, который убил моба; после убийства виден лишь боковой лог о завершении сбора"
+        },
+        {
+          "date": "2026-08-19T16:35:36.712913+00:00",
+          "outcome": "useful",
+          "q": "а сделай что бы шорт код отправлялся для квестовых предметов share_item_ID"
+        },
+        {
+          "date": "2026-08-19T16:13:36.750603+00:00",
+          "outcome": "useful",
+          "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 0.999035332,
-      "source_file": "",
+      "score": 4.71415913,
+      "source_file": "app/Services/DropService.php",
+      "status": "preferred",
+      "uses": 5
+    },
+    "app_services_experienceservice_experienceservice": {
+      "code_fingerprint": "9b2936b942ce88bf21c914582e7221ae54180cef3e7429211ce414ae0039d132",
+      "label": "ExperienceService",
+      "last": "2026-08-20T07:29:37.177812+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T07:29:37.177812+00:00",
+          "outcome": "useful",
+          "q": "добавь коэффициент опыта в админке для игроков"
+        },
+        {
+          "date": "2026-08-19T23:42:55.201997+00:00",
+          "outcome": "useful",
+          "q": "нужно в модель игрока добавить нове поле, коефициент опыта и всем задавать по дефолту 1.0 и учитывать этот коефициент при начислении опыта этот коевициент можно будет менять как в большую сторону так и в меньшу(премиум или штрафы)"
+        },
+        {
+          "date": "2026-08-19T20:48:49.492515+00:00",
+          "outcome": "useful",
+          "q": "переноси"
+        },
+        {
+          "date": "2026-08-19T20:40:34.800850+00:00",
+          "outcome": "useful",
+          "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
+        }
+      ],
+      "score": 3.796132109,
+      "source_file": "app/Services/ExperienceService.php",
+      "status": "preferred",
+      "uses": 4
+    },
+    "app_services_itemtooltip_itemtooltipstatsbuilder_itemtooltipstatsbuilder": {
+      "code_fingerprint": "3805cdc3825badd1f671323567c789d986a808c1a68ed0edd1ee289dafff2d65",
+      "label": "ItemTooltipStatsBuilder",
+      "last": "2026-08-21T05:18:28.621979+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T05:18:28.621979+00:00",
+          "outcome": "useful",
+          "q": "больше нет проблем с n+1?"
+        }
+      ],
+      "score": 0.97601824,
+      "source_file": "app/Services/ItemTooltip/ItemTooltipStatsBuilder.php",
       "status": "tentative",
       "uses": 1
     },
-    "serviceprovider": {
-      "code_fingerprint": "",
-      "label": "ServiceProvider",
-      "last": "2026-08-11T14:06:18.703884+00:00",
+    "app_services_partyservice_partyservice": {
+      "code_fingerprint": "a8ede4bb21f2c8d7fe2b62d27b9f21210aeba13943aee05dc5de6a266941f744",
+      "label": "PartyService",
+      "last": "2026-08-19T20:54:24.075330+00:00",
       "provenance": [
         {
-          "date": "2026-08-11T14:06:18.703884+00:00",
+          "date": "2026-08-19T20:54:24.075330+00:00",
           "outcome": "useful",
-          "q": "как переключить базу назад на продовскую? после твоих прогонов"
+          "q": "а App\\Enums можно попереносить?"
         }
       ],
-      "score": 0.999035332,
-      "source_file": "",
+      "score": 0.946043391,
+      "source_file": "app/Services/PartyService.php",
       "status": "tentative",
       "uses": 1
+    },
+    "app_services_playermovementservice_playermovementservice": {
+      "code_fingerprint": "0937eb140881c8e2f59461c50957645a1642c1e2b048897f4ebc08c08307d594",
+      "label": "PlayerMovementService",
+      "last": "2026-08-21T04:39:10.117163+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-21T04:39:10.117163+00:00",
+          "outcome": "useful",
+          "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
+        },
+        {
+          "date": "2026-08-20T19:33:28.413889+00:00",
+          "outcome": "useful",
+          "q": "делай оптимизацию \n- Загружать экипировку, характеристики предметов, камни и руны пакетно.\n- Рассчитывать `StatSheet` игрока один раз на HTTP-запрос и повторно использовать результат."
+        },
+        {
+          "date": "2026-08-20T19:15:27.711006+00:00",
+          "outcome": "useful",
+          "q": "а при переходе на локациях, немного запросов на проверку есть ли на локации нпс или здание или какой-то закрытый переход?"
+        }
+      ],
+      "score": 2.908923021,
+      "source_file": "app/Services/PlayerMovementService.php",
+      "status": "preferred",
+      "uses": 3
+    },
+    "resources_views_admin_layout_header_blade": {
+      "code_fingerprint": "ddbfaffbeb870ed0ff2d26806f4fec62bf7d4d4d7dde253e8fa7b726875c1899",
+      "label": "header.blade.php",
+      "last": "2026-08-20T17:03:35.754507+00:00",
+      "provenance": [
+        {
+          "date": "2026-08-20T17:03:35.754507+00:00",
+          "outcome": "useful",
+          "q": "сделай отступ с права а то заезжает сильно в край"
+        },
+        {
+          "date": "2026-08-20T16:13:01.946207+00:00",
+          "outcome": "useful",
+          "q": "нужно в админке сделать какой-то бредкрамб, что бы было удобно возвращаться на шаг назад"
+        }
+      ],
+      "score": 1.928372512,
+      "source_file": "resources/views/admin/layout/header.blade.php",
+      "status": "preferred",
+      "uses": 2
     }
   },
   "version": 1

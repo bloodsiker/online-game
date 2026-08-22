@@ -2,7 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat;
 
-use App\DTO\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicsService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
@@ -12,6 +12,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRoundHit;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Auth;
 
 readonly class FightOrchestrator
@@ -32,7 +33,10 @@ readonly class FightOrchestrator
     {
         return \DB::transaction(function () use ($id, $monsterId, $action) {
             $user = Auth::user();
-            $player = $user->player;
+            $player = Player::query()
+                ->whereKey($user->player->id)
+                ->lockForUpdate()
+                ->firstOrFail();
             $battleLocation = $user->currentLocation;
             $fightDTO = new FightDTO;
 
@@ -45,7 +49,11 @@ readonly class FightOrchestrator
                 ->first();
 
             $attackedPlayer = BattleDetail::with('user')
-                ->where(['user_id' => $user->id])
+                ->where([
+                    'battle_id' => $battle->id,
+                    'user_id' => $user->id,
+                ])
+                ->lockForUpdate()
                 ->first();
 
             $battleRound = $this->createRound(
@@ -123,7 +131,7 @@ readonly class FightOrchestrator
                 );
 
                 $this->saveHits($battleRound, $user->id, $attackedMonster->location_monster_id, $playerHpAfterRound, $monsterHpAfterPlayerAttack, $playerLog, $monsterLog);
-                $this->finishService->checkAndFinish($battle, $battleLocation);
+                $this->finishService->checkAndFinish($battle, $battleLocation, $user);
 
                 return $fightDTO;
             }
@@ -133,7 +141,7 @@ readonly class FightOrchestrator
 
             $this->attackService->checkLevelUp($player, $playerLog);
 
-            $finishDTO = $this->finishService->checkAndFinish($battle, $battleLocation);
+            $finishDTO = $this->finishService->checkAndFinish($battle, $battleLocation, $user);
 
             $fullLog = (new AttackResultDTO)->merge($playerLog)->merge($monsterLog);
             $battleRound->action = $fullLog->getLog();
@@ -149,7 +157,9 @@ readonly class FightOrchestrator
                 ->setBattle($finishDTO->battle ?? $battle)
                 ->setBattleRound($battleRound)
                 ->setAttackedMonster($attackedMonster)
-                ->setPlayer($player->refresh())
+                // fresh() returns the updated scalar state without reloading every
+                // relation that was used for the stat calculation in this round.
+                ->setPlayer($player->fresh())
                 ->setSideLog($fullLog->getSideLog());
         });
     }

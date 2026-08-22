@@ -331,20 +331,24 @@
 </head>
 <body>
 
-<table class="main-table" cellspacing="0" cellpadding="10" width="100%" height="100%">
+<table class="main-table battle-layout" cellspacing="0" cellpadding="10" width="100%" height="100%">
     <tbody>
     <tr valign="top">
         @if($battle)
-            <td>
-                @if($battle->status->isActive() && $randomAttackedMonster)
-                    <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
+            @if($battle->status->isActive())
+                <td class="battle-col-actions" valign="top">
+                    @if($randomAttackedMonster)
+                        <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
-                    @include('battle::partials.action_panel')
-                @elseif($battle->status->isActive())
-                    <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
-                @endif
+                        @include('battle::partials.action_panel')
+                    @else
+                        <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
+                    @endif
+                </td>
+            @endif
 
-                <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="/info/?mid=491678816" target="_blank">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
+            <td @if($battle->status->isActive()) class="battle-col-log" @else colspan="3" @endif valign="top">
+                <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="{{ route('info.monster', ['id' => $round->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
 
                 {!! $round->action !!}
 
@@ -357,12 +361,14 @@
             </td>
 
             @if($battle->status->isActive())
-                <td width="30%" valign="top">
+                <td class="battle-col-participants" valign="top">
                     @include('battle::partials.side_panel')
                 </td>
             @endif
         @else
-            <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+            <td colspan="3">
+                <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+            </td>
         @endif
     </tr>
     </tbody>
@@ -400,35 +406,6 @@
         });
     }
 
-    function buffOrDebuff() {
-        if (Math.random() > 0.7) {
-            const blessings = [
-                { id: 'crit_' + Date.now(), name: 'Кровь Берсерка', duration: 15 },
-                { id: 'rage_' + Date.now(), name: 'Покров Небес', duration: 20 },
-                { id: 'regen_' + Date.now(), name: 'Регенерация', duration: 19 },
-                { id: 'dux_' + Date.now(), name: 'Дыхание Леса', duration: 14 },
-                { id: 'dobl' + Date.now(), name: 'Свет Доблести', duration: 21 }
-            ];
-            const blessing = blessings[Math.floor(Math.random() * blessings.length)];
-
-            parent.sendToFrame('character-frame', { blessing });
-        }
-
-        if (Math.random() > 0.8) {
-            const curses = [
-                { id: 'burn_' + Date.now(), name: 'Горение', duration: 10 },
-                { id: 'slow_' + Date.now(), name: 'Замедление', duration: 15 },
-                { id: 'blind_' + Date.now(), name: 'Проклятие Хрупкости', duration: 21 },
-                { id: 'slip_' + Date.now(), name: 'Слепота', duration: 8 },
-                { id: 'book_' + Date.now(), name: 'Крига Страху', duration: 18 }
-            ];
-            const curse = curses[Math.floor(Math.random() * curses.length)];
-
-            parent.sendToFrame('character-frame', { curse });
-        }
-    }
-
-    buffOrDebuff();
 </script>
 
 

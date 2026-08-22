@@ -1960,6 +1960,9 @@
     var _ctxItemCount = 1;
     var _ctxItemName  = '';
     var _ctxItemImage = '';
+    var _ctxItemDroppable = false;
+    var _teleportUseKeyItemIds = @json($teleportUseKeyItemIds ?? []);
+    var _droppableItemIds = @json($droppableItemIds ?? []);
 
     function showCtxMenu(el, event) {
         event.stopPropagation();
@@ -1971,15 +1974,20 @@
         _ctxItemCount = parseInt(el.getAttribute('data-count')) || 1;
         _ctxItemName  = el.getAttribute('data-name') || '';
         _ctxItemImage = el.getAttribute('data-image') || '';
+        _ctxItemDroppable = _droppableItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         var type     = _ctxItemType;
         var equipped = el.getAttribute('data-equipped') === '1';
 
         var equippable = ['weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
-        var usable     = ['potion','eat','scroll','artifact','chest','gift','key'].indexOf(type) !== -1;
+        var usable     = ['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1;
+        if (type === 'key') {
+            usable = _teleportUseKeyItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
+        }
 
         document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
         document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
         document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
+        document.getElementById('ctx-drop').style.display    = _ctxItemDroppable ? '' : 'none';
 
         var menu = document.getElementById('item-ctx-menu');
         menu.style.display = 'block';
@@ -2010,7 +2018,9 @@
                 }
                 break;
             case 'drop':
-                showDropDialog(id, _ctxItemCount);
+                if (_ctxItemDroppable) {
+                    showDropDialog(id, _ctxItemCount);
+                }
                 break;
             case 'chat':
                 try {

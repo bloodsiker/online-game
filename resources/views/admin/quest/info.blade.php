@@ -136,53 +136,75 @@
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalObjective">Добавить задание</a>
                                     </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-bordered mb-none">
-                                            <thead>
-                                            <tr>
-                                                <th width="50">ID</th>
-                                                <th width="100">Тип</th>
-                                                <th>Описание</th>
-                                                <th width="100">Цель (ID)</th>
-                                                <th width="100">Предмет</th>
-                                                <th width="80">Кол-во</th>
-                                                <th width="80">Шанс</th>
-                                                <th width="70"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @forelse($quest->objectives as $obj)
-                                                <tr style="vertical-align: middle">
-                                                    <td>{{ $obj->id }}</td>
-                                                    <td><span class="badge badge-info">{{ $obj->type }}</span></td>
-                                                    <td>{{ $obj->description }}</td>
-                                                    <td>
-                                                        @if($obj->type === 'deliver')
-                                                            {{ $obj->shareItem?->name ?? $obj->target_id }}
-                                                        @else
-                                                            {{ $obj->target_id }}
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if($obj->collectItem)
-                                                            <img src="{{ $obj->collectItem->image }}" style="width:20px;vertical-align:middle;" alt="">
+                                    @foreach($quest->objectives as $obj)
+                                        <form action="{{ route('admin.quest.objective.update', [$quest->id, $obj->id]) }}" method="post" class="mb-3 p-2" style="border:1px solid #e5e5e5;border-radius:4px;">
+                                            {{ csrf_field() }}
+                                            <div class="row">
+                                                <div class="col-md-1">
+                                                    <label class="col-form-label">ID</label>
+                                                    <input type="text" class="form-control" value="{{ $obj->id }}" disabled>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Тип задания</label>
+                                                    <select name="type" class="form-control">
+                                                        <option value="kill" @selected($obj->type === 'kill')>kill — убить монстра</option>
+                                                        <option value="collect" @selected($obj->type === 'collect')>collect — собрать предмет</option>
+                                                        <option value="talk" @selected($obj->type === 'talk')>talk — поговорить с NPC</option>
+                                                        <option value="deliver" @selected($obj->type === 'deliver')>deliver — сдать предмет</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Тип цели</label>
+                                                    <select name="target_type" class="form-control">
+                                                        <option value="monster" @selected($obj->target_type === 'monster')>monster</option>
+                                                        <option value="npc" @selected($obj->target_type === 'npc')>npc</option>
+                                                        <option value="item" @selected($obj->target_type === 'item')>item</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">ID цели</label>
+                                                    <input type="number" class="form-control" name="target_id" value="{{ $obj->target_id }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Неск. ID цели</label>
+                                                    <input type="text" class="form-control" name="target_ids" value="{{ !empty($obj->target_ids) ? implode(',', $obj->target_ids) : '' }}" placeholder="85,93">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Предмет для сбора (ID)</label>
+                                                    <input type="number" class="form-control" name="share_item_id" value="{{ $obj->share_item_id }}">
+                                                    @if($obj->collectItem)
+                                                        <small class="text-muted d-block">
+                                                            <img src="{{ $obj->collectItem->image }}" style="width:16px;vertical-align:middle;" alt="">
                                                             {{ $obj->collectItem->name }}
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $obj->required_amount }}</td>
-                                                    <td>{{ $obj->drop_chance !== null ? $obj->drop_chance . '%' : '—' }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.quest.objective.delete', [$quest->id, $obj->id]) }}"
-                                                           class="btn btn-xs btn-danger"
-                                                           onclick="return confirm('Удалить?')">Удалить</a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="8" class="text-center text-muted">Нет заданий</td></tr>
-                                            @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Кол-во</label>
+                                                    <input type="number" min="1" class="form-control" name="required_amount" value="{{ $obj->required_amount }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Шанс дропа (%)</label>
+                                                    <input type="number" step="0.01" class="form-control" name="drop_chance" value="{{ $obj->drop_chance }}" placeholder="только для collect">
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <label class="col-form-label">Описание для игрока</label>
+                                                    <input type="text" class="form-control" name="description" value="{{ $obj->description }}">
+                                                </div>
+                                                <div class="col-md-3 d-flex align-items-end" style="gap:6px;">
+                                                    <button class="btn btn-primary btn-sm">Сохранить</button>
+                                                    <a href="{{ route('admin.quest.objective.delete', [$quest->id, $obj->id]) }}"
+                                                       class="btn btn-danger btn-sm"
+                                                       onclick="return confirm('Удалить?')">Удалить</a>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endforeach
+                                    @if($quest->objectives->isEmpty())
+                                        <p class="text-center text-muted">Заданий пока нет</p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -192,49 +214,63 @@
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalReward">Добавить награду</a>
                                     </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-bordered mb-none">
-                                            <thead>
-                                            <tr>
-                                                <th width="50">ID</th>
-                                                <th width="160">Тип</th>
-                                                <th>Предмет / Локация</th>
-                                                <th width="100">Кол-во</th>
-                                                <th width="70"></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @forelse($quest->rewards as $reward)
-                                                <tr style="vertical-align: middle">
-                                                    <td>{{ $reward->id }}</td>
-                                                    <td><span class="badge badge-primary">{{ $reward->type->label() }}</span></td>
-                                                    <td>
-                                                        @if($reward->itemInfo)
-                                                            @if($reward->itemInfo->image)
-                                                                <img src="{{ $reward->itemInfo->image }}" style="width:20px;vertical-align:middle;" alt="">
-                                                            @endif
-                                                            {{ $reward->itemInfo->name }}
-                                                        @elseif($reward->location)
-                                                            {{ $reward->location->name }}
-                                                        @elseif($reward->reputation)
-                                                            {{ $reward->reputation->name }}
-                                                        @else
-                                                            —
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $reward->amount ?: '—' }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.quest.reward.delete', [$quest->id, $reward->id]) }}"
-                                                           class="btn btn-xs btn-danger"
-                                                           onclick="return confirm('Удалить?')">Удалить</a>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="5" class="text-center text-muted">Нет наград</td></tr>
-                                            @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    @foreach($quest->rewards as $reward)
+                                        <form action="{{ route('admin.quest.reward.update', [$quest->id, $reward->id]) }}" method="post" class="mb-3 p-2" style="border:1px solid #e5e5e5;border-radius:4px;">
+                                            {{ csrf_field() }}
+                                            <div class="row">
+                                                <div class="col-md-1">
+                                                    <label class="col-form-label">ID</label>
+                                                    <input type="text" class="form-control" value="{{ $reward->id }}" disabled>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Тип награды</label>
+                                                    <select name="type" class="form-control">
+                                                        @foreach($rewardTypes as $rt)
+                                                            <option value="{{ $rt->value }}" @selected($reward->type === $rt)>{{ $rt->label() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Кол-во</label>
+                                                    <input type="number" class="form-control" name="amount" value="{{ $reward->amount }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Предмет (ID)</label>
+                                                    <input type="number" class="form-control" name="share_item_id" value="{{ $reward->share_item_id }}">
+                                                    @if($reward->itemInfo)
+                                                        <small class="text-muted d-block">{{ $reward->itemInfo->name }}</small>
+                                                    @endif
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Локация (ID)</label>
+                                                    <input type="number" class="form-control" name="location_id" value="{{ $reward->location_id }}">
+                                                    @if($reward->location)
+                                                        <small class="text-muted d-block">{{ $reward->location->name }}</small>
+                                                    @endif
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Репутация</label>
+                                                    <select name="reputation_id" class="form-control">
+                                                        <option value="">— не выбрана —</option>
+                                                        @foreach($reputations as $rep)
+                                                            <option value="{{ $rep->id }}" @selected((int) $reward->reputation_id === $rep->id)>[{{ $rep->id }}] {{ $rep->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-12 text-end">
+                                                    <button class="btn btn-primary btn-sm">Сохранить</button>
+                                                    <a href="{{ route('admin.quest.reward.delete', [$quest->id, $reward->id]) }}"
+                                                       class="btn btn-danger btn-sm"
+                                                       onclick="return confirm('Удалить?')">Удалить</a>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endforeach
+                                    @if($quest->rewards->isEmpty())
+                                        <p class="text-center text-muted">Наград пока нет</p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -345,6 +381,10 @@
                     <div class="form-group mb-2">
                         <label>ID цели <small class="text-muted">(ID монстра / NPC / предмета)</small></label>
                         <input type="number" class="form-control" name="target_id">
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Несколько ID цели <small class="text-muted">(через запятую, вместо поля «ID цели» выше — напр. разные уровни одного монстра: 85,93. Убийство ЛЮБОГО из них засчитывается в общий прогресс)</small></label>
+                        <input type="text" class="form-control" name="target_ids" placeholder="85,93">
                     </div>
                     <div class="form-group mb-2" id="obj-item-row">
                         <label>Предмет для сбора (collect)</label>

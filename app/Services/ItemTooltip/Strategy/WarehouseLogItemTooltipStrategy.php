@@ -4,6 +4,7 @@ namespace App\Services\ItemTooltip\Strategy;
 
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\ItemTooltipDto;
+use App\Services\ItemTooltip\ItemTooltipRelationLoader;
 
 readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -11,7 +12,11 @@ readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInt
 
     public function collect(ItemTooltipCollector $collector): void
     {
-        foreach ($this->items as $log) {
+        $logs = ItemTooltipRelationLoader::load($this->items, [
+            'item.itemInfo',
+        ]);
+
+        foreach ($logs as $log) {
             $item = $log->item;
             $itemInfo = $item->itemInfo;
             $collector->add(new ItemTooltipDto(

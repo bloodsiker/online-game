@@ -2,7 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss;
 
-use App\DTO\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;

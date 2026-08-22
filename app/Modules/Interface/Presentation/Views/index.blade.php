@@ -1272,6 +1272,63 @@
     checkUnreadMail();
     setInterval(checkUnreadMail, 60000);
 
+    // Единый heartbeat: онлайн, серверная регенерация, периодический урон
+    // и синхронизация HP/MP/эффектов во всех игровых фреймах.
+    const playerHeartbeatInterval = {{ (int) config('game.player_heartbeat_seconds', 10) * 1000 }};
+    let playerHeartbeatInFlight = false;
+
+    async function syncPlayerHeartbeat() {
+        if (playerHeartbeatInFlight) return;
+
+        playerHeartbeatInFlight = true;
+
+        try {
+            const response = await fetch('{{ route('player.heartbeat') }}', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) return;
+
+            const state = await response.json();
+            const message = {
+                type: 'playerState',
+                hp: state.hp,
+                mp: state.mp,
+                effects: state.effects,
+                effectDamage: state.effect_damage,
+                serverTime: state.server_time,
+            };
+
+            sendToFrame('character-frame', message, window.location.origin);
+            const gameFrame = document.getElementById('game-frame');
+            gameFrame?.contentWindow?.postMessage(message, window.location.origin);
+
+            if (state.dead && state.death_url && gameFrame?.contentWindow) {
+                if (state.death_message) {
+                    showErrorIframe(state.death_message);
+                }
+
+                gameFrame.contentWindow.location.replace(state.death_url);
+            }
+        } catch (error) {
+            // Следующий heartbeat восстановит состояние после временной ошибки сети.
+        } finally {
+            playerHeartbeatInFlight = false;
+        }
+    }
+
+    syncPlayerHeartbeat();
+    setInterval(syncPlayerHeartbeat, playerHeartbeatInterval);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) syncPlayerHeartbeat();
+    });
+
     function attackMonster(id, monsterId, action) {
         let routeTemplate = "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
         document.getElementById('game-frame').contentWindow.location.href = routeTemplate

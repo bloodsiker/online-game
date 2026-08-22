@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\DTO\AttackResultDTO;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Quest\Domain\Events\QuestItemDropped;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class DropService
@@ -33,7 +35,7 @@ class DropService
         $locationMonster->save();
     }
 
-    public function dropItemsFromMonsters(Battle $battle, Location $location, ?int $dungeonSessionId = null): void
+    public function dropItemsFromMonsters(Battle $battle, Location $location, User $dropRecipient, ?int $dungeonSessionId = null): void
     {
         if ($battle->status->isFinish()) {
             $detailsWithMonsters = BattleDetail::with('locationMonster.monster.items')
@@ -62,12 +64,19 @@ class DropService
                 $item->count_use = $dropItem['item']->count_use;
                 $item->save();
 
-                $pivotData = ['count' => $dropItem['count']];
+                $pivotData = [
+                    'count' => $dropItem['count'],
+                    'expires_at' => $dropItem['item']->groundExpiresAt(),
+                ];
                 if ($dungeonSessionId !== null) {
                     $pivotData['dungeon_session_id'] = $dungeonSessionId;
                 }
 
                 $location->itemsOnLocation()->attach($item->id, $pivotData);
+
+                if ($dropItem['item']->type === ShareItemType::QUEST) {
+                    QuestItemDropped::dispatch($dropRecipient, (int) $dropItem['item']->id);
+                }
             }
         }
     }

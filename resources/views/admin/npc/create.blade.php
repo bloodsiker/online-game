@@ -20,6 +20,10 @@
                             <label class="col-form-label">Локация</label>
                             <select id="sel-location" name="location_id" class="form-control"></select>
                         </div>
+                        <div class="checkbox-custom checkbox-default">
+                            <input type="checkbox" id="hide-location" name="hide_location" value="1" @checked(old('hide_location'))>
+                            <label for="hide-location">Скрывать местоположение в информации об НПС</label>
+                        </div>
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="5">{{ old('description') }}</textarea>

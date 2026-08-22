@@ -27,6 +27,7 @@ class UnequipItem
         $item = $this->readRepository->findItem($itemId);
 
         $player->refresh();
+        $this->statService->invalidate($player);
         $newSheet = $this->statService->resolve($player);
         $this->statService->scaleHp($player, $oldSheet->getHpMax(), $newSheet->getHpMax(), $oldSheet->getMpMax(), $newSheet->getMpMax());
 

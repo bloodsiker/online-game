@@ -158,7 +158,7 @@
                 @endif
 
                 @foreach($page->npcs as $npc)
-                    <div><a href="{{ $npc->infoUrl }}" target="_blank" class="color-red">{{ $npc->name }}</a> [<a href="{{ $npc->talkUrl }}">говорить</a>]</div>
+                    <div><a href="{{ $npc->infoUrl }}" onclick="window.open(this.href,'','width=730,height=650,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $npc->name }}</a> [<a href="{{ $npc->talkUrl }}">говорить</a>]</div>
                 @endforeach
 
                 <div class="side-move">

@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Город Нейрин
+                                            Шепчущий Лес
                                         </div>
                                     </div>
                                 </div>
@@ -375,39 +375,39 @@
                                                                                     style="padding: 6px 4px; text-align: justify;">
                                                                                     <table class="coll w100 p10h p2v brd2-all">
                                                                                         <tbody>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3493,2)"
-                                                                                          onmouseover="mark_l(3493,1)"
-                                                                                          onmouseout="mark_l(3493,0)"><span
-                                                                                            class="listloc">3493</span> <span
-                                                                                            style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MzcwMQ#3494">Домик охотника</a> <span
-                                                                                            class="listloc">3494</span></span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class>
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3571,2)"
-                                                                                          onmouseover="mark_l(3571,1)"
-                                                                                          onmouseout="mark_l(3571,0)"><span
-                                                                                            class="listloc">3571</span> <span
-                                                                                            style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MjAwMA#2000">Эльфийский лес</a> <span
-                                                                                            class="listloc">2000</span></span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                    <span class="line-align" onclick="mark_l(3503,2)"
-                                                                                          onmouseover="mark_l(3503,1)"
-                                                                                          onmouseout="mark_l(3503,0)"><span
-                                                                                            class="listloc">3503</span> <span
-                                                                                            style="font-size:18px;">→</span> <a
-                                                                                            href="/i/map.php?m=MjAxMQ#1430">Холмы хоббитов</a> <span
-                                                                                            class="listloc">1430</span></span>
-                                                                                            </td>
-                                                                                        </tr>
+                                        <tr class="bg_l">
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align" onclick="mark_l(102,2)"
+                                                      onmouseover="mark_l(102,1)"
+                                                      onmouseout="mark_l(102,0)"><span
+                                                        class="listloc">102</span> <span
+                                                        style="font-size:18px;">→</span> <a
+                                                        href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#101">Город</a> <span
+                                                        class="listloc">101</span></span>
+                                            </td>
+                                        </tr>
+                                        <tr class=>
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align" onclick="mark_l(245,2)"
+                                                      onmouseover="mark_l(245,1)"
+                                                      onmouseout="mark_l(245,0)"><span
+                                                        class="listloc">245</span> <span
+                                                        style="font-size:18px;">→</span> <a
+                                                        href="{{ route('on_map', array_merge(['s' => '9uF1sO7v'], request()->except(['s']))) }}#511">Катакомбы Жертвоприношений</a> <span
+                                                        class="listloc">511</span></span>
+                                            </td>
+                                        </tr>
+                                        <tr class="bg_l">
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align" onclick="mark_l(418,2)"
+                                                      onmouseover="mark_l(418,1)"
+                                                      onmouseout="mark_l(418,0)"><span
+                                                        class="listloc">418</span> <span
+                                                        style="font-size:18px;">→</span> <a
+                                                        href="{{ route('on_map', array_merge(['s' => 'Kj9u18NJl3'], request()->except(['s']))) }}#883">Забытый Курган</a> <span
+                                                        class="listloc">883</span></span>
+                                            </td>
+                                        </tr>
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>
@@ -457,37 +457,59 @@
                                                                                     style="padding: 6px 4px; text-align: justify;">
                                                                                     <table class="coll w100 p10h p2v brd2-all">
                                                                                         <tbody>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                                <span class="line-align"
-                                                                                                      style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
-                                                                                                      onclick="area_click(1)"
-                                                                                                      onmouseover="area_show(1,1)"
-                                                                                                      onmouseout="area_show(1,0)"><span
-                                                                                                        class="a1 listloc"
-                                                                                                        style="">&nbsp;</span> - Город Нейрин</span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class>
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                                <span class="line-align"
-                                                                                                      style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
-                                                                                                      onclick="area_click(3028)"
-                                                                                                      onmouseover="area_show(3028,1)"
-                                                                                                      onmouseout="area_show(3028,0)"><span
-                                                                                                        class="a3028 listloc"
-                                                                                                        style="">&nbsp;</span> - Пастбища</span>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                        <tr class="bg_l">
-                                                                                            <td class="brd2-top brd2-bt b">
-                                                                                                <a href="/i/map.php" class="line-align"><span
-                                                                                                        style="margin-top:6px;display:inline-block;"><span
-                                                                                                            class="ulocation"><span
-                                                                                                                class="listloc"
-                                                                                                                id="lid">135</span></span> - Вы здесь</span></a>
-                                                                                            </td>
-                                                                                        </tr>
+                                        <tr class="bg_l">
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align"
+                                                      style="cursor:pointer;margin-top:6px;display:inline-block;"
+                                                      onclick="area_click(2)"
+                                                      onmouseover="area_show(2,1)"
+                                                      onmouseout="area_show(2,0)"><span
+                                                        class="a2 listloc"
+                                                        style="">&nbsp;</span> - Шепчущий Лес</span>
+                                            </td>
+                                        </tr>
+                                        <tr class=>
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align"
+                                                      style="cursor:pointer;margin-top:6px;display:inline-block;"
+                                                      onclick="area_click(3)"
+                                                      onmouseover="area_show(3,1)"
+                                                      onmouseout="area_show(3,0)"><span
+                                                        class="a3 listloc"
+                                                        style="">&nbsp;</span> - Опустевшая Долина</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="bg_l">
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align"
+                                                      style="cursor:pointer;margin-top:6px;display:inline-block;"
+                                                      onclick="area_click(4)"
+                                                      onmouseover="area_show(4,1)"
+                                                      onmouseout="area_show(4,0)"><span
+                                                        class="a4 listloc"
+                                                        style="">&nbsp;</span> - Ожившая окраина</span>
+                                            </td>
+                                        </tr>
+                                        <tr class=>
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align"
+                                                      style="cursor:pointer;margin-top:6px;display:inline-block;"
+                                                      onclick="area_click(5)"
+                                                      onmouseover="area_show(5,1)"
+                                                      onmouseout="area_show(5,0)"><span
+                                                        class="a5 listloc"
+                                                        style="">&nbsp;</span> - Заброшеное кладбище</span>
+                                            </td>
+                                        </tr>
+                                        @auth
+                                        <tr class="bg_l">
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align"><span style="margin-top:6px;display:inline-block;"><span
+                                                        class="ulocation"><span class="listloc"
+                                                            id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>
+                                            </td>
+                                        </tr>
+                                        @endauth
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>

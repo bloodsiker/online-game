@@ -42,7 +42,7 @@ final class MonsterStatFormulas
     }
 
     /**
-     * HP игрока по формуле из RecalculatePlayerModification (DEFAULT_HP=10, HP_PER_LEVEL=12),
+     * HP игрока по формуле из PlayerStatFormulas (DEFAULT_HP=10, HP_PER_LEVEL=12),
      * без учёта Выносливости — нужен как ориентир для калибровки урона монстра.
      */
     public static function referencePlayerHp(int $level): float
