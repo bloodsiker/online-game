@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
@@ -148,14 +150,14 @@ readonly class AttackService
             );
 
             if (! $hit->getAppliedEffects()->isEmpty()) {
-                foreach ($hit->getAppliedEffects() as $effect) {
-                    $this->effectService->applyEffectToMonster($effect, $locMonster, $battle, $result);
+                foreach ($hit->getAppliedEffects() as $applied) {
+                    $this->effectService->applyEffectToMonster($applied['effect'], $locMonster, $battle, $result, $applied['tickValue']);
 
                     $result->log(sprintf(
                         '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',
                         $locMonster->monster->name,
                         $hit->getMagicSkill()->name,
-                        $effect->name
+                        $applied['effect']->name
                     ));
                 }
             }

@@ -61,7 +61,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
 
         foreach ($this->magicSkill->skillEffects as $effectData) {
             if (random_int(1, 100) <= $effectData->pivot->chance) {
-                $hit->addAppliedEffect($effectData); // TODO(Task 10): pass tickValue: $hit->getDamage() once FightHitDTO::addAppliedEffect($effect, ?int $tickValue) exists
+                $hit->addAppliedEffect($effectData, tickValue: $hit->getDamage());
             }
         }
 

@@ -33,7 +33,8 @@ class BattleEffectService
         Effect $effect,
         MonsterOnLocation $locMonster,
         Battle $battle,
-        AttackResultDTO $result
+        AttackResultDTO $result,
+        ?int $tickValueOverride = null,
     ): void {
         $type = ActiveEffectType::tryFrom($effect->slug);
 
@@ -61,6 +62,9 @@ class BattleEffectService
 
         if ($existing) {
             $existing->stacks = max($existing->stacks, $effectiveDuration);
+            if ($tickValueOverride !== null) {
+                $existing->current_value = $tickValueOverride;
+            }
             $existing->save();
 
             return;
@@ -73,7 +77,7 @@ class BattleEffectService
             'type' => $type,
             'applied_at' => now(),
             'stacks' => $effectiveDuration,
-            'current_value' => (float) $effect->value_per_tick,
+            'current_value' => $tickValueOverride ?? (float) $effect->value_per_tick,
         ]);
     }
 
