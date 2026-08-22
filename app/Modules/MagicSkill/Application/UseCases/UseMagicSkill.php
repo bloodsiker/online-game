@@ -38,15 +38,15 @@ class UseMagicSkill
             return new MagicSkillActionResultDTO('error', 'Это заклинание нельзя использовать вне боя', httpCode: 422);
         }
 
+        $target = $this->readRepository->findAllyTarget($caster, $targetPlayerId);
+        if (! $target) {
+            return new MagicSkillActionResultDTO('error', 'Цель не найдена', httpCode: 404);
+        }
+
         $castAttempt = $this->castGuard->tryConsume($caster, $skill);
 
         if (! $castAttempt->ok) {
             return new MagicSkillActionResultDTO('error', $castAttempt->reason, httpCode: 422);
-        }
-
-        $target = $this->readRepository->findAllyTarget($caster, $targetPlayerId);
-        if (! $target) {
-            return new MagicSkillActionResultDTO('error', 'Цель не найдена', httpCode: 404);
         }
 
         $casterSheet = $this->statService->resolve($caster);
