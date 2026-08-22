@@ -30,6 +30,11 @@
                                     <a class="nav-link" data-bs-target="#tab-scroll" href="#tab-scroll" data-bs-toggle="tab">Свиток заточки</a>
                                 </li>
                             @endif
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::BOOK)
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-target="#tab-book" href="#tab-book" data-bs-toggle="tab">Книга</a>
+                                </li>
+                            @endif
                         </ul>
 
                         <form action="{{ route('admin.item.info', $item->id) }}" method="post" enctype="multipart/form-data">
@@ -280,6 +285,27 @@
                                                             <span class="text-muted small"> — {{ $scrollType->description() }}</span>
                                                         </div>
                                                     @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- КНИГА --}}
+                                @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::BOOK)
+                                    <div id="tab-book" class="tab-pane">
+                                        <div class="row pt-3 pb-3">
+                                            <div class="col-lg-5">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Заклинание</label>
+                                                    <select name="magic_skill_id" class="form-control" data-plugin-selectTwo
+                                                            data-plugin-options='{ "placeholder": "Не выбрано", "allowClear": true }'>
+                                                        <option value=""></option>
+                                                        @foreach($magicSkills as $id => $name)
+                                                            <option value="{{ $id }}" @selected(old('magic_skill_id', $item->magicSkillBook?->magic_skill_id) == $id)>{{ $name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <small class="form-text text-muted">Игрок, использующий эту книгу, изучит выбранное заклинание.</small>
                                                 </div>
                                             </div>
                                         </div>

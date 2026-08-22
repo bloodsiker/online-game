@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
@@ -62,8 +64,9 @@ class ItemController extends Controller
     public function create(): View
     {
         $skills = Skill::orderBy('name')->get();
+        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
 
-        return view('admin.item.create', compact('skills'));
+        return view('admin.item.create', compact('skills', 'magicSkills'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -79,6 +82,10 @@ class ItemController extends Controller
             ]);
         }
 
+        if ($item->type === ShareItemType::BOOK) {
+            $this->syncMagicSkillBook($item, $request);
+        }
+
         return redirect()->route('admin.item.info', ['item' => $item->id])
             ->with('success', 'Предмет создан.');
     }
@@ -89,19 +96,24 @@ class ItemController extends Controller
             $this->fillItem($item, $request);
             $item->save();
 
+            if ($item->type === ShareItemType::BOOK) {
+                $this->syncMagicSkillBook($item, $request);
+            }
+
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook']);
 
         $skills = Skill::orderBy('name')->get();
+        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = ShareItemRequirementType::cases();
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
@@ -228,6 +240,22 @@ class ItemController extends Controller
             $pool = $request->input('rune_stat_pool', []);
             $item->rune_stat_pool = count($pool) > 0 ? $pool : null;
         }
+    }
+
+    private function syncMagicSkillBook(ShareItem $item, Request $request): void
+    {
+        $magicSkillId = $request->filled('magic_skill_id') ? (int) $request->input('magic_skill_id') : null;
+
+        if ($magicSkillId === null) {
+            MagicSkillBook::where('share_item_id', $item->id)->delete();
+
+            return;
+        }
+
+        MagicSkillBook::updateOrCreate(
+            ['share_item_id' => $item->id],
+            ['magic_skill_id' => $magicSkillId],
+        );
     }
 
     private function storeItemImage(UploadedFile $file): string

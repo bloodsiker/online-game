@@ -87,6 +87,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Коэффициент силы <small class="text-muted">(от интеллекта/атрибута)</small></label>
+                                    <input type="number" step="0.01" min="0" class="form-control" name="power_coefficient" value="{{ old('power_coefficient', 0) }}">
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="col-form-label">Базовое лечение</label>
                             <input type="number" min="0" class="form-control" name="base_healing" value="{{ old('base_healing', 0) }}">
