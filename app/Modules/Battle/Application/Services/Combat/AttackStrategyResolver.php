@@ -12,7 +12,8 @@ use App\Modules\Battle\Application\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\OneHandWeaponStrategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Domain\Services\MonsterCombatantFactory;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
@@ -23,12 +24,14 @@ readonly class AttackStrategyResolver
     public function __construct(
         private HitCalculator $hitCalc,
         private MagicHitCalculator $magicHitCalc,
+        private MonsterCombatantFactory $combatantFactory,
         private PlayerMagicSkillService $playerMagicSkillService,
         private PlayerStatService $statService,
     ) {}
 
-    public function resolve(Player $player, Monster $monster, int $action): AttackStrategyInterface
+    public function resolve(Player $player, MonsterOnLocation $locMonster, int $action): AttackStrategyInterface
     {
+        $monster = $this->combatantFactory->build($locMonster);
         $sheet = $this->statService->resolve($player);
 
         $equip = $player->playerEquip;
