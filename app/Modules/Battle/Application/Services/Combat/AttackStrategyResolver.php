@@ -17,6 +17,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Services\MagicCastGuard;
 use App\Services\PlayerMagicSkillService;
 
 readonly class AttackStrategyResolver
@@ -27,6 +28,7 @@ readonly class AttackStrategyResolver
         private MonsterCombatantFactory $combatantFactory,
         private PlayerMagicSkillService $playerMagicSkillService,
         private PlayerStatService $statService,
+        private MagicCastGuard $castGuard,
     ) {}
 
     public function resolve(Player $player, MonsterOnLocation $locMonster, int $action): AttackStrategyInterface
@@ -50,6 +52,7 @@ readonly class AttackStrategyResolver
 
             return new MagicAttackStrategy(
                 magicHitCalc: $this->magicHitCalc,
+                castGuard: $this->castGuard,
                 player: $sheet,
                 playerModel: $player,
                 monster: $monster,

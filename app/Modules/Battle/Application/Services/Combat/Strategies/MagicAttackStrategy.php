@@ -9,11 +9,13 @@ use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Services\MagicCastGuard;
 
 class MagicAttackStrategy implements AttackStrategyInterface
 {
     public function __construct(
         private MagicHitCalculator $magicHitCalc,
+        private MagicCastGuard $castGuard,
         private FightHitInterface $player,     // StatSheet с полными рассчитанными статами
         private Player $playerModel, // Player model для чтения/записи mp_now
         private FightHitInterface $monster,
@@ -38,15 +40,15 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-        if ($this->playerModel->mp_now < $this->magicSkill->mana_cost) {
+        $castAttempt = $this->castGuard->tryConsume($this->playerModel, $this->magicSkill);
+
+        if (! $castAttempt->ok) {
             return [
                 (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage(sprintf('Недостаточно маны, требуется %s', $this->magicSkill->mana_cost)),
+                    ->setMessage($castAttempt->reason),
             ];
         }
-
-        $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
 
         // Магия не уворачивается и не критует (см. спеку, правило 1) — сразу считаем финальный урон.
         $hit = $this->magicHitCalc->hit(
