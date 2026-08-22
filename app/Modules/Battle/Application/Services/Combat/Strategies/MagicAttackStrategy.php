@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
-use App\Modules\Battle\Application\Services\Combat\HitCalculator;
+use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class MagicAttackStrategy implements AttackStrategyInterface
 {
     public function __construct(
-        private HitCalculator $hitCalc,
+        private MagicHitCalculator $magicHitCalc,
         private FightHitInterface $player,     // StatSheet с полными рассчитанными статами
         private Player $playerModel, // Player model для чтения/записи mp_now
-        private Monster $monster,
+        private FightHitInterface $monster,
         private MagicSkill $magicSkill,
     ) {}
 
@@ -49,24 +48,18 @@ class MagicAttackStrategy implements AttackStrategyInterface
 
         $this->playerModel->mp_now -= $this->magicSkill->mana_cost;
 
-        // Базовый урон от скилла (уворот бросается один раз — внутри hit() ниже)
-        $baseDamage = random_int($this->magicSkill->min_damage, $this->magicSkill->max_damage);
-
-        // TODO(Task 4): заменить на MagicHitCalculator — без уворота/крита/брони, см. спеку.
-        $hit = $this->hitCalc->hit($this->player, $this->monster, $baseDamage, $baseDamage);
-
-        if ($hit->isDodge()) {
-            return [
-                $hit
-                    ->setMagicSkill($this->magicSkill)
-                    ->setWeaponName($this->magicSkill->name)
-                    ->setWeapon(null),
-            ];
-        }
+        // Магия не уворачивается и не критует (см. спеку, правило 1) — сразу считаем финальный урон.
+        $hit = $this->magicHitCalc->hit(
+            $this->player,
+            $this->monster,
+            $this->magicSkill->min_damage,
+            $this->magicSkill->max_damage,
+            $this->magicSkill->power_coefficient,
+        );
 
         foreach ($this->magicSkill->skillEffects as $effectData) {
             if (random_int(1, 100) <= $effectData->pivot->chance) {
-                $hit->addAppliedEffect($effectData);
+                $hit->addAppliedEffect($effectData); // TODO(Task 10): pass tickValue: $hit->getDamage() once FightHitDTO::addAppliedEffect($effect, ?int $tickValue) exists
             }
         }
 

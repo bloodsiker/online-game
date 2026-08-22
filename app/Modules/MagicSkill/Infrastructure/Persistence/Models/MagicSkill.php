@@ -21,7 +21,7 @@ class MagicSkill extends Model
 
     protected $fillable = [
         'name', 'slug', 'description', 'level', 'skill_id', 'type', 'mana_cost',
-        'min_damage', 'max_damage', 'base_healing', 'cooldown', 'target_type',
+        'min_damage', 'max_damage', 'power_coefficient', 'base_healing', 'cooldown', 'target_type',
         'is_passive', 'effects',
     ];
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\Services\Combat\Strategies\AttackStrategyInterface;
@@ -20,6 +22,7 @@ readonly class AttackStrategyResolver
 {
     public function __construct(
         private HitCalculator $hitCalc,
+        private MagicHitCalculator $magicHitCalc,
         private PlayerMagicSkillService $playerMagicSkillService,
         private PlayerStatService $statService,
     ) {}
@@ -43,7 +46,7 @@ readonly class AttackStrategyResolver
             }
 
             return new MagicAttackStrategy(
-                hitCalc: $this->hitCalc,
+                magicHitCalc: $this->magicHitCalc,
                 player: $sheet,
                 playerModel: $player,
                 monster: $monster,
