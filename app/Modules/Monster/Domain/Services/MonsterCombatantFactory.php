@@ -24,6 +24,10 @@ class MonsterCombatantFactory
 
         foreach ($activeEffects as $active) {
             foreach ((array) ($active->effect?->stat_modifiers ?? []) as $modifier) {
+                if (! is_array($modifier)) {
+                    continue;
+                }
+
                 $type = $modifier['type'] ?? null;
 
                 if (is_string($type) && array_key_exists($type, $totals) && ! ($modifier['is_percent'] ?? false)) {
