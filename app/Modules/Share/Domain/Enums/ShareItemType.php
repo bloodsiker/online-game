@@ -18,6 +18,7 @@ enum ShareItemType: string
     case QUEST = 'quest';
     case ARTIFACT = 'artifact';
     case RECIPE = 'recipe';
+    case BOOK = 'book';
     case CHEST = 'chest';
     case SCROLL = 'scroll';
     case GIFT = 'gift';
@@ -66,6 +67,7 @@ enum ShareItemType: string
             self::QUEST => 'Квест',
             self::ARTIFACT => 'Артефакт',
             self::RECIPE => 'Рецепт',
+            self::BOOK => 'Книга заклинаний',
             self::CHEST => 'Сундук',
             self::EAT => 'Еда',
             self::GIFT => 'Подарок',
@@ -89,6 +91,7 @@ enum ShareItemType: string
                 self::BAG,
                 self::RESOURCE,
                 self::RECIPE,
+                self::BOOK,
                 self::SCROLL,
                 self::GEM,
                 self::MOUNT,
