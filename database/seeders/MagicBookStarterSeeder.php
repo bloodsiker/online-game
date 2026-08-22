@@ -59,10 +59,14 @@ class MagicBookStarterSeeder extends Seeder
 
     private function bookifyExistingAttackSpells(): void
     {
+        // power_coefficient=0.30 было стартовым ориентиром спеки, снижено до 0.15 по
+        // итогам battle:simulate-pve (Task 14) — без снижения магия била в 1.8-2.3 раза
+        // быстрее меле-билдов на 20/55/100 lvl (иммунна к броне/уворту, а монстры не
+        // имеют magic_resistance по дизайну — см. Monster::getMagicResistance()).
         $spells = [
-            'fire_spark' => ['name' => 'Книга: Огненная искра', 'power_coefficient' => 0.30],
-            'flame_barrage' => ['name' => 'Книга: Огненный залп', 'power_coefficient' => 0.30],
-            'incinerating_vortex' => ['name' => 'Книга: Испепеляющий вихрь', 'power_coefficient' => 0.30],
+            'fire_spark' => ['name' => 'Книга: Огненная искра', 'power_coefficient' => 0.15],
+            'flame_barrage' => ['name' => 'Книга: Огненный залп', 'power_coefficient' => 0.15],
+            'incinerating_vortex' => ['name' => 'Книга: Испепеляющий вихрь', 'power_coefficient' => 0.15],
         ];
 
         foreach ($spells as $slug => $data) {

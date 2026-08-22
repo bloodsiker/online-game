@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Presentation\Console;
 
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
+use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 use Illuminate\Console\Command;
 
 /**
@@ -37,7 +39,7 @@ class SimulatePveEncounter extends Command
 
     protected $description = 'PvE: типовые билды игрока против монстра с заданными (или взятыми из базы) статами';
 
-    public function handle(HitCalculator $calc): int
+    public function handle(HitCalculator $calc, MagicHitCalculator $magicCalc): int
     {
         $monster = $this->option('id')
             ? Monster::findOrFail((int) $this->option('id'))
@@ -82,7 +84,7 @@ class SimulatePveEncounter extends Command
             $roundsToLose = [];
 
             for ($i = 0; $i < $fights; $i++) {
-                $outcome = $this->fight($calc, $player, $monster, $monsterHp, $maxRounds);
+                $outcome = $this->fight($calc, $magicCalc, $player, $monster, $monsterHp, $maxRounds);
 
                 if ($outcome->result === 'win') {
                     $wins++;
@@ -119,25 +121,43 @@ class SimulatePveEncounter extends Command
             level: $level,
         );
 
+        $makeMage = fn (float $int, float $wis, float $end) => new MageFighter(
+            intelligence: (int) round($budget * $int),
+            wisdom: (int) round($budget * $wis),
+            endurance: (int) round($budget * $end),
+            level: $level,
+        );
+
         // Сила есть у всех (нужна под требования вещей), выносливость — типовой запас живучести
         return [
             'Танк' => $make(0.55, 0.1, 0.1, 0.25),
             'Уворот' => $make(0.2, 0.5, 0.1, 0.2),
             'Крит' => $make(0.2, 0.1, 0.5, 0.2),
             'Универсал' => $make(0.28, 0.28, 0.24, 0.2),
+            // Маг: бюджет идёт в интеллект (сила заклинаний) и мудрость (резист/мана) вместо
+            // силы/ловкости/интуиции — от мили-статов у мага броня/уворот/крит всегда нулевые,
+            // компенсируется выносливостью и уроном заклинаний (см. spellFor()).
+            'Маг' => $makeMage(0.5, 0.2, 0.3),
         ];
     }
 
-    private function fight(HitCalculator $calc, SimFighter $player, Monster $monster, int $monsterMaxHp, int $maxRounds): PveOutcome
+    private function fight(HitCalculator $calc, MagicHitCalculator $magicCalc, SimFighter $player, Monster $monster, int $monsterMaxHp, int $maxRounds): PveOutcome
     {
         $playerHp = $player->realHp();
         $monsterHpLeft = $monsterMaxHp;
+        $spell = $player instanceof MageFighter ? $this->spellFor($player->level) : null;
 
         for ($round = 1; $round <= $maxRounds; $round++) {
             // Игрок всегда атакует первым — как в реальном бою (AttackService → MonsterAttackService)
-            $hit = $calc->hit($player, $monster, $player->minDmg(), $player->maxDmg());
-            if (! $hit->isDodge()) {
+            if ($spell !== null) {
+                // Магия не уворачивается, не критует и не блокируется — см. MagicHitCalculator
+                $hit = $magicCalc->hit($player, $monster, $spell['min'], $spell['max'], $spell['power']);
                 $monsterHpLeft -= $hit->getDamage();
+            } else {
+                $hit = $calc->hit($player, $monster, $player->minDmg(), $player->maxDmg());
+                if (! $hit->isDodge()) {
+                    $monsterHpLeft -= $hit->getDamage();
+                }
             }
             if ($monsterHpLeft <= 0) {
                 return new PveOutcome('win', $round);
@@ -153,6 +173,53 @@ class SimulatePveEncounter extends Command
         }
 
         return new PveOutcome('draw', $maxRounds);
+    }
+
+    /**
+     * Один из 3 стартовых атакующих спеллов (database/seeders/AttackSkillSeeder.php) —
+     * берётся тот, чей уровень открытия ближе всего игроку снизу: fire_spark (lvl 1),
+     * flame_barrage (lvl 20), incinerating_vortex (lvl 55). Значения захардкожены, а не
+     * читаются из БД — симулятор остаётся чистым in-memory расчётом, как и остальные билды;
+     * держать в синхроне с AttackSkillSeeder / MagicBookStarterSeeder (power_coefficient) и
+     * реальной БД game.magic_skills при тюнинге.
+     *
+     * @return array{name: string, min: int, max: int, power: float}
+     */
+    private function spellFor(int $level): array
+    {
+        return match (true) {
+            $level >= 55 => ['name' => 'Испепеляющий вихрь', 'min' => 30, 'max' => 44, 'power' => 0.15],
+            $level >= 20 => ['name' => 'Огненный залп', 'min' => 12, 'max' => 18, 'power' => 0.15],
+            default => ['name' => 'Огненная искра', 'min' => 4, 'max' => 7, 'power' => 0.15],
+        };
+    }
+}
+
+/**
+ * Синтетический маг: как SimFighter, но сила/ловкость/интуиция не качаются вовсе —
+ * бюджет весь в интеллекте (урон заклинаний, см. MagicHitCalculator::magicPower)
+ * и мудрости (магический резист); броня/уворот/крит от мили-стат — всегда 0.
+ * Урон по монстру считается не через minDmg()/maxDmg(), а через spellFor() + MagicHitCalculator.
+ */
+final class MageFighter extends SimFighter
+{
+    public function __construct(
+        public int $intelligence,
+        public int $wisdom,
+        int $endurance = 0,
+        int $level = 12,
+    ) {
+        parent::__construct(strength: 0, agility: 0, intuition: 0, endurance: $endurance, level: $level);
+    }
+
+    public function getIntelligence(): int
+    {
+        return $this->intelligence;
+    }
+
+    public function getMagicResistance(): int
+    {
+        return max(0, ($this->wisdom - 1) * PlayerStatFormulas::MAGIC_RESIST_PER_WIS);
     }
 }
 

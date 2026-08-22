@@ -13,18 +13,22 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Атакующие заклинания, зеркалящие 3 тира оружия (StarterEquipmentSeeder lvl1,
- * TIER2_SLOT_LEVEL['weapon']=20, HighTierEquipmentSeeder::WEAPON_LEVEL=55):
- * тот же уровень открытия и тот же диапазон урона
- * (EquipmentStatFormulas::weaponDamage), умноженный на SPELL_DAMAGE_MULTIPLIER —
- * «как с учётом двух оружий в руках, но чуть меньше» (DUAL_WIELD_DAMAGE_SHARE=0.75
- * даёт ×1.5 суммарно за 2 удара, спелл — ×1.3 одним хитом).
+ * Атакующие заклинания, 3 тира по уровню открытия зеркалят тиры оружия
+ * (StarterEquipmentSeeder lvl1, TIER2_SLOT_LEVEL['weapon']=20,
+ * HighTierEquipmentSeeder::WEAPON_LEVEL=55). Диапазон урона (min/max_damage)
+ * НЕ равен диапазону оружия того же тира — магия (MagicHitCalculator, правило 1
+ * спеки) не режется бронёй и не может промахнуться/уворот, поэтому исходные
+ * «зеркальные» числа (21-30/59-87) давали магу двукратный DPS-перевес против
+ * меле на 20/55/100 lvl (battle:simulate-pve, Task 14). Текущие min/max —
+ * калиброваны по симуляциям, ниже сырого урона оружия того же тира.
  *
  * Изучение/экипировка гейтится через magic_skill_requirements (интеллект,
  * мудрость, навык «Колдовство» — см. MagicSkillRequirementService,
  * UpdateEquippedMagicSkills). Навык «Колдовство» качается за каждое успешное
  * применение (MagicAttackStrategy → AttackService::gainExperienceSkill), урон
- * дополнительно растёт от интеллекта (PlayerStatFormulas::intelligenceDamagePercent).
+ * дополнительно растёт от интеллекта через magic_skills.power_coefficient
+ * (MagicHitCalculator), не через PlayerStatFormulas::intelligenceDamagePercent —
+ * та формула зарезервирована за силой оружия.
  */
 class AttackSkillSeeder extends Seeder
 {
@@ -78,8 +82,11 @@ class AttackSkillSeeder extends Seeder
                 'target_type' => 'enemy',
                 'skill_id' => $spellSkillId,
                 'mana_cost' => 25,
-                'min_damage' => 21,
-                'max_damage' => 30,
+                // min/max снижены с 21-30 по итогам battle:simulate-pve (Task 14) —
+                // магия не мит игируется бронёй/увортом, поэтому исходные «зеркальные
+                // оружию» числа давали магу двукратное преимущество в DPS.
+                'min_damage' => 12,
+                'max_damage' => 18,
                 'base_healing' => 0,
                 'cooldown' => 0,
                 'level' => 20,
@@ -100,8 +107,9 @@ class AttackSkillSeeder extends Seeder
                 'target_type' => 'enemy',
                 'skill_id' => $spellSkillId,
                 'mana_cost' => 55,
-                'min_damage' => 59,
-                'max_damage' => 87,
+                // min/max снижены с 59-87 по той же причине, что у flame_barrage выше.
+                'min_damage' => 30,
+                'max_damage' => 44,
                 'base_healing' => 0,
                 'cooldown' => 0,
                 'level' => 55,
