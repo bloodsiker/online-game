@@ -18,6 +18,7 @@ enum ShareItemStatType: string
     case DODGE = 'dodge';
     case CRITICAL = 'critical';
     case MAGIC_ATTACK = 'magic_attack';
+    case MAGIC_RESISTANCE = 'magic_resistance';
     case HP_MAX = 'hp_max';
     case CRIT_DAMAGE = 'crit_damage';
     case ENDURANCE = 'endurance';
@@ -40,6 +41,7 @@ enum ShareItemStatType: string
             self::DODGE => 'Уворот',
             self::CRITICAL => 'Критический удар',
             self::MAGIC_ATTACK => 'Магическая атака',
+            self::MAGIC_RESISTANCE => 'Магическое сопротивление',
             self::HP_MAX => 'Уровень жизни',
             self::CRIT_DAMAGE => 'Сила крит. удара',
             self::ENDURANCE => 'Выносливость',

@@ -116,6 +116,7 @@ class PlayerStatService
             'dodge' => (float) max(0, ($primary['agility'] - 1) * PlayerStatFormulas::DODGE_PER_AGILITY),
             'critical' => (float) max(0, ($primary['intuition'] - 1) * PlayerStatFormulas::CRITICAL_PER_INT),
             'armor' => (float) max(0, ($primary['strength'] - 1) * PlayerStatFormulas::ARMOR_PER_STR),
+            'magic_resistance' => (float) max(0, ($primary['wisdom'] - 1) * PlayerStatFormulas::MAGIC_RESIST_PER_WIS),
             // Как и броня от силы — от итоговой выносливости (с учётом шмота/баффов),
             // а не от «сырого» hp_max: иначе +выносливость с предмета не давала бы HP.
             'hp_max' => (float) (PlayerStatFormulas::DEFAULT_HP
@@ -162,6 +163,7 @@ class PlayerStatService
         $sheet->dodge = $computed['dodge'];
         $sheet->critical = $computed['critical'];
         $sheet->armor = $computed['armor'];
+        $sheet->magicResistance = $computed['magic_resistance'];
         $sheet->hpMax = $computed['hp_max'];
         $sheet->mpMax = $computed['mp_max'];
         $sheet->leftMinDmg = $computed['left_min_dmg'];
@@ -258,6 +260,7 @@ class PlayerStatService
                     ShareItemStatType::DODGE => 'dodge',
                     ShareItemStatType::CRITICAL => 'critical',
                     ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
+                    ShareItemStatType::MAGIC_RESISTANCE => 'magic_resistance',
                     ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
                     ShareItemStatType::ENDURANCE => 'endurance',
                     ShareItemStatType::BLOCK_CHANCE => 'block_chance',

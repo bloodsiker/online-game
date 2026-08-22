@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Domain\Contracts;
 
 use App\Modules\Battle\Domain\Enums\CombatClass;
@@ -12,6 +14,12 @@ interface FightHitInterface
 
     /** Итоговый интеллект (с учётом экипировки) — масштабирует урон атакующих заклинаний, см. MagicAttackStrategy */
     public function getIntelligence(): int;
+
+    /** Магическое сопротивление (Мудрость + экипировка) — единственная защита от магии, см. MagicHitCalculator */
+    public function getMagicResistance(): int;
+
+    /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/жезл и т.п.) — интеллект считается отдельно */
+    public function getMagicAttack(): int;
 
     public function getArmor(): int;
 
