@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Strict types on every new/modified file: `declare(strict_types=1);`.
+- Strict types on every new/modified file: `declare(strict_types=1);`. Several legacy files this plan modifies (`Combat/Strategies/*.php`, `HitCalculator`-adjacent files) predate this convention and currently lack it — add the declaration when editing them, even though the task's own code sample may omit it for brevity. Do not add it to files you are not otherwise touching in this task.
 - Named arguments for clarity; `match` over `switch`; typed arrays/collections, never bare `array` typehints.
 - Magic never dodges, never crits, never gets blocked by a shield — only `magic_resistance` mitigates it (spec rule 1).
 - `magic_skill_requirements` is checked **only** inside `LearnMagicSkillFromBook` — never at equip time (spec rule 3).
@@ -2720,16 +2720,7 @@ class MagicBookStarterSeeder extends Seeder
 
             $skill->update(['power_coefficient' => $data['power_coefficient']]);
 
-            $book = ShareItem::create([
-                'name' => $data['name'],
-                'type' => ShareItemType::BOOK,
-                'description' => sprintf('Обучает заклинанию «%s». Расходуется при изучении.', $skill->name),
-                'is_sell' => true,
-                'is_give' => true,
-                'price' => 200 * max(1, $skill->level),
-            ]);
-
-            MagicSkillBook::create(['share_item_id' => $book->id, 'magic_skill_id' => $skill->id]);
+            $this->makeBook($data['name'], $skill, priceMultiplier: 200);
         }
     }
 
@@ -2892,7 +2883,7 @@ class MagicBookStarterSeeder extends Seeder
         $this->makeBook('Книга: Разъедающая ржавчина', $skill);
     }
 
-    private function makeBook(string $name, MagicSkill $skill): void
+    private function makeBook(string $name, MagicSkill $skill, int $priceMultiplier = 150): void
     {
         $book = ShareItem::create([
             'name' => $name,
@@ -2900,7 +2891,7 @@ class MagicBookStarterSeeder extends Seeder
             'description' => sprintf('Обучает заклинанию «%s». Расходуется при изучении.', $skill->name),
             'is_sell' => true,
             'is_give' => true,
-            'price' => 150 * max(1, $skill->level),
+            'price' => $priceMultiplier * max(1, $skill->level),
         ]);
 
         MagicSkillBook::create(['share_item_id' => $book->id, 'magic_skill_id' => $skill->id]);
