@@ -313,7 +313,11 @@
                                                 <select id="magic_skill_id" name="magic_skill_id" data-plugin-selectTwo class="form-control populate placeholder" data-plugin-options='{ "placeholder": "Не выбрано", "allowClear": true }'>
                                                     <option value=""></option>
                                                     @foreach($magicSkills as $id => $name)
-                                                        <option value="{{ $id }}" @selected(old('magic_skill_id') == $id)>{{ $name }}</option>
+                                                        <option value="{{ $id }}"
+                                                            @selected(old('magic_skill_id') == $id)
+                                                            @disabled(in_array($id, $claimedMagicSkillIds))>
+                                                            {{ $name }}{{ in_array($id, $claimedMagicSkillIds) ? ' (уже привязано)' : '' }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                                 <small class="form-text text-muted">Игрок, использующий эту книгу, изучит выбранное заклинание.</small>

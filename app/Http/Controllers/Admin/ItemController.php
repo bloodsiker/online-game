@@ -65,8 +65,9 @@ class ItemController extends Controller
     {
         $skills = Skill::orderBy('name')->get();
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
 
-        return view('admin.item.create', compact('skills', 'magicSkills'));
+        return view('admin.item.create', compact('skills', 'magicSkills', 'claimedMagicSkillIds'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -83,7 +84,10 @@ class ItemController extends Controller
         }
 
         if ($item->type === ShareItemType::BOOK) {
-            $this->syncMagicSkillBook($item, $request);
+            $bookError = $this->syncMagicSkillBook($item, $request);
+            if ($bookError !== null) {
+                return redirect()->route('admin.item.info', ['item' => $item->id])->with('error', $bookError);
+            }
         }
 
         return redirect()->route('admin.item.info', ['item' => $item->id])
@@ -97,7 +101,10 @@ class ItemController extends Controller
             $item->save();
 
             if ($item->type === ShareItemType::BOOK) {
-                $this->syncMagicSkillBook($item, $request);
+                $bookError = $this->syncMagicSkillBook($item, $request);
+                if ($bookError !== null) {
+                    return redirect()->back()->with('error', $bookError);
+                }
             }
 
             return redirect()->back()->with('success', 'Сохранено.');
@@ -107,13 +114,14 @@ class ItemController extends Controller
 
         $skills = Skill::orderBy('name')->get();
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $claimedMagicSkillIds = MagicSkillBook::where('share_item_id', '!=', $item->id)->pluck('magic_skill_id')->all();
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = ShareItemRequirementType::cases();
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
@@ -242,20 +250,31 @@ class ItemController extends Controller
         }
     }
 
-    private function syncMagicSkillBook(ShareItem $item, Request $request): void
+    /** Возвращает текст ошибки, если заклинание уже привязано к другой книге, иначе null. */
+    private function syncMagicSkillBook(ShareItem $item, Request $request): ?string
     {
         $magicSkillId = $request->filled('magic_skill_id') ? (int) $request->input('magic_skill_id') : null;
 
         if ($magicSkillId === null) {
             MagicSkillBook::where('share_item_id', $item->id)->delete();
 
-            return;
+            return null;
+        }
+
+        $alreadyLinkedToAnotherBook = MagicSkillBook::where('magic_skill_id', $magicSkillId)
+            ->where('share_item_id', '!=', $item->id)
+            ->exists();
+
+        if ($alreadyLinkedToAnotherBook) {
+            return 'Это заклинание уже привязано к другой книге.';
         }
 
         MagicSkillBook::updateOrCreate(
             ['share_item_id' => $item->id],
             ['magic_skill_id' => $magicSkillId],
         );
+
+        return null;
     }
 
     private function storeItemImage(UploadedFile $file): string
