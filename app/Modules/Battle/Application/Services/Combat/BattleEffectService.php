@@ -17,6 +17,9 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 class BattleEffectService
 {
+    /** Боссы не иммунны к дебаффам, но держат их вдвое короче — см. спеку */
+    private const BOSS_DEBUFF_DURATION_MULTIPLIER = 0.5;
+
     public function __construct(
         private readonly PlayerStatService $statService,
         private readonly PlayerTimedEffectService $timedEffectService,
@@ -34,16 +37,30 @@ class BattleEffectService
     ): void {
         $type = ActiveEffectType::tryFrom($effect->slug);
 
-        if ($type === null) {
-            return; // Неизвестный тип эффекта — игнорируем
+        // Дебафф без соответствующего ActiveEffectType (например, чистый
+        // "минус к стату") всё равно должен пройти — иначе строка
+        // MonsterActiveEffect никогда не создаётся и MonsterCombatant её не
+        // увидит. Игнорируем только по-настоящему неизвестные НЕ-дебаффы.
+        if ($type === null && $effect->type !== 'debuff') {
+            return; // Неизвестный тип эффекта, не дебафф — игнорируем
+        }
+
+        $effectiveDuration = (int) $effect->duration;
+
+        if ($effect->type === 'debuff' && $locMonster->monster->is_boss) {
+            $effectiveDuration = max(1, (int) round($effectiveDuration * self::BOSS_DEBUFF_DURATION_MULTIPLIER));
         }
 
         $existing = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
-            ->where('type', $type)
+            ->when(
+                $type !== null,
+                fn ($query) => $query->where('type', $type),
+                fn ($query) => $query->where('effect_id', $effect->id),
+            )
             ->first();
 
         if ($existing) {
-            $existing->stacks = max($existing->stacks, (int) $effect->duration);
+            $existing->stacks = max($existing->stacks, $effectiveDuration);
             $existing->save();
 
             return;
@@ -55,7 +72,7 @@ class BattleEffectService
             'battle_id' => $battle->id,
             'type' => $type,
             'applied_at' => now(),
-            'stacks' => (int) $effect->duration,
+            'stacks' => $effectiveDuration,
             'current_value' => (float) $effect->value_per_tick,
         ]);
     }

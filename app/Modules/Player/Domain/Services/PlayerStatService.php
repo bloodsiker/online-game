@@ -206,7 +206,7 @@ class PlayerStatService
 
         $computed = [];
         foreach ($base as $stat => $baseVal) {
-            $computed[$stat] = (int) floor(($baseVal + $flat[$stat]) * (1 + $percent[$stat] / 100));
+            $computed[$stat] = max(0, (int) floor(($baseVal + $flat[$stat]) * (1 + $percent[$stat] / 100)));
         }
 
         return $computed;
