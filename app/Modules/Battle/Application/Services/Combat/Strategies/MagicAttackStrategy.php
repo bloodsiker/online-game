@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
@@ -7,7 +9,6 @@ use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 class MagicAttackStrategy implements AttackStrategyInterface
@@ -51,15 +52,8 @@ class MagicAttackStrategy implements AttackStrategyInterface
         // Базовый урон от скилла (уворот бросается один раз — внутри hit() ниже)
         $baseDamage = random_int($this->magicSkill->min_damage, $this->magicSkill->max_damage);
 
-        // Бонус от интеллекта — тот же принцип, что у силы для оружия (см. PlayerStatFormulas::strengthDamagePercent)
-        $intBonusPct = PlayerStatFormulas::intelligenceDamagePercent(
-            (float) $this->player->getIntelligence(),
-            $this->player->getLevel(),
-        );
-        $totalDamage = (int) round($baseDamage * (1 + $intBonusPct / 100));
-
-        // Рассчитываем хит с итоговым уроном
-        $hit = $this->hitCalc->hit($this->player, $this->monster, $totalDamage, $totalDamage);
+        // TODO(Task 4): заменить на MagicHitCalculator — без уворота/крита/брони, см. спеку.
+        $hit = $this->hitCalc->hit($this->player, $this->monster, $baseDamage, $baseDamage);
 
         if ($hit->isDodge()) {
             return [
