@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\MagicSkill;
 
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
+use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\MagicSkill\Application\UseCases\UseMagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\EloquentMagicSkillRepository;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
@@ -83,6 +84,7 @@ class UseMagicSkillTargetNotFoundTest extends TestCase
             statService: $this->createMock(PlayerStatService::class),
             effectService: $this->createMock(BattleEffectService::class),
             castGuard: new MagicCastGuard,
+            magicHitCalc: new MagicHitCalculator,
         );
 
         $user = User::findOrFail(1);

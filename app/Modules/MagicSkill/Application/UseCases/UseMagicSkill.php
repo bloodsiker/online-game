@@ -6,6 +6,7 @@ namespace App\Modules\MagicSkill\Application\UseCases;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
+use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\MagicSkill\Application\DTOs\MagicSkillActionResultDTO;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
@@ -23,6 +24,7 @@ class UseMagicSkill
         private readonly PlayerStatService $statService,
         private readonly BattleEffectService $effectService,
         private readonly MagicCastGuard $castGuard,
+        private readonly MagicHitCalculator $magicHitCalc,
     ) {}
 
     public function execute(User $user, int $skillId, ?int $targetPlayerId): MagicSkillActionResultDTO
@@ -55,7 +57,12 @@ class UseMagicSkill
         $log = new AttackResultDTO;
 
         if ($skill->base_healing > 0) {
-            $heal = $skill->base_healing;
+            $heal = $this->magicHitCalc->heal(
+                $casterSheet,
+                minHeal: $skill->base_healing,
+                maxHeal: $skill->base_healing,
+                powerCoefficient: $skill->power_coefficient,
+            );
             $target->hp_now = min($targetSheet->getHpMax(), $target->hp_now + $heal);
             $log->log(sprintf('Заклинание восстановило <b>%d HP</b> игроку %s', $heal, $target->user->name));
         }
