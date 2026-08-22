@@ -6,6 +6,7 @@ namespace App\Modules\MagicSkill\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\MagicSkill\Application\UseCases\GetMagicSkillPage;
+use App\Modules\MagicSkill\Application\UseCases\LearnMagicSkillFromBook;
 use App\Modules\MagicSkill\Application\UseCases\UpdateEquippedMagicSkills;
 use App\Modules\MagicSkill\Application\UseCases\UpdateMagicSkillOrder;
 use App\Modules\MagicSkill\Application\UseCases\UseMagicSkill;
@@ -20,6 +21,7 @@ class MagicSkillController extends Controller
         private readonly UpdateEquippedMagicSkills $updateEquippedMagicSkills,
         private readonly UpdateMagicSkillOrder $updateMagicSkillOrder,
         private readonly UseMagicSkill $useMagicSkill,
+        private readonly LearnMagicSkillFromBook $learnMagicSkillFromBook,
     ) {}
 
     public function index(Request $request)
@@ -59,6 +61,13 @@ class MagicSkillController extends Controller
             $skill,
             $request->integer('target_player_id') ?: null,
         );
+
+        return response()->json($result->toArray(), $result->httpCode);
+    }
+
+    public function learnFromBook(Request $request, int $item): JsonResponse
+    {
+        $result = $this->learnMagicSkillFromBook->execute(Auth::user(), $item);
 
         return response()->json($result->toArray(), $result->httpCode);
     }
