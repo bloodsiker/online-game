@@ -34,9 +34,6 @@ final class PlayerStatFormulas
     /** Прибавка к урону оружия за очко силы, % (80 силы → +20% урона) */
     public const DMG_PCT_PER_STR = 0.35;
 
-    /** Прибавка к урону атакующих заклинаний за очко интеллекта — тот же темп, что у силы, см. strengthDamagePercent */
-    public const DMG_PCT_PER_INT = 0.35;
-
     /**
      * Мягкий потолок бонуса урона от силы, %: рост асимптотически ограничен,
      * иначе на высоких уровнях сила давала бы сотни процентов урона при
@@ -59,18 +56,6 @@ final class PlayerStatFormulas
     {
         $levelScale = max(1.0, $level / 12);
         $raw = max(0, ($strength - 1) * self::DMG_PCT_PER_STR) / $levelScale;
-
-        return self::DMG_PCT_CAP * $raw / ($raw + self::DMG_PCT_CAP);
-    }
-
-    /**
-     * Бонус урона атакующих заклинаний от интеллекта — зеркалит strengthDamagePercent,
-     * так же нормирован по уровню и мягко ограничен потолком (см. MagicAttackStrategy).
-     */
-    public static function intelligenceDamagePercent(float $intelligence, int $level): float
-    {
-        $levelScale = max(1.0, $level / 12);
-        $raw = max(0, ($intelligence - 1) * self::DMG_PCT_PER_INT) / $levelScale;
 
         return self::DMG_PCT_CAP * $raw / ($raw + self::DMG_PCT_CAP);
     }

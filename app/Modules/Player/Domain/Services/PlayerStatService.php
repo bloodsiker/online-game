@@ -126,7 +126,7 @@ class PlayerStatService
             'left_max_dmg' => (float) $player->max_dmg,
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
-            'magic_attack' => (float) $primary['intelligence'],
+            'magic_attack' => 0.0,
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
             'crit_damage' => PlayerStatFormulas::CRIT_DAMAGE_BASE
                 + PlayerStatFormulas::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
