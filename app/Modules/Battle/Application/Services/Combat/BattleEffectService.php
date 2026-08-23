@@ -17,6 +17,9 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 class BattleEffectService
 {
+    /** Боссы не иммунны к дебаффам, но держат их вдвое короче — см. спеку */
+    private const BOSS_DEBUFF_DURATION_MULTIPLIER = 0.5;
+
     public function __construct(
         private readonly PlayerStatService $statService,
         private readonly PlayerTimedEffectService $timedEffectService,
@@ -30,20 +33,39 @@ class BattleEffectService
         Effect $effect,
         MonsterOnLocation $locMonster,
         Battle $battle,
-        AttackResultDTO $result
+        AttackResultDTO $result,
+        ?int $tickValueOverride = null,
     ): void {
         $type = ActiveEffectType::tryFrom($effect->slug);
 
-        if ($type === null) {
-            return; // Неизвестный тип эффекта — игнорируем
+        // Дебафф без соответствующего ActiveEffectType (например, чистый
+        // "минус к стату") всё равно должен пройти — иначе строка
+        // MonsterActiveEffect никогда не создаётся и MonsterCombatant её не
+        // увидит. Игнорируем только по-настоящему неизвестные НЕ-дебаффы.
+        if ($type === null && $effect->type !== 'debuff') {
+            return; // Неизвестный тип эффекта, не дебафф — игнорируем
+        }
+
+        $effectiveDuration = (int) $effect->duration;
+
+        if ($effect->type === 'debuff' && $locMonster->monster->is_boss) {
+            $effectiveDuration = max(1, (int) round($effectiveDuration * self::BOSS_DEBUFF_DURATION_MULTIPLIER));
         }
 
         $existing = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
-            ->where('type', $type)
+            ->where('battle_id', $battle->id)
+            ->when(
+                $type !== null,
+                fn ($query) => $query->where('type', $type),
+                fn ($query) => $query->where('effect_id', $effect->id),
+            )
             ->first();
 
         if ($existing) {
-            $existing->stacks = max($existing->stacks, (int) $effect->duration);
+            $existing->stacks = max($existing->stacks, $effectiveDuration);
+            if ($tickValueOverride !== null) {
+                $existing->current_value = $tickValueOverride;
+            }
             $existing->save();
 
             return;
@@ -55,8 +77,8 @@ class BattleEffectService
             'battle_id' => $battle->id,
             'type' => $type,
             'applied_at' => now(),
-            'stacks' => (int) $effect->duration,
-            'current_value' => (float) $effect->value_per_tick,
+            'stacks' => $effectiveDuration,
+            'current_value' => $tickValueOverride ?? (float) $effect->value_per_tick,
         ]);
     }
 
@@ -309,7 +331,9 @@ class BattleEffectService
         Battle $battle,
         AttackResultDTO $result
     ): bool {
-        $effects = MonsterActiveEffect::where('location_monster_id', $locMonster->id)->get();
+        $effects = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
+            ->with('effect')
+            ->get();
 
         $isStunned = false;
 
@@ -330,6 +354,28 @@ class BattleEffectService
                         $locMonster->monster->name,
                         $effect->stacks
                     ));
+                    $effect->save();
+                }
+
+                continue;
+            }
+
+            // Чистый стат-дебафф (type = NULL): ни стана, ни тика — только
+            // stat_modifiers, которые читает MonsterCombatantFactory. Раньше
+            // такую строку не трогал никто, кроме AttackService::handleMonsterDeath(),
+            // поэтому дебафф жил до самой смерти моба. Списываем стак за раунд,
+            // как у стана и DoT, и удаляем строку по исчерпании.
+            if ($effect->type === null) {
+                $effect->stacks--;
+
+                if ($effect->stacks <= 0) {
+                    $result->log(sprintf(
+                        '<p class="color-info">✨ Эффект <b>%s</b> на %s рассеялся.</p>',
+                        $effect->effect?->name ?? 'заклинания',
+                        $locMonster->monster->name
+                    ));
+                    $effect->delete();
+                } else {
                     $effect->save();
                 }
 

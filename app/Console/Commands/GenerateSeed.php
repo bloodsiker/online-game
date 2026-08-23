@@ -151,6 +151,10 @@ class GenerateSeed extends Command
         $this->call('db:seed', ['--class' => 'ReputationSeeder']);
         $this->call('db:seed', ['--class' => 'DungeonSeeder']);
         $this->call('db:seed', ['--class' => 'BuffSkillSeeder']);
+        // Порядок важен: MagicBookStarterSeeder оборачивает в книги те три
+        // атакующих заклинания, которые создаёт AttackSkillSeeder.
+        $this->call('db:seed', ['--class' => 'AttackSkillSeeder']);
+        $this->call('db:seed', ['--class' => 'MagicBookStarterSeeder']);
     }
 
     /**

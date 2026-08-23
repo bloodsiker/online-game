@@ -135,6 +135,16 @@ class Monster extends Model implements FightHitInterface
         return 0;
     }
 
+    public function getMagicResistance(): int
+    {
+        return 0;
+    }
+
+    public function getMagicAttack(): int
+    {
+        return 0;
+    }
+
     /**
      * Класс монстра определяется доминирующей характеристикой.
      * Нормализуем через базовые значения, т.к. у монстров нет первичных стат.

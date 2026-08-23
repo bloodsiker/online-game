@@ -23,6 +23,12 @@ class DatabaseSeeder extends Seeder
         $this->call(DungeonSeeder::class);
         $this->call(SurvivalArenaSeeder::class);
         $this->call(BuffSkillSeeder::class);
+        // Порядок важен: MagicBookStarterSeeder::bookifyExistingAttackSpells()
+        // оборачивает в книги три заклинания (fire_spark/flame_barrage/
+        // incinerating_vortex), которые создаёт AttackSkillSeeder. Оба зависят
+        // от навыка «Колдовство» из миграции 2026_08_22_120000.
+        $this->call(AttackSkillSeeder::class);
+        $this->call(MagicBookStarterSeeder::class);
         $this->call(EventActivitySeeder::class);
         $this->call(HighTierEquipmentSeeder::class);
         $this->call(OvergrownRoadMonsterSeeder::class);

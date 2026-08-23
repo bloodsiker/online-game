@@ -53,6 +53,8 @@ class StatSheet implements FightHitInterface
 
     public int $magicAttack = 0;
 
+    public int $magicResistance = 0;
+
     /** Множитель критического урона, % (150 = ×1.5) */
     public int $critDamage = 150;
 
@@ -78,6 +80,16 @@ class StatSheet implements FightHitInterface
     public function getArmor(): int
     {
         return $this->armor;
+    }
+
+    public function getMagicResistance(): int
+    {
+        return $this->magicResistance;
+    }
+
+    public function getMagicAttack(): int
+    {
+        return $this->magicAttack;
     }
 
     public function getDodge(): int

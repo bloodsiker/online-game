@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
@@ -47,7 +49,7 @@ readonly class AttackService
         // Restore HP the monster would have regenerated since the last attack
         $locMonster->regenerate();
 
-        $strategy = $this->resolver->resolve($player, $locMonster->monster, $action);
+        $strategy = $this->resolver->resolve($player, $locMonster, $action, $battle);
 
         $isBoss = $locMonster->monster->isBoss();
         $runePassives = $this->runePassiveService->resolve($player);
@@ -148,14 +150,14 @@ readonly class AttackService
             );
 
             if (! $hit->getAppliedEffects()->isEmpty()) {
-                foreach ($hit->getAppliedEffects() as $effect) {
-                    $this->effectService->applyEffectToMonster($effect, $locMonster, $battle, $result);
+                foreach ($hit->getAppliedEffects() as $applied) {
+                    $this->effectService->applyEffectToMonster($applied['effect'], $locMonster, $battle, $result, $applied['tickValue']);
 
                     $result->log(sprintf(
                         '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',
                         $locMonster->monster->name,
                         $hit->getMagicSkill()->name,
-                        $effect->name
+                        $applied['effect']->name
                     ));
                 }
             }

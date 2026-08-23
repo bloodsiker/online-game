@@ -31,6 +31,9 @@ final class PlayerStatFormulas
 
     public const ARMOR_PER_STR = 1;
 
+    /** Магическое сопротивление от Мудрости — та же роль, что у Силы для брони, но по другой стате */
+    public const MAGIC_RESIST_PER_WIS = 1;
+
     /** Прибавка к урону оружия за очко силы, % (80 силы → +20% урона) */
     public const DMG_PCT_PER_STR = 0.35;
 

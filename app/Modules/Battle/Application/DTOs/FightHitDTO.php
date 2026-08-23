@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\DTOs;
 
 use App\Models\Skill;
@@ -200,13 +202,14 @@ final class FightHitDTO
         return $this;
     }
 
-    public function addAppliedEffect(Effect $effect): self
+    public function addAppliedEffect(Effect $effect, ?int $tickValue = null): self
     {
-        $this->appliedEffects->push($effect);
+        $this->appliedEffects->push(['effect' => $effect, 'tickValue' => $tickValue]);
 
         return $this;
     }
 
+    /** @return Collection<int, array{effect: Effect, tickValue: ?int}> */
     public function getAppliedEffects(): Collection
     {
         return $this->appliedEffects;

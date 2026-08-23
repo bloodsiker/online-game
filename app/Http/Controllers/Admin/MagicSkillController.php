@@ -77,6 +77,7 @@ class MagicSkillController extends Controller
         $magicSkill->mana_cost = (int) $request->input('mana_cost', 0);
         $magicSkill->min_damage = (int) $request->input('min_damage', 0);
         $magicSkill->max_damage = (int) $request->input('max_damage', 0);
+        $magicSkill->power_coefficient = (float) $request->input('power_coefficient', 0);
         $magicSkill->base_healing = (int) $request->input('base_healing', 0);
         $magicSkill->cooldown = (int) $request->input('cooldown', 0);
         $magicSkill->is_passive = (bool) $request->input('is_passive', false);

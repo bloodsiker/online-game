@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
@@ -62,8 +64,10 @@ class ItemController extends Controller
     public function create(): View
     {
         $skills = Skill::orderBy('name')->get();
+        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
 
-        return view('admin.item.create', compact('skills'));
+        return view('admin.item.create', compact('skills', 'magicSkills', 'claimedMagicSkillIds'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -79,6 +83,13 @@ class ItemController extends Controller
             ]);
         }
 
+        // Зовём всегда, а не только для BOOK: syncMagicSkillBook() сам снимает
+        // привязку, если предмет книгой не является (см. IMPORTANT 10).
+        $bookError = $this->syncMagicSkillBook($item, $request);
+        if ($bookError !== null) {
+            return redirect()->route('admin.item.info', ['item' => $item->id])->with('error', $bookError);
+        }
+
         return redirect()->route('admin.item.info', ['item' => $item->id])
             ->with('success', 'Предмет создан.');
     }
@@ -89,19 +100,26 @@ class ItemController extends Controller
             $this->fillItem($item, $request);
             $item->save();
 
+            $bookError = $this->syncMagicSkillBook($item, $request);
+            if ($bookError !== null) {
+                return redirect()->back()->with('error', $bookError);
+            }
+
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook']);
 
         $skills = Skill::orderBy('name')->get();
+        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $claimedMagicSkillIds = MagicSkillBook::where('share_item_id', '!=', $item->id)->pluck('magic_skill_id')->all();
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = ShareItemRequirementType::cases();
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
@@ -228,6 +246,44 @@ class ItemController extends Controller
             $pool = $request->input('rune_stat_pool', []);
             $item->rune_stat_pool = count($pool) > 0 ? $pool : null;
         }
+    }
+
+    /** Возвращает текст ошибки, если заклинание уже привязано к другой книге, иначе null. */
+    private function syncMagicSkillBook(ShareItem $item, Request $request): ?string
+    {
+        // Предмет не книга (в том числе — перестал ей быть после смены типа):
+        // привязку надо снять. Иначе осиротевшая строка magic_skill_books
+        // держит заклинание «занятым» (unique magic_skill_id не даёт привязать
+        // его к настоящей книге), а LearnMagicSkillFromBook продолжает учить
+        // заклинанию с предмета, который книгой уже не является.
+        if ($item->type !== ShareItemType::BOOK) {
+            MagicSkillBook::where('share_item_id', $item->id)->delete();
+
+            return null;
+        }
+
+        $magicSkillId = $request->filled('magic_skill_id') ? (int) $request->input('magic_skill_id') : null;
+
+        if ($magicSkillId === null) {
+            MagicSkillBook::where('share_item_id', $item->id)->delete();
+
+            return null;
+        }
+
+        $alreadyLinkedToAnotherBook = MagicSkillBook::where('magic_skill_id', $magicSkillId)
+            ->where('share_item_id', '!=', $item->id)
+            ->exists();
+
+        if ($alreadyLinkedToAnotherBook) {
+            return 'Это заклинание уже привязано к другой книге.';
+        }
+
+        MagicSkillBook::updateOrCreate(
+            ['share_item_id' => $item->id],
+            ['magic_skill_id' => $magicSkillId],
+        );
+
+        return null;
     }
 
     private function storeItemImage(UploadedFile $file): string

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Models\Skill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
@@ -102,6 +103,11 @@ class ShareItem extends Model
     public function recipe(): HasOne
     {
         return $this->hasOne(ShareRecipe::class, 'share_item_id');
+    }
+
+    public function magicSkillBook(): HasOne
+    {
+        return $this->hasOne(MagicSkillBook::class, 'share_item_id');
     }
 
     public function skill(): ?BelongsTo

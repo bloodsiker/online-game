@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 class DualWieldStrategy implements AttackStrategyInterface
@@ -12,7 +13,7 @@ class DualWieldStrategy implements AttackStrategyInterface
     public function __construct(
         private readonly HitCalculator $hitCalc,
         private readonly FightHitInterface $player,
-        private readonly Monster $monster,
+        private readonly FightHitInterface $monster,
         private readonly ShareItem $leftWeapon,
         private readonly ShareItem $rightWeapon,
     ) {}

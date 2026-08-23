@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 
 class OneHandWeaponStrategy implements AttackStrategyInterface
@@ -13,7 +14,7 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
     public function __construct(
         private HitCalculator $hitCalc,
         private FightHitInterface $player,
-        private Monster $monster,
+        private FightHitInterface $monster,
         private PlayerEquipment $equip,
     ) {}
 
