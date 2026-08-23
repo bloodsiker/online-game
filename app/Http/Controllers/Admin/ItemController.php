@@ -83,11 +83,11 @@ class ItemController extends Controller
             ]);
         }
 
-        if ($item->type === ShareItemType::BOOK) {
-            $bookError = $this->syncMagicSkillBook($item, $request);
-            if ($bookError !== null) {
-                return redirect()->route('admin.item.info', ['item' => $item->id])->with('error', $bookError);
-            }
+        // Зовём всегда, а не только для BOOK: syncMagicSkillBook() сам снимает
+        // привязку, если предмет книгой не является (см. IMPORTANT 10).
+        $bookError = $this->syncMagicSkillBook($item, $request);
+        if ($bookError !== null) {
+            return redirect()->route('admin.item.info', ['item' => $item->id])->with('error', $bookError);
         }
 
         return redirect()->route('admin.item.info', ['item' => $item->id])
@@ -100,11 +100,9 @@ class ItemController extends Controller
             $this->fillItem($item, $request);
             $item->save();
 
-            if ($item->type === ShareItemType::BOOK) {
-                $bookError = $this->syncMagicSkillBook($item, $request);
-                if ($bookError !== null) {
-                    return redirect()->back()->with('error', $bookError);
-                }
+            $bookError = $this->syncMagicSkillBook($item, $request);
+            if ($bookError !== null) {
+                return redirect()->back()->with('error', $bookError);
             }
 
             return redirect()->back()->with('success', 'Сохранено.');
@@ -253,6 +251,17 @@ class ItemController extends Controller
     /** Возвращает текст ошибки, если заклинание уже привязано к другой книге, иначе null. */
     private function syncMagicSkillBook(ShareItem $item, Request $request): ?string
     {
+        // Предмет не книга (в том числе — перестал ей быть после смены типа):
+        // привязку надо снять. Иначе осиротевшая строка magic_skill_books
+        // держит заклинание «занятым» (unique magic_skill_id не даёт привязать
+        // его к настоящей книге), а LearnMagicSkillFromBook продолжает учить
+        // заклинанию с предмета, который книгой уже не является.
+        if ($item->type !== ShareItemType::BOOK) {
+            MagicSkillBook::where('share_item_id', $item->id)->delete();
+
+            return null;
+        }
+
         $magicSkillId = $request->filled('magic_skill_id') ? (int) $request->input('magic_skill_id') : null;
 
         if ($magicSkillId === null) {

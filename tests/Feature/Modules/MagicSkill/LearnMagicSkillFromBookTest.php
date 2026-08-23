@@ -233,6 +233,43 @@ class LearnMagicSkillFromBookTest extends TestCase
         );
     }
 
+    /**
+     * Final review, IMPORTANT 10: строка magic_skill_books могла осиротеть, если
+     * админ сменил тип предмета с BOOK на что-то другое. Use case искал книгу
+     * строго по share_item_id и без проверки типа — «книгой» оставался, например,
+     * MISC-предмет. Теперь тип предмета авторитетнее наличия строки связи.
+     */
+    public function test_learning_is_rejected_when_the_linked_item_is_no_longer_a_book(): void
+    {
+        DB::table('magic_skill_requirements')->insert([
+            'magic_skill_id' => self::MAGIC_SKILL_ID,
+            'type' => 'level',
+            'min_value' => 5,
+        ]);
+
+        $itemId = $this->giveBook(count: 1);
+
+        // Предмету сменили тип, но строка связи осталась висеть.
+        DB::table('share_items')->where('id', self::SHARE_ITEM_ID)->update(['type' => 'misc']);
+
+        $result = $this->makeUseCase()->execute(User::findOrFail(1), self::SHARE_ITEM_ID);
+
+        $this->assertFalse($result->ok);
+        $this->assertStringContainsString('не книга заклинаний', $result->message);
+        $this->assertFalse(
+            DB::table('player_magic_skills')
+                ->where('player_id', 1)
+                ->where('magic_skill_id', self::MAGIC_SKILL_ID)
+                ->exists(),
+            'заклинание не должно изучаться с предмета, который перестал быть книгой',
+        );
+        $this->assertSame(
+            1,
+            DB::table('backpacks')->where('item_id', $itemId)->value('count'),
+            'предмет при отказе не расходуется',
+        );
+    }
+
     private function giveBook(int $count): int
     {
         $itemId = DB::table('items')->insertGetId([

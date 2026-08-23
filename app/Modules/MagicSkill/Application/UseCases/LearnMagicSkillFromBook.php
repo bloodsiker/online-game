@@ -7,6 +7,7 @@ namespace App\Modules\MagicSkill\Application\UseCases;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\MagicSkill\Application\DTOs\LearnMagicSkillResultDTO;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Services\MagicSkillRequirementService;
 use Illuminate\Database\QueryException;
@@ -35,6 +36,13 @@ class LearnMagicSkillFromBook
 
         $skill = $book->magicSkill;
         $shareItem = $book->shareItem;
+
+        // Строка magic_skill_books могла осиротеть: предмету сменили тип, а
+        // привязка осталась (см. ItemController::syncMagicSkillBook). Учить с
+        // не-книги нельзя — тип предмета авторитетнее наличия строки связи.
+        if ($shareItem === null || $shareItem->type !== ShareItemType::BOOK) {
+            return new LearnMagicSkillResultDTO(ok: false, message: 'Это не книга заклинаний', httpCode: 422);
+        }
 
         $alreadyLearned = DB::table('player_magic_skills')
             ->where('player_id', $player->id)
