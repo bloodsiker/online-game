@@ -179,14 +179,20 @@ class MagicBookStarterSeeder extends Seeder
             'name' => 'Прилив магии',
             'slug' => 'arcane_surge',
             'type' => 'buff',
-            'description' => '+25% к магической атаке на 15 секунд',
+            'description' => '+25% к интеллекту на 15 секунд',
             'duration' => 15,
             'is_stackable' => false,
             'max_stacks' => 1,
             'tick_interval' => 1,
             'value_per_tick' => 0,
+            // Бафает интеллект, а НЕ magic_attack: magic_attack по дизайну
+            // считается только с экипировки (PlayerStatService::buildSheet(),
+            // база 0.0), поэтому «+25% к магической атаке» давало ровно 0 всем,
+            // у кого нет посоха. Силу заклинаний считает
+            // MagicHitCalculator::magicPower() = интеллект + magic_attack —
+            // процент от интеллекта работает у любого мага.
             'stat_modifiers' => [
-                ['type' => 'magic_attack', 'value' => 25, 'is_percent' => true],
+                ['type' => 'intelligence', 'value' => 25, 'is_percent' => true],
             ],
             'is_dispellable' => true,
         ]);
@@ -194,7 +200,7 @@ class MagicBookStarterSeeder extends Seeder
         $skill = MagicSkill::create([
             'name' => 'Прилив магии',
             'slug' => 'arcane_surge_skill',
-            'description' => 'Временно усиливает магическую атаку заклинателя на 25%.',
+            'description' => 'Временно поднимает интеллект заклинателя на 25% — сильнее бьют все заклинания.',
             'type' => 'buff',
             'target_type' => 'self',
             'skill_id' => $spellSkillId,
