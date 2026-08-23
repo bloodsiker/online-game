@@ -53,6 +53,7 @@ class BattleEffectService
         }
 
         $existing = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
+            ->where('battle_id', $battle->id)
             ->when(
                 $type !== null,
                 fn ($query) => $query->where('type', $type),

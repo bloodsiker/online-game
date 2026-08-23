@@ -185,6 +185,41 @@ class MonsterDebuffLifecycleTest extends TestCase
         );
     }
 
+    public function test_recasting_the_same_debuff_in_a_fresh_battle_scopes_to_that_battle_not_a_stale_row(): void
+    {
+        // Re-review finding: applyEffectToMonster()'s $existing lookup only scoped by
+        // location_monster_id + type/effect_id, not battle_id — so a stale row left over
+        // from an abandoned battle A got silently refreshed (and re-targeted) by a cast in
+        // a brand-new battle B, while MonsterCombatantFactory::build() (scoped to B) never
+        // saw it. The debuff appeared to succeed but had no effect for the caster.
+        $locMonster = $this->spawn(armor: 50);
+        $battleA = Battle::create();
+        $service = app(BattleEffectService::class);
+        $factory = new MonsterCombatantFactory;
+
+        // Same Effect row cast twice — this is what makes the $existing lookup in
+        // applyEffectToMonster() match across battles when it isn't scoped by battle_id.
+        $effect = $this->armorDebuff(duration: 10);
+
+        $service->applyEffectToMonster($effect, $locMonster, $battleA, new AttackResultDTO);
+        $this->assertSame(35, $factory->build($locMonster, $battleA->id)->getArmor());
+
+        // Battle A abandoned without the monster dying — its debuff row is now stale.
+        $battleB = Battle::create();
+        $service->applyEffectToMonster($effect, $locMonster, $battleB, new AttackResultDTO);
+
+        $this->assertSame(
+            35,
+            $factory->build($locMonster, $battleB->id)->getArmor(),
+            'дебафф, наложенный заново в новом бою, обязан подействовать в этом же бою, а не молча обновить чужую строку',
+        );
+        $this->assertSame(
+            2,
+            DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->count(),
+            'должна появиться отдельная строка для battle B, а не одна общая на оба боя',
+        );
+    }
+
     public function test_boss_halved_debuff_duration_is_now_actually_consumed(): void
     {
         $locMonster = $this->spawn(isBoss: true, armor: 60);
