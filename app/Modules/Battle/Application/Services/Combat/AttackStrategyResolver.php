@@ -49,6 +49,9 @@ readonly class AttackStrategyResolver
 
             if ($playerSkill instanceof MagicSkill && $playerSkill->isBuffSkill()) {
                 return new MagicBuffStrategy(
+                    castGuard: $this->castGuard,
+                    magicHitCalc: $this->magicHitCalc,
+                    casterSheet: $sheet,
                     playerModel: $player,
                     magicSkill: $playerSkill,
                 );
