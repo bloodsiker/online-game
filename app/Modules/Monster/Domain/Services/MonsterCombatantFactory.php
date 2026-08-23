@@ -13,12 +13,21 @@ class MonsterCombatantFactory
     /** @var list<string> статы, которые дебафф умеет снижать в этом релизе — см. спеку */
     private const DEBUFFABLE_STATS = ['armor', 'dodge'];
 
-    public function build(MonsterOnLocation $locMonster): MonsterCombatant
+    /**
+     * @param  int|null  $battleId  Бой, в рамках которого собирается боец. Дебаффы
+     *                              висят на конкретном спавне монстра (MonsterOnLocation),
+     *                              а не на бое, поэтому без этой привязки дебафф,
+     *                              наложенный в одном бою, продолжал резать броню
+     *                              этому же спавну во всех последующих боях других
+     *                              игроков. null — только для вызовов вне боя.
+     */
+    public function build(MonsterOnLocation $locMonster, ?int $battleId): MonsterCombatant
     {
         $totals = array_fill_keys(self::DEBUFFABLE_STATS, 0.0);
 
         $activeEffects = MonsterActiveEffect::query()
             ->where('location_monster_id', $locMonster->id)
+            ->when($battleId !== null, fn ($query) => $query->where('battle_id', $battleId))
             ->with('effect')
             ->get();
 

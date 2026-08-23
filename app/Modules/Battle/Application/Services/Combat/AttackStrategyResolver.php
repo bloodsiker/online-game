@@ -10,6 +10,7 @@ use App\Modules\Battle\Application\Services\Combat\Strategies\FistAttackStrategy
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicAttackStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\MagicBuffStrategy;
 use App\Modules\Battle\Application\Services\Combat\Strategies\OneHandWeaponStrategy;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Domain\Services\MonsterCombatantFactory;
@@ -31,9 +32,12 @@ readonly class AttackStrategyResolver
         private MagicCastGuard $castGuard,
     ) {}
 
-    public function resolve(Player $player, MonsterOnLocation $locMonster, int $action): AttackStrategyInterface
+    public function resolve(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle): AttackStrategyInterface
     {
-        $monster = $this->combatantFactory->build($locMonster);
+        // battle_id обязателен: дебаффы хранятся на спавне монстра, и без
+        // привязки к текущему бою чужой дебафф из прошлого боя продолжал бы
+        // резать статы этому мобу — см. MonsterCombatantFactory::build().
+        $monster = $this->combatantFactory->build($locMonster, $battle->id);
         $sheet = $this->statService->resolve($player);
 
         $equip = $player->playerEquip;

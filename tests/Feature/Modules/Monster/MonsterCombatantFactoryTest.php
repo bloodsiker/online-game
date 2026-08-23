@@ -90,7 +90,7 @@ class MonsterCombatantFactoryTest extends TestCase
             ['type' => 'armor', 'value' => -15.0, 'is_percent' => false],
         ]);
 
-        $combatant = (new MonsterCombatantFactory)->build($locMonster);
+        $combatant = (new MonsterCombatantFactory)->build($locMonster, null);
 
         $this->assertSame(35, $combatant->getArmor());
         $this->assertSame(10, $combatant->getDodge(), 'unrelated stat must stay untouched');
@@ -106,7 +106,7 @@ class MonsterCombatantFactoryTest extends TestCase
             ['type' => 'armor', 'value' => -1000.0, 'is_percent' => true],
         ]);
 
-        $combatant = (new MonsterCombatantFactory)->build($locMonster);
+        $combatant = (new MonsterCombatantFactory)->build($locMonster, null);
 
         $this->assertSame(35, $combatant->getArmor(), 'percent modifier must be ignored — only the flat -15 applies');
     }
@@ -118,7 +118,7 @@ class MonsterCombatantFactoryTest extends TestCase
             ['type' => 'critical', 'value' => -100.0, 'is_percent' => false],
         ]);
 
-        $combatant = (new MonsterCombatantFactory)->build($locMonster);
+        $combatant = (new MonsterCombatantFactory)->build($locMonster, null);
 
         $this->assertSame(50, $combatant->getArmor());
         $this->assertSame(10, $combatant->getDodge());
@@ -135,7 +135,7 @@ class MonsterCombatantFactoryTest extends TestCase
         // entry isn't an array.
         $this->attachActiveEffect($locMonster, ['attack' => 5]);
 
-        $combatant = (new MonsterCombatantFactory)->build($locMonster);
+        $combatant = (new MonsterCombatantFactory)->build($locMonster, null);
 
         $this->assertSame(50, $combatant->getArmor());
         $this->assertSame(10, $combatant->getDodge());

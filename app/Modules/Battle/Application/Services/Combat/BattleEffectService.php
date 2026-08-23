@@ -330,7 +330,9 @@ class BattleEffectService
         Battle $battle,
         AttackResultDTO $result
     ): bool {
-        $effects = MonsterActiveEffect::where('location_monster_id', $locMonster->id)->get();
+        $effects = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
+            ->with('effect')
+            ->get();
 
         $isStunned = false;
 
@@ -351,6 +353,28 @@ class BattleEffectService
                         $locMonster->monster->name,
                         $effect->stacks
                     ));
+                    $effect->save();
+                }
+
+                continue;
+            }
+
+            // Чистый стат-дебафф (type = NULL): ни стана, ни тика — только
+            // stat_modifiers, которые читает MonsterCombatantFactory. Раньше
+            // такую строку не трогал никто, кроме AttackService::handleMonsterDeath(),
+            // поэтому дебафф жил до самой смерти моба. Списываем стак за раунд,
+            // как у стана и DoT, и удаляем строку по исчерпании.
+            if ($effect->type === null) {
+                $effect->stacks--;
+
+                if ($effect->stacks <= 0) {
+                    $result->log(sprintf(
+                        '<p class="color-info">✨ Эффект <b>%s</b> на %s рассеялся.</p>',
+                        $effect->effect?->name ?? 'заклинания',
+                        $locMonster->monster->name
+                    ));
+                    $effect->delete();
+                } else {
                     $effect->save();
                 }
 

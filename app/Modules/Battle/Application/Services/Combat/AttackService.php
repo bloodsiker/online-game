@@ -49,7 +49,7 @@ readonly class AttackService
         // Restore HP the monster would have regenerated since the last attack
         $locMonster->regenerate();
 
-        $strategy = $this->resolver->resolve($player, $locMonster, $action);
+        $strategy = $this->resolver->resolve($player, $locMonster, $action, $battle);
 
         $isBoss = $locMonster->monster->isBoss();
         $runePassives = $this->runePassiveService->resolve($player);
