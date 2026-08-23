@@ -86,22 +86,38 @@ class MagicBookStarterSeeder extends Seeder
 
     private function createDotSpell(int $spellSkillId): void
     {
-        // slug 'burn' уже занят effects.id=1 (существующий монстровый дебафф-эффект,
-        // duration=10/tick=2/value_per_tick=2/chance=50 — рассчитан под другую
-        // подсистему), поэтому у заклинательского ожога отдельный slug.
-        $effect = Effect::create([
-            'name' => 'Ожог',
-            'slug' => 'burn_spell',
-            'type' => 'debuff',
-            'description' => 'Периодический урон огнём',
-            'duration' => 6,
-            'is_stackable' => false,
-            'max_stacks' => 1,
-            'tick_interval' => 2,
-            'value_per_tick' => 0, // перекрывается MagicHitCalculator-расчётом при касте — см. MagicAttackStrategy
-            'stat_modifiers' => null,
-            'is_dispellable' => true,
-        ]);
+        // Переиспользуем уже существующую строку effects.slug='burn' (её создаёт
+        // GenerateSeed для монстрового дебаффа), а НЕ заводим отдельный слаг:
+        // BattleEffectService::applyEffectToMonster() резолвит ActiveEffectType
+        // строго по слагу эффекта, и любой слаг вне ActiveEffectType (прежний
+        // 'burn_spell') давал MonsterActiveEffect.type = NULL — такая строка не
+        // тикала и не истекала, заклинание было мёртвым контентом.
+        //
+        // Строка теперь обслуживает две подсистемы сразу, поэтому её числовые
+        // поля не переписываем: value_per_tick всё равно перекрывается
+        // tickValueOverride в момент каста (MagicAttackStrategy →
+        // applyEffectToMonster), а duration/tick_interval/chance продолжают
+        // обслуживать монстровый дебафф. Обновляем только описание — под
+        // двойное назначение. Если строки ещё нет (чистое окружение), создаём
+        // её по числам из спеки заклинания.
+        $effect = Effect::firstOrNew(['slug' => 'burn']);
+
+        if (! $effect->exists) {
+            $effect->fill([
+                'name' => 'Ожог',
+                'type' => 'debuff',
+                'duration' => 6,
+                'is_stackable' => false,
+                'max_stacks' => 1,
+                'tick_interval' => 2,
+                'value_per_tick' => 0, // перекрывается MagicHitCalculator-расчётом при касте
+                'stat_modifiers' => null,
+                'is_dispellable' => true,
+            ]);
+        }
+
+        $effect->description = 'Периодический урон огнём';
+        $effect->save();
 
         $skill = MagicSkill::create([
             'name' => 'Тлеющая рана',
