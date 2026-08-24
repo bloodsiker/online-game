@@ -484,16 +484,6 @@
         window.parent.postMessage({ url: url }, '*');
     }
 
-    function handleKeydown(event) {
-        switch (event.key.toLowerCase()) {
-            case 'i': sendDataToGame('{{ route('backpack') }}'); break;
-            case 'c': sendDataToGame('{{ route('character') }}'); break;
-            case ' ': sendDataToGame('{{ route('location') }}'); break;
-            default: return;
-        }
-        event.preventDefault();
-    }
-    document.addEventListener('keydown', handleKeydown);
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}');

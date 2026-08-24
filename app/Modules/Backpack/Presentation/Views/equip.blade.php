@@ -363,16 +363,6 @@
         try { window.top.sendToFrame('character-frame', @json($hpMp)); } catch(e) {}
     @endif
 
-    document.addEventListener('keydown', function(event) {
-        switch (event.key.toLowerCase()) {
-            case ' ':
-                window.top.sendDataToGame('{{ route('location') }}');
-                break;
-            default:
-                return;
-        }
-        event.preventDefault();
-    });
 </script>
 
 </body>

@@ -22,7 +22,7 @@ class GetNpcPage
     public function execute(User $user, int $npcId): NpcPageDTO
     {
         $player = $user->player;
-        $npc = $this->readRepository->findNpcOrFail($npcId);
+        $npc = $this->readRepository->findNpcByIdOrFail($npcId);
 
         $completedQuestIds = $this->readRepository->getCompletedQuestIds($player->id);
         $inProgressQuestIds = $this->readRepository->getInProgressQuestIds($player->id);

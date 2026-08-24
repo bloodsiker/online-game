@@ -160,15 +160,6 @@
 </table>
 
 <script>
-    document.addEventListener('keydown', function(event) {
-        switch (event.key.toLowerCase()) {
-            case 'i': window.parent.sendDataToGame('{{ route('backpack') }}'); break;
-            case 'c': window.parent.sendDataToGame('{{ route('character') }}'); break;
-            case ' ': window.parent.sendDataToGame('{{ route('location') }}'); break;
-            default: return;
-        }
-        event.preventDefault();
-    });
 </script>
 </body>
 </html>

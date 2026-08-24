@@ -6,13 +6,16 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Services\Recovery\RecoveryStrategyFactory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class HealthController extends Controller
 {
     public function __construct(private PlayerStatService $statService) {}
 
-    public function index($id)
+    public function index(Request $request, int $id): View|JsonResponse|RedirectResponse
     {
         $user = Auth::user();
         $structure = Structure::find($id);
@@ -27,6 +30,21 @@ class HealthController extends Controller
         $resultDto = $strategy->recover($player, $structure);
 
         $playerDecorator = $this->statService->resolve($resultDto->player);
+
+        if ($request->expectsJson()) {
+            $message = 'Вы подошли к алтарю и, возложив на него руки, почувствовали, как энергия алтаря наполняет вас. Вы восстановили '
+                .$resultDto->hpHealed.' единиц здоровья';
+
+            if ($resultDto->mpHealed > 0) {
+                $message .= ' и '.$resultDto->mpHealed.' единиц маны';
+            }
+
+            return response()->json([
+                'message' => $message.'.',
+                'hp' => ['current' => $resultDto->player->hp_now, 'max' => $playerDecorator->getHpMax()],
+                'mp' => ['current' => $resultDto->player->mp_now, 'max' => $playerDecorator->getMpMax()],
+            ]);
+        }
 
         return view('health.heal', [
             'structure' => $structure,

@@ -74,6 +74,7 @@ class ClanController extends Controller
             'inClan' => $page->inClan,
             'activeQuests' => $page->activeQuests,
             'isLeader' => $page->isLeader,
+            'registrarNpc' => $page->registrarNpc,
         ]);
     }
 

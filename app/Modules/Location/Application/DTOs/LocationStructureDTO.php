@@ -13,5 +13,6 @@ final readonly class LocationStructureDTO
         public string $name,
         public string $entryUrl,
         public array $actions,
+        public bool $isHeal,
     ) {}
 }

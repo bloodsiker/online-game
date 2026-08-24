@@ -515,26 +515,6 @@
 
 
 <script>
-    document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey || event.metaKey || event.altKey) {
-            return;
-        }
-
-        switch (event.key.toLowerCase()) {
-            case 'i':
-                window.parent.sendDataToGame('{{ route('backpack') }}');
-                break;
-            case 'c':
-                window.parent.sendDataToGame('{{ route('character') }}');
-                break;
-            case ' ':
-                window.parent.sendDataToGame('{{ route('location') }}');
-                break;
-            default:
-                return;
-        }
-        event.preventDefault();
-    });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

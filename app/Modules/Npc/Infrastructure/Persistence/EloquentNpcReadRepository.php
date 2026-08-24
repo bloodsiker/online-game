@@ -16,9 +16,19 @@ use Illuminate\Support\Collection;
 
 class EloquentNpcReadRepository implements NpcReadRepository
 {
-    public function findNpcOrFail(string $uuid): Npc
+    public function findNpcByIdOrFail(int $id): Npc
+    {
+        return Npc::with(['structures.actions', 'location'])->findOrFail($id);
+    }
+
+    public function findNpcByUuidOrFail(string $uuid): Npc
     {
         return Npc::with(['structures.actions', 'location'])->where('uuid', $uuid)->firstOrFail();
+    }
+
+    public function findNpcByNameOrFail(string $name): Npc
+    {
+        return Npc::query()->where('name', $name)->firstOrFail();
     }
 
     public function getCompletedQuestIds(int $playerId): array

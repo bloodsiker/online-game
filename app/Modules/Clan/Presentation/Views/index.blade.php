@@ -156,7 +156,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Информация</td>
+                                <td align="center" class="tbl-usi_label-center">{{ $registrarNpc->name }}</td>
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -169,11 +169,12 @@
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                        <img src="{{ asset('img/npc/arhivarius.jpg') }}" alt="Эрдинг" width="190"
-                             height="171"><br>
-                        <div class="p2v">Архивариус Вудугри - архивариус Регистрационной палаты, лицо, уполномоченное регистрировать
-                            кланы расы древних и хранить их архивы.
-                        </div>
+                        @if($registrarNpc->image)
+                            <img src="{{ $registrarNpc->image }}" alt="{{ $registrarNpc->name }}" width="190"><br>
+                        @endif
+                        @if($registrarNpc->description)
+                            <div class="p2v">{!! nl2br(e($registrarNpc->description)) !!}</div>
+                        @endif
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
                 </tr>
@@ -191,22 +192,6 @@
 </table>
 
 <script>
-    document.addEventListener('keydown', function(event) {
-        switch (event.key.toLowerCase()) {
-            case 'i':
-                window.parent.sendDataToGame('{{ route('backpack') }}');
-                break;
-            case 'c':
-                window.parent.sendDataToGame('{{ route('character') }}');
-                break;
-            case ' ':
-                window.parent.sendDataToGame('{{ route('location') }}');
-                break;
-            default:
-                return;
-        }
-        event.preventDefault();
-    });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

@@ -505,37 +505,6 @@
     }
 </script>
 <script>
-    {{--document.addEventListener('keydown', function(event) {--}}
-    {{--    switch (event.key.toLowerCase()) {--}}
-    {{--        case 'arrowup':--}}
-    {{--            document.getElementById('move-north').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowdown':--}}
-    {{--            document.getElementById('move-south').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowleft':--}}
-    {{--            document.getElementById('move-west').click();--}}
-    {{--            break;--}}
-    {{--        case 'arrowright':--}}
-    {{--            document.getElementById('move-east').click();--}}
-    {{--            break;--}}
-    {{--        case 'f':--}}
-    {{--            document.getElementById('take-item').click();--}}
-    {{--            break;--}}
-    {{--        case 'i':--}}
-    {{--            toLocation('{{ route('backpack') }}');--}}
-    {{--            break;--}}
-    {{--        case 'c':--}}
-    {{--            toLocation('{{ route('character') }}');--}}
-    {{--            break;--}}
-    {{--        case ' ':--}}
-    {{--            toLocation('{{ route('location') }}');--}}
-    {{--            break;--}}
-    {{--        default:--}}
-    {{--            return;--}}
-    {{--    }--}}
-    {{--    event.preventDefault();--}}
-    {{--});--}}
 
     // Обработка сообщений от игрового iframe
     window.addEventListener('message', function(event) {

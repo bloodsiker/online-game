@@ -16,7 +16,7 @@ class GetNpcInfoPage
     public function execute(string $uuid): NpcInfoPageDTO
     {
         return new NpcInfoPageDTO(
-            $this->readRepository->findNpcOrFail($uuid),
+            $this->readRepository->findNpcByUuidOrFail($uuid),
         );
     }
 }

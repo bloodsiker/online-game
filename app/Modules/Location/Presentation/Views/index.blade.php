@@ -248,11 +248,11 @@
                                                 @endforeach
                                                 @foreach($page->structures as $structure)
                                                     <div class="structures" style="margin: 5px">
-                                                        <span class="butt1 pointer"><span><button class="butt1 shop" data-href="{{ $structure->entryUrl }}" type="submit">{{ $structure->name }}</button></span></span>
+                                                        <span class="butt1 pointer"><span><button class="butt1 shop" @if($structure->isHeal) data-heal-url="{{ $structure->entryUrl }}" @else data-href="{{ $structure->entryUrl }}" @endif type="submit">{{ $structure->name }}</button></span></span>
                                                         @if($structure->actions !== [])
                                                             <ul>
                                                                 @foreach($structure->actions as $action)
-                                                                    <li><a href="{{ $action->url }}" class="actions"><img src="{{ asset('img/icon/users-arrow.gif') }}" alt="" align="absMiddle">{{ $action->label }}</a></li>
+                                                                    <li><a href="{{ $action->url }}" class="actions" @if($action->isHeal) data-heal-url="{{ $action->url }}" @endif><img src="{{ asset('img/icon/users-arrow.gif') }}" alt="" align="absMiddle">{{ $action->label }}</a></li>
                                                                 @endforeach
                                                             </ul>
                                                         @endif
@@ -282,45 +282,6 @@
 </table>
 
 <script>
-    function handleKeydown(event) {
-        if (event.ctrlKey || event.metaKey || event.altKey) {
-            return;
-        }
-
-        switch (event.key.toLowerCase()) {
-            case 'arrowup':
-                document.getElementById('move-north')?.click();
-                break;
-            case 'arrowdown':
-                document.getElementById('move-south')?.click();
-                break;
-            case 'arrowleft':
-                document.getElementById('move-west')?.click();
-                break;
-            case 'arrowright':
-                document.getElementById('move-east')?.click();
-                break;
-            case 'f':
-                document.getElementById('take-item')?.click();
-                break;
-            case 'i':
-                sendDataToGame('{{ route('backpack') }}');
-                break;
-            case 'c':
-                sendDataToGame('{{ route('character') }}');
-                break;
-            case ' ':
-                document.getElementById('attack')?.click();
-                break;
-            default:
-                return;
-        }
-
-        event.preventDefault();
-    }
-
-    document.addEventListener('keydown', handleKeydown);
-
     function sendDataToGame(url) {
         window.parent.postMessage({ url: url }, '*');
     }
@@ -348,13 +309,64 @@
     }
 
     document.querySelectorAll('.shop').forEach(function(button) {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(event) {
+            const healUrl = this.getAttribute('data-heal-url');
+            if (healUrl) {
+                event.preventDefault();
+                healAtFountain(healUrl, this);
+                return;
+            }
+
             const href = this.getAttribute('data-href');
             if (href) {
                 window.location.href = href;
             }
         });
     });
+
+    document.querySelectorAll('[data-heal-url].actions').forEach(function(action) {
+        action.addEventListener('click', function(event) {
+            event.preventDefault();
+            healAtFountain(this.getAttribute('data-heal-url'), this);
+        });
+    });
+
+    async function healAtFountain(url, trigger) {
+        if (trigger.dataset.healing === 'true') {
+            return;
+        }
+
+        trigger.dataset.healing = 'true';
+        trigger.setAttribute('aria-disabled', 'true');
+        if (trigger instanceof HTMLButtonElement) {
+            trigger.disabled = true;
+        }
+
+        try {
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store',
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Не удалось восстановить здоровье.');
+            }
+
+            hp = data.hp;
+            mp = data.mp;
+            parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
+            parent.openGameMessageModal({ title: 'Целительный фонтан', message: data.message });
+        } catch (error) {
+            parent.showErrorIframe(error.message || 'Не удалось восстановить здоровье.');
+        } finally {
+            delete trigger.dataset.healing;
+            trigger.removeAttribute('aria-disabled');
+            if (trigger instanceof HTMLButtonElement) {
+                trigger.disabled = false;
+            }
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
         const buttons = document.querySelectorAll('.butt1.shop');

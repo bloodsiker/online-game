@@ -185,6 +185,7 @@ class LocationPageViewMapper
                 $actions[] = new LocationStructureActionDTO(
                     label: (string) $action->name,
                     url: $url,
+                    isHeal: $structure->isHeal(),
                 );
             }
 
@@ -192,6 +193,7 @@ class LocationPageViewMapper
                 name: (string) $structure->name,
                 entryUrl: $entryUrl,
                 actions: $actions,
+                isHeal: $structure->isHeal(),
             );
         }
 

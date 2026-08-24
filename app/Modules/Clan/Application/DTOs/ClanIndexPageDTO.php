@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Application\DTOs;
 
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use Illuminate\Support\Collection;
 
 final readonly class ClanIndexPageDTO
@@ -15,5 +16,6 @@ final readonly class ClanIndexPageDTO
         public bool $inClan,
         public Collection $activeQuests,
         public bool $isLeader,
+        public Npc $registrarNpc,
     ) {}
 }

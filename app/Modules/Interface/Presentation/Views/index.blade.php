@@ -1105,6 +1105,31 @@
     </div>
 </div>
 
+<div id="game-message-overlay" class="error_div" style="display:none;z-index:1002;"></div>
+<div id="game-message-modal" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:400px;">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title" id="game-message-title"></div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeGameMessageModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:14px 18px 10px;">
+                    <div id="game-message-content" style="text-align:center;font-size:12px;line-height:1.45;color:#2a1a0e;"></div>
+                    <div style="margin:14px 0 4px;text-align:center;">
+                        <b class="butt1 pointer" onclick="closeGameMessageModal()"><b><input value="Закрыть" type="button"></b></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom"><div class="popup-right-bottom"><div class="popup-bottom-center"></div></div></div>
+    </div>
+</div>
+
 <script>
     function showLogoutConfirm() {
         document.getElementById('logout_confirm_overlay').style.display = 'block';
@@ -1139,6 +1164,7 @@
 <iframe width="1" height="1" frameborder="0" id="error" name="error" src="" scrolling="no" style="display: none; position: absolute; left: 0px; top: 0px; z-index: 1001;" allowtransparency="true"></iframe>
 
 <script language="javaScript" src="{{ asset('js/common.js') }}"></script>
+<script src="{{ asset('js/game-shortcuts.js') }}"></script>
 
 <script>
     function showErrorIframe(message) {
@@ -1173,40 +1199,14 @@
     }
 </script>
 <script>
-    document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey || event.metaKey || event.altKey) {
-            return;
-        }
-
-        switch (event.key.toLowerCase()) {
-            case 'arrowup':
-                document.getElementById('move-north').click();
-                break;
-            case 'arrowdown':
-                document.getElementById('move-south').click();
-                break;
-            case 'arrowleft':
-                document.getElementById('move-west').click();
-                break;
-            case 'arrowright':
-                document.getElementById('move-east').click();
-                break;
-            case 'f':
-                document.getElementById('take-item').click();
-                break;
-            case 'i':
-                toLocation('{{ route('backpack') }}');
-                break;
-            case 'c':
-                toLocation('{{ route('character') }}');
-                break;
-            case ' ':
-                toLocation('{{ route('location') }}');
-                break;
-            default:
-                return;
-        }
-        event.preventDefault();
+    GameShortcuts.init({
+        frameId: 'game-frame',
+        routes: {
+            backpack: '{{ route('backpack') }}',
+            character: '{{ route('character') }}',
+            location: '{{ route('location') }}',
+        },
+        navigate: toLocation,
     });
 
     // Обработка сообщений от игрового iframe
@@ -1528,6 +1528,18 @@
     function closePtsModal() {
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display   = 'none';
+    }
+
+    function openGameMessageModal(data) {
+        document.getElementById('game-message-title').textContent = data.title;
+        document.getElementById('game-message-content').textContent = data.message;
+        document.getElementById('game-message-overlay').style.display = 'block';
+        document.getElementById('game-message-modal').style.display = 'block';
+    }
+
+    function closeGameMessageModal() {
+        document.getElementById('game-message-overlay').style.display = 'none';
+        document.getElementById('game-message-modal').style.display = 'none';
     }
 
     function _ptsAdded() {

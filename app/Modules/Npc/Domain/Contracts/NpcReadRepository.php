@@ -10,7 +10,11 @@ use Illuminate\Support\Collection;
 
 interface NpcReadRepository
 {
-    public function findNpcOrFail(string $uuid): Npc;
+    public function findNpcByIdOrFail(int $id): Npc;
+
+    public function findNpcByUuidOrFail(string $uuid): Npc;
+
+    public function findNpcByNameOrFail(string $name): Npc;
 
     public function getCompletedQuestIds(int $playerId): array;
 
