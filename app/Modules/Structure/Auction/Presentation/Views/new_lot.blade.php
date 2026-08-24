@@ -150,6 +150,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -284,7 +286,7 @@
                                                             </td>
                                                         </tr>
                                                         <tr class="">
-                                                            <td height="28" class="brd2-top brd2 b">Выделить заявку: Цена(<span title="Рубин"><img src="https://fun-dwar.com//images/m_rub.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;1.00)</td>
+                                                            <td height="28" class="brd2-top brd2 b">Выделить заявку:</td>
                                                             <td height="28" class="brd2-top brd2 b" align="left" nowrap=""><input type="hidden" name="form[super]" value="">
                                                                 <input type="checkbox" name="form[super]" value="1" id="super" onchange="recalculate();" title="Позиция таких заявок выше остальных.">&nbsp;<label for="_chk_1"></label><br>
                                                             </td>
@@ -349,8 +351,7 @@
                                                         <td align="right" nowrap="">
                                                             <b>Деньги:</b>
                                                             &nbsp;<b class="redd"><span title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                                                            &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Рубин"><img src="https://fun-dwar.com//images/m_rub.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;676.96 </b>
-                                                            &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="https://fun-dwar.com//images/m_dmd.gif" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;3.82 </b>
+                                                            &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                                                         </td>
                                                     </tr>
                                                     </tbody>

@@ -18,7 +18,7 @@ class GetSellableItems
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $userId)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.is_sell', 1)
+            ->where('share_items.is_auction_sellable', 1)
             ->orderBy('items.share_item_id', 'desc')
             ->get();
     }

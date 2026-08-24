@@ -73,6 +73,7 @@ class ShareItem extends Model
         'count_use' => 0,
         'is_active' => true,
         'is_sell' => true,
+        'is_auction_sellable' => false,
         'is_give' => true,
         'is_droppable' => true,
         'is_slot_usable' => false,

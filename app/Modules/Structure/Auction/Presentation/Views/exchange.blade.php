@@ -90,6 +90,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -116,6 +118,7 @@
                 <tr class="bg_l">
                     <td align="left" nowrap=""><b>Монет:</b>
                     &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                     <td align="right" nowrap=""><b>Биржа — заявки на покупку от других игроков. Продайте свои предметы по выгодным ценам.</b></td>
                 </tr>
@@ -316,10 +319,12 @@
             const count = countInput ? countInput.value : 1;
             const href = this.getAttribute('data-href');
             if (href) {
-                window.location.href = href + '?count=' + count;
+                submitAuctionAction(href, {count: count});
             }
         });
     });
+
+    function submitAuctionAction(url, data) { const form = document.createElement('form'); form.method = 'POST'; form.action = url; form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">'; Object.entries(data || {}).forEach(([key, value]) => { const input = document.createElement('input'); input.type = 'hidden'; input.name = key; input.value = value; form.appendChild(input); }); document.body.appendChild(form); form.submit(); }
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

@@ -141,6 +141,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -358,10 +360,12 @@
         button.addEventListener('click', function() {
             const href = this.getAttribute('data-href');
             if (href) {
-                window.location.href = href;
+                submitAuctionAction(href);
             }
         });
     });
+
+    function submitAuctionAction(url) { const form = document.createElement('form'); form.method = 'POST'; form.action = url; form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">'; document.body.appendChild(form); form.submit(); }
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

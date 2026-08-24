@@ -9,6 +9,7 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Models\AuctionHistory;
+use App\Modules\Structure\Auction\Domain\Models\AuctionSaleProceeds;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -59,7 +60,7 @@ class BuyLot
                 $user->backpack()->attach($lot->item->id, ['equipped' => 0, 'count' => $lot->count]);
             }
 
-            AuctionHistory::create([
+            $history = AuctionHistory::create([
                 'buy_user_id' => $user->id,
                 'sell_user_id' => $lot->user_id,
                 'structure_id' => $lot->structure_id,
@@ -67,6 +68,8 @@ class BuyLot
                 'count' => $lot->count,
                 'price' => $lot->price,
             ]);
+
+            AuctionSaleProceeds::create(['user_id' => $lot->user_id, 'structure_id' => $lot->structure_id, 'auction_history_id' => $history->id, 'amount' => $lot->price]);
 
             $lot->delete();
 

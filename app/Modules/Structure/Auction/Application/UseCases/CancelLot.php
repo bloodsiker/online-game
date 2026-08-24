@@ -8,18 +8,20 @@ use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CancelLot
 {
-    public function execute(User $user, int $slotId): AuctionResultDTO
+    public function execute(User $user, Structure $auction, int $slotId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $slotId, &$result) {
             $slot = Auction::where('id', $slotId)
                 ->where('user_id', $user->id)
+                ->where('structure_id', $auction->id)
                 ->lockForUpdate()
                 ->first();
 

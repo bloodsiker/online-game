@@ -8,18 +8,20 @@ use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class TakeClaim
 {
-    public function execute(User $user, int $claimId): AuctionResultDTO
+    public function execute(User $user, Structure $auction, int $claimId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $claimId, &$result) {
             $claim = AuctionClaim::where('id', $claimId)
                 ->where('user_id', $user->id)
+                ->where('structure_id', $auction->id)
                 ->lockForUpdate()
                 ->first();
 

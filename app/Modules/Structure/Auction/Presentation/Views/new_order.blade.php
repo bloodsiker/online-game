@@ -100,6 +100,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -121,6 +123,10 @@
                         &nbsp;&nbsp;&nbsp;<b class="redd">
                             <span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
                             &nbsp;{{ format_money($user->money) }}
+                        </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd">
+                            <span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
+                            &nbsp;{{ format_money($user->diamond) }}
                         </b>
                     </td>
                     <td align="right" nowrap="" style="color:#888;">

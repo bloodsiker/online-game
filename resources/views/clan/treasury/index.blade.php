@@ -103,6 +103,10 @@
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                             {{ format_money($membership->user->money) }}
                         </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd">
+                            <img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle">
+                            {{ format_money($membership->user->diamond) }}
+                        </b>
                     </td>
                 </tr>
                 </tbody>

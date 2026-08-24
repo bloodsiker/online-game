@@ -220,6 +220,7 @@ class ItemController extends Controller
         $item->is_two_hand = (bool) $request->input('is_two_hand', false);
         $item->is_active = (bool) $request->input('is_active', true);
         $item->is_sell = (bool) $request->input('is_sell', true);
+        $item->is_auction_sellable = (bool) $request->input('is_auction_sellable', false);
         $item->is_give = (bool) $request->input('is_give', true);
         $item->is_droppable = (bool) $request->input('is_droppable', true);
         $item->is_weight = (bool) $request->input('is_weight', true);

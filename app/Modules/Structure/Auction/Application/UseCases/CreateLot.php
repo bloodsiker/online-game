@@ -26,6 +26,10 @@ class CreateLot
         int $price,
         bool $isAnonymous,
     ): AuctionResultDTO {
+        if ($auction->location_id !== $user->location_id) {
+            return new AuctionResultDTO(false, 'Вы не находитесь рядом с Комиссионным магазином!');
+        }
+
         $fee = $this->feeCalculator->calculate($price);
         if ($user->money < $fee) {
             return new AuctionResultDTO(false, 'Не достаточно монет что бы оплатить налог.');
@@ -34,6 +38,13 @@ class CreateLot
         $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $auction, $itemId, $amount, $price, $fee, $isAnonymous, &$result) {
+            $freshUser = User::lockForUpdate()->findOrFail($user->id);
+            if ($freshUser->money < $fee) {
+                $result = ['ok' => false, 'message' => 'Не достаточно монет что бы оплатить налог.'];
+
+                return;
+            }
+
             $slotItem = Backpack::where('item_id', $itemId)
                 ->where('user_id', $user->id)
                 ->where('equipped', 0)
@@ -43,6 +54,12 @@ class CreateLot
 
             if (! $slotItem instanceof Backpack) {
                 $result = ['ok' => false, 'message' => 'Не найдено предмета в сумке.'];
+
+                return;
+            }
+
+            if (! $slotItem->item->itemInfo->is_auction_sellable) {
+                $result = ['ok' => false, 'message' => 'Этот предмет нельзя выставить на аукцион.'];
 
                 return;
             }
@@ -64,7 +81,7 @@ class CreateLot
                 $slotItem->decrement('count', $qty);
             }
 
-            $user->decrement('money', $fee);
+            $freshUser->decrement('money', $fee);
 
             $result = ['ok' => true, 'message' => sprintf('%s выставлен на продажу', $slotItem->item->itemInfo->name)];
         });

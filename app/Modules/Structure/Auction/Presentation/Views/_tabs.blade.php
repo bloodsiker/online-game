@@ -13,6 +13,7 @@
         ['key' => 'buy',     'label' => 'Купить товар', 'route' => route('auction',         ['id' => $commissionShop->id]), 'width' => 100],
         ['key' => 'my_lot',  'label' => 'Мои лоты',     'route' => route('auction.my_lot',  ['id' => $commissionShop->id]), 'width' => 80],
         ['key' => 'new_lot', 'label' => 'Новый лот',    'route' => route('auction.new_lot', ['id' => $commissionShop->id]), 'width' => 80],
+        ['key' => 'sale_proceeds', 'label' => 'Выручка', 'route' => route('auction.sale_proceeds', ['id' => $commissionShop->id]), 'width' => 70],
     ];
     $exchangeTabs = [
         ['key' => 'exchange',  'label' => 'Продать',      'route' => route('auction.exchange',  ['id' => $exchange->id]), 'width' => 60],

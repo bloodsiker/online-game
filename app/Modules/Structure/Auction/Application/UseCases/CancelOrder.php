@@ -6,18 +6,20 @@ namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CancelOrder
 {
-    public function execute(User $user, int $orderId): AuctionResultDTO
+    public function execute(User $user, Structure $auction, int $orderId): AuctionResultDTO
     {
         $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $orderId, &$result) {
             $order = AuctionOrder::where('id', $orderId)
                 ->where('user_id', $user->id)
+                ->where('structure_id', $auction->id)
                 ->lockForUpdate()
                 ->first();
 

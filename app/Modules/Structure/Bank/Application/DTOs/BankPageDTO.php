@@ -13,6 +13,7 @@ final readonly class BankPageDTO
     public function __construct(
         public string $bankAccount,
         public int $money,
+        public int $diamond,
         public int $bankBalance,
         public array $logs,
         public array $pagination,

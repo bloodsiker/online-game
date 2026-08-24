@@ -23,6 +23,10 @@ class FulfillOrder
 
     public function execute(User $user, Structure $auction, int $orderId, int $count): AuctionResultDTO
     {
+        if ($auction->location_id !== $user->location_id) {
+            return new AuctionResultDTO(false, 'Вы не находитесь рядом с Биржей.');
+        }
+
         $result = ['ok' => true, 'message' => ''];
 
         DB::transaction(function () use ($user, $auction, $orderId, $count, &$result) {
@@ -39,6 +43,12 @@ class FulfillOrder
 
             if ($order->user_id === $user->id) {
                 $result = ['ok' => false, 'message' => 'Нельзя выполнить собственную заявку.'];
+
+                return;
+            }
+
+            if (! $order->shareItem->is_auction_sellable) {
+                $result = ['ok' => false, 'message' => 'Этот предмет больше нельзя продавать через аукцион.'];
 
                 return;
             }

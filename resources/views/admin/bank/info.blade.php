@@ -108,7 +108,7 @@
                                                     <span class="tier-badge">{{ $loop->iteration }}</span>
                                                     <span>Уровень {{ $loop->iteration }}</span>
                                                     <span class="tier-diamond">
-                                                        <img src="/img/icon/m_dmd.gif" width="11" height="11" style="vertical-align:middle;margin-right:3px;">{{ number_format($tier->diamond_threshold, 2) }}
+                                                        <img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" style="vertical-align:middle;margin-right:3px;">{{ number_format($tier->diamond_threshold, 2) }}
                                                     </span>
                                                     <small style="opacity:.6;font-weight:400;">— {{ $tier->items->count() }} {{ trans_choice('предмет|предмета|предметов', $tier->items->count()) }}</small>
                                                 </div>

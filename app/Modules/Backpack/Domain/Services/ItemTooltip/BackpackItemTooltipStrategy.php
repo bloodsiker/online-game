@@ -44,7 +44,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 skills: [],
                 desc: $itemInfo->description ?? '',
                 store: false,
-                nogive: ! $itemInfo->is_sell,
+                nogive: ! $itemInfo->is_give,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
                 stats: ItemTooltipStatsBuilder::build($itemInfo, $upgradeLvl),

@@ -158,7 +158,8 @@
                         <table class="coll w100 p10h p2v brd2-all">
                         <tr class="bg_l">
                             <td align="left" nowrap width="20%"><b>У вас:</b>&nbsp;&nbsp;&nbsp;
-                                <b class="redd">{{ format_money($user->money) }}</b>
+                                <b class="redd"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle"> {{ format_money($user->money) }}</b>
+                                &nbsp;&nbsp;&nbsp;<b class="redd"><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle"> {{ format_money($user->diamond) }}</b>
                             </td>
                             <td>
                                 <b class="butt2 pointer"><b><input value="Обмен" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('bank') }}';" style="width:60px"></b></b>

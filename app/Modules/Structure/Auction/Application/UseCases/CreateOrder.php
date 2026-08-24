@@ -21,7 +21,11 @@ class CreateOrder
         int $price,
         bool $isAnonymous,
     ): AuctionResultDTO {
-        $shareItem = ShareItem::where('id', $shareItemId)->where('is_sell', 1)->first();
+        if ($auction->location_id !== $user->location_id) {
+            return new AuctionResultDTO(false, 'Вы не находитесь рядом с Биржей.');
+        }
+
+        $shareItem = ShareItem::where('id', $shareItemId)->where('is_auction_sellable', 1)->first();
         if (! $shareItem) {
             return new AuctionResultDTO(false, 'Предмет не найден.');
         }

@@ -77,6 +77,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -103,6 +105,7 @@
                 <tr class="bg_l">
                     <td align="left" nowrap=""><b>Монет:</b>
                     &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                     </td>
                 </tr>
                 </tbody>
@@ -205,9 +208,11 @@
     document.querySelectorAll('.cancel-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const href = this.getAttribute('data-href');
-            if (href) window.location.href = href;
+            if (href) submitAuctionAction(href);
         });
     });
+
+    function submitAuctionAction(url) { const form = document.createElement('form'); form.method = 'POST'; form.action = url; form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">'; document.body.appendChild(form); form.submit(); }
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

@@ -140,10 +140,17 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label" for="is_sell">Можно продать</label>
+                                                <label class="col-form-label" for="is_sell">Можно продать магазину</label>
                                                 <select class="form-control" name="is_sell" id="is_sell">
                                                     <option value="1" @selected(old('is_sell', '1') === '1')>Да</option>
                                                     <option value="0" @selected(old('is_sell') === '0')>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="is_auction_sellable">Можно продать на аукционе</label>
+                                                <select class="form-control" name="is_auction_sellable" id="is_auction_sellable">
+                                                    <option value="1" @selected(old('is_auction_sellable') === '1')>Да</option>
+                                                    <option value="0" @selected(old('is_auction_sellable', '0') === '0')>Нет</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">

@@ -25,6 +25,7 @@ class BankPageViewMapper
         return new BankPageDTO(
             bankAccount: (string) $user->bank_account,
             money: (int) $user->money,
+            diamond: (int) $user->diamond,
             bankBalance: (int) $user->bank_balance,
             logs: collect($logs->items())->map(fn ($log) => [
                 'createdAt' => $log->created_at->format('d.m.Y H:i'),

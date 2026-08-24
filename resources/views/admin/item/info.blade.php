@@ -158,10 +158,17 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Можно продать</label>
+                                                <label class="col-form-label">Можно продать магазину</label>
                                                 <select class="form-control" name="is_sell">
                                                     <option value="1" @selected($item->is_sell)>Да</option>
                                                     <option value="0" @selected(!$item->is_sell)>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Можно продать на аукционе</label>
+                                                <select class="form-control" name="is_auction_sellable">
+                                                    <option value="1" @selected($item->is_auction_sellable)>Да</option>
+                                                    <option value="0" @selected(!$item->is_auction_sellable)>Нет</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">

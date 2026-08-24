@@ -16,6 +16,8 @@ use App\Modules\Structure\Auction\Application\UseCases\CreateOrder;
 use App\Modules\Structure\Auction\Application\UseCases\FulfillOrder;
 use App\Modules\Structure\Auction\Application\UseCases\GetAuctionLots;
 use App\Modules\Structure\Auction\Application\UseCases\GetClaims;
+use App\Modules\Structure\Auction\Application\UseCases\GetSaleProceeds;
+use App\Modules\Structure\Auction\Application\UseCases\TakeSaleProceeds;
 use App\Modules\Structure\Auction\Application\UseCases\GetExchangeOrders;
 use App\Modules\Structure\Auction\Application\UseCases\GetLotForEdit;
 use App\Modules\Structure\Auction\Application\UseCases\GetMyOrders;
@@ -43,6 +45,8 @@ class AuctionController extends Controller
         private readonly GetExchangeOrders $getExchangeOrders,
         private readonly GetMyOrders $getMyOrders,
         private readonly GetClaims $getClaims,
+        private readonly GetSaleProceeds $getSaleProceeds,
+        private readonly TakeSaleProceeds $takeSaleProceeds,
         private readonly GetSellableItems $getSellableItems,
     ) {}
 
@@ -100,7 +104,7 @@ class AuctionController extends Controller
             return $this->redirectWithMessage('Построение не найдено.');
         }
 
-        $result = $this->cancelLot->execute($user, $slotId);
+        $result = $this->cancelLot->execute($user, $auction, $slotId);
         session()->flash('message', $result->message);
 
         return redirect()->route('auction.my_lot', ['id' => $auction->id]);
@@ -236,7 +240,7 @@ class AuctionController extends Controller
         }
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
-        $shareItems = ShareItem::where('is_sell', 1)->orderBy('name')->get();
+        $shareItems = ShareItem::where('is_auction_sellable', 1)->orderBy('name')->get();
 
         return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem', 'commissionShop', 'exchange'));
     }
@@ -272,7 +276,7 @@ class AuctionController extends Controller
         $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
-        $result = $this->cancelOrder->execute($user, $orderId);
+        $result = $this->cancelOrder->execute($user, $auction, $orderId);
         session()->flash('message', $result->message);
 
         return redirect()->route('auction.my_orders', ['id' => $auction->id]);
@@ -298,8 +302,24 @@ class AuctionController extends Controller
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $claims = $this->getClaims->execute($auction->id, $user->id);
+        $saleProceeds = collect();
+        $group = 'exchange';
+        $mode = 'claims';
 
-        return view('auction::claims', compact('auction', 'user', 'claims', 'commissionShop', 'exchange'));
+        return view('auction::claims', compact('auction', 'user', 'claims', 'saleProceeds', 'commissionShop', 'exchange', 'group', 'mode'));
+    }
+
+    public function saleProceeds(int $id): mixed
+    {
+        $user = Auth::user();
+        $auction = Structure::findOrFail($id);
+        [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
+        $claims = collect();
+        $saleProceeds = $this->getSaleProceeds->execute([$commissionShop->id], $user->id);
+        $group = 'commission';
+        $mode = 'sale_proceeds';
+
+        return view('auction::claims', compact('auction', 'user', 'claims', 'saleProceeds', 'commissionShop', 'exchange', 'group', 'mode'));
     }
 
     public function claimTake(int $id, int $claimId): RedirectResponse
@@ -307,12 +327,22 @@ class AuctionController extends Controller
         $user = Auth::user();
         $auction = Structure::findOrFail($id);
 
-        $result = $this->takeClaim->execute($user, $claimId);
+        $result = $this->takeClaim->execute($user, $auction, $claimId);
         if (! $result->ok) {
             session()->flash('message', $result->message);
         }
 
         return redirect()->route('auction.claims', ['id' => $auction->id]);
+    }
+
+    public function takeSaleProceeds(int $id, int $proceedsId): RedirectResponse
+    {
+        $user = Auth::user();
+        $auction = Structure::findOrFail($id);
+        $result = $this->takeSaleProceeds->execute($user, $auction, $proceedsId);
+        session()->flash('message', $result->message);
+
+        return redirect()->route('auction.sale_proceeds', ['id' => $auction->id]);
     }
 
     private function redirectWithMessage(string $message): RedirectResponse

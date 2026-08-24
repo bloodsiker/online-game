@@ -36,6 +36,8 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
+@include('auction::_building_switcher')
+
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr height="22">
@@ -62,9 +64,13 @@
                             <span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
                             &nbsp;{{ format_money($user->money) }}
                         </b>
+                        &nbsp;&nbsp;&nbsp;<b class="redd">
+                            <span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>
+                            &nbsp;{{ format_money($user->diamond) }}
+                        </b>
                     </td>
                     <td align="right" nowrap="">
-                        <b>Здесь хранятся купленные вами товары с биржи. Заберите их в инвентарь.</b>
+                        <b>{{ ($mode ?? 'claims') === 'claims' ? 'Здесь хранятся купленные вами товары с Биржи.' : 'Здесь хранится выручка от ваших комиссионных лотов.' }}</b>
                     </td>
                 </tr>
                 </tbody>
@@ -72,6 +78,23 @@
 
             <br>
 
+            @if($saleProceeds->isNotEmpty())
+                <table class="coll w100 p10h p2v brd2-all" border="0">
+                    <tbody>
+                    <tr class="bg_l"><td class="brd2" colspan="3"><b>Выручка от продаж</b></td></tr>
+                    @foreach($saleProceeds as $proceeds)
+                        <tr class="claim-highlight">
+                            <td class="brd2" align="left"><b>{{ $proceeds->history->item->itemInfo->name }}</b> × {{ $proceeds->history->count }}<br><span style="color:#888">{{ $proceeds->created_at->format('d.m.Y H:i') }}</span></td>
+                            <td class="brd2" align="center"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle"> <b>{{ format_money($proceeds->amount) }}</b></td>
+                            <td class="brd2" align="center"><b class="butt2 pointer"><b><input value="забрать" type="submit" class="take-proceeds-btn" data-href="{{ route('auction.sale_proceeds.take', ['id' => $auction->id, 'proceedsId' => $proceeds->id]) }}"></b></b></td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                <br>
+            @endif
+
+            @if(($mode ?? 'claims') === 'claims')
             <table class="coll w100 brd2-all" border="0">
                 <colgroup>
                     <col width="50">
@@ -132,6 +155,7 @@
                 </tr>
                 </tbody>
             </table>
+            @endif
 
         </td>
         <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -161,9 +185,12 @@
     document.querySelectorAll('.take-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const href = this.getAttribute('data-href');
-            if (href) window.location.href = href;
+            if (href) submitAuctionAction(href);
         });
     });
+    document.querySelectorAll('.take-proceeds-btn').forEach(function (btn) { btn.addEventListener('click', function () { const href = this.getAttribute('data-href'); if (href) submitAuctionAction(href); }); });
+
+    function submitAuctionAction(url) { const form = document.createElement('form'); form.method = 'POST'; form.action = url; form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">'; document.body.appendChild(form); form.submit(); }
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')
