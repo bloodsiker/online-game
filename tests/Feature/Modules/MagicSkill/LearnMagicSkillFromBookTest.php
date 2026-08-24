@@ -74,10 +74,11 @@ class LearnMagicSkillFromBookTest extends TestCase
 
     public function test_learning_succeeds_when_requirements_met_and_book_is_consumed(): void
     {
-        // Требование: уровень >= 5, у игрока уровень 10 — выполнено.
+        // Требование: интеллект >= 5, у игрока интеллект 10 — выполнено.
         DB::table('magic_skill_requirements')->insert([
             'magic_skill_id' => self::MAGIC_SKILL_ID,
-            'type' => 'level',
+            'type' => 'stat',
+            'stat_key' => 'intelligence',
             'min_value' => 5,
         ]);
 
@@ -104,10 +105,11 @@ class LearnMagicSkillFromBookTest extends TestCase
 
     public function test_learning_fails_and_book_is_not_consumed_when_requirement_unmet(): void
     {
-        // Требование: уровень >= 50, у игрока уровень 10 — не выполнено.
+        // Требование: интеллект >= 50, у игрока интеллект 10 — не выполнено.
         DB::table('magic_skill_requirements')->insert([
             'magic_skill_id' => self::MAGIC_SKILL_ID,
-            'type' => 'level',
+            'type' => 'stat',
+            'stat_key' => 'intelligence',
             'min_value' => 50,
         ]);
 
@@ -133,12 +135,37 @@ class LearnMagicSkillFromBookTest extends TestCase
         );
     }
 
-    public function test_learning_twice_is_rejected_on_the_second_attempt(): void
+    public function test_learning_checks_spellcasting_skill_not_player_level(): void
     {
-        // Требование: уровень >= 5, у игрока уровень 10 — выполнено оба раза.
+        DB::table('skills')->insert(['id' => 1, 'name' => 'Колдовство', 'type' => 'magic']);
+        DB::table('player_skills')->insert([
+            'player_id' => 1,
+            'skill_id' => 1,
+            'lvl' => 4,
+        ]);
         DB::table('magic_skill_requirements')->insert([
             'magic_skill_id' => self::MAGIC_SKILL_ID,
-            'type' => 'level',
+            'type' => 'skill',
+            'skill_id' => 1,
+            'min_value' => 5,
+        ]);
+
+        $itemId = $this->giveBook(count: 1);
+
+        $result = $this->makeUseCase()->execute(User::findOrFail(1), self::SHARE_ITEM_ID);
+
+        $this->assertFalse($result->ok);
+        $this->assertStringContainsString('Колдовство', $result->message);
+        $this->assertSame(1, DB::table('backpacks')->where('item_id', $itemId)->value('count'));
+    }
+
+    public function test_learning_twice_is_rejected_on_the_second_attempt(): void
+    {
+        // Требование: интеллект >= 5, у игрока интеллект 10 — выполнено оба раза.
+        DB::table('magic_skill_requirements')->insert([
+            'magic_skill_id' => self::MAGIC_SKILL_ID,
+            'type' => 'stat',
+            'stat_key' => 'intelligence',
             'min_value' => 5,
         ]);
 
@@ -188,28 +215,22 @@ class LearnMagicSkillFromBookTest extends TestCase
     {
         DB::table('magic_skill_requirements')->insert([
             'magic_skill_id' => self::MAGIC_SKILL_ID,
-            'type' => 'level',
+            'type' => 'stat',
+            'stat_key' => 'intelligence',
             'min_value' => 5,
         ]);
 
         $itemId = $this->giveBook(count: 1);
 
-        $raceWinnerInserted = false;
-        DB::listen(function ($query) use (&$raceWinnerInserted): void {
-            if ($raceWinnerInserted || ! str_contains($query->sql, 'player_magic_skills')) {
-                return;
-            }
-
-            $raceWinnerInserted = true;
-
-            DB::table('player_magic_skills')->insert([
-                'player_id' => 1,
-                'magic_skill_id' => self::MAGIC_SKILL_ID,
-                'is_equipped' => false,
-                'cooldown_end_at' => null,
-                'sort_order' => 0,
-            ]);
-        });
+        // Параллельный запрос, захвативший player lock раньше нас, завершился
+        // и уже создал связь. Наш запрос не должен расходовать книгу.
+        DB::table('player_magic_skills')->insert([
+            'player_id' => 1,
+            'magic_skill_id' => self::MAGIC_SKILL_ID,
+            'is_equipped' => false,
+            'cooldown_end_at' => null,
+            'sort_order' => 0,
+        ]);
 
         $useCase = $this->makeUseCase();
         $user = User::findOrFail(1);
@@ -243,7 +264,8 @@ class LearnMagicSkillFromBookTest extends TestCase
     {
         DB::table('magic_skill_requirements')->insert([
             'magic_skill_id' => self::MAGIC_SKILL_ID,
-            'type' => 'level',
+            'type' => 'stat',
+            'stat_key' => 'intelligence',
             'min_value' => 5,
         ]);
 
@@ -291,7 +313,6 @@ class LearnMagicSkillFromBookTest extends TestCase
     {
         return new LearnMagicSkillFromBook(
             requirementService: new MagicSkillRequirementService,
-            backpackService: new BackpackService($this->createMock(ItemRequirementService::class)),
         );
     }
 
@@ -435,6 +456,13 @@ class LearnMagicSkillFromBookTest extends TestCase
             $table->unsignedSmallInteger('sort_order')->default(0);
 
             $table->unique(['player_id', 'magic_skill_id']);
+        });
+
+        Schema::create('player_skills', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('skill_id');
+            $table->unsignedInteger('lvl')->default(1);
         });
     }
 }

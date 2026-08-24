@@ -34,10 +34,9 @@ readonly class AttackStrategyResolver
 
     public function resolve(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle): AttackStrategyInterface
     {
-        // battle_id обязателен: дебаффы хранятся на спавне монстра, и без
-        // привязки к текущему бою чужой дебафф из прошлого боя продолжал бы
-        // резать статы этому мобу — см. MonsterCombatantFactory::build().
-        $monster = $this->combatantFactory->build($locMonster, $battle->id);
+        // Магические эффекты хранятся на конкретном спавне моба и истекают по
+        // реальному времени, поэтому действуют и после завершения боя.
+        $monster = $this->combatantFactory->build($locMonster);
         $sheet = $this->statService->resolve($player);
 
         $equip = $player->playerEquip;

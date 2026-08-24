@@ -82,6 +82,7 @@ class BossDebuffDurationTest extends TestCase
             $table->unsignedBigInteger('battle_id')->nullable();
             $table->string('type')->nullable();
             $table->timestamp('applied_at')->nullable();
+            $table->timestamp('last_tick_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();

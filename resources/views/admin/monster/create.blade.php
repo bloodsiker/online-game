@@ -70,6 +70,26 @@
                                     <label class="col-form-label">Макс. атака</label>
                                     <input type="number" step="0.01" class="form-control" name="max_dmg" value="{{ old('max_dmg', 1) }}">
                                 </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Тип атаки</label>
+                                    <select class="form-control" name="attack_type">
+                                        @foreach (\App\Modules\Monster\Domain\Enums\MonsterAttackType::cases() as $attackType)
+                                            <option value="{{ $attackType->value }}" @selected(old('attack_type', 'physical') === $attackType->value)>{{ $attackType->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Магическая атака</label>
+                                    <input type="number" min="0" class="form-control" name="magic_attack" value="{{ old('magic_attack', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Коэффициент магии</label>
+                                    <input type="number" min="0" step="0.01" class="form-control" name="magic_power_coefficient" value="{{ old('magic_power_coefficient', 0) }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Магическое сопротивление</label>
+                                    <input type="number" min="0" class="form-control" name="magic_resistance" value="{{ old('magic_resistance', 1) }}">
+                                </div>
                             </div>
 
                             <div class="col-lg-4">

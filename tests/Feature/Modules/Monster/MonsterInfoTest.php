@@ -40,6 +40,7 @@ class MonsterInfoTest extends TestCase
             'lvl' => 10,
             'hp' => 100,
             'armor' => 5,
+            'magic_resistance' => 8,
             'dodge' => 0,
             'critical' => 0,
             'min_dmg' => 10,
@@ -67,6 +68,9 @@ class MonsterInfoTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Карты обитания');
+        $response->assertSeeText('Броня');
+        $response->assertSeeText('Магическое сопротивление');
+        $response->assertSeeText('8');
         $response->assertSeeText('Гранитный Перевал, Шепчущий Лес');
         $this->assertSame(1, substr_count($content, 'Гранитный Перевал'));
         $this->assertSame(1, substr_count($content, 'Шепчущий Лес'));
@@ -94,6 +98,7 @@ class MonsterInfoTest extends TestCase
             $table->unsignedInteger('lvl');
             $table->unsignedInteger('hp');
             $table->unsignedInteger('armor');
+            $table->unsignedInteger('magic_resistance')->default(0);
             $table->unsignedInteger('dodge');
             $table->unsignedInteger('critical');
             $table->double('min_dmg');

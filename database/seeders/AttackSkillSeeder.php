@@ -64,12 +64,12 @@ class AttackSkillSeeder extends Seeder
                 'min_damage' => 4,
                 'max_damage' => 7,
                 'base_healing' => 0,
-                'cooldown' => 0,
+                'cooldown' => 1,
                 'level' => 1,
                 'is_passive' => false,
             ]);
             $this->addRequirements($fireSpark->id, [
-                [MagicSkillRequirementType::LEVEL, null, null, 1],
+                [MagicSkillRequirementType::SKILL, null, $spellSkillId, 1],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 3],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::WISDOM, null, 2],
             ]);
@@ -88,15 +88,14 @@ class AttackSkillSeeder extends Seeder
                 'min_damage' => 12,
                 'max_damage' => 18,
                 'base_healing' => 0,
-                'cooldown' => 0,
+                'cooldown' => 1,
                 'level' => 20,
                 'is_passive' => false,
             ]);
             $this->addRequirements($fireball->id, [
-                [MagicSkillRequirementType::LEVEL, null, null, 20],
+                [MagicSkillRequirementType::SKILL, null, $spellSkillId, 20],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 35],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::WISDOM, null, 20],
-                [MagicSkillRequirementType::SKILL, null, $spellSkillId, 5],
             ]);
 
             $vortex = MagicSkill::create([
@@ -111,15 +110,14 @@ class AttackSkillSeeder extends Seeder
                 'min_damage' => 30,
                 'max_damage' => 44,
                 'base_healing' => 0,
-                'cooldown' => 0,
+                'cooldown' => 1,
                 'level' => 55,
                 'is_passive' => false,
             ]);
             $this->addRequirements($vortex->id, [
-                [MagicSkillRequirementType::LEVEL, null, null, 55],
+                [MagicSkillRequirementType::SKILL, null, $spellSkillId, 55],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 90],
                 [MagicSkillRequirementType::STAT, PlayerStatKey::WISDOM, null, 45],
-                [MagicSkillRequirementType::SKILL, null, $spellSkillId, 15],
             ]);
 
             $player = Player::find(self::PLAYER_ID);

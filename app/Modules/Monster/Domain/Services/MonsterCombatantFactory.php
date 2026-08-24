@@ -14,20 +14,17 @@ class MonsterCombatantFactory
     private const DEBUFFABLE_STATS = ['armor', 'dodge'];
 
     /**
-     * @param  int|null  $battleId  Бой, в рамках которого собирается боец. Дебаффы
-     *                              висят на конкретном спавне монстра (MonsterOnLocation),
-     *                              а не на бое, поэтому без этой привязки дебафф,
-     *                              наложенный в одном бою, продолжал резать броню
-     *                              этому же спавну во всех последующих боях других
-     *                              игроков. null — только для вызовов вне боя.
+     * Боевые магические эффекты принадлежат конкретному спавну моба и живут
+     * до expires_at, поэтому переживают завершение боя — привязки к бою не требуется.
      */
-    public function build(MonsterOnLocation $locMonster, ?int $battleId): MonsterCombatant
+    public function build(MonsterOnLocation $locMonster): MonsterCombatant
     {
         $totals = array_fill_keys(self::DEBUFFABLE_STATS, 0.0);
 
         $activeEffects = MonsterActiveEffect::query()
             ->where('location_monster_id', $locMonster->id)
-            ->when($battleId !== null, fn ($query) => $query->where('battle_id', $battleId))
+            ->whereNull('battle_id')
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->with('effect')
             ->get();
 

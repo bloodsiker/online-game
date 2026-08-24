@@ -109,6 +109,7 @@ return new class extends Migration
             $table->foreignId('effect_id')->constrained('effects')->onDelete('cascade');
 
             $table->timestamp('applied_at');           // Когда наложен
+            $table->timestamp('last_tick_at')->nullable(); // Когда последний раз сработал тик (для DoT/HoT)
             $table->timestamp('expires_at')->nullable(); // Когда истекает (null = пока не снимут)
             $table->integer('stacks')->default(1);     // Текущее количество стаков
             $table->integer('current_value')->nullable(); // Остаток значения (для DoT/HoT)

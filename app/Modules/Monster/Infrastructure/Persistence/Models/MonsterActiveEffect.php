@@ -19,11 +19,12 @@ class MonsterActiveEffect extends Model
 
     protected $fillable = [
         'location_monster_id', 'effect_id', 'battle_id', 'type',
-        'applied_at', 'expires_at', 'stacks', 'current_value',
+        'applied_at', 'last_tick_at', 'expires_at', 'stacks', 'current_value',
     ];
 
     protected $casts = [
         'applied_at' => 'datetime',
+        'last_tick_at' => 'datetime',
         'expires_at' => 'datetime',
         'type' => ActiveEffectType::class,
     ];

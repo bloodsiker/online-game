@@ -56,7 +56,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="col-form-label">Требуемый уровень</label>
+                                    <label class="col-form-label">Уровень заклинания</label>
                                     <input type="number" min="1" class="form-control" name="level" value="{{ $magicSkill->level }}">
                                 </div>
                             </div>
@@ -168,6 +168,95 @@
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
                                 <button class="btn btn-primary btn-sm mb-2">Добавить</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-md-6">
+            <section class="card">
+                <header class="card-header"><h2 class="card-title">Требования к изучению</h2></header>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Проверяются только при изучении книги. Уже изученное заклинание остаётся доступным.</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-none">
+                            <thead>
+                            <tr>
+                                <th>Тип</th>
+                                <th>Требование</th>
+                                <th width="100">Минимум</th>
+                                <th width="70"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @forelse($magicSkill->requirements as $requirement)
+                                <tr style="vertical-align: middle">
+                                    <td><span class="badge badge-info">{{ $requirement->type->label() }}</span></td>
+                                    <td>{{ $requirement->label() }}</td>
+                                    <td>{{ $requirement->min_value }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.magic_skill.requirement.delete', [$magicSkill->id, $requirement->id]) }}"
+                                           class="btn btn-xs btn-danger"
+                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="text-center text-muted">Требования не заданы</td></tr>
+                            @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    <form action="{{ route('admin.magic_skill.requirement.add', $magicSkill->id) }}" method="post">
+                        {{ csrf_field() }}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Тип</label>
+                                    <select name="type" class="form-control" required>
+                                        @foreach (\App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType::cases() as $type)
+                                            <option value="{{ $type->value }}" @selected(old('type') === $type->value)>{{ $type->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Характеристика</label>
+                                    <select name="stat_key" class="form-control">
+                                        <option value="">—</option>
+                                        @foreach (\App\Modules\Player\Domain\Enums\PlayerStatKey::cases() as $stat)
+                                            <option value="{{ $stat->value }}" @selected(old('stat_key') === $stat->value)>{{ $stat->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Навык</label>
+                                    <select name="skill_id" class="form-control" data-plugin-selectTwo>
+                                        <option value="">—</option>
+                                        @foreach ($skills as $skill)
+                                            <option value="{{ $skill->id }}" @selected((string) old('skill_id') === (string) $skill->id)>{{ $skill->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Минимальное значение</label>
+                                    <input type="number" min="1" name="min_value" class="form-control" value="{{ old('min_value', 1) }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-8 d-flex align-items-end">
+                                <button class="btn btn-primary btn-sm mb-2">Добавить требование</button>
                             </div>
                         </div>
                     </form>

@@ -8,6 +8,7 @@ use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,7 +23,8 @@ class Monster extends Model implements FightHitInterface
 
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
-        'exp', 'min_money', 'max_money', 'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
+        'exp', 'min_money', 'max_money', 'attack_type', 'magic_attack', 'magic_power_coefficient', 'magic_resistance',
+        'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
     protected $attributes = [
@@ -31,6 +33,7 @@ class Monster extends Model implements FightHitInterface
 
     protected $casts = [
         'is_boss' => 'boolean',
+        'attack_type' => MonsterAttackType::class,
         'respawn_at' => 'datetime',
     ];
 
@@ -137,12 +140,17 @@ class Monster extends Model implements FightHitInterface
 
     public function getMagicResistance(): int
     {
-        return 0;
+        return max(0, (int) $this->magic_resistance);
     }
 
     public function getMagicAttack(): int
     {
-        return 0;
+        return max(0, (int) $this->magic_attack);
+    }
+
+    public function usesMagicAttack(): bool
+    {
+        return ($this->attack_type ?? MonsterAttackType::PHYSICAL)->isMagic();
     }
 
     /**

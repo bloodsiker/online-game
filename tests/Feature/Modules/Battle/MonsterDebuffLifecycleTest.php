@@ -82,6 +82,7 @@ class MonsterDebuffLifecycleTest extends TestCase
             $table->unsignedBigInteger('battle_id')->nullable();
             $table->string('type')->nullable();
             $table->timestamp('applied_at')->nullable();
+            $table->timestamp('last_tick_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();
@@ -113,7 +114,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         return MonsterOnLocation::create(['monster_id' => $monster->id, 'hp_now' => 200, 'hp_max' => 200]);
     }
 
-    public function test_null_type_debuff_decrements_and_is_deleted_when_it_runs_out(): void
+    public function test_null_type_debuff_lives_for_seconds_not_for_battle_rounds(): void
     {
         $locMonster = $this->spawn();
         $battle = Battle::create();
@@ -126,20 +127,21 @@ class MonsterDebuffLifecycleTest extends TestCase
         $this->assertNull($row->type, 'чистый стат-дебафф хранится без ActiveEffectType — это и есть проблемный случай');
         $this->assertSame(3, (int) $row->stacks);
 
-        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
         $this->assertSame(
-            2,
+            3,
             (int) DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks'),
-            'каждый раунд обязан списывать стак',
+            'повторный ход не должен сокращать эффект без прошедшего времени',
         );
 
-        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        DB::table('monster_active_effects')
+            ->where('location_monster_id', $locMonster->id)
+            ->update(['expires_at' => now()->subSecond()]);
         $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
 
         $this->assertSame(
             0,
             DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->count(),
-            'по исчерпании длительности строка обязана удаляться, а не висеть до смерти моба',
+            'по истечении времени строка обязана удаляться, а не висеть до смерти моба',
         );
         $this->assertSame(200, $locMonster->hp_now, 'чистый стат-дебафф не наносит урона');
     }
@@ -154,13 +156,15 @@ class MonsterDebuffLifecycleTest extends TestCase
         $service->applyEffectToMonster($this->armorDebuff(duration: 2), $locMonster, $battle, new AttackResultDTO);
         $this->assertSame(35, $factory->build($locMonster, $battle->id)->getArmor());
 
-        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        DB::table('monster_active_effects')
+            ->where('location_monster_id', $locMonster->id)
+            ->update(['expires_at' => now()->subSecond()]);
         $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
 
         $this->assertSame(50, $factory->build($locMonster, $battle->id)->getArmor(), 'после истечения дебафф обязан перестать резать броню');
     }
 
-    public function test_debuff_from_another_battle_does_not_leak_into_a_fresh_battle(): void
+    public function test_debuff_from_another_battle_persists_on_the_same_monster(): void
     {
         $locMonster = $this->spawn(armor: 50);
         $battleA = Battle::create();
@@ -174,9 +178,9 @@ class MonsterDebuffLifecycleTest extends TestCase
         $battleB = Battle::create();
 
         $this->assertSame(
-            50,
+            35,
             $factory->build($locMonster, $battleB->id)->getArmor(),
-            'дебафф из чужого боя не должен резать броню в новом бою',
+            'дебафф должен переживать завершение первого боя',
         );
         $this->assertSame(
             35,
@@ -185,7 +189,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         );
     }
 
-    public function test_recasting_the_same_debuff_in_a_fresh_battle_scopes_to_that_battle_not_a_stale_row(): void
+    public function test_recasting_the_same_debuff_refreshes_one_persistent_row(): void
     {
         // Re-review finding: applyEffectToMonster()'s $existing lookup only scoped by
         // location_monster_id + type/effect_id, not battle_id — so a stale row left over
@@ -211,16 +215,16 @@ class MonsterDebuffLifecycleTest extends TestCase
         $this->assertSame(
             35,
             $factory->build($locMonster, $battleB->id)->getArmor(),
-            'дебафф, наложенный заново в новом бою, обязан подействовать в этом же бою, а не молча обновить чужую строку',
+            'дебафф, наложенный заново в новом бою, обязан продолжать действовать',
         );
         $this->assertSame(
-            2,
+            1,
             DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->count(),
-            'должна появиться отдельная строка для battle B, а не одна общая на оба боя',
+            'повторный каст должен обновить один постоянный эффект, а не создать стак',
         );
     }
 
-    public function test_boss_halved_debuff_duration_is_now_actually_consumed(): void
+    public function test_boss_halved_debuff_duration_is_applied_in_seconds(): void
     {
         $locMonster = $this->spawn(isBoss: true, armor: 60);
         $battle = Battle::create();
@@ -234,11 +238,11 @@ class MonsterDebuffLifecycleTest extends TestCase
             (int) DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks'),
         );
 
+        $this->assertSame(45, $factory->build($locMonster, $battle->id)->getArmor(), 'дебафф активен до истечения времени');
+        DB::table('monster_active_effects')
+            ->where('location_monster_id', $locMonster->id)
+            ->update(['expires_at' => now()->subSecond()]);
         $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
-        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
-        $this->assertSame(45, $factory->build($locMonster, $battle->id)->getArmor(), 'на третьем раунде дебафф ещё жив');
-
-        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
-        $this->assertSame(60, $factory->build($locMonster, $battle->id)->getArmor(), 'укороченная вдвое длительность обязана истечь вдвое быстрее');
+        $this->assertSame(60, $factory->build($locMonster, $battle->id)->getArmor(), 'укороченная вдвое длительность истекает по времени');
     }
 }

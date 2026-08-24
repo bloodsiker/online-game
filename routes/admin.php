@@ -139,6 +139,8 @@ Route::get('/skills', [SkillController::class, 'list'])->name('skills');
 Route::match(['GET', 'POST'], '/magic-skill/create', [MagicSkillController::class, 'create'])->name('magic_skill.create');
 Route::post('/magic-skill/{magic_skill}/effect', [MagicSkillController::class, 'addEffect'])->name('magic_skill.effect.add');
 Route::get('/magic-skill/{magic_skill}/effect/{effect}/delete', [MagicSkillController::class, 'deleteEffect'])->name('magic_skill.effect.delete');
+Route::post('/magic-skill/{magic_skill}/requirement', [MagicSkillController::class, 'addRequirement'])->name('magic_skill.requirement.add');
+Route::get('/magic-skill/{magic_skill}/requirement/{requirement}/delete', [MagicSkillController::class, 'deleteRequirement'])->name('magic_skill.requirement.delete');
 Route::match(['GET', 'POST'], '/magic-skill/{magic_skill}', [MagicSkillController::class, 'info'])->name('magic_skill.info');
 Route::get('/magic-skills', [MagicSkillController::class, 'list'])->name('magic_skills');
 

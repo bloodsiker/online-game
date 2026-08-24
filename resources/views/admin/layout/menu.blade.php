@@ -56,17 +56,19 @@
                             <span>Навыки</span>
                         </a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.magic_skills', 'admin.magic_skill.*') ? 'nav-active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.magic_skills') }}">
-                            <i class="bx bx-magic-wand" aria-hidden="true"></i>
-                            <span>Скиллы (магия)</span>
+                    <li class="{{ request()->routeIs('admin.magic_skills', 'admin.magic_skill.*', 'admin.effects', 'admin.effect.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-atom" aria-hidden="true"></i>
+                            <span>Магия</span>
                         </a>
-                    </li>
-                    <li class="{{ request()->routeIs('admin.effects', 'admin.effect.*') ? 'nav-active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.effects') }}">
-                            <i class="bx bx-flash" aria-hidden="true"></i>
-                            <span>Эффекты</span>
-                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.magic_skills', 'admin.magic_skill.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.magic_skills') }}">Заклинания</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.effects', 'admin.effect.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.effects') }}">Эффекты</a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="{{ request()->routeIs('admin.items', 'admin.item.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.items') }}">
@@ -191,6 +193,8 @@
                             <span>Почта</span>
                         </a>
                     </li>
+                    {{-- Временное скрытие пунктов демо-шаблона Porto ниже «Почта». --}}
+                    {{--
                     <li class="nav-parent">
                         <a class="nav-link" href="#">
                             <i class="bx bx-cart-alt" aria-hidden="true"></i>
@@ -862,6 +866,7 @@
                             <span>Changelog</span>
                         </a>
                     </li>
+                    --}}
 
                 </ul>
             </nav>

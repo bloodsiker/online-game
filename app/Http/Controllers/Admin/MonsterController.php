@@ -10,6 +10,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\JsonResponse;
@@ -270,6 +271,11 @@ class MonsterController extends Controller
         $monster->critical = (int) $request->input('critical', 0);
         $monster->min_dmg = (float) $request->input('min_dmg', 0);
         $monster->max_dmg = (float) $request->input('max_dmg', 0);
+        $monster->attack_type = MonsterAttackType::tryFrom((string) $request->input('attack_type'))
+            ?? MonsterAttackType::PHYSICAL;
+        $monster->magic_attack = max(0, (int) $request->input('magic_attack', 0));
+        $monster->magic_power_coefficient = max(0, (float) $request->input('magic_power_coefficient', 0));
+        $monster->magic_resistance = max(0, (int) $request->input('magic_resistance', $monster->lvl));
         $monster->aggression = (int) $request->input('aggression', 0);
         $monster->exp = (int) $request->input('exp', 0);
         $monster->min_money = (int) $request->input('min_money', 0);

@@ -224,12 +224,14 @@
                                                     <td class="brd2-top brd2-bt b redd" align="right">{{ $page->monster->min_dmg }} .. {{ $page->monster->max_dmg }}</td>
                                                 </tr>
                                                 @endif
-                                                @if($page->monster->armor)
                                                 <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
                                                     <td class="brd2-top brd2-bt b">Броня</td>
-                                                    <td class="brd2-top brd2-bt b redd" align="right">{{ $page->monster->armor }}</td>
+                                                    <td class="brd2-top brd2-bt b redd" align="right">{{ $page->monster->getArmor() }}</td>
                                                 </tr>
-                                                @endif
+                                                <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
+                                                    <td class="brd2-top brd2-bt b">Магическое сопротивление</td>
+                                                    <td class="brd2-top brd2-bt b redd" align="right">{{ $page->monster->getMagicResistance() }}</td>
+                                                </tr>
                                                 @if($page->monster->dodge)
                                                 <tr class="{{ $row++ % 2 === 0 ? 'bg_l' : '' }}">
                                                     <td class="brd2-top brd2-bt b">Уворот</td>

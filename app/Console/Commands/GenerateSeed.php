@@ -155,6 +155,7 @@ class GenerateSeed extends Command
         // атакующих заклинания, которые создаёт AttackSkillSeeder.
         $this->call('db:seed', ['--class' => 'AttackSkillSeeder']);
         $this->call('db:seed', ['--class' => 'MagicBookStarterSeeder']);
+        $this->call('db:seed', ['--class' => 'MageTierOneEquipmentSeeder']);
     }
 
     /**

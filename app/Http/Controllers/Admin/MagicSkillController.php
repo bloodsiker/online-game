@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Skill;
+use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
+use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -42,10 +46,15 @@ class MagicSkillController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $magic_skill->load('skillEffects');
+        $magic_skill->load('skillEffects', 'requirements.skill');
         $effects = Effect::orderBy('name')->get();
+        $skills = Skill::orderBy('name')->get();
 
-        return view('admin.magic_skill.info', ['magicSkill' => $magic_skill, 'effects' => $effects]);
+        return view('admin.magic_skill.info', [
+            'magicSkill' => $magic_skill,
+            'effects' => $effects,
+            'skills' => $skills,
+        ]);
     }
 
     public function addEffect(Request $request, MagicSkill $magic_skill): RedirectResponse
@@ -62,6 +71,44 @@ class MagicSkillController extends Controller
         $magic_skill->skillEffects()->detach($effect->id);
 
         return redirect()->back()->with('success', 'Эффект удалён.');
+    }
+
+    public function addRequirement(Request $request, MagicSkill $magic_skill): RedirectResponse
+    {
+        $validated = $request->validate([
+            'type' => ['required', 'in:stat,skill'],
+            'stat_key' => ['nullable', 'string', 'in:'.implode(',', array_column(PlayerStatKey::cases(), 'value'))],
+            'skill_id' => ['nullable', 'integer', 'exists:skills,id'],
+            'min_value' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $type = MagicSkillRequirementType::from($validated['type']);
+
+        if ($type === MagicSkillRequirementType::STAT && empty($validated['stat_key'])) {
+            return redirect()->back()->withErrors(['stat_key' => 'Выберите характеристику.'])->withInput();
+        }
+
+        if ($type === MagicSkillRequirementType::SKILL && empty($validated['skill_id'])) {
+            return redirect()->back()->withErrors(['skill_id' => 'Выберите навык.'])->withInput();
+        }
+
+        $magic_skill->requirements()->create([
+            'type' => $type,
+            'stat_key' => $type === MagicSkillRequirementType::STAT ? $validated['stat_key'] : null,
+            'skill_id' => $type === MagicSkillRequirementType::SKILL ? $validated['skill_id'] : null,
+            'min_value' => $validated['min_value'],
+        ]);
+
+        return redirect()->back()->with('success', 'Требование добавлено.');
+    }
+
+    public function deleteRequirement(MagicSkill $magic_skill, MagicSkillRequirement $requirement): RedirectResponse
+    {
+        abort_unless($requirement->magic_skill_id === $magic_skill->id, 404);
+
+        $requirement->delete();
+
+        return redirect()->back()->with('success', 'Требование удалено.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────

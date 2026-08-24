@@ -134,6 +134,26 @@
                                                 <label class="col-form-label">Макс. атака</label>
                                                 <input type="number" step="0.01" class="form-control" name="max_dmg" value="{{ $monster->max_dmg }}">
                                             </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Тип атаки</label>
+                                                <select class="form-control" name="attack_type">
+                                                    @foreach (\App\Modules\Monster\Domain\Enums\MonsterAttackType::cases() as $attackType)
+                                                        <option value="{{ $attackType->value }}" @selected($monster->attack_type === $attackType)>{{ $attackType->label() }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Магическая атака</label>
+                                                <input type="number" min="0" class="form-control" name="magic_attack" value="{{ $monster->magic_attack }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Коэффициент магии</label>
+                                                <input type="number" min="0" step="0.01" class="form-control" name="magic_power_coefficient" value="{{ $monster->magic_power_coefficient }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Магическое сопротивление</label>
+                                                <input type="number" min="0" class="form-control" name="magic_resistance" value="{{ $monster->magic_resistance }}">
+                                            </div>
                                         </div>
 
                                         <div class="col-lg-4">

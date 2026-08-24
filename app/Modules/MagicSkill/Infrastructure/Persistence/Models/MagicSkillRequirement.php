@@ -40,7 +40,7 @@ class MagicSkillRequirement extends Model
     public function label(): string
     {
         return match ($this->type) {
-            MagicSkillRequirementType::LEVEL => 'Уровень персонажа',
+            MagicSkillRequirementType::LEVEL => 'Уровень персонажа (будет заменён на Колдовство)',
             MagicSkillRequirementType::STAT => $this->statLabel(),
             MagicSkillRequirementType::SKILL => $this->skill?->name ?? 'Навык #'.$this->skill_id,
         };

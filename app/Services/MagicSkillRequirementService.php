@@ -13,7 +13,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 class MagicSkillRequirementService
 {
     /**
-     * Проверяет, выполняет ли игрок все требования заклинания (уровень/статы/навык).
+     * Проверяет, выполняет ли игрок все требования заклинания (статы/навык).
      * Возвращает null при успехе или строку с описанием первого неудовлетворённого требования.
      */
     public function check(Player $player, MagicSkill $skill): ?string
@@ -35,7 +35,9 @@ class MagicSkillRequirementService
 
         foreach ($skill->requirements as $req) {
             $met = match ($req->type) {
-                MagicSkillRequirementType::LEVEL => $player->lvl >= $req->min_value,
+                // Старые записи будут переведены миграцией в требование навыка.
+                // До её запуска они не должны ни блокировать изучение, ни вызывать 500.
+                MagicSkillRequirementType::LEVEL => true,
                 MagicSkillRequirementType::STAT => $this->checkStat($player, (string) $req->stat_key, $req->min_value),
                 MagicSkillRequirementType::SKILL => (int) $skillLevels->get($req->skill_id, 0) >= $req->min_value,
             };

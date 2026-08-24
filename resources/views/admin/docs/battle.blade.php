@@ -150,14 +150,14 @@
                             <tr>
                                 <td>Мудрость</td>
                                 <td><span class="badge-note">не боевая</span></td>
-                                <td>Максимум маны</td>
-                                <td><code>mp_max = 10 + 3 × (мудрость − 1)</code></td>
+                                <td>Максимум маны и магическое сопротивление</td>
+                                <td><code>mp_max = 10 + 3 × (мудрость − 1)</code><br><code>magic_resistance = мудрость − 1</code> + бонусы экипировки</td>
                             </tr>
                             <tr>
                                 <td>Интеллект</td>
                                 <td><span class="badge-note">не боевая</span></td>
                                 <td>Сила магической атаки</td>
-                                <td>напрямую как <code>magic_attack</code></td>
+                                <td><code>magic_power = intelligence + magic_attack</code>, где <code>magic_attack</code> — бонусы экипировки</td>
                             </tr>
                             <tr>
                                 <td>Выносливость</td>
@@ -249,6 +249,53 @@
                         K и ARMOR_CONSTANT умножаются на <code>levelScale</code> — форма кривых (в процентах) не меняется
                         от 1 до 500 уровня, только абсолютные цифры характеристик растут вместе с уровнем.
                     </div>
+                </div>
+
+                {{-- ══════════════════════════════════════════════════════════════ --}}
+                {{-- МАГИЧЕСКАЯ АТАКА --}}
+                {{-- ══════════════════════════════════════════════════════════════ --}}
+                <div class="doc-section">
+                    <h3><i class="bx bx-atom"></i> Магическая атака и сопротивление</h3>
+
+                    <div class="section-intro">
+                        Магический урон используют атакующие заклинания игрока и монстры с типом атаки
+                        <span class="badge-enum">magic</span>. Для него применяется отдельный
+                        <code>MagicHitCalculator</code>: магический удар не может промахнуться, стать критическим,
+                        быть заблокирован щитом или отражён руной. Единственная защита цели — магическое сопротивление.
+                    </div>
+
+                    <h4>Формула урона заклинания игрока</h4>
+                    <div class="flow-box">
+                        <code>сила_магии = интеллект + magic_attack экипировки</code><br>
+                        <code>сырой_урон = random(min_damage, max_damage) + round(сила_магии × power_coefficient)</code><br>
+                        <code>A = 220 × max(1, средний_уровень_сторон ÷ 12)</code><br>
+                        <code>итоговый_урон = max(1, round(сырой_урон × A ÷ (A + magic_resistance цели)))</code>
+                    </div>
+                    <p>
+                        <code>min_damage</code>, <code>max_damage</code> и <code>power_coefficient</code> задаются отдельно
+                        у каждого заклинания. Интеллект — базовая часть силы магии; свойство предмета
+                        <code>magic_attack</code> добавляется к ней. Мудрость повышает ману и магическое сопротивление,
+                        а предметы могут дать дополнительное <code>magic_resistance</code>.
+                    </p>
+
+                    <h4>Магические атаки монстров</h4>
+                    <table class="table table-bordered table-hover field-table">
+                        <thead><tr><th>Поле моба</th><th>Назначение</th><th>Как используется</th></tr></thead>
+                        <tbody>
+                            <tr><td>attack_type</td><td>Тип обычной атаки</td><td><span class="badge-enum">physical</span> — физическая атака; <span class="badge-enum">magic</span> — магическая</td></tr>
+                            <tr><td>min_dmg / max_dmg</td><td>Базовый диапазон</td><td>Используется для обоих типов атак как <code>random(min_dmg, max_dmg)</code></td></tr>
+                            <tr><td>magic_attack</td><td>Сила магии моба</td><td>Добавляется к базовому диапазону только при магической атаке</td></tr>
+                            <tr><td>magic_power_coefficient</td><td>Коэффициент силы магии</td><td><code>magic_attack × magic_power_coefficient</code>; при <code>0</code> магическая атака наносит только базовый диапазон</td></tr>
+                            <tr><td>magic_resistance</td><td>Защита от заклинаний</td><td>Снижает только магический урон. Базовое значение для обычного моба — <code>1 × уровень</code>, но его можно задать индивидуально.</td></tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        У мобов нет интеллекта, поэтому их сила магии состоит только из поля <code>magic_attack</code>.
+                        Их магическое сопротивление задаётся отдельно и не влияет на физическую защиту.
+                        Для босса специальный навык может переопределить тип урона через <code>damage_type</code> и
+                        коэффициент через <code>magic_power_coefficient</code>. Перед сохранением моба с магической атакой
+                        следует проверить его против персонажа с разным <code>magic_resistance</code>.
+                    </p>
                 </div>
 
                 {{-- ══════════════════════════════════════════════════════════════ --}}

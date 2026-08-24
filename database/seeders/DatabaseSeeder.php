@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         // от навыка «Колдовство» из миграции 2026_08_22_120000.
         $this->call(AttackSkillSeeder::class);
         $this->call(MagicBookStarterSeeder::class);
+        $this->call(MageTierOneEquipmentSeeder::class);
         $this->call(EventActivitySeeder::class);
         $this->call(HighTierEquipmentSeeder::class);
         $this->call(OvergrownRoadMonsterSeeder::class);

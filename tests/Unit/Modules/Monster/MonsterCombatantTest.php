@@ -21,12 +21,20 @@ class MonsterCombatantTest extends TestCase
 
     public function test_no_debuffs_passes_through_species_stats_unchanged(): void
     {
-        $monster = new Monster(['armor' => 40, 'dodge' => 12, 'critical' => 8, 'lvl' => 30]);
+        $monster = new Monster(['armor' => 40, 'dodge' => 12, 'critical' => 8, 'lvl' => 30, 'magic_resistance' => 60]);
         $combatant = new MonsterCombatant($monster, []);
 
         $this->assertSame(40, $combatant->getArmor());
         $this->assertSame(12, $combatant->getDodge());
         $this->assertSame(8, $combatant->getCritical());
         $this->assertSame(30, $combatant->getLevel());
+        $this->assertSame(60, $combatant->getMagicResistance());
+    }
+
+    public function test_magic_resistance_cannot_be_negative(): void
+    {
+        $monster = new Monster(['magic_resistance' => -10]);
+
+        $this->assertSame(0, $monster->getMagicResistance());
     }
 }

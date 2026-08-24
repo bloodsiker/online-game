@@ -138,7 +138,7 @@ class MagicBookStarterSeeder extends Seeder
         $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
-            [MagicSkillRequirementType::LEVEL, null, null, 10],
+            [MagicSkillRequirementType::SKILL, null, $spellSkillId, 10],
             [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 12],
             [MagicSkillRequirementType::STAT, PlayerStatKey::WISDOM, null, 8],
         ]);
@@ -160,13 +160,13 @@ class MagicBookStarterSeeder extends Seeder
             'max_damage' => 0,
             'power_coefficient' => 0.35,
             'base_healing' => 40,
-            'cooldown' => 20,
+            'cooldown' => 1,
             'level' => 5,
             'is_passive' => false,
         ]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
-            [MagicSkillRequirementType::LEVEL, null, null, 5],
+            [MagicSkillRequirementType::SKILL, null, $spellSkillId, 5],
             [MagicSkillRequirementType::STAT, PlayerStatKey::WISDOM, null, 10],
         ]);
 
@@ -216,7 +216,7 @@ class MagicBookStarterSeeder extends Seeder
         $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
-            [MagicSkillRequirementType::LEVEL, null, null, 15],
+            [MagicSkillRequirementType::SKILL, null, $spellSkillId, 15],
             [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 18],
         ]);
 
@@ -260,9 +260,8 @@ class MagicBookStarterSeeder extends Seeder
         $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
-            [MagicSkillRequirementType::LEVEL, null, null, 18],
+            [MagicSkillRequirementType::SKILL, null, $spellSkillId, 18],
             [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 20],
-            [MagicSkillRequirementType::SKILL, null, $spellSkillId, 3],
         ]);
 
         $this->makeBook('Книга: Разъедающая ржавчина', $skill);

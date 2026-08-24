@@ -138,6 +138,7 @@ class SeededDotSpellTicksTest extends TestCase
             $table->unsignedBigInteger('battle_id')->nullable();
             $table->string('type')->nullable();
             $table->timestamp('applied_at')->nullable();
+            $table->timestamp('last_tick_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();
@@ -195,27 +196,26 @@ class SeededDotSpellTicksTest extends TestCase
         $this->assertNotNull($row);
         $this->assertSame('burn', $row->type, 'type = NULL означал бы, что строку никто никогда не прочитает');
 
-        $duration = (int) $effect->duration;
-        $this->assertGreaterThan(0, $duration);
-
         $hpBefore = $locMonster->hp_now;
 
-        for ($round = 1; $round <= $duration; $round++) {
-            $hpAtRoundStart = $locMonster->hp_now;
-            $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        // Сразу после наложения тика нет: время, а не число ходов, управляет DoT.
+        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        $this->assertSame($hpBefore, $locMonster->hp_now);
 
-            $this->assertSame(
-                $hpAtRoundStart - 7,
-                $locMonster->hp_now,
-                sprintf('раунд %d: DoT обязан снять ровно tickValueOverride HP', $round),
-            );
-        }
+        DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)
+            ->update(['last_tick_at' => now()->subSeconds(2)]);
+        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        $this->assertSame($hpBefore - 7, $locMonster->hp_now);
 
-        $this->assertSame($hpBefore - 7 * $duration, $locMonster->hp_now);
+        // При следующем обращении к мобу забираются пропущенные тики до expires_at.
+        DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)
+            ->update(['last_tick_at' => now()->subSeconds(4), 'expires_at' => now()]);
+        $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
+        $this->assertSame($hpBefore - 21, $locMonster->hp_now);
         $this->assertSame(
             0,
             DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->count(),
-            'после отработки всех стаков строка эффекта обязана быть удалена',
+            'после истечения времени строка эффекта обязана быть удалена',
         );
     }
 }

@@ -9,6 +9,8 @@ use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -22,6 +24,7 @@ readonly class MonsterAttackService
 {
     public function __construct(
         private HitCalculator $hitCalc,
+        private MagicHitCalculator $magicHitCalc,
         private BossPhaseService $bossPhaseService,
         private BattleEffectService $effectService,
         private PlayerStatService $statService,
@@ -34,25 +37,33 @@ readonly class MonsterAttackService
     {
         // Защита считается по итоговым статам (шмот/баффы), а не по сырой модели
         $sheet = $this->statService->resolve($player);
-        $hit = $this->hitCalc->hit($locationMonster->monster, $sheet, $locationMonster->monster->min_dmg, $locationMonster->monster->max_dmg);
+        $monster = $locationMonster->monster;
+        $isMagic = $monster->usesMagicAttack();
+        $hit = $this->resolveHit($monster, $sheet, $monster->min_dmg, $monster->max_dmg, $isMagic);
 
-        if ($hit->isDodge()) {
-            $result->log(sprintf('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', $locationMonster->monster->name));
+        if (! $isMagic && $hit->isDodge()) {
+            $result->log(sprintf('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', $monster->name));
 
             return;
         }
 
-        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        }
 
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
-        $msg = $hit->isCritical()
+        $msg = $isMagic
+            ? sprintf('<p>%s использует магическую атаку! <br>Повреждения: <b class="color-magic">%s</b></p>', $monster->name, $hit->getDamage())
+            : ($hit->isCritical()
             ? sprintf('<p>%s прыгнул на вас. <b class="color-red">нанесен критический удар!</b> <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage())
-            : sprintf('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage());
+            : sprintf('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage()));
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        }
     }
 
     /**
@@ -243,9 +254,10 @@ readonly class MonsterAttackService
     ): void {
         $monster = $locationMonster->monster;
 
-        $hit = $this->hitCalc->hit($monster, $sheet, $minDmg, $maxDmg);
+        $isMagic = $monster->usesMagicAttack();
+        $hit = $this->resolveHit($monster, $sheet, $minDmg, $maxDmg, $isMagic);
 
-        if ($hit->isDodge()) {
+        if (! $isMagic && $hit->isDodge()) {
             $result->log(sprintf(
                 '<p><b class="color-boss">%s</b> атакует неудачно... Вы <b class="color-green">увернулись</b></p>',
                 $monster->name
@@ -254,7 +266,9 @@ readonly class MonsterAttackService
             return;
         }
 
-        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        }
 
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
@@ -262,7 +276,14 @@ readonly class MonsterAttackService
             ? sprintf(' <span class="color-enrage">(урон +%d%%)</span>', $totalModifier)
             : '';
 
-        $msg = $hit->isCritical()
+        $msg = $isMagic
+            ? sprintf(
+                '<p><b class="color-boss">%s</b> использует магическую атаку%s! <br>Повреждения: <b class="color-magic">%s</b></p>',
+                $monster->name,
+                $modifierText,
+                $hit->getDamage(),
+            )
+            : ($hit->isCritical()
             ? sprintf(
                 '<p><b class="color-boss">%s</b> набрасывается на вас%s. <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b></p>',
                 $monster->name,
@@ -274,11 +295,13 @@ readonly class MonsterAttackService
                 $monster->name,
                 $modifierText,
                 $hit->getDamage()
-            );
+            ));
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        }
     }
 
     private function executeBossSpecialSkill(
@@ -317,9 +340,13 @@ readonly class MonsterAttackService
         $skillMinDmg = (int) ($minDmg * $damageMultiplier);
         $skillMaxDmg = (int) ($maxDmg * $damageMultiplier);
 
-        $hit = $this->hitCalc->hit($monster, $sheet, $skillMinDmg, $skillMaxDmg);
+        $attackType = MonsterAttackType::tryFrom((string) ($skill->parameters['damage_type'] ?? $monster->attack_type?->value))
+            ?? MonsterAttackType::PHYSICAL;
+        $isMagic = $attackType->isMagic();
+        $powerCoefficient = (float) ($skill->parameters['magic_power_coefficient'] ?? $monster->magic_power_coefficient);
+        $hit = $this->resolveHit($monster, $sheet, $skillMinDmg, $skillMaxDmg, $isMagic, $powerCoefficient);
 
-        if ($hit->isDodge()) {
+        if (! $isMagic && $hit->isDodge()) {
             $result->log(sprintf(
                 '<p><b class="color-boss">%s</b> использует <b>%s</b>, но вы <b class="color-green">увернулись</b>!</p>',
                 $monster->name,
@@ -329,13 +356,24 @@ readonly class MonsterAttackService
             return;
         }
 
-        $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyDefensiveRunePassives($player, $hit, $locationMonster, $result);
+        }
 
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $skillEmoji = $this->getSkillEmoji($randomSkill);
 
-        $msg = $hit->isCritical()
+        $msg = $isMagic
+            ? sprintf(
+                '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-magic">Магический урон: %s</b> (x%.1f)</p>',
+                $monster->name,
+                $skillEmoji,
+                $skill->skill_name ?? $randomSkill,
+                $hit->getDamage(),
+                $damageMultiplier,
+            )
+            : ($hit->isCritical()
             ? sprintf(
                 '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b> (x%.1f)</p>',
                 $monster->name,
@@ -351,15 +389,43 @@ readonly class MonsterAttackService
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
                 $damageMultiplier
-            );
+            ));
 
         $result->log($msg);
 
-        $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        if (! $isMagic) {
+            $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
+        }
 
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);
         }
+    }
+
+    /**
+     * Магическая атака моба использует ту же формулу, что и заклинания игрока:
+     * базовый диапазон + magic_attack × coefficient, затем magic_resistance
+     * цели. Для неё не применяются уворот, крит и блок щитом.
+     */
+    private function resolveHit(
+        Monster $monster,
+        StatSheet $target,
+        float|int $minDamage,
+        float|int $maxDamage,
+        bool $isMagic,
+        ?float $powerCoefficient = null,
+    ): FightHitDTO {
+        if ($isMagic) {
+            return $this->magicHitCalc->hit(
+                $monster,
+                $target,
+                (int) round($minDamage),
+                (int) round($maxDamage),
+                $powerCoefficient ?? (float) $monster->magic_power_coefficient,
+            );
+        }
+
+        return $this->hitCalc->hit($monster, $target, (int) round($minDamage), (int) round($maxDamage));
     }
 
     private function getSkillEmoji(string $skillCode): string

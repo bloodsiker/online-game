@@ -56,6 +56,8 @@ class MonsterCombatantFactoryTest extends TestCase
             $table->id();
             $table->unsignedBigInteger('location_monster_id');
             $table->unsignedBigInteger('effect_id')->nullable();
+            $table->unsignedBigInteger('battle_id')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }
