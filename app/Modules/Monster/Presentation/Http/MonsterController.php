@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Monster\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Monster\Application\DTOs\MonsterInfoPageDTO;
 use App\Modules\Monster\Application\UseCases\GetMonsterInfoPage;
 use App\Services\ItemTooltip\ItemTooltipCollector;
 use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
@@ -20,6 +21,18 @@ class MonsterController extends Controller
     {
         $page = $this->getMonsterInfoPage->execute($id);
 
+        return $this->renderInfo($page);
+    }
+
+    public function catalogInfo(int $id)
+    {
+        $page = $this->getMonsterInfoPage->executeByMonsterId($id);
+
+        return $this->renderInfo($page);
+    }
+
+    private function renderInfo(MonsterInfoPageDTO $page)
+    {
         $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($page->monster->items));
 
         return view('monster::info', [

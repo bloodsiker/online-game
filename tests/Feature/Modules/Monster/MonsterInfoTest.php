@@ -77,6 +77,40 @@ class MonsterInfoTest extends TestCase
         $response->assertDontSeeText('Без карты');
     }
 
+    public function test_catalog_info_page_uses_monster_id(): void
+    {
+        DB::table('maps')->insert(['id' => 1, 'name' => 'Гранитный Перевал']);
+        DB::table('locations')->insert(['id' => 10, 'map_id' => 1, 'name' => 'Каменный Хребет']);
+        DB::table('monsters')->insert([
+            'id' => 103,
+            'name' => 'Каменный Голем',
+            'lvl' => 10,
+            'hp' => 100,
+            'armor' => 5,
+            'magic_resistance' => 8,
+            'dodge' => 0,
+            'critical' => 0,
+            'min_dmg' => 10,
+            'max_dmg' => 20,
+            'aggression' => 0,
+            'exp' => 50,
+            'min_money' => 0,
+            'max_money' => 0,
+            'is_boss' => false,
+        ]);
+        DB::table('location_has_monsters')->insert([
+            'location_id' => 10,
+            'monster_id' => 103,
+            'aggression' => null,
+        ]);
+
+        $response = $this->get(route('info.monster.catalog', ['id' => 103]));
+
+        $response->assertOk();
+        $response->assertSeeText('Каменный Голем');
+        $response->assertSeeText('Гранитный Перевал');
+    }
+
     private function createTables(): void
     {
         Schema::create('maps', function (Blueprint $table): void {

@@ -19,4 +19,12 @@ class EloquentMonsterReadRepository implements MonsterReadRepository
             ->find($locationMonsterId)
             ?->monster;
     }
+
+    public function findById(int $monsterId): ?Monster
+    {
+        return Monster::with([
+            'items',
+            'locations.map',
+        ])->find($monsterId);
+    }
 }

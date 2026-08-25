@@ -1458,14 +1458,15 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title">Распределение очков</div>
+                    <div class="popup_global_title" id="pts-modal-title">Распределение очков</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closePtsModal()"></div>
         </div>
         <div class="popup-left-center">
             <div class="popup-right-center">
-                <div class="popup_global_content" style="padding:10px 18px 4px;">
+                <div class="popup_global_content" id="pts-modal-content" style="padding:10px 18px 4px;">
+                    <div id="pts-modal-points-content">
                     <div style="text-align:center;margin-bottom:8px;font-size:11px;color:#2a1a0e;">
                         Свободно очков: <b id="pts-modal-free" style="color:#8b2000;"></b>
                     </div>
@@ -1475,6 +1476,8 @@
                         <b class="butt1 pointer" onclick="ptsSave()"><b><input value="Сохранить" type="button"></b></b>
                         <b class="butt1 pointer" onclick="closePtsModal()"><b><input value="Отмена" type="button"></b></b>
                     </div>
+                    </div>
+                    <div id="pts-modal-map-monsters-content" style="display:none;max-height:min(480px,calc(100vh - 150px));overflow:auto;"></div>
                 </div>
             </div>
         </div>
@@ -1488,9 +1491,14 @@
 
 <script>
     let _ptsData = {};
+    let _ptsModalMode = 'points';
 
     function openPtsModal(data) {
         _ptsData = data;
+        _ptsModalMode = 'points';
+        document.getElementById('pts-modal-title').textContent = 'Распределение очков';
+        document.getElementById('pts-modal-points-content').style.display = '';
+        document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
 
         document.getElementById('pts-modal-free').textContent = data.free;
         document.getElementById('pts-msg').style.display = 'none';
@@ -1526,8 +1534,97 @@
     }
 
     function closePtsModal() {
+        if (_ptsModalMode === 'map-monsters') {
+            closeMapMonstersModal();
+            return;
+        }
+
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display   = 'none';
+    }
+
+    function openMapMonstersModal(data) {
+        const title = document.getElementById('pts-modal-title');
+        const pointsContent = document.getElementById('pts-modal-points-content');
+        const monstersContent = document.getElementById('pts-modal-map-monsters-content');
+
+        _ptsModalMode = 'map-monsters';
+        title.textContent = 'Монстры: ' + data.map;
+        pointsContent.style.display = 'none';
+        monstersContent.style.display = '';
+        monstersContent.replaceChildren();
+
+        if (data.error) {
+            monstersContent.textContent = data.error;
+        } else if (!Array.isArray(data.monsters)) {
+            monstersContent.textContent = 'Загрузка…';
+        } else if (data.monsters.length === 0) {
+            monstersContent.textContent = 'На этой карте монстры не указаны.';
+        } else {
+            const list = document.createElement('ul');
+            list.style.cssText = 'margin:0;padding:7px;list-style:none;';
+
+            data.monsters.forEach(function (monster) {
+                const item = document.createElement('li');
+                item.style.cssText = 'display:flex;align-items:center;gap:7px;min-height:36px;padding:4px;border-bottom:1px solid rgba(166,115,69,.35);';
+
+                if (monster.image) {
+                    const image = document.createElement('img');
+                    image.src = monster.image;
+                    image.alt = '';
+                    image.style.cssText = 'width:30px;height:30px;object-fit:contain;';
+                    item.appendChild(image);
+                }
+
+                const name = document.createElement('span');
+                name.textContent = monster.name;
+                name.style.cssText = 'color:#48250f;font-weight:bold;';
+                item.appendChild(name);
+
+                const levels = document.createElement('span');
+                levels.style.cssText = 'margin-left:4px;color:#89552e;';
+                levels.append('(ур. ');
+                monster.levels.forEach(function (levelData, index) {
+                    if (index > 0) levels.append(', ');
+
+                    const level = document.createElement(levelData.info_url ? 'a' : 'span');
+                    level.textContent = levelData.value;
+                    if (levelData.info_url) {
+                        level.href = levelData.info_url;
+                        level.title = 'Открыть информацию о монстре';
+                        level.style.cssText = 'color:inherit;';
+                        level.addEventListener('click', function (event) {
+                            event.preventDefault();
+                            window.open(this.href, '', 'width=730,height=650');
+                        });
+                    }
+                    levels.appendChild(level);
+                });
+                levels.append(')');
+                item.appendChild(levels);
+
+                if (monster.is_boss) {
+                    const boss = document.createElement('span');
+                    boss.textContent = 'БОСС';
+                    boss.style.cssText = 'margin-left:5px;color:#8b2000;font-size:10px;font-weight:bold;';
+                    item.appendChild(boss);
+                }
+                list.appendChild(item);
+            });
+            monstersContent.appendChild(list);
+        }
+
+        document.getElementById('pts-overlay').style.display = 'block';
+        document.getElementById('pts-modal').style.display = 'block';
+    }
+
+    function closeMapMonstersModal() {
+        _ptsModalMode = 'points';
+        document.getElementById('pts-overlay').style.display = 'none';
+        document.getElementById('pts-modal').style.display = 'none';
+        document.getElementById('pts-modal-title').textContent = 'Распределение очков';
+        document.getElementById('pts-modal-points-content').style.display = '';
+        document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
     }
 
     function openGameMessageModal(data) {

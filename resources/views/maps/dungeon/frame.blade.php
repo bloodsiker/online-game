@@ -348,7 +348,9 @@ if ($dungeon && $dungeon->first_location_id) {
 
         var el = document.getElementById('u' + lid);
         if (!el) {
+            @if(request()->routeIs('on_map'))
             document.location.href = '{{ route('on_map', ['hide' => 1]) }}';
+            @endif
             return;
         }
         el.className = (el.className + ' ulocation').trim();

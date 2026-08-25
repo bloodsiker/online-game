@@ -9,4 +9,6 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 interface MonsterReadRepository
 {
     public function findByLocationMonsterId(int $locationMonsterId): ?Monster;
+
+    public function findById(int $monsterId): ?Monster;
 }

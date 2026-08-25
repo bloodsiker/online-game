@@ -1551,7 +1551,9 @@
         if (lid <= 0) return;
         if (prevlocation > 0) document.getElementById('u' + prevlocation).className = '';
         if (document.getElementById('u' + lid) == undefined) {
+            @if(request()->routeIs('on_map'))
             document.location.href = '{{ route('on_map', ['hide' => 1]) }}';
+            @endif
         } else {
             zcurrent = map_get_lvl(lid);
             mapshow();

@@ -92,7 +92,7 @@
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Клан</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">Данжи</a>
-    <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} return false;">Карты</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('maps') }}', true); return false;">Карты</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('friends') }}', true); return false;">Друзья</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">Рейтинг</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
@@ -117,7 +117,7 @@
         m_clan:        function () { menuGo(false, '{{ route('clan.member') }}', true); },
         m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
         m_dungeon:     function () { menuGo(false, '{{ route('dungeon.index') }}', true); },
-        m_maps:        function () { try { window.top.systemInfo('Карты в разработке.', 'Карты'); } catch (e) {} },
+        m_maps:        function () { menuGo(false, '{{ route('maps') }}', true); },
         m_friends:     function () { menuGo(false, '{{ route('friends') }}', true); },
         m_rating:      function () { menuGo(true,  '{{ route('rating') }}', true); },
         m_referral:    function () { menuGo(false, '{{ route('referral') }}', true); },

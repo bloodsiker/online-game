@@ -6,6 +6,7 @@ namespace App\Modules\Location\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Location\Application\UseCases\GetLocationPage;
+use App\Modules\Location\Application\UseCases\GetMapsPage;
 use App\Modules\Location\Application\UseCases\GetTakeItemsPage;
 use App\Modules\Location\Application\UseCases\MoveToLocation;
 use App\Modules\Location\Application\UseCases\PassThroughGate;
@@ -16,6 +17,7 @@ class LocationController extends Controller
 {
     public function __construct(
         private readonly GetLocationPage $getLocationPage,
+        private readonly GetMapsPage $getMapsPage,
         private readonly MoveToLocation $moveToLocation,
         private readonly GetTakeItemsPage $getTakeItemsPage,
         private readonly PassThroughGate $passThroughGate,
@@ -66,6 +68,17 @@ class LocationController extends Controller
 
         return view('location::take_items', [
             'page' => $this->getTakeItemsPage->execute($user),
+        ]);
+    }
+
+    public function maps(): mixed
+    {
+        /** @var ?User $user */
+        $user = Auth::user();
+        $currentMapId = $user?->loadMissing('currentLocation')->currentLocation?->map_id;
+
+        return view('location::maps', [
+            'page' => $this->getMapsPage->execute($currentMapId !== null ? (int) $currentMapId : null),
         ]);
     }
 }

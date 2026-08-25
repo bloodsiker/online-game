@@ -342,7 +342,7 @@
                                                             <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
                                                                 <tbody>
                                                                 <tr>
-                                                                    <td>
+                                                                    <td valign="top">
                                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
                                                                             <tbody>
                                                                             <tr height="22">
@@ -415,7 +415,7 @@
                                                                             </tbody>
                                                                         </table>
                                                                     </td>
-                                                                    <td>
+                                                                    <td valign="top">
                                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
                                                                             <tbody>
                                                                             <tr height="22">
@@ -459,9 +459,9 @@
                                                                                         @auth
                                                                                         <tr class=>
                                                                                             <td class="brd2-top brd2-bt b">
-                                                                                                <span class="line-align"><span style="margin-top:6px;display:inline-block;"><span
+                                                                                                @if($currentMapUrl ?? null)<a href="{{ $currentMapUrl }}" title="Открыть карту текущей локации">@endif<span class="line-align"><span style="margin-top:6px;display:inline-block;"><span
                                                                                                         class="ulocation"><span class="listloc"
-                                                                                                            id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>
+                                                                                                            id="lid">{{ auth()->user()->location_id }}</span></span> - Вы здесь</span></span>@if($currentMapUrl ?? null)</a>@endif
                                                                                             </td>
                                                                                         </tr>
                                                                                         @endauth

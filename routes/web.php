@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/dd', [HomeController::class, 'gebug'])->name('gebug');
 Route::get('/map', [HomeController::class, 'map'])->name('map');
+Route::get('/map/{map}/monsters', [HomeController::class, 'publicMapMonsters'])->name('map.monsters');
+Route::get('/map/{slug}', [HomeController::class, 'publicMap'])->name('map.public');
 Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
 Route::get('/map4', [HomeController::class, 'map4'])->name('map4');
