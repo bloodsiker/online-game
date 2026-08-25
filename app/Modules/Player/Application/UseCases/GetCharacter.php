@@ -26,6 +26,7 @@ class GetCharacter
                 exp: $s->exp,
                 expUp: $s->exp_up,
                 expDiff: $s->exp_diff,
+                type: (string) $s->skill->type,
             ))
             ->all();
 
@@ -36,6 +37,9 @@ class GetCharacter
             hpNow: $player->hp_now,
             mpNow: $player->mp_now,
             money: $player->user->money,
+            diamond: (int) $player->user->diamond,
+            bankBalance: (int) $player->user->bank_balance,
+            bankAccount: $player->user->bank_account !== null ? (string) $player->user->bank_account : null,
             exp: $player->exp,
             expUp: $player->exp_up,
             expPercent: $player->getPercentExp(),

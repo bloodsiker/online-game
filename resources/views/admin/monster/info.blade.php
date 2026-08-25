@@ -25,6 +25,11 @@
                                     Локации <span class="badge badge-primary">{{ $monster->locations->count() }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-effects" href="#tab-effects" data-bs-toggle="tab">
+                                    Эффекты удара <span class="badge badge-danger">{{ $monster->effects->count() }}</span>
+                                </a>
+                            </li>
                             @if($monster->is_boss)
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-phases" href="#tab-phases" data-bs-toggle="tab">
@@ -302,6 +307,81 @@
                                 </div>
                             </div>
 
+                            {{-- ЭФФЕКТЫ ПОСЛЕ УДАРА --}}
+                            <div id="tab-effects" class="tab-pane">
+                                <div class="pt-3">
+                                    @if($availableEffects->isNotEmpty())
+                                        <div class="mb-3">
+                                            <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalMonsterEffect">
+                                                Добавить эффект
+                                            </a>
+                                        </div>
+                                    @endif
+
+                                    @foreach($monster->effects as $effect)
+                                        <form id="effect-update-{{ $effect->id }}"
+                                              action="{{ route('admin.monster.effect.update', [$monster->id, $effect->id]) }}"
+                                              method="post">
+                                            {{ csrf_field() }}
+                                        </form>
+                                    @endforeach
+
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th>Эффект</th>
+                                                <th width="130">Механика</th>
+                                                <th width="120">Шанс (%)</th>
+                                                <th width="170">Сила эффекта (%)</th>
+                                                <th width="110">Длительность</th>
+                                                <th width="150"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($monster->effects as $effect)
+                                                <tr style="vertical-align: middle">
+                                                    <td>
+                                                        <a href="{{ route('admin.effect.info', $effect->id) }}">{{ $effect->name }}</a>
+                                                        <div class="small text-muted">{{ $effect->description }}</div>
+                                                        <div class="small text-info">{{ $effect->resolvedDamageScalingType()->label() }}</div>
+                                                    </td>
+                                                    <td>{{ $effect->resolvedActiveType()?->label() ?? 'Дебаф статов' }}</td>
+                                                    <td>
+                                                        <input form="effect-update-{{ $effect->id }}" type="number" step="0.01" min="0" max="100"
+                                                               class="form-control form-control-sm" name="chance" value="{{ $effect->pivot->chance }}">
+                                                    </td>
+                                                    <td>
+                                                        <input form="effect-update-{{ $effect->id }}" type="number" step="0.01" min="0" max="100"
+                                                               class="form-control form-control-sm" name="power_percent"
+                                                               value="{{ $effect->pivot->power_percent }}"
+                                                               placeholder="только для DoT">
+                                                    </td>
+                                                    <td>
+                                                        <input form="effect-update-{{ $effect->id }}" type="number" min="1"
+                                                               class="form-control form-control-sm" name="duration_seconds"
+                                                               value="{{ $effect->pivot->duration_seconds }}" required>
+                                                    </td>
+                                                    <td style="white-space:nowrap;">
+                                                        <button form="effect-update-{{ $effect->id }}" class="btn btn-xs btn-primary">Сохранить</button>
+                                                        <a href="{{ route('admin.monster.effect.delete', [$monster->id, $effect->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить эффект у этого монстра?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="6" class="text-center text-muted">У монстра нет эффектов после удара</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <p class="text-muted small mt-2 mb-0">
+                                        Эффект проверяется только после успешного удара с уроном. Для DoT сила рассчитывается как процент от нанесённого урона.
+                                    </p>
+                                </div>
+                            </div>
+
                             @if($monster->is_boss)
 
                             {{-- ФАЗЫ БОЯ --}}
@@ -406,7 +486,11 @@
                                                     data-is-active="{{ $mechanic->is_active ? '1' : '0' }}"
                                                     data-config="{{ json_encode($mechanic->config) }}">
                                                     <td>
-                                                        {{ $mechanic->getIcon() }}
+                                                        @if($mechanic->image)
+                                                            <img src="{{ $mechanic->image }}" alt="" style="width:28px;height:28px;object-fit:contain;vertical-align:middle;margin-right:4px;">
+                                                        @else
+                                                            {{ $mechanic->getIcon() }}
+                                                        @endif
                                                         <strong>{{ $mechanic->getLabel() }}</strong>
                                                         <br><small class="text-muted">{{ $mechanic->mechanic_type?->value }}</small>
                                                     </td>
@@ -499,6 +583,54 @@
                 </div>
             </section>
         </div>
+    </div>
+
+    {{-- Модалка: добавить эффект после удара --}}
+    <div id="modalMonsterEffect" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.monster.effect.add', $monster->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить эффект после удара</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Эффект</label>
+                        <select name="effect_id" class="form-control" required>
+                            @foreach($availableEffects as $effect)
+                                <option value="{{ $effect->id }}">
+                                    {{ $effect->name }} — {{ $effect->resolvedActiveType()?->label() ?? 'дебаф статов' }} — {{ $effect->resolvedDamageScalingType()->label() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Шанс срабатывания (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" name="chance" value="10" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Сила DoT (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" class="form-control" name="power_percent" placeholder="Для дебафа оставить пустым">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Длительность (сек)</label>
+                                <input type="number" min="1" class="form-control" name="duration_seconds" value="5" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
     </div>
 
     {{-- Модалка: добавить моба в пул призыва --}}
@@ -660,7 +792,7 @@
     {{-- Модалка: добавить / редактировать механику --}}
     <div id="modalAddMechanic" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
-            <form id="form-mechanic" action="{{ route('admin.monster.boss.mechanic.add', $monster->id) }}" method="post">
+            <form id="form-mechanic" action="{{ route('admin.monster.boss.mechanic.add', $monster->id) }}" method="post" enctype="multipart/form-data">
                 <header class="card-header"><h2 class="card-title" id="mechanic-modal-title">Добавить механику</h2></header>
                 <div class="card-body">
                     {{ csrf_field() }}
@@ -711,6 +843,21 @@
                                 <label class="col-form-label">Конфигурация (JSON)</label>
                                 <small class="text-muted d-block">Зависит от типа механики. Напр.: <code>{"multiplier":2}</code></small>
                                 <textarea class="form-control font-monospace" name="config" id="mechanic_config" rows="3" placeholder="{}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-form-label">Картинка умения</label>
+                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <small class="text-muted d-block">60×60 px или квадратная. Максимум 4 МБ.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="checkbox-custom checkbox-default mb-3">
+                                <input type="checkbox" id="delete-mechanic-image" name="delete_image" value="1">
+                                <label for="delete-mechanic-image">Удалить текущую картинку</label>
                             </div>
                         </div>
                     </div>

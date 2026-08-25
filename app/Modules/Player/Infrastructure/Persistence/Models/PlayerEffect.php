@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

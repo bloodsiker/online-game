@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Player;
 
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
@@ -117,7 +117,6 @@ class PlayerStatServiceDebuffClampTest extends TestCase
             $table->string('type')->default('debuff');
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -139,6 +138,7 @@ class PlayerStatServiceDebuffClampTest extends TestCase
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(1);
             $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
             $table->timestamps();
         });
     }
@@ -151,7 +151,6 @@ class PlayerStatServiceDebuffClampTest extends TestCase
             'name' => 'Разрушение брони',
             'slug' => 'armor_shatter',
             'type' => 'debuff',
-            'duration' => 8,
             'stat_modifiers' => [
                 ['stat' => 'armor', 'value' => -9999, 'is_percent' => false],
             ],

@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.effect.create') }}" method="post">
+                    <form action="{{ route('admin.effect.create') }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col-md-8">
@@ -30,8 +30,13 @@
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
                         </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Картинка</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="form-text text-muted">Максимум 4 МБ.</small>
+                        </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Тип</label>
                                     <select class="form-control" name="type" data-plugin-selectTwo>
@@ -41,24 +46,47 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Активная механика</label>
+                                    <select class="form-control" name="active_type" data-plugin-selectTwo>
+                                        <option value="">Нет</option>
+                                        @foreach($activeTypes as $activeType)
+                                            <option value="{{ $activeType->value }}" @selected(old('active_type') === $activeType->value)>
+                                                {{ $activeType->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Шанс наложения, %</label>
                                     <input type="number" min="0" max="100" class="form-control" name="chance" value="{{ old('chance', 0) }}">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="col-form-label">Длительность (сек) <small class="text-muted">(0 = до снятия)</small></label>
-                                    <input type="number" min="0" class="form-control" name="duration" value="{{ old('duration', 0) }}">
+                                    <label class="col-form-label">Масштабирование урона</label>
+                                    <select class="form-control" name="damage_scaling_type" data-plugin-selectTwo>
+                                        <option value="" @selected(old('damage_scaling_type') === null)>Не задано</option>
+                                        @foreach($damageScalingTypes as $scalingType)
+                                            <option value="{{ $scalingType->value }}" @selected(old('damage_scaling_type') === $scalingType->value)>
+                                                {{ $scalingType->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
+                        </div>
+                        <div class="alert alert-info py-2">
+                            Настройка применяется к периодическому урону монстров. «От макс. HP» распределяет указанный у монстра процент на всю длительность эффекта.
                         </div>
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Тик каждые (сек)</label>
-                                    <input type="number" min="1" class="form-control" name="tick_interval" value="{{ old('tick_interval', 1) }}">
+                                    <input type="number" min="0" class="form-control" name="tick_interval" value="{{ old('tick_interval', 1) }}">
                                 </div>
                             </div>
                             <div class="col-md-3">

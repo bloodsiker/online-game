@@ -5,6 +5,7 @@ use App\Modules\Battle\BattleServiceProvider;
 use App\Modules\Chat\ChatServiceProvider;
 use App\Modules\Clan\ClanServiceProvider;
 use App\Modules\Dungeon\DungeonServiceProvider;
+use App\Modules\Effect\EffectServiceProvider;
 use App\Modules\Event\EventServiceProvider;
 use App\Modules\Friend\FriendServiceProvider;
 use App\Modules\Interface\InterfaceServiceProvider;
@@ -30,6 +31,7 @@ return [
     BattleServiceProvider::class,
     ChatServiceProvider::class,
     DungeonServiceProvider::class,
+    EffectServiceProvider::class,
     FriendServiceProvider::class,
     InterfaceServiceProvider::class,
     ItemServiceProvider::class,

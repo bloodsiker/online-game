@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Battle;
 
+use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Battle\Application\Services\Combat\MonsterAttackService;
-use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\Combat\MonsterOnHitEffectService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -33,6 +34,10 @@ class MonsterMagicAttackTest extends TestCase
             magicHitCalc: new MagicHitCalculator,
             bossPhaseService: $this->createMock(BossPhaseService::class),
             effectService: $this->createMock(BattleEffectService::class),
+            onHitEffectService: new MonsterOnHitEffectService(
+                $this->createMock(BattleEffectService::class),
+                $this->createMock(RandomizerInterface::class),
+            ),
             statService: $this->createMock(PlayerStatService::class),
             runePassiveService: $this->createMock(PlayerRunePassiveService::class),
             random: $this->createMock(RandomizerInterface::class),

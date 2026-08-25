@@ -70,6 +70,7 @@ class MagicBuffStrategyTest extends TestCase
             $table->unsignedBigInteger('magic_skill_id');
             $table->unsignedBigInteger('effect_id');
             $table->integer('chance')->default(100);
+            $table->unsignedInteger('duration_seconds')->default(0);
         });
         Schema::create('effects', function (Blueprint $table): void {
             $table->id();

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');                    // Название скилла
             $table->string('slug')->unique();          // Уникальный код (fireball, heal и т.д.)
             $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->integer('level')->default(1);
             $table->enum('type', ['attack', 'defense', 'buff', 'debuff', 'heal', 'utility']);
             $table->integer('mana_cost')->default(0);
@@ -35,6 +36,7 @@ return new class extends Migration
             $table->string('slug')->unique();          // Уникальный код (regen, poison, stun)
             $table->enum('type', ['buff', 'debuff', 'neutral']);
             $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->integer('chance')->default(0);
 
             // Параметры эффекта

@@ -2,19 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Modules\Effect\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use Illuminate\Http\Request;
 
 class EffectController extends Controller
 {
     public function list()
     {
-        $list = Effect::withCount('magicSkills')->orderByDesc('id')->get();
+        $list = Effect::withCount(['magicSkills', 'monsters'])->orderByDesc('id')->get();
 
-        return view('admin.effect.list', compact('list'));
+        return view('effect::admin.list', compact('list'));
     }
 
     public function create(Request $request): mixed
@@ -28,7 +30,10 @@ class EffectController extends Controller
                 ->with('success', 'Эффект создан.');
         }
 
-        return view('admin.effect.create');
+        $activeTypes = ActiveEffectType::cases();
+        $damageScalingTypes = EffectDamageScalingType::cases();
+
+        return view('effect::admin.create', compact('activeTypes', 'damageScalingTypes'));
     }
 
     public function info(Request $request, Effect $effect): mixed
@@ -40,9 +45,12 @@ class EffectController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $effect->load('magicSkills');
+        $effect->load(['magicSkills', 'monsters']);
 
-        return view('admin.effect.info', compact('effect'));
+        $activeTypes = ActiveEffectType::cases();
+        $damageScalingTypes = EffectDamageScalingType::cases();
+
+        return view('effect::admin.info', compact('effect', 'activeTypes', 'damageScalingTypes'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -52,14 +60,29 @@ class EffectController extends Controller
         $effect->name = $request->input('name');
         $effect->slug = $request->input('slug');
         $effect->type = $request->input('type');
+        $effect->active_type = $request->filled('active_type')
+            ? ActiveEffectType::from((string) $request->input('active_type'))
+            : null;
+        $effect->damage_scaling_type = $request->filled('damage_scaling_type')
+            ? EffectDamageScalingType::tryFrom((string) $request->input('damage_scaling_type'))
+            : null;
         $effect->description = $request->input('description');
         $effect->chance = (int) $request->input('chance', 0);
-        $effect->duration = (int) $request->input('duration', 0);
         $effect->is_stackable = (bool) $request->input('is_stackable', false);
         $effect->max_stacks = (int) $request->input('max_stacks', 1);
         $effect->tick_interval = (int) $request->input('tick_interval', 1);
         $effect->value_per_tick = $request->filled('value_per_tick') ? (int) $request->input('value_per_tick') : null;
         $effect->is_dispellable = (bool) $request->input('is_dispellable', true);
+
+        if ($request->hasFile('image')) {
+            $request->validate(['image' => ['image', 'max:4096']]);
+            $oldImage = $effect->getRawOriginal('image');
+            $effect->image = $request->file('image')->store('effects', 'public');
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($effect->getRawOriginal('image'));
+            $effect->image = null;
+        }
 
         $statModifiers = $request->input('stat_modifiers');
         $effect->stat_modifiers = $statModifiers ? json_decode((string) $statModifiers, true) : null;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Skill;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -96,8 +96,8 @@ class MagicBookStarterSeeder extends Seeder
         // Строка теперь обслуживает две подсистемы сразу, поэтому её числовые
         // поля не переписываем: value_per_tick всё равно перекрывается
         // tickValueOverride в момент каста (MagicAttackStrategy →
-        // applyEffectToMonster), а duration/tick_interval/chance продолжают
-        // обслуживать монстровый дебафф. Обновляем только описание — под
+        // applyEffectToMonster), а длительность хранится на конкретной связи.
+        // Обновляем только описание — под
         // двойное назначение. Если строки ещё нет (чистое окружение), создаём
         // её по числам из спеки заклинания.
         $effect = Effect::firstOrNew(['slug' => 'burn']);
@@ -106,7 +106,6 @@ class MagicBookStarterSeeder extends Seeder
             $effect->fill([
                 'name' => 'Ожог',
                 'type' => 'debuff',
-                'duration' => 6,
                 'is_stackable' => false,
                 'max_stacks' => 1,
                 'tick_interval' => 2,
@@ -135,7 +134,7 @@ class MagicBookStarterSeeder extends Seeder
             'level' => 10,
             'is_passive' => false,
         ]);
-        $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
+        $skill->skillEffects()->attach($effect->id, ['chance' => 100, 'duration_seconds' => 6]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
             [MagicSkillRequirementType::SKILL, null, $spellSkillId, 10],
@@ -180,7 +179,6 @@ class MagicBookStarterSeeder extends Seeder
             'slug' => 'arcane_surge',
             'type' => 'buff',
             'description' => '+25% к интеллекту на 15 секунд',
-            'duration' => 15,
             'is_stackable' => false,
             'max_stacks' => 1,
             'tick_interval' => 1,
@@ -213,7 +211,7 @@ class MagicBookStarterSeeder extends Seeder
             'level' => 15,
             'is_passive' => false,
         ]);
-        $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
+        $skill->skillEffects()->attach($effect->id, ['chance' => 100, 'duration_seconds' => 15]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
             [MagicSkillRequirementType::SKILL, null, $spellSkillId, 15],
@@ -230,7 +228,6 @@ class MagicBookStarterSeeder extends Seeder
             'slug' => 'corroding_rust',
             'type' => 'debuff',
             'description' => 'Снижает броню цели на 10 секунд',
-            'duration' => 10,
             'is_stackable' => false,
             'max_stacks' => 1,
             'tick_interval' => 1,
@@ -257,7 +254,7 @@ class MagicBookStarterSeeder extends Seeder
             'level' => 18,
             'is_passive' => false,
         ]);
-        $skill->skillEffects()->attach($effect->id, ['chance' => 100]);
+        $skill->skillEffects()->attach($effect->id, ['chance' => 100, 'duration_seconds' => 10]);
 
         $this->addRequirements($skill->id, $spellSkillId, [
             [MagicSkillRequirementType::SKILL, null, $spellSkillId, 18],

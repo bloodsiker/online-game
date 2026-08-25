@@ -18,6 +18,7 @@
                             <thead>
                             <tr>
                                 <th width="50">ID</th>
+                                <th width="58">Иконка</th>
                                 <th>Название</th>
                                 <th width="110">Slug</th>
                                 <th width="100">Тип</th>
@@ -34,6 +35,13 @@
                             @forelse($list as $skill)
                                 <tr style="vertical-align: middle">
                                     <td>{{ $skill->id }}</td>
+                                    <td class="text-center">
+                                        @if($skill->image)
+                                            <img src="{{ $skill->image }}" alt="{{ $skill->name }}" style="width:36px;height:36px;object-fit:contain;">
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                     <td><a href="{{ route('admin.magic_skill.info', $skill->id) }}">{{ $skill->name }}</a></td>
                                     <td class="text-muted small">{{ $skill->slug }}</td>
                                     <td><span class="badge badge-primary">{{ $skill->type }}</span></td>
@@ -54,7 +62,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="11" class="text-center text-muted">Нет скиллов</td></tr>
+                                <tr><td colspan="12" class="text-center text-muted">Нет скиллов</td></tr>
                             @endforelse
                             </tbody>
                         </table>

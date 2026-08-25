@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Battle\Domain\Enums;
+namespace App\Modules\Effect\Domain\Enums;
 
 enum ActiveEffectType: string
 {
     case STUN = 'stun';
+    case PARALYSIS = 'paralysis';
     case POISON = 'poison';
     case BLEED = 'bleed';
     case BURN = 'burn';
@@ -15,6 +16,14 @@ enum ActiveEffectType: string
     public function isStun(): bool
     {
         return $this === self::STUN;
+    }
+
+    public function isControl(): bool
+    {
+        return match ($this) {
+            self::STUN, self::PARALYSIS => true,
+            default => false,
+        };
     }
 
     public function isDoT(): bool
@@ -34,6 +43,7 @@ enum ActiveEffectType: string
     {
         return match ($this) {
             self::STUN => '💫',
+            self::PARALYSIS => '⚡',
             self::POISON => '☠️',
             self::BLEED => '🩸',
             self::BURN => '🔥',
@@ -45,6 +55,7 @@ enum ActiveEffectType: string
     {
         return match ($this) {
             self::STUN => 'Оглушение',
+            self::PARALYSIS => 'Паралич',
             self::POISON => 'Отравление',
             self::BLEED => 'Кровотечение',
             self::BURN => 'Ожог',

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Monster;
 
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Domain\Services\MonsterCombatantFactory;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
@@ -44,7 +44,6 @@ class MonsterCombatantFactoryTest extends TestCase
         Schema::create('effects', function (Blueprint $table): void {
             $table->id();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);

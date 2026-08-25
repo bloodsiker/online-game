@@ -6,9 +6,10 @@ use App\Console\Seeders\ItemsSeeder;
 use App\Models\Experience;
 use App\Models\Skill;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
@@ -404,7 +405,6 @@ class GenerateSeed extends Command
         $effect->type = 'debuff';
         $effect->description = 'Ожог';
         $effect->chance = 50;
-        $effect->duration = 10;
         $effect->is_stackable = false;
         $effect->max_stacks = 1;
         $effect->tick_interval = 2;
@@ -415,15 +415,16 @@ class GenerateSeed extends Command
 
         $skill->skillEffects()->attach($effect->id, [
             'chance' => $effect->chance,
+            'duration_seconds' => 10,
         ]);
 
         $effect2 = new Effect;
         $effect2->name = 'Оглушение';
         $effect2->slug = 'stun';
+        $effect2->active_type = ActiveEffectType::STUN;
         $effect2->type = 'debuff';
         $effect2->description = 'Оглушение';
         $effect2->chance = 30;
-        $effect2->duration = 30;
         $effect2->is_stackable = true;
         $effect2->max_stacks = 3;
         $effect2->tick_interval = 0;
@@ -435,10 +436,10 @@ class GenerateSeed extends Command
         $effect3 = new Effect;
         $effect3->name = 'Паралич';
         $effect3->slug = 'paralysis';
+        $effect3->active_type = ActiveEffectType::PARALYSIS;
         $effect3->type = 'debuff';
         $effect3->description = 'Паралич';
         $effect3->chance = 30;
-        $effect3->duration = 50;
         $effect3->is_stackable = true;
         $effect3->max_stacks = 3;
         $effect3->tick_interval = 0;
@@ -453,7 +454,6 @@ class GenerateSeed extends Command
         $effect4->type = 'buff';
         $effect4->description = 'С небольшой вероятностью срабатывает в бою и накладывает временное увеличение атаки персонажа';
         $effect4->chance = 5;
-        $effect4->duration = 50;
         $effect4->is_stackable = false;
         $effect4->max_stacks = 1;
         $effect4->tick_interval = 0;
@@ -462,7 +462,10 @@ class GenerateSeed extends Command
         $effect4->is_dispellable = false;
         $effect4->save();
 
-        $skill3->skillEffects()->attach($effect4->id, ['chance' => $effect4->chance]);
+        $skill3->skillEffects()->attach($effect4->id, [
+            'chance' => $effect4->chance,
+            'duration_seconds' => 50,
+        ]);
 
         $player = $this->user1->player;
 

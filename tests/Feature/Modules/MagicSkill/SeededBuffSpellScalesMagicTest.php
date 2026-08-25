@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\MagicSkill;
 
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -109,6 +108,7 @@ class SeededBuffSpellScalesMagicTest extends TestCase
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(1);
             $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
             $table->timestamps();
         });
         Schema::create('skills', function (Blueprint $table): void {
@@ -147,6 +147,7 @@ class SeededBuffSpellScalesMagicTest extends TestCase
             $table->unsignedBigInteger('magic_skill_id');
             $table->unsignedBigInteger('effect_id');
             $table->integer('chance')->default(100);
+            $table->unsignedInteger('duration_seconds')->default(0);
             $table->timestamps();
         });
         Schema::create('magic_skill_requirements', function (Blueprint $table): void {
@@ -165,7 +166,6 @@ class SeededBuffSpellScalesMagicTest extends TestCase
             $table->string('type')->default('debuff');
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -184,6 +184,7 @@ class SeededBuffSpellScalesMagicTest extends TestCase
             $table->integer('count_use')->default(0);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
+            $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
             $table->boolean('is_droppable')->default(true);
             $table->boolean('is_slot_usable')->default(false);
@@ -213,7 +214,11 @@ class SeededBuffSpellScalesMagicTest extends TestCase
 
     public function test_seeded_buff_targets_a_stat_that_actually_feeds_magic_power(): void
     {
-        $effect = Effect::where('slug', 'arcane_surge')->firstOrFail();
+        $effect = MagicSkill::where('slug', 'arcane_surge_skill')
+            ->firstOrFail()
+            ->skillEffects()
+            ->where('effects.slug', 'arcane_surge')
+            ->firstOrFail();
 
         $types = array_column($effect->stat_modifiers, 'type');
 
@@ -227,7 +232,11 @@ class SeededBuffSpellScalesMagicTest extends TestCase
 
     public function test_seeded_buff_measurably_raises_magic_damage(): void
     {
-        $effect = Effect::where('slug', 'arcane_surge')->firstOrFail();
+        $effect = MagicSkill::where('slug', 'arcane_surge_skill')
+            ->firstOrFail()
+            ->skillEffects()
+            ->where('effects.slug', 'arcane_surge')
+            ->firstOrFail();
         $player = $this->player(['intelligence' => 40.0, 'lvl' => 12]);
 
         $statService = app(PlayerStatService::class);
@@ -247,7 +256,7 @@ class SeededBuffSpellScalesMagicTest extends TestCase
             'effect_id' => $effect->id,
             'battle_id' => null,
             'applied_at' => now(),
-            'expires_at' => now()->addSeconds((int) $effect->duration),
+            'expires_at' => now()->addSeconds((int) $effect->pivot->duration_seconds),
             'stacks' => 0,
         ]);
         $statService->invalidate($player);

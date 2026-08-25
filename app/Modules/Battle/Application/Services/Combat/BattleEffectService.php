@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Domain\Services\PlayerTimedEffectService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use Carbon\CarbonInterface;
 
 class BattleEffectService
 {
@@ -27,16 +29,16 @@ class BattleEffectService
 
     /**
      * Apply an Effect model (from player magic skill) to the monster.
-     * Uses effect->slug to resolve the ActiveEffectType.
      */
     public function applyEffectToMonster(
         Effect $effect,
         MonsterOnLocation $locMonster,
         Battle $battle,
         AttackResultDTO $result,
-        ?int $tickValueOverride = null,
+        int $durationSeconds,
+        int|float|null $tickValueOverride = null,
     ): void {
-        $type = ActiveEffectType::tryFrom($effect->slug);
+        $type = $effect->resolvedActiveType();
 
         // Дебафф без соответствующего ActiveEffectType (например, чистый
         // "минус к стату") всё равно должен пройти — иначе строка
@@ -46,7 +48,9 @@ class BattleEffectService
             return; // Неизвестный тип эффекта, не дебафф — игнорируем
         }
 
-        $effectiveDuration = (int) $effect->duration;
+        $effectiveDuration = $type?->isControl()
+            ? max(1, $durationSeconds)
+            : max(0, $durationSeconds);
 
         if ($effect->type === 'debuff' && $locMonster->monster->is_boss) {
             $effectiveDuration = max(1, (int) round($effectiveDuration * self::BOSS_DEBUFF_DURATION_MULTIPLIER));
@@ -67,7 +71,7 @@ class BattleEffectService
 
         if ($existing) {
             $existing->stacks = $effectiveDuration;
-            $existing->expires_at = now()->addSeconds($effectiveDuration);
+            $existing->expires_at = $effectiveDuration > 0 ? now()->addSeconds($effectiveDuration) : null;
             $existing->last_tick_at = now();
             if ($tickValueOverride !== null) {
                 $existing->current_value = $tickValueOverride;
@@ -84,7 +88,7 @@ class BattleEffectService
             'type' => $type,
             'applied_at' => now(),
             'last_tick_at' => now(),
-            'expires_at' => now()->addSeconds($effectiveDuration),
+            'expires_at' => $effectiveDuration > 0 ? now()->addSeconds($effectiveDuration) : null,
             'stacks' => $effectiveDuration,
             'current_value' => $tickValueOverride ?? (float) $effect->value_per_tick,
         ]);
@@ -103,42 +107,57 @@ class BattleEffectService
         Effect $effect,
         Player $player,
         ?Battle $battle,
-        AttackResultDTO $result
+        AttackResultDTO $result,
+        int $durationSeconds,
+        int|float|null $tickValueOverride = null,
     ): void {
-        $type = ActiveEffectType::tryFrom($effect->slug);
+        $type = $effect->resolvedActiveType();
         // null type = buff with stat_modifiers, no DoT/stun processing needed
 
         $existing = PlayerActiveEffect::where('player_id', $player->id)
-            ->where('effect_id', $effect->id)
             ->whereNull('battle_id')
+            ->when(
+                $type !== null,
+                fn ($query) => $query->where('type', $type),
+                fn ($query) => $query->where('effect_id', $effect->id),
+            )
             ->first();
 
-        $expiresAt = $effect->duration > 0
-            ? now()->addSeconds($effect->duration)
-            : null;
+        $effectiveDuration = $type?->isControl()
+            ? max(1, $durationSeconds)
+            : max(0, $durationSeconds);
+        $expiresAt = match (true) {
+            $effectiveDuration > 0 => now()->addSeconds($effectiveDuration),
+            default => null,
+        };
 
         if ($existing) {
+            $existing->effect_id = $effect->id;
+            $existing->type = $type;
+            $existing->applied_at = now();
             $existing->expires_at = $expiresAt;
             $existing->last_tick_at = now();
+            $existing->current_value = $tickValueOverride ?? (float) $effect->value_per_tick;
+            $existing->tick_remainder = 0;
             $existing->save();
-            $this->statService->invalidate($player);
-
-            return;
+            $activeEffect = $existing;
+        } else {
+            $activeEffect = PlayerActiveEffect::create([
+                'player_id' => $player->id,
+                'effect_id' => $effect->id,
+                'battle_id' => null,
+                'type' => $type,
+                'applied_at' => now(),
+                'last_tick_at' => now(),
+                'expires_at' => $expiresAt,
+                'stacks' => 0,
+                'current_value' => $tickValueOverride ?? (float) $effect->value_per_tick,
+                'tick_remainder' => 0,
+            ]);
         }
 
-        PlayerActiveEffect::create([
-            'player_id' => $player->id,
-            'effect_id' => $effect->id,
-            'battle_id' => null,
-            'type' => $type,
-            'applied_at' => now(),
-            'last_tick_at' => now(),
-            'expires_at' => $expiresAt,
-            'stacks' => 0,
-            'current_value' => (float) $effect->value_per_tick,
-        ]);
-
         $this->statService->invalidate($player);
+        $this->notifyPlayerFrame($result, $activeEffect, $effectiveDuration, $effect);
     }
 
     /**
@@ -147,52 +166,92 @@ class BattleEffectService
     public function applyCustomEffectToPlayer(
         ActiveEffectType $type,
         float $value,
-        int $stacks,
+        int $durationOrTicks,
         Player $player,
         Battle $battle,
         AttackResultDTO $result
     ): void {
         $isTimedDoT = $type->isDoT();
+        $isTimedControl = $type->isControl();
+        $isPersistentTimedEffect = $isTimedDoT || $isTimedControl;
         $tickSeconds = max(1, (int) config('game.player_heartbeat_seconds', 10));
-        $expiresAt = $isTimedDoT ? now()->addSeconds(max(1, $stacks) * $tickSeconds) : null;
+        $expiresAt = match (true) {
+            $isTimedControl => now()->addSeconds(max(1, $durationOrTicks)),
+            $isTimedDoT => now()->addSeconds(max(1, $durationOrTicks) * $tickSeconds),
+            default => null,
+        };
 
         $existing = PlayerActiveEffect::where('player_id', $player->id)
             ->where('type', $type)
-            ->when(
-                $isTimedDoT,
-                fn ($query) => $query->whereNull('battle_id'),
-                fn ($query) => $query->where('battle_id', $battle->id),
-            )
+            ->when(! $isPersistentTimedEffect, fn ($query) => $query->where('battle_id', $battle->id))
             ->first();
 
         if ($existing) {
-            $existing->stacks = $isTimedDoT ? $stacks : max($existing->stacks, $stacks);
+            if ($isPersistentTimedEffect) {
+                $existing->battle_id = null;
+            }
+            $existing->stacks = $isTimedControl
+                ? 0
+                : ($isTimedDoT ? $durationOrTicks : max($existing->stacks, $durationOrTicks));
             $existing->last_tick_at = now();
             $existing->expires_at = $expiresAt;
+            $existing->tick_remainder = 0;
             $existing->save();
-            $this->statService->invalidate($player);
-
-            return;
+            $activeEffect = $existing;
+        } else {
+            $activeEffect = PlayerActiveEffect::create([
+                'player_id' => $player->id,
+                'battle_id' => $isPersistentTimedEffect ? null : $battle->id,
+                'type' => $type,
+                'applied_at' => now(),
+                'last_tick_at' => now(),
+                'expires_at' => $expiresAt,
+                'stacks' => $isTimedControl ? 0 : $durationOrTicks,
+                'current_value' => $value,
+                'tick_remainder' => 0,
+            ]);
         }
-
-        PlayerActiveEffect::create([
-            'player_id' => $player->id,
-            'battle_id' => $isTimedDoT ? null : $battle->id,
-            'type' => $type,
-            'applied_at' => now(),
-            'last_tick_at' => now(),
-            'expires_at' => $expiresAt,
-            'stacks' => $stacks,
-            'current_value' => $value,
-        ]);
 
         $this->statService->invalidate($player);
 
+        $displayDuration = match (true) {
+            $isTimedControl => max(1, $durationOrTicks),
+            $isTimedDoT => max(1, $durationOrTicks) * $tickSeconds,
+            default => 0,
+        };
+        $this->notifyPlayerFrame($result, $activeEffect, $displayDuration);
+
+        $durationText = $isTimedControl
+            ? sprintf('%d сек.', max(1, $durationOrTicks))
+            : sprintf('%d тиков', $durationOrTicks);
+
         $result->log(sprintf(
-            '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%d тиков)</p>',
+            '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%s)</p>',
             $type->emoji(),
             $type->label(),
-            $stacks
+            $durationText,
+        ));
+    }
+
+    private function notifyPlayerFrame(
+        AttackResultDTO $result,
+        PlayerActiveEffect $activeEffect,
+        int $durationSeconds,
+        ?Effect $definition = null,
+    ): void {
+        if ($durationSeconds <= 0) {
+            return;
+        }
+
+        $definition ??= $activeEffect->effect;
+        $type = $activeEffect->type;
+        $isCurse = $type?->isDoT() || $type?->isControl() || $definition?->type === 'debuff';
+
+        $result->notifyPlayerEffect(new PlayerEffectNotificationDTO(
+            id: ($definition?->slug ?? 'effect').'_'.$activeEffect->id,
+            name: $definition?->name ?? ($type?->label() ?? 'Эффект'),
+            duration: $durationSeconds,
+            isCurse: $isCurse,
         ));
     }
 
@@ -202,17 +261,27 @@ class BattleEffectService
     public function applyCustomEffectToMonster(
         ActiveEffectType $type,
         float $value,
-        int $stacks,
+        int $durationSeconds,
         MonsterOnLocation $locMonster,
         Battle $battle,
         AttackResultDTO $result
     ): void {
+        $isTimedControl = $type->isControl();
+        $expiresAt = $isTimedControl
+            ? now()->addSeconds(max(1, $durationSeconds))
+            : null;
+
         $existing = MonsterActiveEffect::where('location_monster_id', $locMonster->id)
             ->where('type', $type)
             ->first();
 
         if ($existing) {
-            $existing->stacks = max($existing->stacks, $stacks);
+            if ($isTimedControl) {
+                $existing->battle_id = null;
+            }
+            $existing->stacks = $isTimedControl ? 0 : max($existing->stacks, $durationSeconds);
+            $existing->last_tick_at = now();
+            $existing->expires_at = $expiresAt;
             $existing->save();
 
             return;
@@ -220,19 +289,25 @@ class BattleEffectService
 
         MonsterActiveEffect::create([
             'location_monster_id' => $locMonster->id,
-            'battle_id' => $battle->id,
+            'battle_id' => $isTimedControl ? null : $battle->id,
             'type' => $type,
             'applied_at' => now(),
-            'stacks' => $stacks,
+            'last_tick_at' => now(),
+            'expires_at' => $expiresAt,
+            'stacks' => $isTimedControl ? 0 : $durationSeconds,
             'current_value' => $value,
         ]);
 
+        $durationText = $isTimedControl
+            ? sprintf('%d сек.', max(1, $durationSeconds))
+            : sprintf('%d ход(а)', $durationSeconds);
+
         $result->log(sprintf(
-            '<p class="color-debuff">%s %s получает эффект: <b>%s</b> (%d ход(а))</p>',
+            '<p class="color-debuff">%s %s получает эффект: <b>%s</b> (%s)</p>',
             $type->emoji(),
             $locMonster->monster->name,
             $type->label(),
-            $stacks
+            $durationText,
         ));
     }
 
@@ -242,7 +317,8 @@ class BattleEffectService
      */
     public function processPlayerEffects(Player $player, Battle $battle, AttackResultDTO $result): bool
     {
-        $tickResult = $this->timedEffectService->process($player, now());
+        $now = now();
+        $tickResult = $this->timedEffectService->process($player, $now);
         foreach ($tickResult->effects as $processedEffect) {
             $result->log(sprintf(
                 '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
@@ -262,21 +338,31 @@ class BattleEffectService
         $statsChanged = false;
 
         foreach ($effects as $effect) {
-            if ($effect->isStun()) {
-                $isStunned = true;
-                $effect->stacks--;
+            $this->upgradeLegacyControlExpiration($effect, $now);
 
-                if ($effect->stacks <= 0) {
-                    $result->log('<p class="color-info">💫 Вы больше не оглушены.</p>');
-                    $statsChanged = $statsChanged || $effect->effect_id !== null;
-                    $effect->delete();
-                } else {
+            if ($effect->expires_at !== null && $effect->expires_at->lte($now) && ! $effect->isDoT()) {
+                if ($effect->isControl()) {
                     $result->log(sprintf(
-                        '<p class="color-debuff">💫 Вы оглушены и пропускаете ход! (осталось %d ходов)</p>',
-                        $effect->stacks
+                        '<p class="color-info">%s Эффект <b>%s</b> рассеялся.</p>',
+                        $effect->type->emoji(),
+                        $effect->type->label(),
                     ));
-                    $effect->save();
                 }
+                $statsChanged = $statsChanged || $effect->effect_id !== null;
+                $effect->delete();
+
+                continue;
+            }
+
+            if ($effect->isControl()) {
+                $isStunned = true;
+                $remainingSeconds = max(1, (int) $now->diffInSeconds($effect->expires_at, false));
+                $result->log(sprintf(
+                    '<p class="color-debuff">%s Вы под эффектом <b>%s</b> и не можете атаковать! (осталось %d сек.)</p>',
+                    $effect->type->emoji(),
+                    $effect->type->label(),
+                    $remainingSeconds,
+                ));
 
                 continue;
             }
@@ -335,6 +421,8 @@ class BattleEffectService
         $isStunned = false;
 
         foreach ($effects as $effect) {
+            $this->upgradeLegacyControlExpiration($effect, $now);
+
             // DoT сначала обязан забрать все тики, накопившиеся до момента
             // истечения; остальные эффекты можно снять сразу.
             if ($effect->expires_at !== null && $effect->expires_at->lte($now) && ! $effect->isDoT()) {
@@ -348,24 +436,16 @@ class BattleEffectService
                 continue;
             }
 
-            if ($effect->isStun()) {
+            if ($effect->isControl()) {
                 $isStunned = true;
-                $effect->stacks--;
-
-                if ($effect->stacks <= 0) {
-                    $result->log(sprintf(
-                        '<p class="color-info">💫 %s больше не оглушен.</p>',
-                        $locMonster->monster->name
-                    ));
-                    $effect->delete();
-                } else {
-                    $result->log(sprintf(
-                        '<p class="color-debuff">💫 %s оглушен и пропускает ход! (осталось %d ходов)</p>',
-                        $locMonster->monster->name,
-                        $effect->stacks
-                    ));
-                    $effect->save();
-                }
+                $remainingSeconds = max(1, (int) $now->diffInSeconds($effect->expires_at, false));
+                $result->log(sprintf(
+                    '<p class="color-debuff">%s %s под эффектом <b>%s</b> и не может атаковать! (осталось %d сек.)</p>',
+                    $effect->type->emoji(),
+                    $locMonster->monster->name,
+                    $effect->type->label(),
+                    $remainingSeconds,
+                ));
 
                 continue;
             }
@@ -417,6 +497,24 @@ class BattleEffectService
         }
 
         return $isStunned;
+    }
+
+    /**
+     * Old battle-bound control rows stored their duration in stacks. Convert
+     * them lazily so an in-progress fight survives deployment of timed control.
+     */
+    private function upgradeLegacyControlExpiration(
+        PlayerActiveEffect|MonsterActiveEffect $effect,
+        CarbonInterface $now,
+    ): void {
+        if (! $effect->isControl() || $effect->expires_at !== null) {
+            return;
+        }
+
+        $startedAt = $effect->applied_at ?? $effect->created_at ?? $now;
+        $effect->expires_at = $startedAt->copy()->addSeconds(max(1, (int) $effect->stacks));
+        $effect->battle_id = null;
+        $effect->save();
     }
 
     /**

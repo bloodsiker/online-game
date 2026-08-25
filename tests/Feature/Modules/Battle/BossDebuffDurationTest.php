@@ -7,7 +7,7 @@ namespace Tests\Feature\Modules\Battle;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use Illuminate\Database\Schema\Blueprint;
@@ -66,7 +66,6 @@ class BossDebuffDurationTest extends TestCase
             $table->string('type')->default('debuff');
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(8);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -102,10 +101,10 @@ class BossDebuffDurationTest extends TestCase
     {
         $monster = Monster::create(['name' => 'Boss', 'is_boss' => true]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Слабость', 'slug' => 'weakness', 'type' => 'debuff', 'duration' => 8]);
+        $effect = Effect::create(['name' => 'Слабость', 'slug' => 'weakness', 'type' => 'debuff']);
         $battle = Battle::create();
 
-        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 8);
 
         $stacks = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks');
         $this->assertSame(4, $stacks, 'boss debuffs must apply at half duration, not full or zero');
@@ -115,10 +114,10 @@ class BossDebuffDurationTest extends TestCase
     {
         $monster = Monster::create(['name' => 'Regular', 'is_boss' => false]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Слабость', 'slug' => 'weakness', 'type' => 'debuff', 'duration' => 8]);
+        $effect = Effect::create(['name' => 'Слабость', 'slug' => 'weakness', 'type' => 'debuff']);
         $battle = Battle::create();
 
-        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 8);
 
         $stacks = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks');
         $this->assertSame(8, $stacks);
@@ -130,10 +129,10 @@ class BossDebuffDurationTest extends TestCase
         // Effect->type column — halving must be scoped to type === 'debuff' only.
         $monster = Monster::create(['name' => 'Boss', 'is_boss' => true]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Оглушение', 'slug' => 'stun', 'type' => 'neutral', 'duration' => 8]);
+        $effect = Effect::create(['name' => 'Оглушение', 'slug' => 'stun', 'type' => 'neutral']);
         $battle = Battle::create();
 
-        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 8);
 
         $stacks = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks');
         $this->assertSame(8, $stacks);
@@ -149,12 +148,12 @@ class BossDebuffDurationTest extends TestCase
     {
         $monster = Monster::create(['name' => 'Target', 'is_boss' => false]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Ослабление брони', 'slug' => 'armor_down', 'type' => 'debuff', 'duration' => 6]);
+        $effect = Effect::create(['name' => 'Ослабление брони', 'slug' => 'armor_down', 'type' => 'debuff']);
         $battle = Battle::create();
 
         $service = app(BattleEffectService::class);
 
-        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 6);
 
         $rows = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->get();
         $this->assertCount(1, $rows, 'a debuff-type Effect with no matching ActiveEffectType case must not be silently dropped');
@@ -163,7 +162,7 @@ class BossDebuffDurationTest extends TestCase
         $this->assertSame(6, $rows->first()->stacks);
 
         // Re-cast the same spell — must refresh the existing row, not duplicate it.
-        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 6);
 
         $rowsAfter = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->get();
         $this->assertCount(1, $rowsAfter, 'recasting the same unrecognized debuff must refresh the existing row, not create a duplicate');

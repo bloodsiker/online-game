@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.effect.info', $effect->id) }}" method="post">
+                    <form action="{{ route('admin.effect.info', $effect->id) }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col-md-8">
@@ -30,8 +30,25 @@
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="3">{{ $effect->description }}</textarea>
                         </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Картинка</label>
+                            @if($effect->image)
+                                <div class="mb-2">
+                                    <img src="{{ $effect->image }}" alt="{{ $effect->name }}"
+                                         style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;padding:3px;background:#fff;">
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="form-text text-muted">Максимум 4 МБ.</small>
+                            @if($effect->image)
+                                <div class="checkbox-custom checkbox-default mt-2">
+                                    <input type="checkbox" id="delete-effect-image" name="delete_image" value="1">
+                                    <label for="delete-effect-image">Удалить текущую картинку</label>
+                                </div>
+                            @endif
+                        </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Тип</label>
                                     <select class="form-control" name="type" data-plugin-selectTwo>
@@ -41,24 +58,49 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Активная механика</label>
+                                    <select class="form-control" name="active_type" data-plugin-selectTwo>
+                                        <option value="">Нет</option>
+                                        @foreach($activeTypes as $activeType)
+                                            <option value="{{ $activeType->value }}" @selected($effect->resolvedActiveType()?->value === $activeType->value)>
+                                                {{ $activeType->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Шанс наложения, %</label>
                                     <input type="number" min="0" max="100" class="form-control" name="chance" value="{{ $effect->chance }}">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="col-form-label">Длительность (сек) <small class="text-muted">(0 = до снятия)</small></label>
-                                    <input type="number" min="0" class="form-control" name="duration" value="{{ $effect->duration }}">
+                                    <label class="col-form-label">Масштабирование урона</label>
+                                    <select class="form-control" name="damage_scaling_type" data-plugin-selectTwo>
+                                        <option value="" @selected($effect->damage_scaling_type === null)>Не задано</option>
+                                        @foreach($damageScalingTypes as $scalingType)
+                                            <option value="{{ $scalingType->value }}" @selected($effect->damage_scaling_type === $scalingType)>
+                                                {{ $scalingType->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
+                        @if($effect->damage_scaling_type)
+                            <div class="alert alert-info py-2">
+                                {{ $effect->damage_scaling_type->description() }}
+                            </div>
+                        @endif
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Тик каждые (сек)</label>
-                                    <input type="number" min="1" class="form-control" name="tick_interval" value="{{ $effect->tick_interval }}">
+                                    <input type="number" min="0" class="form-control" name="tick_interval" value="{{ $effect->tick_interval }}">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -93,6 +135,36 @@
                     </form>
                 </div>
             </section>
+
+            <section class="card mt-3">
+                <header class="card-header"><h2 class="card-title">Назначен монстрам</h2></header>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-none">
+                            <thead>
+                            <tr>
+                                <th>Монстр</th>
+                                <th width="90">Шанс, %</th>
+                                <th width="110">Длительность</th>
+                                <th width="120">Сила эффекта, %</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @forelse($effect->monsters as $monster)
+                                <tr style="vertical-align: middle">
+                                    <td><a href="{{ route('admin.monster.info', $monster->id) }}">{{ $monster->name }} (ур. {{ $monster->lvl }})</a></td>
+                                    <td>{{ $monster->pivot->chance }}</td>
+                                    <td>{{ $monster->pivot->duration_seconds }} сек.</td>
+                                    <td>{{ $monster->pivot->power_percent ?? '—' }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="text-center text-muted">Ни одному монстру не назначен этот эффект</td></tr>
+                            @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
 
         <div class="col-md-6">
@@ -105,6 +177,7 @@
                             <tr>
                                 <th>Скилл</th>
                                 <th width="100">Шанс, %</th>
+                                <th width="110">Длительность</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -112,9 +185,10 @@
                                 <tr style="vertical-align: middle">
                                     <td><a href="{{ route('admin.magic_skill.info', $skill->id) }}">{{ $skill->name }}</a></td>
                                     <td>{{ $skill->pivot->chance }}</td>
+                                    <td>{{ $skill->pivot->duration_seconds }} сек.</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="2" class="text-center text-muted">Ни один скилл не использует этот эффект</td></tr>
+                                <tr><td colspan="3" class="text-center text-muted">Ни один скилл не использует этот эффект</td></tr>
                             @endforelse
                             </tbody>
                         </table>

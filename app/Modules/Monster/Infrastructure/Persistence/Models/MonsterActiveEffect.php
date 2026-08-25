@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +47,11 @@ class MonsterActiveEffect extends Model
     public function isStun(): bool
     {
         return $this->type?->isStun() ?? false;
+    }
+
+    public function isControl(): bool
+    {
+        return $this->type?->isControl() ?? false;
     }
 
     public function isDoT(): bool

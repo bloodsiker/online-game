@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\DTOs;
 
 use App\Models\Skill;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Support\Collection;

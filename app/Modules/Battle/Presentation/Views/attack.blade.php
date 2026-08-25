@@ -401,9 +401,18 @@
     let lvl = parseInt('{{ $player->lvl }}');
     let money = parseInt('{{ $player->user->money }}');
     let diamond = parseInt('{{ $player->user->diamond }}');
+    const appliedEffects = @json($fightDTO->getPlayerEffects());
 
     function playerAction() {
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl, money, diamond });
+        parent.sendToFrame('character-frame', {
+            hp,
+            mp,
+            experience,
+            lvl,
+            money,
+            diamond,
+            appliedEffects,
+        });
     }
     playerAction();
 

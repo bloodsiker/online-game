@@ -6,8 +6,8 @@ namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -56,7 +56,8 @@ class Monster extends Model implements FightHitInterface
     public function effects(): BelongsToMany
     {
         return $this->belongsToMany(Effect::class, 'monster_effects')
-            ->withPivot('chance')
+            ->withPivot(['chance', 'duration_seconds', 'power_percent', 'trigger_on_hit'])
+            ->wherePivot('trigger_on_hit', true)
             ->withTimestamps();
     }
 

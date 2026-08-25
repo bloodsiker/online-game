@@ -13,5 +13,12 @@ class MonsterEffect extends Model
 
     public $table = 'monster_effects';
 
-    protected $fillable = ['monster_id', 'effect_id', 'chance'];
+    protected $fillable = ['monster_id', 'effect_id', 'chance', 'duration_seconds', 'power_percent', 'trigger_on_hit'];
+
+    protected $casts = [
+        'chance' => 'float',
+        'duration_seconds' => 'integer',
+        'power_percent' => 'float',
+        'trigger_on_hit' => 'boolean',
+    ];
 }

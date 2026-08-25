@@ -15,6 +15,8 @@ class EloquentMonsterReadRepository implements MonsterReadRepository
         return MonsterOnLocation::with([
             'monster.items',
             'monster.locations.map',
+            'monster.effects',
+            'monster.mechanics',
         ])
             ->find($locationMonsterId)
             ?->monster;
@@ -25,6 +27,8 @@ class EloquentMonsterReadRepository implements MonsterReadRepository
         return Monster::with([
             'items',
             'locations.map',
+            'effects',
+            'mechanics',
         ])->find($monsterId);
     }
 }

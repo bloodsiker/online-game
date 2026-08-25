@@ -21,6 +21,9 @@ final readonly class CharacterDTO
         public int $mpNow,
         // Economy
         public int $money,
+        public int $diamond,
+        public int $bankBalance,
+        public ?string $bankAccount,
         // Progress
         public int $exp,
         public int $expUp,

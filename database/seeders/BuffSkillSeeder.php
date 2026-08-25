@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Seeder;
@@ -41,7 +41,6 @@ class BuffSkillSeeder extends Seeder
                 'slug' => 'battle_cry',
                 'type' => 'buff',
                 'description' => '+30% к атаке',
-                'duration' => 300, // секунд вне боя
                 'is_stackable' => false,
                 'max_stacks' => 1,
                 'tick_interval' => 1,
@@ -57,7 +56,6 @@ class BuffSkillSeeder extends Seeder
                 'slug' => 'stone_skin',
                 'type' => 'buff',
                 'description' => '+50% к броне',
-                'duration' => 180,
                 'is_stackable' => false,
                 'max_stacks' => 1,
                 'tick_interval' => 1,
@@ -73,7 +71,6 @@ class BuffSkillSeeder extends Seeder
                 'slug' => 'blessing',
                 'type' => 'buff',
                 'description' => '+20% HP и MP',
-                'duration' => 600,
                 'is_stackable' => false,
                 'max_stacks' => 1,
                 'tick_interval' => 1,
@@ -90,7 +87,6 @@ class BuffSkillSeeder extends Seeder
                 'slug' => 'regen',
                 'type' => 'buff',
                 'description' => '+15 HP каждый ход (4 хода)',
-                'duration' => 4,   // ходов в бою (stacks)
                 'is_stackable' => false,
                 'max_stacks' => 1,
                 'tick_interval' => 1,
@@ -115,7 +111,7 @@ class BuffSkillSeeder extends Seeder
                 'level' => 1,
                 'is_passive' => false,
             ]);
-            $battleCry->skillEffects()->attach($effectAttack->id, ['chance' => 100]);
+            $battleCry->skillEffects()->attach($effectAttack->id, ['chance' => 100, 'duration_seconds' => 300]);
 
             $stoneSkin = MagicSkill::create([
                 'name' => 'Каменная кожа',
@@ -131,7 +127,7 @@ class BuffSkillSeeder extends Seeder
                 'level' => 1,
                 'is_passive' => false,
             ]);
-            $stoneSkin->skillEffects()->attach($effectArmor->id, ['chance' => 100]);
+            $stoneSkin->skillEffects()->attach($effectArmor->id, ['chance' => 100, 'duration_seconds' => 180]);
 
             $blessing = MagicSkill::create([
                 'name' => 'Благословение',
@@ -147,7 +143,7 @@ class BuffSkillSeeder extends Seeder
                 'level' => 1,
                 'is_passive' => false,
             ]);
-            $blessing->skillEffects()->attach($effectBlessing->id, ['chance' => 100]);
+            $blessing->skillEffects()->attach($effectBlessing->id, ['chance' => 100, 'duration_seconds' => 600]);
 
             $minorHeal = MagicSkill::create([
                 'name' => 'Малое исцеление',
@@ -193,7 +189,7 @@ class BuffSkillSeeder extends Seeder
                 'level' => 1,
                 'is_passive' => false,
             ]);
-            $regen->skillEffects()->attach($effectRegen->id, ['chance' => 100]);
+            $regen->skillEffects()->attach($effectRegen->id, ['chance' => 100, 'duration_seconds' => 4]);
 
             // ── Выдать игроку id=1 ─────────────────────────────────────────────
 

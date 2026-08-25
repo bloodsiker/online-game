@@ -296,7 +296,6 @@ class UseMagicSkillHealFormulaTest extends TestCase
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->integer('duration')->default(0);
             $table->json('stat_modifiers')->nullable();
             $table->timestamps();
         });
@@ -306,6 +305,7 @@ class UseMagicSkillHealFormulaTest extends TestCase
             $table->unsignedBigInteger('magic_skill_id');
             $table->unsignedBigInteger('effect_id');
             $table->unsignedSmallInteger('chance')->default(100);
+            $table->unsignedInteger('duration_seconds')->default(0);
             $table->timestamps();
 
             $table->unique(['magic_skill_id', 'effect_id']);

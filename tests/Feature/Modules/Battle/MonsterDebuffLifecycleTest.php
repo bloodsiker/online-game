@@ -7,7 +7,8 @@ namespace Tests\Feature\Modules\Battle;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Domain\Services\MonsterCombatantFactory;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -66,7 +67,6 @@ class MonsterDebuffLifecycleTest extends TestCase
             $table->string('type')->default('debuff');
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -96,13 +96,12 @@ class MonsterDebuffLifecycleTest extends TestCase
         });
     }
 
-    private function armorDebuff(int $duration = 3): Effect
+    private function armorDebuff(): Effect
     {
         return Effect::create([
             'name' => 'Разъедающая ржавчина',
             'slug' => 'corroding_rust', // нет такого кейса в ActiveEffectType → type = NULL
             'type' => 'debuff',
-            'duration' => $duration,
             'stat_modifiers' => [['type' => 'armor', 'value' => -15, 'is_percent' => false]],
         ]);
     }
@@ -120,7 +119,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         $battle = Battle::create();
         $service = app(BattleEffectService::class);
 
-        $service->applyEffectToMonster($this->armorDebuff(duration: 3), $locMonster, $battle, new AttackResultDTO);
+        $service->applyEffectToMonster($this->armorDebuff(), $locMonster, $battle, new AttackResultDTO, durationSeconds: 3);
 
         $row = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->first();
         $this->assertNotNull($row);
@@ -153,7 +152,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         $service = app(BattleEffectService::class);
         $factory = new MonsterCombatantFactory;
 
-        $service->applyEffectToMonster($this->armorDebuff(duration: 2), $locMonster, $battle, new AttackResultDTO);
+        $service->applyEffectToMonster($this->armorDebuff(), $locMonster, $battle, new AttackResultDTO, durationSeconds: 2);
         $this->assertSame(35, $factory->build($locMonster, $battle->id)->getArmor());
 
         DB::table('monster_active_effects')
@@ -171,7 +170,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         $service = app(BattleEffectService::class);
         $factory = new MonsterCombatantFactory;
 
-        $service->applyEffectToMonster($this->armorDebuff(duration: 10), $locMonster, $battleA, new AttackResultDTO);
+        $service->applyEffectToMonster($this->armorDebuff(), $locMonster, $battleA, new AttackResultDTO, durationSeconds: 10);
         $this->assertSame(35, $factory->build($locMonster, $battleA->id)->getArmor(), 'в своём бою дебафф обязан действовать');
 
         // Бой A брошен, монстр не убит — строка дебаффа осталась висеть на спавне.
@@ -203,14 +202,14 @@ class MonsterDebuffLifecycleTest extends TestCase
 
         // Same Effect row cast twice — this is what makes the $existing lookup in
         // applyEffectToMonster() match across battles when it isn't scoped by battle_id.
-        $effect = $this->armorDebuff(duration: 10);
+        $effect = $this->armorDebuff();
 
-        $service->applyEffectToMonster($effect, $locMonster, $battleA, new AttackResultDTO);
+        $service->applyEffectToMonster($effect, $locMonster, $battleA, new AttackResultDTO, durationSeconds: 10);
         $this->assertSame(35, $factory->build($locMonster, $battleA->id)->getArmor());
 
         // Battle A abandoned without the monster dying — its debuff row is now stale.
         $battleB = Battle::create();
-        $service->applyEffectToMonster($effect, $locMonster, $battleB, new AttackResultDTO);
+        $service->applyEffectToMonster($effect, $locMonster, $battleB, new AttackResultDTO, durationSeconds: 10);
 
         $this->assertSame(
             35,
@@ -232,7 +231,7 @@ class MonsterDebuffLifecycleTest extends TestCase
         $factory = new MonsterCombatantFactory;
 
         // duration 6 → на боссе 3 (BOSS_DEBUFF_DURATION_MULTIPLIER = 0.5)
-        $service->applyEffectToMonster($this->armorDebuff(duration: 6), $locMonster, $battle, new AttackResultDTO);
+        $service->applyEffectToMonster($this->armorDebuff(), $locMonster, $battle, new AttackResultDTO, durationSeconds: 6);
         $this->assertSame(
             3,
             (int) DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('stacks'),
@@ -244,5 +243,48 @@ class MonsterDebuffLifecycleTest extends TestCase
             ->update(['expires_at' => now()->subSecond()]);
         $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO);
         $this->assertSame(60, $factory->build($locMonster, $battle->id)->getArmor(), 'укороченная вдвое длительность истекает по времени');
+    }
+
+    public function test_stun_and_paralysis_block_by_elapsed_seconds_not_round_count(): void
+    {
+        foreach ([ActiveEffectType::STUN, ActiveEffectType::PARALYSIS] as $controlType) {
+            $locMonster = $this->spawn();
+            $battle = Battle::create();
+            $effect = Effect::create([
+                'name' => $controlType->label(),
+                'slug' => $controlType->value,
+                'type' => 'debuff',
+            ]);
+            $service = app(BattleEffectService::class);
+
+            $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 5);
+
+            $this->assertTrue($service->processMonsterEffects($locMonster, $battle, new AttackResultDTO));
+            $stacksAfterFirstCheck = (int) DB::table('monster_active_effects')
+                ->where('location_monster_id', $locMonster->id)
+                ->value('stacks');
+
+            $this->assertTrue(
+                $service->processMonsterEffects($locMonster, $battle, new AttackResultDTO),
+                'повторная проверка в ту же секунду не должна снимать контроль',
+            );
+            $this->assertSame(
+                $stacksAfterFirstCheck,
+                (int) DB::table('monster_active_effects')
+                    ->where('location_monster_id', $locMonster->id)
+                    ->value('stacks'),
+                'число боевых действий не должно сокращать длительность контроля',
+            );
+
+            DB::table('monster_active_effects')
+                ->where('location_monster_id', $locMonster->id)
+                ->update(['expires_at' => now()->subSecond()]);
+
+            $this->assertFalse($service->processMonsterEffects($locMonster, $battle, new AttackResultDTO));
+            $this->assertDatabaseMissing('monster_active_effects', [
+                'location_monster_id' => $locMonster->id,
+                'type' => $controlType->value,
+            ]);
+        }
     }
 }

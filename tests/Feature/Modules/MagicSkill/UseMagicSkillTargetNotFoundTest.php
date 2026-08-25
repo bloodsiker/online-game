@@ -172,6 +172,7 @@ class UseMagicSkillTargetNotFoundTest extends TestCase
             $table->unsignedBigInteger('magic_skill_id');
             $table->unsignedBigInteger('effect_id');
             $table->integer('chance')->default(0);
+            $table->unsignedInteger('duration_seconds')->default(0);
             $table->timestamps();
         });
     }

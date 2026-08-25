@@ -46,6 +46,7 @@ class ItemBookLinkTest extends TestCase
             $table->boolean('is_two_hand')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
+            $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
             $table->boolean('is_droppable')->default(true);
             $table->boolean('is_weight')->default(true);

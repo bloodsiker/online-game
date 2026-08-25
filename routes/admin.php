@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\ClanController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
-use App\Http\Controllers\Admin\EffectController;
 use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\LocationController;
@@ -71,6 +70,9 @@ Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'cre
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
 Route::post('/monster/{monster}/drop/{item}', [MonsterController::class, 'infoDropUpdate'])->name('monster.info.drop.update');
 Route::get('/monster/{monster}/drop/delete/{item}', [MonsterController::class, 'infoDropDeleteItem'])->name('monster.info.drop.delete_item');
+Route::post('/monster/{monster}/effect', [MonsterController::class, 'addEffect'])->name('monster.effect.add');
+Route::post('/monster/{monster}/effect/{effect}', [MonsterController::class, 'updateEffect'])->name('monster.effect.update');
+Route::get('/monster/{monster}/effect/{effect}/delete', [MonsterController::class, 'deleteEffect'])->name('monster.effect.delete');
 Route::get('/monster/{monster}/locations', [MonsterController::class, 'infoLocation'])->name('monster.info.location');
 Route::post('/monster/{monster}/location', [MonsterController::class, 'location'])->name('monster.info.location.save');
 Route::post('/monster/{monster}/location/{location}/aggression', [MonsterController::class, 'updateLocation'])->name('monster.info.location.aggression');
@@ -138,15 +140,12 @@ Route::get('/skills', [SkillController::class, 'list'])->name('skills');
 
 Route::match(['GET', 'POST'], '/magic-skill/create', [MagicSkillController::class, 'create'])->name('magic_skill.create');
 Route::post('/magic-skill/{magic_skill}/effect', [MagicSkillController::class, 'addEffect'])->name('magic_skill.effect.add');
+Route::post('/magic-skill/{magic_skill}/effect/{effect}', [MagicSkillController::class, 'updateEffect'])->name('magic_skill.effect.update');
 Route::get('/magic-skill/{magic_skill}/effect/{effect}/delete', [MagicSkillController::class, 'deleteEffect'])->name('magic_skill.effect.delete');
 Route::post('/magic-skill/{magic_skill}/requirement', [MagicSkillController::class, 'addRequirement'])->name('magic_skill.requirement.add');
 Route::get('/magic-skill/{magic_skill}/requirement/{requirement}/delete', [MagicSkillController::class, 'deleteRequirement'])->name('magic_skill.requirement.delete');
 Route::match(['GET', 'POST'], '/magic-skill/{magic_skill}', [MagicSkillController::class, 'info'])->name('magic_skill.info');
 Route::get('/magic-skills', [MagicSkillController::class, 'list'])->name('magic_skills');
-
-Route::match(['GET', 'POST'], '/effect/create', [EffectController::class, 'create'])->name('effect.create');
-Route::match(['GET', 'POST'], '/effect/{effect}', [EffectController::class, 'info'])->name('effect.info');
-Route::get('/effects', [EffectController::class, 'list'])->name('effects');
 
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
 Route::match(['GET', 'POST'], '/quest/create', [QuestController::class, 'create'])->name('quest.create');

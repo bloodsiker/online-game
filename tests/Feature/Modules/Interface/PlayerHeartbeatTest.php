@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Interface;
 
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -32,6 +33,7 @@ class PlayerHeartbeatTest extends TestCase
         config()->set('game.player_heartbeat_seconds', 10);
         DB::purge('sqlite');
 
+        $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->createSchema();
     }
 
@@ -378,6 +380,7 @@ class PlayerHeartbeatTest extends TestCase
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
             $table->timestamps();
         });
     }

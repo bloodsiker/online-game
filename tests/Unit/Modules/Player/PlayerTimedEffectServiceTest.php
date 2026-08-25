@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Player;
 
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Domain\Services\PlayerTimedEffectService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
@@ -58,6 +58,7 @@ class PlayerTimedEffectServiceTest extends TestCase
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
             $table->timestamps();
         });
     }
@@ -169,6 +170,41 @@ class PlayerTimedEffectServiceTest extends TestCase
 
         $this->assertSame(1, $livingPlayer->fresh()->hp_now);
         $this->assertSame(0, $deadPlayer->fresh()->hp_now);
+    }
+
+    public function test_fractional_tick_damage_is_accumulated_without_losing_total_damage(): void
+    {
+        $startedAt = CarbonImmutable::parse('2026-08-21 13:00:00');
+        $player = $this->player(100);
+        $definitionId = DB::table('effects')->insertGetId([
+            'name' => 'Кровотечение',
+            'slug' => 'monster_bleed',
+            'tick_interval' => 1,
+            'created_at' => $startedAt,
+            'updated_at' => $startedAt,
+        ]);
+        $activeEffect = PlayerActiveEffect::query()->create([
+            'player_id' => $player->id,
+            'effect_id' => $definitionId,
+            'type' => ActiveEffectType::BLEED,
+            'applied_at' => $startedAt,
+            'last_tick_at' => $startedAt,
+            'expires_at' => $startedAt->addSeconds(20),
+            'current_value' => 0.35,
+            'tick_remainder' => 0,
+        ]);
+
+        $service = app(PlayerTimedEffectService::class);
+        $firstHalf = $service->process($player, $startedAt->addSeconds(10));
+
+        $this->assertSame(3, $firstHalf->totalDamage);
+        $this->assertEqualsWithDelta(0.5, $activeEffect->fresh()->tick_remainder, 0.000001);
+
+        $secondHalf = $service->process($player->refresh(), $startedAt->addSeconds(20));
+
+        $this->assertSame(4, $secondHalf->totalDamage);
+        $this->assertSame(93, $player->fresh()->hp_now);
+        $this->assertDatabaseMissing('player_active_effects', ['id' => $activeEffect->id]);
     }
 
     private function player(int $hp): Player

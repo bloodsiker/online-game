@@ -7,9 +7,10 @@ namespace Tests\Feature\Modules\Battle;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -57,9 +58,9 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->string('name')->default('debuff');
             $table->string('slug')->default('armor_down');
             $table->string('type')->default('debuff');
+            $table->string('active_type')->nullable();
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(8);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -79,6 +80,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
             $table->timestamps();
         });
         Schema::create('battles', function (Blueprint $table): void {
@@ -89,6 +91,26 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->json('boss_metadata')->nullable();
             $table->timestamps();
         });
+        Schema::create('players', function (Blueprint $table): void {
+            $table->id();
+            $table->integer('hp_now')->default(100);
+            $table->decimal('experience_multiplier', 6, 3)->default(1.0);
+            $table->timestamps();
+        });
+        Schema::create('player_active_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('effect_id')->nullable();
+            $table->unsignedBigInteger('battle_id')->nullable();
+            $table->string('type')->nullable();
+            $table->timestamp('applied_at')->nullable();
+            $table->timestamp('last_tick_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->integer('stacks')->default(0);
+            $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
+            $table->timestamps();
+        });
     }
 
     public function test_tick_value_override_is_stored_verbatim_not_effects_static_value(): void
@@ -96,13 +118,13 @@ class DotTickFixedAtCastTimeTest extends TestCase
         $monster = Monster::create(['name' => 'Target', 'is_boss' => false]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
         $effect = Effect::create([
-            'name' => 'Ожог', 'slug' => 'burn', 'type' => 'debuff', 'duration' => 6,
+            'name' => 'Ожог', 'slug' => 'burn', 'type' => 'debuff',
             'value_per_tick' => 999, // deliberately wrong — must NOT be what gets stored
         ]);
         $battle = Battle::create();
 
         app(BattleEffectService::class)->applyEffectToMonster(
-            $effect, $locMonster, $battle, new AttackResultDTO, tickValueOverride: 23,
+            $effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 6, tickValueOverride: 23,
         );
 
         $stored = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('current_value');
@@ -113,12 +135,12 @@ class DotTickFixedAtCastTimeTest extends TestCase
     {
         $monster = Monster::create(['name' => 'Target', 'is_boss' => false]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Ожог', 'slug' => 'burn', 'type' => 'debuff', 'duration' => 6]);
+        $effect = Effect::create(['name' => 'Ожог', 'slug' => 'burn', 'type' => 'debuff']);
         $battle = Battle::create();
         $service = app(BattleEffectService::class);
 
-        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, tickValueOverride: 10);
-        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, tickValueOverride: 40);
+        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 6, tickValueOverride: 10);
+        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 6, tickValueOverride: 40);
 
         $stored = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('current_value');
         $this->assertSame(40.0, (float) $stored, 'recasting must refresh the tick value, not keep the first cast\'s number');
@@ -129,12 +151,88 @@ class DotTickFixedAtCastTimeTest extends TestCase
     {
         $monster = Monster::create(['name' => 'Target', 'is_boss' => false]);
         $locMonster = MonsterOnLocation::create(['monster_id' => $monster->id]);
-        $effect = Effect::create(['name' => 'Регенерация', 'slug' => 'regen', 'type' => 'buff', 'duration' => 4, 'value_per_tick' => 15]);
+        $effect = Effect::create(['name' => 'Регенерация', 'slug' => 'regen', 'type' => 'buff', 'value_per_tick' => 15]);
         $battle = Battle::create();
 
-        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO);
+        app(BattleEffectService::class)->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, durationSeconds: 4);
 
         $stored = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->value('current_value');
         $this->assertSame(15.0, (float) $stored, 'existing non-magic callers (no override passed) must keep working exactly as before');
+    }
+
+    public function test_monster_dot_override_is_stored_on_player_effect(): void
+    {
+        $player = new Player;
+        $player->hp_now = 100;
+        $player->save();
+        $effect = Effect::create([
+            'name' => 'Кровотечение от моба',
+            'slug' => 'monster_bleed',
+            'type' => 'debuff',
+            'active_type' => 'bleed',
+            'value_per_tick' => 999,
+        ]);
+
+        $result = new AttackResultDTO;
+
+        app(BattleEffectService::class)->applyEffectToPlayer(
+            $effect,
+            $player,
+            null,
+            $result,
+            durationSeconds: 3,
+            tickValueOverride: 7,
+        );
+
+        $stored = DB::table('player_active_effects')->where('player_id', $player->id)->first();
+
+        $this->assertSame('bleed', $stored->type);
+        $this->assertSame(7.0, (float) $stored->current_value);
+
+        $notification = $result->getPlayerEffects()[0] ?? null;
+        $this->assertNotNull($notification);
+        $this->assertSame('monster_bleed_'.$stored->id, $notification->id);
+        $this->assertSame('Кровотечение от моба', $notification->name);
+        $this->assertSame(3, $notification->duration);
+        $this->assertTrue($notification->isCurse);
+    }
+
+    public function test_same_runtime_dot_type_refreshes_instead_of_stacking(): void
+    {
+        $player = new Player;
+        $player->hp_now = 100;
+        $player->save();
+        $first = Effect::create([
+            'name' => 'Кровотечение заклинания', 'slug' => 'spell_bleed', 'type' => 'debuff',
+            'active_type' => 'bleed',
+        ]);
+        $second = Effect::create([
+            'name' => 'Кровотечение зверя', 'slug' => 'monster_bleed', 'type' => 'debuff',
+            'active_type' => 'bleed',
+        ]);
+        $service = app(BattleEffectService::class);
+        $firstResult = new AttackResultDTO;
+        $secondResult = new AttackResultDTO;
+
+        $service->applyEffectToPlayer($first, $player, null, $firstResult, durationSeconds: 5, tickValueOverride: 3);
+        DB::table('player_active_effects')->where('player_id', $player->id)->update([
+            'applied_at' => now()->subMinute(),
+            'tick_remainder' => 0.75,
+        ]);
+        $service->applyEffectToPlayer($second, $player, null, $secondResult, durationSeconds: 3, tickValueOverride: 8);
+
+        $effects = DB::table('player_active_effects')->where('player_id', $player->id)->get();
+
+        $this->assertCount(1, $effects);
+        $this->assertSame($second->id, (int) $effects->first()->effect_id);
+        $this->assertSame(8.0, (float) $effects->first()->current_value);
+        $this->assertSame(0.0, (float) $effects->first()->tick_remainder);
+        $this->assertTrue(now()->subSecond()->lte($effects->first()->applied_at));
+        $this->assertSame(
+            'monster_bleed_'.$effects->first()->id,
+            $secondResult->getPlayerEffects()[0]->id,
+            'повторное наложение должно обновлять тот же элемент и таймер в character-frame',
+        );
+        $this->assertSame(3, $secondResult->getPlayerEffects()[0]->duration);
     }
 }

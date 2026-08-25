@@ -12,6 +12,7 @@ final readonly class PlayerSkillDTO
         public int $exp,
         public int $expUp,
         public int $expDiff,
+        public string $type = 'combat',
     ) {}
 
     public function expPercent(): float

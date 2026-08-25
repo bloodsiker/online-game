@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\MagicSkill\Infrastructure\Persistence\Models;
 
 use App\Models\Skill;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +22,7 @@ class MagicSkill extends Model
     protected $table = 'magic_skills';
 
     protected $fillable = [
-        'name', 'slug', 'description', 'level', 'skill_id', 'type', 'mana_cost',
+        'name', 'slug', 'description', 'image', 'level', 'skill_id', 'type', 'mana_cost',
         'min_damage', 'max_damage', 'power_coefficient', 'base_healing', 'cooldown', 'target_type',
         'is_passive', 'effects',
     ];
@@ -36,10 +38,15 @@ class MagicSkill extends Model
         'is_passive' => false,
     ];
 
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
+
     public function skillEffects(): BelongsToMany
     {
         return $this->belongsToMany(Effect::class, 'magic_skill_effects')
-            ->withPivot('chance');
+            ->withPivot(['chance', 'duration_seconds']);
     }
 
     public function players(): BelongsToMany

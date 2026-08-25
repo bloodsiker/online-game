@@ -8,10 +8,10 @@ use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
@@ -78,7 +78,13 @@ readonly class AttackService
                     $result->log(sprintf('<p class="color-buff">%s</p>', $hit->getMessage()));
                 }
                 foreach ($hit->getSelfAppliedEffects() as $effect) {
-                    $this->effectService->applyEffectToPlayer($effect, $player, $battle, $result);
+                    $this->effectService->applyEffectToPlayer(
+                        $effect,
+                        $player,
+                        $battle,
+                        $result,
+                        (int) $effect->pivot->duration_seconds,
+                    );
                     $result->log(sprintf(
                         '<p>Заклинание %s наложило на вас: <b class="color-purple">%s</b></p>',
                         $hit->getMagicSkill()->name,
@@ -151,7 +157,14 @@ readonly class AttackService
 
             if (! $hit->getAppliedEffects()->isEmpty()) {
                 foreach ($hit->getAppliedEffects() as $applied) {
-                    $this->effectService->applyEffectToMonster($applied['effect'], $locMonster, $battle, $result, $applied['tickValue']);
+                    $this->effectService->applyEffectToMonster(
+                        $applied['effect'],
+                        $locMonster,
+                        $battle,
+                        $result,
+                        (int) $applied['effect']->pivot->duration_seconds,
+                        $applied['tickValue'],
+                    );
 
                     $result->log(sprintf(
                         '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',

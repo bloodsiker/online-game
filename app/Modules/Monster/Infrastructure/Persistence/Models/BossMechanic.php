@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Models;
 
-use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicInterface;
+use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BossMechanic extends Model
 {
     protected $fillable = [
-        'monster_id', 'mechanic_type', 'mechanic_class',
+        'monster_id', 'mechanic_type', 'image', 'mechanic_class',
         'trigger_hp_percent', 'trigger_turn', 'config',
         'priority', 'is_active',
     ];
@@ -22,6 +23,11 @@ class BossMechanic extends Model
         'is_active' => 'boolean',
         'mechanic_type' => BossMechanicType::class,
     ];
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
 
     public function monster(): BelongsTo
     {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Infrastructure\Persistence\Models;
 
-use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +31,8 @@ use Illuminate\Notifications\Notifiable;
  * @property string $remember_token
  * @property int $money
  * @property int $diamond
+ * @property int $bank_balance
+ * @property string|null $bank_account
  * @property int $warehouse_count
  * @property int $bag_count
  * @property int $slot_count

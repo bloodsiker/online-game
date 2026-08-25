@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.magic_skill.create') }}" method="post">
+                    <form action="{{ route('admin.magic_skill.create') }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col-md-8">
@@ -29,6 +29,11 @@
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Картинка</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="form-text text-muted">Максимум 4 МБ.</small>
                         </div>
                         <div class="row">
                             <div class="col-md-4">

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Domain\DTO\PlayerEffectTickResult;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
@@ -66,15 +66,20 @@ final class PlayerTimedEffectService
             }
 
             if ($dueTicks > 0) {
-                $damage = max(0, (int) $activeEffect->current_value) * $dueTicks;
+                $rawDamage = max(0, (float) $activeEffect->current_value) * $dueTicks
+                    + max(0, (float) $activeEffect->tick_remainder);
+                $damage = max(0, (int) floor($rawDamage + 0.0000001));
+                $activeEffect->tick_remainder = max(0, round($rawDamage - $damage, 6));
                 $totalDamage += $damage;
 
-                $processedEffects[] = [
-                    'label' => $activeEffect->type?->label() ?? 'Периодический эффект',
-                    'emoji' => $activeEffect->type?->emoji() ?? '',
-                    'damage' => $damage,
-                    'ticks' => $dueTicks,
-                ];
+                if ($damage > 0) {
+                    $processedEffects[] = [
+                        'label' => $activeEffect->type?->label() ?? 'Периодический эффект',
+                        'emoji' => $activeEffect->type?->emoji() ?? '',
+                        'damage' => $damage,
+                        'ticks' => $dueTicks,
+                    ];
+                }
 
                 $activeEffect->last_tick_at = $lastTickAt->copy()->addSeconds($dueTicks * $tickSeconds);
 

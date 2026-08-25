@@ -396,8 +396,8 @@
                                             @foreach($skill->skillEffects as $effect)
                                                 <div class="skill-effect-row">
                                                     <span class="skill-effect-name">{{ $effect->name }}</span>
-                                                    @if($effect->duration > 0)
-                                                        <span class="skill-effect-duration">{{ format_cooldown($effect->duration) }}</span>
+                                                    @if($effect->pivot->duration_seconds > 0)
+                                                        <span class="skill-effect-duration">{{ format_cooldown($effect->pivot->duration_seconds) }}</span>
                                                     @endif
                                                     @if($effect->pivot->chance < 100)
                                                         <span class="skill-effect-chance">{{ $effect->pivot->chance }}%</span>
@@ -575,9 +575,7 @@
                 startCooldown(skillId, data.cooldown_until);
             }
             if (data.blessings && data.blessings.length) {
-                data.blessings.forEach(function (blessing) {
-                    window.parent.sendToFrame('character-frame', { blessing });
-                });
+                window.parent.sendToFrame('character-frame', { appliedEffects: data.blessings });
             }
         })
         .catch(() => window.parent.showErrorIframe('Ошибка при применении'));

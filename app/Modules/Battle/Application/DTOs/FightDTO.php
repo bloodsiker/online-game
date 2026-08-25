@@ -5,6 +5,7 @@ namespace App\Modules\Battle\Application\DTOs;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
 final class FightDTO
@@ -21,6 +22,9 @@ final class FightDTO
 
     /** Разовые уведомления (квесты и т.п.) — не сохраняются в БД, см. AttackResultDTO::getSideLog() */
     protected string $sideLog = '';
+
+    /** @var list<PlayerEffectNotificationDTO> */
+    protected array $playerEffects = [];
 
     public function getBattle(): Battle
     {
@@ -90,6 +94,20 @@ final class FightDTO
     public function setSideLog(string $sideLog): self
     {
         $this->sideLog = $sideLog;
+
+        return $this;
+    }
+
+    /** @return list<PlayerEffectNotificationDTO> */
+    public function getPlayerEffects(): array
+    {
+        return $this->playerEffects;
+    }
+
+    /** @param list<PlayerEffectNotificationDTO> $playerEffects */
+    public function setPlayerEffects(array $playerEffects): self
+    {
+        $this->playerEffects = $playerEffects;
 
         return $this;
     }

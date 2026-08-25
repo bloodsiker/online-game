@@ -15,5 +15,5 @@ class MagicSkillEffect extends Model
 
     public $timestamps = true;
 
-    protected $fillable = ['magic_skill_id', 'effect_id', 'chance'];
+    protected $fillable = ['magic_skill_id', 'effect_id', 'chance', 'duration_seconds'];
 }

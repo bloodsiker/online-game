@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +21,7 @@ class PlayerActiveEffect extends Model
     protected $fillable = [
         'player_id', 'effect_id', 'battle_id', 'type',
         'source_player_id', 'source_magic_skill_id',
-        'applied_at', 'last_tick_at', 'expires_at', 'stacks', 'current_value',
+        'applied_at', 'last_tick_at', 'expires_at', 'stacks', 'current_value', 'tick_remainder',
     ];
 
     protected $casts = [
@@ -31,6 +31,7 @@ class PlayerActiveEffect extends Model
         'type' => ActiveEffectType::class,
         'stacks' => 'integer',
         'current_value' => 'float',
+        'tick_remainder' => 'float',
     ];
 
     public function player(): BelongsTo
@@ -61,6 +62,11 @@ class PlayerActiveEffect extends Model
     public function isStun(): bool
     {
         return $this->type?->isStun() ?? false;
+    }
+
+    public function isControl(): bool
+    {
+        return $this->type?->isControl() ?? false;
     }
 
     public function isDoT(): bool

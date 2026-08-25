@@ -43,7 +43,7 @@ readonly class FightOrchestrator
             $battle = $this->battleRepository->getOneById($id);
             $battle->increment('rounds');
 
-            $attackedMonster = BattleDetail::with(['locationMonster.monster'])
+            $attackedMonster = BattleDetail::with(['locationMonster.monster.effects'])
                 ->where(['location_monster_id' => $monsterId])
                 ->lockForUpdate()
                 ->first();
@@ -160,7 +160,8 @@ readonly class FightOrchestrator
                 // fresh() returns the updated scalar state without reloading every
                 // relation that was used for the stat calculation in this round.
                 ->setPlayer($player->fresh())
-                ->setSideLog($fullLog->getSideLog());
+                ->setSideLog($fullLog->getSideLog())
+                ->setPlayerEffects($fullLog->getPlayerEffects());
         });
     }
 

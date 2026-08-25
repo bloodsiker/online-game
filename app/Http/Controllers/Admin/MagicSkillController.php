@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -59,11 +59,26 @@ class MagicSkillController extends Controller
 
     public function addEffect(Request $request, MagicSkill $magic_skill): RedirectResponse
     {
-        $magic_skill->skillEffects()->attach($request->input('effect_id'), [
-            'chance' => (int) $request->input('chance', 100),
+        $data = $this->validateEffectAssignment($request);
+
+        $magic_skill->skillEffects()->attach($data['effect_id'], [
+            'chance' => $data['chance'],
+            'duration_seconds' => $data['duration_seconds'],
         ]);
 
         return redirect()->back()->with('success', 'Эффект добавлен.');
+    }
+
+    public function updateEffect(Request $request, MagicSkill $magic_skill, Effect $effect): RedirectResponse
+    {
+        $data = $this->validateEffectAssignment($request, includeEffect: false);
+
+        $magic_skill->skillEffects()->updateExistingPivot($effect->id, [
+            'chance' => $data['chance'],
+            'duration_seconds' => $data['duration_seconds'],
+        ]);
+
+        return redirect()->back()->with('success', 'Параметры эффекта обновлены.');
     }
 
     public function deleteEffect(MagicSkill $magic_skill, Effect $effect): RedirectResponse
@@ -113,6 +128,21 @@ class MagicSkillController extends Controller
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    /** @return array{effect_id?: int, chance: int, duration_seconds: int} */
+    private function validateEffectAssignment(Request $request, bool $includeEffect = true): array
+    {
+        $rules = [
+            'chance' => ['required', 'integer', 'min:0', 'max:100'],
+            'duration_seconds' => ['required', 'integer', 'min:0'],
+        ];
+
+        if ($includeEffect) {
+            $rules['effect_id'] = ['required', 'integer', 'exists:effects,id'];
+        }
+
+        return $request->validate($rules);
+    }
+
     private function fillMagicSkill(MagicSkill $magicSkill, Request $request): void
     {
         $magicSkill->name = $request->input('name');
@@ -128,5 +158,15 @@ class MagicSkillController extends Controller
         $magicSkill->base_healing = (int) $request->input('base_healing', 0);
         $magicSkill->cooldown = (int) $request->input('cooldown', 0);
         $magicSkill->is_passive = (bool) $request->input('is_passive', false);
+
+        if ($request->hasFile('image')) {
+            $request->validate(['image' => ['image', 'max:4096']]);
+            $oldImage = $magicSkill->getRawOriginal('image');
+            $magicSkill->image = $request->file('image')->store('magic-skills', 'public');
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($magicSkill->getRawOriginal('image'));
+            $magicSkill->image = null;
+        }
     }
 }

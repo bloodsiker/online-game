@@ -6,11 +6,11 @@ use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
-use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -27,6 +27,7 @@ readonly class MonsterAttackService
         private MagicHitCalculator $magicHitCalc,
         private BossPhaseService $bossPhaseService,
         private BattleEffectService $effectService,
+        private MonsterOnHitEffectService $onHitEffectService,
         private PlayerStatService $statService,
         private PlayerRunePassiveService $runePassiveService,
         private RandomizerInterface $random,
@@ -64,6 +65,8 @@ readonly class MonsterAttackService
         if (! $isMagic) {
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
+
+        $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
     }
 
     /**
@@ -302,6 +305,8 @@ readonly class MonsterAttackService
         if (! $isMagic) {
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
+
+        $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
     }
 
     private function executeBossSpecialSkill(
@@ -397,6 +402,8 @@ readonly class MonsterAttackService
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
 
+        $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
+
         if (isset($skill->parameters['effects'])) {
             $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);
         }
@@ -457,7 +464,7 @@ readonly class MonsterAttackService
         foreach ($effects as $effect) {
             $type = ActiveEffectType::tryFrom($effect['type'] ?? '');
             $chance = $effect['chance'] ?? 100;
-            $stacks = (int) ($effect['duration'] ?? $effect['stacks'] ?? 2);
+            $durationOrTicks = (int) ($effect['duration'] ?? $effect['stacks'] ?? 2);
             $value = (float) ($effect['value'] ?? 0);
 
             if ($type === null || random_int(1, 100) > $chance) {
@@ -467,7 +474,7 @@ readonly class MonsterAttackService
             $this->effectService->applyCustomEffectToPlayer(
                 $type,
                 $value,
-                $stacks,
+                $durationOrTicks,
                 $player,
                 $battle,
                 $result

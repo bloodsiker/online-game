@@ -6,8 +6,8 @@ namespace Tests\Feature\Modules\Battle;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
-use App\Modules\Battle\Domain\Enums\ActiveEffectType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -68,7 +68,6 @@ class SeededDotSpellTicksTest extends TestCase
             $table->string('type')->default('debuff');
             $table->text('description')->nullable();
             $table->integer('chance')->default(0);
-            $table->integer('duration')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
             $table->integer('tick_interval')->default(1);
@@ -82,6 +81,7 @@ class SeededDotSpellTicksTest extends TestCase
             $table->unsignedBigInteger('magic_skill_id');
             $table->unsignedBigInteger('effect_id');
             $table->integer('chance')->default(100);
+            $table->unsignedInteger('duration_seconds')->default(0);
             $table->timestamps();
         });
         Schema::create('magic_skill_requirements', function (Blueprint $table): void {
@@ -103,6 +103,7 @@ class SeededDotSpellTicksTest extends TestCase
             $table->integer('count_use')->default(0);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
+            $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
             $table->boolean('is_droppable')->default(true);
             $table->boolean('is_slot_usable')->default(false);
@@ -190,7 +191,14 @@ class SeededDotSpellTicksTest extends TestCase
         $service = app(BattleEffectService::class);
 
         // Каст: MagicAttackStrategy передаёт сюда посчитанный урон как tickValueOverride.
-        $service->applyEffectToMonster($effect, $locMonster, $battle, new AttackResultDTO, tickValueOverride: 7);
+        $service->applyEffectToMonster(
+            $effect,
+            $locMonster,
+            $battle,
+            new AttackResultDTO,
+            durationSeconds: (int) $effect->pivot->duration_seconds,
+            tickValueOverride: 7,
+        );
 
         $row = DB::table('monster_active_effects')->where('location_monster_id', $locMonster->id)->first();
         $this->assertNotNull($row);

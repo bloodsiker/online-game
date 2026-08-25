@@ -53,7 +53,7 @@
         .redd, .redd * { color: #ba0000 !important; }
         a { color: #955c4a; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        #artifact_alt .aa-table {
+        #artifact_alt .aa-table, #monster_ability_alt .aa-table {
             border-radius: 30px 30px 0 0;
             box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, 0.2);
             font-size: 11px;
@@ -97,15 +97,21 @@
         .list_dark { background-color: #F4BB8A; }
         .skill_list td { padding: 0 7px; }
         .red, .red * { color: #d00000; }
+        .monster-abilities-grid { overflow: hidden; min-height: 62px; }
+        .monster-ability-icon { display: block; float: left; width: 60px; height: 60px; margin: 1px; border: 1px solid #b9774d; background: #2b1b14; }
+        .monster-ability-icon:hover { border-color: #f0d08a; }
+        .monster-ability-icon img { display: block; width: 60px; height: 60px; object-fit: contain; }
     </style>
     {!! $itemTooltipScript !!}
     <script>
         window.gebi = window.gebi || function (id) { return document.getElementById(id); };
     </script>
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
+    <script src="{{ asset('js/monster_ability_tooltip.js') }}?v={{ filemtime(public_path('js/monster_ability_tooltip.js')) }}"></script>
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
+<div id="monster_ability_alt" style="width: 300px; display: none; position: fixed; z-index: 10000002; left: 0;top: 0"></div>
 <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
     <tbody>
     <tr>
@@ -274,6 +280,87 @@
                                     </tr>
                                     </tbody>
                                 </table>
+
+                                @php
+                                    $monsterEffects = $page->monster->effects;
+                                    $monsterSkills = $page->monster->mechanics
+                                        ->where('is_active', true)
+                                        ->sortBy('priority');
+                                @endphp
+                                @if($monsterEffects->isNotEmpty())
+                                    @include('monster::info-partials.abilities', ['title' => 'Эффекты', 'abilities' => $monsterEffects, 'kind' => 'effect'])
+                                @endif
+                                @if($monsterSkills->isNotEmpty())
+                                    @include('monster::info-partials.abilities', ['title' => 'Умения', 'abilities' => $monsterSkills, 'kind' => 'skill'])
+                                @endif
+
+                                @if(false && ($monsterEffects->isNotEmpty() || $monsterSkills->isNotEmpty()))
+                                <table width="490" border="0" cellspacing="0" cellpadding="0" class="mrg-top">
+                                    <tbody>
+                                    <tr height="22">
+                                        <td width="20" align="right" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-left.gif') }}" width="20" height="22" alt></td>
+                                        <td class="tbl-shp_sml-top" valign="top" align="center">
+                                            <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
+                                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
+                                                <td class="tbl-usi_label-center">Эффекты и навыки</td>
+                                                <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
+                                            </tr></tbody></table>
+                                        </td>
+                                        <td width="20" align="left" valign="bottom"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-top-right.gif') }}" width="20" height="22" alt></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-usi_left">&nbsp;</td>
+                                        <td class="tbl-usi_bg" valign="top" style="padding:6px 4px;">
+                                            <table width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr>
+                                                <td width="50%" valign="top" style="padding-right:3px;">
+                                                    <table class="coll w100 p10h p2v brd2-all"><tbody>
+                                                    <tr><td class="brd2-top brd2-bt b" colspan="2">Эффекты</td></tr>
+                                                    @forelse($monsterEffects as $effect)
+                                                    <tr class="{{ $loop->even ? 'bg_l' : '' }}">
+                                                        <td class="brd2-top brd2-bt" width="30" align="center">
+                                                            @if($effect->image)
+                                                                <img src="{{ $effect->image }}" width="22" height="22" alt="{{ $effect->name }}" style="object-fit:contain;vertical-align:middle;">
+                                                            @else
+                                                                {{ $effect->resolvedActiveType()?->emoji() ?? '⚠️' }}
+                                                            @endif
+                                                        </td>
+                                                        <td class="brd2-top brd2-bt"><b>{{ $effect->name }}</b><br><span class="redd">{{ $effect->pivot->chance }}% · {{ $effect->pivot->duration_seconds }} сек.</span></td>
+                                                    </tr>
+                                                    @empty
+                                                    <tr><td class="brd2-top brd2-bt" colspan="2">Нет</td></tr>
+                                                    @endforelse
+                                                    </tbody></table>
+                                                </td>
+                                                <td width="50%" valign="top" style="padding-left:3px;">
+                                                    <table class="coll w100 p10h p2v brd2-all"><tbody>
+                                                    <tr><td class="brd2-top brd2-bt b">Навыки</td></tr>
+                                                    @forelse($monsterSkills as $skill)
+                                                    <tr class="{{ $loop->even ? 'bg_l' : '' }}">
+                                                        <td class="brd2-top brd2-bt"><b>{{ $skill->getIcon() }} {{ $skill->getLabel() }}</b>
+                                                            @if($skill->trigger_hp_percent !== null)
+                                                                <br><span class="redd">при {{ $skill->trigger_hp_percent }}% здоровья</span>
+                                                            @elseif($skill->trigger_turn !== null)
+                                                                <br><span class="redd">на {{ $skill->trigger_turn }} ходу</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    @empty
+                                                    <tr><td class="brd2-top brd2-bt">Нет</td></tr>
+                                                    @endforelse
+                                                    </tbody></table>
+                                                </td>
+                                            </tr></tbody></table>
+                                        </td>
+                                        <td class="tbl-usi_right">&nbsp;</td>
+                                    </tr>
+                                    <tr height="18">
+                                        <td width="20" align="right" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-left.gif') }}" width="20" height="18" alt></td>
+                                        <td class="tbl-shp_sml-bottom" valign="top" align="center">&nbsp;</td>
+                                        <td width="20" align="left" valign="top"><img src="{{ asset('img/bg/info/tbl-shp_sml-corner-bottom-right.gif') }}" width="20" height="18" alt></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                @endif
 
                                 @if($page->monster->items->isNotEmpty())
                                 <table width="490" border="0" cellspacing="0" cellpadding="0" class="mrg-top">

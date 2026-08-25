@@ -307,11 +307,29 @@
         container.style.display = (hasBlessings || hasCurses) ? 'block' : 'none';
     }
 
-    // Додати благословення
-    function addBlessing(id, name, duration) {
-        const endTime = Date.now() + (duration * 1000);
+    function upsertTimedEffect(id, name, duration, type) {
+        if (!id || duration <= 0) return;
 
-        activeEffects.blessings.set(id, {
+        const target = type === 'curse' ? activeEffects.curses : activeEffects.blessings;
+        const endTime = Date.now() + (duration * 1000);
+        const existing = target.get(id);
+
+        if (existing) {
+            existing.name = name;
+            existing.endTime = endTime;
+            existing.duration = duration * 1000;
+
+            const element = document.querySelector(`[data-effect-id="${id}"]`);
+            if (element) {
+                element.title = name;
+                const nameElement = element.querySelector('.effect-name');
+                if (nameElement) nameElement.textContent = name;
+            }
+
+            return;
+        }
+
+        target.set(id, {
             id,
             name,
             endTime,
@@ -319,24 +337,18 @@
         });
 
         updateSectionsVisibility();
-        renderBlessings();
-        startEffectTimer(id, 'blessing');
+        type === 'curse' ? renderCurses() : renderBlessings();
+        startEffectTimer(id, type);
+    }
+
+    // Додати благословення
+    function addBlessing(id, name, duration) {
+        upsertTimedEffect(id, name, duration, 'blessing');
     }
 
     // Додати прокляття
     function addCurse(id, name, duration) {
-        const endTime = Date.now() + (duration * 1000);
-
-        activeEffects.curses.set(id, {
-            id,
-            name,
-            endTime,
-            duration: duration * 1000
-        });
-
-        updateSectionsVisibility();
-        renderCurses();
-        startEffectTimer(id, 'curse');
+        upsertTimedEffect(id, name, duration, 'curse');
     }
 
     // Сервер присылает полный актуальный список. Между heartbeat таймеры
@@ -519,7 +531,7 @@
         if (event.origin !== window.location.origin) return;
 
         // console.log('Получены данные в character:', event.data);
-        const { hp, mp, experience, lvl, blessing, curse, money, diamond, effects } = event.data;
+        const { hp, mp, experience, lvl, blessing, curse, money, diamond, effects, appliedEffects } = event.data;
 
         if (hp !== undefined) {
             const hpBar = document.getElementById('hpBar');
@@ -568,6 +580,18 @@
 
         if (curse !== undefined) {
             addCurse(curse.id, curse.name, curse.duration);
+        }
+
+        if (Array.isArray(appliedEffects)) {
+            appliedEffects.forEach(effect => {
+                if (!effect) return;
+
+                if (effect.is_curse) {
+                    addCurse(effect.id, effect.name, effect.duration);
+                } else {
+                    addBlessing(effect.id, effect.name, effect.duration);
+                }
+            });
         }
 
         if (Array.isArray(effects)) {

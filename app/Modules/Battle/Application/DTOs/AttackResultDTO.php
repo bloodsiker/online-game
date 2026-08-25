@@ -2,6 +2,8 @@
 
 namespace App\Modules\Battle\Application\DTOs;
 
+use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
+
 final class AttackResultDTO
 {
     private array $logs = [];
@@ -12,6 +14,9 @@ final class AttackResultDTO
      * battle_rounds/battle_round_hits и не всплывают повторно в истории боя.
      */
     private array $sideLogs = [];
+
+    /** @var list<PlayerEffectNotificationDTO> */
+    private array $playerEffects = [];
 
     public function log(string $text): self
     {
@@ -37,6 +42,27 @@ final class AttackResultDTO
         return implode('', $this->sideLogs);
     }
 
+    public function notifyPlayerEffect(PlayerEffectNotificationDTO $effect): self
+    {
+        foreach ($this->playerEffects as $index => $current) {
+            if ($current->id === $effect->id) {
+                $this->playerEffects[$index] = $effect;
+
+                return $this;
+            }
+        }
+
+        $this->playerEffects[] = $effect;
+
+        return $this;
+    }
+
+    /** @return list<PlayerEffectNotificationDTO> */
+    public function getPlayerEffects(): array
+    {
+        return $this->playerEffects;
+    }
+
     public function merge(AttackResultDTO $other): self
     {
         foreach ($other->logs as $entry) {
@@ -45,6 +71,10 @@ final class AttackResultDTO
 
         foreach ($other->sideLogs as $entry) {
             $this->sideLogs[] = $entry;
+        }
+
+        foreach ($other->playerEffects as $effect) {
+            $this->notifyPlayerEffect($effect);
         }
 
         return $this;

@@ -7,6 +7,7 @@ namespace App\Modules\MagicSkill\Application\UseCases;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
+use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\MagicSkill\Application\DTOs\MagicSkillActionResultDTO;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
@@ -67,20 +68,20 @@ class UseMagicSkill
             $log->log(sprintf('Заклинание восстановило <b>%d HP</b> игроку %s', $heal, $target->user->name));
         }
 
-        $appliedBlessings = [];
         $skill->loadMissing('skillEffects');
         foreach ($skill->skillEffects as $effect) {
             if (random_int(1, 100) <= $effect->pivot->chance) {
-                $this->effectService->applyEffectToPlayer($effect, $target, null, $log);
-                if ($target->id === $caster->id) {
-                    $appliedBlessings[] = [
-                        'id' => $effect->slug.'_'.time(),
-                        'name' => $effect->name,
-                        'duration' => (int) $effect->duration,
-                    ];
-                }
+                $durationSeconds = (int) $effect->pivot->duration_seconds;
+                $this->effectService->applyEffectToPlayer($effect, $target, null, $log, $durationSeconds);
             }
         }
+
+        $appliedBlessings = $target->id === $caster->id
+            ? array_map(
+                static fn (PlayerEffectNotificationDTO $effect): array => $effect->toArray(),
+                $log->getPlayerEffects(),
+            )
+            : [];
 
         $this->writeRepository->savePlayers($caster, $target);
 

@@ -6,11 +6,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Modules\Monster\Domain\Enums\MonsterAttackType;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\JsonResponse;
@@ -79,15 +82,23 @@ class MonsterController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $monster->load(['items', 'locations.map']);
+        $monster->load(['items', 'locations.map', 'effects']);
         if ($monster->is_boss) {
             $monster->load(['phases', 'mechanics', 'summonPool']);
         }
 
         $mechanicTypes = BossMechanicType::cases();
         $allMonsters = Monster::orderBy('name')->get();
+        $availableEffects = Effect::query()
+            ->where('type', 'debuff')
+            ->where(fn ($query) => $query
+                ->whereIn('active_type', $this->assignableEffectTypes())
+                ->orWhereNotNull('stat_modifiers'))
+            ->whereNotIn('id', $monster->effects->modelKeys())
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters'));
+        return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters', 'availableEffects'));
     }
 
     public function infoDrop(Request $request, Monster $monster): RedirectResponse
@@ -117,6 +128,55 @@ class MonsterController extends Controller
         $monster->items()->detach($item->id);
 
         return redirect()->back()->with('success', 'Предмет удалён.');
+    }
+
+    public function addEffect(Request $request, Monster $monster): RedirectResponse
+    {
+        $data = $this->validateEffectAssignment($request);
+        $effect = Effect::query()
+            ->whereKey($data['effect_id'])
+            ->where('type', 'debuff')
+            ->where(fn ($query) => $query
+                ->whereIn('active_type', $this->assignableEffectTypes())
+                ->orWhereNotNull('stat_modifiers'))
+            ->firstOrFail();
+
+        MonsterEffect::query()->updateOrCreate(
+            ['monster_id' => $monster->id, 'effect_id' => $effect->id],
+            [
+                'chance' => $data['chance'],
+                'duration_seconds' => $data['duration_seconds'],
+                'power_percent' => $data['power_percent'] ?? null,
+                'trigger_on_hit' => true,
+            ],
+        );
+
+        return redirect()->back()->with('success', 'Эффект после удара добавлен.');
+    }
+
+    public function updateEffect(Request $request, Monster $monster, Effect $effect): RedirectResponse
+    {
+        $data = $this->validateEffectAssignment($request, includeEffect: false);
+
+        MonsterEffect::query()
+            ->where('monster_id', $monster->id)
+            ->where('effect_id', $effect->id)
+            ->firstOrFail()
+            ->update([
+                'chance' => $data['chance'],
+                'duration_seconds' => $data['duration_seconds'],
+                'power_percent' => $data['power_percent'] ?? null,
+                'trigger_on_hit' => true,
+            ]);
+
+        return redirect()->back()->with('success', 'Параметры эффекта обновлены.');
+    }
+
+    public function deleteEffect(Monster $monster, Effect $effect): RedirectResponse
+    {
+        $monster->effects()->detach($effect->id);
+
+        return redirect()->back()->with('success', 'Эффект после удара удалён.');
     }
 
     public function infoLocation(Monster $monster): View
@@ -154,6 +214,34 @@ class MonsterController extends Controller
         $monster->locations()->detach($location->id);
 
         return redirect()->back()->with('success', 'Локация удалена.');
+    }
+
+    /** @return array{effect_id?: int, chance: float, duration_seconds: int, power_percent?: float|null} */
+    private function validateEffectAssignment(Request $request, bool $includeEffect = true): array
+    {
+        $rules = [
+            'chance' => ['required', 'numeric', 'min:0', 'max:100'],
+            'duration_seconds' => ['required', 'integer', 'min:1'],
+            'power_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ];
+
+        if ($includeEffect) {
+            $rules['effect_id'] = ['required', 'integer', 'exists:effects,id'];
+        }
+
+        return $request->validate($rules);
+    }
+
+    /** @return list<string> */
+    private function assignableEffectTypes(): array
+    {
+        return array_values(array_map(
+            static fn (ActiveEffectType $type): string => $type->value,
+            array_filter(
+                ActiveEffectType::cases(),
+                static fn (ActiveEffectType $type): bool => $type->isDoT() || $type->isControl(),
+            ),
+        ));
     }
 
     // ── Boss Phases ───────────────────────────────────────────────────────────
@@ -197,7 +285,7 @@ class MonsterController extends Controller
 
     public function addMechanic(Request $request, Monster $monster): RedirectResponse
     {
-        BossMechanic::create([
+        $mechanic = new BossMechanic([
             'monster_id' => $monster->id,
             'mechanic_type' => $request->input('mechanic_type'),
             'trigger_hp_percent' => $request->filled('trigger_hp_percent') ? (int) $request->input('trigger_hp_percent') : null,
@@ -206,6 +294,8 @@ class MonsterController extends Controller
             'is_active' => (bool) $request->input('is_active', true),
             'config' => $request->filled('config') ? json_decode($request->input('config'), true) : null,
         ]);
+        $this->syncMechanicImage($mechanic, $request);
+        $mechanic->save();
 
         return redirect()->back()->with('success', 'Механика добавлена.');
     }
@@ -218,6 +308,7 @@ class MonsterController extends Controller
         $mechanic->priority = (int) $request->input('priority', 0);
         $mechanic->is_active = (bool) $request->input('is_active', true);
         $mechanic->config = $request->filled('config') ? json_decode($request->input('config'), true) : null;
+        $this->syncMechanicImage($mechanic, $request);
         $mechanic->save();
 
         return redirect()->back()->with('success', 'Механика обновлена.');
@@ -298,5 +389,18 @@ class MonsterController extends Controller
     private function storeImage(UploadedFile $file): string
     {
         return $file->store('monsters', 'public');
+    }
+
+    private function syncMechanicImage(BossMechanic $mechanic, Request $request): void
+    {
+        if ($request->hasFile('image')) {
+            $request->validate(['image' => ['image', 'max:4096']]);
+            $oldImage = $mechanic->getRawOriginal('image');
+            $mechanic->image = $request->file('image')->store('boss-mechanics', 'public');
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($mechanic->getRawOriginal('image'));
+            $mechanic->image = null;
+        }
     }
 }

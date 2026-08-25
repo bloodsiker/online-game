@@ -11,15 +11,15 @@
         body {
             height: 100%;
             margin: 0;
-            color: #000;
-            font-family: Tahoma;
-            font-size: 14px;
+            color: #45382f;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 12px;
         }
         a {
-            color: #000000;
+            color: #765039;
         }
         a:hover{
-            color: #353434
+            color: #4e3425;
         }
         .b {
             background-color: #CEBBAA;
@@ -84,6 +84,7 @@
             font-size: 0;
         }
         .tbl-usi_bg {
+            background-color: #e8dac7;
             background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
             background-repeat: repeat;
         }
@@ -129,37 +130,44 @@
                         <style>
                             .char-wrap {
                                 display: flex;
-                                gap: 8px;
-                                padding: 10px;
+                                gap: 10px;
+                                padding: 12px;
                                 align-items: flex-start;
                             }
                             /* ── колонки ── */
-                            .char-col { display: flex; flex-direction: column; gap: 8px; }
+                            .char-col { display: flex; flex-direction: column; gap: 10px; }
                             .char-col-left  { width: 200px; flex-shrink: 0; }
                             .char-col-mid   { flex: 1; min-width: 170px; }
                             .char-col-right { flex: 1; min-width: 170px; }
 
                             /* ── карточка ── */
                             .char-card {
-                                border: 1px solid #CEBBAA;
-                                border-radius: 4px;
+                                border: 1px solid #bca68e;
+                                border-radius: 3px;
                                 overflow: hidden;
                                 font-size: 11px;
                                 font-family: Tahoma, sans-serif;
+                                background: #f4ecdf;
+                                box-shadow: 0 1px 2px rgba(66, 45, 30, .10);
                             }
                             .char-card-title {
-                                background: url({{ asset('img/bg/table-header.jpg') }}) repeat-x top left #DFBBA3;
-                                color: #461c0b;
+                                background-color: #ddcbb3;
+                                background-image: linear-gradient(rgba(238, 224, 204, .88), rgba(216, 195, 168, .88)), url({{ asset('img/bg/table-header2.jpg') }});
+                                background-repeat: repeat-x;
+                                color: #563e2f;
                                 font-weight: bold;
-                                padding: 4px 8px;
+                                padding: 6px 9px;
                                 font-size: 11px;
-                                letter-spacing: 0.3px;
+                                letter-spacing: .15px;
+                                border-bottom: 1px solid #c5b096;
+                                text-shadow: 0 1px rgba(255, 250, 239, .75);
                             }
+                            .char-card-title a { color: inherit !important; }
                             .char-card-body {
-{{--                                background-image: url({{ asset('img/bg/bgg.gif') }});--}}
+                                background-color: #f5eddf;
                                 background-image: url({{ asset('img/bg/common-bg.png') }});
                                 background-repeat: repeat;
-                                padding: 7px 9px;
+                                padding: 9px 10px;
                             }
 
                             /* ── портрет ── */
@@ -168,32 +176,48 @@
                                 width: 130px;
                                 height: 170px;
                                 object-fit: cover;
-                                border: 2px solid #CEBBAA;
+                                border: 1px solid #a98f74;
                                 border-radius: 3px;
                                 margin: 0 auto 8px;
+                                padding: 3px;
+                                background: #e4d4bd;
+                                box-shadow: 0 2px 4px rgba(62, 40, 26, .16);
                             }
                             .char-name {
                                 text-align: center;
                                 font-weight: bold;
-                                font-size: 12px;
-                                color: #461c0b;
-                                margin-bottom: 6px;
+                                font-size: 13px;
+                                color: #563a29;
+                                margin-bottom: 8px;
+                                letter-spacing: .15px;
+                            }
+                            .char-class-badge {
+                                display: inline-block;
+                                padding: 2px 7px;
+                                border: 1px solid #b9a38b;
+                                border-left: 3px solid var(--class-accent, #80634f);
+                                border-radius: 3px;
+                                background: #ece0cf;
+                                color: #57443a;
+                                font-size: 10px;
+                                font-weight: bold;
                             }
 
                             /* ── прогресс-бар ── */
                             .char-bar-wrap {
-                                background: #b09880;
-                                border-radius: 3px;
-                                height: 8px;
+                                background: #d2c4b4;
+                                border: 1px solid rgba(104, 80, 62, .25);
+                                border-radius: 5px;
+                                height: 7px;
                                 overflow: hidden;
-                                margin: 3px 0 5px;
-                                box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+                                margin: 4px 0 6px;
+                                box-shadow: inset 0 1px 2px rgba(68, 45, 30, .12);
                             }
                             .char-bar-fill {
                                 height: 100%;
-                                border-radius: 3px;
+                                border-radius: 5px;
                                 transition: width 0.3s;
-                                box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+                                box-shadow: none;
                             }
                             .char-bar-exp  { background: linear-gradient(90deg, #c07820, #f0b030, #e89020); }
                             .char-bar-hp   { background: linear-gradient(90deg, #aa1010, #ee3030, #cc2020); }
@@ -204,31 +228,34 @@
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
-                                padding: 2px 0;
-                                border-bottom: 1px solid #EDD5C3;
-                                color: #333;
+                                min-height: 16px;
+                                padding: 4px 2px;
+                                border-bottom: 1px solid #dfd2c1;
+                                color: #4b413a;
                                 font-size: 11px;
                             }
+                            .char-stat-row:hover { background: rgba(220, 203, 181, .20); }
                             .char-stat-row:last-child { border-bottom: none; }
                             .char-stat-val {
                                 font-weight: bold;
-                                color: #461c0b;
+                                color: #533d30;
                                 white-space: nowrap;
                             }
-                            .char-stat-label { color: #5a3a2a; }
+                            .char-stat-label { color: #6c5c51; }
 
                             /* ── строка навыка со своим баром ── */
-                            .char-skill-row { padding: 3px 0; border-bottom: 1px solid #EDD5C3; }
+                            .char-skill-row { padding: 5px 1px 6px; border-bottom: 1px solid #dfd2c1; }
                             .char-skill-row:last-child { border-bottom: none; }
                             .char-skill-head {
                                 display: flex;
                                 justify-content: space-between;
                                 font-size: 11px;
-                                color: #333;
+                                color: #554a42;
                             }
-                            .char-skill-head b { color: #461c0b; }
-                            .char-skill-pct { color: #888; font-size: 10px; }
-                            .char-bar-skill { background: linear-gradient(90deg, #6a3818, #c07030, #a05828); }
+                            .char-skill-head b { color: #594032; }
+                            .char-skill-pct { color: #8a7a70; font-size: 10px; }
+                            .char-bar-skill,
+                            .char-skill-row .char-bar-fill { background: #8e7055 !important; }
 
                             /* ── деньги ── */
 
@@ -237,23 +264,28 @@
                                 display: flex;
                                 gap: 12px;
                                 font-size: 11px;
-                                padding: 4px 0 0;
-                                color: #5a3a2a;
+                                padding: 2px 0;
+                                color: #6c5c51;
                             }
-                            .char-battle-row span b { color: #461c0b; }
+                            .char-battle-row span b { color: #533d30; }
 
                             /* ── очки ── */
                             .char-freepoints {
                                 margin-top: 5px;
-                                background: #FADCC2;
-                                border: 1px solid #CEBBAA;
+                                background: #eee2d1;
+                                border: 1px solid #c5b096;
                                 border-radius: 3px;
-                                padding: 4px 7px;
+                                padding: 6px 8px;
                                 font-size: 11px;
-                                color: #461c0b;
+                                color: #594437;
                             }
-                            .char-freepoints a { color: #8b3a1a; font-weight: bold; }
+                            .char-freepoints a { color: #765039; font-weight: bold; text-decoration: none; }
+                            .char-freepoints a:hover { color: #4e3425; text-decoration: underline; }
                         </style>
+
+                        @php
+                            $skillsByType = collect($character->skills)->groupBy(fn ($skill) => $skill->type);
+                        @endphp
 
                         <div class="char-wrap">
 
@@ -266,16 +298,14 @@
                                         <div class="char-name">{{ $character->playerName }}</div>
                                         <img src="{{ asset('img/avatar/dark_elf.jpg') }}"
                                              class="char-portrait" alt="Портрет">
-                                        <div style="font-size:11px; color:#461c0b;">
+                                        <div style="font-size:11px; color:#59483d;">
                                             Ур. <b>{{ $character->level }}</b>
                                             &nbsp;·&nbsp;
                                             <b>{{ $character->raceName }}</b>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            <span style="font-size:11px; color:#5a3a2a;">Класс: </span>
-                                            <span style="display:inline-block; padding:2px 8px; border-radius:3px; font-size:11px; font-weight:bold;
-                                                background:{{ $character->stats->getDisplayCombatClassColor() }};
-                                                color:#fff;">
+                                            <span style="font-size:11px; color:#75665b;">Класс: </span>
+                                            <span class="char-class-badge" style="--class-accent:{{ $character->stats->getDisplayCombatClassColor() }};">
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
@@ -294,8 +324,8 @@
                                             <div class="char-bar-fill char-bar-exp"
                                                  style="width:{{ $character->expPercent }}%"></div>
                                         </div>
-                                        <div style="font-size:10px; color:#888;">
-                                            след. уровень: <b style="color:#461c0b">{{ $character->expUp }}</b>
+                                        <div style="font-size:10px; color:#8a7a70;">
+                                            след. уровень: <b style="color:#59483d">{{ $character->expUp }}</b>
                                         </div>
                                     </div>
                                 </div>
@@ -316,13 +346,15 @@
                                                 <img src="{{ asset('img/icon/m_dmd.gif') }}" width="14" height="14" style="vertical-align:middle; margin-right:3px;" alt="">
                                                 Бриллианты
                                             </span>
-                                            <span class="char-stat-val">0</span>
+                                            <span class="char-stat-val">{{ number_format($character->diamond, 0, '', ' ') }}</span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label" style="color:#888;">В банке</span>
-                                            <span class="char-stat-val">0</span>
+                                            <span class="char-stat-label" style="color:#8a7a70;">В банке</span>
+                                            <span class="char-stat-val">{{ number_format($character->bankBalance, 0, '', ' ') }}</span>
                                         </div>
-                                        <div style="font-size:10px; color:#888; padding-top:3px;">Счёт: <b style="color:#5a3a2a">7131</b></div>
+                                        @if($character->bankAccount)
+                                            <div style="font-size:10px; color:#8a7a70; padding-top:3px;">Счёт: <b style="color:#665247">{{ $character->bankAccount }}</b></div>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -345,7 +377,7 @@
                                 {{-- Основные характеристики --}}
                                 <div class="char-card">
                                     <div class="char-card-title">
-                                        <a href="/b/use.php?bid=14" style="color:#461c0b;text-decoration:none;">Основные характеристики</a>
+                                        <a href="/b/use.php?bid=14" style="color:#563e2f;text-decoration:none;">Основные характеристики</a>
                                     </div>
                                     <div class="char-card-body">
                                         @foreach([
@@ -362,9 +394,9 @@
                                                 <span class="char-stat-val">
                                                     {{ $base }}
                                                     @if($bonus > 0)
-                                                        <span style="color:#2a7a2a;font-size:11px">(+{{ $bonus }})</span>
+                                                        <span style="color:#5e7654;font-size:11px">(+{{ $bonus }})</span>
                                                     @elseif($bonus < 0)
-                                                        <span style="color:#8b2020;font-size:11px">({{ $bonus }})</span>
+                                                        <span style="color:#8a5550;font-size:11px">({{ $bonus }})</span>
                                                     @endif
                                                 </span>
                                             </div>
@@ -384,8 +416,8 @@
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Здоровье:
-                                            <b style="color:#8b2020">{{ $character->hpNow }}</b>
-                                            / <b style="color:#461c0b">{{ $character->stats->getHpMax() }}</b>
+                                            <b style="color:#8d4f49">{{ $character->hpNow }}</b>
+                                            / <b style="color:#59483d">{{ $character->stats->getHpMax() }}</b>
                                         </div>
                                         @php $hpPct = $character->stats->getHpMax() > 0 ? min(round($character->hpNow * 100 / $character->stats->getHpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
@@ -393,7 +425,7 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Класс</span>
-                                            <span class="char-stat-val" style="color:{{ $character->stats->getDisplayCombatClassColor() }}">
+                                            <span class="char-stat-val">
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
@@ -418,8 +450,8 @@
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
                                             Мана:
-                                            <b style="color:#2040a0">{{ $character->mpNow }}</b>
-                                            / <b style="color:#461c0b">{{ $character->stats->getMpMax() }}</b>
+                                            <b style="color:#526f8d">{{ $character->mpNow }}</b>
+                                            / <b style="color:#59483d">{{ $character->stats->getMpMax() }}</b>
                                         </div>
                                         @php $mpPct = $character->stats->getMpMax() > 0 ? min(round($character->mpNow * 100 / $character->stats->getMpMax()), 100) : 0; @endphp
                                         <div class="char-bar-wrap" style="height:10px; margin-bottom:8px;">
@@ -427,7 +459,7 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Атака</span>
-                                            <span class="char-stat-val">237</span>
+                                            <span class="char-stat-val">{{ $character->stats->getMagicAttack() }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -441,7 +473,7 @@
                                 <div class="char-card">
                                     <div class="char-card-title">Боевые навыки</div>
                                     <div class="char-card-body">
-                                        @foreach($character->skills as $skill)
+                                        @forelse($skillsByType->get('combat', collect()) as $skill)
                                             @php $pct = $skill->expPercent(); @endphp
                                             <div class="char-skill-row">
                                                 <div class="char-skill-head">
@@ -452,7 +484,9 @@
                                                     <div class="char-bar-fill char-bar-skill" style="width:{{ $pct }}%"></div>
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            <div class="char-skill-pct">Боевые навыки пока не освоены.</div>
+                                        @endforelse
                                     </div>
                                 </div>
 
@@ -460,20 +494,20 @@
                                 <div class="char-card">
                                     <div class="char-card-title">Волшебные навыки</div>
                                     <div class="char-card-body">
-                                        @foreach([
-                                            ['Волшебное оружие', 1,  52.46],
-                                            ['Колдовство',       14, 27.13],
-                                        ] as [$name, $lvl, $pct])
+                                        @forelse($skillsByType->get('magic', collect()) as $skill)
+                                            @php $pct = $skill->expPercent(); @endphp
                                             <div class="char-skill-row">
                                                 <div class="char-skill-head">
-                                                    <span>{{ $name }}: <b>{{ $lvl }}</b></span>
+                                                    <span>{{ $skill->name }}: <b>{{ $skill->level }}</b></span>
                                                     <span class="char-skill-pct">{{ $pct }}%</span>
                                                 </div>
                                                 <div class="char-bar-wrap" style="margin:2px 0 0;">
                                                     <div class="char-bar-fill char-bar-skill" style="width:{{ $pct }}%"></div>
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            <div class="char-skill-pct">Волшебные навыки пока не освоены.</div>
+                                        @endforelse
                                     </div>
                                 </div>
 
@@ -481,27 +515,20 @@
                                 <div class="char-card">
                                     <div class="char-card-title">Мирные умения</div>
                                     <div class="char-card-body">
-                                        @foreach([
-                                            ['Охота',                         15, 56.15, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Зачаровывание предметов',       24, 67.12, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Торговля',                      32, 69.39, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Торговля дефицитными товарами', 43, 61.20, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Взлом замков',                   6, 40.33, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Подводное плавание',            17, 21.67, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Рыболовство',                    2, 12.78, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Лесозаготовка',                 17, 56.01, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                            ['Горное дело',                   16, 35.08, 'linear-gradient(90deg,#b06000,#f0a000)'],
-                                        ] as [$name, $lvl, $pct, $color])
+                                        @forelse($skillsByType->get('peaceful', collect()) as $skill)
+                                            @php $pct = $skill->expPercent(); @endphp
                                             <div class="char-skill-row">
                                                 <div class="char-skill-head">
-                                                    <span>{{ $name }}: <b>{{ $lvl }}</b></span>
+                                                    <span>{{ $skill->name }}: <b>{{ $skill->level }}</b></span>
                                                     <span class="char-skill-pct">{{ $pct }}%</span>
                                                 </div>
                                                 <div class="char-bar-wrap" style="margin:2px 0 0;">
-                                                    <div class="char-bar-fill" style="width:{{ $pct }}%; background:{{ $color }};"></div>
+                                                    <div class="char-bar-fill char-bar-skill" style="width:{{ $pct }}%;"></div>
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            <div class="char-skill-pct">Мирные умения пока не освоены.</div>
+                                        @endforelse
                                     </div>
                                 </div>
 

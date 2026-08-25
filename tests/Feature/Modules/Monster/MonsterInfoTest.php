@@ -56,6 +56,27 @@ class MonsterInfoTest extends TestCase
             'monster_id' => 103,
             'location_id' => 10,
         ]);
+        DB::table('effects')->insert([
+            'id' => 1,
+            'name' => 'Кровотечение',
+            'slug' => 'monster_bleed',
+            'type' => 'debuff',
+            'image' => 'effects/bleed.png',
+        ]);
+        DB::table('monster_effects')->insert([
+            'monster_id' => 103,
+            'effect_id' => 1,
+            'chance' => 12,
+            'duration_seconds' => 20,
+            'trigger_on_hit' => true,
+        ]);
+        DB::table('boss_mechanics')->insert([
+            'monster_id' => 103,
+            'mechanic_type' => 'enrage',
+            'trigger_hp_percent' => 30,
+            'is_active' => true,
+            'priority' => 1,
+        ]);
         DB::table('location_has_monsters')->insert([
             ['location_id' => 10, 'monster_id' => 103, 'aggression' => null],
             ['location_id' => 11, 'monster_id' => 103, 'aggression' => null],
@@ -70,6 +91,12 @@ class MonsterInfoTest extends TestCase
         $response->assertSeeText('Карты обитания');
         $response->assertSeeText('Броня');
         $response->assertSeeText('Магическое сопротивление');
+        $response->assertSeeText('Эффекты');
+        $response->assertSeeText('Умения');
+        $response->assertSee('effects/bleed.png', false);
+        $response->assertSee('data-tooltip-type="Эффект"', false);
+        $response->assertSee('data-tooltip-type="Умение"', false);
+        $response->assertSee('monster_ability_tooltip.js', false);
         $response->assertSeeText('8');
         $response->assertSeeText('Гранитный Перевал, Шепчущий Лес');
         $this->assertSame(1, substr_count($content, 'Гранитный Перевал'));
@@ -169,6 +196,39 @@ class MonsterInfoTest extends TestCase
             $table->double('drop_chance')->default(0);
             $table->unsignedInteger('min_count')->default(1);
             $table->unsignedInteger('max_count')->default(1);
+        });
+
+        Schema::create('effects', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug');
+            $table->string('type');
+            $table->string('active_type')->nullable();
+            $table->string('image')->nullable();
+        });
+
+        Schema::create('monster_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('monster_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->decimal('chance', 5, 2)->default(0);
+            $table->unsignedInteger('duration_seconds')->default(0);
+            $table->decimal('power_percent', 5, 2)->nullable();
+            $table->boolean('trigger_on_hit')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::create('boss_mechanics', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('monster_id');
+            $table->string('mechanic_type');
+            $table->string('image')->nullable();
+            $table->unsignedInteger('trigger_hp_percent')->nullable();
+            $table->unsignedInteger('trigger_turn')->nullable();
+            $table->json('config')->nullable();
+            $table->unsignedInteger('priority')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
         });
     }
 }

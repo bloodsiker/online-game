@@ -10,7 +10,7 @@
         <div class="col-md-6">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.magic_skill.info', $magicSkill->id) }}" method="post">
+                    <form action="{{ route('admin.magic_skill.info', $magicSkill->id) }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row">
                             <div class="col-md-8">
@@ -29,6 +29,23 @@
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="3">{{ $magicSkill->description }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Картинка</label>
+                            @if($magicSkill->image)
+                                <div class="mb-2">
+                                    <img src="{{ $magicSkill->image }}" alt="{{ $magicSkill->name }}"
+                                         style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;padding:3px;background:#fff;">
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="form-text text-muted">Максимум 4 МБ.</small>
+                            @if($magicSkill->image)
+                                <div class="checkbox-custom checkbox-default mt-2">
+                                    <input type="checkbox" id="delete-magic-skill-image" name="delete_image" value="1">
+                                    <label for="delete-magic-skill-image">Удалить текущую картинку</label>
+                                </div>
+                            @endif
                         </div>
                         <div class="row">
                             <div class="col-md-4">
@@ -116,6 +133,13 @@
             <section class="card">
                 <header class="card-header"><h2 class="card-title">Наложенные эффекты</h2></header>
                 <div class="card-body">
+                    @foreach($magicSkill->skillEffects as $effect)
+                        <form id="magic-effect-update-{{ $effect->id }}"
+                              action="{{ route('admin.magic_skill.effect.update', [$magicSkill->id, $effect->id]) }}"
+                              method="post">
+                            {{ csrf_field() }}
+                        </form>
+                    @endforeach
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered mb-none">
                             <thead>
@@ -123,7 +147,8 @@
                                 <th>Эффект</th>
                                 <th width="90">Тип</th>
                                 <th width="100">Шанс, %</th>
-                                <th width="70"></th>
+                                <th width="120">Длительность</th>
+                                <th width="145"></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -131,15 +156,24 @@
                                 <tr style="vertical-align: middle">
                                     <td><a href="{{ route('admin.effect.info', $effect->id) }}">{{ $effect->name }}</a></td>
                                     <td><span class="badge badge-info">{{ $effect->type }}</span></td>
-                                    <td>{{ $effect->pivot->chance }}</td>
                                     <td>
+                                        <input form="magic-effect-update-{{ $effect->id }}" type="number" min="0" max="100"
+                                               class="form-control form-control-sm" name="chance" value="{{ $effect->pivot->chance }}" required>
+                                    </td>
+                                    <td>
+                                        <input form="magic-effect-update-{{ $effect->id }}" type="number" min="0"
+                                               class="form-control form-control-sm" name="duration_seconds"
+                                               value="{{ $effect->pivot->duration_seconds }}" required>
+                                    </td>
+                                    <td style="white-space:nowrap;">
+                                        <button form="magic-effect-update-{{ $effect->id }}" class="btn btn-xs btn-primary">Сохранить</button>
                                         <a href="{{ route('admin.magic_skill.effect.delete', [$magicSkill->id, $effect->id]) }}"
                                            class="btn btn-xs btn-danger"
                                            onclick="return confirm('Удалить?')">Удалить</a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="text-center text-muted">Эффекты не привязаны</td></tr>
+                                <tr><td colspan="5" class="text-center text-muted">Эффекты не привязаны</td></tr>
                             @endforelse
                             </tbody>
                         </table>
@@ -150,7 +184,7 @@
                     <form action="{{ route('admin.magic_skill.effect.add', $magicSkill->id) }}" method="post">
                         {{ csrf_field() }}
                         <div class="row">
-                            <div class="col-md-7">
+                            <div class="col-md-5">
                                 <div class="form-group mb-2">
                                     <label class="col-form-label">Эффект</label>
                                     <select name="effect_id" class="form-control" data-plugin-selectTwo required>
@@ -164,6 +198,12 @@
                                 <div class="form-group mb-2">
                                     <label class="col-form-label">Шанс, %</label>
                                     <input type="number" min="0" max="100" class="form-control" name="chance" value="100">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Длит-ть, сек</label>
+                                    <input type="number" min="0" class="form-control" name="duration_seconds" value="5" required>
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex align-items-end">

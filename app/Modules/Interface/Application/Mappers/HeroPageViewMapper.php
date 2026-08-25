@@ -33,7 +33,7 @@ class HeroPageViewMapper
                 ? (int) $now->diffInSeconds($activeEffect->expires_at, false)
                 : $this->remainingBattleEffectSeconds($activeEffect, $now);
 
-            $isCurse = $activeEffect->type?->isDoT() || $activeEffect->type?->isStun()
+            $isCurse = $activeEffect->type?->isDoT() || $activeEffect->type?->isControl()
                 || ($activeEffect->effect && in_array($activeEffect->effect->type, ['debuff']));
 
             return new HeroEffectDTO(
