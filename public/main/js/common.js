@@ -234,16 +234,20 @@ function getCoords(obj){
 	return ret
 }
 var waitFuncId=0
-function waitObj(id,evFunc){
+var waitObjMaxTries=300
+function waitObj(id,evFunc,tries){
 	if(document.getElementById){
-		if(typeof evFunc=='function'){
-			window['waitFunc'+waitFuncId]=evFunc
-			evFunc='waitFunc'+waitFuncId
+		if(typeof tries!='number') tries=0
+		if(tries>waitObjMaxTries) return
+		var func=evFunc
+		if(typeof func=='function'){
+			window['waitFunc'+waitFuncId]=func
+			func='waitFunc'+waitFuncId
 			waitFuncId++
 		}
 		var obj=(id=='body')?document.body:document.getElementById(id)
-		if(obj) window[evFunc]()
-		else setTimeout("waitObj('"+id+"','"+evFunc+"')",100)
+		if(obj) window[func]()
+		else setTimeout(function(){ waitObj(id,func,tries+1) },100)
 	}else{
 		onload=evFunc
 	}
@@ -1061,6 +1065,25 @@ function _background(obj, name) {
 	}
 }
 
+function altMouseMoveThrottle(fn) {
+	var pending = null, lastEvent = null;
+	return function (e) {
+		lastEvent = e || window.event;
+		if (pending) return;
+		if (window.requestAnimationFrame) {
+			pending = window.requestAnimationFrame(function () {
+				pending = null;
+				fn(lastEvent);
+			});
+		} else {
+			pending = setTimeout(function () {
+				pending = null;
+				fn(lastEvent);
+			}, 16);
+		}
+	};
+}
+
 function getIframeShift() {
 	var currentWindow = window,
 		currentFrame = null,
@@ -1111,9 +1134,9 @@ function artifactAlt(obj, evnt, show) {
     if (act4 == 0) act4 = '';
     if (act1 == null) act1 = 0;
     if (show == 2) {
-        document.onmousemove = function (e) {
+        document.onmousemove = altMouseMoveThrottle(function (e) {
             artifactAlt(obj, e || event, 1);
-        }
+        })
 
         if (!artifact_alt.getAttribute('art_id') || obj.getAttribute('div_id') != artifact_alt.getAttribute('art_id')) {
             if (typeof (art_alt) == "undefined") {
@@ -1355,7 +1378,7 @@ function userAlt(obj, evnt, show) {
 	if (!user_alt) return;
 
 	if (show == 1) {
-		document.onmousemove=function(e) {userAlt(obj, e||event, 1);}
+		document.onmousemove=altMouseMoveThrottle(function(e) {userAlt(obj, e||event, 1);})
 
 		if (!user_alt.getAttribute('soc_id') || !user_alt.getAttribute('soc_user_id') || obj.getAttribute('soc_id') != user_alt.getAttribute('soc_id') || obj.getAttribute('soc_user_id') != user_alt.getAttribute('soc_user_id') ) {
 			if (soc_user_alts[soc_id] && soc_user_alts[soc_id] != undefined || soc_user_alts[soc_user_id] && soc_user_alts[soc_user_id] != undefined) {
@@ -2002,7 +2025,7 @@ function ShowDiv(obj, evnt, show, param) {
 	var div = gebi(obj.getAttribute('div_id'));
 	if (!div) return;
 	if (show == 2) {
-		document.onmousemove=function(e) {artifactAlt(obj, e||event, 1)}
+		document.onmousemove=altMouseMoveThrottle(function(e) {artifactAlt(obj, e||event, 1)})
 		div.style.display = 'block';
 	}
 	if (!show) {
@@ -2062,7 +2085,7 @@ function petAlt(obj, evnt, show) {
 	var act1 = obj.getAttribute('act1');
 	var act2 = obj.getAttribute('act2');
 	if (show == 2) {
-		document.onmousemove=function(e) {petAlt(obj, e||event, 1)}
+		document.onmousemove=altMouseMoveThrottle(function(e) {petAlt(obj, e||event, 1)})
 		div.style.display = 'block';
 		if (act1 || act2) {
 			_background(obj, (top.locale_path + "images/itemact-"+ act1) + (act2 +".gif"));
@@ -2429,12 +2452,12 @@ function systemConfirm(ms,obj,func){
         return true;
     };
 
-    $('.btn_sys_confirm_close').click(function(){
+    $('.btn_sys_confirm_close').off('click.sysConfirm').on('click.sysConfirm',function(){
         div.style.display = 'none';
         close_div.style.display = 'none';
     });
 
-    $('.popup_global_close_btn').click(function(){
+    $('.popup_global_close_btn').off('click.sysConfirm').on('click.sysConfirm',function(){
         div.style.display = 'none';
         close_div.style.display = 'none';
     });
@@ -2486,12 +2509,12 @@ function systemConfirm_zatochka(ms,title,obj,func){
         return true;
     };
 	
-	$('.btn_sys_confirm_close').click(function(){
+	$('.btn_sys_confirm_close').off('click.sysConfirm').on('click.sysConfirm',function(){
         div.style.display = 'none';
         close_div.style.display = 'none';
     });
 
-    $('.popup_global_close_btn').click(function(){
+    $('.popup_global_close_btn').off('click.sysConfirm').on('click.sysConfirm',function(){
         div.style.display = 'none';
         close_div.style.display = 'none';
     });
@@ -3432,7 +3455,6 @@ function delete_user_drop(id){
                 }
             }
         },
-        async: false,
     });
 }
 
@@ -3625,6 +3647,9 @@ function findClosest(elem, parent) {
 */
 function countdownTimer(elem, dtime, textArray, callback) {
 	elem = typeof elem === 'string' ? document.getElementById(elem) : elem;
+	if (elem.timer) {
+		clearInterval(elem.timer);
+	}
 	elem.timer = setInterval(function() {
 		var ctime = (new Date).getTime(),
 			time = dtime - (ctime / 1000);
@@ -3836,7 +3861,7 @@ function clan_talents_alt(talent_id, num, m_event, evnt){
     var cur_num = alt_div.attr("data-num");
 
     if(evnt == 2){
-        document.onmousemove=function(e){ clan_talents_alt(0, 0, e||event, 1); }
+        document.onmousemove=altMouseMoveThrottle(function(e){ clan_talents_alt(0, 0, e||event, 1); })
         alt_div.show();
     }else if(evnt == 0){
         document.onmousemove=function(){};

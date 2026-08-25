@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Services\MapMonstersCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -57,6 +58,8 @@ class LocationController extends Controller
             'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
         ]);
 
+        MapMonstersCache::flush();
+
         return redirect()->back()->with('success', 'Моб добавлен.');
     }
 
@@ -74,6 +77,8 @@ class LocationController extends Controller
     public function deleteMonster(Location $location, Monster $monster): RedirectResponse
     {
         $location->monsters()->detach($monster->id);
+
+        MapMonstersCache::flush();
 
         return redirect()->back()->with('success', 'Моб удалён.');
     }
@@ -102,6 +107,8 @@ class LocationController extends Controller
             $this->deleteStorageImage($location->getRawOriginal('image'));
             $location->image = null;
         }
+
+        MapMonstersCache::flush();
     }
 
     private function storeImage(UploadedFile $file): string

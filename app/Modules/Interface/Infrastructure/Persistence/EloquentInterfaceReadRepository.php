@@ -12,6 +12,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 
 class EloquentInterfaceReadRepository implements InterfaceReadRepository
@@ -28,18 +29,28 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
 
     public function getUsersOnLocation(int $locationId): Collection
     {
-        return User::with(['player', 'clanMembership.clan'])
-            ->where('location_id', $locationId)
-            ->orderByDesc('last_online_at')
-            ->get();
+        return Cache::remember(
+            'who:users_on_location:'.$locationId,
+            now()->addSeconds(60),
+            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+                ->where('location_id', $locationId)
+                ->orderByDesc('last_online_at')
+                ->get(),
+        );
     }
 
     public function getOnlineUsers(Carbon $threshold): Collection
     {
-        return User::with(['player', 'clanMembership.clan'])
-            ->where('last_online_at', '>=', $threshold)
-            ->orderByDesc('last_online_at')
-            ->get();
+        $bucket = (int) floor(time() / 60);
+
+        return Cache::remember(
+            'who:online_users:'.$bucket,
+            now()->addSeconds(75),
+            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+                ->where('last_online_at', '>=', $threshold)
+                ->orderByDesc('last_online_at')
+                ->get(),
+        );
     }
 
     public function getPlayerActiveEffects(int $playerId): Collection

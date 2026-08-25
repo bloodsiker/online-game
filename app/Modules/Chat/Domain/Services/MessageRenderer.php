@@ -7,6 +7,7 @@ namespace App\Modules\Chat\Domain\Services;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class MessageRenderer
 {
@@ -111,7 +112,12 @@ class MessageRenderer
 
         // Replace [[item_ID]] shortcodes
         $rendered = preg_replace_callback('/\[\[item_(\d+)\]\]/', function ($matches) {
-            $item = Item::with('itemInfo')->find((int) $matches[1]);
+            /** @var Item|null $item */
+            $item = Cache::remember(
+                'chat:shortcode:item:'.$matches[1],
+                now()->addMinutes(5),
+                fn (): ?Item => Item::with('itemInfo')->find((int) $matches[1]),
+            );
 
             if (! $item || ! $item->itemInfo) {
                 return '<span class="chat-item-unknown" title="Предмет не найден">[???]</span>';
@@ -131,7 +137,12 @@ class MessageRenderer
 
         // Replace [[share_item_ID]] shortcodes
         $rendered = preg_replace_callback('/\[\[share_item_(\d+)\]\]/', function ($matches) {
-            $item = ShareItem::find((int) $matches[1]);
+            /** @var ShareItem|null $item */
+            $item = Cache::remember(
+                'chat:shortcode:share_item:'.$matches[1],
+                now()->addMinutes(5),
+                fn (): ?ShareItem => ShareItem::find((int) $matches[1]),
+            );
 
             if (! $item) {
                 return '<span class="chat-item-unknown" title="Предмет не найден">[???]</span>';
@@ -149,7 +160,12 @@ class MessageRenderer
 
         // Replace [[user_ID]] shortcodes with profile links
         $rendered = preg_replace_callback('/\[\[user_(\d+)\]\]/', function ($matches) {
-            $user = User::find((int) $matches[1]);
+            /** @var User|null $user */
+            $user = Cache::remember(
+                'chat:shortcode:user:'.$matches[1],
+                now()->addMinutes(5),
+                fn (): ?User => User::find((int) $matches[1]),
+            );
 
             if (! $user) {
                 return '<span class="chat-item-unknown" title="Персонаж не найден">[???]</span>';

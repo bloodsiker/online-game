@@ -128,11 +128,7 @@
     <script type="text/javascript" src="{{ asset('main/js/backbone.js') }}"></script>
     <script type="text/javascript" src="{{ asset('main/js/main.js') }}"></script>
 
-    <script type="text/javascript" src="{{ asset('main/js/canvas/pixi.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/canvas/pixi-filters.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/canvas.all.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/canvas/canvas.path.js') }}"></script>
-
+    {{-- PIXI/canvas здесь не используются: канвас нужен только iframe меню (Interface/menu.blade.php) --}}
 
     <link rel="stylesheet" href="{{ asset('main/css/index_glav.css') }}"/>
 

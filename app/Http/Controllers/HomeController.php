@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Services\MapMonstersCache;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
@@ -138,37 +141,43 @@ class HomeController extends Controller
 
     public function publicMapMonsters(Map $map): JsonResponse
     {
-        $monsters = Monster::query()
-            ->whereHas('locations', fn ($query) => $query->where('locations.map_id', $map->id))
-            ->orderBy('name')
-            ->get(['id', 'name', 'lvl', 'image', 'is_boss'])
-            ->groupBy('name')
-            ->map(static function ($sameNameMonsters): array {
-                /** @var Monster $monster */
-                $monster = $sameNameMonsters->first();
+        $monsters = Cache::remember(
+            MapMonstersCache::key($map->id),
+            now()->addMinutes(MapMonstersCache::TTL_MINUTES),
+            function () use ($map): Collection {
+                return Monster::query()
+                    ->whereHas('locations', fn ($query) => $query->where('locations.map_id', $map->id))
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'lvl', 'image', 'is_boss'])
+                    ->groupBy('name')
+                    ->map(static function ($sameNameMonsters): array {
+                        /** @var Monster $monster */
+                        $monster = $sameNameMonsters->first();
 
-                return [
-                    'name' => (string) $monster->name,
-                    'levels' => $sameNameMonsters
-                        ->sortBy('lvl')
-                        ->groupBy('lvl')
-                        ->map(static function ($sameLevelMonsters): array {
-                            /** @var Monster $monster */
-                            $monster = $sameLevelMonsters->first();
+                        return [
+                            'name' => (string) $monster->name,
+                            'levels' => $sameNameMonsters
+                                ->sortBy('lvl')
+                                ->groupBy('lvl')
+                                ->map(static function ($sameLevelMonsters): array {
+                                    /** @var Monster $monster */
+                                    $monster = $sameLevelMonsters->first();
 
-                            return [
-                                'value' => (int) $monster->lvl,
-                                'info_url' => route('info.monster.catalog', ['id' => $monster->id]),
-                            ];
-                        })
-                        ->values()
-                        ->all(),
-                    'image' => $monster->image,
-                    'is_boss' => $sameNameMonsters->contains(static fn (Monster $item): bool => $item->isBoss()),
-                ];
-            })
-            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
-            ->values();
+                                    return [
+                                        'value' => (int) $monster->lvl,
+                                        'info_url' => route('info.monster.catalog', ['id' => $monster->id]),
+                                    ];
+                                })
+                                ->values()
+                                ->all(),
+                            'image' => $monster->image,
+                            'is_boss' => $sameNameMonsters->contains(static fn (Monster $item): bool => $item->isBoss()),
+                        ];
+                    })
+                    ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+                    ->values();
+            },
+        );
 
         return response()->json([
             'map' => $map->name,

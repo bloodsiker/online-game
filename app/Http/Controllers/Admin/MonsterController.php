@@ -16,6 +16,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Services\MapMonstersCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -195,6 +196,8 @@ class MonsterController extends Controller
             'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
         ]);
 
+        MapMonstersCache::flush();
+
         return redirect()->back()->with('success', 'Локация добавлена.');
     }
 
@@ -206,12 +209,16 @@ class MonsterController extends Controller
             'aggression' => $aggression !== '' && $aggression !== null ? (int) $aggression : null,
         ]);
 
+        MapMonstersCache::flush();
+
         return response()->json(['status' => 'ok']);
     }
 
     public function deleteLocation(Monster $monster, Location $location): RedirectResponse
     {
         $monster->locations()->detach($location->id);
+
+        MapMonstersCache::flush();
 
         return redirect()->back()->with('success', 'Локация удалена.');
     }

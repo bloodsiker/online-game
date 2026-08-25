@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\Observers\MonsterObserver;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
@@ -16,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Monster::observe(MonsterObserver::class);
+
         View::composer(['main.index', 'auth.register'], function ($view) {
             $tenMinutesAgo = Carbon::now()->subMinutes(10);
             $onlineCount = User::where('last_online_at', '>=', $tenMinutesAgo)->count();

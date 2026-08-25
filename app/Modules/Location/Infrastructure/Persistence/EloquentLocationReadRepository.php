@@ -13,6 +13,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class EloquentLocationReadRepository implements LocationReadRepository
 {
@@ -31,10 +32,16 @@ class EloquentLocationReadRepository implements LocationReadRepository
 
     public function getLocationUsers(int $locationId): Collection
     {
-        return User::with(['player', 'clanMembership.clan'])
-            ->where('location_id', $locationId)
-            ->orderByDesc('last_online_at')
-            ->get();
+        // Тот же список, что и в InterfaceReadRepository::getUsersOnLocation —
+        // используем общий ключ кэша, чтобы не дублировать запросы.
+        return Cache::remember(
+            'who:users_on_location:'.$locationId,
+            now()->addSeconds(60),
+            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+                ->where('location_id', $locationId)
+                ->orderByDesc('last_online_at')
+                ->get(),
+        );
     }
 
     public function findDungeonSessionByUserId(int $userId): ?DungeonSession
