@@ -13,7 +13,7 @@ class PostServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'post');
 
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Presentation/Http/Route/web.php');
 
         Route::middleware(['web', 'isAdmin'])

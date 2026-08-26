@@ -1120,9 +1120,7 @@
             <div class="popup-right-center">
                 <div class="popup_global_content" style="padding:14px 18px 10px;">
                     <div id="game-message-content" style="text-align:center;font-size:12px;line-height:1.45;color:#2a1a0e;"></div>
-                    <div style="margin:14px 0 4px;text-align:center;">
-                        <b class="butt1 pointer" onclick="closeGameMessageModal()"><b><input value="Закрыть" type="button"></b></b>
-                    </div>
+                    <div id="game-message-actions" style="margin:14px 0 4px;text-align:center;"></div>
                 </div>
             </div>
         </div>
@@ -1234,6 +1232,11 @@
     function updateIframeWho() {
         const iframeWho = document.getElementById('who-frame');
         iframeWho.src = iframeWho.src;
+    }
+
+    function refreshChatChannels() {
+        const chatFrame = document.getElementById('chat-frame');
+        if (chatFrame) chatFrame.src = chatFrame.src;
     }
 </script>
 
@@ -1630,14 +1633,58 @@
     function openGameMessageModal(data) {
         document.getElementById('game-message-title').textContent = data.title;
         document.getElementById('game-message-content').textContent = data.message;
+        setGameMessageModalActions(data.actions || [{ label: 'Закрыть', onClick: closeGameMessageModal }]);
         document.getElementById('game-message-overlay').style.display = 'block';
         document.getElementById('game-message-modal').style.display = 'block';
+    }
+
+    function openGameConfirmModal(data) {
+        openGameMessageModal({
+            title: data.title,
+            message: data.message,
+            actions: [
+                { label: data.cancelLabel || 'Отмена', onClick: closeGameMessageModal },
+                {
+                    label: data.confirmLabel || 'Ок',
+                    onClick: function () {
+                        closeGameMessageModal();
+                        data.onConfirm();
+                    },
+                },
+            ],
+        });
+    }
+
+    function setGameMessageModalActions(actions) {
+        var container = document.getElementById('game-message-actions');
+        container.innerHTML = '';
+
+        actions.forEach(function (action, index) {
+            var wrapper = document.createElement('b');
+            wrapper.className = 'butt1 pointer';
+            wrapper.style.margin = index ? '0 0 0 8px' : '0';
+            var inner = document.createElement('b');
+            var button = document.createElement('input');
+            button.type = 'button';
+            button.value = action.label;
+            button.addEventListener('click', action.onClick);
+            inner.appendChild(button);
+            wrapper.appendChild(inner);
+            container.appendChild(wrapper);
+        });
     }
 
     function closeGameMessageModal() {
         document.getElementById('game-message-overlay').style.display = 'none';
         document.getElementById('game-message-modal').style.display = 'none';
     }
+
+    @if(session('party_success') || session('party_error'))
+        openGameMessageModal({
+            title: @json(session('party_error') ? 'Ошибка группы' : 'Группа'),
+            message: @json(session('party_success') ?? session('party_error')),
+        });
+    @endif
 
     function _ptsAdded() {
         return ['strength','intuition','agility','intelligence','wisdom','endurance'].reduce((s, k) => s + (parseInt(document.getElementById('ptsi-' + k)?.value) || 0), 0);

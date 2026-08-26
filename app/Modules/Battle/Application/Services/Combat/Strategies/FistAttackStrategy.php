@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
-use App\Models\Skill;
 use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 
 class FistAttackStrategy implements AttackStrategyInterface
 {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Interface\Infrastructure\Persistence;
 
-use App\Models\Map;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;

@@ -294,15 +294,28 @@
                                                                     style="background-color: #cc6600;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Торговый</span></li>
-                                                        <li class="moveable channel ui-sortable-handle"
-                                                            data-channel="clan" data-channel-code="4"
-                                                            channel-serialize="channel_clan"
-                                                            onclick="chatChangePreset(4)"><span
-                                                                class="ch settings"
-                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
-                                                                                          style="background-color: #007a03;"></span><span
-                                                                    class="settings-cover"></span></span><span
-                                                                class="text">Клан</span></li>
+                                                        @if($hasClan)
+                                                            <li class="moveable channel ui-sortable-handle"
+                                                                data-channel="clan" data-channel-code="4"
+                                                                channel-serialize="channel_clan"
+                                                                onclick="chatChangePreset(4)"><span
+                                                                    class="ch settings"
+                                                                    onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                                              style="background-color: #007a03;"></span><span
+                                                                        class="settings-cover"></span></span><span
+                                                                    class="text">Клан</span></li>
+                                                        @endif
+                                                        @if($hasParty)
+                                                            <li class="moveable channel ui-sortable-handle"
+                                                                data-channel="party" data-channel-code="16"
+                                                                channel-serialize="channel_party"
+                                                                onclick="chatChangePreset(16)"><span
+                                                                    class="ch settings"
+                                                                    onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                                              style="background-color: #009999;"></span><span
+                                                                        class="settings-cover"></span></span><span
+                                                                    class="text">Группа</span></li>
+                                                        @endif
                                                         <li class="moveable channel ui-sortable-handle"
                                                             data-channel="private" data-channel-code="32"
                                                             channel-serialize="channel_private"
@@ -405,6 +418,19 @@
                                                             bottomFrame.contentWindow.postMessage({ type: 'setChannel', channel: slug }, '*');
                                                         }
                                                     }
+
+                                                    var chatHasParty = @json($hasParty);
+                                                    function refreshPartyChannelAvailability() {
+                                                        fetch('{{ route('chat.party-availability') }}')
+                                                            .then(function (response) { return response.json(); })
+                                                            .then(function (data) {
+                                                                if (Boolean(data.has_party) !== chatHasParty) {
+                                                                    window.location.reload();
+                                                                }
+                                                            })
+                                                            .catch(function () {});
+                                                    }
+                                                    setInterval(refreshPartyChannelAvailability, 10000);
 
                                                     function chatFrameSelect(type) {
                                                         var whoFrame = document.getElementById('who-frame');

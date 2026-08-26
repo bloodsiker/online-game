@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\MagicSkill\Infrastructure\Persistence\Models;
 
-use App\Models\Skill;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

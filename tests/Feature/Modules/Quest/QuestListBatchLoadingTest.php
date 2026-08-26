@@ -6,11 +6,11 @@ namespace Tests\Feature\Modules\Quest;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Presentation\Http\QuestController;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ExperienceService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\News;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 use Illuminate\Database\Eloquent\Collection;
 
 final class NewsShortcodeRenderer

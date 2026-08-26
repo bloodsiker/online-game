@@ -30,6 +30,7 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use RuntimeException;
 
 class ClanController extends Controller
@@ -55,7 +56,7 @@ class ClanController extends Controller
         private readonly GetClanLogsPage $getClanLogsPage,
     ) {}
 
-    public function membersFrame(): \Illuminate\View\View
+    public function membersFrame(): View
     {
         $page = $this->getClanMembersFrame->execute(Auth::user());
 
@@ -66,7 +67,7 @@ class ClanController extends Controller
         ]);
     }
 
-    public function index(): \Illuminate\View\View
+    public function index(): View
     {
         $page = $this->getClanIndexPage->execute(Auth::user());
 
@@ -78,7 +79,7 @@ class ClanController extends Controller
         ]);
     }
 
-    public function member(): \Illuminate\View\View|RedirectResponse
+    public function member(): View|RedirectResponse
     {
         try {
             $page = $this->getClanMemberPage->execute(Auth::user());
@@ -100,7 +101,7 @@ class ClanController extends Controller
         ]);
     }
 
-    public function role(): \Illuminate\View\View|RedirectResponse
+    public function role(): View|RedirectResponse
     {
         try {
             $page = $this->getClanRolePage->execute(Auth::user());
@@ -141,7 +142,7 @@ class ClanController extends Controller
         try {
             $this->cancelClanRequest->execute(Auth::user(), $joinRequest);
             session()->flash('message', 'Заявка отменена.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -153,7 +154,7 @@ class ClanController extends Controller
         try {
             $this->inviteToClan->execute(Auth::user(), $request->input('invite_nick'));
             session()->flash('message', 'Приглашение в клан отправлено');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -165,7 +166,7 @@ class ClanController extends Controller
         try {
             $this->leaveClan->execute(Auth::user());
             session()->flash('message', 'Вы покинули клан.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -177,7 +178,7 @@ class ClanController extends Controller
         try {
             $this->kickClanMember->execute(Auth::user(), $target);
             session()->flash('message', 'Игрок исключён из клана.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -189,7 +190,7 @@ class ClanController extends Controller
         try {
             $this->saveClanMemberRoles->execute(Auth::user(), $request->input('form.mem', []));
             session()->flash('message', 'Звания участников сохранены.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -201,7 +202,7 @@ class ClanController extends Controller
         try {
             $this->addClanRole->execute(Auth::user(), $request->input('name'));
             session()->flash('message', 'Звание добавлено.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -213,7 +214,7 @@ class ClanController extends Controller
         try {
             $this->deleteClanRole->execute(Auth::user(), $role);
             session()->flash('message', 'Звание удалено.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -225,14 +226,14 @@ class ClanController extends Controller
         try {
             $this->saveClanRoles->execute(Auth::user(), $request->input('form.grades', []));
             session()->flash('message', 'Полномочия сохранены.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
         return redirect()->route('clan.role');
     }
 
-    public function information(): \Illuminate\View\View|RedirectResponse
+    public function information(): View|RedirectResponse
     {
         try {
             $page = $this->getClanInformationPage->execute(Auth::user());
@@ -254,7 +255,7 @@ class ClanController extends Controller
         try {
             $this->saveClanDescription->execute(Auth::user(), $request->input('description', ''));
             session()->flash('message', 'Описание клана сохранено.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
@@ -271,14 +272,14 @@ class ClanController extends Controller
                 $request->input('news_3', ''),
             );
             session()->flash('message', 'Новости клана сохранены.');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             session()->flash('message', $e->getMessage());
         }
 
         return redirect()->route('clan.information');
     }
 
-    public function quests(Request $request): \Illuminate\View\View|RedirectResponse
+    public function quests(Request $request): View|RedirectResponse
     {
         try {
             $page = $this->getClanQuestsPage->execute(Auth::user());
@@ -298,7 +299,7 @@ class ClanController extends Controller
         ]);
     }
 
-    public function logs(Request $request): \Illuminate\View\View|RedirectResponse
+    public function logs(Request $request): View|RedirectResponse
     {
         try {
             $page = $this->getClanLogsPage->execute(

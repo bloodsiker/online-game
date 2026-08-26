@@ -6,6 +6,7 @@ namespace App\Modules\Item\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
 use App\Modules\Item\Application\UseCases\DropItem;
 use App\Modules\Item\Application\UseCases\EquipItem;
 use App\Modules\Item\Application\UseCases\GetChestPage;
@@ -19,7 +20,6 @@ use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemEffect\ItemEffectStrategyFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

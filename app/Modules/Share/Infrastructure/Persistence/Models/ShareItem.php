@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
-use App\Models\Skill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Database\Eloquent\Casts\Attribute;

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\MagicSkill\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Modules\MagicSkill\Application\DTOs\LearnMagicSkillResultDTO;
-use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\MagicSkill\Application\DTOs\LearnMagicSkillResultDTO;
+use App\Modules\MagicSkill\Application\Services\MagicSkillRequirementService;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\MagicSkillRequirementService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 

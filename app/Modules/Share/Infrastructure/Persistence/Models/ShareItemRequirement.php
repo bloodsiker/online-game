@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
-use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
-use App\Models\Skill;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
+use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

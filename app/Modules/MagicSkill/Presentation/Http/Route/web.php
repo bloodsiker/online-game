@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Modules\MagicSkill\Presentation\Http\MagicSkillController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['updateLastOnline'])->group(function (): void {
+Route::group([], function (): void {
     Route::post('/magic-skill/update', [MagicSkillController::class, 'updateSkill'])->name('magic_skill.update');
     Route::post('/magic-skill/order', [MagicSkillController::class, 'updateOrder'])->name('magic_skill.order');
     Route::post('/magic-skill/{skill}/use', [MagicSkillController::class, 'useSkill'])->name('magic_skill.use');

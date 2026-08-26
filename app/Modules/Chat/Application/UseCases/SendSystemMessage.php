@@ -38,4 +38,15 @@ class SendSystemMessage
             'type' => $type->value,
         ]);
     }
+
+    public function toParty(int $partyId, string $message): ChatMessage
+    {
+        return $this->repository->create([
+            'user_id' => null,
+            'channel' => ChatChannel::Party->value,
+            'party_id' => $partyId,
+            'message' => $message,
+            'type' => ChatMessageType::PartyNotice->value,
+        ]);
+    }
 }

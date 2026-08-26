@@ -35,6 +35,29 @@ class ChatService
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Information);
     }
 
+    public function sendPartyInviteToUser(User $user, string $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::PartyInvite);
+    }
+
+    public function sendPartyNoticeToUser(User $user, string $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::PartyNotice);
+    }
+
+    /** Удаляет персональное системное сообщение, не затрагивая чужой чат. */
+    public function removeSystemMessageForUser(User $user, ?int $messageId): void
+    {
+        if ($messageId === null) {
+            return;
+        }
+
+        ChatMessage::query()
+            ->whereKey($messageId)
+            ->where('target_user_id', $user->id)
+            ->delete();
+    }
+
     public function sendQuestToUser(User $user, string $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Quest);
@@ -48,6 +71,11 @@ class ChatService
     public function sendSystem(string $message, ?int $mapId = null, ?int $clanId = null): ChatMessage
     {
         return $this->sendSystemMessage->toChannel($message, $mapId, $clanId);
+    }
+
+    public function sendSystemToParty(int $partyId, string $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toParty($partyId, $message);
     }
 
     public function getMessages(User $user, ChatChannel $channel, ?int $afterId = null, int $limit = 60): Collection

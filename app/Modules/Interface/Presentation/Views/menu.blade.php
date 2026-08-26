@@ -75,7 +75,7 @@
     </style>
 
     <script src="{{ asset('main/js/canvas/pixi.js') }}"></script>
-    <script src="{{ asset('main/js/canvas/pixi-filters.js') }}"></script>
+    {{-- pixi-filters.js не нужен: обрезанный бандл использует только core-фильтры (ColorMatrix/Alpha) --}}
     <script src="{{ asset('main/js/canvas/canvas.all.js') }}"></script>
 </head>
 <body>

@@ -16,8 +16,8 @@ use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
+use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
-use App\Services\PlayerSkillService;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 

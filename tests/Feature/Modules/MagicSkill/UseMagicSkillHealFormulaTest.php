@@ -6,6 +6,7 @@ namespace Tests\Feature\Modules\MagicSkill;
 
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
+use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Application\UseCases\UseMagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\EloquentMagicSkillRepository;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -14,7 +15,6 @@ use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\MagicCastGuard;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

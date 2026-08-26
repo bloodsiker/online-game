@@ -2,9 +2,9 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Repositories\MonsterOnLocationRepository;
 use Illuminate\Support\Collection;
 

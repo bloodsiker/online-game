@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Skill;
-use App\Models\Skill\SkillLevelRequirement;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
 use Illuminate\Database\Seeder;
 
 /**

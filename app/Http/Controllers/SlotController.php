@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
-use App\Services\HotbarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

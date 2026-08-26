@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Structure\PremiumShop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\Models\BankStock;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

@@ -9,8 +9,8 @@ use Carbon\Carbon;
 final readonly class WhoPageDTO
 {
     /**
-     * @param array<WhoUserDTO> $onlineOnLocation
-     * @param array<WhoUserDTO> $onlineInGame
+     * @param  array<WhoUserDTO>  $onlineOnLocation
+     * @param  array<WhoUserDTO>  $onlineInGame
      */
     public function __construct(
         public array $onlineOnLocation,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Skill;
 use App\Modules\Item\Domain\Services\EquipmentStatFormulas;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
@@ -16,6 +15,7 @@ use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Seeder;
 

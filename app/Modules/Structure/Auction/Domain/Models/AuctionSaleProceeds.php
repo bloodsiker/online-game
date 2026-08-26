@@ -13,7 +13,18 @@ class AuctionSaleProceeds extends Model
 {
     protected $fillable = ['user_id', 'structure_id', 'auction_history_id', 'amount'];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function structure(): BelongsTo { return $this->belongsTo(Structure::class); }
-    public function history(): BelongsTo { return $this->belongsTo(AuctionHistory::class, 'auction_history_id'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function structure(): BelongsTo
+    {
+        return $this->belongsTo(Structure::class);
+    }
+
+    public function history(): BelongsTo
+    {
+        return $this->belongsTo(AuctionHistory::class, 'auction_history_id');
+    }
 }

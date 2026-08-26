@@ -2,9 +2,9 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
-use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicInterface;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 
 abstract class BaseBossMechanic implements BossMechanicInterface
 {

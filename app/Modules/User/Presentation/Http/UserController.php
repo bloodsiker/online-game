@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Presentation\Http;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

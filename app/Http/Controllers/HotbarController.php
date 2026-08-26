@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Application\ItemEffect\EffectHandler;
+use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
+use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
-use App\Services\HotbarService;
-use App\Services\ItemEffect\EffectHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,7 +96,7 @@ class HotbarController extends Controller
 
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
-            $strategy = \App\Services\ItemEffect\ItemEffectStrategyFactory::make($effect->type);
+            $strategy = ItemEffectStrategyFactory::make($effect->type);
             $strategy->apply($player, $effect, $stats->getHpMax(), $stats->getMpMax());
         }
 

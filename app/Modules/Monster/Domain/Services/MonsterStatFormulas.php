@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Domain\Services;
 
-use App\Services\ExperienceCurve;
+use App\Modules\Player\Domain\Services\ExperienceCurve;
 
 /**
  * Формулы характеристик монстров по уровню — чтобы новый контент не собирался

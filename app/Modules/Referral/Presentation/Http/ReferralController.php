@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Presentation\Http;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Referral\Application\UseCases\GetReferralPage;
 use App\Modules\Referral\Domain\Contracts\ReferralRepository;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\View\View;
 
 final class ReferralController
@@ -30,7 +30,7 @@ final class ReferralController
         $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($shareItems));
 
         return view('referral::index', [
-            'page'              => $this->getReferralPage->handle(auth()->user()),
+            'page' => $this->getReferralPage->handle(auth()->user()),
             'itemTooltipScript' => $this->tooltipCollector->renderScript(),
         ]);
     }

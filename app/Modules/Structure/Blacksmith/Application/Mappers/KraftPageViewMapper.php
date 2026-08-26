@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Application\Mappers;
 
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Structure\Blacksmith\Application\DTOs\KraftPageDTO;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\Support\Collection;
 
 class KraftPageViewMapper

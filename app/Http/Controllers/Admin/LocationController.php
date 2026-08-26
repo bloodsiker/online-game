@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Services\MapMonstersCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;

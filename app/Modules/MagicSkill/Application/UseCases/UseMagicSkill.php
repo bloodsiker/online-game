@@ -9,11 +9,11 @@ use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\MagicSkill\Application\DTOs\MagicSkillActionResultDTO;
+use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\MagicCastGuard;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

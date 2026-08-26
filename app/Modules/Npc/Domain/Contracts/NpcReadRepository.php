@@ -16,11 +16,13 @@ interface NpcReadRepository
 
     public function findNpcByNameOrFail(string $name): Npc;
 
-    public function getCompletedQuestIds(int $playerId): array;
-
-    public function getInProgressQuestIds(int $playerId): array;
-
-    public function getRepeatableReadyIds(int $playerId): array;
+    /**
+     * Состояния всех квестов игрока одним запросом — вместо трёх отдельных
+     * выборок completed / in_progress / repeatable_ready.
+     *
+     * @return array{completed: list<int>, in_progress: list<int>, repeatable_ready: list<int>}
+     */
+    public function getPlayerQuestStateGroups(int $playerId): array;
 
     public function getQuestsOnCooldown(int $playerId, int $npcId): Collection;
 

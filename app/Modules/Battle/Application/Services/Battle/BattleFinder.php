@@ -2,10 +2,10 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 
 readonly class BattleFinder
 {

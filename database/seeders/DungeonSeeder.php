@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;

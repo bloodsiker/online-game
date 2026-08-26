@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\MagicSkill;
 
-use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\MagicSkill\Application\Services\MagicSkillRequirementService;
 use App\Modules\MagicSkill\Application\UseCases\LearnMagicSkillFromBook;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemRequirementService;
-use App\Services\MagicSkillRequirementService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

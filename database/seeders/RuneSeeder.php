@@ -28,13 +28,13 @@ use Illuminate\Database\Seeder;
 class RuneSeeder extends Seeder
 {
     private const THEMES = [
-        'Огонь'   => ['pool' => ['attack'],                          'img' => 'img/items/runes/fire.png'],
-        'Лёд'     => ['pool' => ['armor', 'hp_max'],                 'img' => 'img/items/runes/ice.png'],
-        'Молния'  => ['pool' => ['agility', 'critical'],             'img' => 'img/items/runes/lightning.png'],
-        'Тень'    => ['pool' => ['dodge', 'critical', 'attack'],     'img' => 'img/items/runes/shadow.png'],
-        'Земля'   => ['pool' => ['strength', 'armor', 'hp_max'],     'img' => 'img/items/runes/earth.png'],
-        'Свет'    => ['pool' => ['hp_max', 'mp_max', 'intelligence'],'img' => 'img/items/runes/holy.png'],
-        'Хаос'    => ['pool' => null,                                'img' => 'img/items/runes/chaos.png'],
+        'Огонь' => ['pool' => ['attack'],                          'img' => 'img/items/runes/fire.png'],
+        'Лёд' => ['pool' => ['armor', 'hp_max'],                 'img' => 'img/items/runes/ice.png'],
+        'Молния' => ['pool' => ['agility', 'critical'],             'img' => 'img/items/runes/lightning.png'],
+        'Тень' => ['pool' => ['dodge', 'critical', 'attack'],     'img' => 'img/items/runes/shadow.png'],
+        'Земля' => ['pool' => ['strength', 'armor', 'hp_max'],     'img' => 'img/items/runes/earth.png'],
+        'Свет' => ['pool' => ['hp_max', 'mp_max', 'intelligence'], 'img' => 'img/items/runes/holy.png'],
+        'Хаос' => ['pool' => null,                                'img' => 'img/items/runes/chaos.png'],
     ];
 
     public function run(): void
@@ -57,14 +57,14 @@ class RuneSeeder extends Seeder
                         'name' => $name,
                     ],
                     [
-                        'description'    => "Тематика: {$theme}. Редкость: {$rarity->label()}. Статы генерируются при вплавлении.",
-                        'image'          => $def['img'],
-                        'rune_rarity'    => $rarity->value,
+                        'description' => "Тематика: {$theme}. Редкость: {$rarity->label()}. Статы генерируются при вплавлении.",
+                        'image' => $def['img'],
+                        'rune_rarity' => $rarity->value,
                         'rune_stat_pool' => $def['pool'],
-                        'price'          => $this->price($rarity),
-                        'is_sell'        => true,
-                        'is_active'      => true,
-                        'is_weight'      => false,
+                        'price' => $this->price($rarity),
+                        'is_sell' => true,
+                        'is_active' => true,
+                        'is_weight' => false,
                     ]
                 );
 
@@ -84,11 +84,11 @@ class RuneSeeder extends Seeder
             ],
             [
                 'description' => 'Открывает новый рунный слот на оружии или щите. Максимум 3 слота.',
-                'image'       => 'img/items/runes/rune_key.png',
-                'price'       => 3000,
-                'is_sell'     => true,
-                'is_active'   => true,
-                'is_weight'   => false,
+                'image' => 'img/items/runes/rune_key.png',
+                'price' => 3000,
+                'is_sell' => true,
+                'is_active' => true,
+                'is_weight' => false,
             ]
         );
 
@@ -98,9 +98,9 @@ class RuneSeeder extends Seeder
     private function price(RuneRarity $rarity): int
     {
         return match ($rarity) {
-            RuneRarity::COMMON    => 300,
-            RuneRarity::RARE      => 1000,
-            RuneRarity::EPIC      => 3500,
+            RuneRarity::COMMON => 300,
+            RuneRarity::RARE => 1000,
+            RuneRarity::EPIC => 3500,
             RuneRarity::LEGENDARY => 12000,
         };
     }

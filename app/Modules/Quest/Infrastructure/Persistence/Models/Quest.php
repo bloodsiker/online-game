@@ -61,11 +61,19 @@ class Quest extends Model
 
     public function hasStages(): bool
     {
+        if ($this->relationLoaded('stages')) {
+            return $this->stages->isNotEmpty();
+        }
+
         return $this->stages()->exists();
     }
 
     public function firstStage(): ?QuestStage
     {
+        if ($this->relationLoaded('stages')) {
+            return $this->stages->first();
+        }
+
         return $this->stages()->first();
     }
 

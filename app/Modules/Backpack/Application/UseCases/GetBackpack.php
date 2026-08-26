@@ -6,9 +6,9 @@ namespace App\Modules\Backpack\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
 
 class GetBackpack
 {

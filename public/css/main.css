@@ -182,7 +182,7 @@ span.butt1 input, span.butt1 button.butt1, span.butt1.disabled input, span.butt1
     text-decoration: none;
     margin: 0 33px;
     background: transparent url('/img/bg/btn/tbl-btn2_center.png') center top repeat-x;
-    padding-bottom: 3px;
+    padding-bottom: 4px;
     outline: none;
 }
 
@@ -795,7 +795,7 @@ b.butt1 input, b.butt1 button.butt1, b.butt1.disabled input, b.butt1.disabled bu
     text-decoration: none;
     margin: 0 33px;
     background: transparent url(/img/bg/btn/tbl-btn2_center.png) center top repeat-x;
-    padding-bottom: 3px;
+    padding-bottom: 4px;
     outline: none;
 }
 

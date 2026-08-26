@@ -429,6 +429,12 @@
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
+                                        <div class="char-stat-row" title="Урон оружия за раунд — по логике боя: одно оружие (включая дворучное) бьёт одной рукой, два оружия — суммарно">
+                                            <span class="char-stat-label">Урон</span>
+                                            <span class="char-stat-val">
+                                                {{ format_money($character->weaponDamage['min']) }} – {{ format_money($character->weaponDamage['max']) }}
+                                            </span>
+                                        </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Броня</span>
                                             <span class="char-stat-val">{{ $character->stats->getArmor() }}</span>

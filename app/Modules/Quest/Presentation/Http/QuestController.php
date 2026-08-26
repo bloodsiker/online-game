@@ -11,6 +11,7 @@ use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
@@ -27,7 +28,6 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
-use App\Services\ExperienceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,7 +56,7 @@ class QuestController extends Controller
             if ($clanMembership) {
                 $clanQuests = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
                     ->orderByDesc('id')
-                    ->with('quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'objectives.questObjective', 'currentStage', 'user')
+                    ->with('clan', 'quest.rewards.itemInfo', 'quest.rewards.location', 'quest.stages.objectives', 'quest.dialogues', 'objectives.questObjective', 'currentStage', 'user')
                     ->paginate(20)
                     ->withQueryString();
                 $clanQuestProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
@@ -92,7 +92,9 @@ class QuestController extends Controller
 
     public function quest($id, Request $request)
     {
-        $quest = Quest::with('rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'dialogues')->find($id);
+        // stages + objectives.map: firstStage()/hasStages() и карта в view
+        // работают по уже загруженным связям без лишних exists()/lazy-запросов.
+        $quest = Quest::with('rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'dialogues', 'stages', 'objectives.map')->find($id);
         $npc = Npc::find($request->integer('npc'));
         $user = Auth::user();
         $player = $user->player;
@@ -740,22 +742,22 @@ class QuestController extends Controller
             $currentStage = $questPlayer->currentStage;
             $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
 
-            // Check deliver items for this stage
-            foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = $objective->shareItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
+            // Проверка наличия предметов одним агрегатным запросом
+            $stageShareItemIds = $currentStage->objectives
+                ->whereIn('type', ['deliver', 'collect'])
+                ->filter(fn ($objective) => (bool) $objective->share_item_id)
+                ->map(fn ($objective) => (int) $objective->share_item_id)
+                ->unique()
+                ->values()
+                ->all();
+            $backpackCounts = $this->backpackService->countByShareItemIds($user, $stageShareItemIds);
 
-            // Check collect items for this stage
-            foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
+            foreach ($currentStage->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = $objective->collectItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
+                $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
+                if ($shareItem && ($backpackCounts[(int) $objective->share_item_id] ?? 0) < $objective->required_amount) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
                 }
@@ -834,19 +836,22 @@ class QuestController extends Controller
 
         // Check deliver and collect items for non-staged quest
         if (! $hasStages) {
-            foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = $objective->shareItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-            foreach ($quest->objectives->where('type', 'collect') as $objective) {
+            // Проверка наличия предметов одним агрегатным запросом
+            $finalShareItemIds = $quest->objectives
+                ->whereIn('type', ['deliver', 'collect'])
+                ->filter(fn ($objective) => (bool) $objective->share_item_id)
+                ->map(fn ($objective) => (int) $objective->share_item_id)
+                ->unique()
+                ->values()
+                ->all();
+            $backpackCounts = $this->backpackService->countByShareItemIds($user, $finalShareItemIds);
+
+            foreach ($quest->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
                 if (! $objective->share_item_id) {
                     continue;
                 }
-                $shareItem = $objective->collectItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
+                $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
+                if ($shareItem && ($backpackCounts[(int) $objective->share_item_id] ?? 0) < $objective->required_amount) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
                 }

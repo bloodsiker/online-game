@@ -13,6 +13,7 @@ class QuestPlayerObjective extends Model
     use HasFactory;
 
     protected $fillable = ['quest_player_id', 'quest_objective_id', 'amount'];
+
     protected $attributes = ['amount' => 0];
 
     public function questPlayer(): BelongsTo

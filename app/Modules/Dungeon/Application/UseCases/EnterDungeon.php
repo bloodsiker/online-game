@@ -6,8 +6,8 @@ namespace App\Modules\Dungeon\Application\UseCases;
 
 use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
 use App\Modules\Dungeon\Domain\Contracts\DungeonReadRepository;
+use App\Modules\Party\Application\Services\PartyService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\PartyService;
 
 class EnterDungeon
 {

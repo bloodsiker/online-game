@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Item\Application\Mappers;
 
 use App\Modules\Item\Application\DTOs\ItemInfoPageDTO;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -12,7 +13,6 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
-use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ItemInfoPageViewMapper
 {

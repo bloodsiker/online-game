@@ -8,12 +8,15 @@ use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use RuntimeException;
 
 class SendMessage
 {
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
+        private readonly PartyRepositoryInterface $partyRepository,
     ) {}
 
     /**
@@ -61,6 +64,15 @@ class SendMessage
 
         if ($defaultChannel === ChatChannel::Clan) {
             $data['clan_id'] = $sender->clanMembership?->clan_id;
+        }
+
+        if ($defaultChannel === ChatChannel::Party) {
+            $party = $this->partyRepository->findActiveByUser((int) $sender->id);
+            if ($party === null) {
+                throw new RuntimeException('Канал группы доступен только её участникам.');
+            }
+
+            $data['party_id'] = $party->id;
         }
 
         return $this->repository->create($data);

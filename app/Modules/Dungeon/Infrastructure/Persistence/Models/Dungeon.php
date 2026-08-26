@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Dungeon\Infrastructure\Persistence\Models;
 
-use App\Models\Map;
 use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
 use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

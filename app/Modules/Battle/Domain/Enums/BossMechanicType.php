@@ -2,6 +2,22 @@
 
 namespace App\Modules\Battle\Domain\Enums;
 
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\AoeAttackMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\BerserkMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\BuffSelfMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DamageToHealMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DeathExplosionMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DebuffPlayerMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\EnrageMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ImmunityMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\LifeDrainMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\MirrorImageMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ReflectDamageMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\RegenerationMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ShieldMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\SummonMinionsMechanic;
+use App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\TeleportMechanic;
+
 enum BossMechanicType: string
 {
     case ENRAGE = 'enrage';
@@ -26,21 +42,21 @@ enum BossMechanicType: string
     public function getClass(): string
     {
         return match ($this) {
-            self::ENRAGE => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\EnrageMechanic::class,
-            self::REGENERATION => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\RegenerationMechanic::class,
-            self::SUMMON_MINIONS => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\SummonMinionsMechanic::class,
-            self::AOE_ATTACK => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\AoeAttackMechanic::class,
-            self::SHIELD => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ShieldMechanic::class,
-            self::DEATH_EXPLOSION => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DeathExplosionMechanic::class,
-            self::TELEPORT => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\TeleportMechanic::class,
-            self::BUFF_SELF => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\BuffSelfMechanic::class,
-            self::DEBUFF_PLAYER => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DebuffPlayerMechanic::class,
-            self::LIFE_DRAIN => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\LifeDrainMechanic::class,
-            self::REFLECT_DAMAGE => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ReflectDamageMechanic::class,
-            self::IMMUNITY => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\ImmunityMechanic::class,
-            self::BERSERK => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\BerserkMechanic::class,
-            self::MIRROR_IMAGE => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\MirrorImageMechanic::class,
-            self::DAMAGE_TO_HEAL => \App\Modules\Battle\Application\Services\Combat\Boss\Mechanics\DamageToHealMechanic::class,
+            self::ENRAGE => EnrageMechanic::class,
+            self::REGENERATION => RegenerationMechanic::class,
+            self::SUMMON_MINIONS => SummonMinionsMechanic::class,
+            self::AOE_ATTACK => AoeAttackMechanic::class,
+            self::SHIELD => ShieldMechanic::class,
+            self::DEATH_EXPLOSION => DeathExplosionMechanic::class,
+            self::TELEPORT => TeleportMechanic::class,
+            self::BUFF_SELF => BuffSelfMechanic::class,
+            self::DEBUFF_PLAYER => DebuffPlayerMechanic::class,
+            self::LIFE_DRAIN => LifeDrainMechanic::class,
+            self::REFLECT_DAMAGE => ReflectDamageMechanic::class,
+            self::IMMUNITY => ImmunityMechanic::class,
+            self::BERSERK => BerserkMechanic::class,
+            self::MIRROR_IMAGE => MirrorImageMechanic::class,
+            self::DAMAGE_TO_HEAL => DamageToHealMechanic::class,
         };
     }
 

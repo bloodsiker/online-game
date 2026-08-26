@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
-use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

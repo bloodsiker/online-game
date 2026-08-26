@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Post\Presentation\Http;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Post\Application\UseCases\BulkLetters;
 use App\Modules\Post\Application\UseCases\DeleteLetter;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Post\Application\UseCases\ReadLetter;
 use App\Modules\Post\Application\UseCases\SendLetter;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

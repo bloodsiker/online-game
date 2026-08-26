@@ -7,9 +7,9 @@ namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Services\MagicCastGuard;
 
 class MagicAttackStrategy implements AttackStrategyInterface
 {

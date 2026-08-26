@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
-use App\Models\Map;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Storage;
+
 if (! function_exists('format_cooldown')) {
     function format_cooldown(int $seconds): string
     {
@@ -45,6 +47,6 @@ if (! function_exists('resolve_storage_image_url')) {
             return $value;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($value);
+        return Storage::disk('public')->url($value);
     }
 }

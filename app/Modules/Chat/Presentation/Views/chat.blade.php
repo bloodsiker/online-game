@@ -47,6 +47,11 @@
         .msg-information       { border-left: 2px solid #df5d03; padding-left: 3px; color: #df5d03; font-weight: bold; }
         .msg-information small { color: #df5d03; }
         .msg-information-icon  { font-weight: bold; }
+        .msg-party_invite      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
+        .msg-party_invite small { color: #000; }
+        .msg-party_invite .party-invite-action { font-weight: bold; }
+        .msg-party_notice      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
+        .msg-party_notice small { color: #000; }
         .msg-quest             { border-left: 2px solid #000000; padding-left: 3px; color: #000000; font-style: italic; }
         .msg-quest small       { color: #000000; font-style: normal; }
         .msg-quest_item            { border-left: 2px solid #009900; padding-left: 3px; color: #009900; font-weight: bold; }
@@ -79,6 +84,11 @@
         .msg-ch-location small        { color: #0055cc; }
         .msg-ch-location .player-link { color: #0055cc; }
 
+        /* Party channel */
+        .msg-ch-party small            { color: #009999; }
+        .msg-ch-party .player-link     { color: #009999; }
+        .msg-ch-party .msg-time-reply  { color: #009999; }
+
         .lgb       { background-image: url({{ asset('img/bg/lgb.gif') }}); background-repeat: repeat; }
         .lgb-left  { background-image: url({{ asset('img/icon/lgb-left.gif') }}); background-repeat: repeat-y; width: 14px; }
         .lgb-right { background-image: url({{ asset('img/icon/lgb-right.gif') }}); background-repeat: repeat-y; width: 15px; }
@@ -98,6 +108,7 @@
                             'clan'     => ' msg-ch-clan',
                             'trade'    => ' msg-ch-trade',
                             'location' => ' msg-ch-location',
+                            'party'    => ' msg-ch-party',
                             default    => '',
                         };
                         $showArrow = in_array($msg->type, ['private', 'mention']);
@@ -118,6 +129,9 @@
 
                         @elseif ($msg->type === 'information')
                             <span class="msg-information-icon">✔</span> {!! $msg->content !!}
+
+                        @elseif (in_array($msg->type, ['party_invite', 'party_notice'], true))
+                            {!! $msg->content !!}
 
                         @elseif ($msg->type === 'quest')
                             {!! $msg->content !!}
@@ -223,6 +237,8 @@
             html += '<span class="msg-system-icon">★</span> ' + msg.content;
         } else if (msg.type === 'information') {
             html += '<span class="msg-information-icon">✔</span> ' + msg.content;
+        } else if (msg.type === 'party_invite' || msg.type === 'party_notice') {
+            html += msg.content;
         } else if (msg.type === 'quest') {
             html += msg.content;
         } else if (msg.type === 'quest_item') {
@@ -245,6 +261,43 @@
         return html;
     }
 
+    function handlePartyInviteAction(link) {
+        if (!link || link.dataset.pending === '1') return false;
+
+        link.dataset.pending = '1';
+        fetch(link.href, {
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok) throw new Error(data.message || 'Не удалось обработать приглашение.');
+                    return data;
+                });
+            })
+            .then(function (data) {
+                try {
+                    if (window.top.refreshChatChannels) window.top.refreshChatChannels();
+                    if (window.top.openGameMessageModal) {
+                        window.top.openGameMessageModal({ title: 'Группа', message: data.message });
+                    }
+                } catch (e) {}
+            })
+            .catch(function (error) {
+                link.dataset.pending = '0';
+                try {
+                    if (window.top.openGameMessageModal) {
+                        window.top.openGameMessageModal({ title: 'Группа', message: error.message });
+                    }
+                } catch (e) {}
+            });
+
+        return false;
+    }
+
     function replyToUser(name) {
         try {
             var actionFrame = parent.document.getElementById('bottom-frame');
@@ -254,7 +307,7 @@
         } catch (e) {}
     }
 
-    var chClass = { clan: ' msg-ch-clan', trade: ' msg-ch-trade', location: ' msg-ch-location' };
+    var chClass = { clan: ' msg-ch-clan', trade: ' msg-ch-trade', location: ' msg-ch-location', party: ' msg-ch-party' };
 
     function insertSorted(content, div, id) {
         var nodes = content.querySelectorAll('[data-id]');

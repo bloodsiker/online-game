@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Application\Mappers;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopSellPageDTO;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use Illuminate\Support\Collection;
 
 class ShopSellPageViewMapper

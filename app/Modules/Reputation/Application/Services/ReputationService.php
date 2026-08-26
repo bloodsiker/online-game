@@ -83,12 +83,31 @@ class ReputationService
         $quest = $randomTierQuest->quest;
 
         return DB::transaction(function () use ($player, $quest) {
-            $questPlayer = QuestPlayer::create([
-                'player_id' => $player->id,
-                'quest_id' => $quest->id,
-                'status' => QuestPlayerStatus::IN_PROGRESS,
-                'current_stage_id' => $quest->firstStage()?->id,
-            ]);
+            // Строка на пару (игрок, квест) единственная (UNIQUE):
+            // повторная выдача ежедневки переиспользует её, как это делает
+            // QuestController::take() для repeatable-квестов.
+            $questPlayer = QuestPlayer::query()
+                ->where('player_id', $player->id)
+                ->where('quest_id', $quest->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($questPlayer) {
+                $questPlayer->objectives()->delete();
+                $questPlayer->update([
+                    'status' => QuestPlayerStatus::IN_PROGRESS,
+                    'current_stage_id' => $quest->firstStage()?->id,
+                    'completed_at' => null,
+                    'reset_at' => null,
+                ]);
+            } else {
+                $questPlayer = QuestPlayer::create([
+                    'player_id' => $player->id,
+                    'quest_id' => $quest->id,
+                    'status' => QuestPlayerStatus::IN_PROGRESS,
+                    'current_stage_id' => $quest->firstStage()?->id,
+                ]);
+            }
 
             foreach ($quest->objectives as $objective) {
                 QuestPlayerObjective::create([

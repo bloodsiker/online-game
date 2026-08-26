@@ -6,11 +6,11 @@ namespace App\Modules\Backpack\Domain\Services;
 
 use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemRequirementService;
 use Illuminate\Database\Eloquent\Collection;
 
 class BackpackService
@@ -112,6 +112,33 @@ class BackpackService
             ->sum('count');
 
         return $count >= $quantity;
+    }
+
+    /**
+     * Количество предметов каждого типа в рюкзаке одним агрегатным запросом —
+     * замена серии hasItemByShareItem() при проверке сдачи квеста.
+     *
+     * @param  list<int>  $shareItemIds
+     * @return array<int, int> share_item_id => суммарное количество (отсутствующие = 0)
+     */
+    public function countByShareItemIds(User $user, array $shareItemIds): array
+    {
+        if ($shareItemIds === []) {
+            return [];
+        }
+
+        $totals = Backpack::query()
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.equipped', 0)
+            ->whereIn('items.share_item_id', $shareItemIds)
+            ->groupBy('items.share_item_id')
+            ->selectRaw('items.share_item_id, SUM(backpacks.count) as total')
+            ->pluck('total', 'items.share_item_id');
+
+        return collect($shareItemIds)
+            ->mapWithKeys(fn (int $id): array => [$id => (int) ($totals[$id] ?? 0)])
+            ->all();
     }
 
     public function addItemByShareItem(User $user, ShareItem $shareItem, int $quantity = 1): Backpack

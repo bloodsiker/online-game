@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle\Application\DTOs;
 
-use App\Models\Skill;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Support\Collection;
 
 final class FightHitDTO

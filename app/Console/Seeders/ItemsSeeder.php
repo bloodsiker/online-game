@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Seeders;
 
-use App\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;

@@ -8,6 +8,8 @@ use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Domain\Enums\QuestType;
+use App\Modules\Quest\Domain\Services\QuestDefinitionsCache;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
@@ -31,30 +33,41 @@ class EloquentNpcReadRepository implements NpcReadRepository
         return Npc::query()->where('name', $name)->firstOrFail();
     }
 
-    public function getCompletedQuestIds(int $playerId): array
+    public function getPlayerQuestStateGroups(int $playerId): array
     {
-        return QuestPlayer::where('player_id', $playerId)
-            ->where('status', QuestPlayerStatus::COMPLETED)
-            ->pluck('quest_id')
-            ->toArray();
-    }
+        $rows = QuestPlayer::where('player_id', $playerId)
+            ->with('quest:id,type')
+            ->get(['id', 'quest_id', 'status', 'reset_at']);
 
-    public function getInProgressQuestIds(int $playerId): array
-    {
-        return QuestPlayer::where('player_id', $playerId)
-            ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->pluck('quest_id')
-            ->toArray();
-    }
+        $completed = [];
+        $inProgress = [];
+        $repeatableReady = [];
 
-    public function getRepeatableReadyIds(int $playerId): array
-    {
-        return QuestPlayer::where('player_id', $playerId)
-            ->where('status', QuestPlayerStatus::COMPLETED)
-            ->whereHas('quest', fn ($q) => $q->where('type', 'repeatable'))
-            ->where(fn ($q) => $q->whereNull('reset_at')->orWhere('reset_at', '<=', now()))
-            ->pluck('quest_id')
-            ->toArray();
+        foreach ($rows as $row) {
+            if ($row->status === QuestPlayerStatus::IN_PROGRESS) {
+                $inProgress[] = $row->quest_id;
+
+                continue;
+            }
+
+            if ($row->status !== QuestPlayerStatus::COMPLETED) {
+                continue;
+            }
+
+            $completed[] = $row->quest_id;
+
+            if ($row->quest?->type === QuestType::REPEATABLE
+                && ($row->reset_at === null || $row->reset_at->lte(now()))
+            ) {
+                $repeatableReady[] = $row->quest_id;
+            }
+        }
+
+        return [
+            'completed' => $completed,
+            'in_progress' => $inProgress,
+            'repeatable_ready' => $repeatableReady,
+        ];
     }
 
     public function getQuestsOnCooldown(int $playerId, int $npcId): Collection
@@ -94,16 +107,14 @@ class EloquentNpcReadRepository implements NpcReadRepository
 
     public function getAvailableQuests(int $npcId, array $excludeIds, array $completedQuestIds, bool $hasClanMembership): Collection
     {
-        return Quest::whereNotIn('id', $excludeIds)
-            ->isActive()
-            ->where('start_npc_id', $npcId)
-            ->where('type', '!=', 'reputation')
-            ->where(function ($query) use ($completedQuestIds) {
-                $query->whereNull('after_quest_id')
-                    ->orWhereIn('after_quest_id', $completedQuestIds);
-            })
-            ->when(! $hasClanMembership, fn ($q) => $q->where('type', '!=', 'clan'))
-            ->get();
+        // Статичный список квестов НПС — из версионного кэша; динамические
+        // условия игрока (исключения, цепочки, клан) применяются в памяти.
+        return QuestDefinitionsCache::availableByNpc($npcId)
+            ->reject(fn (Quest $quest): bool => in_array((int) $quest->id, $excludeIds, true))
+            ->filter(fn (Quest $quest): bool => $quest->after_quest_id === null
+                || in_array((int) $quest->after_quest_id, $completedQuestIds, true))
+            ->filter(fn (Quest $quest): bool => $hasClanMembership || $quest->type !== QuestType::CLAN)
+            ->values();
     }
 
     public function getNpcReputations(int $npcId): Collection

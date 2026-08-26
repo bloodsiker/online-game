@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\Mappers;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Location\Application\DTOs\TakeItemsPageDTO;
 use App\Modules\Location\Application\DTOs\TakeLocationItemDTO;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use Illuminate\Support\Collection;
 
 class TakeItemsPageViewMapper

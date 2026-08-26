@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Monster\Infrastructure\Persistence\Observers;
 
+use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Services\MapMonstersCache;
 
 class MonsterObserver
 {

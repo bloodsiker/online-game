@@ -6,7 +6,6 @@ namespace App\Modules\MagicSkill\Domain\Contracts;
 
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use Illuminate\Support\Collection;
 
 interface MagicSkillReadRepository
 {

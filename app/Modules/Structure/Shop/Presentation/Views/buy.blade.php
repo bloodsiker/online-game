@@ -322,9 +322,11 @@
                                                     <tr class="bg_l">
                                                         <td>
                                                             <a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
+                                                               data-id="{{ $cartItem->shopItem->item->id }}"
+                                                               onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                                                onclick="window.open('{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
                                                                style="color:{{ $cartItem->shopItem->item->rarity?->color() ?? '#666666' }};"
-                                                               class="b">{{ $cartItem->shopItem->item->name }}</a>
+                                                               class="b" title="">{{ $cartItem->shopItem->item->name }}</a>
                                                         </td>
                                                         <td class="b red" align="center">
                                                             @if($cartItem->shopItem->diamond)

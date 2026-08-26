@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Role;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,19 +16,19 @@ class UserRepository extends AbstractRepository
         return User::class;
     }
 
-    public function getQuery(): \Illuminate\Database\Eloquent\Builder
+    public function getQuery(): Builder
     {
         return $this->model->query()->select(['users.*']);
     }
 
-    public function create(array $data): \Illuminate\Database\Eloquent\Model
+    public function create(array $data): Model
     {
         $data['password'] = Hash::make($data['password']);
 
         return parent::create($data);
     }
 
-    public function update(array $data, int|string $id): \Illuminate\Database\Eloquent\Model
+    public function update(array $data, int|string $id): Model
     {
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);

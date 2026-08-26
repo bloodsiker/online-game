@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use Illuminate\Database\Eloquent\Builder;
 
 class MonsterRepository extends AbstractRepository
 {
@@ -16,7 +17,7 @@ class MonsterRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery(): \Illuminate\Database\Eloquent\Builder
+    public function getQuery(): Builder
     {
         return $this->model->query()->select(['monsters.*']);
     }

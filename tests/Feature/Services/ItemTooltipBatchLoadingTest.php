@@ -6,7 +6,7 @@ namespace Tests\Feature\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
-use App\Services\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

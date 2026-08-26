@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $target_user_id
  * @property int|null $clan_id
  * @property int|null $map_id
+ * @property int|null $party_id
  * @property string $message
  * @property ChatMessageType $type
  * @property-read User|null $sender
@@ -30,6 +31,7 @@ class ChatMessage extends Model
         'target_user_id',
         'clan_id',
         'map_id',
+        'party_id',
         'message',
         'type',
     ];

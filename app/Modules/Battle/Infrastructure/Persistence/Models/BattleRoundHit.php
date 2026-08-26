@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int    $battle_round_id
- * @property string $participant_type  user|monster
- * @property int    $participant_id    user_id или location_monster_id
+ * @property int $battle_round_id
+ * @property string $participant_type user|monster
+ * @property int $participant_id user_id или location_monster_id
  * @property int|null $hp_after
  * @property string $action
  */

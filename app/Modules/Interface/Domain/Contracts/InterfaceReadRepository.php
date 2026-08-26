@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Interface\Domain\Contracts;
 
-use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 

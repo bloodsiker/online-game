@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Rating\Infrastructure\Persistence;
 
-use App\Models\Skill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Rating\Domain\Contracts\RatingReadRepository;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

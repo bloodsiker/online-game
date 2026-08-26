@@ -1,6 +1,5 @@
 // $Id: common.js,v 1.156 2010-02-04 08:34:34 s.ignatenkov Exp $
 
-var undefined;
 var iam_sorting_now;
 //document.write('<script type="text\/javascript" src="\/js\/base64.js"><\/' + 'script>');
 
@@ -110,15 +109,27 @@ function get_art_alt(id, win) {
 	return get_art_alt(id, top.frames['main_frame']);
 }
 
+// Кэш тултипов предметов растёт всю сессию — ограничиваем, чтобы память
+// не текла на длинных сессиях. FIFO-вытеснение достаточно для этих данных.
+var ART_ALT_MAX = 500;
+function art_alt_cap(store) {
+    var keys = Object.keys(store);
+    while (keys.length > ART_ALT_MAX) {
+        delete store[keys.shift()];
+    }
+}
+
 function set_art_alt(id, data, win) {
     if (win) {
         if (win.art_alt) {
             win.art_alt[id] = data;
+            art_alt_cap(win.art_alt);
             return;
         }
-        for (var i = 0; i < win.frames.length; ++i) {
+        for (var i = 0; i < win.frames.length; i++) {
             if (win.frames[i].art_alt) {
                 win.frames[i].art_alt[id] = data;
+                art_alt_cap(win.frames[i].art_alt);
                 return;
             }
         }
@@ -126,13 +137,16 @@ function set_art_alt(id, data, win) {
     }
     if (art_alt) {
         art_alt[id] = data;
+        art_alt_cap(art_alt);
         return;
     }
     if (_top().items_alt) {
         _top().items_alt[id] = data;
+        art_alt_cap(_top().items_alt);
         return;
     }
     _top().frames['main_frame'].art_alt[id] = data;
+    art_alt_cap(_top().frames['main_frame'].art_alt);
 }
 
 function loadPuzzle(params) {
@@ -261,6 +275,8 @@ function preloadImages() {
 		d._prImg[j] = new Image;
 		d._prImg[j++].src = a[i];
 	}
+	// Ограничиваем историю предзагрузок: ссылки на старые Image не дают GC
+	while (d._prImg.length > 200) d._prImg.shift();
 }
 
 function checkbox_set(pfx, val) {
@@ -920,7 +936,7 @@ if (window.$) {
 			var n = 0;
 			var page_param = parse_str(location.search.split('?')[1]);
 			$('.tab a').each(function(i, v) {
-				$(v).click(function(e) {
+				$(v).off('click.clanMng').on('click.clanMng', function(e) {
 					$(this).clanMngGradeDismarkTab();
 					e.preventDefault();
 					if (!$(v).hasClass(activeClass) && !$(v).hasClass('lock')) {
@@ -949,7 +965,7 @@ if (window.$) {
 			});
 			$('#colspan-watch').attr('colspan', n);
 			if (!page_param.submode) $('.tab:first a').removeClass(defaultClass).addClass(activeClass);
-			e.parents('form:first').submit(function(event) {
+			e.parents('form:first').off('submit.clanMng').on('submit.clanMng', function(event) {
 				$(this).attr('action', $(this).attr('action') + '&' +$('.tab a.active').get(0).hash.split('#')[1]);
 				var changed = e.find('.not-saved');
 				if (changed.length > 0) {
@@ -1673,15 +1689,6 @@ function fightUpdateLog(ctime, nick1, level1, nick2, level2, code, i1, i2, i3, s
 	try {
 		top.frames['main_frame'].frames['main'].fightUpdateLog(ctime, nick1, level1, nick2, level2, code, i1, i2, i3, s1);
 	} catch (e) {};
-}
-
-function resurrect(paidResurrect) {
-	addurl = '';
-	if (paidResurrect) {
-		addurl = '&in[paidResurrect]=1'
-	}
-	//top.frames["main_frame"].frames["main"].location.href = 'action_run.php?code=RESURRECT&url_success=area.php&url_error=area.php'+addurl;
-	tProcessMenu('b06', {url: 'action_run.php?code=RESURRECT&url_success=area.php&url_error=area.php'+addurl});
 }
 
 function inArray(needle, haystack) {
@@ -2491,6 +2498,12 @@ function systemConfirm_zatochka(ms,title,obj,func){
 	div.style.left = document.body.scrollLeft + (document.body.clientWidth - div.offsetWidth)/2 - 150
 	div.style.display = 'block';
 
+	// Раньше close_div не объявлялся: клики по btnOk/close падали с ReferenceError
+	var close_div = top.gebi('systemConfirm_close_div');
+	close_div.style.width = document.body.clientWidth;
+	close_div.style.height = document.body.clientHeight;
+	close_div.style.display = 'block';
+
 	var  btnOk = gebi("btnOk");
 	btnOk.onclick = function () {
         if(!func) {
@@ -2977,10 +2990,6 @@ function openLocator() {
 }
 
 function confirm_front(area_id) {
-    entry_point_request('front', 'fight_join', {area_id: area_id}, function(response) { if (response['status'] != 100) showError(response['error'],response['error_crc']); })
-}
-
-function confirm_front(area_id) {
     entry_point_request('front', 'fight_join', {area_id: area_id}, function (response) {
         if (response['status'] != 100) showError(response['error'], response['error_crc']);
     })
@@ -3101,6 +3110,11 @@ function gui_styled(input, textarea) {
         var w = '';
 
         $('.' + input).each(function() {
+            // Идемпотентность: повторный вызов не оборачивает уже обёрнутое
+            if ($(this).parent().hasClass('ff__input-wrap-input')) {
+                return;
+            }
+
             if ($(this).attr('width')) {
                 w = $(this).attr('width');
             } else {
@@ -3115,6 +3129,10 @@ function gui_styled(input, textarea) {
         var w = '';
 
         $('.' + textarea).each(function() {
+            if ($(this).parent().hasClass('textarea-styled')) {
+                return;
+            }
+
             if ($(this).attr('width')) {
                 w = $(this).attr('width');
             } else {
@@ -3125,40 +3143,44 @@ function gui_styled(input, textarea) {
         })
     }
 
-    $('.textarea-styled').append('<div class="textarea-styled__right-top"></div><div class="textarea-styled__right-bottom"></div><div class="textarea-styled__left-bottom"></div><div class="textarea-styled__left-top"></div><div class="textarea-styled__top"></div><div class="textarea-styled__right"></div><div class="textarea-styled__bottom"></div><div class="textarea-styled__left"></div>');
+    $('.textarea-styled').not(':has(.textarea-styled__top)').append('<div class="textarea-styled__right-top"></div><div class="textarea-styled__right-bottom"></div><div class="textarea-styled__left-bottom"></div><div class="textarea-styled__left-top"></div><div class="textarea-styled__top"></div><div class="textarea-styled__right"></div><div class="textarea-styled__bottom"></div><div class="textarea-styled__left"></div>');
 
     $('.ff__input-wrap')
-        .on('mouseenter', function() {
+        .off('.guiStyled')
+        .on('mouseenter.guiStyled', function() {
             $(this).addClass('hover');
         })
-        .on('mouseleave', function() {
+        .on('mouseleave.guiStyled', function() {
             $(this).removeClass('hover');
         })
-        .on('click', function() {
+        .on('click.guiStyled', function() {
             $(this).children('input').focus();
         });
 
     $('.ff__input-wrap input')
-        .on('focus', function() {
+        .off('.guiStyled')
+        .on('focus.guiStyled', function() {
             $(this).parents('.ff__input-wrap').addClass('focus');
         })
-        .on('blur', function() {
+        .on('blur.guiStyled', function() {
             $(this).parents('.ff__input-wrap').removeClass('focus');
         });
 
     $('.textarea-styled')
-        .on('mouseenter', function() {
+        .off('.guiStyled')
+        .on('mouseenter.guiStyled', function() {
             $(this).addClass('hover');
         })
-        .on('mouseleave', function() {
+        .on('mouseleave.guiStyled', function() {
             $(this).removeClass('hover');
         });
 
     $('.textarea-styled textarea')
-        .on('focus', function() {
+        .off('.guiStyled')
+        .on('focus.guiStyled', function() {
             $(this).parents('.textarea-styled').addClass('focus');
         })
-        .on('blur', function() {
+        .on('blur.guiStyled', function() {
             $(this).parents('.textarea-styled').removeClass('focus');
         });
 }
@@ -3242,30 +3264,6 @@ function karsilastir(nick) {
         top.frames['main_frame'].frames['main'].location.href = 'user.php?mode=achievement_compare&eslestir[button]&filter[compare_nick]=' + nick;
     }
     catch (e) { }
-}
-function showMsg3(url, title, w, h) {
-    w = w || 520;
-    h = h || 320;
-
-    var div = gebi('popup_styled'),
-        iframe = gebi('popup_styled_iframe'),
-        hider = gebi('frame_content_hider'),
-        title_div = gebi('popup_styled_title');
-
-    iframe.src = url;
-    iframe.style.height = h;
-    iframe.style.width = w;
-
-    title_div.innerHTML = title;
-
-    div.style.top = document.body.scrollTop + (document.body.clientHeight - h) / 2;
-    div.style.left = document.body.scrollLeft + (document.body.clientWidth - w) / 2;
-
-    hider.style.display = 'block';
-
-    iframe.onload = function () {
-        div.style.display = 'block';
-    }
 }
 function closeMsg() {
     gebi('frame_content_hider').style.display = 'none';

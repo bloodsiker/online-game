@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services;
 
+use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Services\ItemRequirementService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

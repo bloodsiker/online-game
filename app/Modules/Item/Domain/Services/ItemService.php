@@ -11,12 +11,11 @@ use App\Modules\Item\Domain\Enums\ItemActionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
+use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\HotbarService;
-use App\Services\ItemRequirementService;
 use Illuminate\Support\Facades\DB;
 
 class ItemService

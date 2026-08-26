@@ -3,7 +3,7 @@
 use App\Modules\Location\Presentation\Http\LocationController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['updateLastOnline'])->group(function () {
+Route::group([], function () {
     Route::get('/maps', [LocationController::class, 'maps'])->name('maps');
     Route::get('/location/move/{direction}', [LocationController::class, 'moveTo'])->name('move-to');
     Route::get('/location/gate/{gateId}', [LocationController::class, 'passGate'])->name('gate-pass');

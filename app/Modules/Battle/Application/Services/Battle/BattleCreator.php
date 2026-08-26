@@ -2,9 +2,9 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
-use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use Illuminate\Support\Collection;
 
 class BattleCreator

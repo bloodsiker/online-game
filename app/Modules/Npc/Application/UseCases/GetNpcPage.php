@@ -24,9 +24,10 @@ class GetNpcPage
         $player = $user->player;
         $npc = $this->readRepository->findNpcByIdOrFail($npcId);
 
-        $completedQuestIds = $this->readRepository->getCompletedQuestIds($player->id);
-        $inProgressQuestIds = $this->readRepository->getInProgressQuestIds($player->id);
-        $repeatableReadyIds = $this->readRepository->getRepeatableReadyIds($player->id);
+        $questStates = $this->readRepository->getPlayerQuestStateGroups($player->id);
+        $completedQuestIds = $questStates['completed'];
+        $inProgressQuestIds = $questStates['in_progress'];
+        $repeatableReadyIds = $questStates['repeatable_ready'];
         $questsOnCooldown = $this->readRepository->getQuestsOnCooldown($player->id, $npc->id);
 
         $clanMembership = $user->clanMembership;

@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class MonsterOnLocationRepository extends AbstractRepository
@@ -19,7 +20,7 @@ class MonsterOnLocationRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery(): \Illuminate\Database\Eloquent\Builder
+    public function getQuery(): Builder
     {
         return $this->model->query()->select(['monster_on_locations.*']);
     }

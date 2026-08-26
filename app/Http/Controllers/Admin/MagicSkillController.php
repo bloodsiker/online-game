@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;

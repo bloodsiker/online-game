@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Rating\Domain\Contracts;
 
-use App\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

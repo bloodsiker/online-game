@@ -11,6 +11,8 @@ enum ChatMessageType: string
     case System = 'system';
     case Mention = 'mention';
     case Information = 'information';
+    case PartyInvite = 'party_invite';
+    case PartyNotice = 'party_notice';
     case Quest = 'quest';
     case QuestItem = 'quest_item';
 }

@@ -44,5 +44,12 @@ final readonly class CharacterDTO
         public StatSheet $stats,
         // Skills
         public array $skills,
+        /**
+         * Урон оружия за раунд — по логике AttackStrategyResolver:
+         * одно оружие/дворучное = диапазон этой руки, два оружия = сумма ударов.
+         *
+         * @var array{min: int, max: int}
+         */
+        public array $weaponDamage = ['min' => 0, 'max' => 0],
     ) {}
 }

@@ -33,21 +33,21 @@ class ClanQuestSeeder extends Seeder
             // Quest 1: Easy — kill mice
             [
                 'quest' => [
-                    'title'            => 'Охота на грызунов',
-                    'description'      => 'Мышиные стаи угрожают нашим амбарам. Кlan должен разобраться с этой угрозой — уничтожьте 30 мышей.',
-                    'type'             => 'clan',
-                    'start_npc_id'     => $npc->id,
-                    'complete_npc_id'  => $npc->id,
-                    'reset_period'     => 86400, // 1 day
-                    'is_active'        => true,
+                    'title' => 'Охота на грызунов',
+                    'description' => 'Мышиные стаи угрожают нашим амбарам. Кlan должен разобраться с этой угрозой — уничтожьте 30 мышей.',
+                    'type' => 'clan',
+                    'start_npc_id' => $npc->id,
+                    'complete_npc_id' => $npc->id,
+                    'reset_period' => 86400, // 1 day
+                    'is_active' => true,
                 ],
                 'objectives' => [
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 1, // Мышь
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 1, // Мышь
                         'required_amount' => 30,
-                        'description'     => 'Убить 30 мышей',
+                        'description' => 'Убить 30 мышей',
                     ],
                 ],
                 'rewards' => [
@@ -59,21 +59,21 @@ class ClanQuestSeeder extends Seeder
             // Quest 2: Easy/Medium — kill bats
             [
                 'quest' => [
-                    'title'            => 'Налёт летучих мышей',
-                    'description'      => 'Стаи летучих мышей атакуют ночные дозоры. Клан должен уничтожить 50 летучих мышей и восстановить порядок.',
-                    'type'             => 'clan',
-                    'start_npc_id'     => $npc->id,
-                    'complete_npc_id'  => $npc->id,
-                    'reset_period'     => 172800, // 2 days
-                    'is_active'        => true,
+                    'title' => 'Налёт летучих мышей',
+                    'description' => 'Стаи летучих мышей атакуют ночные дозоры. Клан должен уничтожить 50 летучих мышей и восстановить порядок.',
+                    'type' => 'clan',
+                    'start_npc_id' => $npc->id,
+                    'complete_npc_id' => $npc->id,
+                    'reset_period' => 172800, // 2 days
+                    'is_active' => true,
                 ],
                 'objectives' => [
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 2, // Летучая мышь
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 2, // Летучая мышь
                         'required_amount' => 50,
-                        'description'     => 'Убить 50 летучих мышей',
+                        'description' => 'Убить 50 летучих мышей',
                     ],
                 ],
                 'rewards' => [
@@ -86,21 +86,21 @@ class ClanQuestSeeder extends Seeder
             // Quest 3: Medium — kill ancient dragons
             [
                 'quest' => [
-                    'title'            => 'Угроза драконов',
-                    'description'      => 'Древние драконы вырвались из подземелий и сеют хаос. Клану поручено уничтожить 20 Древних драконов.',
-                    'type'             => 'clan',
-                    'start_npc_id'     => $npc->id,
-                    'complete_npc_id'  => $npc->id,
-                    'reset_period'     => 604800, // 7 days
-                    'is_active'        => true,
+                    'title' => 'Угроза драконов',
+                    'description' => 'Древние драконы вырвались из подземелий и сеют хаос. Клану поручено уничтожить 20 Древних драконов.',
+                    'type' => 'clan',
+                    'start_npc_id' => $npc->id,
+                    'complete_npc_id' => $npc->id,
+                    'reset_period' => 604800, // 7 days
+                    'is_active' => true,
                 ],
                 'objectives' => [
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 3, // Древний дракон
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 3, // Древний дракон
                         'required_amount' => 20,
-                        'description'     => 'Убить 20 Древних драконов',
+                        'description' => 'Убить 20 Древних драконов',
                     ],
                 ],
                 'rewards' => [
@@ -113,28 +113,28 @@ class ClanQuestSeeder extends Seeder
             // Quest 4: Hard — kill undead
             [
                 'quest' => [
-                    'title'            => 'Противостояние нежити',
-                    'description'      => 'Лич Некромант поднимает легионы нежити. Клан обязан уничтожить 15 Личей Некромантов и 10 Властелинов Нежити.',
-                    'type'             => 'clan',
-                    'start_npc_id'     => $npc->id,
-                    'complete_npc_id'  => $npc->id,
-                    'reset_period'     => 604800, // 7 days
-                    'is_active'        => true,
+                    'title' => 'Противостояние нежити',
+                    'description' => 'Лич Некромант поднимает легионы нежити. Клан обязан уничтожить 15 Личей Некромантов и 10 Властелинов Нежити.',
+                    'type' => 'clan',
+                    'start_npc_id' => $npc->id,
+                    'complete_npc_id' => $npc->id,
+                    'reset_period' => 604800, // 7 days
+                    'is_active' => true,
                 ],
                 'objectives' => [
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 4, // Лич Некромант
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 4, // Лич Некромант
                         'required_amount' => 15,
-                        'description'     => 'Убить 15 Личей Некромантов',
+                        'description' => 'Убить 15 Личей Некромантов',
                     ],
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 7, // Властелин Нежити
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 7, // Властелин Нежити
                         'required_amount' => 10,
-                        'description'     => 'Убить 10 Властелинов Нежити',
+                        'description' => 'Убить 10 Властелинов Нежити',
                     ],
                 ],
                 'rewards' => [
@@ -147,28 +147,28 @@ class ClanQuestSeeder extends Seeder
             // Quest 5: Hard — kill demons and vampires
             [
                 'quest' => [
-                    'title'            => 'Чёрная угроза',
-                    'description'      => 'Демоны и вампиры вышли из тёмных глубин. Клану предстоит уничтожить 10 Демонов Регенерации и 10 Древних вампиров.',
-                    'type'             => 'clan',
-                    'start_npc_id'     => $npc->id,
-                    'complete_npc_id'  => $npc->id,
-                    'reset_period'     => 259200, // 3 days
-                    'is_active'        => true,
+                    'title' => 'Чёрная угроза',
+                    'description' => 'Демоны и вампиры вышли из тёмных глубин. Клану предстоит уничтожить 10 Демонов Регенерации и 10 Древних вампиров.',
+                    'type' => 'clan',
+                    'start_npc_id' => $npc->id,
+                    'complete_npc_id' => $npc->id,
+                    'reset_period' => 259200, // 3 days
+                    'is_active' => true,
                 ],
                 'objectives' => [
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 6, // Демон Регенерации
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 6, // Демон Регенерации
                         'required_amount' => 10,
-                        'description'     => 'Убить 10 Демонов Регенерации',
+                        'description' => 'Убить 10 Демонов Регенерации',
                     ],
                     [
-                        'type'            => 'kill',
-                        'target_type'     => 'monster',
-                        'target_id'       => 5, // Древний вампир
+                        'type' => 'kill',
+                        'target_type' => 'monster',
+                        'target_id' => 5, // Древний вампир
                         'required_amount' => 10,
-                        'description'     => 'Убить 10 Древних вампиров',
+                        'description' => 'Убить 10 Древних вампиров',
                     ],
                 ],
                 'rewards' => [

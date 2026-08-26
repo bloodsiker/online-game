@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Reputation\Application\UseCases;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Modules\Reputation\Application\DTOs\ReputationShopPageDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Application\Services\ReputationShopCartService;
 use App\Modules\Reputation\Domain\Contracts\ReputationReadRepository;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 
 class GetReputationShopPage
 {

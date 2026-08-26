@@ -407,7 +407,11 @@
                                     <tbody>
                                     @foreach($cart->getItems() as $cartItem)
                                         <tr class="bg_l">
-                                            <td><a href="#" data-id="{{ $cartItem->shopItem->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" onclick="showArtifactInfo(false, );return false;" class="redd b">{{ $cartItem->shopItem->item->name }}</a></td>
+                                            <td><a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
+                                                   data-id="{{ $cartItem->shopItem->item->id }}"
+                                                   onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                   onclick="window.open('{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                   class="redd b">{{ $cartItem->shopItem->item->name }}</a></td>
                                             <td class="b red" align="center">
 {{--                                                <div style="padding-top:5px;" art_id="15629">--}}
 {{--                                                    <img style="cursor: pointer;" height="15" width="15" src="{{ asset('img/resource/q_gorst.gif') }}" art_id="15629"--}}

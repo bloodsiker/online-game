@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\MapMonstersCache;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;

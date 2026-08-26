@@ -18,9 +18,13 @@ class TakeSaleProceeds
             $structureIds = Structure::where('location_id', $auction->location_id)->pluck('id');
             $proceeds = AuctionSaleProceeds::where('id', $proceedsId)->where('user_id', $user->id)
                 ->whereIn('structure_id', $structureIds)->lockForUpdate()->first();
-            if (! $proceeds) return new AuctionResultDTO(false, 'Выручка от продажи не найдена.');
+            if (! $proceeds) {
+                return new AuctionResultDTO(false, 'Выручка от продажи не найдена.');
+            }
             User::lockForUpdate()->findOrFail($user->id)->increment('money', $proceeds->amount);
-            $amount = $proceeds->amount; $proceeds->delete();
+            $amount = $proceeds->amount;
+            $proceeds->delete();
+
             return new AuctionResultDTO(true, "Получено {$amount} монет за продажу.");
         });
     }

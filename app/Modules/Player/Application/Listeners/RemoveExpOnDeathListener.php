@@ -3,7 +3,7 @@
 namespace App\Modules\Player\Application\Listeners;
 
 use App\Modules\Player\Domain\Events\PlayerDied;
-use App\Services\ExperienceService;
+use App\Modules\Player\Domain\Services\ExperienceService;
 
 readonly class RemoveExpOnDeathListener
 {

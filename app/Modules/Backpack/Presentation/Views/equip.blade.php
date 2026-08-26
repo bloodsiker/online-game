@@ -230,19 +230,25 @@
                 </tr>
                 <tr>
                     <td class="item-hero"
-                        @if($playerEquip->handLeft) data-id="{{ $playerEquip->handLeft->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->handLeft || $playerEquip->hand_left_mirror) data-id="{{ ($playerEquip->handLeft ?? $playerEquip->hand_left_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->handLeft)
                             <img src="{{ $playerEquip->handLeft->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handLeft->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        @elseif($playerEquip->hand_left_mirror)
+                            {{-- Зеркало дворучного оружия из второй руки --}}
+                            <img src="{{ $playerEquip->hand_left_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->handRight) data-id="{{ $playerEquip->handRight->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($playerEquip->handRight || $playerEquip->hand_right_mirror) data-id="{{ ($playerEquip->handRight ?? $playerEquip->hand_right_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->handRight)
                             <img src="{{ $playerEquip->handRight->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handRight->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        @elseif($playerEquip->hand_right_mirror)
+                            {{-- Зеркало дворучного оружия из первой руки --}}
+                            <img src="{{ $playerEquip->hand_right_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

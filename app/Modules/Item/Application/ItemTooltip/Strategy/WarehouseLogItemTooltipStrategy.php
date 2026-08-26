@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Modules\Item\Application\ItemTooltip\Strategy;
+
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
+
+readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInterface
+{
+    public function __construct(private iterable $items) {}
+
+    public function collect(ItemTooltipCollector $collector): void
+    {
+        $logs = ItemTooltipRelationLoader::load($this->items, [
+            'item.itemInfo',
+        ]);
+
+        foreach ($logs as $log) {
+            $item = $log->item;
+            $itemInfo = $item->itemInfo;
+            $collector->add(new ItemTooltipDto(
+                id: $item->id,
+                title: $itemInfo->name,
+                color: $itemInfo->rarity->color(),
+                image: $itemInfo->image,
+                kind: $itemInfo->getTypeName(),
+                price: sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $itemInfo->price),
+                diamond: '',
+                lev: ['title' => ' Уровень ', 'value' => '1'],
+                skills: [],
+                desc: $itemInfo->description ?? '',
+                store: false,
+                nogive: true,
+                noweight: true,
+                nosell: true,
+            ));
+        }
+    }
+}

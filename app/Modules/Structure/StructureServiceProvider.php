@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure;
 
+use App\Modules\Structure\Bank\Domain\Contracts\BankDepositRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankLogRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
+use App\Modules\Structure\Bank\Infrastructure\Persistence\EloquentBankDepositRepository;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\EloquentBankLogRepository;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\EloquentBankUserRepository;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\LaravelTransactionManager as BankLaravelTransactionManager;
@@ -40,8 +42,8 @@ class StructureServiceProvider extends ServiceProvider
     {
         $this->app->bind(BankUserRepository::class, EloquentBankUserRepository::class);
         $this->app->bind(BankLogRepository::class, EloquentBankLogRepository::class);
-        $this->app->bind(\App\Modules\Structure\Bank\Domain\Contracts\BankDepositRepository::class, \App\Modules\Structure\Bank\Infrastructure\Persistence\EloquentBankDepositRepository::class);
-        $this->app->bind(\App\Modules\Structure\Bank\Domain\Contracts\TransactionManager::class, BankLaravelTransactionManager::class);
+        $this->app->bind(BankDepositRepository::class, EloquentBankDepositRepository::class);
+        $this->app->bind(Bank\Domain\Contracts\TransactionManager::class, BankLaravelTransactionManager::class);
 
         $this->app->bind(BlacksmithReadRepository::class, EloquentBlacksmithReadRepository::class);
         $this->app->bind(BlacksmithInventoryRepository::class, EloquentBlacksmithInventoryRepository::class);
@@ -75,32 +77,26 @@ class StructureServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/Warehouse/Presentation/Views', 'warehouse');
 
-        // Auction routes — inside updateLastOnline middleware (same as web.php group)
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Auction/Presentation/Http/Route/web.php');
 
         // Bank routes — only web middleware
         Route::middleware(['web'])
             ->group(__DIR__.'/Bank/Presentation/Http/Route/web.php');
 
-        // PremiumShop routes — inside updateLastOnline middleware
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/PremiumShop/Presentation/Http/Route/web.php');
 
-        // Shop routes — inside updateLastOnline middleware
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Shop/Presentation/Http/Route/web.php');
 
-        // Exchange routes — inside updateLastOnline middleware
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Exchange/Presentation/Http/Route/web.php');
 
-        // Blacksmith routes — inside updateLastOnline middleware
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Blacksmith/Presentation/Http/Route/web.php');
 
-        // Warehouse routes — inside updateLastOnline middleware
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Warehouse/Presentation/Http/Route/web.php');
     }
 }

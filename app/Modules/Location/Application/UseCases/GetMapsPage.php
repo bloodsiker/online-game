@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\UseCases;
 
-use App\Models\Map;
-use App\Modules\Location\Application\DTOs\MapTreeNodeDTO;
 use App\Modules\Location\Application\DTOs\MapsPageDTO;
+use App\Modules\Location\Application\DTOs\MapTreeNodeDTO;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use Illuminate\Support\Collection;
 
 final class GetMapsPage
@@ -45,8 +45,8 @@ final class GetMapsPage
     }
 
     /**
-     * @param Collection<int, Collection<int, Map>> $childrenByParent
-     * @param array<int, true> $visited
+     * @param  Collection<int, Collection<int, Map>>  $childrenByParent
+     * @param  array<int, true>  $visited
      */
     private function makeNode(Map $map, Collection $childrenByParent, ?int $currentMapId, array &$visited): MapTreeNodeDTO
     {

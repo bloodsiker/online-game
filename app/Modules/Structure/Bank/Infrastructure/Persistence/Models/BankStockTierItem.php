@@ -13,7 +13,7 @@ class BankStockTierItem extends Model
     protected $fillable = ['tier_id', 'share_item_id', 'count', 'sort_order'];
 
     protected $casts = [
-        'count'      => 'integer',
+        'count' => 'integer',
         'sort_order' => 'integer',
     ];
 

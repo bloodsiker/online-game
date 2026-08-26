@@ -8,8 +8,8 @@ use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Player\Domain\Services\ExperienceCurve;
 use App\Modules\Player\Domain\Services\PlayerStatFormulas;
-use App\Services\ExperienceCurve;
 use Illuminate\Console\Command;
 
 /**

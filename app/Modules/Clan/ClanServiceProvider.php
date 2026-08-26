@@ -23,7 +23,7 @@ class ClanServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'clan');
 
-        Route::middleware(['web', 'updateLastOnline'])
+        Route::middleware(['web'])
             ->group(__DIR__.'/Presentation/Http/Route/web.php');
     }
 }

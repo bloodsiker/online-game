@@ -9,13 +9,17 @@ use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
+use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 {
-    public function __construct(private readonly FriendRelationshipRepository $friendRelationshipRepository) {}
+    public function __construct(
+        private readonly FriendRelationshipRepository $friendRelationshipRepository,
+        private readonly PartyRepositoryInterface $partyRepository,
+    ) {}
 
     public function create(array $data): ChatMessage
     {
@@ -102,7 +106,13 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                 ->orWhere(fn ($q2) => $q2
                     ->where('channel', ChatChannel::Main->value)
                     ->where('target_user_id', $user->id)
-                    ->whereIn('type', [ChatMessageType::Information->value, ChatMessageType::Quest->value, ChatMessageType::QuestItem->value])
+                    ->whereIn('type', [
+                        ChatMessageType::Information->value,
+                        ChatMessageType::PartyInvite->value,
+                        ChatMessageType::PartyNotice->value,
+                        ChatMessageType::Quest->value,
+                        ChatMessageType::QuestItem->value,
+                    ])
                     ->where('created_at', '>=', Carbon::now()->subMinutes(10))
                 )
                 ->orWhere($privateClause)
@@ -144,6 +154,8 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                 ->orWhere($systemClause)
             ),
 
+            ChatChannel::Party => $this->applyPartyChannelFilter($query, $user),
+
             ChatChannel::Private => $query->where(fn ($q) => $q
                 ->where($privateFullClause)
                 ->orWhere($systemClause)
@@ -151,5 +163,17 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
             ChatChannel::System => $query->where('channel', ChatChannel::System->value),
         };
+    }
+
+    private function applyPartyChannelFilter(Builder $query, User $user): Builder
+    {
+        $party = $this->partyRepository->findActiveByUser((int) $user->id);
+
+        if ($party === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where('channel', ChatChannel::Party->value)
+            ->where('party_id', $party->id);
     }
 }

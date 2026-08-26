@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $user_id
  * @property int $amount
- * @property float $percent  процент в день
+ * @property float $percent процент в день
  * @property int $term_days
  * @property Carbon $matures_at
  * @property Carbon|null $closed_at

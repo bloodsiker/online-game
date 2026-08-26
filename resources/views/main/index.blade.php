@@ -207,7 +207,7 @@
             text-decoration: none;
             margin: 0 33px;
             background: transparent url(images/tbl-btn2_center.png) center top repeat-x;
-            padding-bottom: 2px;
+            padding-bottom: 4px;
             outline: none;
         }
     </style>

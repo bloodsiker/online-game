@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services;
 
+use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Services\MagicCastGuard;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

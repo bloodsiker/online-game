@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Skill;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

@@ -6,9 +6,9 @@ namespace App\Modules\Event\Presentation\Http;
 
 use App\Modules\Event\Application\UseCases\GetActivityCards;
 use App\Modules\Event\Domain\Enums\ActivityPeriod;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 

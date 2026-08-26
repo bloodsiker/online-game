@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Monster\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Monster\Application\DTOs\MonsterInfoPageDTO;
 use App\Modules\Monster\Application\UseCases\GetMonsterInfoPage;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 
 class MonsterController extends Controller
 {

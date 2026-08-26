@@ -11,12 +11,12 @@ use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Enums\ClanWarehouseAction;
 use App\Modules\Clan\Domain\Models\ClanWarehouse;
 use App\Modules\Clan\Domain\Models\ClanWarehouseLog;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ClanWarehouseItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\Strategy\WarehouseLogItemTooltipStrategy;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\ClanWarehouseItemTooltipStrategy;
-use App\Services\ItemTooltip\Strategy\WarehouseLogItemTooltipStrategy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

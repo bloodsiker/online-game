@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/post', [PostController::class, 'index'])->name('post');
 Route::get('/post/unread-count', [PostController::class, 'unreadCount'])
-    ->withoutMiddleware('updateLastOnline')
     ->name('post.unread-count');
 Route::get('/post/letter/{id}', [PostController::class, 'letter'])->name('post.letter');
 Route::post('/post/send', [PostController::class, 'send'])->name('post.send');

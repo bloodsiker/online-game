@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\Mappers;
 
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyPageDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopCartDTO;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use Illuminate\Support\Collection;
 
 class ShopBuyPageViewMapper
@@ -32,8 +32,14 @@ class ShopBuyPageViewMapper
         ?int $activeCategoryId,
         ShopCartDTO $cart,
     ): ShopBuyPageDTO {
+        // Тултипы нужны и для товаров вне активной категории, лежащих в корзине:
+        // собираем их вместе с сеткой (дубликаты коллектор убирает по id).
+        $tooltipItems = $shopItems->merge(
+            $cart->getItems()->map(fn ($cartItem) => $cartItem->shopItem)->filter(),
+        );
+
         $itemTooltipScript = $this->collector
-            ->collectFrom(new PremiumShopItemTooltipStrategy($shopItems))
+            ->collectFrom(new PremiumShopItemTooltipStrategy($tooltipItems))
             ->renderScript();
 
         return new ShopBuyPageDTO(

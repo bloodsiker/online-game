@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Bank\Application\DTOs;
 
+use App\Modules\Structure\Bank\Domain\Models\BankDeposit;
 use Illuminate\Support\Collection;
 
 class DepositsPageDTO
 {
     /**
      * @param  array<int, array{label: string, percent: float, min: int, max: int}>  $terms  срок в днях => условия
-     * @param  Collection<int, \App\Modules\Structure\Bank\Domain\Models\BankDeposit>  $openDeposits
+     * @param  Collection<int, BankDeposit>  $openDeposits
      */
     public function __construct(
         public readonly int $money,

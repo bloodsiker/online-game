@@ -191,7 +191,7 @@
         if (btn) btn.src = '{{ asset('img/bg/chat/smile-reg.gif') }}';
     }
 
-    var channelSlugToCode = { main: 1, location: 2, trade: 8, clan: 4, private: 32 };
+    var channelSlugToCode = { main: 1, location: 2, trade: 8, clan: 4, party: 16, private: 32 };
     var prevChannelCode = 1;
 
     function chatTogglePrivateMode() {

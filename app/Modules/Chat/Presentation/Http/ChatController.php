@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
+use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,16 +24,20 @@ class ChatController extends Controller
         private readonly GetMessages $getMessages,
         private readonly ManageIgnore $manageIgnore,
         private readonly FriendRelationshipRepository $friendRelationshipRepository,
+        private readonly PartyRepositoryInterface $partyRepository,
     ) {}
 
     public function index(): View
     {
-        return view('chat::index');
+        return view('chat::index', [
+            'hasParty' => $this->partyRepository->findActiveByUser((int) auth()->id()) !== null,
+            'hasClan' => auth()->user()->clanMembership !== null,
+        ]);
     }
 
     public function chat(Request $request, FriendRelationshipRepository $friendRepository): View
     {
-        $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
+        $channel = $this->availableChannel($request);
         $user = auth()->user();
         $messages = $this->getMessages->execute($user, $channel);
 
@@ -50,7 +55,7 @@ class ChatController extends Controller
 
     public function chatAction(Request $request): View
     {
-        $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
+        $channel = $this->availableChannel($request);
 
         return view('chat::chat-action', compact('channel'));
     }
@@ -62,7 +67,7 @@ class ChatController extends Controller
             'channel' => 'required|string',
         ]);
 
-        $channel = ChatChannel::tryFrom($request->input('channel')) ?? ChatChannel::Main;
+        $channel = ChatChannel::tryFrom((string) $request->input('channel')) ?? ChatChannel::Main;
         $raw = $request->input('message');
 
         // Private message validation
@@ -104,20 +109,42 @@ class ChatController extends Controller
             return response()->json(['ok' => false, 'error' => 'Вы не состоите в клане.']);
         }
 
-        $this->sendMessage->execute(auth()->user(), $raw, $channel);
+        if (! $isPrivate && $channel === ChatChannel::Party
+            && $this->partyRepository->findActiveByUser((int) auth()->id()) === null) {
+            return response()->json(['ok' => false, 'error' => 'Канал группы больше недоступен.']);
+        }
+
+        try {
+            $this->sendMessage->execute(auth()->user(), $raw, $channel);
+        } catch (\RuntimeException $e) {
+            return response()->json(['ok' => false, 'error' => $e->getMessage()]);
+        }
 
         return response()->json(['ok' => true]);
     }
 
     public function messages(Request $request): JsonResponse
     {
-        $channel = ChatChannel::tryFrom($request->query('channel', 'main')) ?? ChatChannel::Main;
+        $requestedChannel = ChatChannel::tryFrom((string) $request->query('channel')) ?? ChatChannel::Main;
+        if ($requestedChannel === ChatChannel::Party
+            && $this->partyRepository->findActiveByUser((int) auth()->id()) === null) {
+            return response()->json([]);
+        }
+
+        $channel = $this->availableChannel($request);
         $user = auth()->user();
         $afterId = $request->query('after_id');
         $afterId = is_numeric($afterId) ? max(0, (int) $afterId) : null;
         $messages = $this->getMessages->execute($user, $channel, $afterId, $afterId === null ? 30 : 100);
 
         return response()->json($messages);
+    }
+
+    public function partyAvailability(): JsonResponse
+    {
+        return response()->json([
+            'has_party' => $this->partyRepository->findActiveByUser((int) auth()->id()) !== null,
+        ]);
     }
 
     public function addIgnore(Request $request): JsonResponse
@@ -140,5 +167,18 @@ class ChatController extends Controller
         $ignores = $this->manageIgnore->list(auth()->user());
 
         return view('chat::ignores', compact('ignores'));
+    }
+
+    private function availableChannel(Request $request, string $input = 'channel'): ChatChannel
+    {
+        $channel = ChatChannel::tryFrom((string) $request->input($input, ChatChannel::Main->value))
+            ?? ChatChannel::Main;
+
+        if ($channel === ChatChannel::Party
+            && $this->partyRepository->findActiveByUser((int) auth()->id()) === null) {
+            return ChatChannel::Main;
+        }
+
+        return $channel;
     }
 }

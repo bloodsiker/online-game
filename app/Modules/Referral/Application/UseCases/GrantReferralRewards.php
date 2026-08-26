@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Referral\Application\UseCases;
 
-use App\Modules\Referral\Domain\Enums\ReferralRewardType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Referral\Domain\Contracts\ReferralRepository;
 use App\Modules\Referral\Domain\Contracts\ReferralRewardIssuer;
 use App\Modules\Referral\Domain\Contracts\TransactionManager;
+use App\Modules\Referral\Domain\Enums\ReferralRewardType;
 
 final readonly class GrantReferralRewards
 {

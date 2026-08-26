@@ -10,7 +10,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 final readonly class HeroPageDTO
 {
     /**
-     * @param array<HeroEffectDTO> $activeEffects
+     * @param  array<HeroEffectDTO>  $activeEffects
      */
     public function __construct(
         public Player $player,

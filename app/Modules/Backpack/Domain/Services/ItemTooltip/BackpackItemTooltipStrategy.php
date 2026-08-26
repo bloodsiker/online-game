@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Services\ItemTooltip;
 
-use App\Services\ItemTooltip\ItemTooltipCollector;
-use App\Services\ItemTooltip\ItemTooltipDto;
-use App\Services\ItemTooltip\ItemTooltipRelationLoader;
-use App\Services\ItemTooltip\ItemTooltipStatsBuilder;
-use App\Services\ItemTooltip\Strategy\ItemTooltipStrategyInterface;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ItemTooltipStrategyInterface;
 
 class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
 {

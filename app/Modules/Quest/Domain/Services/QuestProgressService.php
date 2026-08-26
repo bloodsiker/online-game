@@ -9,7 +9,11 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
+use Illuminate\Support\Collection;
 
 class QuestProgressService
 {
@@ -24,11 +28,19 @@ class QuestProgressService
     {
         $messages = [];
 
-        foreach ($player->questsInProgress()->with('objectives.questObjective')->get() as $questPlayer) {
-            foreach ($questPlayer->objectives as $playerObj) {
-                $qo = $playerObj->questObjective;
+        // Карта локации нужна для целей с фильтром по map_id —
+        // грузим связь один раз вместо ленивой загрузки на каждую цель.
+        $locationMonster->loadMissing('location');
+        $locationMapId = $locationMonster->location?->map_id;
 
-                if (! in_array($qo->type, ['kill', 'collect'])) {
+        [$questPlayers, $progressByQuestPlayer, $objectivesMap] = $this->loadPersonalProgress($player);
+
+        foreach ($questPlayers as $questPlayer) {
+            foreach ($progressByQuestPlayer[$questPlayer->id] ?? [] as $playerObj) {
+                /** @var QuestObjective|null $qo */
+                $qo = $objectivesMap[$questPlayer->quest_id][$playerObj->quest_objective_id] ?? null;
+
+                if (! in_array($qo?->type, ['kill', 'collect'], true)) {
                     continue;
                 }
 
@@ -40,7 +52,7 @@ class QuestProgressService
                     continue;
                 }
 
-                if ($qo->map_id && (int) $qo->map_id !== (int) $locationMonster->location->map_id) {
+                if ($qo->map_id && (int) $qo->map_id !== (int) $locationMapId) {
                     continue;
                 }
 
@@ -55,8 +67,18 @@ class QuestProgressService
                     }
                 }
 
-                $playerObj->increment('amount');
-                $playerObj->refresh();
+                // Условный инкремент закрывает гонку параллельных киллов
+                // (без него двое могли бы перевалить required_amount).
+                $updated = (bool) $playerObj->newQuery()
+                    ->whereKey($playerObj->getKey())
+                    ->where('amount', '<', $qo->required_amount)
+                    ->increment('amount');
+
+                if (! $updated) {
+                    continue;
+                }
+
+                $playerObj->amount++;
 
                 if ($qo->type === 'collect' && $qo->share_item_id) {
                     $shareItem = $qo->collectItem;
@@ -84,25 +106,41 @@ class QuestProgressService
             }
         }
 
+        return $this->progressClanKillAndCollect($player, $locationMonster, $locationMapId, $messages);
+    }
+
+    private function progressClanKillAndCollect(
+        Player $player,
+        MonsterOnLocation $locationMonster,
+        ?int $locationMapId,
+        array $messages,
+    ): array {
         $clanMembership = $player->user->clanMembership;
         if (! $clanMembership) {
             return $messages;
         }
 
-        $clanProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
+        $clanProgress = QuestClanProgress::query()
+            ->setEagerLoads([])
+            ->where('clan_id', $clanMembership->clan_id)
             ->where('user_id', $player->user_id)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('objectives.questObjective')
             ->first();
 
         if (! $clanProgress) {
             return $messages;
         }
 
-        foreach ($clanProgress->objectives as $clanObj) {
-            $qo = $clanObj->questObjective;
+        $objectivesMap = QuestDefinitionsCache::objectivesByQuest();
+        $clanObjectives = QuestClanObjective::query()
+            ->where('quest_clan_progress_id', $clanProgress->id)
+            ->get();
 
-            if (! in_array($qo->type, ['kill', 'collect'])) {
+        foreach ($clanObjectives as $clanObj) {
+            /** @var QuestObjective|null $qo */
+            $qo = $objectivesMap[$clanProgress->quest_id][$clanObj->quest_objective_id] ?? null;
+
+            if (! in_array($qo?->type, ['kill', 'collect'], true)) {
                 continue;
             }
 
@@ -114,7 +152,7 @@ class QuestProgressService
                 continue;
             }
 
-            if ($qo->map_id && (int) $qo->map_id !== (int) $locationMonster->location->map_id) {
+            if ($qo->map_id && (int) $qo->map_id !== (int) $locationMapId) {
                 continue;
             }
 
@@ -129,8 +167,17 @@ class QuestProgressService
                 }
             }
 
-            $clanObj->increment('amount');
-            $clanObj->refresh();
+            // Условный инкремент против гонки параллельных киллов (см. выше).
+            $updated = (bool) $clanObj->newQuery()
+                ->whereKey($clanObj->getKey())
+                ->where('amount', '<', $qo->required_amount)
+                ->increment('amount');
+
+            if (! $updated) {
+                continue;
+            }
+
+            $clanObj->amount++;
 
             if ($qo->type === 'collect' && $qo->share_item_id) {
                 $shareItem = $qo->collectItem;
@@ -161,6 +208,31 @@ class QuestProgressService
     }
 
     /**
+     * Активные персональные квесты игрока + строки прогресса одним запросом.
+     * Определения целей берутся из версионного кэша — SQL по статичной
+     * таблице quest_objectives не выполняется.
+     *
+     * @return array{0: Collection<int, QuestPlayer>, 1: array<int, list<QuestPlayerObjective>>, 2: array<int, Collection<int, QuestObjective>>}
+     */
+    private function loadPersonalProgress(Player $player): array
+    {
+        $questPlayers = $player->questsInProgress()->setEagerLoads([])->get();
+        if ($questPlayers->isEmpty()) {
+            return [$questPlayers, [], []];
+        }
+
+        $objectivesMap = QuestDefinitionsCache::objectivesByQuest();
+
+        $progressByQuestPlayer = QuestPlayerObjective::query()
+            ->whereIn('quest_player_id', $questPlayers->modelKeys())
+            ->get()
+            ->groupBy('quest_player_id')
+            ->all();
+
+        return [$questPlayers, $progressByQuestPlayer, $objectivesMap];
+    }
+
+    /**
      * Откатывает прогресс сбора для 'collect'-заданий при выбросе квестового
      * предмета из рюкзака — иначе прогресс останется засчитан без предмета на руках.
      */
@@ -170,11 +242,14 @@ class QuestProgressService
             return;
         }
 
-        foreach ($player->questsInProgress()->with('objectives.questObjective')->get() as $questPlayer) {
-            foreach ($questPlayer->objectives as $playerObj) {
-                $qo = $playerObj->questObjective;
+        [$questPlayers, $progressByQuestPlayer, $objectivesMap] = $this->loadPersonalProgress($player);
 
-                if ($qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
+        foreach ($questPlayers as $questPlayer) {
+            foreach ($progressByQuestPlayer[$questPlayer->id] ?? [] as $playerObj) {
+                /** @var QuestObjective|null $qo */
+                $qo = $objectivesMap[$questPlayer->quest_id][$playerObj->quest_objective_id] ?? null;
+
+                if (! $qo || $qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
                     continue;
                 }
 
@@ -190,20 +265,26 @@ class QuestProgressService
             return;
         }
 
-        $clanProgress = QuestClanProgress::where('clan_id', $clanMembership->clan_id)
+        $clanProgress = QuestClanProgress::query()
+            ->setEagerLoads([])
+            ->where('clan_id', $clanMembership->clan_id)
             ->where('user_id', $player->user_id)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('objectives.questObjective')
             ->first();
 
         if (! $clanProgress) {
             return;
         }
 
-        foreach ($clanProgress->objectives as $clanObj) {
-            $qo = $clanObj->questObjective;
+        $clanObjectives = QuestClanObjective::query()
+            ->where('quest_clan_progress_id', $clanProgress->id)
+            ->get();
 
-            if ($qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
+        foreach ($clanObjectives as $clanObj) {
+            /** @var QuestObjective|null $qo */
+            $qo = $objectivesMap[$clanProgress->quest_id][$clanObj->quest_objective_id] ?? null;
+
+            if (! $qo || $qo->type !== 'collect' || (int) $qo->share_item_id !== $shareItemId) {
                 continue;
             }
 

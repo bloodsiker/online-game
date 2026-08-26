@@ -28,9 +28,9 @@ class BankStockController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $stock = BankStock::create([
-            'name'      => $request->input('name'),
+            'name' => $request->input('name'),
             'starts_at' => $request->input('starts_at'),
-            'ends_at'   => $request->input('ends_at'),
+            'ends_at' => $request->input('ends_at'),
             'is_active' => (bool) $request->input('is_active', false),
         ]);
 
@@ -41,9 +41,9 @@ class BankStockController extends Controller
     {
         if ($request->isMethod('POST') && $request->input('_action') === 'update') {
             $stock->update([
-                'name'      => $request->input('name'),
+                'name' => $request->input('name'),
                 'starts_at' => $request->input('starts_at'),
-                'ends_at'   => $request->input('ends_at'),
+                'ends_at' => $request->input('ends_at'),
                 'is_active' => (bool) $request->input('is_active', false),
             ]);
 
@@ -61,9 +61,9 @@ class BankStockController extends Controller
         $order = $stock->tiers()->max('sort_order') + 1;
 
         BankStockTier::create([
-            'stock_id'          => $stock->id,
+            'stock_id' => $stock->id,
             'diamond_threshold' => $threshold,
-            'sort_order'        => $order,
+            'sort_order' => $order,
         ]);
 
         return redirect()->back()->with('success', 'Уровень добавлен.');
@@ -81,10 +81,10 @@ class BankStockController extends Controller
         $order = $tier->items()->max('sort_order') + 1;
 
         BankStockTierItem::create([
-            'tier_id'       => $tier->id,
+            'tier_id' => $tier->id,
             'share_item_id' => (int) $request->input('share_item_id'),
-            'count'         => (int) $request->input('count', 0),
-            'sort_order'    => $order,
+            'count' => (int) $request->input('count', 0),
+            'sort_order' => $order,
         ]);
 
         return redirect()->back()->with('success', 'Предмет добавлен.');
@@ -109,25 +109,25 @@ class BankStockController extends Controller
         $stock->load('tiers.items.shareItem');
 
         $copy = BankStock::create([
-            'name'      => $stock->name.' (копия)',
+            'name' => $stock->name.' (копия)',
             'starts_at' => $stock->starts_at,
-            'ends_at'   => $stock->ends_at,
+            'ends_at' => $stock->ends_at,
             'is_active' => false,
         ]);
 
         foreach ($stock->tiers as $tier) {
             $newTier = BankStockTier::create([
-                'stock_id'          => $copy->id,
+                'stock_id' => $copy->id,
                 'diamond_threshold' => $tier->diamond_threshold,
-                'sort_order'        => $tier->sort_order,
+                'sort_order' => $tier->sort_order,
             ]);
 
             foreach ($tier->items as $item) {
                 BankStockTierItem::create([
-                    'tier_id'       => $newTier->id,
+                    'tier_id' => $newTier->id,
                     'share_item_id' => $item->share_item_id,
-                    'count'         => $item->count,
-                    'sort_order'    => $item->sort_order,
+                    'count' => $item->count,
+                    'sort_order' => $item->sort_order,
                 ]);
             }
         }

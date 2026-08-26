@@ -113,4 +113,27 @@ class PlayerEquipment extends Model
     {
         return $this->belongsTo(Item::class, 'bag_second')->with(['itemInfo']);
     }
+
+    /**
+     * Дворучное оружие из правой руки для отображения в пустой левой
+     * (манекен показывает его во второй руке с пониженной прозрачностью).
+     */
+    public function getHandLeftMirrorAttribute(): ?Item
+    {
+        return $this->handLeft === null
+            && $this->handRight !== null
+            && $this->handRight->itemInfo?->is_two_hand
+                ? $this->handRight
+                : null;
+    }
+
+    /** @see getHandLeftMirrorAttribute() */
+    public function getHandRightMirrorAttribute(): ?Item
+    {
+        return $this->handRight === null
+            && $this->handLeft !== null
+            && $this->handLeft->itemInfo?->is_two_hand
+                ? $this->handLeft
+                : null;
+    }
 }

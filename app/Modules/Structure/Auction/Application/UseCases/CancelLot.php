@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
+use App\Modules\Item\Application\ItemEffect\ValueObjects\ItemEffectValue;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
-use App\Services\ItemEffect\ValueObjects\ItemEffectValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

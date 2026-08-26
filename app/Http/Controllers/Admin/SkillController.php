@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Http\Request;
 
 class SkillController extends Controller

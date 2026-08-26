@@ -10,6 +10,7 @@ enum ChatChannel: string
     case Location = 'location';
     case Trade = 'trade';
     case Clan = 'clan';
+    case Party = 'party';
     case Private = 'private';
     case System = 'system';
 
@@ -20,6 +21,7 @@ enum ChatChannel: string
             self::Location => 'Местность',
             self::Trade => 'Торговый',
             self::Clan => 'Клан',
+            self::Party => 'Группа',
             self::Private => 'Личные',
             self::System => 'Системные',
         };

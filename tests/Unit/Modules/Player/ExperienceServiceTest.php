@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Player;
 
+use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Services\ExperienceService;
 use Tests\TestCase;
 
 class ExperienceServiceTest extends TestCase

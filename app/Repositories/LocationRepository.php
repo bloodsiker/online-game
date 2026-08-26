@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use Illuminate\Database\Eloquent\Builder;
 
 class LocationRepository extends AbstractRepository
 {
@@ -16,7 +17,7 @@ class LocationRepository extends AbstractRepository
         return $this->model->query();
     }
 
-    public function getQuery(): \Illuminate\Database\Eloquent\Builder
+    public function getQuery(): Builder
     {
         return $this->model->query()->select(['locations.*']);
     }

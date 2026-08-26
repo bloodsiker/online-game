@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Exchange\Infrastructure\Persistence;
 
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Exchange\Domain\Contracts\ExchangeInventoryRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;

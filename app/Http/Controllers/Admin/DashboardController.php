@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
-use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Http\Controllers\Controller;
+use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 

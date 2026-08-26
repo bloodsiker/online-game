@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Modules\Player\Application\Services\Recovery\RecoveryStrategyFactory;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
-use App\Services\Recovery\RecoveryStrategyFactory;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class HealthController extends Controller
 {

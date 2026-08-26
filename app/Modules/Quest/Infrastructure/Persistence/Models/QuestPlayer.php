@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
-use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,7 +22,9 @@ class QuestPlayer extends Model
     ];
 
     protected $fillable = ['player_id', 'quest_id', 'status', 'current_stage_id', 'completed_at', 'reset_at'];
+
     protected $attributes = ['status' => QuestPlayerStatus::IN_PROGRESS];
+
     protected $with = ['objectives.questObjective', 'quest'];
 
     public function player(): BelongsTo

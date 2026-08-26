@@ -14,7 +14,7 @@ class BankStockTier extends Model
 
     protected $casts = [
         'diamond_threshold' => 'float',
-        'sort_order'        => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function stock(): BelongsTo

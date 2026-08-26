@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Console\Seeders\ItemsSeeder;
 use App\Models\Experience;
-use App\Models\Skill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
@@ -18,6 +18,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
+use App\Modules\Player\Domain\Services\ExperienceCurve;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
@@ -32,7 +33,6 @@ use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Services\ExperienceCurve;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -160,7 +160,7 @@ class GenerateSeed extends Command
     }
 
     /**
-     * Таблица опыта строится по формуле (см. \App\Services\ExperienceCurve),
+     * Таблица опыта строится по формуле (см. \App\Modules\Player\Domain\Services\ExperienceCurve),
      * а не вбивается вручную — раньше шаг между уровнями рос произвольно
      * и обрывался на 50 уровне. Планируется 100 уровней сейчас, до 1000 в будущем.
      */

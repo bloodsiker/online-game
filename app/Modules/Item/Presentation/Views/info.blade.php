@@ -152,7 +152,7 @@
                                                                             <tr>
                                                                                 <td class="tbl-ati_regular b red" title="Цена" nowrap>
                                                                                     @if ($page->price > 0)
-                                                                                        <span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ $page->price }}
+                                                                                        <span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->price) }}
                                                                                     @else
                                                                                         &nbsp;
                                                                                     @endif
