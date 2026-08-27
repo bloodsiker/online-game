@@ -26,7 +26,6 @@ Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name
 Route::get('/clan', [ClanController::class, 'index'])->name('clan');
 Route::post('/clan', [ClanController::class, 'store'])->name('clan.store');
 Route::get('/clan/skills', [ClanSkillController::class, 'index'])->name('clan.skills');
-Route::post('/clan/skills/{id}/learn', [ClanSkillController::class, 'learn'])->name('clan.skills.learn');
 
 Route::match(['get', 'post'], '/clan-warehouse/{id}', [ClanWarehouseController::class, 'put'])->name('clan.warehouse');
 Route::match(['get', 'post'], '/clan-warehouse/{id}/take', [ClanWarehouseController::class, 'take'])->name('clan.warehouse.take');

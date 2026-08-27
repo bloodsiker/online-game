@@ -389,7 +389,6 @@
                         <tr><td>GET</td><td>/clan/logs</td><td>clan.logs</td><td>—</td><td>Лог активности клана</td></tr>
                         <tr><td>GET</td><td>/clan/quests</td><td>clan.quests</td><td>—</td><td>Клановые квесты</td></tr>
                         <tr><td>GET</td><td>/clan/skills</td><td>clan.skills</td><td>—</td><td>Клановые навыки</td></tr>
-                        <tr><td>POST</td><td>/clan/skills/{id}/learn</td><td>clan.skills.learn</td><td>LEARN_SKILL</td><td>Изучить / улучшить навык</td></tr>
                         <tr><td>GET</td><td>/clan-warehouse/{id}</td><td>clan-warehouse.put</td><td>DEPOSIT</td><td>Интерфейс сдачи вещи</td></tr>
                         <tr><td>POST</td><td>/clan-warehouse/{id}</td><td>clan-warehouse.put.action</td><td>DEPOSIT</td><td>Положить вещь на склад</td></tr>
                         <tr><td>GET</td><td>/clan-warehouse/{id}/take</td><td>clan-warehouse.take</td><td>WITHDRAW_ITEMS</td><td>Интерфейс получения вещи</td></tr>

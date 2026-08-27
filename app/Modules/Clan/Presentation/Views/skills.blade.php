@@ -24,19 +24,14 @@
             padding: 6px 8px;
             background-image: url(/img/bg/info/bg_l.gif);
         }
-        .skill-card.skill-disabled { opacity: 0.65; }
         .skill-name { font-weight: bold; font-size: 12px; color: #461c0b; }
         .skill-level { color: #8D2616; font-weight: bold; }
         .skill-desc { color: #555; margin: 2px 0 4px; }
-        .req-row { color: #666; margin-top: 2px; }
         .req-ok { color: #2a7a2a; font-weight: bold; }
-        .req-fail { color: #a02020; font-weight: bold; }
         .effect-tag { color: #1a4d8a; font-weight: bold; }
         .skill-kind { display: inline-block; margin-left: 4px; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .skill-kind.passive { color: #1a4d8a; background: #dceafb; border: 1px solid #92afd0; }
         .skill-kind.active { color: #8D2616; background: #f7e0d2; border: 1px solid #d5a17e; }
-        .msg-success { color: #2a7a2a; font-weight: bold; padding: 4px 8px; border: 1px solid #2a7a2a; display: inline-block; margin-bottom: 8px; }
-        .msg-error   { color: #a02020; font-weight: bold; padding: 4px 8px; border: 1px solid #a02020; display: inline-block; margin-bottom: 8px; }
         .w100 { width: 100%; }
     </style>
 </head>
@@ -86,51 +81,16 @@
                             </tbody>
                         </table>
 
-                        {{-- Flash messages --}}
-                        @if(session('success'))
-                            <div class="msg-success">{{ session('success') }}</div>
-                        @endif
-                        @if(session('message'))
-                            <div class="msg-error">{{ session('message') }}</div>
-                        @endif
-
                         {{-- Skills list --}}
                         @forelse($definitions as $def)
                             @php
                                 $currentLevel = $learnedMap[$def->id] ?? 0;
-                                $nextLevel    = $currentLevel + 1;
-                                $isMaxed      = $currentLevel >= $def->max_level;
-                                $nextLevelData = !$isMaxed ? $def->levels->firstWhere('level', $nextLevel) : null;
-
-                                // Check requirements for next level
-                                $canLearnThis = false;
-                                $reqClanLvl   = false;
-                                $reqPoints    = false;
-                                $reqItems     = collect();
-                                $reqItemsMet  = true;
-
-                                if ($nextLevelData && !$isMaxed) {
-                                    $reqClanLvl = $clan->lvl >= $nextLevelData->required_clan_level;
-                                    $reqPoints  = $clan->points >= $nextLevelData->required_bonus_points;
-                                    $reqItems = $nextLevelData->itemRequirements;
-                                    if ($reqItems->isEmpty() && $nextLevelData->share_item_id) {
-                                        $reqItems = collect([(object) [
-                                            'share_item_id' => $nextLevelData->share_item_id,
-                                            'count' => $nextLevelData->share_item_count ?? 1,
-                                            'shareItem' => $nextLevelData->stoneItem,
-                                        ]]);
-                                    }
-                                    $reqItemsMet = $reqItems->every(fn ($requirement) =>
-                                        ($backpackShareItemCounts->get($requirement->share_item_id, 0) >= $requirement->count)
-                                    );
-                                    $canLearnThis = $reqClanLvl && $reqPoints && $reqItemsMet;
-                                }
-
                                 $currentLevelData = $currentLevel > 0 ? $def->levels->firstWhere('level', $currentLevel) : null;
-                                $displayMagicSkill = $currentLevelData?->magicSkill ?? $nextLevelData?->magicSkill;
+                                $displayLevelData = $currentLevelData ?? $def->levels->firstWhere('level', 1);
+                                $displayMagicSkill = $displayLevelData?->magicSkill;
                             @endphp
 
-                            <div class="skill-card {{ (!$canLearnThis && !$currentLevel) ? 'skill-disabled' : '' }}">
+                            <div class="skill-card">
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                     <tbody>
                                     <tr>
@@ -156,8 +116,8 @@
                                                 </span>
                                             @endif
 
-                                            @if($currentLevelData && $currentLevelData->magicSkill)
-                                                @foreach($currentLevelData->magicSkill->effects ?? [] as $eff)
+                                            @if($displayMagicSkill)
+                                                @foreach($displayMagicSkill->effects ?? [] as $eff)
                                                     &nbsp;—&nbsp;
                                                     <span class="effect-tag">
                                                         +{{ $eff['value'] }}{{ !empty($eff['is_percent']) ? '%' : '' }}
@@ -168,54 +128,8 @@
 
                                             <div class="skill-desc">{{ $def->description }}</div>
 
-                                            @if($isMaxed)
-                                                <span style="color:#2a7a2a;font-weight:bold;">&#10003; Максимальный уровень</span>
-                                            @elseif($nextLevelData)
-                                                <div class="req-row">
-                                                    <b>Следующий уровень {{ $nextLevel }}:</b>
-                                                    @foreach($nextLevelData->magicSkill->effects ?? [] as $eff)
-                                                        +{{ $eff['value'] }}{{ !empty($eff['is_percent']) ? '%' : '' }}
-                                                        {{ \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($eff['type'])?->label() ?? $eff['type'] }}
-                                                    @endforeach
-                                                </div>
-                                                <div class="req-row">
-                                                    Уровень клана:
-                                                    <span class="{{ $reqClanLvl ? 'req-ok' : 'req-fail' }}">
-                                                        {{ $clan->lvl }} / {{ $nextLevelData->required_clan_level }}
-                                                    </span>
-                                                    &nbsp;&nbsp;
-                                                    Бонусные очки:
-                                                    <span class="{{ $reqPoints ? 'req-ok' : 'req-fail' }}">
-                                                        {{ number_format($clan->points, 0, '.', ' ') }} / {{ number_format($nextLevelData->required_bonus_points, 0, '.', ' ') }}
-                                                    </span>
-                                                </div>
-                                                @if($reqItems->isNotEmpty())
-                                                    <div class="req-row">
-                                                        Требуемые предметы:
-                                                        @foreach($reqItems as $requirement)
-                                                            <span class="{{ $backpackShareItemCounts->get($requirement->share_item_id, 0) >= $requirement->count ? 'req-ok' : 'req-fail' }}">
-                                                                «{{ $requirement->shareItem?->name ?? 'Предмет' }}»
-                                                                {{ $backpackShareItemCounts->get($requirement->share_item_id, 0) }} / {{ $requirement->count }} шт.
-                                                            </span>@if(!$loop->last), @endif
-                                                        @endforeach
-                                                    </div>
-                                                @endif
-
-                                                @if($canLearn)
-                                                    <form method="post" action="{{ route('clan.skills.learn', $def->id) }}" style="margin-top:4px; display:inline;">
-                                                        @csrf
-                                                        <b class="butt2 pointer">
-                                                            <b>
-                                                                <input
-                                                                    type="submit"
-                                                                    value="Изучить"
-                                                                    style="width:70px;"
-                                                                    {{ !$canLearnThis ? 'disabled' : '' }}
-                                                                >
-                                                            </b>
-                                                        </b>
-                                                    </form>
-                                                @endif
+                                            @if(!$currentLevel)
+                                                <span style="color:#777;">Не изучен</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -242,27 +156,6 @@
     </tr>
     </tbody>
 </table>
-
-<script>
-
-    @if (session()->has('message'))
-        window.parent.showErrorIframe('{{ session('message') }}')
-    @endif
-
-    @if (session()->has('success'))
-        let hp = {
-            current: parseInt('{{ $player->hp_now }}'),
-            max: parseInt('{{ $playerDecorator->getHpMax() }}')
-        };
-        let mp = {
-            current: parseInt('{{ $player->mp_now }}'),
-            max: parseInt('{{ $playerDecorator->getMpMax() }}')
-        };
-        let experience = parseFloat('{{ $player->getPercentExp() }}');
-        let lvl = parseInt('{{ $player->lvl }}');
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
-    @endif
-</script>
 
 </body>
 </html>

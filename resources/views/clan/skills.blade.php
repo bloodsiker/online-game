@@ -182,21 +182,6 @@
                                                     @endif
                                                 </div>
 
-                                                @if($canLearn)
-                                                    <form method="post" action="{{ route('clan.skills.learn', $def->id) }}" style="margin-top:4px; display:inline;">
-                                                        @csrf
-                                                        <b class="butt2 pointer">
-                                                            <b>
-                                                                <input
-                                                                    type="submit"
-                                                                    value="Изучить"
-                                                                    style="width:70px;"
-                                                                    {{ !$canLearnThis ? 'disabled' : '' }}
-                                                                >
-                                                            </b>
-                                                        </b>
-                                                    </form>
-                                                @endif
                                             @endif
                                         </td>
                                     </tr>
