@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $image
  * @property int $is_two_hand
  * @property int $count_use
+ * @property int|null $max_drop_level_difference Maximum level the player can exceed the monster by for this item to drop.
  * @property int|null $expire
  * @property bool $is_active
  * @property bool $is_sell

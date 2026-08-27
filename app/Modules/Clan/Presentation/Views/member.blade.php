@@ -100,7 +100,8 @@
                             <tr class="bg_l">
                                 <td align="left" nowrap=""><b>Игроков в клане:</b>&nbsp;&nbsp;&nbsp;
                                     <b>всего:&nbsp;<b class="redd">{{ $memberCount }}</b> из <b class="redd">40</b> / </b>
-                                    <b>online:&nbsp;<b class="redd">{{ $onlineCount }}</b></b>
+                                    <b>online:&nbsp;<b class="redd">{{ $onlineCount }}</b> / </b>
+                                    <b>опыт клана:&nbsp;<b class="redd">{{ $clan->experience }}</b></b>
                                 </td>
                             </tr>
                             </tbody>
@@ -122,6 +123,7 @@
                                     <td class="b" align="center" title="Состояние">Состояние</td>
                                     <td class="b" align="center" title="Дата и время последнего входа в игру">Последний вход</td>
                                     <td class="b" align="center" title="Статус игрока (Online/Offline)">Статус</td>
+                                    <td class="b" align="center" title="Опыт, внесённый игроком в развитие клана">Вклад опыта</td>
                                     <td class="b" align="center" title="Бонусные очки, заработанные для клана">Бонусы</td>
                                     <td class="b" align="center" title="Доступные действия над членом клана">Действия</td>
                                 </tr>
@@ -133,7 +135,7 @@
                                                 <a href="#" title="Приватное сообщение">
                                                     <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
                                                 </a>
-                                                <img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle">&nbsp;
+                                                @if($clan->icon)<a href="{{ route('clan.public', ['clan' => $clan->id]) }}" title="Открыть публичную информацию о клане" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle"></a>&nbsp;@endif
                                                 <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
                                                 &nbsp;
                                             </td>
@@ -149,7 +151,12 @@
                                                 @endif
                                             </td>
                                             <td width="26%" align="center">
-                                                <b>{{ $row['user']->currentLocation?->name ?? '--' }}</b>
+                                                @php($location = $row['user']->currentLocation)
+                                                @if($location?->map?->slug)
+                                                    <a href="{{ route('map.public', ['slug' => $location->map->slug]) }}#{{ $location->id }}" target="_blank" title="Открыть карту и расположение игрока"><b>{{ $location->name }}</b></a>
+                                                @else
+                                                    <b>{{ $location?->name ?? '--' }}</b>
+                                                @endif
                                             </td>
                                             <td width="26%" align="center"><b>принят в клан</b></td>
                                             <td width="16%" align="center">
@@ -161,6 +168,9 @@
                                                 @else
                                                     <b>offline</b>
                                                 @endif
+                                            </td>
+                                            <td align="center" nowrap="">
+                                                <b class="grnn">{{ $row['membership']->experience_contributed }}</b>
                                             </td>
                                             <td align="center" nowrap="">
                                                 <b class="grnn">{{ $row['membership']->points }}</b>
@@ -195,6 +205,7 @@
                                             <td width="26%" align="center"><b>{{ $row['status']->label() }}</b></td>
                                             <td width="16%" align="center"><b>--</b></td>
                                             <td width="18%" align="center"><b>--</b></td>
+                                            <td align="center"><b>--</b></td>
                                             <td align="center"><b>--</b></td>
                                             <td align="right">
                                                 <b class="butt2 pointer"><b>

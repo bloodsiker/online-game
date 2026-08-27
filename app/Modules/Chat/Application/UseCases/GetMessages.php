@@ -73,6 +73,7 @@ class GetMessages
             reply_to: $replyTo,
             sender_level: $msg->sender?->player?->lvl,
             sender_clan_icon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
+            sender_clan_id: $clan?->id,
         );
     }
 }

@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\ActionController;
 use App\Http\Controllers\Admin\ApiController;
 use App\Http\Controllers\Admin\BankStockController;
 use App\Http\Controllers\Admin\ClanController;
+use App\Http\Controllers\Admin\ClanLevelController;
+use App\Http\Controllers\Admin\ClanSkillController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
@@ -26,6 +28,20 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/clan-skills', [ClanSkillController::class, 'index'])->name('clan_skills');
+Route::match(['GET', 'POST'], '/clan-skill/create', [ClanSkillController::class, 'create'])->name('clan_skill.create');
+Route::match(['GET', 'POST'], '/clan-skill/{clanSkill}', [ClanSkillController::class, 'edit'])->name('clan_skill.edit');
+Route::post('/clan-skill/{clanSkill}/level', [ClanSkillController::class, 'addLevel'])->name('clan_skill.level.add');
+Route::post('/clan-skill/{clanSkill}/level/{level}', [ClanSkillController::class, 'updateLevel'])->name('clan_skill.level.update');
+Route::get('/clan-skill/{clanSkill}/level/{level}/delete', [ClanSkillController::class, 'deleteLevel'])->name('clan_skill.level.delete');
+Route::post('/clan-skill/{clanSkill}/level/{level}/item', [ClanSkillController::class, 'addItemRequirement'])->name('clan_skill.item.add');
+Route::get('/clan-skill/{clanSkill}/level/{level}/item/{requirement}/delete', [ClanSkillController::class, 'deleteItemRequirement'])->name('clan_skill.item.delete');
+
+Route::get('/clan-levels', [ClanLevelController::class, 'index'])->name('clan_levels');
+Route::post('/clan-level', [ClanLevelController::class, 'store'])->name('clan_level.store');
+Route::post('/clan-level/{clanLevel}', [ClanLevelController::class, 'update'])->name('clan_level.update');
+Route::post('/clan-level/{clanLevel}/delete', [ClanLevelController::class, 'delete'])->name('clan_level.delete');
 
 Route::get('/news', [NewsController::class, 'list'])->name('news');
 Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
@@ -56,6 +72,7 @@ Route::get('/items', [ItemController::class, 'list'])->name('items');
 Route::get('/item/create', [ItemController::class, 'create'])->name('item.create');
 Route::post('/item/create', [ItemController::class, 'store'])->name('item.store');
 Route::match(['GET', 'POST'], '/item/{item}', [ItemController::class, 'info'])->name('item.info');
+Route::post('/item/{item}/duplicate', [ItemController::class, 'duplicate'])->name('item.duplicate');
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');
 Route::post('/item/recipe/{recipe}', [ItemController::class, 'addItemToRecipe'])->name('item.recipe.add_item');
 Route::get('/item/recipe/{recipe}/delete/{item}', [ItemController::class, 'deleteItemInRecipe'])->name('item.recipe.delete_item');

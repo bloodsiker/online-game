@@ -33,7 +33,7 @@ class ClanSkillController extends Controller
             'definitions' => $page->definitions,
             'learnedMap' => $page->learnedMap,
             'canLearn' => $page->canLearn,
-            'backpackShareItemIds' => $page->backpackShareItemIds,
+            'backpackShareItemCounts' => $page->backpackShareItemCounts,
             'player' => $page->player,
             'playerDecorator' => $page->playerDecorator,
         ]);

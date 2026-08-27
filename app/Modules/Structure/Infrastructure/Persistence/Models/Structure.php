@@ -42,6 +42,10 @@ class Structure extends Model
 
     public const TYPE_AUCTION_EXCHANGE = 'auction_exchange';
 
+    public const TYPE_REPUTATION_EXCHANGE = 'reputation_exchange';
+
+    public const TYPE_CLAN_SKILL_HALL = 'clan_skill_hall';
+
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
         self::TYPE_AUCTION => 'Аукцион',
@@ -53,6 +57,8 @@ class Structure extends Model
         self::TYPE_BLACKSMITH => 'Кузня',
         self::TYPE_EXCHANGE => 'Обмен',
         self::TYPE_AUCTION_EXCHANGE => 'Биржа',
+        self::TYPE_REPUTATION_EXCHANGE => 'Обмен на репутацию',
+        self::TYPE_CLAN_SKILL_HALL => 'Зал клановых наставлений',
     ];
 
     protected $with = ['location'];
@@ -160,5 +166,15 @@ class Structure extends Model
     public function isClanBank(): bool
     {
         return $this->type === self::TYPE_CLAN_BANK;
+    }
+
+    public function isClanSkillHall(): bool
+    {
+        return $this->type === self::TYPE_CLAN_SKILL_HALL;
+    }
+
+    public function isReputationExchange(): bool
+    {
+        return $this->type === self::TYPE_REPUTATION_EXCHANGE;
     }
 }

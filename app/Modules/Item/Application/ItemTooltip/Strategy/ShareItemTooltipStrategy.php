@@ -28,9 +28,10 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 color: $shareItem->rarity->color(),
                 image: $shareItem->image,
                 kind: $shareItem->getTypeName(),
-                price: $shareItem->price
-                    ? sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $shareItem->price)
-                    : '',
+                // Тот же формат базовых данных, что у предмета из рюкзака.
+                // Это шаблон предмета, поэтому у него нет только свойств
+                // конкретного экземпляра: заточки, камней и рун.
+                price: sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $shareItem->price),
                 diamond: '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],
@@ -41,6 +42,8 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 nosell: ! $shareItem->is_sell,
                 stats: ItemTooltipStatsBuilder::build($shareItem),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($shareItem),
+                gems: [],
+                runes: [],
             ));
         }
     }

@@ -13,6 +13,7 @@ use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerMagicSkill;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ClanSkillService
@@ -44,60 +45,122 @@ class ClanSkillService
             return "Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.";
         }
 
-        if ($levelData->share_item_id) {
-            $stone = Backpack::where('user_id', $player->user_id)
-                ->whereHas('item', fn ($q) => $q->where('share_item_id', $levelData->share_item_id))
-                ->first();
+        $itemRequirements = $this->itemRequirements($levelData);
+        if ($error = $this->validateItemRequirements($player, $itemRequirements)) {
+            return $error;
+        }
 
-            $required = $levelData->share_item_count ?? 1;
-            $stoneName = $levelData->stoneItem?->name ?? 'Предмет';
+        try {
+            DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player, $itemRequirements) {
+                $clan->decrement('points', $levelData->required_bonus_points);
+                $this->consumeItemRequirements($player, $itemRequirements);
 
-            if (! $stone || $stone->count < $required) {
-                return "В рюкзаке недостаточно предметов «{$stoneName}». Нужно: {$required}.";
+                if ($learned) {
+                    $learned->update(['current_level' => $nextLevel]);
+                } else {
+                    $learned = ClanLearnedSkill::create([
+                        'clan_id' => $clan->id,
+                        'clan_skill_definition_id' => $definition->id,
+                        'current_level' => $nextLevel,
+                    ]);
+                }
+
+                $this->syncSkillForAllMembers($clan, $definition, $currentLevel, $nextLevel, $levelData);
+
+                $isNew = $currentLevel === 0;
+                ClanLog::create([
+                    'clan_id' => $clan->id,
+                    'user_id' => $player->user_id,
+                    'action' => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
+                    'details' => $isNew
+                        ? "Изучен новый навык «{$definition->name}»"
+                        : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
+                ]);
+            });
+        } catch (\RuntimeException $e) {
+            return $e->getMessage();
+        }
+
+        return null;
+    }
+
+    /** @return Collection<int, array{share_item_id: int, count: int, name: string}> */
+    private function itemRequirements(ClanSkillLevel $levelData): Collection
+    {
+        $requirements = $levelData->itemRequirements
+            ->map(fn ($requirement) => [
+                'share_item_id' => (int) $requirement->share_item_id,
+                'count' => (int) $requirement->count,
+                'name' => $requirement->shareItem?->name ?? 'Предмет',
+            ]);
+
+        if ($requirements->isNotEmpty() || $levelData->share_item_id === null) {
+            return $requirements;
+        }
+
+        return collect([[
+            'share_item_id' => (int) $levelData->share_item_id,
+            'count' => (int) ($levelData->share_item_count ?? 1),
+            'name' => $levelData->stoneItem?->name ?? 'Предмет',
+        ]]);
+    }
+
+    private function validateItemRequirements(Player $player, Collection $requirements): ?string
+    {
+        $available = $this->backpacksByShareItem($player, $requirements);
+
+        foreach ($requirements as $requirement) {
+            if ($available->get($requirement['share_item_id'], collect())->sum('count') < $requirement['count']) {
+                return "В рюкзаке недостаточно предметов «{$requirement['name']}». Нужно: {$requirement['count']}.";
             }
         }
 
-        DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player) {
-            $clan->decrement('points', $levelData->required_bonus_points);
+        return null;
+    }
 
-            if ($levelData->share_item_id) {
-                $stone = Backpack::where('user_id', $player->user_id)
-                    ->whereHas('item', fn ($q) => $q->where('share_item_id', $levelData->share_item_id))
-                    ->first();
+    private function consumeItemRequirements(Player $player, Collection $requirements): void
+    {
+        $available = $this->backpacksByShareItem($player, $requirements, lock: true);
 
-                $required = $levelData->share_item_count ?? 1;
+        foreach ($requirements as $requirement) {
+            $backpacks = $available->get($requirement['share_item_id'], collect());
+            if ($backpacks->sum('count') < $requirement['count']) {
+                throw new \RuntimeException("В рюкзаке недостаточно предметов «{$requirement['name']}». Нужно: {$requirement['count']}.");
+            }
 
-                if ($stone->count <= $required) {
-                    $stone->delete();
+            $remaining = $requirement['count'];
+            foreach ($backpacks as $backpack) {
+                $taken = min($remaining, $backpack->count);
+                if ($backpack->count <= $taken) {
+                    $backpack->delete();
                 } else {
-                    $stone->decrement('count', $required);
+                    $backpack->decrement('count', $taken);
+                }
+
+                $remaining -= $taken;
+                if ($remaining === 0) {
+                    break;
                 }
             }
+        }
+    }
 
-            if ($learned) {
-                $learned->update(['current_level' => $nextLevel]);
-            } else {
-                $learned = ClanLearnedSkill::create([
-                    'clan_id' => $clan->id,
-                    'clan_skill_definition_id' => $definition->id,
-                    'current_level' => $nextLevel,
-                ]);
-            }
+    private function backpacksByShareItem(Player $player, Collection $requirements, bool $lock = false): Collection
+    {
+        if ($requirements->isEmpty()) {
+            return collect();
+        }
 
-            $this->syncSkillForAllMembers($clan, $definition, $currentLevel, $nextLevel, $levelData);
+        $query = Backpack::query()
+            ->where('user_id', $player->user_id)
+            ->whereHas('item', fn ($q) => $q->whereIn('share_item_id', $requirements->pluck('share_item_id')))
+            ->with('item');
 
-            $isNew = $currentLevel === 0;
-            ClanLog::create([
-                'clan_id' => $clan->id,
-                'user_id' => $player->user_id,
-                'action' => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
-                'details' => $isNew
-                    ? "Изучен новый навык «{$definition->name}»"
-                    : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
-            ]);
-        });
+        if ($lock) {
+            $query->lockForUpdate();
+        }
 
-        return null;
+        return $query->get()->groupBy(fn (Backpack $backpack) => $backpack->item->share_item_id);
     }
 
     private function syncSkillForAllMembers(

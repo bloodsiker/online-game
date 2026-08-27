@@ -3,9 +3,10 @@
         ['route' => 'clan.member',      'label' => 'Состав клана', 'width' => 100],
         ['route' => 'clan.role',        'label' => 'Звания',       'width' => 60],
         ['route' => 'clan.information', 'label' => 'Информация',   'width' => 70],
-        ['route' => 'clan.skills',      'label' => 'Навыки',          'width' => 70],
+        ['route' => 'clan.characteristics', 'label' => 'Характеристики', 'width' => 105],
+        ['route' => 'clan.skills',      'label' => 'Навыки',       'width' => 70],
         ['route' => 'clan.quests',      'label' => 'Квесты',       'width' => 80],
-        ['route' => null,               'label' => 'Управление',      'width' => 70],
+        ['route' => null,               'label' => 'Управление',  'width' => 70],
         ['route' => 'clan.logs',        'label' => 'Логи',            'width' => 50],
     ];
     $activeTab = $activeTab ?? null;

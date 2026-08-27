@@ -47,7 +47,16 @@ class DropService
                 if ($monster->locationMonster->monster instanceof Monster) {
                     $monsterItems = $monster->locationMonster->monster->items;
                     foreach ($monsterItems as $item) {
-                        $randomChance = mt_rand(0, 100000) / 1000;
+                        if (
+                            $item->max_drop_level_difference !== null
+                            && $dropRecipient->lvl - $monster->locationMonster->monster->lvl > $item->max_drop_level_difference
+                        ) {
+                            continue;
+                        }
+
+                        // 100 000 равновероятных значений: одно значение = 0.001%.
+                        // Диапазон начинается с 1, чтобы шанс 0% никогда не срабатывал.
+                        $randomChance = random_int(1, 100000) / 1000;
                         if ($randomChance <= $item->pivot->drop_chance) {
                             $droppedItems[] = [
                                 'item' => $item,

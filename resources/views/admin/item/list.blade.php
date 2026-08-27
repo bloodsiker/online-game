@@ -100,6 +100,10 @@
                                     <td>{{ $item->slot?->label() ?? '—' }}</td>
                                     <td>
                                         <a href="{{ route('admin.item.info', $item->id) }}" class="btn btn-xs btn-primary">Изменить</a>
+                                        <form action="{{ route('admin.item.duplicate', $item->id) }}" method="post" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-xs btn-default">Дубль</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @empty

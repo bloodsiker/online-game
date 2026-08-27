@@ -165,6 +165,7 @@ class GetNpcPage
             dialogueStartNode: $this->readRepository->getStartDialogueNode($npc->id),
             reputationShops: $reputationShops,
             isClanRegistrar: $npc->name === config('game.clan_registrar_npc_name'),
+            hasClanMembership: $clanMembership !== null,
         );
     }
 }

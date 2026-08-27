@@ -9,7 +9,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use Illuminate\Database\Seeder;
 
 /**
- * 5 clan quests (type=clan, repeatable via reset_period) assigned to NPC "Глава города" (id=1).
+ * 5 clan quests (type=clan, repeatable via reset_period) assigned to the clan mentor.
  *
  * Monsters:
  *   1 — Мышь
@@ -27,7 +27,7 @@ class ClanQuestSeeder extends Seeder
 {
     public function run(): void
     {
-        $npc = Npc::findOrFail(1); // Глава города
+        $npc = Npc::query()->where('name', config('game.clan_mentor_npc_name'))->firstOrFail();
 
         $quests = [
             // Quest 1: Easy — kill mice

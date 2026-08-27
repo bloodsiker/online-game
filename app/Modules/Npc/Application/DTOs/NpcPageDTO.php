@@ -22,5 +22,6 @@ final readonly class NpcPageDTO
         public ?NpcDialogueNode $dialogueStartNode = null,
         public Collection $reputationShops = new Collection,
         public bool $isClanRegistrar = false,
+        public bool $hasClanMembership = false,
     ) {}
 }

@@ -37,6 +37,7 @@ class NpcController extends Controller
             'dialogueStartNode' => $page->dialogueStartNode,
             'reputationShops' => $page->reputationShops,
             'isClanRegistrar' => $page->isClanRegistrar,
+            'hasClanMembership' => $page->hasClanMembership,
         ]);
     }
 

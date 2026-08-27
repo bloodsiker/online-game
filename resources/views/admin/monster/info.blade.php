@@ -222,7 +222,7 @@
                                                     <td><img src="{{ $item->image }}" width="36" alt=""></td>
                                                     <td><a href="{{ route('admin.item.info', $item->id) }}" target="_blank">{{ $item->name }}</a></td>
                                                     <td>
-                                                        <input form="drop-update-{{ $item->id }}" type="number" step="0.01" min="0" max="100"
+                                                        <input form="drop-update-{{ $item->id }}" type="number" step="0.001" min="0" max="100"
                                                                class="form-control form-control-sm" name="drop_chance" value="{{ $item->pivot->drop_chance }}">
                                                     </td>
                                                     <td>
@@ -676,7 +676,7 @@
                     </div>
                     <div class="form-group mb-2">
                         <label>Шанс (%)</label>
-                        <input type="number" step="0.01" class="form-control" name="drop_chance" value="10">
+                        <input type="number" step="0.001" min="0" max="100" class="form-control" name="drop_chance" value="10">
                     </div>
                     <div class="row">
                         <div class="col-md-6">

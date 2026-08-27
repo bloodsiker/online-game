@@ -170,6 +170,10 @@ class LocationPageViewMapper
                 continue;
             }
 
+            if ($structure->isClanSkillHall() && $user->clanMembership === null) {
+                continue;
+            }
+
             $entryUrl = $this->resolveEntryUrl($structure);
             if ($entryUrl === null) {
                 continue;
@@ -208,6 +212,7 @@ class LocationPageViewMapper
             $structure->isClanWarehouse() => route('clan.warehouse', ['id' => $structure->id]),
             $structure->isBank() => route('bank', ['id' => $structure->id]),
             $structure->isClanBank() => route('clan.treasury', ['id' => $structure->id]),
+            $structure->isClanSkillHall() => route('clan_skill_hall', ['id' => $structure->id]),
             $structure->isAuction() => route('auction', ['id' => $structure->id]),
             $structure->isAuctionExchange() => route('auction.exchange', ['id' => $structure->id]),
             $structure->isBlacksmith() => route('blacksmith', ['id' => $structure->id]),

@@ -86,7 +86,21 @@
 </table>
 
 <script>
+    var maxBattleLogEntries = 200;
     var rowIndex = 0;
+
+    function limitBattleLogEntries(entries) {
+        return entries.slice(-maxBattleLogEntries);
+    }
+
+    function trimBattleLogDom() {
+        var tbody = document.getElementById('log-body');
+        if (!tbody) return;
+
+        while (tbody.children.length > maxBattleLogEntries * 2) {
+            tbody.removeChild(tbody.firstElementChild);
+        }
+    }
 
     function renderEntry(entry) {
         var tbody = document.getElementById('log-body');
@@ -130,8 +144,10 @@
                 ts: Date.now(),
             };
             entries.push(entry);
+            entries = limitBattleLogEntries(entries);
             sessionStorage.setItem('battleLog', JSON.stringify(entries));
             renderEntry(entry);
+            trimBattleLogDom();
         }
     };
 
@@ -143,6 +159,8 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         var entries = JSON.parse(sessionStorage.getItem('battleLog') || '[]');
+        entries = limitBattleLogEntries(entries);
+        sessionStorage.setItem('battleLog', JSON.stringify(entries));
         entries.forEach(function(entry) { renderEntry(entry); });
     });
 </script>

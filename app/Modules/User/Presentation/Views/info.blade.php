@@ -423,7 +423,7 @@
                                                                 <tr class="bg_l">
                                                                     <td class="brd2-top brd2-bt b">Клан</td>
                                                                     <td class="brd2-top brd2-bt b redd" align="right">
-                                                                        {{ $user->clanMembership->clan->name }}@if($user->clanMembership->clan->icon)&nbsp;<img src="{{ Storage::disk('public')->url($user->clanMembership->clan->icon) }}" alt="" border="0" width="13" height="13" align="absmiddle">@endif
+                                                                        <a href="{{ route('clan.public', ['clan' => $user->clanMembership->clan->id]) }}" title="Открыть информацию о клане" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $user->clanMembership->clan->name }}@if($user->clanMembership->clan->icon)&nbsp;<img src="{{ Storage::disk('public')->url($user->clanMembership->clan->icon) }}" alt="" border="0" width="13" height="13" align="absmiddle">@endif</a>
                                                                     </td>
                                                                 </tr>
                                                                 @if($user->clanMembership->role)

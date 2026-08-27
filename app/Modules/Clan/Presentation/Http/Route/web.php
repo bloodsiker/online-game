@@ -6,6 +6,7 @@ use App\Modules\Clan\Presentation\Http\ClanTreasuryController;
 use App\Modules\Clan\Presentation\Http\ClanWarehouseController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/clan-info/{clan}', [ClanController::class, 'publicInfo'])->name('clan.public');
 Route::get('/clan/member', [ClanController::class, 'member'])->name('clan.member');
 Route::post('/clan/member/save-roles', [ClanController::class, 'saveMemberRoles'])->name('clan.member.save-roles');
 Route::post('/clan/member/leave', [ClanController::class, 'leaveClan'])->name('clan.member.leave');
@@ -17,6 +18,7 @@ Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name(
 Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
 Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
 Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
+Route::get('/clan/characteristics', [ClanController::class, 'characteristics'])->name('clan.characteristics');
 Route::get('/clan/logs', [ClanController::class, 'logs'])->name('clan.logs');
 Route::get('/clan/quests', [ClanController::class, 'quests'])->name('clan.quests');
 Route::post('/clan/information/description', [ClanController::class, 'saveDescription'])->name('clan.information.save-description');

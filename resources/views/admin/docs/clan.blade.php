@@ -294,9 +294,19 @@
                         <tr><td>level</td><td>tinyint</td><td>Номер уровня (1, 2, 3…)</td><td></td></tr>
                         <tr><td>required_clan_level</td><td>tinyint</td><td>Минимальный уровень клана</td><td>Проверяется по <code>clans.lvl</code></td></tr>
                         <tr><td>required_bonus_points</td><td>int</td><td>Стоимость в бонусных очках</td><td>Списываются из <code>clans.points</code></td></tr>
-                        <tr><td>share_item_id</td><td>FK → share_items nullable</td><td>Предмет-камень для изучения</td><td>Берётся из рюкзака инициатора</td></tr>
-                        <tr><td>share_item_count</td><td>int nullable</td><td>Количество предметов</td><td>По умолчанию 1</td></tr>
+                        <tr><td>share_item_id / share_item_count</td><td>legacy nullable</td><td>Старое одиночное требование предмета</td><td>Поддерживается для ранее созданных навыков</td></tr>
                         <tr><td>magic_skill_id</td><td>FK → magic_skills nullable</td><td>Магический навык, который получают участники при изучении</td><td>Применяется через <code>player_magic_skills</code></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4><span class="tbl-name">clan_skill_level_item_requirements</span></h4>
+                    <p>Список предметов, требуемых для изучения конкретного уровня навыка. Один уровень может требовать один или несколько разных предметов.</p>
+                    <table class="table table-bordered table-sm field-table">
+                        <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th></tr></thead>
+                        <tbody>
+                        <tr><td>clan_skill_level_id</td><td>FK</td><td>Уровень кланового навыка</td></tr>
+                        <tr><td>share_item_id</td><td>FK → share_items</td><td>Требуемый предмет</td></tr>
+                        <tr><td>count</td><td>int</td><td>Необходимое количество предмета</td></tr>
                         </tbody>
                     </table>
 
@@ -312,7 +322,7 @@
 
                     <div class="flow-box">
                         <strong>При изучении навыка (в транзакции):</strong><br>
-                        1. Проверяется уровень клана, бонусные очки, наличие предмета в рюкзаке<br>
+                        1. Проверяется уровень клана, бонусные очки и наличие всех требуемых предметов в рюкзаке<br>
                         2. Списываются <code>clans.points</code><br>
                         3. Предмет удаляется из <code>backpacks</code> инициатора<br>
                         4. Создаётся/обновляется запись в <code>clan_learned_skills</code><br>

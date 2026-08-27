@@ -3,10 +3,11 @@
         ['route' => 'clan.member',      'label' => 'Состав клана', 'width' => 100],
         ['route' => 'clan.role',        'label' => 'Звания',       'width' => 60],
         ['route' => 'clan.information', 'label' => 'Информация',   'width' => 70],
-        ['route' => 'clan.skills',      'label' => 'Навыки',          'width' => 70],
+        ['route' => 'clan.characteristics', 'label' => 'Характеристики', 'width' => 105],
+        ['route' => 'clan.skills',      'label' => 'Навыки',       'width' => 70],
         ['route' => 'clan.quests',      'label' => 'Квесты',       'width' => 80],
-        ['route' => null,               'label' => 'Управление',      'width' => 70],
-        ['route' => 'clan.logs',        'label' => 'Логи',            'width' => 50],
+        ['route' => null,               'label' => 'Управление',  'width' => 70],
+        ['route' => 'clan.logs',        'label' => 'Логи',         'width' => 50],
     ];
     $activeTab = $activeTab ?? null;
 @endphp
@@ -24,8 +25,7 @@
                 $href = $tab['route'] ? route($tab['route']) : '';
             @endphp
             <td width="19"><img src="{{ asset($l) }}" width="19" height="21"><br></td>
-            <td width="{{ $tab['width'] }}" align="center"
-                style="background: url({{ asset($c) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <td width="{{ $tab['width'] }}" align="center" style="background: url({{ asset($c) }}) center top repeat-x; padding: 0px 2px 6px;">
                 <a href="{{ $href }}" class="{{ $cls }}">{{ $tab['label'] }}</a>
             </td>
             <td width="19"><img src="{{ asset($r) }}" width="19" height="21"><br></td>

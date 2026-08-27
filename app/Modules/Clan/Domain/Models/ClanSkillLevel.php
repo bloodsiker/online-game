@@ -8,6 +8,7 @@ use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClanSkillLevel extends Model
 {
@@ -31,6 +32,11 @@ class ClanSkillLevel extends Model
     public function stoneItem(): BelongsTo
     {
         return $this->belongsTo(ShareItem::class, 'share_item_id');
+    }
+
+    public function itemRequirements(): HasMany
+    {
+        return $this->hasMany(ClanSkillLevelItemRequirement::class)->with('shareItem');
     }
 
     public function magicSkill(): BelongsTo

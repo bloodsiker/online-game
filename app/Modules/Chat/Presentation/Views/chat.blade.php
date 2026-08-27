@@ -140,8 +140,8 @@
                             <span class="msg-quest_item-icon">✦</span> {!! $msg->content !!}
 
                         @elseif ($msg->type === 'private')
-                            @if ($msg->sender_clan_icon)
-                                <img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt="">
+                            @if ($msg->sender_clan_icon && $msg->sender_clan_id)
+                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
                             @endif
                             <span class="prv-name">{{ $msg->sender_name }}</span>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
                             <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
@@ -149,8 +149,8 @@
                             <span class="prv-name">{{ $msg->target_name ?? '?' }}</span> {!! $msg->content !!}
 
                         @else
-                            @if ($msg->sender_clan_icon)
-                                <img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt="">
+                            @if ($msg->sender_clan_icon && $msg->sender_clan_id)
+                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
                             @endif
                             <a href="#"
                                class="player-link n"
@@ -198,8 +198,10 @@
     }
 
     function clanIconHtml(msg) {
-        if (!msg.sender_clan_icon) return '';
-        return '<img src="' + safeAttr(msg.sender_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt="">';
+        if (!msg.sender_clan_icon || !msg.sender_clan_id) return '';
+        var clanUrl = '{{ url('/clan-info') }}/' + parseInt(msg.sender_clan_id, 10);
+        return '<a href="' + clanUrl + '" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;">'
+             + '<img src="' + safeAttr(msg.sender_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt=""></a>';
     }
 
     function levelHtml(msg) {
@@ -215,6 +217,11 @@
     // Иконка информации о персонаже возле ника — открывает карточку игрока в отдельном окне
     function chatOpenUserInfo(userId) {
         window.open('{{ url('/info/u') }}/' + userId, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        return false;
+    }
+
+    function chatOpenClanInfo(url) {
+        window.open(url, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
         return false;
     }
 

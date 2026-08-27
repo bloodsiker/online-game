@@ -22,7 +22,7 @@ class GetClanSkillsPage
     {
         $context = $this->resolveClanContext->require($user);
 
-        $definitions = ClanSkillDefinition::with(['levels.stoneItem', 'levels.magicSkill'])
+        $definitions = ClanSkillDefinition::with(['levels.itemRequirements.shareItem', 'levels.stoneItem', 'levels.magicSkill'])
             ->orderBy('sort_order')
             ->get();
 
@@ -30,12 +30,11 @@ class GetClanSkillsPage
             ->pluck('current_level', 'clan_skill_definition_id');
 
         $player = $user->player;
-        $backpackShareItemIds = Backpack::where('user_id', $user->id)
+        $backpackShareItemCounts = Backpack::where('user_id', $user->id)
             ->with('item')
             ->get()
-            ->map(fn ($backpack) => $backpack->item->share_item_id)
-            ->unique()
-            ->values();
+            ->groupBy(fn ($backpack) => $backpack->item->share_item_id)
+            ->map(fn ($backpacks) => $backpacks->sum('count'));
 
         return new ClanSkillsPageDTO(
             clan: $context->clan,
@@ -43,7 +42,7 @@ class GetClanSkillsPage
             definitions: $definitions,
             learnedMap: $learnedMap,
             canLearn: $context->membership->role->hasPermission(ClanPermission::LEARN_SKILL),
-            backpackShareItemIds: $backpackShareItemIds,
+            backpackShareItemCounts: $backpackShareItemCounts,
             player: $player,
             playerDecorator: $this->statService->resolve($player),
         );

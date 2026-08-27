@@ -45,6 +45,7 @@ class WhoPageViewMapper
             isOnline: $user->last_online_at?->gt($threshold) ?? false,
             clanName: $clan?->name,
             clanIcon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
+            clanId: $clan?->id,
         );
     }
 }

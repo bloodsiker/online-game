@@ -14,5 +14,6 @@ final readonly class WhoUserDTO
         public bool $isOnline,
         public ?string $clanName,
         public ?string $clanIcon,
+        public ?int $clanId,
     ) {}
 }

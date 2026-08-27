@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Console\Seeders\ItemsSeeder;
 use App\Models\Experience;
-use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
@@ -29,6 +28,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -148,6 +148,8 @@ class GenerateSeed extends Command
         $this->createNpcAndQuest();
         $this->call('db:seed', ['--class' => 'ClanSkillSeeder']);
         $this->call('db:seed', ['--class' => 'QuestSeeder']);
+        $this->call('db:seed', ['--class' => 'ClanMentorNpcSeeder']);
+        $this->call('db:seed', ['--class' => 'ClanSkillHallSeeder']);
         $this->call('db:seed', ['--class' => 'ClanQuestSeeder']);
         $this->call('db:seed', ['--class' => 'ReputationSeeder']);
         $this->call('db:seed', ['--class' => 'DungeonSeeder']);

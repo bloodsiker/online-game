@@ -12,6 +12,7 @@ use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -33,6 +34,7 @@ readonly class AttackService
         private QuestProgressService $questService,
         private EventActivityProgressService $eventActivityProgressService,
         private ExperienceService $experienceService,
+        private ClanExperienceService $clanExperienceService,
         private PlayerSkillService $playerSkillService,
         private DropService $dropService,
         private BossShieldService $shieldService,
@@ -113,7 +115,7 @@ readonly class AttackService
 
                     // Нараховуємо досвід за спробу атаки (опціонально)
                     $exp = $this->calculateExperience($player, $locMonster->monster, 1, $locMonster->hp_max, $xpMultiplier);
-                    $player->exp += $exp;
+                    $this->awardMonsterExperience($player, $locMonster->monster, $exp);
 
                     continue;
                 }
@@ -134,7 +136,7 @@ readonly class AttackService
             $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
 
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
-            $player->exp += $exp;
+            $this->awardMonsterExperience($player, $locMonster->monster, $exp);
 
             $this->playerSkillService->gainExperienceSkill($player, $hit->getSkill(), $hit->getWeapon());
 
@@ -242,7 +244,7 @@ readonly class AttackService
             $extraExp = $this->calculateExperience($player, $locMonster->monster, $extraDamage, $locMonster->hp_max, $xpMultiplier);
 
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
-            $player->exp += $extraExp;
+            $this->awardMonsterExperience($player, $locMonster->monster, $extraExp);
 
             $result->log(sprintf(
                 '<p><b class="color-red">⚔ Двойной удар руны! Вы наносите ещё %d урона %s (опыт +%d)</b></p>',
@@ -289,7 +291,7 @@ readonly class AttackService
 
         $secondMonster->hp_now = max(0, $secondMonster->hp_now - $chainDamage);
         $secondMonster->save();
-        $player->exp += $exp;
+        $this->awardMonsterExperience($player, $secondMonster->monster, $exp);
 
         $result->log(sprintf(
             '<p><b class="color-purple">🔗 Цепная атака руны поражает %s! <br>Повреждения: %d (ваш опыт +%d)</b></p>',
@@ -533,5 +535,11 @@ readonly class AttackService
         $baseExperience = (int) round(max(1, $takeExp * $levelMultiplier * $xpMultiplier));
 
         return $this->experienceService->calculateGain($player, $baseExperience);
+    }
+
+    private function awardMonsterExperience(Player $player, Monster $monster, int $experience): void
+    {
+        $player->exp += $experience;
+        $this->clanExperienceService->awardForMonsterExperience($player, $monster, $experience);
     }
 }

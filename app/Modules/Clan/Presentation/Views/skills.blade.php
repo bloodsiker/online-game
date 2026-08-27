@@ -32,6 +32,9 @@
         .req-ok { color: #2a7a2a; font-weight: bold; }
         .req-fail { color: #a02020; font-weight: bold; }
         .effect-tag { color: #1a4d8a; font-weight: bold; }
+        .skill-kind { display: inline-block; margin-left: 4px; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+        .skill-kind.passive { color: #1a4d8a; background: #dceafb; border: 1px solid #92afd0; }
+        .skill-kind.active { color: #8D2616; background: #f7e0d2; border: 1px solid #d5a17e; }
         .msg-success { color: #2a7a2a; font-weight: bold; padding: 4px 8px; border: 1px solid #2a7a2a; display: inline-block; margin-bottom: 8px; }
         .msg-error   { color: #a02020; font-weight: bold; padding: 4px 8px; border: 1px solid #a02020; display: inline-block; margin-bottom: 8px; }
         .w100 { width: 100%; }
@@ -103,17 +106,28 @@
                                 $canLearnThis = false;
                                 $reqClanLvl   = false;
                                 $reqPoints    = false;
-                                $reqStone     = false;
+                                $reqItems     = collect();
+                                $reqItemsMet  = true;
 
                                 if ($nextLevelData && !$isMaxed) {
                                     $reqClanLvl = $clan->lvl >= $nextLevelData->required_clan_level;
                                     $reqPoints  = $clan->points >= $nextLevelData->required_bonus_points;
-                                    $reqStone   = !$nextLevelData->share_item_id
-                                        || $backpackShareItemIds->contains($nextLevelData->share_item_id);
-                                    $canLearnThis = $reqClanLvl && $reqPoints && $reqStone;
+                                    $reqItems = $nextLevelData->itemRequirements;
+                                    if ($reqItems->isEmpty() && $nextLevelData->share_item_id) {
+                                        $reqItems = collect([(object) [
+                                            'share_item_id' => $nextLevelData->share_item_id,
+                                            'count' => $nextLevelData->share_item_count ?? 1,
+                                            'shareItem' => $nextLevelData->stoneItem,
+                                        ]]);
+                                    }
+                                    $reqItemsMet = $reqItems->every(fn ($requirement) =>
+                                        ($backpackShareItemCounts->get($requirement->share_item_id, 0) >= $requirement->count)
+                                    );
+                                    $canLearnThis = $reqClanLvl && $reqPoints && $reqItemsMet;
                                 }
 
                                 $currentLevelData = $currentLevel > 0 ? $def->levels->firstWhere('level', $currentLevel) : null;
+                                $displayMagicSkill = $currentLevelData?->magicSkill ?? $nextLevelData?->magicSkill;
                             @endphp
 
                             <div class="skill-card {{ (!$canLearnThis && !$currentLevel) ? 'skill-disabled' : '' }}">
@@ -136,6 +150,11 @@
                                             <span class="skill-level">
                                                 Ур. {{ $currentLevel }} / {{ $def->max_level }}
                                             </span>
+                                            @if($displayMagicSkill)
+                                                <span class="skill-kind {{ $displayMagicSkill->is_passive ? 'passive' : 'active' }}">
+                                                    {{ $displayMagicSkill->is_passive ? 'Пассивный' : 'Активный' }}
+                                                </span>
+                                            @endif
 
                                             @if($currentLevelData && $currentLevelData->magicSkill)
                                                 @foreach($currentLevelData->magicSkill->effects ?? [] as $eff)
@@ -169,18 +188,18 @@
                                                     <span class="{{ $reqPoints ? 'req-ok' : 'req-fail' }}">
                                                         {{ number_format($clan->points, 0, '.', ' ') }} / {{ number_format($nextLevelData->required_bonus_points, 0, '.', ' ') }}
                                                     </span>
-                                                    @if($nextLevelData->stoneItem)
-                                                        &nbsp;&nbsp;
-                                                        Камень «{{ $nextLevelData->stoneItem->name }}»
-                                                        @if($nextLevelData->share_item_count > 1)
-                                                            ({{ $nextLevelData->share_item_count }} шт.)
-                                                        @endif
-                                                        :
-                                                        <span class="{{ $reqStone ? 'req-ok' : 'req-fail' }}">
-                                                            {{ $reqStone ? 'есть' : 'нет' }}
-                                                        </span>
-                                                    @endif
                                                 </div>
+                                                @if($reqItems->isNotEmpty())
+                                                    <div class="req-row">
+                                                        Требуемые предметы:
+                                                        @foreach($reqItems as $requirement)
+                                                            <span class="{{ $backpackShareItemCounts->get($requirement->share_item_id, 0) >= $requirement->count ? 'req-ok' : 'req-fail' }}">
+                                                                «{{ $requirement->shareItem?->name ?? 'Предмет' }}»
+                                                                {{ $backpackShareItemCounts->get($requirement->share_item_id, 0) }} / {{ $requirement->count }} шт.
+                                                            </span>@if(!$loop->last), @endif
+                                                        @endforeach
+                                                    </div>
+                                                @endif
 
                                                 @if($canLearn)
                                                     <form method="post" action="{{ route('clan.skills.learn', $def->id) }}" style="margin-top:4px; display:inline;">

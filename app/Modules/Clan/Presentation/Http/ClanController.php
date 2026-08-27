@@ -10,6 +10,7 @@ use App\Modules\Clan\Application\UseCases\AddClanRole;
 use App\Modules\Clan\Application\UseCases\CancelClanRequest;
 use App\Modules\Clan\Application\UseCases\CreateClan;
 use App\Modules\Clan\Application\UseCases\DeleteClanRole;
+use App\Modules\Clan\Application\UseCases\GetClanCharacteristicsPage;
 use App\Modules\Clan\Application\UseCases\GetClanIndexPage;
 use App\Modules\Clan\Application\UseCases\GetClanInformationPage;
 use App\Modules\Clan\Application\UseCases\GetClanLogsPage;
@@ -17,6 +18,7 @@ use App\Modules\Clan\Application\UseCases\GetClanMemberPage;
 use App\Modules\Clan\Application\UseCases\GetClanMembersFrame;
 use App\Modules\Clan\Application\UseCases\GetClanQuestsPage;
 use App\Modules\Clan\Application\UseCases\GetClanRolePage;
+use App\Modules\Clan\Application\UseCases\GetPublicClanPage;
 use App\Modules\Clan\Application\UseCases\InviteToClan;
 use App\Modules\Clan\Application\UseCases\KickClanMember;
 use App\Modules\Clan\Application\UseCases\LeaveClan;
@@ -24,6 +26,7 @@ use App\Modules\Clan\Application\UseCases\SaveClanDescription;
 use App\Modules\Clan\Application\UseCases\SaveClanMemberRoles;
 use App\Modules\Clan\Application\UseCases\SaveClanNews;
 use App\Modules\Clan\Application\UseCases\SaveClanRoles;
+use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -50,10 +53,12 @@ class ClanController extends Controller
         private readonly DeleteClanRole $deleteClanRole,
         private readonly SaveClanRoles $saveClanRoles,
         private readonly GetClanInformationPage $getClanInformationPage,
+        private readonly GetClanCharacteristicsPage $getClanCharacteristicsPage,
         private readonly SaveClanDescription $saveClanDescription,
         private readonly SaveClanNews $saveClanNews,
         private readonly GetClanQuestsPage $getClanQuestsPage,
         private readonly GetClanLogsPage $getClanLogsPage,
+        private readonly GetPublicClanPage $getPublicClanPage,
     ) {}
 
     public function membersFrame(): View
@@ -64,6 +69,21 @@ class ClanController extends Controller
             'members' => $page->members,
             'clan' => $page->clan,
             'tenMinutesAgo' => $page->tenMinutesAgo,
+        ]);
+    }
+
+    public function publicInfo(Request $request, Clan $clan): View
+    {
+        $page = $this->getPublicClanPage->execute($clan, $request->query('mode'));
+
+        return view('clan::public', [
+            'clan' => $page->clan,
+            'mode' => $page->mode,
+            'membersCount' => $page->membersCount,
+            'levelRank' => $page->levelRank,
+            'experienceRank' => $page->experienceRank,
+            'members' => $page->members,
+            'logs' => $page->logs,
         ]);
     }
 
@@ -247,6 +267,26 @@ class ClanController extends Controller
             'clan' => $page->clan,
             'membership' => $page->membership,
             'canChangeNews' => $page->canChangeNews,
+        ]);
+    }
+
+    public function characteristics(): View|RedirectResponse
+    {
+        try {
+            $page = $this->getClanCharacteristicsPage->execute(Auth::user());
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
+
+            return redirect()->route('clan');
+        }
+
+        return view('clan::characteristics', [
+            'clan' => $page->clan,
+            'membership' => $page->membership,
+            'nextLevel' => $page->nextLevel,
+            'currentLevelExperience' => $page->currentLevelExperience,
+            'experienceToNextLevel' => $page->experienceToNextLevel,
+            'progressPercent' => $page->progressPercent,
         ]);
     }
 

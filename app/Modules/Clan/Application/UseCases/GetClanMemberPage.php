@@ -21,7 +21,7 @@ class GetClanMemberPage
         $context = $this->resolveClanContext->require($user);
 
         $clan = $context->membership->clan()
-            ->with(['members.user.currentLocation', 'members.role', 'roles'])
+            ->with(['members.user.currentLocation.map', 'members.role', 'roles'])
             ->firstOrFail();
 
         $onlineThreshold = Carbon::now()->subMinutes(10);

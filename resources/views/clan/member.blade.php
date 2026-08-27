@@ -133,7 +133,7 @@
                                                 <a href="#" title="Приватное сообщение">
                                                     <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
                                                 </a>
-                                                <img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle">&nbsp;
+                                                @if($clan->icon)<a href="{{ route('clan.public', ['clan' => $clan->id]) }}" title="Открыть публичную информацию о клане" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle"></a>&nbsp;@endif
                                                 <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
                                                 &nbsp;
                                             </td>

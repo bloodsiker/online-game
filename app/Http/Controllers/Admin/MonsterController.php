@@ -104,8 +104,10 @@ class MonsterController extends Controller
 
     public function infoDrop(Request $request, Monster $monster): RedirectResponse
     {
+        $dropChance = $this->validatedDropChance($request);
+
         $monster->items()->attach($request->input('share_item_id'), [
-            'drop_chance' => (float) $request->input('drop_chance', 0),
+            'drop_chance' => $dropChance,
             'min_count' => (int) $request->input('min_count', 1),
             'max_count' => (int) $request->input('max_count', 1),
         ]);
@@ -115,13 +117,22 @@ class MonsterController extends Controller
 
     public function infoDropUpdate(Request $request, Monster $monster, ShareItem $item): RedirectResponse
     {
+        $dropChance = $this->validatedDropChance($request);
+
         $monster->items()->updateExistingPivot($item->id, [
-            'drop_chance' => (float) $request->input('drop_chance', 0),
+            'drop_chance' => $dropChance,
             'min_count' => (int) $request->input('min_count', 1),
             'max_count' => (int) $request->input('max_count', 1),
         ]);
 
         return redirect()->back()->with('success', 'Дроп обновлён.');
+    }
+
+    private function validatedDropChance(Request $request): float
+    {
+        return (float) $request->validate([
+            'drop_chance' => ['required', 'numeric', 'decimal:0,3', 'between:0,100'],
+        ])['drop_chance'];
     }
 
     public function infoDropDeleteItem(Monster $monster, ShareItem $item): RedirectResponse

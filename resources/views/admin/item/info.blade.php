@@ -115,6 +115,11 @@
                                                 <input type="number" class="form-control" name="count_use" value="{{ $item->count_use }}">
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label" for="max_drop_level_difference">Макс. разница уровней для дропа</label>
+                                                <input type="number" min="0" max="255" class="form-control" id="max_drop_level_difference" name="max_drop_level_difference" value="{{ old('max_drop_level_difference', $item->max_drop_level_difference) }}">
+                                                <small class="form-text text-muted">Пусто — предмет выпадает всегда. Лимит учитывает, насколько уровень игрока выше уровня моба.</small>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="expire">Срок жизни на локации, минут</label>
                                                 <input type="number" min="1" class="form-control" id="expire" name="expire" value="{{ old('expire', $item->expire) }}">
                                                 <small class="form-text text-muted">Оставьте пустым, чтобы предмет не исчезал.</small>

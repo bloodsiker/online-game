@@ -94,6 +94,18 @@
                             <span>Кланы</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.clan_levels', 'admin.clan_level.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.clan_levels') }}">
+                            <i class="bx bx-bar-chart-alt-2" aria-hidden="true"></i>
+                            <span>Уровни клана</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.clan_skills', 'admin.clan_skill.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.clan_skills') }}">
+                            <i class="bx bx-star" aria-hidden="true"></i>
+                            <span>Клановые навыки</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.reputations', 'admin.reputation.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.reputations') }}">
                             <i class="bx bx-medal" aria-hidden="true"></i>

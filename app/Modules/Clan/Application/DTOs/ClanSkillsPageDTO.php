@@ -13,7 +13,7 @@ final readonly class ClanSkillsPageDTO
     /**
      * @param  Collection<int, mixed>  $definitions
      * @param  Collection<int, mixed>  $learnedMap
-     * @param  Collection<int, mixed>  $backpackShareItemIds
+     * @param  Collection<int, int>  $backpackShareItemCounts
      */
     public function __construct(
         public Clan $clan,
@@ -21,7 +21,7 @@ final readonly class ClanSkillsPageDTO
         public Collection $definitions,
         public Collection $learnedMap,
         public bool $canLearn,
-        public Collection $backpackShareItemIds,
+        public Collection $backpackShareItemCounts,
         public mixed $player,
         public mixed $playerDecorator,
     ) {}

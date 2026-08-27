@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('news_3')->nullable();
             $table->text('description')->nullable();
             $table->integer('lvl')->default(1);
+            $table->decimal('experience', 18, 2)->unsigned()->default(0);
             $table->unsignedInteger('points')->default(0);
             $table->unsignedBigInteger('treasury')->default(0);
             $table->unsignedInteger('warehouse_capacity')->default(50);
@@ -44,6 +45,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('role_id')->constrained('clan_roles');
             $table->unsignedInteger('points')->default(0);
+            $table->decimal('experience_contributed', 18, 2)->unsigned()->default(0);
             $table->timestamps();
 
             $table->unique(['clan_id', 'user_id']);

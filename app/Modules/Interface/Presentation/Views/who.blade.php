@@ -109,10 +109,10 @@
                         <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                              onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
                         @if($user->clanName)
-                            @if($user->clanIcon)
-                                <img class="clan-icon" src="{{ $user->clanIcon }}"
+                            @if($user->clanIcon && $user->clanId)
+                                <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}"
                                      title="{{ $user->clanName }}" alt="{{ $user->clanName }}"
-                                     style="{{ $user->isOnline ? '' : 'opacity:.6' }}">
+                                     style="{{ $user->isOnline ? '' : 'opacity:.6' }}"></a>
                             @else
                                 <span class="clan-tag">[{{ $user->clanName }}]</span>
                             @endif
@@ -137,8 +137,8 @@
                     <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                          onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
                     @if($user->clanName)
-                        @if($user->clanIcon)
-                            <img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}">
+                        @if($user->clanIcon && $user->clanId)
+                            <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}"></a>
                         @else
                             <span class="clan-tag">[{{ $user->clanName }}]</span>
                         @endif
@@ -186,6 +186,11 @@
         return false;
     }
 
+    function whoOpenClanInfo(url) {
+        window.open(url, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        return false;
+    }
+
     function renderLocationUsers(users) {
         var container = document.getElementById('location-users');
         var countEl   = document.getElementById('location-count');
@@ -200,8 +205,9 @@
             var opacity = u.is_online ? '' : 'opacity:.6;';
 
             var clan = '';
-            if (u.clan_icon) {
-                clan = '<img class="clan-icon" src="' + u.clan_icon + '" title="' + u.clan_name + '" alt="' + u.clan_name + '" style="' + opacity + '">';
+            if (u.clan_icon && u.clan_id) {
+                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;">'
+                    + '<img class="clan-icon" src="' + u.clan_icon + '" title="' + u.clan_name + '" alt="' + u.clan_name + '" style="' + opacity + '"></a>';
             } else if (u.clan_name) {
                 clan = '<span class="clan-tag">[' + u.clan_name + ']</span>';
             }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -21,11 +20,13 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ItemController extends Controller
@@ -122,6 +123,63 @@ class ItemController extends Controller
         return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
+    public function duplicate(ShareItem $item): RedirectResponse
+    {
+        $item->load([
+            'stats',
+            'effects',
+            'requirements',
+            'recipe.items',
+            'itemHasItems',
+            'magicSkillBook',
+        ]);
+
+        $copy = DB::transaction(function () use ($item): ShareItem {
+            $copy = $item->replicate();
+            $copy->name = $item->name.' (копия)';
+            $copy->save();
+
+            foreach ($item->stats as $stat) {
+                $copy->stats()->save($stat->replicate());
+            }
+
+            foreach ($item->effects as $effect) {
+                $copy->effects()->save($effect->replicate());
+            }
+
+            foreach ($item->requirements as $requirement) {
+                $copy->requirements()->save($requirement->replicate());
+            }
+
+            if ($item->recipe !== null) {
+                $recipe = $item->recipe->replicate();
+                $recipe->share_item_id = $copy->id;
+                $recipe->save();
+
+                $recipe->items()->sync($item->recipe->items->mapWithKeys(
+                    fn (ShareItem $ingredient): array => [$ingredient->id => ['count' => $ingredient->pivot->count]],
+                )->all());
+            }
+
+            $copy->itemHasItems()->sync($item->itemHasItems->mapWithKeys(
+                fn (ShareItem $containedItem): array => [$containedItem->id => [
+                    'min_count' => $containedItem->pivot->min_count,
+                    'max_count' => $containedItem->pivot->max_count,
+                    'drop_chance' => $containedItem->pivot->drop_chance,
+                ]],
+            )->all());
+
+            return $copy;
+        });
+
+        $message = 'Предмет скопирован вместе с его характеристиками, эффектами, требованиями и составом.';
+        if ($item->magicSkillBook !== null) {
+            $message .= ' Привязка к заклинанию не скопирована: одно заклинание может быть связано только с одной книгой.';
+        }
+
+        return redirect()->route('admin.item.info', $copy->id)->with('success', $message);
+    }
+
     public function addStat(Request $request, ShareItem $item): RedirectResponse
     {
         ShareItemStat::create([
@@ -193,6 +251,7 @@ class ItemController extends Controller
     {
         $request->validate([
             'expire' => ['nullable', 'integer', 'min:1'],
+            'max_drop_level_difference' => ['nullable', 'integer', 'between:0,255'],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -216,6 +275,9 @@ class ItemController extends Controller
         $item->price = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);
         $item->count_use = (int) $request->input('count_use', 0);
+        $item->max_drop_level_difference = $request->filled('max_drop_level_difference')
+            ? (int) $request->input('max_drop_level_difference')
+            : null;
         $item->expire = $request->filled('expire') ? (int) $request->input('expire') : null;
         $item->is_two_hand = (bool) $request->input('is_two_hand', false);
         $item->is_active = (bool) $request->input('is_active', true);

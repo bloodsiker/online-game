@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $role_id
  * @property int $points
+ * @property string $experience_contributed
  * @property-read User $user
  * @property-read Clan $clan
  * @property-read ClanRole $role
@@ -23,7 +24,11 @@ class ClanMember extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['role_id', 'clan_id', 'user_id', 'points'];
+    protected $fillable = ['role_id', 'clan_id', 'user_id', 'points', 'experience_contributed'];
+
+    protected $casts = [
+        'experience_contributed' => 'decimal:2',
+    ];
 
     public function user(): BelongsTo
     {

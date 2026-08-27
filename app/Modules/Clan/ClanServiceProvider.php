@@ -8,6 +8,7 @@ use App\Modules\Clan\Domain\Contracts\TransactionManager;
 use App\Modules\Clan\Domain\Repositories\ClanRepositoryInterface;
 use App\Modules\Clan\Infrastructure\Persistence\EloquentClanRepository;
 use App\Modules\Clan\Infrastructure\Persistence\LaravelTransactionManager;
+use App\Modules\Clan\Presentation\Console\SimulateClanExperience;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,5 +26,9 @@ class ClanServiceProvider extends ServiceProvider
 
         Route::middleware(['web'])
             ->group(__DIR__.'/Presentation/Http/Route/web.php');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([SimulateClanExperience::class]);
+        }
     }
 }
