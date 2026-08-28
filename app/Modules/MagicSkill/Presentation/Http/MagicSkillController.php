@@ -10,6 +10,7 @@ use App\Modules\MagicSkill\Application\UseCases\LearnMagicSkillFromBook;
 use App\Modules\MagicSkill\Application\UseCases\UpdateEquippedMagicSkills;
 use App\Modules\MagicSkill\Application\UseCases\UpdateMagicSkillOrder;
 use App\Modules\MagicSkill\Application\UseCases\UseMagicSkill;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,13 @@ class MagicSkillController extends Controller
                 (string) $request->get('group', 'magic_skill'),
             ),
         ]);
+    }
+
+    public function info(MagicSkill $skill): mixed
+    {
+        $skill->load(['requirements.skill', 'skillEffects']);
+
+        return view('magic-skill::info', compact('skill'));
     }
 
     public function updateSkill(Request $request): JsonResponse

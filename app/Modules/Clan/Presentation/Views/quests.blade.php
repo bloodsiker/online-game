@@ -6,9 +6,13 @@
     <title>Клановые квесты</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        * { font-family: Tahoma; font-size: 12px; }
         html { height: 100%; }
-        body { height: 100%; margin: 0; color: #000; }
+        /* font-size задаём через body (наследование), а НЕ через '*': универсальный
+           селектор перебивал бы .tbl-shp-sml { font-size: 0 } из main.css у вложенных
+           ячеек рамки — картинки лейбла получали строчный отступ под базовую линию,
+           строка вырастала выше 22px, а угловые спрайты (no-repeat, 22px) не тянулись,
+           из-за чего появлялся разрыв рамки. */
+        body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 12px; }
         a, a:link, a:visited, a:active { text-decoration: none; color: #461C0B; }
         table.coll { border-collapse: collapse; border-spacing: 0; }
         .brd2-all { border: 1px solid #DB9F73; }
@@ -138,7 +142,7 @@
 
 @include('clan.partials.tabs', ['activeTab' => 'clan.quests'])
 
-<table class="coll" width="100%" height="100%" border="0">
+<table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
     <tr>
         <td valign="top" width="100%">

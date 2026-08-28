@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionClaim;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -34,7 +33,7 @@ class TakeClaim
             $shareItem = $claim->item->itemInfo;
             $existing = $this->findBackpackSlot($user->id, $shareItem->id);
 
-            if ($existing instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
+            if ($existing instanceof Backpack && $shareItem->is_stackable) {
                 $existing->increment('count', $claim->count);
             } else {
                 $user->backpack()->attach($claim->item_id, ['equipped' => 0, 'count' => $claim->count]);

@@ -47,6 +47,17 @@
         .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid; font-weight: bold; }
         .message.success { color: #247327; border-color: #247327; }
         .message.error { color: #a02020; border-color: #a02020; }
+        #skill_effect_alt .aa-table { border-radius: 30px 30px 0 0; box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2); font-size: 11px; }
+        #skill_effect_alt .aa-tl { background: url(/img/bg/item_info/tbl-pop_corner-top-left.gif) no-repeat; width: 14px; height: 24px; }
+        #skill_effect_alt .aa-t { background: url(/img/bg/item_info/tbl-pop_top.gif); height: 24px; }
+        #skill_effect_alt .aa-tr { background: url(/img/bg/item_info/tbl-pop_corner-top-right.gif) no-repeat; width: 14px; height: 24px; }
+        #skill_effect_alt .aa-l { background: url(/img/bg/item_info/tbl-pop_left.gif) repeat-y; width: 14px; }
+        #skill_effect_alt .aa-r { background: url(/img/bg/item_info/tbl-pop_right.gif) repeat-y; width: 14px; }
+        #skill_effect_alt .aa-bl { background: url(/img/bg/item_info/tbl-pop_corner-bottom-left.gif) no-repeat; width: 14px; height: 5px; }
+        #skill_effect_alt .aa-b { background: url(/img/bg/item_info/tbl-pop_bottom.gif) repeat-x; height: 5px; }
+        #skill_effect_alt .aa-br { background: url(/img/bg/item_info/tbl-pop_corner-bottom-right.gif) no-repeat; width: 14px; height: 5px; }
+        #skill_effect_alt .skill_list td { padding: 0 7px; }
+        #skill_effect_alt .list_dark { background-color: #F4BB8A; }
     </style>
 </head>
 <body>
@@ -98,19 +109,40 @@
                         $next = $isMaxed ? null : $definition->levels->firstWhere('level', $nextLevel);
                         $current = $currentLevel > 0 ? $definition->levels->firstWhere('level', $currentLevel) : null;
                         $displayMagicSkill = $current?->magicSkill ?? $next?->magicSkill;
+                        $skillIcon = $displayMagicSkill?->image ?: $definition->icon ?: asset('img/icon/qst_default_start_new_m.gif');
+                        $skillIconAlt = $displayMagicSkill?->name ?? $definition->name;
+                        $skillTooltipMeta = $displayMagicSkill ? array_merge([
+                            ['label' => 'Тип', 'value' => $displayMagicSkill->is_passive ? 'Пассивный навык' : 'Активный навык'],
+                            ['label' => 'Уровень', 'value' => $displayMagicSkill->level],
+                        ], array_map(static fn (array $effect): array => [
+                            'label' => 'Бонус',
+                            'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
+                        ], $displayMagicSkill->effects ?? [])) : [];
                         $requirements = $next?->itemRequirements ?? collect();
                         if ($requirements->isEmpty() && $next?->share_item_id) {
                             $requirements = collect([(object) ['share_item_id' => $next->share_item_id, 'count' => $next->share_item_count ?? 1, 'shareItem' => $next->stoneItem]]);
                         }
                         $hasClanLevel = $next !== null && $clan->lvl >= $next->required_clan_level;
                         $hasPoints = $next !== null && $clan->points >= $next->required_bonus_points;
+                        $hasMoney = $next !== null && $user->money >= $next->required_money;
                         $hasItems = $requirements->every(fn ($requirement) => $backpackShareItemCounts->get($requirement->share_item_id, 0) >= $requirement->count);
-                        $canLearnThis = $next !== null && $hasClanLevel && $hasPoints && $hasItems;
+                        $canLearnThis = $next !== null && $hasClanLevel && $hasPoints && $hasMoney && $hasItems;
                     @endphp
                     <div class="skill-card">
                         <div class="skill-title">{{ $definition->name }}<span class="skill-level">Уровень {{ $currentLevel }} / {{ $definition->max_level }}</span></div>
-                        <div class="skill-icon">
-                            <img src="{{ $definition->icon ?: asset('img/icon/qst_default_start_new_m.gif') }}" alt="{{ $definition->name }}">
+                        <div class="skill-icon" @if($displayMagicSkill)
+                            style="cursor:pointer;"
+                            data-tooltip-container="skill_effect_alt"
+                            data-tooltip-type="Заклинание"
+                            data-tooltip-name="{{ $displayMagicSkill->name }}"
+                            data-tooltip-image="{{ $skillIcon }}"
+                            data-tooltip-description="{{ strip_tags((string) $displayMagicSkill->description) }}"
+                            data-tooltip-meta="{!! e(json_encode($skillTooltipMeta, JSON_UNESCAPED_UNICODE)) !!}"
+                            onmouseover="showSkillEffectInfo(this,event,2)"
+                            onmouseout="showSkillEffectInfo(this,event,0)"
+                            onclick="window.open('{{ route('magic_skill.info', $displayMagicSkill->id) }}','','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
+                        @endif>
+                            <img src="{{ $skillIcon }}" alt="{{ $skillIconAlt }}">
                         </div>
                         @if($displayMagicSkill)
                             <span class="skill-kind {{ $displayMagicSkill->is_passive ? 'passive' : 'active' }}">
@@ -129,6 +161,7 @@
                                 <div class="req-title">Требования для уровня {{ $nextLevel }}</div>
                                 <div>Уровень: <span class="{{ $hasClanLevel ? 'req-ok' : 'req-fail' }}">{{ $clan->lvl }} / {{ $next->required_clan_level }}</span></div>
                                 <div>Очки: <span class="{{ $hasPoints ? 'req-ok' : 'req-fail' }}">{{ number_format($clan->points, 0, '.', ' ') }} / {{ number_format($next->required_bonus_points, 0, '.', ' ') }}</span></div>
+                                <div>Монеты: <span class="{{ $hasMoney ? 'req-ok' : 'req-fail' }}">{{ number_format($user->money, 0, '.', ' ') }} / {{ number_format($next->required_money, 0, '.', ' ') }}</span></div>
                                 @if($requirements->isNotEmpty())
                                     <div class="requirement-items">
                                         @foreach($requirements as $requirement)
@@ -164,6 +197,7 @@
     </tr>
     <tr height="18"><td class="tbl-shp-sml lb"><b></b></td><td class="tbl-shp-sml bb">&nbsp;</td><td class="tbl-shp-sml rb"><b></b></td></tr>
 </table>
+<div id="skill_effect_alt" style="width:300px;display:none;position:fixed;z-index:10000002;left:0;top:0"></div>
 <script>
     function equalizeSkillRequirements() {
         const requirements = Array.from(document.querySelectorAll('.skill-requirements'));
@@ -179,5 +213,6 @@
 </script>
 {!! $itemTooltipScript !!}
 <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
+<script src="{{ asset('js/monster_ability_tooltip.js') }}?v={{ filemtime(public_path('js/monster_ability_tooltip.js')) }}"></script>
 </body>
 </html>

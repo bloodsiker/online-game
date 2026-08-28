@@ -9,8 +9,6 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Quest\Domain\Events\QuestItemDropped;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class DropService
@@ -82,10 +80,6 @@ class DropService
                 }
 
                 $location->itemsOnLocation()->attach($item->id, $pivotData);
-
-                if ($dropItem['item']->type === ShareItemType::QUEST) {
-                    QuestItemDropped::dispatch($dropRecipient, (int) $dropItem['item']->id);
-                }
             }
         }
     }

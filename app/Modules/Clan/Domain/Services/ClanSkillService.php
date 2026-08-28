@@ -13,6 +13,7 @@ use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerMagicSkill;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +23,7 @@ class ClanSkillService
      * Attempt to learn (or upgrade) a clan skill.
      * Returns null on success, or an error message string.
      */
-    public function learn(Clan $clan, ClanSkillDefinition $definition, Player $player): ?string
+    public function learn(Clan $clan, ClanSkillDefinition $definition, Player $player, User $user): ?string
     {
         $learned = $clan->learnedSkills()->where('clan_skill_definition_id', $definition->id)->first();
         $currentLevel = $learned?->current_level ?? 0;
@@ -45,14 +46,24 @@ class ClanSkillService
             return "Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.";
         }
 
+        if ($user->money < $levelData->required_money) {
+            return "Недостаточно монет. Требуется: {$levelData->required_money}.";
+        }
+
         $itemRequirements = $this->itemRequirements($levelData);
         if ($error = $this->validateItemRequirements($player, $itemRequirements)) {
             return $error;
         }
 
         try {
-            DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player, $itemRequirements) {
+            DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player, $user, $itemRequirements) {
+                $freshUser = User::query()->lockForUpdate()->findOrFail($user->id);
+                if ($freshUser->money < $levelData->required_money) {
+                    throw new \RuntimeException("Недостаточно монет. Требуется: {$levelData->required_money}.");
+                }
+
                 $clan->decrement('points', $levelData->required_bonus_points);
+                $freshUser->decrement('money', $levelData->required_money);
                 $this->consumeItemRequirements($player, $itemRequirements);
 
                 if ($learned) {

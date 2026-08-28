@@ -15,6 +15,7 @@ enum ClanSkillEffectType: string
     case MP_MAX = 'mp_max';
     case ATTACK = 'attack';
     case DEFENSE = 'defense';
+    case MAGIC_RESISTANCE = 'magic_resistance';
 
     public function label(): string
     {
@@ -28,6 +29,7 @@ enum ClanSkillEffectType: string
             self::MP_MAX => 'Макс. MP',
             self::ATTACK => 'Атака',
             self::DEFENSE => 'Защита',
+            self::MAGIC_RESISTANCE => 'Магическое сопротивление',
         };
     }
 }

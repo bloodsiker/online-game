@@ -28,8 +28,12 @@
         tooltip.style.top = Math.max(7, Math.min(y, Math.max(7, maxY))) + 'px';
     }
 
+    function tooltipElement(element) {
+        return document.getElementById(element.dataset.tooltipContainer || 'monster_ability_alt');
+    }
+
     function renderTooltip(element) {
-        var tooltip = document.getElementById('monster_ability_alt');
+        var tooltip = tooltipElement(element);
         if (!tooltip) {
             return null;
         }
@@ -70,8 +74,8 @@
         return tooltip;
     }
 
-    window.showMonsterAbilityInfo = function (element, event, show) {
-        var tooltip = document.getElementById('monster_ability_alt');
+    window.showSkillEffectInfo = function (element, event, show) {
+        var tooltip = tooltipElement(element);
         if (!tooltip) {
             return;
         }
@@ -96,4 +100,7 @@
 
         positionTooltip(tooltip, event || window.event);
     };
+
+    // Старое имя оставлено для карточек умений и эффектов монстров.
+    window.showMonsterAbilityInfo = window.showSkillEffectInfo;
 }());

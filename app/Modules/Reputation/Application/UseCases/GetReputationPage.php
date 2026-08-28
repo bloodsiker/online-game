@@ -27,6 +27,7 @@ class GetReputationPage
         $activeQuest = $this->reputationService->getActiveQuest($player, $reputation);
         $cooldownDiff = $this->reputationService->getCooldownDiff($player, $reputation);
         $earnedMedals = $this->reputationService->getEarnedMedals($reputation, $pr->points, $player);
+        $earnedFeatMedals = $this->reputationService->getEarnedFeatMedals($reputation, $pr->points, $player);
 
         $progressMap = [];
         if ($activeQuest) {
@@ -43,6 +44,7 @@ class GetReputationPage
             activeQuest: $activeQuest,
             cooldownDiff: $cooldownDiff,
             earnedMedals: $earnedMedals,
+            earnedFeatMedals: $earnedFeatMedals,
             progressMap: $progressMap,
             message: session('rep_error') ?? session('rep_success'),
             messageType: session()->has('rep_success') ? 'success' : 'error',

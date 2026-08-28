@@ -323,50 +323,46 @@
 </head>
 <body>
 
-<table class="main-table battle-layout" cellspacing="0" cellpadding="10" width="100%" height="100%">
-    <tbody>
-    <tr valign="top">
-        @if($battle)
-            @if($battle->status->isActive())
-                <td class="battle-col-actions" valign="top">
-                    @if($randomAttackedMonster)
-                        <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
+<div class="battle-layout">
+    @if($battle)
+        @if($battle->status->isActive())
+            <div class="battle-col-actions">
+                @if($randomAttackedMonster)
+                    <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
-                        @include('battle::partials.action_panel')
-                    @else
-                        <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
-                    @endif
-                </td>
+                    @include('battle::partials.action_panel')
+                @else
+                    <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
+                @endif
+            </div>
 
-                <td class="battle-col-log" valign="top"></td>
+            <div class="battle-col-log"></div>
 
-                <td class="battle-col-participants" valign="top">
-                    @include('battle::partials.side_panel')
-                </td>
-            @else
-                <td colspan="3" valign="top">
-                    @if($lastRound)
-                        <p>
-                            <u><b>Раунд N {{ $lastRound->round_number }}</b></u>
-                            @if($lastRound->locationMonster?->monster)
-                                - <a href="{{ route('info.monster', ['id' => $lastRound->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $lastRound->locationMonster->monster->name }}</a> {{ $lastRound->locationMonster->monster->lvl }}
-                            @endif
-                        </p>
-
-                        {!! $lastRound->action !!}
-                    @endif
-
-                    <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
-                </td>
-            @endif
+            <aside class="battle-col-participants">
+                @include('battle::partials.side_panel')
+            </aside>
         @else
-            <td colspan="3">
+            <div class="battle-col-finished">
+                @if($lastRound)
+                    <p>
+                        <u><b>Раунд N {{ $lastRound->round_number }}</b></u>
+                        @if($lastRound->locationMonster?->monster)
+                            - <a href="{{ route('info.monster', ['id' => $lastRound->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $lastRound->locationMonster->monster->name }}</a> {{ $lastRound->locationMonster->monster->lvl }}
+                        @endif
+                    </p>
+
+                    {!! $lastRound->action !!}
+                @endif
+
                 <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
-            </td>
+            </div>
         @endif
-    </tr>
-    </tbody>
-</table>
+    @else
+        <div class="battle-col-finished">
+            <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+        </div>
+    @endif
+</div>
 
 <script>
 </script>

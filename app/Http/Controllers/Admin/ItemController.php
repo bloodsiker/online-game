@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
@@ -121,6 +123,47 @@ class ItemController extends Controller
         $rarities = ItemRarity::cases();
 
         return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+    }
+
+    public function drop(ShareItem $item): View
+    {
+        $item->load([
+            'monsters' => fn ($query) => $query
+                ->orderBy('monsters.name')
+                ->orderBy('monsters.lvl')
+                ->orderBy('monsters.id'),
+        ]);
+
+        return view('admin.item.drop', compact('item'));
+    }
+
+    public function quests(ShareItem $item): View
+    {
+        $objectiveUsages = QuestObjective::query()
+            ->with([
+                'quest' => fn ($query) => $query->without('objectives'),
+                'stage',
+            ])
+            ->where(function ($query) use ($item): void {
+                $query->where('share_item_id', $item->id)
+                    ->orWhere(function ($query) use ($item): void {
+                        $query->where('target_type', 'item')
+                            ->where('target_id', $item->id);
+                    });
+            })
+            ->orderBy('quest_id')
+            ->orderBy('stage_id')
+            ->orderBy('id')
+            ->get();
+
+        $rewardUsages = QuestReward::query()
+            ->with(['quest' => fn ($query) => $query->without('objectives')])
+            ->where('share_item_id', $item->id)
+            ->orderBy('quest_id')
+            ->orderBy('id')
+            ->get();
+
+        return view('admin.item.quests', compact('item', 'objectiveUsages', 'rewardUsages'));
     }
 
     public function duplicate(ShareItem $item): RedirectResponse
@@ -285,6 +328,7 @@ class ItemController extends Controller
         $item->is_auction_sellable = (bool) $request->input('is_auction_sellable', false);
         $item->is_give = (bool) $request->input('is_give', true);
         $item->is_droppable = (bool) $request->input('is_droppable', true);
+        $item->is_stackable = (bool) $request->input('is_stackable', false);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Quest;
 
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use App\Modules\Quest\Domain\Services\QuestDefinitionsCache;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
@@ -15,7 +18,9 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Mockery;
 use Tests\TestCase;
 
 class QuestKillProgressTest extends TestCase
@@ -115,6 +120,95 @@ class QuestKillProgressTest extends TestCase
         $this->assertSame(0, (int) DB::table('quest_player_objectives')->where('id', $playerObjectiveId)->value('amount'));
     }
 
+    public function test_quest_item_notification_is_dispatched_for_an_active_accepted_collect_objective(): void
+    {
+        Event::fake([QuestItemDropped::class]);
+
+        $user = User::query()->create(['name' => 'collector']);
+        DB::table('players')->insert(['id' => $user->id, 'user_id' => $user->id, 'lvl' => 1]);
+        DB::table('monsters')->insert(['id' => 7, 'name' => 'Хранитель']);
+        DB::table('share_items')->insert(['id' => 42, 'name' => 'Треснувший амулет', 'type' => 'quest']);
+
+        $quest = Quest::query()->create(['title' => 'Треснувшая реликвия', 'type' => 'main']);
+        $objective = QuestObjective::query()->create([
+            'quest_id' => $quest->id,
+            'type' => 'collect',
+            'target_id' => 7,
+            'share_item_id' => 42,
+            'required_amount' => 1,
+            'drop_chance' => 100,
+        ]);
+
+        DB::table('quest_players')->insert([
+            'id' => 1,
+            'player_id' => $user->id,
+            'quest_id' => $quest->id,
+            'status' => 'in_progress',
+        ]);
+        DB::table('quest_player_objectives')->insert([
+            'quest_player_id' => 1,
+            'quest_objective_id' => $objective->id,
+            'amount' => 0,
+        ]);
+
+        $backpackService = Mockery::mock(BackpackService::class);
+        $backpackService->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
+
+        $service = new QuestProgressService($backpackService);
+        $service->progressKillAndCollect(
+            Player::query()->findOrFail($user->id),
+            $this->monsterSpawn(7),
+        );
+
+        Event::assertDispatched(
+            QuestItemDropped::class,
+            fn (QuestItemDropped $event): bool => $event->recipient->is($user) && $event->shareItemId === 42,
+        );
+    }
+
+    public function test_quest_item_notification_is_not_dispatched_for_a_non_active_quest(): void
+    {
+        Event::fake([QuestItemDropped::class]);
+
+        $user = User::query()->create(['name' => 'former-collector']);
+        DB::table('players')->insert(['id' => $user->id, 'user_id' => $user->id, 'lvl' => 1]);
+        DB::table('monsters')->insert(['id' => 7, 'name' => 'Хранитель']);
+        DB::table('share_items')->insert(['id' => 42, 'name' => 'Треснувший амулет', 'type' => 'quest']);
+
+        $quest = Quest::query()->create(['title' => 'Завершённый квест', 'type' => 'main']);
+        $objective = QuestObjective::query()->create([
+            'quest_id' => $quest->id,
+            'type' => 'collect',
+            'target_id' => 7,
+            'share_item_id' => 42,
+            'required_amount' => 1,
+            'drop_chance' => 100,
+        ]);
+
+        DB::table('quest_players')->insert([
+            'id' => 1,
+            'player_id' => $user->id,
+            'quest_id' => $quest->id,
+            'status' => 'completed',
+        ]);
+        DB::table('quest_player_objectives')->insert([
+            'quest_player_id' => 1,
+            'quest_objective_id' => $objective->id,
+            'amount' => 0,
+        ]);
+
+        $backpackService = Mockery::mock(BackpackService::class);
+        $backpackService->shouldNotReceive('addItemByShareItem');
+
+        $service = new QuestProgressService($backpackService);
+        $service->progressKillAndCollect(
+            Player::query()->findOrFail($user->id),
+            $this->monsterSpawn(7),
+        );
+
+        Event::assertNotDispatched(QuestItemDropped::class);
+    }
+
     private function playerOf(User $user): Player
     {
         $player = new Player;
@@ -123,6 +217,18 @@ class QuestKillProgressTest extends TestCase
         $user->setRelation('player', $player);
 
         return $player;
+    }
+
+    private function monsterSpawn(int $monsterId): MonsterOnLocation
+    {
+        $spawn = new MonsterOnLocation;
+        $spawn->monster_id = $monsterId;
+        $spawn->location_id = 1;
+        $spawn->hp_max = 10;
+        $spawn->hp_now = 10;
+        $spawn->active = 1;
+
+        return $spawn;
     }
 
     private function createTables(): void
@@ -137,6 +243,7 @@ class QuestKillProgressTest extends TestCase
         Schema::dropIfExists('quest_clan_progress');
         Schema::dropIfExists('quest_clan_objectives');
         Schema::dropIfExists('monster_on_locations');
+        Schema::dropIfExists('share_items');
 
         Schema::create('locations', function (Blueprint $t): void {
             $t->increments('id');
@@ -145,6 +252,12 @@ class QuestKillProgressTest extends TestCase
         Schema::create('monsters', function (Blueprint $t): void {
             $t->increments('id');
             $t->string('name')->nullable();
+        });
+        Schema::create('share_items', function (Blueprint $t): void {
+            $t->increments('id');
+            $t->string('name');
+            $t->string('type');
+            $t->timestamps();
         });
         Schema::create('players', function (Blueprint $t): void {
             $t->increments('id');

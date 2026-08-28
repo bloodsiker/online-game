@@ -33,6 +33,6 @@ class LearnClanSkill
 
         $definition = ClanSkillDefinition::findOrFail($definitionId);
 
-        return $this->skillService->learn($context->clan, $definition, $player);
+        return $this->skillService->learn($context->clan, $definition, $player, $user);
     }
 }

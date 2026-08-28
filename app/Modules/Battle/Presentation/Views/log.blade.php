@@ -36,7 +36,7 @@
 
         .tbl-shp_sml-top    { background-image: url({{ asset('main/images/tbl-shp_sml-top.gif') }}); background-repeat: repeat-x; height: 22px; }
         .tbl-shp_sml-bottom { background-image: url({{ asset('main/images/tbl-shp_sml-bottom.gif') }}); background-repeat: repeat-x; height: 18px; }
-        .tbl-usi_left  { background-image: url({{ asset('main/images/tbl-usi_left.gif') }}); background-repeat: repeat-y; background-position: right; width: 20px; }
+        .tbl-usi_left  { background-image: url({{ asset('main/images/tbl-usi_left.gif') }}); background-repeat: repeat-y; background-position: right top; width: 20px; }
         .tbl-usi_right { background-image: url({{ asset('main/images/tbl-usi_right.gif') }}); background-repeat: repeat-y; width: 20px; }
         .tbl-usi_bg    { background-image: url({{ asset('main/images/tbl-usi_bg.gif') }}); background-repeat: repeat; }
         .tbl-usi_label-center {

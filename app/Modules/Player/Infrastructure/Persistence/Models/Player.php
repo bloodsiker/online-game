@@ -9,6 +9,7 @@ use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -88,6 +89,11 @@ class Player extends Model
     public function hotbarSlots(): HasMany
     {
         return $this->hasMany(PlayerSlot::class, 'player_id')->orderBy('slot_number');
+    }
+
+    public function reputations(): HasMany
+    {
+        return $this->hasMany(PlayerReputation::class, 'player_id');
     }
 
     public function questsInProgress(): HasMany

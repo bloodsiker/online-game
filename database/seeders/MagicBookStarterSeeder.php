@@ -224,10 +224,10 @@ class MagicBookStarterSeeder extends Seeder
     private function createDebuffSpell(int $spellSkillId): void
     {
         $effect = Effect::create([
-            'name' => 'Разъедающая ржавчина',
+            'name' => 'Кислотная порча',
             'slug' => 'corroding_rust',
             'type' => 'debuff',
-            'description' => 'Снижает броню цели на 10 секунд',
+            'description' => 'Броня цели разъедена кислотой на 10 секунд.',
             'is_stackable' => false,
             'max_stacks' => 1,
             'tick_interval' => 1,
@@ -239,9 +239,9 @@ class MagicBookStarterSeeder extends Seeder
         ]);
 
         $skill = MagicSkill::create([
-            'name' => 'Разъедающая ржавчина',
+            'name' => 'Кислотная порча',
             'slug' => 'corroding_rust_skill',
-            'description' => 'Разъедает броню цели, снижая защиту на 10 секунд.',
+            'description' => 'Выплёскивает едкую субстанцию, разъедающую металл — снижает защиту цели на 10 секунд.',
             'type' => 'attack',
             'target_type' => 'enemy',
             'skill_id' => $spellSkillId,
@@ -261,7 +261,7 @@ class MagicBookStarterSeeder extends Seeder
             [MagicSkillRequirementType::STAT, PlayerStatKey::INTELLIGENCE, null, 20],
         ]);
 
-        $this->makeBook('Книга: Разъедающая ржавчина', $skill);
+        $this->makeBook('Книга: Кислотная порча', $skill);
     }
 
     private function makeBook(string $name, MagicSkill $skill, int $priceMultiplier = 150): void

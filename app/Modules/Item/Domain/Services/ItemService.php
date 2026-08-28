@@ -366,7 +366,7 @@ class ItemService
 
     private function addPickedItemToBackpack(User $user, Item $item, int $count): void
     {
-        if ($item->itemInfo->type === ShareItemType::RESOURCE) {
+        if ($item->itemInfo->is_stackable) {
             $existing = $this->backpackService->getItem($user, $item->itemInfo);
             if ($existing) {
                 $existing->increment('count', $count);

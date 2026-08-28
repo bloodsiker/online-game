@@ -20,6 +20,7 @@ final readonly class ReputationPageDTO
         public mixed $activeQuest,
         public ?string $cooldownDiff,
         public Collection $earnedMedals,
+        public Collection $earnedFeatMedals,
         public array $progressMap,
         public ?string $message,
         public string $messageType,

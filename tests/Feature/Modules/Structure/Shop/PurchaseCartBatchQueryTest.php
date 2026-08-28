@@ -109,7 +109,8 @@ class PurchaseCartBatchQueryTest extends TestCase
 
         $this->assertTrue($result->ok);
         $this->assertSame(7, (int) DB::table('backpacks')->where('user_id', 20)->value('count'));
-        $this->assertSame(2, DB::table('backpacks')->where('user_id', 10)->count());
+        $this->assertSame(1, DB::table('backpacks')->where('user_id', 10)->count());
+        $this->assertSame(2, (int) DB::table('backpacks')->where('user_id', 10)->value('count'));
     }
 
     private function cartItem(int $id, int $quantity = 1): ShopCart
@@ -117,6 +118,7 @@ class PurchaseCartBatchQueryTest extends TestCase
         $shareItem = (new ShareItem)->forceFill([
             'id' => $id,
             'type' => ShareItemType::RESOURCE,
+            'is_stackable' => true,
             'count_use' => 0,
         ]);
         $shareItem->exists = true;

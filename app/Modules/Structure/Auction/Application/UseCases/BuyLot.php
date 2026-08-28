@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Models\AuctionHistory;
@@ -54,7 +53,7 @@ class BuyLot
             $shareItem = $lot->item->itemInfo;
             $existing = $this->findBackpackSlot($user->id, $shareItem->id);
 
-            if ($existing instanceof Backpack && $shareItem->type === ShareItemType::RESOURCE) {
+            if ($existing instanceof Backpack && $shareItem->is_stackable) {
                 $existing->increment('count', $lot->count);
             } else {
                 $user->backpack()->attach($lot->item->id, ['equipped' => 0, 'count' => $lot->count]);

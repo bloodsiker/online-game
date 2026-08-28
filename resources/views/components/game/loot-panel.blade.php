@@ -4,6 +4,7 @@
     'locationUrl',
     'message' => '',
     'backpackUrl' => null,
+    'itemTooltipScript' => '',
     'emptyMessage' => 'На земле ничего не осталось.',
 ])
 
@@ -255,6 +256,15 @@
         text-overflow: ellipsis;
     }
 
+    .loot-item-name a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .loot-item-name a:hover {
+        text-decoration: underline;
+    }
+
     .loot-item-hint {
         color: #8a6a4f;
         font-size: 9px;
@@ -342,13 +352,31 @@
                     <div class="loot-grid">
                         @foreach($items as $item)
                             <article class="loot-card">
-                                <div class="loot-icon">
+                                <div class="loot-icon"
+                                    @if(isset($item->shareItemId))
+                                        data-id="{{ $item->shareItemId }}"
+                                        onmouseover="showItemInfo(this,event,2)"
+                                        onmouseout="showItemInfo(this,event,0)"
+                                    @endif>
                                     <img src="{{ $item->image }}" alt="{{ $item->name }}">
                                     <span class="loot-quantity">×{{ $item->count }}</span>
                                 </div>
                                 <div class="loot-card-content">
                                     <div>
-                                        <div class="loot-item-name" title="{{ $item->name }}">{{ $item->name }}</div>
+                                        <div class="loot-item-name">
+                                            @if(isset($item->infoUrl, $item->shareItemId))
+                                                <a data-id="{{ $item->shareItemId }}"
+                                                   href="{{ $item->infoUrl }}"
+                                                   title="Открыть информацию о предмете"
+                                                   onmouseover="showItemInfo(this,event,2)"
+                                                   onmouseout="showItemInfo(this,event,0)"
+                                                   onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
+                                                    {{ $item->name }}
+                                                </a>
+                                            @else
+                                                {{ $item->name }}
+                                            @endif
+                                        </div>
                                         <div class="loot-item-hint">
                                             {{ $item->actionLabel === 'Поднять'
                                                 ? 'Предмет можно забрать в рюкзак'
@@ -392,3 +420,5 @@
     </tr>
     </tbody>
 </table>
+
+{!! $itemTooltipScript !!}

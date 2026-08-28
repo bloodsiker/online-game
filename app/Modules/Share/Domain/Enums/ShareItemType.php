@@ -43,15 +43,6 @@ enum ShareItemType: string
         ], true);
     }
 
-    /**
-     * Стакается ли предмет в одной ячейке рюкзака (несколько штук в count).
-     * Экипировка — нет: каждый предмет хранится отдельным экземпляром.
-     */
-    public function isStackable(): bool
-    {
-        return ! $this->isEquipment();
-    }
-
     public function label(): string
     {
         return match ($this) {

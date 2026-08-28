@@ -145,7 +145,7 @@ class BackpackService
     {
         $quantity = max(1, $quantity);
 
-        if (! $shareItem->type->isStackable()) {
+        if (! $shareItem->is_stackable) {
             $created = [];
             for ($i = 0; $i < $quantity; $i++) {
                 $created[] = $this->createBackpackItemByShareItem($user, $shareItem);
@@ -166,9 +166,9 @@ class BackpackService
     }
 
     /**
-     * Выдаёт несколько единиц предмета с учётом стакаемости типа:
+     * Выдаёт несколько единиц предмета с учётом признака стакаемости:
      * стакающиеся кладутся одной ячейкой (count += quantity),
-     * экипировка — отдельными экземплярами по одному в ячейке.
+     * остальные — отдельными экземплярами по одному в ячейке.
      *
      * @return list<Backpack>
      */
@@ -176,7 +176,7 @@ class BackpackService
     {
         $quantity = max(1, $quantity);
 
-        if ($shareItem->type->isStackable()) {
+        if ($shareItem->is_stackable) {
             return [$this->addItemByShareItem($user, $shareItem, $quantity)];
         }
 

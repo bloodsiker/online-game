@@ -74,4 +74,35 @@ class ReputationBatchQueryTest extends TestCase
         $this->assertSame([1, 3, 5], $medals->pluck('id')->all());
         $this->assertCount(1, $questProgressQueries);
     }
+
+    public function test_separate_feat_medal_does_not_block_the_regular_tier_medal(): void
+    {
+        $tier = (new ReputationTier)->forceFill([
+            'id' => 1,
+            'min_points' => 3000,
+            'medal_name' => 'Медаль Почета',
+            'feat_quest_id' => 501,
+            'feat_medal_name' => 'Медаль Поклонения',
+        ]);
+
+        $reputation = new Reputation;
+        $reputation->setRelation('tiers', new EloquentCollection([$tier]));
+
+        $player = (new Player)->forceFill(['id' => 10]);
+        $player->exists = true;
+
+        $service = new ReputationService;
+
+        $this->assertSame([1], $service->getEarnedMedals($reputation, 3000, $player)->pluck('id')->all());
+        $this->assertSame([], $service->getEarnedFeatMedals($reputation, 3000, $player)->pluck('id')->all());
+
+        DB::table('quest_players')->insert([
+            'player_id' => 10,
+            'quest_id' => 501,
+            'status' => QuestPlayerStatus::COMPLETED->value,
+        ]);
+
+        $this->assertSame([1], $service->getEarnedMedals($reputation, 3000, $player)->pluck('id')->all());
+        $this->assertSame([1], $service->getEarnedFeatMedals($reputation, 3000, $player)->pluck('id')->all());
+    }
 }

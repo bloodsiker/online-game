@@ -5,13 +5,37 @@
     .fight-window .tbl-usi_bg { min-width: 208px; }
     .fight-body { padding: 8px 6px 10px; }
 
-    .battle-layout { table-layout: fixed; }
-    /*.battle-col-actions { width: 32%; }*/
-    .battle-col-participants { width: 30%; }
+    .battle-layout {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+        min-height: 100%;
+        box-sizing: border-box;
+    }
+    .battle-col-participants {
+        flex: 0 0 320px;
+        width: 320px;
+        min-width: 320px;
+        max-width: 320px;
+        margin-left: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    .battle-col-actions {
+        flex: 0 0 auto;
+        width: max-content;
+        padding: 10px;
+        box-sizing: border-box;
+    }
     .battle-col-log {
-        width: 38%;
+        flex: 0 1 auto;
+        width: auto;
+        min-width: 0;
+        padding: 10px;
+        box-sizing: border-box;
         overflow-wrap: anywhere;
     }
+    .battle-col-finished { flex: 1 1 auto; padding: 10px; }
 
     .fight-act { margin-bottom: 2px; text-align: center; white-space: nowrap; }
     .fight-act button { width: 158px; white-space: nowrap; }

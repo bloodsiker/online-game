@@ -11,6 +11,9 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class ReputationController extends Controller
 {
@@ -117,7 +120,12 @@ class ReputationController extends Controller
     /** @return array<string, mixed> */
     private function tierData(Request $request): array
     {
-        return [
+        $request->validate([
+            'medal_image' => ['nullable', 'image', 'max:4096'],
+            'feat_medal_image' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $data = [
             'min_points' => (int) $request->input('min_points', 0),
             // Пустое значение = открытый верхний тир (без потолка)
             'max_points' => $request->filled('max_points') ? (int) $request->input('max_points') : null,
@@ -126,7 +134,30 @@ class ReputationController extends Controller
             // Подвиг: квест (или финальный квест цепочки), без которого медаль не выдаётся
             'feat_quest_id' => $request->input('feat_quest_id') ?: null,
             'feat_description' => $request->input('feat_description') ?: null,
+            'feat_medal_name' => $request->input('feat_medal_name') ?: null,
+            'feat_medal_icon' => $request->input('feat_medal_icon') ?: null,
         ];
+
+        if ($request->hasFile('medal_image')) {
+            $data['medal_icon'] = $this->storeMedalImage($request->file('medal_image'));
+        }
+
+        if ($request->hasFile('feat_medal_image')) {
+            $data['feat_medal_icon'] = $this->storeMedalImage($request->file('feat_medal_image'));
+        }
+
+        return $data;
+    }
+
+    private function storeMedalImage(UploadedFile $image): string
+    {
+        $directory = public_path('img/reputation/uploaded');
+        File::ensureDirectoryExists($directory);
+
+        $filename = Str::uuid()->toString().'.'.$image->extension();
+        $image->move($directory, $filename);
+
+        return 'img/reputation/uploaded/'.$filename;
     }
 
     private function fillReputation(Reputation $reputation, Request $request): void

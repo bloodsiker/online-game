@@ -71,6 +71,8 @@ Route::get('/item-logs', [ItemActionLogController::class, 'list'])->name('item_l
 Route::get('/items', [ItemController::class, 'list'])->name('items');
 Route::get('/item/create', [ItemController::class, 'create'])->name('item.create');
 Route::post('/item/create', [ItemController::class, 'store'])->name('item.store');
+Route::get('/item/{item}/drop', [ItemController::class, 'drop'])->name('item.drop');
+Route::get('/item/{item}/quests', [ItemController::class, 'quests'])->name('item.quests');
 Route::match(['GET', 'POST'], '/item/{item}', [ItemController::class, 'info'])->name('item.info');
 Route::post('/item/{item}/duplicate', [ItemController::class, 'duplicate'])->name('item.duplicate');
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');

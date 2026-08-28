@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
@@ -16,11 +17,27 @@ use Illuminate\Http\Request;
 
 class MagicSkillController extends Controller
 {
-    public function list()
+    public function list(Request $request)
     {
-        $list = MagicSkill::withCount('skillEffects')->orderByDesc('id')->get();
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'type' => trim((string) $request->query('type', '')),
+            'is_passive' => (string) $request->query('is_passive', ''),
+        ];
 
-        return view('admin.magic_skill.list', compact('list'));
+        $types = MagicSkill::query()->whereNotNull('type')->distinct()->orderBy('type')->pluck('type');
+        $list = MagicSkill::query()
+            ->withCount('skillEffects')
+            ->when($filters['q'] !== '', function ($query) use ($filters): void {
+                $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['q']).'%';
+                $query->where(fn ($query) => $query->where('name', 'like', $search)->orWhere('slug', 'like', $search));
+            })
+            ->when($filters['type'] !== '' && $types->contains($filters['type']), fn ($query) => $query->where('type', $filters['type']))
+            ->when(in_array($filters['is_passive'], ['0', '1'], true), fn ($query) => $query->where('is_passive', (int) $filters['is_passive']))
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.magic_skill.list', compact('list', 'filters', 'types'));
     }
 
     public function create(Request $request): mixed
@@ -158,6 +175,7 @@ class MagicSkillController extends Controller
         $magicSkill->base_healing = (int) $request->input('base_healing', 0);
         $magicSkill->cooldown = (int) $request->input('cooldown', 0);
         $magicSkill->is_passive = (bool) $request->input('is_passive', false);
+        $magicSkill->effects = $this->passiveEffectsData($request);
 
         if ($request->hasFile('image')) {
             $request->validate(['image' => ['image', 'max:4096']]);
@@ -168,5 +186,26 @@ class MagicSkillController extends Controller
             $this->deleteStorageImage($magicSkill->getRawOriginal('image'));
             $magicSkill->image = null;
         }
+    }
+
+    /** @return list<array{type: string, value: float|int, is_percent: bool}> */
+    private function passiveEffectsData(Request $request): array
+    {
+        $request->validate([
+            'passive_effects' => ['nullable', 'array'],
+            'passive_effects.*.type' => ['nullable', 'string', 'in:'.implode(',', array_column(ClanSkillEffectType::cases(), 'value'))],
+            'passive_effects.*.value' => ['nullable', 'numeric', 'between:-100000,100000'],
+            'passive_effects.*.is_percent' => ['nullable', 'boolean'],
+        ]);
+
+        return collect($request->input('passive_effects', []))
+            ->filter(static fn (mixed $effect): bool => is_array($effect) && filled($effect['type'] ?? null))
+            ->map(static fn (array $effect): array => [
+                'type' => (string) $effect['type'],
+                'value' => (float) ($effect['value'] ?? 0),
+                'is_percent' => (bool) ($effect['is_percent'] ?? false),
+            ])
+            ->values()
+            ->all();
     }
 }

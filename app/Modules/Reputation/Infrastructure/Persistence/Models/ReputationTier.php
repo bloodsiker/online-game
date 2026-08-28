@@ -13,7 +13,17 @@ class ReputationTier extends Model
 {
     protected $table = 'reputation_tiers';
 
-    protected $fillable = ['reputation_id', 'min_points', 'max_points', 'medal_name', 'medal_icon', 'feat_quest_id', 'feat_description'];
+    protected $fillable = [
+        'reputation_id',
+        'min_points',
+        'max_points',
+        'medal_name',
+        'medal_icon',
+        'feat_quest_id',
+        'feat_description',
+        'feat_medal_name',
+        'feat_medal_icon',
+    ];
 
     protected $casts = [
         'min_points' => 'integer',

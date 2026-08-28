@@ -36,7 +36,7 @@ class PurchaseCart
         DB::transaction(function () use ($user, $cart, $shopId): void {
             $stackableShareItemIds = $cart->getItems()
                 ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
-                ->filter(static fn ($shareItem): bool => $shareItem->type->isStackable())
+                ->filter(static fn ($shareItem): bool => $shareItem->is_stackable)
                 ->pluck('id')
                 ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
                 ->unique()
@@ -56,7 +56,7 @@ class PurchaseCart
             foreach ($cart->getItems() as $itemInCart) {
                 $shareItem = $itemInCart->shopItem->item;
 
-                if (! $shareItem->type->isStackable()) {
+                if (! $shareItem->is_stackable) {
                     for ($i = 1; $i <= $itemInCart->quantity; $i++) {
                         $item = new Item;
                         $item->share_item_id = $shareItem->id;

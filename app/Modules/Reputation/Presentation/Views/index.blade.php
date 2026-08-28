@@ -169,25 +169,43 @@
                             </tr>
 
                             {{-- Medals --}}
-                            @php $tiersWithMedals = $page->reputation->tiers->filter(fn($t) => $t->medal_name); @endphp
+                            @php $tiersWithMedals = $page->reputation->tiers->filter(fn($t) => $t->medal_name || $t->feat_medal_name); @endphp
                             @if($tiersWithMedals->count())
                                 <tr class="bg_l">
                                     <td class="brd2-top brd2-bt" colspan="3" style="padding: 5px 10px;">
                                         <b style="font-size:11px; color:#461C0B;">Медали:</b><br>
                                         @foreach($tiersWithMedals as $tier)
-                                            @php $isEarned = $page->earnedMedals->contains('id', $tier->id); @endphp
-                                            @if($isEarned)
-                                                <span class="medal-earned" title="Получена при {{ $tier->min_points }} очках{{ $tier->feat_quest_id ? ' и выполненном подвиге' : '' }}">
-                                                    @if($tier->medal_icon)🏅 @endif{{ $tier->medal_name }}
-                                                </span>
-                                            @elseif($tier->feat_quest_id && $page->pr->points >= $tier->min_points)
-                                                <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
-                                                    ⚔ {{ $tier->medal_name }} — требуется подвиг
-                                                </span>
-                                            @else
-                                                <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках{{ $tier->feat_quest_id ? '. Подвиг: ' . ($tier->feat_description ?? '') : '' }}">
-                                                    🔒 {{ $tier->medal_name }} ({{ $tier->min_points }}@if($tier->feat_quest_id) + подвиг @endif)
-                                                </span>
+                                            @if($tier->medal_name)
+                                                @php $isEarned = $page->earnedMedals->contains('id', $tier->id); @endphp
+                                                @if($isEarned)
+                                                    <span class="medal-earned" title="Получена при {{ $tier->min_points }} очках{{ $tier->feat_quest_id && !$tier->feat_medal_name ? ' и выполненном подвиге' : '' }}">
+                                                        @if($tier->medal_icon)🏅 @endif{{ $tier->medal_name }}
+                                                    </span>
+                                                @elseif($tier->feat_quest_id && !$tier->feat_medal_name && $page->pr->points >= $tier->min_points)
+                                                    <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
+                                                        ⚔ {{ $tier->medal_name }} — требуется подвиг
+                                                    </span>
+                                                @else
+                                                    <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках{{ $tier->feat_quest_id && !$tier->feat_medal_name ? '. Подвиг: ' . ($tier->feat_description ?? '') : '' }}">
+                                                        🔒 {{ $tier->medal_name }} ({{ $tier->min_points }}@if($tier->feat_quest_id && !$tier->feat_medal_name) + подвиг @endif)
+                                                    </span>
+                                                @endif
+                                            @endif
+
+                                            @if($tier->feat_medal_name)
+                                                @if($page->earnedFeatMedals->contains('id', $tier->id))
+                                                    <span class="medal-earned" title="Получена за подвиг: {{ $tier->feat_description ?? $tier->feat_medal_name }}">
+                                                        @if($tier->feat_medal_icon)🏅 @endif{{ $tier->feat_medal_name }}
+                                                    </span>
+                                                @elseif($page->pr->points >= $tier->min_points)
+                                                    <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
+                                                        ⚔ {{ $tier->feat_medal_name }} — требуется подвиг
+                                                    </span>
+                                                @else
+                                                    <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках. Подвиг: {{ $tier->feat_description ?? '' }}">
+                                                        🔒 {{ $tier->feat_medal_name }} ({{ $tier->min_points }} + подвиг)
+                                                    </span>
+                                                @endif
                                             @endif
                                         @endforeach
                                     </td>

@@ -12,8 +12,9 @@
                 <form action="{{ route('admin.clan_skill.level.update', [$skill, $level]) }}" method="post" class="row align-items-end">
                     @csrf
                     <div class="col-md-2"><label>Уровень</label><input class="form-control" type="number" min="1" name="level" value="{{ $level->level }}"></div>
-                    <div class="col-md-3"><label>Уровень клана</label><input class="form-control" type="number" min="1" name="required_clan_level" value="{{ $level->required_clan_level }}"></div>
-                    <div class="col-md-3"><label>Бонусные очки</label><input class="form-control" type="number" min="0" name="required_bonus_points" value="{{ $level->required_bonus_points }}"></div>
+                    <div class="col-md-2"><label>Уровень клана</label><input class="form-control" type="number" min="1" name="required_clan_level" value="{{ $level->required_clan_level }}"></div>
+                    <div class="col-md-2"><label>Бонусные очки</label><input class="form-control" type="number" min="0" name="required_bonus_points" value="{{ $level->required_bonus_points }}"></div>
+                    <div class="col-md-2"><label>Монеты</label><input class="form-control" type="number" min="0" name="required_money" value="{{ $level->required_money }}"></div>
                     <div class="col-md-3"><label>Выдаваемый маг. навык</label><select class="form-control" name="magic_skill_id"><option value="">—</option>@foreach($magicSkills as $magicSkill)<option value="{{ $magicSkill->id }}" @selected($level->magic_skill_id === $magicSkill->id)>{{ $magicSkill->name }}</option>@endforeach</select></div>
                     <div class="col-md-1"><button class="btn btn-primary btn-sm">Сохранить</button></div>
                 </form>
@@ -34,8 +35,9 @@
         <hr><h5>Добавить уровень</h5>
         <form action="{{ route('admin.clan_skill.level.add', $skill) }}" method="post" class="row align-items-end">@csrf
             <div class="col-md-2"><label>Уровень</label><input class="form-control" type="number" min="1" name="level" required></div>
-            <div class="col-md-3"><label>Уровень клана</label><input class="form-control" type="number" min="1" name="required_clan_level" value="1" required></div>
-            <div class="col-md-3"><label>Бонусные очки</label><input class="form-control" type="number" min="0" name="required_bonus_points" value="0" required></div>
+            <div class="col-md-2"><label>Уровень клана</label><input class="form-control" type="number" min="1" name="required_clan_level" value="1" required></div>
+            <div class="col-md-2"><label>Бонусные очки</label><input class="form-control" type="number" min="0" name="required_bonus_points" value="0" required></div>
+            <div class="col-md-2"><label>Монеты</label><input class="form-control" type="number" min="0" name="required_money" value="0" required></div>
             <div class="col-md-3"><label>Выдаваемый маг. навык</label><select class="form-control" name="magic_skill_id"><option value="">—</option>@foreach($magicSkills as $magicSkill)<option value="{{ $magicSkill->id }}">{{ $magicSkill->name }}</option>@endforeach</select></div>
             <div class="col-md-1"><button class="btn btn-success btn-sm">Добавить</button></div>
         </form>

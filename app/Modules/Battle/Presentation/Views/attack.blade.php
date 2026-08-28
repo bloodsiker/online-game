@@ -331,48 +331,44 @@
 </head>
 <body>
 
-<table class="main-table battle-layout" cellspacing="0" cellpadding="10" width="100%" height="100%">
-    <tbody>
-    <tr valign="top">
-        @if($battle)
-            @if($battle->status->isActive())
-                <td class="battle-col-actions" valign="top">
-                    @if($randomAttackedMonster)
-                        <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
+<div class="battle-layout">
+    @if($battle)
+        @if($battle->status->isActive())
+            <div class="battle-col-actions">
+                @if($randomAttackedMonster)
+                    <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
-                        @include('battle::partials.action_panel')
-                    @else
-                        <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
-                    @endif
-                </td>
-            @endif
-
-            <td @if($battle->status->isActive()) class="battle-col-log" @else colspan="3" @endif valign="top">
-                <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="{{ route('info.monster', ['id' => $round->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
-
-                {!! $round->action !!}
-
-                {{-- Разовые уведомления (прогресс квестов и т.п.) — только сейчас, не сохраняются и не всплывают в истории боя --}}
-                {!! $fightDTO->getSideLog() !!}
-
-                @if($battle->status->isFinish())
-                    <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+                    @include('battle::partials.action_panel')
+                @else
+                    <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
                 @endif
-            </td>
-
-            @if($battle->status->isActive())
-                <td class="battle-col-participants" valign="top">
-                    @include('battle::partials.side_panel')
-                </td>
-            @endif
-        @else
-            <td colspan="3">
-                <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
-            </td>
+            </div>
         @endif
-    </tr>
-    </tbody>
-</table>
+
+        <div class="{{ $battle->status->isActive() ? 'battle-col-log' : 'battle-col-finished' }}">
+            <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="{{ route('info.monster', ['id' => $round->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
+
+            {!! $round->action !!}
+
+            {{-- Разовые уведомления (прогресс квестов и т.п.) — только сейчас, не сохраняются и не всплывают в истории боя --}}
+            {!! $fightDTO->getSideLog() !!}
+
+            @if($battle->status->isFinish())
+                <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+            @endif
+        </div>
+
+        @if($battle->status->isActive())
+            <aside class="battle-col-participants">
+                @include('battle::partials.side_panel')
+            </aside>
+        @endif
+    @else
+        <div class="battle-col-finished">
+            <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+        </div>
+    @endif
+</div>
 
 <script>
 </script>

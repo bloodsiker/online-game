@@ -13,5 +13,6 @@ final readonly class TakeItemsPageDTO
         public int $count,
         public array $items,
         public string $backUrl,
+        public string $itemTooltipScript,
     ) {}
 }

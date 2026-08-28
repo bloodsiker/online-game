@@ -91,6 +91,30 @@ class SkillEffectImageUploadTest extends TestCase
         Storage::disk('public')->assertExists($path);
     }
 
+    public function test_admin_stores_passive_stat_bonuses_for_magic_skill(): void
+    {
+        $this->post(route('admin.magic_skill.create'), [
+            'name' => 'Клановая закалка',
+            'slug' => 'clan-conditioning-test',
+            'type' => 'buff',
+            'target_type' => 'self',
+            'is_passive' => '1',
+            'passive_effects' => [
+                ['type' => 'strength', 'value' => '5', 'is_percent' => '0'],
+                ['type' => 'hp_max', 'value' => '10', 'is_percent' => '1'],
+            ],
+        ])->assertRedirect();
+
+        $effects = json_decode((string) DB::table('magic_skills')
+            ->where('slug', 'clan-conditioning-test')
+            ->value('effects'), true);
+
+        $this->assertSame([
+            ['type' => 'strength', 'value' => 5, 'is_percent' => false],
+            ['type' => 'hp_max', 'value' => 10, 'is_percent' => true],
+        ], $effects);
+    }
+
     public function test_admin_uploads_an_image_for_an_effect(): void
     {
         $this->post(route('admin.effect.create'), [

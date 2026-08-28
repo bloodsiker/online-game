@@ -12,6 +12,7 @@ use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
+use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -68,7 +69,8 @@ class QuestItemNotificationTest extends TestCase
             ->once()
             ->andReturn([]);
 
-        $repository = new EloquentChatMessageRepository($friendRepository);
+        $partyRepository = Mockery::mock(PartyRepositoryInterface::class);
+        $repository = new EloquentChatMessageRepository($friendRepository, $partyRepository);
         $sender = new SendSystemMessage($repository);
 
         $recipient = new User;

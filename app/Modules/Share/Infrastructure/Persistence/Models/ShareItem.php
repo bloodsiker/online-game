@@ -35,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_sell
  * @property bool $is_give
  * @property bool $is_droppable
+ * @property bool $is_stackable
  * @property bool $is_slot_usable
  * @property bool $is_weight
  * @property int $price
@@ -77,6 +78,7 @@ class ShareItem extends Model
         'is_auction_sellable' => false,
         'is_give' => true,
         'is_droppable' => true,
+        'is_stackable' => false,
         'is_slot_usable' => false,
         'is_weight' => true,
         'break_crystal' => 0,
@@ -89,6 +91,7 @@ class ShareItem extends Model
         'is_sell' => 'boolean',
         'is_give' => 'boolean',
         'is_droppable' => 'boolean',
+        'is_stackable' => 'boolean',
         'is_active' => 'boolean',
         'expire' => 'integer',
         'type' => ShareItemType::class,

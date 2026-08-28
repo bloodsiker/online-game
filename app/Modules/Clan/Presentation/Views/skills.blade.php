@@ -6,9 +6,13 @@
     <title>Навыки клана</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        * { font-family: Tahoma; font-size: 12px; }
         html { height: 100%; }
-        body { height: 100%; margin: 0; color: #000; }
+        /* font-size задаём через body (наследование), а НЕ через '*': универсальный
+           селектор перебивал бы .tbl-shp-sml { font-size: 0 } из main.css у вложенных
+           ячеек рамки — картинки лейбла получали строчный отступ под базовую линию,
+           строка вырастала выше 22px, а угловые спрайты (no-repeat, 22px) не тянулись,
+           из-за чего появлялся разрыв рамки. */
+        body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 12px; }
         a, a:link, a:visited, a:active { text-decoration: none; }
         .p10h, .p10h td { padding-left: 10px; padding-right: 10px; }
         .p4v, .p4v td { padding-top: 4px; padding-bottom: 4px; }
@@ -33,13 +37,25 @@
         .skill-kind.passive { color: #1a4d8a; background: #dceafb; border: 1px solid #92afd0; }
         .skill-kind.active { color: #8D2616; background: #f7e0d2; border: 1px solid #d5a17e; }
         .w100 { width: 100%; }
+        .skill-spell-icon { width:36px; height:36px; object-fit:contain; cursor:pointer; border:1px solid #db9f73; background:#fbd4a4; }
+        #skill_effect_alt .aa-table { border-radius: 30px 30px 0 0; box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2); font-size: 11px; }
+        #skill_effect_alt .aa-tl { background: url(/img/bg/item_info/tbl-pop_corner-top-left.gif) no-repeat; width: 14px; height: 24px; }
+        #skill_effect_alt .aa-t { background: url(/img/bg/item_info/tbl-pop_top.gif); height: 24px; }
+        #skill_effect_alt .aa-tr { background: url(/img/bg/item_info/tbl-pop_corner-top-right.gif) no-repeat; width: 14px; height: 24px; }
+        #skill_effect_alt .aa-l { background: url(/img/bg/item_info/tbl-pop_left.gif) repeat-y; width: 14px; }
+        #skill_effect_alt .aa-r { background: url(/img/bg/item_info/tbl-pop_right.gif) repeat-y; width: 14px; }
+        #skill_effect_alt .aa-bl { background: url(/img/bg/item_info/tbl-pop_corner-bottom-left.gif) no-repeat; width: 14px; height: 5px; }
+        #skill_effect_alt .aa-b { background: url(/img/bg/item_info/tbl-pop_bottom.gif) repeat-x; height: 5px; }
+        #skill_effect_alt .aa-br { background: url(/img/bg/item_info/tbl-pop_corner-bottom-right.gif) no-repeat; width: 14px; height: 5px; }
+        #skill_effect_alt .skill_list td { padding: 0 7px; }
+        #skill_effect_alt .list_dark { background-color: #F4BB8A; }
     </style>
 </head>
 <body class="regblk">
 
 @include('clan.partials.tabs', ['activeTab' => 'clan.skills'])
 
-<table class="coll" width="100%" height="100%" border="0">
+<table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
     <tr>
         <td valign="top" width="100%">
@@ -88,6 +104,15 @@
                                 $currentLevelData = $currentLevel > 0 ? $def->levels->firstWhere('level', $currentLevel) : null;
                                 $displayLevelData = $currentLevelData ?? $def->levels->firstWhere('level', 1);
                                 $displayMagicSkill = $displayLevelData?->magicSkill;
+                                $skillIcon = $displayMagicSkill?->image ?: $def->icon ?: asset('img/icon/qst_default_start_new_m.gif');
+                                $skillIconAlt = $displayMagicSkill?->name ?? $def->name;
+                                $skillTooltipMeta = $displayMagicSkill ? array_merge([
+                                    ['label' => 'Тип', 'value' => $displayMagicSkill->is_passive ? 'Пассивный навык' : 'Активный навык'],
+                                    ['label' => 'Уровень', 'value' => $displayMagicSkill->level],
+                                ], array_map(static fn (array $effect): array => [
+                                    'label' => 'Бонус',
+                                    'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
+                                ], $displayMagicSkill->effects ?? [])) : [];
                             @endphp
 
                             <div class="skill-card">
@@ -96,11 +121,18 @@
                                     <tr>
                                         {{-- Icon --}}
                                         <td width="40" valign="top" style="padding-right: 8px;">
-                                            @if($def->icon)
-                                                <img src="{{ $def->icon }}" style="width:36px;height:36px;" alt="">
-                                            @else
-                                                <div style="width:36px;height:36px;background:#c8a06a;border:1px solid #db9f73;"></div>
-                                            @endif
+                                            <img src="{{ $skillIcon }}" class="skill-spell-icon" alt="{{ $skillIconAlt }}"
+                                                 @if($displayMagicSkill)
+                                                     data-tooltip-container="skill_effect_alt"
+                                                     data-tooltip-type="Заклинание"
+                                                     data-tooltip-name="{{ $displayMagicSkill->name }}"
+                                                     data-tooltip-image="{{ $skillIcon }}"
+                                                     data-tooltip-description="{{ strip_tags((string) $displayMagicSkill->description) }}"
+                                                     data-tooltip-meta="{!! e(json_encode($skillTooltipMeta, JSON_UNESCAPED_UNICODE)) !!}"
+                                                     onmouseover="showSkillEffectInfo(this,event,2)"
+                                                     onmouseout="showSkillEffectInfo(this,event,0)"
+                                                     onclick="window.open('{{ route('magic_skill.info', $displayMagicSkill->id) }}','','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
+                                                 @endif>
                                         </td>
 
                                         {{-- Info --}}
@@ -156,6 +188,9 @@
     </tr>
     </tbody>
 </table>
+
+<div id="skill_effect_alt" style="width:300px;display:none;position:fixed;z-index:10000002;left:0;top:0"></div>
+<script src="{{ asset('js/monster_ability_tooltip.js') }}?v={{ filemtime(public_path('js/monster_ability_tooltip.js')) }}"></script>
 
 </body>
 </html>

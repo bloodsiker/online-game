@@ -105,6 +105,10 @@
                                                         @if($tier->feat_description)
                                                             <br><span class="text-muted">{{ $tier->feat_description }}</span>
                                                         @endif
+                                                        @if($tier->feat_medal_name)
+                                                            <br><span class="text-muted">Награда за подвиг: <strong>{{ $tier->feat_medal_name }}</strong>
+                                                        </span>
+                                                        @endif
                                                     </p>
                                                 @endif
                                                 <p class="mb-2 small text-muted">Квесты этого уровня:</p>
@@ -143,7 +147,7 @@
                                         {{-- Модалка: изменить уровень --}}
                                         <div id="modalTierEdit{{ $tier->id }}" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
                                             <section class="card">
-                                                <form action="{{ route('admin.reputation.tier.update', [$reputation->id, $tier->id]) }}" method="post">
+                                                <form action="{{ route('admin.reputation.tier.update', [$reputation->id, $tier->id]) }}" method="post" enctype="multipart/form-data">
                                                     <header class="card-header"><h2 class="card-title">Изменить уровень «{{ $tier->medal_name ?: $tier->min_points.'+' }}»</h2></header>
                                                     <div class="card-body">
                                                         {{ csrf_field() }}
@@ -166,8 +170,13 @@
                                                             <input type="text" class="form-control" name="medal_name" value="{{ $tier->medal_name }}">
                                                         </div>
                                                         <div class="form-group mb-2">
-                                                            <label>Иконка медали (URL)</label>
+                                                            <label>Изображение медали (URL или путь от <code>public</code>)</label>
                                                             <input type="text" class="form-control" name="medal_icon" value="{{ $tier->medal_icon }}">
+                                                            <input type="file" class="form-control mt-2" name="medal_image" accept="image/*">
+                                                            <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
+                                                            @if($tier->medal_icon)
+                                                                <img src="{{ str_starts_with($tier->medal_icon, 'http') || str_starts_with($tier->medal_icon, '/') ? $tier->medal_icon : asset($tier->medal_icon) }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
+                                                            @endif
                                                         </div>
                                                         <hr>
                                                         <div class="form-group mb-2">
@@ -181,6 +190,19 @@
                                                         <div class="form-group mb-2">
                                                             <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
                                                             <textarea class="form-control" name="feat_description" rows="2">{{ $tier->feat_description }}</textarea>
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>Отдельная медаль за подвиг <small class="text-muted">(пусто = подвиг блокирует обычную медаль)</small></label>
+                                                            <input type="text" class="form-control" name="feat_medal_name" value="{{ $tier->feat_medal_name }}">
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>Изображение медали за подвиг (URL или путь от <code>public</code>)</label>
+                                                            <input type="text" class="form-control" name="feat_medal_icon" value="{{ $tier->feat_medal_icon }}">
+                                                            <input type="file" class="form-control mt-2" name="feat_medal_image" accept="image/*">
+                                                            <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
+                                                            @if($tier->feat_medal_icon)
+                                                                <img src="{{ str_starts_with($tier->feat_medal_icon, 'http') || str_starts_with($tier->feat_medal_icon, '/') ? $tier->feat_medal_icon : asset($tier->feat_medal_icon) }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
+                                                            @endif
                                                         </div>
                                                     </div>
                                                     <footer class="card-footer">
@@ -257,7 +279,7 @@
     {{-- Модалка: добавить уровень --}}
     <div id="modalTier" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
-            <form action="{{ route('admin.reputation.tier.add', $reputation->id) }}" method="post">
+            <form action="{{ route('admin.reputation.tier.add', $reputation->id) }}" method="post" enctype="multipart/form-data">
                 <header class="card-header"><h2 class="card-title">Добавить уровень</h2></header>
                 <div class="card-body">
                     {{ csrf_field() }}
@@ -280,8 +302,10 @@
                         <input type="text" class="form-control" name="medal_name">
                     </div>
                     <div class="form-group mb-2">
-                        <label>Иконка медали (URL)</label>
+                        <label>Изображение медали (URL или путь от <code>public</code>)</label>
                         <input type="text" class="form-control" name="medal_icon">
+                        <input type="file" class="form-control mt-2" name="medal_image" accept="image/*">
+                        <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
                     </div>
                     <hr>
                     <div class="form-group mb-2">
@@ -291,6 +315,16 @@
                     <div class="form-group mb-2">
                         <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
                         <textarea class="form-control" name="feat_description" rows="2"></textarea>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Отдельная медаль за подвиг <small class="text-muted">(пусто = подвиг блокирует обычную медаль)</small></label>
+                        <input type="text" class="form-control" name="feat_medal_name">
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Изображение медали за подвиг (URL или путь от <code>public</code>)</label>
+                        <input type="text" class="form-control" name="feat_medal_icon">
+                        <input type="file" class="form-control mt-2" name="feat_medal_image" accept="image/*">
+                        <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -444,5 +478,11 @@
     });
 </script>
 @endpush
+
+@include('admin.layout.summernote', [
+    'selector' => 'textarea[name=description]',
+    'height' => 220,
+    'placeholder' => 'Описание репутации, которое увидят игроки',
+])
 
 @endsection

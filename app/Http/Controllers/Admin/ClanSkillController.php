@@ -128,6 +128,7 @@ class ClanSkillController extends Controller
             'level' => ['required', 'integer', 'min:1', 'max:99'],
             'required_clan_level' => ['required', 'integer', 'min:1', 'max:99'],
             'required_bonus_points' => ['required', 'integer', 'min:0'],
+            'required_money' => ['required', 'integer', 'min:0'],
             'magic_skill_id' => ['nullable', 'integer', 'exists:magic_skills,id'],
         ]);
     }

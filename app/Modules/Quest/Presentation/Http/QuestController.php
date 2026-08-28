@@ -27,6 +27,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -621,6 +622,23 @@ class QuestController extends Controller
         // Clan quests have their own take method
         if ($quest->isClan()) {
             return $this->takeClan($id, $request);
+        }
+
+        // Квест-подвиг нельзя взять прямым запросом до достижения его тира.
+        $featTier = ReputationTier::query()
+            ->with('reputation')
+            ->where('feat_quest_id', $quest->id)
+            ->first();
+
+        if ($featTier) {
+            $points = $this->reputationService
+                ->getOrCreate($player, $featTier->reputation)
+                ->points;
+
+            if ($points < $featTier->min_points) {
+                return redirect()->route('npc', ['id' => $npcId])
+                    ->with('quest_error', "Квест-подвиг доступен с {$featTier->min_points} очков репутации.");
+            }
         }
 
         $existingQuestPlayer = QuestPlayer::where('player_id', $player->id)

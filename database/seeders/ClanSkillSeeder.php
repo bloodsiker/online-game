@@ -14,7 +14,7 @@ class ClanSkillSeeder extends Seeder
     {
         $skills = [
             [
-                'name' => 'Боевая закалка',
+                'name' => 'Клановая мощь',
                 'description' => 'Тренировки под руководством клана повышают силу всех членов.',
                 'icon' => null,
                 'max_level' => 5,
@@ -44,8 +44,8 @@ class ClanSkillSeeder extends Seeder
                 ],
             ],
             [
-                'name' => 'Клановая мудрость',
-                'description' => 'Совместное обучение повышает интеллект членов клана.',
+                'name' => 'Клановое чутьё',
+                'description' => 'Обмен боевым опытом между соратниками обостряет чутьё каждого члена клана, повышая интуицию.',
                 'icon' => null,
                 'max_level' => 5,
                 'sort_order' => 3,
@@ -73,9 +73,103 @@ class ClanSkillSeeder extends Seeder
                     ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 20],
                 ],
             ],
+            [
+                'name' => 'Клановая эрудиция',
+                'description' => 'Библиотека клана открыта для всех — совместное изучение трудов повышает интеллект членов.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 5,
+                'effect_type' => ClanSkillEffectType::INTELLIGENCE,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 5],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 9],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 14],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 20],
+                ],
+            ],
+            [
+                'name' => 'Клановое благословение',
+                'description' => 'Общие ритуалы и медитации укрепляют духовную связь клана, повышая мудрость.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 6,
+                'effect_type' => ClanSkillEffectType::WISDOM,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 5],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 9],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 14],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 20],
+                ],
+            ],
+            [
+                'name' => 'Клановый источник',
+                'description' => 'Своя закрытая линия маны, проведённая через земли клана, увеличивает запас маны членов.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 7,
+                'effect_type' => ClanSkillEffectType::MP_MAX,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 10],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 25],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 45],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 70],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 100],
+                ],
+            ],
+            [
+                'name' => 'Клановая ярость',
+                'description' => 'Боевой клич клана поднимает боевой пыл — увеличивает атаку в бою.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 8,
+                'effect_type' => ClanSkillEffectType::ATTACK,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 1],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 2],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 3],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 5],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 7],
+                ],
+            ],
+            [
+                'name' => 'Клановая броня',
+                'description' => 'Кузнецы клана куют по общему образцу — повышает защиту всех членов.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 9,
+                'effect_type' => ClanSkillEffectType::DEFENSE,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 5],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 12],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 22],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 35],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 50],
+                ],
+            ],
+            [
+                'name' => 'Клановый оберег',
+                'description' => 'Древние обереги клана рассеивают чужую магию, повышая сопротивление заклинаниям.',
+                'icon' => null,
+                'max_level' => 5,
+                'sort_order' => 10,
+                'effect_type' => ClanSkillEffectType::MAGIC_RESISTANCE,
+                'levels' => [
+                    ['level' => 1, 'required_clan_level' => 1, 'required_bonus_points' => 100,  'effect_value' => 2],
+                    ['level' => 2, 'required_clan_level' => 2, 'required_bonus_points' => 250,  'effect_value' => 4],
+                    ['level' => 3, 'required_clan_level' => 3, 'required_bonus_points' => 500,  'effect_value' => 7],
+                    ['level' => 4, 'required_clan_level' => 4, 'required_bonus_points' => 900,  'effect_value' => 11],
+                    ['level' => 5, 'required_clan_level' => 5, 'required_bonus_points' => 1500, 'effect_value' => 16],
+                ],
+            ],
         ];
 
         foreach ($skills as $skillData) {
+            if (ClanSkillDefinition::where('name', $skillData['name'])->exists()) {
+                continue;
+            }
+
             $definition = ClanSkillDefinition::create([
                 'name' => $skillData['name'],
                 'description' => $skillData['description'],

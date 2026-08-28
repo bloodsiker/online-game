@@ -12,11 +12,28 @@ use Illuminate\Http\Request;
 
 class EffectController extends Controller
 {
-    public function list()
+    public function list(Request $request)
     {
-        $list = Effect::withCount(['magicSkills', 'monsters'])->orderByDesc('id')->get();
+        $filters = [
+            'q' => trim((string) $request->query('q', '')),
+            'type' => trim((string) $request->query('type', '')),
+            'active_type' => trim((string) $request->query('active_type', '')),
+        ];
 
-        return view('effect::admin.list', compact('list'));
+        $types = Effect::query()->whereNotNull('type')->distinct()->orderBy('type')->pluck('type');
+        $activeTypes = ActiveEffectType::cases();
+        $list = Effect::query()
+            ->withCount(['magicSkills', 'monsters'])
+            ->when($filters['q'] !== '', function ($query) use ($filters): void {
+                $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['q']).'%';
+                $query->where(fn ($query) => $query->where('name', 'like', $search)->orWhere('slug', 'like', $search));
+            })
+            ->when($filters['type'] !== '' && $types->contains($filters['type']), fn ($query) => $query->where('type', $filters['type']))
+            ->when(ActiveEffectType::tryFrom($filters['active_type']) !== null, fn ($query) => $query->where('active_type', $filters['active_type']))
+            ->orderByDesc('id')
+            ->get();
+
+        return view('effect::admin.list', compact('list', 'filters', 'types', 'activeTypes'));
     }
 
     public function create(Request $request): mixed

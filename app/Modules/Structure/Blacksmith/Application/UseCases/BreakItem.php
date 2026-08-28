@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
@@ -43,7 +42,7 @@ class BreakItem
 
             $countCrystal = $salvageResult->crystalCount;
 
-            if ($hasBackpack !== null && $crystal->type === ShareItemType::RESOURCE) {
+            if ($hasBackpack !== null && $crystal->is_stackable) {
                 $hasBackpack->count += $countCrystal;
                 $hasBackpack->save();
             } else {

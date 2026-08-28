@@ -38,6 +38,7 @@ class ClanSkillHallController extends Controller
 
         return view('clan_skill_hall::index', [
             'hall' => $hall,
+            'user' => $user,
             'clan' => $page->clan,
             'definitions' => $page->definitions,
             'learnedMap' => $page->learnedMap,

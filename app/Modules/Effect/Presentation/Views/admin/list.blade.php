@@ -13,6 +13,14 @@
                     <div class="mb-3">
                         <a href="{{ route('admin.effect.create') }}" class="btn btn-primary btn-sm">Добавить эффект</a>
                     </div>
+                    <form method="get" action="{{ route('admin.effects') }}" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-5"><div class="form-group"><label>Поиск по названию</label><input class="form-control" name="q" value="{{ $filters['q'] }}" placeholder="Название или slug"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label>Тип</label><select class="form-control" name="type"><option value="">Все типы</option>@foreach($types as $type)<option value="{{ $type }}" @selected($filters['type'] === $type)>{{ $type }}</option>@endforeach</select></div></div>
+                            <div class="col-md-2"><div class="form-group"><label>Механика</label><select class="form-control" name="active_type"><option value="">Все</option>@foreach($activeTypes as $activeType)<option value="{{ $activeType->value }}" @selected($filters['active_type'] === $activeType->value)>{{ $activeType->label() }}</option>@endforeach</select></div></div>
+                            <div class="col-md-2 d-flex align-items-end"><div class="form-group"><button class="btn btn-primary btn-sm">Фильтровать</button> <a href="{{ route('admin.effects') }}" class="btn btn-default btn-sm">Сбросить</a></div></div>
+                        </div>
+                    </form>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered mb-none">
                             <thead>

@@ -174,6 +174,13 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label" for="is_stackable">Складывается в одну ячейку</label>
+                                                <select class="form-control" name="is_stackable" id="is_stackable">
+                                                    <option value="1" @selected(old('is_stackable') === '1')>Да</option>
+                                                    <option value="0" @selected(old('is_stackable', '0') === '0')>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="is_weight">Имеет вес</label>
                                                 <select class="form-control" name="is_weight" id="is_weight">
                                                     <option value="1" @selected(old('is_weight', '1') === '1')>Да</option>

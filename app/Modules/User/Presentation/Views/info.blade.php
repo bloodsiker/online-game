@@ -153,7 +153,7 @@
                                         {{-- Левая колонка: медали + кукла с экипировкой --}}
                                         <td valign="top" width="320">
 
-                                            {{-- Слайдер медалей за репутацию (заглушка) --}}
+                                            {{-- Полученные медали за репутацию --}}
                                             <table border="0" cellpadding="0" cellspacing="0" align="center" class="medal_bg">
                                                 <tbody>
                                                 <tr>
@@ -607,24 +607,19 @@
 </table>
 
 <script>
-    {{-- Слайдер медалей за репутацию (заглушка со статическими картинками) --}}
     var MedalsOnPage = 6;
     var position = 0;
-    var medalImages = [
-        '{{ asset('img/medal/medal_drakon_red.gif') }}',
-        '{{ asset('img/medal/medal_eldiv_red.gif') }}',
-        '{{ asset('img/medal/medal_krof_red.gif') }}',
-        '{{ asset('img/medal/medal_prirody_red.gif') }}',
-        '{{ asset('img/medal/medalnoch_red.gif') }}',
-        '{{ asset('img/medal/medal_druid3.jpg') }}',
-        '{{ asset('img/medal/medal_druidf2.jpg') }}',
-        '{{ asset('img/medal/medal_druid4.jpg') }}',
-    ];
-    var medals = medalImages.map(function (src) {
-        return '<img src="' + src + '" width="35" height="35" border="0">';
+    var medals = @json($reputationMedals).map(function (medal) {
+        var image = document.createElement('img');
+        image.src = medal.image;
+        image.alt = medal.name;
+        image.title = medal.reputation + ': ' + medal.name;
+        image.width = 35;
+        image.height = 35;
+        image.border = 0;
+
+        return image.outerHTML;
     });
-    {{-- Первый слот пустой — виден только фон medal_c.gif --}}
-    medals.unshift('&nbsp;');
 
     function showMedals() {
         for (var i = 0; i < MedalsOnPage; i++) {

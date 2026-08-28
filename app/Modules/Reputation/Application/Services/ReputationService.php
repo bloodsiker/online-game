@@ -151,8 +151,8 @@ class ReputationService
     }
 
     /**
-     * Медаль тира получена, если набраны очки тира И (если у тира задан
-     * подвиг) выполнен квест-подвиг (feat_quest_id — финальный квест цепочки).
+     * Обычная медаль тира. Если подвиг выдаёт отдельную feat-медаль,
+     * он не блокирует обычную медаль этого же тира.
      */
     public function getEarnedMedals(Reputation $reputation, int $points, Player $player): Collection
     {
@@ -165,7 +165,30 @@ class ReputationService
         );
 
         return $eligibleTiers
-            ->filter(fn ($tier) => ! $tier->feat_quest_id || $completedFeatQuestIds->has($tier->feat_quest_id))
+            ->filter(fn ($tier) => ! $tier->feat_quest_id
+                || $tier->feat_medal_name
+                || $completedFeatQuestIds->has($tier->feat_quest_id))
+            ->sortBy('min_points')
+            ->values();
+    }
+
+    /**
+     * Тиры, для которых игрок получил отдельную медаль за подвиг.
+     */
+    public function getEarnedFeatMedals(Reputation $reputation, int $points, Player $player): Collection
+    {
+        $eligibleTiers = $reputation->tiers
+            ->filter(fn ($tier) => $tier->feat_medal_name
+                && $tier->feat_quest_id
+                && $points >= $tier->min_points);
+
+        $completedFeatQuestIds = $this->completedQuestIds(
+            $player,
+            $eligibleTiers->pluck('feat_quest_id')
+        );
+
+        return $eligibleTiers
+            ->filter(fn ($tier) => $completedFeatQuestIds->has($tier->feat_quest_id))
             ->sortBy('min_points')
             ->values();
     }

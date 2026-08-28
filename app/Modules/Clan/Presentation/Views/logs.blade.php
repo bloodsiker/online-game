@@ -58,7 +58,7 @@
 
 @include('clan.partials.tabs', ['activeTab' => 'clan.logs'])
 
-<table class="coll" width="100%" height="100%" border="0">
+<table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
     <tr>
         <td valign="top" width="100%">

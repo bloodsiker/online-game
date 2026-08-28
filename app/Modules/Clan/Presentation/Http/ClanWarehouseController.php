@@ -14,7 +14,6 @@ use App\Modules\Clan\Domain\Models\ClanWarehouseLog;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ClanWarehouseItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\Strategy\WarehouseLogItemTooltipStrategy;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Request;
@@ -75,11 +74,7 @@ class ClanWarehouseController extends Controller
                 ->get();
 
             $stackableItemIds = $items
-                ->filter(static fn (Backpack $backpack): bool => in_array(
-                    $backpack->item->itemInfo->type,
-                    [ShareItemType::RESOURCE, ShareItemType::POTION],
-                    true,
-                ))
+                ->filter(static fn (Backpack $backpack): bool => $backpack->item->itemInfo->is_stackable)
                 ->pluck('item_id')
                 ->map(static fn (mixed $itemId): int => (int) $itemId)
                 ->all();
@@ -105,11 +100,7 @@ class ClanWarehouseController extends Controller
                 $wantCount = (int) ($putCount['count'] ?? $item->count);
                 $actualCount = min($wantCount, $item->count);
 
-                $isStackable = in_array(
-                    $item->item->itemInfo->type,
-                    [ShareItemType::RESOURCE, ShareItemType::POTION],
-                    true,
-                );
+                $isStackable = $item->item->itemInfo->is_stackable;
                 $existing = $isStackable
                     ? $existingWarehouseItems->get((int) $item->item_id)
                     : null;
@@ -218,11 +209,7 @@ class ClanWarehouseController extends Controller
                 ->get();
 
             $stackableShareItemIds = $items
-                ->filter(static fn (ClanWarehouse $warehouseItem): bool => in_array(
-                    $warehouseItem->item->itemInfo->type,
-                    [ShareItemType::RESOURCE, ShareItemType::POTION],
-                    true,
-                ))
+                ->filter(static fn (ClanWarehouse $warehouseItem): bool => $warehouseItem->item->itemInfo->is_stackable)
                 ->pluck('item.share_item_id')
                 ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
                 ->unique()
@@ -245,11 +232,7 @@ class ClanWarehouseController extends Controller
                 $wantCount = (int) ($takeItems[$wItem->id]['count'] ?? $wItem->count);
                 $actualCount = min($wantCount, $wItem->count);
 
-                $isStackable = in_array(
-                    $wItem->item->itemInfo->type,
-                    [ShareItemType::RESOURCE, ShareItemType::POTION],
-                    true,
-                );
+                $isStackable = $wItem->item->itemInfo->is_stackable;
                 $shareItemId = (int) $wItem->item->share_item_id;
                 $existing = $isStackable
                     ? $existingBackpackItems->get($shareItemId)

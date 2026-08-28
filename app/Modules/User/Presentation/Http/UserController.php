@@ -8,6 +8,9 @@ use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Reputation\Application\Services\ReputationService;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,11 +22,20 @@ final class UserController
     public function __construct(
         private readonly PlayerStatService $statService,
         private readonly ItemTooltipCollector $tooltipCollector,
+        private readonly ReputationService $reputationService,
     ) {}
 
     public function info(int $id): Response
     {
-        $user = User::with(['player.race', 'player.playerEquip', 'player.skills', 'clanMembership.clan', 'clanMembership.role', 'currentLocation.map'])->findOrFail($id);
+        $user = User::with([
+            'player.race',
+            'player.playerEquip',
+            'player.skills',
+            'player.reputations.reputation.tiers',
+            'clanMembership.clan',
+            'clanMembership.role',
+            'currentLocation.map',
+        ])->findOrFail($id);
         $stats = $this->statService->resolve($user->player);
         $this->tooltipCollector->collectFrom(new ItemModelTooltipStrategy($this->equippedItems($user)));
 
@@ -37,7 +49,52 @@ final class UserController
             'isOnline' => $isOnline,
             'locationPath' => $this->buildLocationPath($user),
             'itemTooltipScript' => $this->tooltipCollector->renderScript(),
+            'reputationMedals' => $this->reputationMedals($user->player),
         ]);
+    }
+
+    /** @return array<int, array{image: string, name: string, reputation: string}> */
+    private function reputationMedals(Player $player): array
+    {
+        return $player->reputations
+            ->flatMap(function (PlayerReputation $playerReputation) use ($player) {
+                $reputation = $playerReputation->reputation;
+                if ($reputation === null) {
+                    return [];
+                }
+
+                $regularMedals = $this->reputationService
+                    ->getEarnedMedals($reputation, $playerReputation->points, $player)
+                    ->map(fn ($tier) => [
+                        'image' => $this->medalImageUrl($tier->medal_icon),
+                        'name' => $tier->medal_name,
+                        'reputation' => $reputation->name,
+                    ]);
+
+                $featMedals = $this->reputationService
+                    ->getEarnedFeatMedals($reputation, $playerReputation->points, $player)
+                    ->map(fn ($tier) => [
+                        'image' => $this->medalImageUrl($tier->feat_medal_icon),
+                        'name' => $tier->feat_medal_name,
+                        'reputation' => $reputation->name,
+                    ]);
+
+                return $regularMedals->concat($featMedals);
+            })
+            ->filter(fn (array $medal): bool => $medal['image'] !== '')
+            ->values()
+            ->all();
+    }
+
+    private function medalImageUrl(?string $image): string
+    {
+        if ($image === null || $image === '') {
+            return '';
+        }
+
+        return str_starts_with($image, 'http://') || str_starts_with($image, 'https://') || str_starts_with($image, '/')
+            ? $image
+            : asset($image);
     }
 
     /**

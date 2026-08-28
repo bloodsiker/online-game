@@ -20,9 +20,11 @@ class TakeItemsPageViewMapper
                     $isChest = $item->item->itemInfo->type === ShareItemType::CHEST;
 
                     return new TakeLocationItemDTO(
+                        shareItemId: (int) $item->item->share_item_id,
                         image: (string) $item->item->itemInfo->image,
                         name: (string) $item->item->getName(),
                         count: (int) $item->count,
+                        infoUrl: route('items.info.share', ['id' => $item->item->share_item_id]),
                         actionLabel: $isChest
                             ? ($item->item->is_open ? 'Заглянуть' : 'Открыть')
                             : 'Поднять',
@@ -35,6 +37,7 @@ class TakeItemsPageViewMapper
                 }
             )->all(),
             backUrl: route('location'),
+            itemTooltipScript: '',
         );
     }
 }

@@ -17,6 +17,7 @@ class ClanSkillLevel extends Model
         'level',
         'required_clan_level',
         'required_bonus_points',
+        'required_money',
         'share_item_id',
         'share_item_count',
         'magic_skill_id',

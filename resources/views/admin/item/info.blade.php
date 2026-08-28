@@ -6,6 +6,8 @@
 
 @section('body')
 
+    @include('admin.item.navigation', ['item' => $item])
+
     <div class="row">
         <div class="col-md-12">
             <section class="card">
@@ -188,6 +190,13 @@
                                                 <select class="form-control" name="is_droppable">
                                                     <option value="1" @selected($item->is_droppable)>Да</option>
                                                     <option value="0" @selected(!$item->is_droppable)>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Складывается в одну ячейку</label>
+                                                <select class="form-control" name="is_stackable">
+                                                    <option value="1" @selected($item->is_stackable)>Да</option>
+                                                    <option value="0" @selected(!$item->is_stackable)>Нет</option>
                                                 </select>
                                             </div>
                                             <div class="form-group">

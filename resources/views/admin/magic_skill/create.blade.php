@@ -108,6 +108,7 @@
                             <input type="checkbox" id="is-passive" name="is_passive" value="1" @checked(old('is_passive'))>
                             <label for="is-passive">Пассивный скилл</label>
                         </div>
+                        @include('admin.magic_skill.partials.passive-effects', ['passiveEffects' => old('passive_effects', [])])
                         <div class="mt-3">
                             <button class="btn btn-primary">Создать</button>
                             <a href="{{ route('admin.magic_skills') }}" class="btn btn-success">Назад</a>

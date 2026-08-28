@@ -515,6 +515,7 @@ class PlayerStatService
             'agi' => 'agility',
             'mud' => 'wisdom',
             'intel' => 'intelligence',
+            'defense' => 'armor',
             default => $key,
         };
     }

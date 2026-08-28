@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
 use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;
@@ -51,7 +50,7 @@ class PutItems
             $totalCost += 10;
 
             $stackTarget = null;
-            if ($item->item->itemInfo->type === ShareItemType::RESOURCE || $item->item->itemInfo->type === ShareItemType::POTION) {
+            if ($item->item->itemInfo->is_stackable) {
                 $stackTarget = $this->inventoryRepository->findWarehouseStack($user->id, $warehouse->id, $item->item->share_item_id);
             }
 

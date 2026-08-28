@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Warehouse\Application\UseCases;
 
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Warehouse\Application\DTOs\WarehouseResultDTO;
 use App\Modules\Structure\Warehouse\Domain\Contracts\TransactionManager;
@@ -44,7 +43,7 @@ class TakeItems
                 }
 
                 $existing = null;
-                if ($wItem->item->itemInfo->type === ShareItemType::RESOURCE || $wItem->item->itemInfo->type === ShareItemType::POTION) {
+                if ($wItem->item->itemInfo->is_stackable) {
                     $existing = $this->inventoryRepository->findBackpackStack($user->id, $wItem->item->share_item_id);
                 }
 
