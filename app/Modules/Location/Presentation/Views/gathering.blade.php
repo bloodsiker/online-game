@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Добыча ресурсов</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    @vite('resources/js/app.js')
     <style>
         * { box-sizing: border-box; }
         html, body { min-height: 100%; margin: 0; }
@@ -120,9 +121,10 @@
     'use strict';
     try { window.parent.setMapHiddenForGathering(true); } catch (e) {}
     const urls = { state: @js($page->stateUrl), start: @js($page->startUrl), complete: @js($page->completeUrl), cancel: @js($page->cancelUrl) };
+    const mapId = @js($page->mapId);
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const initial = @json($initialGatheringState);
-    const state = { nodes: new Map(), professions: [], attempt: null, selectedNodeId: null, lastResult: null, noticeTimer: null, serverOffset: 0, inventory: {}, completing: false, viewportPositioned: false, pan: null };
+    const state = { nodes: new Map(), professions: [], attempt: null, selectedNodeId: null, lastResult: null, noticeTimer: null, serverOffset: 0, inventory: {}, completing: false, refreshing: null, viewportPositioned: false, pan: null };
     const el = { field: document.getElementById('gathering-field'), nodes: document.getElementById('gathering-nodes'), empty: document.getElementById('gathering-empty'), selection: document.getElementById('gathering-selection'), work: document.getElementById('gathering-work'), workName: document.getElementById('gathering-work-name'), workTime: document.getElementById('gathering-work-time'), progress: document.getElementById('gathering-progress-fill'), progressTrack: document.getElementById('gathering-progress-track'), cancel: document.getElementById('gathering-cancel'), professions: document.getElementById('gathering-professions'), bag: document.getElementById('gathering-bag'), tooltip: document.getElementById('gathering-tooltip'), notice: document.getElementById('gathering-notice') };
 
     function request(url, method) {
@@ -144,8 +146,7 @@
     }
     function renderProfessions() {
         if (!state.professions.length) { el.professions.innerHTML = '<div class="gathering-note">Профессии ещё не созданы. Выполните миграции.</div>'; return; }
-        const icons = { 'Травник': '🌿', 'Рыбак': '🐟', 'Геолог': '⛏' };
-        el.professions.innerHTML = state.professions.map(function (p) { const progress = Math.min(100, p.levelExperience / p.levelExperienceRequired * 100); return '<div class="gathering-skill"><div class="gathering-skill-row"><span>' + (icons[p.name] || '◆') + ' ' + escapeHtml(p.name) + ' <span class="gathering-skill-level">' + p.level + ' ур.</span></span><span>' + Math.round(progress) + '%</span></div><div class="gathering-xp-track"><div class="gathering-xp-fill" style="width:' + progress + '%"></div></div></div>'; }).join('') + '<div class="gathering-note">Опыт начисляется только за успешно добытый ресурс.</div>';
+        el.professions.innerHTML = state.professions.map(function (p) { const progress = Math.min(100, p.levelExperience / p.levelExperienceRequired * 100); return '<div class="gathering-skill"><div class="gathering-skill-row"><span>' + escapeHtml(p.name) + ' <span class="gathering-skill-level">' + p.level + ' ур.</span></span><span>' + Math.round(progress) + '%</span></div><div class="gathering-xp-track"><div class="gathering-xp-fill" style="width:' + progress + '%"></div></div></div>'; }).join('') + '<div class="gathering-note">Опыт начисляется только за успешно добытый ресурс.</div>';
     }
     function renderNodes() {
         const existing = new Map(Array.from(el.nodes.querySelectorAll('.gathering-node')).map(function (node) { return [Number(node.dataset.nodeId), node]; }));
@@ -197,11 +198,25 @@
         state.completing = true; el.cancel.disabled = true; request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; el.cancel.disabled = false; setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { state.completing = false; el.cancel.disabled = false; setLog(error.message || 'Не удалось отменить добычу.', 'is-error'); });
     }
     function renderBag() { const items = Object.values(state.inventory); el.bag.innerHTML = items.length ? items.map(function (item) { return '<li><img src="' + escapeHtml(item.image) + '" alt=""><span>' + escapeHtml(item.name) + '</span><span class="gathering-bag-count">×' + item.count + '</span></li>'; }).join('') : '<li class="empty">пока ничего</li>'; }
-    function refreshState() { return request(urls.state).then(applyState).catch(function () { setLog('Не удалось обновить общее поле карты.', 'is-error'); }); }
+    function refreshState() {
+        if (state.refreshing) return state.refreshing;
+        state.refreshing = request(urls.state).then(applyState).catch(function () { setLog('Не удалось обновить общее поле карты.', 'is-error'); }).finally(function () { state.refreshing = null; });
+        return state.refreshing;
+    }
+    function subscribeToGatheringMap() {
+        if (!window.Echo || mapId < 1) { setLog('Не удалось подключиться к обновлениям карты.', 'is-error'); return; }
+        window.Echo.channel('gathering.map.' + mapId).listen('.gathering.map.updated', refreshState);
+        const connection = window.Echo.connector && window.Echo.connector.pusher ? window.Echo.connector.pusher.connection : null;
+        if (connection) {
+            connection.bind('connected', refreshState);
+            connection.bind('unavailable', function () { setLog('Связь с картой потеряна. Выполняется переподключение.', 'is-warn'); });
+        }
+    }
     el.field.addEventListener('pointerdown', startPan); el.field.addEventListener('pointermove', movePan); el.field.addEventListener('pointerup', stopPan); el.field.addEventListener('pointercancel', stopPan);
     el.cancel.addEventListener('click', cancelGathering);
-    window.addEventListener('pagehide', function () { try { window.parent.setMapHiddenForGathering(false); } catch (e) {} if (!state.attempt) return; const form = new FormData(); form.append('_token', csrf); navigator.sendBeacon(urls.cancel, form); });
-    applyState(initial); positionViewportOnce(); setLog(initial.message || 'Ресурсы доступны. Перемещайте карту и дважды нажмите на кружок, чтобы начать добычу.'); window.setInterval(refreshState, 2000);
+    window.addEventListener('pagehide', function () { try { window.parent.setMapHiddenForGathering(false); } catch (e) {} if (window.Echo) window.Echo.leave('gathering.map.' + mapId); if (!state.attempt) return; const form = new FormData(); form.append('_token', csrf); navigator.sendBeacon(urls.cancel, form); });
+    applyState(initial); positionViewportOnce(); setLog(initial.message || 'Ресурсы доступны. Перемещайте карту и дважды нажмите на кружок, чтобы начать добычу.');
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', subscribeToGatheringMap, { once: true }); else subscribeToGatheringMap();
 })();
 </script>
 </body>

@@ -9,6 +9,8 @@ use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Location\Application\DTOs\GatheringActionResultDTO;
+use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
+use App\Modules\Location\Domain\Events\GatheringMapUpdated;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringNode;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -107,7 +109,7 @@ class GatheringService
                     return $this->failure($blocked, 422);
                 }
 
-                GatheringAttempt::query()->where('expires_at', '<=', now())->delete();
+                $this->deleteExpiredAttempts();
                 if (GatheringAttempt::query()->where('player_id', $lockedPlayer->id)->exists()) {
                     return $this->failure('Сначала завершите текущую добычу.', 409);
                 }
@@ -140,6 +142,13 @@ class GatheringService
                     'completes_at' => $completesAt,
                     'expires_at' => $completesAt->copy()->addSeconds(GatheringAttempt::CLAIM_GRACE_SECONDS),
                 ]);
+
+                GatheringMapUpdated::dispatch((int) $node->mapResource->map_id, (int) $node->id, 'attempt-started');
+                BroadcastGatheringMapUpdate::dispatch(
+                    (int) $node->mapResource->map_id,
+                    (int) $node->id,
+                    'attempt-expired',
+                )->delay($attempt->expires_at)->afterCommit();
 
                 return new GatheringActionResultDTO(
                     ok: true,
@@ -176,6 +185,9 @@ class GatheringService
                 return $this->failure('Активная добыча не найдена.', 404);
             }
 
+            $mapId = (int) $attempt->node->mapResource->map_id;
+            $nodeId = (int) $attempt->gathering_node_id;
+
             $player = Player::query()->whereKey($user->player->id)->lockForUpdate()->firstOrFail();
             $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $lockedUser->setRelation('player', $player);
@@ -183,6 +195,7 @@ class GatheringService
 
             if ($attempt->expires_at->isPast()) {
                 $attempt->delete();
+                GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-expired');
 
                 return $this->failure('Время завершения добычи истекло.', 409);
             }
@@ -193,6 +206,7 @@ class GatheringService
 
             if ((int) $lockedUser->location_id !== (int) $attempt->location_id) {
                 $attempt->delete();
+                GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-cancelled');
 
                 return $this->failure('Добыча отменена из-за перехода на другую локацию.', 409);
             }
@@ -200,6 +214,7 @@ class GatheringService
             $blocked = $this->areaBlockReason($lockedUser, $lockedUser->currentLocation);
             if ($blocked !== null) {
                 $attempt->delete();
+                GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-cancelled');
 
                 return $this->failure($blocked, 422);
             }
@@ -211,6 +226,7 @@ class GatheringService
                 ->firstOrFail();
             if ($node->respawn_at !== null && $node->respawn_at->isFuture()) {
                 $attempt->delete();
+                GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-finished');
 
                 return new GatheringActionResultDTO(
                     ok: false,
@@ -222,6 +238,7 @@ class GatheringService
             $resourceBlock = $this->resourceBlockReason($player, $resource);
             if ($resourceBlock !== null) {
                 $attempt->delete();
+                GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-cancelled');
 
                 return $this->failure($resourceBlock, 422);
             }
@@ -235,6 +252,11 @@ class GatheringService
             $node->respawn_at = now()->addSeconds(max(1, (int) $resource->gathering_respawn_seconds));
             $node->save();
             $attempt->delete();
+
+            GatheringMapUpdated::dispatch($mapId, $nodeId, 'resource-collected');
+            BroadcastGatheringMapUpdate::dispatch($mapId, $nodeId, 'resource-respawned')
+                ->delay($node->respawn_at)
+                ->afterCommit();
 
             return new GatheringActionResultDTO(
                 ok: true,
@@ -265,7 +287,19 @@ class GatheringService
 
     public function cancelForPlayer(int $playerId): int
     {
-        return GatheringAttempt::query()->where('player_id', $playerId)->delete();
+        $attempts = GatheringAttempt::query()
+            ->where('player_id', $playerId)
+            ->with('node.mapResource')
+            ->get();
+
+        if ($attempts->isEmpty()) {
+            return 0;
+        }
+
+        $deleted = GatheringAttempt::query()->whereKey($attempts->modelKeys())->delete();
+        $this->broadcastAttemptUpdates($attempts, 'attempt-cancelled');
+
+        return $deleted;
     }
 
     private function synchronizeNodes(int $mapId): void
@@ -488,15 +522,47 @@ class GatheringService
 
     private function deleteExpiredAttempts(): void
     {
-        GatheringAttempt::query()->where('expires_at', '<=', now())->delete();
+        $attempts = GatheringAttempt::query()
+            ->where('expires_at', '<=', now())
+            ->with('node.mapResource')
+            ->get();
+
+        if ($attempts->isEmpty()) {
+            return;
+        }
+
+        GatheringAttempt::query()->whereKey($attempts->modelKeys())->delete();
+        $this->broadcastAttemptUpdates($attempts, 'attempt-expired');
     }
 
     private function cancelIfContextChanged(User $user): void
     {
-        GatheringAttempt::query()
+        $hasChangedContext = GatheringAttempt::query()
             ->where('player_id', $user->player->id)
             ->where('location_id', '!=', $user->location_id)
-            ->delete();
+            ->exists();
+
+        if ($hasChangedContext) {
+            $this->cancelForPlayer((int) $user->player->id);
+        }
+    }
+
+    private function broadcastAttemptUpdates(iterable $attempts, string $reason): void
+    {
+        $sent = [];
+
+        foreach ($attempts as $attempt) {
+            $mapId = (int) ($attempt->node?->mapResource?->map_id ?? 0);
+            $nodeId = (int) ($attempt->gathering_node_id ?? 0);
+            $key = $mapId.':'.$nodeId;
+
+            if ($mapId < 1 || $nodeId < 1 || isset($sent[$key])) {
+                continue;
+            }
+
+            $sent[$key] = true;
+            GatheringMapUpdated::dispatch($mapId, $nodeId, $reason);
+        }
     }
 
     private function failure(string $message, int $httpCode): GatheringActionResultDTO

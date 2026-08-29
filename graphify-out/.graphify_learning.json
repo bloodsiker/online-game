@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-29T19:22:57.290492+00:00",
+  "generated_at": "2026-08-29T20:17:22.558085+00:00",
   "nodes": {
     "activeeffecttype": {
       "code_fingerprint": "",
@@ -22,7 +22,7 @@
           "q": "нужно для мобов сейчас придумать и добавить скилы или ефекты после ударов типа после удара осталось кровотечение сначала напиши варианты"
         }
       ],
-      "score": 2.709284023,
+      "score": 2.706919333,
       "source_file": "",
       "status": "preferred",
       "uses": 3
@@ -43,7 +43,7 @@
           "q": "нужно в админке сделать какой-то бредкрамб, что бы было удобно возвращаться на шаг назад"
         }
       ],
-      "score": 1.620219181,
+      "score": 1.618805038,
       "source_file": "resources/views/admin/layout/base.blade.php",
       "status": "preferred",
       "uses": 2
@@ -69,7 +69,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 2.514866576,
+      "score": 2.512671576,
       "source_file": "app/DTO/AttackResultDTO.php",
       "status": "preferred",
       "uses": 3
@@ -90,7 +90,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 1.609357027,
       "source_file": "app/DTO/FightHitDTO.php",
       "status": "preferred",
       "uses": 2
@@ -111,7 +111,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 1.609357027,
       "source_file": "app/DTO/MoveResultDTO.php",
       "status": "preferred",
       "uses": 2
@@ -132,7 +132,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 1.609357027,
       "source_file": "app/DTO/ShopCartDTO.php",
       "status": "preferred",
       "uses": 2
@@ -153,7 +153,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 1.609357027,
       "source_file": "app/Events/PlayerChangeStat.php",
       "status": "preferred",
       "uses": 2
@@ -184,7 +184,7 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 3.25557022,
+      "score": 3.252728726,
       "source_file": "app/Events/PlayerDied.php",
       "status": "preferred",
       "uses": 4
@@ -192,8 +192,13 @@
     "app_events_playerleveledup_playerleveledup": {
       "code_fingerprint": "",
       "label": "PlayerLeveledUp",
-      "last": "2026-08-20T11:17:42.836082+00:00",
+      "last": "2026-08-29T19:23:26.612341+00:00",
       "provenance": [
+        {
+          "date": "2026-08-29T19:23:26.612341+00:00",
+          "outcome": "useful",
+          "q": "а если респавн делать на вебсакетах, то что лучше использовать?"
+        },
         {
           "date": "2026-08-20T11:17:42.836082+00:00",
           "outcome": "useful",
@@ -205,16 +210,21 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 2.608492051,
       "source_file": "app/Events/PlayerLeveledUp.php",
       "status": "preferred",
-      "uses": 2
+      "uses": 3
     },
     "app_events_userregistered_userregistered": {
       "code_fingerprint": "",
       "label": "UserRegistered",
-      "last": "2026-08-20T11:17:42.836082+00:00",
+      "last": "2026-08-29T19:23:26.612341+00:00",
       "provenance": [
+        {
+          "date": "2026-08-29T19:23:26.612341+00:00",
+          "outcome": "useful",
+          "q": "а если респавн делать на вебсакетах, то что лучше использовать?"
+        },
         {
           "date": "2026-08-20T11:17:42.836082+00:00",
           "outcome": "useful",
@@ -226,10 +236,10 @@
           "q": "а App\\DTO можна перенести по модулям? і App\\Events"
         }
       ],
-      "score": 1.610762916,
+      "score": 2.608492051,
       "source_file": "app/Events/UserRegistered.php",
       "status": "preferred",
-      "uses": 2
+      "uses": 3
     },
     "app_http_controllers_admin_mapcontroller_mapcontroller": {
       "code_fingerprint": "4e796cd93a9c6b8cf299e88747532570ad92cb8cd2f167e8e6bf7eeee9b3cd26",
@@ -242,7 +252,7 @@
           "q": "добавь в админке редактирование добавленных ресурсов на карте"
         }
       ],
-      "score": 0.990207051,
+      "score": 0.989342788,
       "source_file": "app/Http/Controllers/Admin/MapController.php",
       "status": "tentative",
       "uses": 1
@@ -258,7 +268,7 @@
           "q": "добавь коэффициент опыта в админке для игроков"
         }
       ],
-      "score": 0.803008749,
+      "score": 0.802307875,
       "source_file": "app/Http/Controllers/Controller.php",
       "status": "tentative",
       "uses": 1
@@ -274,7 +284,7 @@
           "q": "Как из страницы локации вызывается лечение у Целительного фонтана и где отображается ответ игроку?"
         }
       ],
-      "score": 0.888005092,
+      "score": 0.887230033,
       "source_file": "app/Http/Controllers/HealthController.php",
       "status": "tentative",
       "uses": 1
@@ -310,7 +320,7 @@
           "q": "Как сделать отметку Вы здесь ссылкой на карту текущей локации и выровнять информационные блоки карт по верху?"
         }
       ],
-      "score": 7.206591157,
+      "score": 7.200301174,
       "source_file": "app/Http/Controllers/HomeController.php",
       "status": "preferred",
       "uses": 8
@@ -326,7 +336,7 @@
           "q": "где-то используеться свойство is_heal из share_item ?"
         }
       ],
-      "score": 0.811885358,
+      "score": 0.811176737,
       "source_file": "app/Http/Controllers/HotbarController.php",
       "status": "tentative",
       "uses": 1
@@ -357,7 +367,7 @@
           "q": "Сделать приглашения в группу персональными с UUID и показывать сообщения действий группы через game-message-modal"
         }
       ],
-      "score": 3.714432568,
+      "score": 3.711190575,
       "source_file": "app/Http/Controllers/PartyController.php",
       "status": "preferred",
       "uses": 4
@@ -393,7 +403,7 @@
           "q": "а как теперь трекаеться роследнее действие игрока?"
         }
       ],
-      "score": 5.000240699,
+      "score": 4.99587644,
       "source_file": "app/Http/Middleware/UpdateLastActivityMiddleware.php",
       "status": "preferred",
       "uses": 6
@@ -414,7 +424,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Listeners/GiveStarterBonus.php",
       "status": "preferred",
       "uses": 2
@@ -435,7 +445,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Listeners/GrantReferralReward.php",
       "status": "preferred",
       "uses": 2
@@ -461,7 +471,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 2.411807649,
+      "score": 2.409702599,
       "source_file": "app/Listeners/Player/Death/RemoveExpOnDeathListener.php",
       "status": "preferred",
       "uses": 3
@@ -482,7 +492,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Listeners/RecalculatePlayerModification.php",
       "status": "preferred",
       "uses": 2
@@ -503,7 +513,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Listeners/RecalculatePlayerStats.php",
       "status": "preferred",
       "uses": 2
@@ -524,7 +534,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Listeners/SendLevelUpSystemMessage.php",
       "status": "preferred",
       "uses": 2
@@ -545,7 +555,7 @@
           "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
         }
       ],
-      "score": 1.304553504,
+      "score": 1.303414877,
       "source_file": "app/Models/Experience.php",
       "status": "preferred",
       "uses": 2
@@ -581,7 +591,7 @@
           "q": "поставь на фон временно эту картинку public/prototypes/map.png"
         }
       ],
-      "score": 14.729485227,
+      "score": 14.716629187,
       "source_file": "app/Models/Map.php",
       "status": "preferred",
       "uses": 16
@@ -602,7 +612,7 @@
           "q": "а App\\Enums можно попереносить?"
         }
       ],
-      "score": 1.589815693,
+      "score": 1.588428086,
       "source_file": "app/Models/Party/Party.php",
       "status": "preferred",
       "uses": 2
@@ -633,7 +643,7 @@
           "q": "1. player_id. 2. ок. 3. время добычи должно быть на каждом предмете и от редкости увеличиваться и почти все будет настраиваться на самом ресурсе. 4. в инстансах не будет добычи. 5. проверять в двух руках. 6. ок. 7. только у мастерской, неудачи не может быть, по 1 предмету. 8. ок, отменяем добычу. 9. можно добывать, дальше игроку решать что делать с переполненным рюкзаком"
         }
       ],
-      "score": 3.962050834,
+      "score": 3.958592717,
       "source_file": "app/Models/Skill.php",
       "status": "preferred",
       "uses": 4
@@ -654,7 +664,7 @@
           "q": "исправляй баг"
         }
       ],
-      "score": 1.610612157,
+      "score": 1.609206398,
       "source_file": "app/Modules/Backpack/Application/UseCases/GetBackpack.php",
       "status": "preferred",
       "uses": 2
@@ -670,7 +680,7 @@
           "q": "добавь новый тип предметов - Инструмент"
         }
       ],
-      "score": 0.990515273,
+      "score": 0.989650741,
       "source_file": "app/Modules/Backpack/Domain/DTO/BackpackDTO.php",
       "status": "tentative",
       "uses": 1
@@ -706,7 +716,7 @@
           "q": "1. Поле сбора ресурсов привязано к map_id и общее для всех локаций карты. 2. Рецепты мирных профессий изучаются через player_recipes по паттерну MagicSkillBook. 3. Инструменты обязательные, бесконечные, проверяются в руках. Какие еще есть вопросы?"
         }
       ],
-      "score": 12.485371631,
+      "score": 12.474474275,
       "source_file": "app/Modules/Backpack/Domain/Models/Backpack.php",
       "status": "preferred",
       "uses": 14
@@ -737,7 +747,7 @@
           "q": "сам предмет выдавался через сервис прогресса квеста, минуя DropService разве это верно архитектурно?"
         }
       ],
-      "score": 3.363591104,
+      "score": 3.360655329,
       "source_file": "app/Modules/Backpack/Domain/Services/BackpackService.php",
       "status": "preferred",
       "uses": 4
@@ -753,7 +763,7 @@
           "q": "больше нет проблем с n+1?"
         }
       ],
-      "score": 0.820050827,
+      "score": 0.819335078,
       "source_file": "app/Modules/Backpack/Domain/Services/ItemTooltip/BackpackItemTooltipStrategy.php",
       "status": "tentative",
       "uses": 1
@@ -769,7 +779,7 @@
           "q": "Как немедленно передать сработавший в бою эффект в character-frame?"
         }
       ],
-      "score": 0.90410366,
+      "score": 0.903314549,
       "source_file": "app/Modules/Battle/Application/DTOs/FightDTO.php",
       "status": "tentative",
       "uses": 1
@@ -785,7 +795,7 @@
           "q": "если на локацию добавить поля has_npc has_structure и так дале. И по этому признаку уже подгружать нужные ресурсы. При передвижении поможет оптимизировать?"
         }
       ],
-      "score": 0.819533779,
+      "score": 0.818818481,
       "source_file": "app/Modules/Battle/Application/Services/Battle/MonsterSpawner.php",
       "status": "tentative",
       "uses": 1
@@ -821,7 +831,7 @@
           "q": "если учтывать такой темп прокачки и с учетом что игрок будет качаться по 4-6ч в день, сколько уровней игрок может прокачать за 1 месяц, 6 мес и 1 год?"
         }
       ],
-      "score": 4.490769839,
+      "score": 4.486850251,
       "source_file": "app/Modules/Battle/Application/Services/Combat/AttackService.php",
       "status": "preferred",
       "uses": 6
@@ -837,7 +847,7 @@
           "q": "добавь новый тип предметов - Инструмент"
         }
       ],
-      "score": 0.990515273,
+      "score": 0.989650741,
       "source_file": "app/Modules/Battle/Application/Services/Combat/AttackStrategyResolver.php",
       "status": "tentative",
       "uses": 1
@@ -873,7 +883,7 @@
           "q": "такие ефекты как стан и паралич я хочу что бы навешивались на время а не на количество ходов"
         }
       ],
-      "score": 10.596440579,
+      "score": 10.587191901,
       "source_file": "app/Modules/Battle/Application/Services/Combat/BattleEffectService.php",
       "status": "preferred",
       "uses": 12
@@ -894,7 +904,7 @@
           "q": "а сейчас все мобы атакуют физ уроном? что нужно сделать что бы и некоторые мобы били маг уроном?"
         }
       ],
-      "score": 1.767677963,
+      "score": 1.766135116,
       "source_file": "app/Modules/Battle/Application/Services/Combat/Boss/BossPhaseService.php",
       "status": "preferred",
       "uses": 2
@@ -931,7 +941,7 @@
           "q": "сделаешь это что бы ничего не поломать?"
         }
       ],
-      "score": 9.903793644,
+      "score": 9.895149515,
       "source_file": "app/Modules/Battle/Application/Services/Combat/FightOrchestrator.php",
       "status": "contested",
       "uses": 15,
@@ -968,7 +978,7 @@
           "q": "изучи систему боя App\\Modules\\Battle и баланс между треугольником уворот-крит-танк. Не нарушен ли баланс и какие твои будут советы?"
         }
       ],
-      "score": 3.832194433,
+      "score": 3.828849656,
       "source_file": "app/Modules/Battle/Application/Services/Combat/HitCalculator.php",
       "status": "preferred",
       "uses": 5
@@ -1004,7 +1014,7 @@
           "q": "attack_type вынеси в енам и используй медоти енама а не $monster->attack_type === 'physical'"
         }
       ],
-      "score": 6.313206288,
+      "score": 6.30769606,
       "source_file": "app/Modules/Battle/Application/Services/Combat/MonsterAttackService.php",
       "status": "preferred",
       "uses": 8
@@ -1025,7 +1035,7 @@
           "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
         }
       ],
-      "score": 1.644807304,
+      "score": 1.6433717,
       "source_file": "app/Modules/Battle/Application/Services/Combat/PlayerDeathService.php",
       "status": "preferred",
       "uses": 2
@@ -1046,7 +1056,7 @@
           "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
         }
       ],
-      "score": 1.704577504,
+      "score": 1.703089731,
       "source_file": "app/Modules/Battle/Application/Services/Combat/Strategies/MagicAttackStrategy.php",
       "status": "preferred",
       "uses": 2
@@ -1062,7 +1072,7 @@
           "q": "проверь по коду реализацию которую сделал клауд коде"
         }
       ],
-      "score": 0.864644715,
+      "score": 0.863890044,
       "source_file": "app/Modules/Battle/Application/Services/Combat/Strategies/MagicBuffStrategy.php",
       "status": "tentative",
       "uses": 1
@@ -1099,7 +1109,7 @@
           "q": "как оптимизировать PHP-FPM?"
         }
       ],
-      "score": 3.769495504,
+      "score": 3.766205451,
       "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/Battle.php",
       "status": "contested",
       "uses": 7,
@@ -1127,7 +1137,7 @@
           "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
         }
       ],
-      "score": 0.662317676,
+      "score": 0.661739599,
       "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/BattleDetail.php",
       "status": "contested",
       "uses": 2,
@@ -1159,7 +1169,7 @@
           "q": "а для такой игры лучше mysql posgres?"
         }
       ],
-      "score": 2.957083422,
+      "score": 2.954502451,
       "source_file": "app/Modules/Battle/Infrastructure/Persistence/Models/BattleRound.php",
       "status": "preferred",
       "uses": 4
@@ -1195,7 +1205,7 @@
           "q": "как можно протестировать нагрузку приложения, на сервер? на браузер пользователя на базу данных?"
         }
       ],
-      "score": 3.274973714,
+      "score": 3.272115284,
       "source_file": "app/Modules/Battle/Presentation/Http/FightController.php",
       "status": "preferred",
       "uses": 5
@@ -1232,7 +1242,7 @@
           "q": "переноси"
         }
       ],
-      "score": 6.616637056,
+      "score": 6.61086199,
       "source_file": "app/Modules/Chat/Application/Services/ChatService.php",
       "status": "contested",
       "uses": 9,
@@ -1249,7 +1259,7 @@
           "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 0.791292914,
+      "score": 0.790602265,
       "source_file": "app/Modules/Chat/Application/UseCases/GetMessages.php",
       "status": "tentative",
       "uses": 1
@@ -1265,7 +1275,7 @@
           "q": "Добавить защищённый чат-канал Группа для участников Party"
         }
       ],
-      "score": 0.928906769,
+      "score": 0.92809601,
       "source_file": "app/Modules/Chat/Application/UseCases/SendMessage.php",
       "status": "tentative",
       "uses": 1
@@ -1287,7 +1297,7 @@
           "q": "а разве SendQuestItemDropMessage не должен быть в домене чата?"
         }
       ],
-      "score": 2.4879e-05,
+      "score": 2.4858e-05,
       "source_file": "app/Modules/Chat/ChatServiceProvider.php",
       "status": "contested",
       "uses": 1,
@@ -1304,7 +1314,7 @@
           "q": "Удалять чат-сообщение с приглашением в группу после принятия или отклонения"
         }
       ],
-      "score": 0.928602022,
+      "score": 0.927791529,
       "source_file": "app/Modules/Chat/Domain/Models/ChatMessage.php",
       "status": "tentative",
       "uses": 1
@@ -1330,7 +1340,7 @@
           "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 2.512125129,
+      "score": 2.509932521,
       "source_file": "app/Modules/Chat/Domain/Services/MessageRenderer.php",
       "status": "preferred",
       "uses": 3
@@ -1356,7 +1366,7 @@
           "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 2.512002716,
+      "score": 2.509810215,
       "source_file": "app/Modules/Chat/Infrastructure/Persistence/EloquentChatMessageRepository.php",
       "status": "preferred",
       "uses": 3
@@ -1377,7 +1387,7 @@
           "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
         }
       ],
-      "score": 1.750787852,
+      "score": 1.749259747,
       "source_file": "app/Modules/Chat/Presentation/Http/ChatController.php",
       "status": "preferred",
       "uses": 2
@@ -1393,7 +1403,7 @@
           "q": "поправь в админке в разделе http://localhost:85/admin/clans ототбражение иконки клана"
         }
       ],
-      "score": 0.809412701,
+      "score": 0.808706238,
       "source_file": "app/Modules/Clan/Domain/Models/Clan.php",
       "status": "tentative",
       "uses": 1
@@ -1409,7 +1419,7 @@
           "q": "больше нет проблем с n+1?"
         }
       ],
-      "score": 0.820050827,
+      "score": 0.819335078,
       "source_file": "app/Modules/Clan/Presentation/Http/ClanWarehouseController.php",
       "status": "tentative",
       "uses": 1
@@ -1445,7 +1455,7 @@
           "q": "переноси что нужно"
         }
       ],
-      "score": 4.041193195,
+      "score": 4.037666002,
       "source_file": "app/Modules/Dungeon/Application/Services/DungeonCoordinator.php",
       "status": "preferred",
       "uses": 5
@@ -1466,7 +1476,7 @@
           "q": "а App\\Enums можно попереносить?"
         }
       ],
-      "score": 1.589815693,
+      "score": 1.588428086,
       "source_file": "app/Modules/Dungeon/Infrastructure/Persistence/Models/Dungeon.php",
       "status": "preferred",
       "uses": 2
@@ -1482,7 +1492,7 @@
           "q": "Как немедленно передать сработавший в бою эффект в character-frame?"
         }
       ],
-      "score": 0.90410366,
+      "score": 0.903314549,
       "source_file": "app/Modules/Interface/Application/Mappers/HeroPageViewMapper.php",
       "status": "tentative",
       "uses": 1
@@ -1503,7 +1513,7 @@
           "q": "Если добавить в главный шаблон один AJAX, который будет отслеживать онлайн игрока, HP/MP, активные бафы и дебафы, обновлять прогресс-бары в реальном времени и дату последнего онлайна?"
         }
       ],
-      "score": 1.644136129,
+      "score": 1.64270111,
       "source_file": "app/Modules/Interface/Application/UseCases/GetHeroPage.php",
       "status": "preferred",
       "uses": 2
@@ -1519,7 +1529,7 @@
           "q": "Стоит ли кэшировать список онлайн-игроков на 5-10 минут в Redis?"
         }
       ],
-      "score": 0.900864391,
+      "score": 0.900078108,
       "source_file": "app/Modules/Interface/Application/UseCases/GetWhoPage.php",
       "status": "tentative",
       "uses": 1
@@ -1535,7 +1545,7 @@
           "q": "Стоит ли кэшировать список онлайн-игроков на 5-10 минут в Redis?"
         }
       ],
-      "score": 0.900864391,
+      "score": 0.900078108,
       "source_file": "app/Modules/Interface/Infrastructure/Persistence/EloquentInterfaceReadRepository.php",
       "status": "tentative",
       "uses": 1
@@ -1571,7 +1581,7 @@
           "q": "Сделать приглашения в группу персональными с UUID и показывать сообщения действий группы через game-message-modal"
         }
       ],
-      "score": 6.28733507,
+      "score": 6.281847422,
       "source_file": "app/Modules/Interface/Presentation/Http/InterfaceController.php",
       "status": "preferred",
       "uses": 7
@@ -1587,7 +1597,7 @@
           "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
         }
       ],
-      "score": 0.806048926,
+      "score": 0.805345399,
       "source_file": "app/Modules/Item/Application/UseCases/DropItem.php",
       "status": "tentative",
       "uses": 1
@@ -1608,7 +1618,7 @@
           "q": "в share_item нужно добавить признак или можно предмет выбросить, и по етому признаку выводить или не выводить кнопку Выбросить в рюкзаке"
         }
       ],
-      "score": 1.796564199,
+      "score": 1.79499614,
       "source_file": "app/Modules/Item/Domain/Services/ItemService.php",
       "status": "preferred",
       "uses": 2
@@ -1644,7 +1654,7 @@
           "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
         }
       ],
-      "score": 4.249010174,
+      "score": 4.245301596,
       "source_file": "app/Modules/Item/Infrastructure/Persistence/Models/Item.php",
       "status": "preferred",
       "uses": 5
@@ -1680,7 +1690,7 @@
           "q": "мне нужно придумать как сделать мирные профессии, какие именно и как технически реализовать их в игре"
         }
       ],
-      "score": 8.220497118,
+      "score": 8.213322188,
       "source_file": "app/Modules/Location/Application/Mappers/LocationPageViewMapper.php",
       "status": "preferred",
       "uses": 9
@@ -1696,7 +1706,7 @@
           "q": "делай пока что только COUNT(*)"
         }
       ],
-      "score": 0.81964181,
+      "score": 0.818926418,
       "source_file": "app/Modules/Location/Application/UseCases/GetLocationPage.php",
       "status": "tentative",
       "uses": 1
@@ -1712,7 +1722,7 @@
           "q": "делай пока что только COUNT(*)"
         }
       ],
-      "score": 0.81964181,
+      "score": 0.818926418,
       "source_file": "app/Modules/Location/Application/UseCases/MoveToLocation.php",
       "status": "tentative",
       "uses": 1
@@ -1743,7 +1753,7 @@
           "q": "исправляй баг"
         }
       ],
-      "score": 3.255893568,
+      "score": 3.253051792,
       "source_file": "app/Modules/Location/Infrastructure/Persistence/EloquentLocationReadRepository.php",
       "status": "preferred",
       "uses": 4
@@ -1780,7 +1790,7 @@
           "q": "Где добавить общее число локаций рядом со счётчиком карт?"
         }
       ],
-      "score": 10.527528937,
+      "score": 10.518340406,
       "source_file": "app/Modules/Location/Infrastructure/Persistence/Models/Location.php",
       "status": "contested",
       "uses": 13,
@@ -1817,7 +1827,7 @@
           "q": "сделать отдельные блоки эффектов и умений у моба как в референсе"
         }
       ],
-      "score": 10.859559614,
+      "score": 10.850081283,
       "source_file": "app/Modules/MagicSkill/Infrastructure/Persistence/Models/Effect.php",
       "status": "preferred",
       "uses": 12
@@ -1843,7 +1853,7 @@
           "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
         }
       ],
-      "score": 2.583884528,
+      "score": 2.581629288,
       "source_file": "app/Modules/MagicSkill/Infrastructure/Persistence/Models/MagicSkill.php",
       "status": "preferred",
       "uses": 3
@@ -1859,7 +1869,7 @@
           "q": "Где должна храниться длительность переиспользуемого эффекта для монстров и магических умений?"
         }
       ],
-      "score": 0.903935131,
+      "score": 0.903146168,
       "source_file": "app/Modules/MagicSkill/Infrastructure/Persistence/Models/MagicSkillEffect.php",
       "status": "tentative",
       "uses": 1
@@ -1875,7 +1885,7 @@
           "q": "пока что добавь новое поле картинка для скилов и ефектов"
         }
       ],
-      "score": 0.903723242,
+      "score": 0.902934464,
       "source_file": "app/Modules/MagicSkill/Presentation/Http/MagicSkillController.php",
       "status": "tentative",
       "uses": 1
@@ -1891,7 +1901,7 @@
           "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
         }
       ],
-      "score": 0.81172343,
+      "score": 0.81101495,
       "source_file": "app/Modules/Monster/Application/UseCases/GetMonsterInfoPage.php",
       "status": "tentative",
       "uses": 1
@@ -1912,7 +1922,7 @@
           "q": "нужно в информацию о монстре добавит еще карты на которых он обитает http://localhost:85/info/m/5032"
         }
       ],
-      "score": 1.717010572,
+      "score": 1.715511948,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/EloquentMonsterReadRepository.php",
       "status": "preferred",
       "uses": 2
@@ -1943,7 +1953,7 @@
           "q": "добавь в информацию о мобе блок, какие эффекты и какие скилы есть у моба"
         }
       ],
-      "score": 3.622809996,
+      "score": 3.619647972,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/BossMechanic.php",
       "status": "preferred",
       "uses": 4
@@ -1980,7 +1990,7 @@
           "q": "начинай делать 1 пункт а на счет Effect, создаш новый модуль Effect"
         }
       ],
-      "score": 12.152486074,
+      "score": 12.141879265,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/Monster.php",
       "status": "contested",
       "uses": 16,
@@ -2002,7 +2012,7 @@
           "q": "1. Не совсем понял ... должно работать по секундам ... исправляй на 1 сек ... баф и лечение не должны давать опыт колдовства ... изучение книг - фиксь"
         }
       ],
-      "score": 1.768445118,
+      "score": 1.766901602,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/MonsterActiveEffect.php",
       "status": "preferred",
       "uses": 2
@@ -2028,7 +2038,7 @@
           "q": "начинай делать 1 пункт а на счет Effect, создаш новый модуль Effect"
         }
       ],
-      "score": 2.71160542,
+      "score": 2.709238704,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/MonsterEffect.php",
       "status": "preferred",
       "uses": 3
@@ -2050,7 +2060,7 @@
           "q": "ты использовал немного не тех мобов, для прокачки используй локацию Канализация и Шепчущий Лес"
         }
       ],
-      "score": 0.248984741,
+      "score": 0.248767425,
       "source_file": "app/Modules/Monster/Infrastructure/Persistence/Models/MonsterOnLocation.php",
       "status": "contested",
       "uses": 1,
@@ -2072,7 +2082,7 @@
           "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
         }
       ],
-      "score": 1.6523567,
+      "score": 1.650914507,
       "source_file": "app/Modules/Player/Domain/DTO/StatSheet.php",
       "status": "preferred",
       "uses": 2
@@ -2108,7 +2118,7 @@
           "q": "а характеристики предметов лучше вынести в редис?"
         }
       ],
-      "score": 8.309605541,
+      "score": 8.302352835,
       "source_file": "app/Modules/Player/Domain/Services/PlayerStatService.php",
       "status": "preferred",
       "uses": 11
@@ -2145,7 +2155,7 @@
           "q": "1. Поле сбора ресурсов привязано к map_id и общее для всех локаций карты. 2. Рецепты мирных профессий изучаются через player_recipes по паттерну MagicSkillBook. 3. Инструменты обязательные, бесконечные, проверяются в руках. Какие еще есть вопросы?"
         }
       ],
-      "score": 13.559277664,
+      "score": 13.547442992,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/Player.php",
       "status": "contested",
       "uses": 19,
@@ -2182,7 +2192,7 @@
           "q": "а если я хочу что бы отравление могло убить в состоянии афк?"
         }
       ],
-      "score": 6.001410914,
+      "score": 5.996172824,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerActiveEffect.php",
       "status": "preferred",
       "uses": 7
@@ -2218,7 +2228,7 @@
           "q": "а если кеширование вынестив  редис, это даст прирост в скорости и производительности?"
         }
       ],
-      "score": 6.373311969,
+      "score": 6.36774928,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerEquipment.php",
       "status": "preferred",
       "uses": 7
@@ -2239,7 +2249,7 @@
           "q": "как мне продумать системую урона в боях для магов и заклинаний какая градация получения новых скилов, какой урон ставить по соотношению с воинами и на каких уровнях или при каких характеристиках учить новые скилы урон чистый от того что в заклинаниях или бонус от интелекта ну и что еще можешь посоветовать?"
         }
       ],
-      "score": 1.680161285,
+      "score": 1.678694824,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerMagicSkill.php",
       "status": "preferred",
       "uses": 2
@@ -2260,7 +2270,7 @@
           "q": "из всех типов урона я буду использовать Базовое заклинание с кулдауном в 1сек DoT лечение с кулдауном 1 сек баф с кулдауном дебаф с понижением характеристик; мана в единицах; изучение: покупка книги + характеристики + уровень колдовства. Теперь напиши советы и план реализации"
         }
       ],
-      "score": 1.813231807,
+      "score": 1.811649201,
       "source_file": "app/Modules/Player/Infrastructure/Persistence/Models/PlayerSkill.php",
       "status": "preferred",
       "uses": 2
@@ -2291,7 +2301,7 @@
           "q": "Сообщение о выпавшем квестовом предмете должно приходить в основной чат только игроку, который убил моба; после убийства виден лишь боковой лог о завершении сбора"
         }
       ],
-      "score": 3.183925747,
+      "score": 3.181146785,
       "source_file": "app/Modules/Quest/Domain/Services/QuestProgressService.php",
       "status": "preferred",
       "uses": 4
@@ -2307,7 +2317,7 @@
           "q": "исправляй по приоритетам"
         }
       ],
-      "score": 0.82106337,
+      "score": 0.820346738,
       "source_file": "app/Modules/Quest/Infrastructure/Persistence/Models/Quest.php",
       "status": "tentative",
       "uses": 1
@@ -2328,7 +2338,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 1.58948453,
+      "score": 1.588097212,
       "source_file": "app/Modules/Referral/Application/UseCases/GrantReferralRewards.php",
       "status": "preferred",
       "uses": 2
@@ -2344,7 +2354,7 @@
           "q": "исправляй по приоритетам"
         }
       ],
-      "score": 0.82106337,
+      "score": 0.820346738,
       "source_file": "app/Modules/Reputation/Infrastructure/Persistence/Models/Reputation.php",
       "status": "tentative",
       "uses": 1
@@ -2380,7 +2390,7 @@
           "q": "добавь в админке редактирование добавленных ресурсов на карте"
         }
       ],
-      "score": 14.185747842,
+      "score": 14.173366381,
       "source_file": "app/Modules/Share/Infrastructure/Persistence/Models/ShareItem.php",
       "status": "preferred",
       "uses": 16
@@ -2396,7 +2406,7 @@
           "q": "а характеристики предметов лучше вынести в редис?"
         }
       ],
-      "score": 0.819678612,
+      "score": 0.818963188,
       "source_file": "app/Modules/Share/Infrastructure/Persistence/Models/ShareItemStat.php",
       "status": "tentative",
       "uses": 1
@@ -2427,7 +2437,7 @@
           "q": "мне нужно придумать как сделать мирные профессии, какие именно и как технически реализовать их в игре"
         }
       ],
-      "score": 3.91892285,
+      "score": 3.915502375,
       "source_file": "app/Modules/Share/Infrastructure/Persistence/Models/ShareRecipe.php",
       "status": "preferred",
       "uses": 4
@@ -2458,7 +2468,7 @@
           "q": "мне нужно придумать как сделать мирные профессии, какие именно и как технически реализовать их в игре"
         }
       ],
-      "score": 3.91892285,
+      "score": 3.915502375,
       "source_file": "app/Modules/Structure/Blacksmith/Domain/Services/CraftService.php",
       "status": "preferred",
       "uses": 4
@@ -2474,7 +2484,7 @@
           "q": "а какие ключи могу расходоваться? там вроде есть ключи с количеством использований"
         }
       ],
-      "score": 0.804418055,
+      "score": 0.803715951,
       "source_file": "app/Modules/Structure/Blacksmith/Domain/Services/RuneService.php",
       "status": "tentative",
       "uses": 1
@@ -2500,7 +2510,7 @@
           "q": "Как из страницы локации вызывается лечение у Целительного фонтана и где отображается ответ игроку?"
         }
       ],
-      "score": 2.852242221,
+      "score": 2.849752756,
       "source_file": "app/Modules/Structure/Infrastructure/Persistence/Models/Structure.php",
       "status": "preferred",
       "uses": 3
@@ -2537,7 +2547,7 @@
           "q": "а как работает sessions.last_activity?"
         }
       ],
-      "score": 3.941569492,
+      "score": 3.938129251,
       "source_file": "app/Modules/User/Infrastructure/Persistence/Models/User.php",
       "status": "contested",
       "uses": 6,
@@ -2554,7 +2564,7 @@
           "q": "а App\\Enums можно попереносить?"
         }
       ],
-      "score": 0.794865949,
+      "score": 0.794172182,
       "source_file": "app/Repositories/PartyRepository.php",
       "status": "tentative",
       "uses": 1
@@ -2590,7 +2600,7 @@
           "q": "проверь или верно работает оповещение в чате, если игроку с моба выпадает квестовый предмет app/Services/DropService.php app/Modules/Chat/Application/Services/ChatService.php"
         }
       ],
-      "score": 3.960837959,
+      "score": 3.957380901,
       "source_file": "app/Services/DropService.php",
       "status": "preferred",
       "uses": 5
@@ -2621,7 +2631,7 @@
           "q": "посмотри куда еще нужно перенести листенеры с App\\Listeners"
         }
       ],
-      "score": 3.189511372,
+      "score": 3.186727535,
       "source_file": "app/Services/ExperienceService.php",
       "status": "preferred",
       "uses": 4
@@ -2637,7 +2647,7 @@
           "q": "и сделай тултип светлый, что-то похожее на оранжевый? такого цвета как тултип при наведении на предметы"
         }
       ],
-      "score": 0.996229305,
+      "score": 0.995359786,
       "source_file": "app/Services/ItemTooltip/ItemTooltipCollector.php",
       "status": "tentative",
       "uses": 1
@@ -2653,7 +2663,7 @@
           "q": "больше нет проблем с n+1?"
         }
       ],
-      "score": 0.820050827,
+      "score": 0.819335078,
       "source_file": "app/Services/ItemTooltip/ItemTooltipStatsBuilder.php",
       "status": "tentative",
       "uses": 1
@@ -2689,7 +2699,7 @@
           "q": "Сделать приглашения в группу персональными с UUID и показывать сообщения действий группы через game-message-modal"
         }
       ],
-      "score": 5.438870427,
+      "score": 5.434123327,
       "source_file": "app/Services/PartyService.php",
       "status": "preferred",
       "uses": 6
@@ -2715,7 +2725,7 @@
           "q": "а при переходе на локациях, немного запросов на проверку есть ли на локации нпс или здание или какой-то закрытый переход?"
         }
       ],
-      "score": 2.444078022,
+      "score": 2.441944807,
       "source_file": "app/Services/PlayerMovementService.php",
       "status": "preferred",
       "uses": 3
@@ -2736,7 +2746,7 @@
           "q": "из всех типов урона я буду использовать Базовое заклинание с кулдауном в 1сек DoT лечение с кулдауном 1 сек баф с кулдауном дебаф с понижением характеристик; мана в единицах; изучение: покупка книги + характеристики + уровень колдовства. Теперь напиши советы и план реализации"
         }
       ],
-      "score": 1.813231807,
+      "score": 1.811649201,
       "source_file": "app/Services/PlayerSkillService.php",
       "status": "preferred",
       "uses": 2
@@ -2752,7 +2762,7 @@
           "q": "Оформить сообщения приглашения в группу чёрным курсивом в чате"
         }
       ],
-      "score": 0.92925994,
+      "score": 0.928448873,
       "source_file": "",
       "status": "tentative",
       "uses": 1
@@ -2773,7 +2783,7 @@
           "q": "нужно в админке сделать какой-то бредкрамб, что бы было удобно возвращаться на шаг назад"
         }
       ],
-      "score": 1.620219181,
+      "score": 1.618805038,
       "source_file": "resources/views/admin/layout/header.blade.php",
       "status": "preferred",
       "uses": 2
@@ -2789,7 +2799,7 @@
           "q": "додай тестовых по 1 ресурсу и по 1 интрументу и поставь на карту Шепчущий лес"
         }
       ],
-      "score": 0.987769388,
+      "score": 0.986907253,
       "source_file": "",
       "status": "tentative",
       "uses": 1

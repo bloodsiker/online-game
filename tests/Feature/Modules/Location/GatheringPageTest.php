@@ -29,6 +29,7 @@ class GatheringPageTest extends TestCase
 
     public function test_gathering_view_uses_server_endpoints_and_double_click_nodes(): void
     {
+        $this->withoutVite();
         $page = $this->makeUseCase()->execute($this->makeUser());
         $html = view('location::gathering', ['page' => $page])->render();
 
@@ -61,6 +62,9 @@ class GatheringPageTest extends TestCase
         $this->assertStringContainsString('Тяните карту или используйте прокрутку', $html);
         $this->assertStringContainsString("addEventListener('pointerdown'", $html);
         $this->assertStringContainsString('scrollLeft', $html);
+        $this->assertStringContainsString("window.Echo.channel('gathering.map.' + mapId)", $html);
+        $this->assertStringContainsString("listen('.gathering.map.updated'", $html);
+        $this->assertStringNotContainsString('window.setInterval(refreshState, 2000)', $html);
         $this->assertStringNotContainsString('← Вернуться на локацию', $html);
         $this->assertStringNotContainsString('Тихая поляна', $html);
         $this->assertStringNotContainsString('Здесь растут лечебные травы.', $html);

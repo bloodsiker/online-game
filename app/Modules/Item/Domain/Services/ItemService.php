@@ -213,6 +213,12 @@ class ItemService
         $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
+            if ($typeItem === ShareItemType::TOOL
+                && ($playerEquip->handLeft?->itemInfo?->type === ShareItemType::TOOL
+                    || $playerEquip->handRight?->itemInfo?->type === ShareItemType::TOOL)) {
+                return 'В руках уже находится инструмент.';
+            }
+
             if ($playerEquip->handLeft?->itemInfo?->is_two_hand) {
                 return 'Слот занят двуручным оружием';
             }

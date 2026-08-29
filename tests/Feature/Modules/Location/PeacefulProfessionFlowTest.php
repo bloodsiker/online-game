@@ -9,6 +9,8 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Item\Domain\Services\ItemService;
+use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
+use App\Modules\Location\Domain\Events\GatheringMapUpdated;
 use App\Modules\Location\Domain\Services\GatheringService;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
@@ -18,6 +20,8 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Mockery;
 use Tests\TestCase;
@@ -73,6 +77,43 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertGreaterThanOrEqual(18, hypot((float) $newPosition->x_percent - (float) $previousPosition->x_percent, (float) $newPosition->y_percent - (float) $previousPosition->y_percent));
     }
 
+    public function test_gathering_changes_are_broadcast_and_delayed_updates_are_queued(): void
+    {
+        Carbon::setTestNow('2026-08-29 12:00:00');
+        Event::fake([GatheringMapUpdated::class]);
+        Queue::fake([BroadcastGatheringMapUpdate::class]);
+        $this->seedGatheringResource();
+
+        $backpack = Mockery::mock(BackpackService::class);
+        $backpack->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
+        $service = new GatheringService($backpack);
+        $user = User::query()->findOrFail(1);
+        $nodeId = $service->state($user)['nodes'][0]['id'];
+
+        $this->assertTrue($service->start($user, $nodeId)->ok);
+        Event::assertDispatched(
+            GatheringMapUpdated::class,
+            fn (GatheringMapUpdated $event): bool => $event->mapId === 1
+                && $event->nodeId === $nodeId
+                && $event->reason === 'attempt-started',
+        );
+        Queue::assertPushed(
+            BroadcastGatheringMapUpdate::class,
+            fn (BroadcastGatheringMapUpdate $job): bool => $job->reason === 'attempt-expired',
+        );
+
+        Carbon::setTestNow('2026-08-29 12:00:05');
+        $this->assertTrue($service->complete($user)->ok);
+        Event::assertDispatched(
+            GatheringMapUpdated::class,
+            fn (GatheringMapUpdated $event): bool => $event->reason === 'resource-collected',
+        );
+        Queue::assertPushed(
+            BroadcastGatheringMapUpdate::class,
+            fn (BroadcastGatheringMapUpdate $job): bool => $job->reason === 'resource-respawned',
+        );
+    }
+
     public function test_required_tool_is_accepted_in_either_hand(): void
     {
         $this->seedGatheringResource();
@@ -125,7 +166,7 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertDatabaseHas('player_skills', ['player_id' => 2, 'skill_id' => 10, 'exp' => 0]);
     }
 
-    public function test_tool_can_be_equipped_in_either_free_hand(): void
+    public function test_second_tool_cannot_be_equipped_when_another_tool_is_in_hand(): void
     {
         $this->seedGatheringResource();
         DB::table('items')->insert(['id' => 201, 'share_item_id' => 21]);
@@ -149,15 +190,15 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $error = $service->equip(User::query()->findOrFail(1), 201);
 
-        $this->assertNull($error);
+        $this->assertSame('В руках уже находится инструмент.', $error);
         $this->assertDatabaseHas('player_equipments', [
             'player_id' => 1,
-            'hand_left' => 201,
+            'hand_left' => null,
             'hand_right' => 200,
         ]);
         $this->assertDatabaseHas('backpacks', [
             'item_id' => 201,
-            'equipped' => true,
+            'equipped' => false,
         ]);
     }
 
