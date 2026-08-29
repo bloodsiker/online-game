@@ -210,6 +210,21 @@
                                                     </tr>
                                                 @endif
 
+                                                @if($structure->isBarterShop())
+                                                    <tr class="bg_l" title=""
+                                                        onclick="location.href='{{ route('barter_shop', ['id' => $structure->id]) }}'" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                        <td class="brd2-top brd2-bt" width="1%">
+                                                            <img src="{{ asset('img/icon/qst_store.gif') }}" alt="icon" width="46" height="28">
+                                                        </td>
+                                                        <td class="brd2-top brd2-bt">{{ $structure->name }}</td>
+                                                        <td class="brd2-top brd2-bt" align="right">
+                                                            <b class="butt2 pointer"><b>
+                                                                <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('barter_shop', ['id' => $structure->id]) }}';" style="width:60px">
+                                                            </b></b>
+                                                        </td>
+                                                    </tr>
+                                                @endif
+
                                                 @if($structure->isExchange())
                                                     <tr class="bg_l" title=""
                                                         onclick="location.href='{{ route('exchange', ['id' => $structure->id]) }}'" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">

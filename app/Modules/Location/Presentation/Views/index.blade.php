@@ -224,6 +224,10 @@
                                             <a href="{{ $page->takeItemsUrl }}" id="take-item" target="game">
                                                 Искать здесь @if($page->itemsOnLocationCount)({{ $page->itemsOnLocationCount }}) @endif
                                             </a> »
+                                            @if($page->gatheringUrl !== null)
+                                                <br>
+                                                <a href="{{ $page->gatheringUrl }}" id="gather-resources" target="game" onclick="try { window.parent.setMapHiddenForGathering(true); } catch (e) {}">Добыча ресурсов</a> »
+                                            @endif
                                         </td>
                                     </tr>
                                     </tbody>

@@ -66,25 +66,17 @@ readonly class AttackStrategyResolver
             );
         }
 
-        // Nothing on — fist
-        if (! $left instanceof Item && ! $right instanceof Item) {
-            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
-        }
+        $leftIsWeapon = $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON;
+        $rightIsWeapon = $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON;
+        $rightIsShield = $right instanceof Item && $right->itemInfo->type === ShareItemType::SHIELD;
 
-        // Only the shield in the right hand, the left hand is empty — a fist
-        if (
-            ! $left instanceof Item &&
-            $right instanceof Item &&
-            $right->itemInfo->type === ShareItemType::SHIELD
-        ) {
+        // Пустые руки, щиты и инструменты не считаются оружием.
+        if (! $leftIsWeapon && ! $rightIsWeapon) {
             return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
         }
 
         // Weapon in left hand + shield in right hand — only left weapon
-        if (
-            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
-            $right instanceof Item && $right->itemInfo->type === ShareItemType::SHIELD
-        ) {
+        if ($leftIsWeapon && $rightIsShield) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
@@ -94,10 +86,7 @@ readonly class AttackStrategyResolver
         }
 
         // Two weapons — dual
-        if (
-            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
-            $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON
-        ) {
+        if ($leftIsWeapon && $rightIsWeapon) {
             return new DualWieldStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
@@ -107,11 +96,8 @@ readonly class AttackStrategyResolver
             );
         }
 
-        // Only the right weapon (the left one is empty)
-        if (
-            ! $left instanceof Item &&
-            $right instanceof Item && $right->itemInfo->type === ShareItemType::WEAPON
-        ) {
+        // Одно оружие; во второй руке может быть инструмент.
+        if ($leftIsWeapon || $rightIsWeapon) {
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
@@ -120,20 +106,7 @@ readonly class AttackStrategyResolver
             );
         }
 
-        // Only the left weapon (the right one is empty)
-        if (
-            $left instanceof Item && $left->itemInfo->type === ShareItemType::WEAPON &&
-            ! $right instanceof Item
-        ) {
-            return new OneHandWeaponStrategy(
-                hitCalc: $this->hitCalc,
-                player: $sheet,
-                monster: $monster,
-                equip: $player->playerEquip
-            );
-        }
-
-        // Any other case — fist
+        // Защитный fallback для неизвестной комбинации слотов.
         return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
     }
 }

@@ -516,13 +516,14 @@
 
                         <script>
                             let mapVisible = localStorage.getItem('map-visible') !== 'false';
+                            let mapHiddenForGathering = false;
 
                             function applyMapState() {
                                 const mapWrapper = document.getElementById('map-wrapper');
                                 const mapArrow   = document.getElementById('map-toggle-arrow');
                                 const mapBtn     = document.querySelector('.map-toggle-btn');
                                 if (!mapWrapper || !mapArrow || !mapBtn) return;
-                                if (mapVisible) {
+                                if (mapVisible && !mapHiddenForGathering) {
                                     mapWrapper.classList.remove('hidden');
                                     mapArrow.classList.add('open');
                                     mapBtn.style.left = '-3px';
@@ -540,6 +541,11 @@
                                     mapVisible = !!show;
                                 }
                                 localStorage.setItem('map-visible', mapVisible);
+                                applyMapState();
+                            }
+
+                            function setMapHiddenForGathering(hidden) {
+                                mapHiddenForGathering = !!hidden;
                                 applyMapState();
                             }
 

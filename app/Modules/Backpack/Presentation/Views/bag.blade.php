@@ -965,7 +965,7 @@
                                                 <div id="item_list" class="backpack_overflow lscroll">
 
                                                     @if($data->getGroup() === 'main')
-                                                        @if($data->hasWeapon() || $data->hasShield())
+                                                        @if($data->hasWeapon() || $data->hasShield() || $data->hasTool())
                                                             <div id="bag_section" class="bag_section">
                                                                 <div align="center">
                                                                     <table border="0" cellspacing="0" cellpadding="0"
@@ -973,7 +973,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Оружие и щиты</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">Оружие, щиты и инструменты</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1034,6 +1034,27 @@
                                                                                                 onmouseout="showItemInfo(this,event,0)"
                                                                                                 valign="bottom">
                                                                                             </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </li>
+                                                                        @endforeach
+                                                                    @endif
+
+                                                                    @if($data->hasTool())
+                                                                        @foreach($data->getTool() as $item)
+                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
+                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                                       style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                            &nbsp;
+                                                                                            @if($item->count > 1)
+                                                                                                <div class="bpdig">{{ $item->count }}</div>
+                                                                                            @endif
+                                                                                            <span style="position: absolute;right: -1px;top: 41px;" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom"></span>
                                                                                         </td>
                                                                                     </tr>
                                                                                     </tbody>
@@ -1971,9 +1992,10 @@
         var type     = _ctxItemType;
         var equipped = el.getAttribute('data-equipped') === '1';
 
-        var equippable = ['weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
+        var equippable = ['tool','weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
         var usable     = ['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1;
         var isBook     = type === 'book';
+        var isRecipe   = type === 'recipe';
         if (type === 'key') {
             usable = _teleportUseKeyItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         }
@@ -1981,7 +2003,7 @@
         document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
         document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
         document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
-        document.getElementById('ctx-learn').style.display   = isBook   ? '' : 'none';
+        document.getElementById('ctx-learn').style.display   = (isBook || isRecipe) ? '' : 'none';
         document.getElementById('ctx-drop').style.display    = _ctxItemDroppable ? '' : 'none';
 
         var menu = document.getElementById('item-ctx-menu');
@@ -2013,7 +2035,7 @@
                 }
                 break;
             case 'learn':
-                learnItemAjax(_ctxItemShareId, id);
+                learnItemAjax(_ctxItemShareId, id, _ctxItemType);
                 break;
             case 'drop':
                 if (_ctxItemDroppable) {
@@ -2085,8 +2107,12 @@
         });
     }
 
-    function learnItemAjax(shareItemId, itemId) {
-        fetch('{{ route('magic_skill.learn', ['item' => '__ID__']) }}'.replace('__ID__', shareItemId), {
+    function learnItemAjax(shareItemId, itemId, itemType) {
+        var learnUrl = itemType === 'recipe'
+            ? '{{ route('profession.recipe.learn', ['item' => '__ID__']) }}'
+            : '{{ route('magic_skill.learn', ['item' => '__ID__']) }}';
+
+        fetch(learnUrl.replace('__ID__', shareItemId), {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -2119,7 +2145,7 @@
             }
         })
         .catch(function() {
-            try { window.top.showErrorIframe('Ошибка изучения заклинания'); } catch(e) {}
+            try { window.top.showErrorIframe('Ошибка изучения'); } catch(e) {}
         });
     }
 

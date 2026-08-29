@@ -7,6 +7,7 @@ namespace App\Modules\Share\Domain\Enums;
 enum ShareItemType: string
 {
     case RESOURCE = 'resource';
+    case TOOL = 'tool';
     case WEAPON = 'weapon';
     case SHIELD = 'shield';
     case ARMOR = 'armor';
@@ -35,6 +36,7 @@ enum ShareItemType: string
     public function isEquipment(): bool
     {
         return in_array($this, [
+            self::TOOL,
             self::WEAPON,
             self::SHIELD,
             self::ARMOR,
@@ -47,6 +49,7 @@ enum ShareItemType: string
     {
         return match ($this) {
             self::RESOURCE => 'Ресурсы',
+            self::TOOL => 'Инструмент',
             self::WEAPON => 'Оружие',
             self::SHIELD => 'Щит',
             self::ARMOR => 'Броня',
@@ -75,6 +78,7 @@ enum ShareItemType: string
         return match ($group) {
             'main' => [
                 self::POTION,
+                self::TOOL,
                 self::WEAPON,
                 self::SHIELD,
                 self::ARMOR,

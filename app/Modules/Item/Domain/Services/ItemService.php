@@ -230,14 +230,19 @@ class ItemService
                 return null;
             }
 
-            if ($typeItem === ShareItemType::WEAPON && $playerEquip->hand_left && $playerEquip->hand_right) {
+            if (in_array($typeItem, [ShareItemType::TOOL, ShareItemType::WEAPON], true)
+                && $playerEquip->hand_left && $playerEquip->hand_right) {
                 return 'Слот занят';
             }
             if ($typeItem === ShareItemType::SHIELD && $playerEquip->hand_right) {
                 return 'Слот занят';
             }
 
-            if (! $playerEquip->hand_left && $typeItem === ShareItemType::WEAPON) {
+            if ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_left) {
+                $playerEquip->hand_left = $itemId;
+            } elseif ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_right) {
+                $playerEquip->hand_right = $itemId;
+            } elseif (! $playerEquip->hand_left && $typeItem === ShareItemType::WEAPON) {
                 $playerEquip->hand_left = $itemId;
             } elseif (! $playerEquip->hand_right && $playerEquip->hand_left !== $itemId
                 && in_array($typeItem, [ShareItemType::WEAPON, ShareItemType::SHIELD], true)) {

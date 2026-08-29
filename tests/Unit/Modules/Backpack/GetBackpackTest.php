@@ -20,6 +20,20 @@ use Tests\TestCase;
 
 class GetBackpackTest extends TestCase
 {
+    public function test_tool_has_its_own_backpack_group(): void
+    {
+        $tool = $this->backpackItem(itemId: 102, shareItemId: 400);
+        $data = new BackpackDTO(
+            backpack: new Collection([$tool]),
+            items: new Collection(['tool' => new Collection([$tool])]),
+            countItems: 1,
+            group: 'main',
+        );
+
+        $this->assertTrue($data->hasTool());
+        $this->assertSame([$tool], $data->getTool()->all());
+    }
+
     public function test_it_marks_only_keys_with_a_teleport_gate_from_current_location_as_usable(): void
     {
         $availableKey = $this->backpackItem(itemId: 100, shareItemId: 324);

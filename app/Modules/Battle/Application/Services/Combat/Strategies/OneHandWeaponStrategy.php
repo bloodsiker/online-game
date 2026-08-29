@@ -8,6 +8,7 @@ use App\Modules\Battle\Application\Services\Combat\HitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 
 class OneHandWeaponStrategy implements AttackStrategyInterface
 {
@@ -20,7 +21,8 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
 
     public function getHits(): array
     {
-        $itemInfoLeft = $this->equip->handLeft instanceof Item;
+        $itemInfoLeft = $this->equip->handLeft instanceof Item
+            && $this->equip->handLeft->itemInfo->type === ShareItemType::WEAPON;
         $activeWeapon = $itemInfoLeft ? $this->equip->handLeft : $this->equip->handRight;
 
         $min = $itemInfoLeft

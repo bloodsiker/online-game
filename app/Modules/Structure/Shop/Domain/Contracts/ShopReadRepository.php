@@ -18,6 +18,12 @@ interface ShopReadRepository
      */
     public function getShopItems(int $structureId, ?int $categoryId = null): Collection;
 
+    /**
+     * @param  list<int>  $shareItemIds
+     * @return Collection<int, int>
+     */
+    public function getBackpackShareItemCounts(int $userId, array $shareItemIds): Collection;
+
     public function findResourceBackpackItem(int $userId, int $shareItemId): ?Backpack;
 
     /**

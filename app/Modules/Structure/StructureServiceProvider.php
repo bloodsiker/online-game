@@ -81,6 +81,8 @@ class StructureServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/ClanSkillHall/Presentation/Views', 'clan_skill_hall');
 
+        $this->loadViewsFrom(__DIR__.'/Workshop/Presentation/Views', 'workshop');
+
         Route::middleware(['web'])
             ->group(__DIR__.'/Auction/Presentation/Http/Route/web.php');
 
@@ -108,5 +110,8 @@ class StructureServiceProvider extends ServiceProvider
 
         Route::middleware(['web'])
             ->group(__DIR__.'/ClanSkillHall/Presentation/Http/Route/web.php');
+
+        Route::middleware(['web'])
+            ->group(__DIR__.'/Workshop/Presentation/Http/Route/web.php');
     }
 }

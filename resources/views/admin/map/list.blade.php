@@ -13,6 +13,54 @@
                     <div class="mb-3">
                         <a href="{{ route('admin.map.create') }}" class="btn btn-sm btn-primary">Создать карту</a>
                     </div>
+
+                    <form method="get" action="{{ route('admin.maps') }}" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Поиск</label>
+                                    <input type="text"
+                                           name="q"
+                                           class="form-control"
+                                           value="{{ $filters['q'] }}"
+                                           placeholder="Название, slug или папка">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">Родительская карта</label>
+                                    <select name="parent_id" class="form-control">
+                                        <option value="">Все карты</option>
+                                        @foreach($allMaps as $allMap)
+                                            <option value="{{ $allMap->id }}" @selected($filters['parent_id'] === (string) $allMap->id)>
+                                                [{{ $allMap->id }}] {{ $allMap->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">ID локации</label>
+                                    <input type="number"
+                                           name="location_id"
+                                           class="form-control"
+                                           value="{{ $filters['location_id'] }}"
+                                           placeholder="Локация на карте">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="col-form-label">&nbsp;</label>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Фильтровать</button>
+                                        <a href="{{ route('admin.maps') }}" class="btn btn-default btn-sm">Сбросить</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered mb-none">
                             <thead>
@@ -42,6 +90,9 @@
                             @endforelse
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-3">
+                        {{ $listMaps->onEachSide(2)->links('admin.pagination') }}
                     </div>
                 </div>
             </section>

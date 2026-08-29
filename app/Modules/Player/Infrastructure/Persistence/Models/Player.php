@@ -10,6 +10,7 @@ use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -74,6 +75,11 @@ class Player extends Model
         return $this->belongsToMany(MagicSkill::class, 'player_magic_skills')->with('skillEffects')
             ->withPivot(['cooldown_end_at', 'is_equipped', 'sort_order'])
             ->orderByPivot('sort_order');
+    }
+
+    public function recipes()
+    {
+        return $this->belongsToMany(ShareRecipe::class, 'player_recipes')->withTimestamps();
     }
 
     public function activeMagicSkills()

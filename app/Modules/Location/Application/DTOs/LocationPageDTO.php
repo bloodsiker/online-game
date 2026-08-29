@@ -26,6 +26,7 @@ final readonly class LocationPageDTO
         public array $moves,
         public int $itemsOnLocationCount,
         public string $takeItemsUrl,
+        public ?string $gatheringUrl,
         public array $structures,
         public array $gateActions,
         public string $locationUsersJson,

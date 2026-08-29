@@ -109,6 +109,15 @@
 	                                                    <h2 class="card-title" style="font-size: 14px;">
 	                                                        {{ $category->name }}
 	                                                        <span class="badge badge-primary">{{ $categoryItems->count() }}</span>
+	                                                        @if($structure->isBarterShop())
+	                                                            <form action="{{ route('admin.structure.info.category.delete', [$structure->id, $category->id]) }}"
+	                                                                  method="post" class="d-inline ms-2"
+	                                                                  onsubmit="return confirm('Убрать категорию из магазина? Товары останутся без категории.');">
+	                                                                @csrf
+	                                                                @method('DELETE')
+	                                                                <button class="btn btn-xs btn-danger">Убрать категорию</button>
+	                                                            </form>
+	                                                        @endif
 	                                                    </h2>
 	                                                </header>
 	                                                <div class="card-body p-0">
@@ -194,6 +203,11 @@
 	                                <option value="{{ $category->id }}">{{ $category->name }}</option>
 	                            @endforeach
 	                        </select>
+	                    </div>
+	                    <div class="form-group mb-2">
+	                        <label>Или создать новую категорию</label>
+	                        <input type="text" name="category_name" class="form-control" maxlength="255"
+	                               placeholder="Название новой категории">
 	                    </div>
 	                </div>
 	                <footer class="card-footer">
@@ -351,6 +365,29 @@
             cache: true
         },
         minimumInputLength: 0
+    });
+
+    $('.shop-requirement-item-select').each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            placeholder: 'Предмет оплаты',
+            allowClear: true,
+            width: '100%',
+            templateResult: formatItemOption,
+            templateSelection: formatItemOption,
+            ajax: {
+                url: '{{ route('admin.api.items') }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (p) { return { q: p.term, page: p.page || 1 }; },
+                processResults: function (data, p) {
+                    p.page = p.page || 1;
+                    return { results: data.results, pagination: { more: data.pagination.more } };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
     });
 </script>
 @endpush

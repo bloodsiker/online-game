@@ -12,6 +12,8 @@ final readonly class ShopBuyPageDTO
      */
     public function __construct(
         public int $shopId,
+        public string $shopType,
+        public string $shopName,
         public int $money,
         public int $diamonds,
         public array $items,

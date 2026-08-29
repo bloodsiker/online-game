@@ -60,6 +60,9 @@ class LocationPageViewMapper
             moves: $this->mapMoves($location),
             itemsOnLocationCount: $itemsOnLocationCount,
             takeItemsUrl: route('take_items'),
+            gatheringUrl: $location->dungeon_id === null && $location->map_id !== null
+                    ? route('gathering')
+                    : null,
             structures: $this->mapStructures($location, $user),
             gateActions: $this->mapGateActions($location),
             locationUsersJson: $this->mapLocationUsersJson($locationUsers),
@@ -208,6 +211,7 @@ class LocationPageViewMapper
     {
         return match (true) {
             $structure->isShop() => route('shop', ['id' => $structure->id]),
+            $structure->isBarterShop() => route('barter_shop', ['id' => $structure->id]),
             $structure->isWarehouse() => route('warehouse', ['id' => $structure->id]),
             $structure->isClanWarehouse() => route('clan.warehouse', ['id' => $structure->id]),
             $structure->isBank() => route('bank', ['id' => $structure->id]),
@@ -216,6 +220,7 @@ class LocationPageViewMapper
             $structure->isAuction() => route('auction', ['id' => $structure->id]),
             $structure->isAuctionExchange() => route('auction.exchange', ['id' => $structure->id]),
             $structure->isBlacksmith() => route('blacksmith', ['id' => $structure->id]),
+            $structure->isWorkshop() => route('workshop', ['id' => $structure->id]),
             $structure->isHeal() => route('heal', ['id' => $structure->id]),
             default => null,
         };
@@ -224,7 +229,9 @@ class LocationPageViewMapper
     private function resolveActionUrl(object $structure, string $alias): ?string
     {
         return match ($alias) {
-            'buy' => route('shop', ['id' => $structure->id]),
+            'buy' => $structure->isBarterShop()
+                ? route('barter_shop', ['id' => $structure->id])
+                : route('shop', ['id' => $structure->id]),
             'sell' => route('shop.sell_item', ['id' => $structure->id]),
             'put_item' => $structure->isClanWarehouse()
                 ? route('clan.warehouse', ['id' => $structure->id])
@@ -257,6 +264,7 @@ class LocationPageViewMapper
                 $clan = $user->clanMembership?->clan;
 
                 return [
+                    'clan_id' => $clan?->id,
                     'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
                     'clan_name' => $clan?->name,
                     'id' => $user->id,

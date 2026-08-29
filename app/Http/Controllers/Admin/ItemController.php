@@ -67,10 +67,15 @@ class ItemController extends Controller
     public function create(): View
     {
         $skills = Skill::orderBy('name')->get();
+        $gatheringTools = ShareItem::query()
+            ->where('type', ShareItemType::TOOL)
+            ->where('slot', ShareItemSlot::HAND)
+            ->orderBy('name')
+            ->get(['id', 'name']);
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
 
-        return view('admin.item.create', compact('skills', 'magicSkills', 'claimedMagicSkillIds'));
+        return view('admin.item.create', compact('skills', 'gatheringTools', 'magicSkills', 'claimedMagicSkillIds'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -111,9 +116,14 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook', 'gatheringTool']);
 
         $skills = Skill::orderBy('name')->get();
+        $gatheringTools = ShareItem::query()
+            ->where('type', ShareItemType::TOOL)
+            ->where('slot', ShareItemSlot::HAND)
+            ->orderBy('name')
+            ->get(['id', 'name']);
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $claimedMagicSkillIds = MagicSkillBook::where('share_item_id', '!=', $item->id)->pluck('magic_skill_id')->all();
         $statTypes = ShareItemStatType::cases();
@@ -122,7 +132,7 @@ class ItemController extends Controller
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'gatheringTools', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function drop(ShareItem $item): View
@@ -295,6 +305,9 @@ class ItemController extends Controller
         $request->validate([
             'expire' => ['nullable', 'integer', 'min:1'],
             'max_drop_level_difference' => ['nullable', 'integer', 'between:0,255'],
+            'gathering_time_seconds' => ['nullable', 'integer', 'min:1', 'max:86400'],
+            'gathering_respawn_seconds' => ['nullable', 'integer', 'min:1', 'max:604800'],
+            'gathering_tool_share_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -313,8 +326,19 @@ class ItemController extends Controller
             $this->deleteStorageImage($item->getRawOriginal('image'));
             $item->image = null;
         }
+        $transparentImage = $request->file('transparent_image');
+        if ($transparentImage instanceof UploadedFile) {
+            $oldTransparentImage = $item->getRawOriginal('transparent_image');
+            $item->transparent_image = $this->storeItemImage($transparentImage);
+            $this->deleteStorageImage($oldTransparentImage);
+        } elseif ($request->boolean('delete_transparent_image')) {
+            $this->deleteStorageImage($item->getRawOriginal('transparent_image'));
+            $item->transparent_image = null;
+        }
         $item->rarity = ItemRarity::from($request->input('rarity', ItemRarity::COMMON->value));
-        $item->slot = $request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null;
+        $item->slot = $type === ShareItemType::TOOL
+            ? ShareItemSlot::HAND
+            : ($request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null);
         $item->price = (int) $request->input('price', 0);
         $item->break_crystal = (int) $request->input('break_crystal', 0);
         $item->count_use = (int) $request->input('count_use', 0);
@@ -328,12 +352,23 @@ class ItemController extends Controller
         $item->is_auction_sellable = (bool) $request->input('is_auction_sellable', false);
         $item->is_give = (bool) $request->input('is_give', true);
         $item->is_droppable = (bool) $request->input('is_droppable', true);
-        $item->is_stackable = (bool) $request->input('is_stackable', false);
+        $item->is_stackable = $type->isEquipment()
+            ? false
+            : (bool) $request->input('is_stackable', false);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
         $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
         $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
+        $item->gathering_time_seconds = $type === ShareItemType::RESOURCE
+            ? ($request->filled('gathering_time_seconds') ? (int) $request->input('gathering_time_seconds') : $item->rarity->defaultGatheringSeconds())
+            : null;
+        $item->gathering_respawn_seconds = $type === ShareItemType::RESOURCE
+            ? ($request->filled('gathering_respawn_seconds') ? (int) $request->input('gathering_respawn_seconds') : 60)
+            : null;
+        $item->gathering_tool_share_item_id = $type === ShareItemType::RESOURCE && $request->filled('gathering_tool_share_item_id')
+            ? (int) $request->input('gathering_tool_share_item_id')
+            : null;
 
         // Свиток заточки
         $item->upgrade_scroll_type = $request->filled('upgrade_scroll_type')

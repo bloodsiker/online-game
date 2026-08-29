@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Share\Domain\Enums\ItemRarity;
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string|null $description
  * @property string|null $image
+ * @property string|null $transparent_image
  * @property int $is_two_hand
  * @property int $count_use
  * @property int|null $max_drop_level_difference Maximum level the player can exceed the monster by for this item to drop.
@@ -49,6 +51,9 @@ use Illuminate\Support\Carbon;
  * @property int|null $skill_id
  * @property int|null $skill_lvl
  * @property int|null $skill_exp
+ * @property int|null $gathering_time_seconds
+ * @property int|null $gathering_respawn_seconds
+ * @property int|null $gathering_tool_share_item_id
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
  * @property-read Collection|ShareItemStat[] $stats
@@ -68,6 +73,13 @@ class ShareItem extends Model
     {
         return Attribute::make(
             get: fn (?string $value) => $value !== null && $value !== '' ? resolve_storage_image_url($value) : self::DEFAULT_IMAGE,
+        );
+    }
+
+    protected function transparentImage(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value !== null && $value !== '' ? resolve_storage_image_url($value) : null,
         );
     }
 
@@ -101,6 +113,8 @@ class ShareItem extends Model
         'rune_rarity' => RuneRarity::class,
         'rune_stat_pool' => 'array',
         'rarity' => ItemRarity::class,
+        'gathering_time_seconds' => 'integer',
+        'gathering_respawn_seconds' => 'integer',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -113,6 +127,16 @@ class ShareItem extends Model
     public function magicSkillBook(): HasOne
     {
         return $this->hasOne(MagicSkillBook::class, 'share_item_id');
+    }
+
+    public function gatheringTool(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'gathering_tool_share_item_id');
+    }
+
+    public function mapGatheringResources(): HasMany
+    {
+        return $this->hasMany(MapGatheringResource::class);
     }
 
     public function skill(): ?BelongsTo

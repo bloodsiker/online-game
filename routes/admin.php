@@ -111,14 +111,21 @@ Route::get('/monsters', [MonsterController::class, 'list'])->name('monsters');
 Route::get('/structure/{structure}/shop/delete_item/{item}', [StructureController::class, 'infoShopDeleteItem'])->name('structure.info.shop_delete_item');
 Route::post('/structure/{structure}/shop', [StructureController::class, 'infoShop'])->name('structure.info.shop');
 Route::post('/structure/{structure}/shop/{shopItem}', [StructureController::class, 'infoShopUpdate'])->name('structure.info.shop_update');
+Route::post('/structure/{structure}/shop/{shopItem}/requirement', [StructureController::class, 'infoShopAddRequirement'])->name('structure.info.shop_requirement.add');
+Route::delete('/structure/{structure}/shop/{shopItem}/requirement/{requirement}', [StructureController::class, 'infoShopDeleteRequirement'])->name('structure.info.shop_requirement.delete');
 Route::post('/structure/{structure}/category', [StructureController::class, 'infoCategory'])->name('structure.info.category');
+Route::delete('/structure/{structure}/category/{category}', [StructureController::class, 'infoCategoryDelete'])->name('structure.info.category.delete');
 Route::get('/structure/{structure}/action/{action}', [StructureController::class, 'infoActionDelete'])->name('structure.info.action_delete');
 Route::post('/structure/{structure}/action', [StructureController::class, 'infoAction'])->name('structure.info.action');
+Route::match(['GET', 'POST'], '/structure/create', [StructureController::class, 'create'])->name('structure.create');
 Route::match(['GET', 'POST'], '/structure/{structure}', [StructureController::class, 'info'])->name('structure.info');
 Route::get('/structures', [StructureController::class, 'list'])->name('structures');
 
 Route::match(['GET', 'POST'], '/map/create', [MapController::class, 'create'])->name('map.create');
 Route::post('/map/{map}/locations', [MapController::class, 'location'])->name('map.location');
+Route::post('/map/{map}/gathering-resource', [MapController::class, 'saveGatheringResource'])->name('map.gathering-resource.save');
+Route::patch('/map/{map}/gathering-resource/{resource}', [MapController::class, 'updateGatheringResource'])->name('map.gathering-resource.update');
+Route::delete('/map/{map}/gathering-resource/{resource}', [MapController::class, 'deleteGatheringResource'])->name('map.gathering-resource.delete');
 Route::match(['GET', 'POST'], '/map/{map}', [MapController::class, 'info'])->name('map.info');
 Route::get('/maps', [MapController::class, 'list'])->name('maps');
 

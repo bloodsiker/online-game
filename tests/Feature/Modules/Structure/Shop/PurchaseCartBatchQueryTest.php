@@ -113,15 +113,46 @@ class PurchaseCartBatchQueryTest extends TestCase
         $this->assertSame(2, (int) DB::table('backpacks')->where('user_id', 10)->value('count'));
     }
 
+    public function test_purchase_consumes_multiple_item_requirements(): void
+    {
+        DB::table('items')->insert([
+            ['id' => 101, 'share_item_id' => 501],
+            ['id' => 102, 'share_item_id' => 502],
+        ]);
+        DB::table('backpacks')->insert([
+            ['user_id' => 10, 'item_id' => 101, 'count' => 5],
+            ['user_id' => 10, 'item_id' => 102, 'count' => 9],
+        ]);
+
+        $firstPaymentItem = $this->shareItem(501, 'Первый ресурс');
+        $secondPaymentItem = $this->shareItem(502, 'Второй ресурс');
+        $cartService = Mockery::mock(ShopCartService::class);
+        $cartService->shouldReceive('getCart')->once()->andReturn(new ShopCartDTO(
+            new Collection([$this->cartItem(1, quantity: 2)]),
+            0,
+            0,
+            [
+                ['item' => $firstPaymentItem, 'quantity' => 4],
+                ['item' => $secondPaymentItem, 'quantity' => 6],
+            ],
+        ));
+        $cartService->shouldReceive('clearCart')->once()->andReturn(1);
+
+        $result = (new PurchaseCart($cartService))->execute($this->user(10), 100);
+
+        $this->assertTrue($result->ok);
+        $this->assertSame(1, (int) DB::table('backpacks')->where('item_id', 101)->value('count'));
+        $this->assertSame(3, (int) DB::table('backpacks')->where('item_id', 102)->value('count'));
+        $this->assertSame(2, (int) DB::table('backpacks')
+            ->join('items', 'items.id', '=', 'backpacks.item_id')
+            ->where('backpacks.user_id', 10)
+            ->where('items.share_item_id', 1)
+            ->value('backpacks.count'));
+    }
+
     private function cartItem(int $id, int $quantity = 1): ShopCart
     {
-        $shareItem = (new ShareItem)->forceFill([
-            'id' => $id,
-            'type' => ShareItemType::RESOURCE,
-            'is_stackable' => true,
-            'count_use' => 0,
-        ]);
-        $shareItem->exists = true;
+        $shareItem = $this->shareItem($id);
 
         $shopItem = (new ShopItem)->forceFill(['id' => $id]);
         $shopItem->exists = true;
@@ -135,6 +166,20 @@ class PurchaseCartBatchQueryTest extends TestCase
         $cartItem->setRelation('shopItem', $shopItem);
 
         return $cartItem;
+    }
+
+    private function shareItem(int $id, string $name = 'Предмет'): ShareItem
+    {
+        $shareItem = (new ShareItem)->forceFill([
+            'id' => $id,
+            'name' => $name,
+            'type' => ShareItemType::RESOURCE,
+            'is_stackable' => true,
+            'count_use' => 0,
+        ]);
+        $shareItem->exists = true;
+
+        return $shareItem;
     }
 
     private function user(int $id): User

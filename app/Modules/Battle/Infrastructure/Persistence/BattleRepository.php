@@ -8,6 +8,7 @@ use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
+use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -52,6 +53,7 @@ class BattleRepository extends AbstractRepository
         $battleDetails->battle_id = $battle->id;
 
         if ($user instanceof User) {
+            GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
             $battleDetails->user_id = $user->id;
         }
 

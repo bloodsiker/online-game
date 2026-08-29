@@ -23,6 +23,12 @@ class ShopItem extends Model
         'sort_order' => 0,
     ];
 
+    protected $casts = [
+        'price' => 'integer',
+        'diamond' => 'integer',
+        'sort_order' => 'integer',
+    ];
+
     public function requirements(): HasMany
     {
         return $this->hasMany(ShopItemRequirement::class);

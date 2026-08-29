@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,5 +28,10 @@ class ShareRecipe extends Model
     {
         return $this->belongsToMany(ShareItem::class, 'share_recipe_has_items', 'share_recipe_id', 'share_item_id')
             ->withPivot('count');
+    }
+
+    public function players(): BelongsToMany
+    {
+        return $this->belongsToMany(Player::class, 'player_recipes')->withTimestamps();
     }
 }

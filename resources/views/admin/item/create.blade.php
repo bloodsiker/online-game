@@ -75,6 +75,16 @@
                                             </div>
 
                                             <div class="form-group">
+                                                <label class="col-form-label">Картинка без фона</label>
+                                                <div class="mb-2">
+                                                    <img id="create-transparent-image-preview" src="" alt=""
+                                                         style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                                </div>
+                                                <input type="file" class="form-control" name="transparent_image" id="create-transparent-image" accept="image/png,image/webp,image/gif">
+                                                <small class="form-text text-muted">Для карточек и интерфейсов с прозрачным фоном.</small>
+                                            </div>
+
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="description">Описание</label>
                                                 <textarea class="form-control" name="description" rows="5" id="description">{{ old('description') }}</textarea>
                                             </div>
@@ -134,6 +144,23 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="skill_exp">Опыт навыка за удар</label>
                                                 <input type="text" class="form-control" id="skill_exp" name="skill_exp" value="{{ old('skill_exp') }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="gathering_time_seconds">Время добычи, сек.</label>
+                                                <input type="number" min="1" class="form-control" id="gathering_time_seconds" name="gathering_time_seconds" value="{{ old('gathering_time_seconds') }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="gathering_respawn_seconds">Время респавна, сек.</label>
+                                                <input type="number" min="1" class="form-control" id="gathering_respawn_seconds" name="gathering_respawn_seconds" value="{{ old('gathering_respawn_seconds') }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="gathering_tool_share_item_id">Инструмент для добычи</label>
+                                                <select id="gathering_tool_share_item_id" name="gathering_tool_share_item_id" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
+                                                    <option value=""></option>
+                                                    @foreach($gatheringTools as $tool)
+                                                        <option value="{{ $tool->id }}" @selected(old('gathering_tool_share_item_id') == $tool->id)>[{{ $tool->id }}] {{ $tool->name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
 
@@ -369,6 +396,15 @@
         document.getElementById('create-image').addEventListener('change', function () {
             const file = this.files[0];
             const preview = document.getElementById('create-image-preview');
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
+
+        document.getElementById('create-transparent-image').addEventListener('change', function () {
+            const file = this.files[0];
+            const preview = document.getElementById('create-transparent-image-preview');
             if (file) {
                 preview.src = URL.createObjectURL(file);
                 preview.style.display = 'block';

@@ -6,7 +6,10 @@ namespace App\Modules\Structure\Shop\Application\Mappers;
 
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyItemDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyPageDTO;
 use App\Modules\Structure\Shop\Application\DTOs\ShopCartDTO;
@@ -23,14 +26,16 @@ class ShopBuyPageViewMapper
     /**
      * @param  Collection<int, ShopItem>  $shopItems
      * @param  Collection<int, ShareStructureCategory>  $categories
+     * @param  Collection<int, int>  $backpackShareItemCounts
      */
     public function map(
         User $user,
-        int $shopId,
+        Structure $shop,
         Collection $shopItems,
         Collection $categories,
         ?int $activeCategoryId,
         ShopCartDTO $cart,
+        Collection $backpackShareItemCounts,
     ): ShopBuyPageDTO {
         // Тултипы нужны и для товаров вне активной категории, лежащих в корзине:
         // собираем их вместе с сеткой (дубликаты коллектор убирает по id).
@@ -38,12 +43,21 @@ class ShopBuyPageViewMapper
             $cart->getItems()->map(fn ($cartItem) => $cartItem->shopItem)->filter(),
         );
 
-        $itemTooltipScript = $this->collector
-            ->collectFrom(new PremiumShopItemTooltipStrategy($tooltipItems))
-            ->renderScript();
+        $requirementItems = $tooltipItems
+            ->flatMap(fn (ShopItem $shopItem) => $shopItem->requirements->pluck('item'))
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        $this->collector->collectFrom(new PremiumShopItemTooltipStrategy($tooltipItems));
+        if ($requirementItems->isNotEmpty()) {
+            $this->collector->collectFrom(new ShareItemTooltipStrategy($requirementItems));
+        }
 
         return new ShopBuyPageDTO(
-            shopId: $shopId,
+            shopId: (int) $shop->id,
+            shopType: (string) $shop->type,
+            shopName: (string) $shop->name,
             money: (int) $user->money,
             diamonds: (int) $user->diamond,
             items: $shopItems->map(
@@ -54,8 +68,24 @@ class ShopBuyPageViewMapper
                     color: $item->item->rarity?->color() ?? '#666666',
                     image: (string) $item->item->image,
                     typeName: (string) $item->item->getTypeName(),
+                    requiredLevel: $item->item->requirements
+                        ->first(static fn ($requirement): bool => $requirement->type === ShareItemRequirementType::LEVEL)
+                        ?->min_value,
                     price: (int) $item->price,
                     diamond: (int) $item->diamond,
+                    requirements: $item->requirements
+                        ->filter(fn ($requirement): bool => $requirement->item !== null)
+                        ->map(static fn ($requirement): array => [
+                            'id' => (int) $requirement->item->id,
+                            'name' => (string) $requirement->item->name,
+                            'image' => (string) $requirement->item->image,
+                            'color' => $requirement->item->rarity?->color() ?? '#666666',
+                            'quantity' => (int) $requirement->quantity,
+                            'availableQuantity' => (int) $backpackShareItemCounts->get($requirement->item->id, 0),
+                            'infoUrl' => route('items.info.share', ['id' => $requirement->item->id]),
+                        ])
+                        ->values()
+                        ->all(),
                     infoUrl: route('items.info.share', ['id' => $item->item->id]),
                 )
             )->all(),
@@ -67,7 +97,7 @@ class ShopBuyPageViewMapper
             )->all(),
             activeCategoryId: $activeCategoryId,
             cart: $cart,
-            itemTooltipScript: $itemTooltipScript,
+            itemTooltipScript: $this->collector->renderScript(),
         );
     }
 }

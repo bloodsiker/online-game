@@ -15,6 +15,8 @@ class PlayerSkill extends Model
 
     protected $table = 'player_skills';
 
+    protected $fillable = ['player_id', 'skill_id', 'lvl', 'exp', 'exp_up', 'exp_diff'];
+
     protected $attributes = [
         'lvl' => 1,
         'exp' => 0,

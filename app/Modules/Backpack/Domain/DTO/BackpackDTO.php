@@ -45,6 +45,16 @@ final class BackpackDTO
         return $this->items->get('weapon');
     }
 
+    public function hasTool(): bool
+    {
+        return $this->items->has('tool');
+    }
+
+    public function getTool(): Collection
+    {
+        return $this->items->get('tool');
+    }
+
     public function hasBag(): bool
     {
         return $this->items->has('bag');

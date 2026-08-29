@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\Structure\Shop\Application\UseCases\GetBuyPage;
 use App\Modules\Structure\Shop\Application\UseCases\GetSellPage;
@@ -31,18 +32,26 @@ class ShopController extends Controller
         $user = Auth::user();
 
         return view('shop::buy', [
-            'page' => $this->getBuyPage->execute($user, $id, $request->integer('category_id') ?: null),
+            'page' => $this->getBuyPage->execute(
+                $user,
+                $id,
+                $request->integer('category_id') ?: null,
+                $this->expectedType(),
+            ),
         ]);
     }
 
     public function addCart(Request $request, int $id): RedirectResponse
     {
+        $this->ensureStructureType($id);
+
         /** @var User $user */
         $user = Auth::user();
         $this->shopCartService->addItem(
             $user,
             $request->integer('shop_item_id'),
             $request->integer('quantity', 1),
+            $id,
         );
 
         return redirect()->back();
@@ -50,15 +59,19 @@ class ShopController extends Controller
 
     public function deleteCart(int $id, int $cartId): RedirectResponse
     {
+        $this->ensureStructureType($id);
+
         /** @var User $user */
         $user = Auth::user();
-        $this->shopCartService->removeItem($user, $cartId);
+        $this->shopCartService->removeItem($user, $cartId, $id);
 
         return redirect()->back();
     }
 
     public function clearCart(int $id): RedirectResponse
     {
+        $this->ensureStructureType($id);
+
         /** @var User $user */
         $user = Auth::user();
         $this->shopCartService->clearCart($user, $id);
@@ -68,9 +81,11 @@ class ShopController extends Controller
 
     public function purchase(int $id): RedirectResponse
     {
+        $this->ensureStructureType($id);
+
         /** @var User $user */
         $user = Auth::user();
-        $result = $this->purchaseCart->execute($user, $id);
+        $result = $this->purchaseCart->execute($user, $id, $this->expectedType());
 
         if (! $result->ok) {
             session()->flash('message', $result->message);
@@ -81,6 +96,8 @@ class ShopController extends Controller
 
     public function sellItem(Request $request, int $id): mixed
     {
+        $this->ensureStructureType($id);
+
         /** @var User $user */
         $user = Auth::user();
 
@@ -96,5 +113,18 @@ class ShopController extends Controller
         return view('shop::sell', [
             'page' => $this->getSellPage->execute($user, $id),
         ]);
+    }
+
+    protected function expectedType(): string
+    {
+        return Structure::TYPE_SHOP;
+    }
+
+    private function ensureStructureType(int $id): void
+    {
+        Structure::query()
+            ->whereKey($id)
+            ->where('type', $this->expectedType())
+            ->firstOrFail();
     }
 }

@@ -98,6 +98,24 @@
                                                 @endif
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Картинка без фона</label>
+                                                <div class="mb-2">
+                                                    <img id="item-transparent-image-preview" src="{{ $item->transparent_image ?? '' }}" alt=""
+                                                         style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;{{ $item->transparent_image ? '' : 'display:none;' }}">
+                                                    @if($item->transparent_image)
+                                                        <br><small class="text-muted">{{ $item->transparent_image }}</small>
+                                                    @endif
+                                                </div>
+                                                <input type="file" class="form-control" name="transparent_image" id="transparent_image" accept="image/png,image/webp,image/gif">
+                                                <small class="form-text text-muted">Для карточек и интерфейсов с прозрачным фоном.</small>
+                                                @if($item->getRawOriginal('transparent_image'))
+                                                    <div class="checkbox-custom checkbox-danger mt-1">
+                                                        <input type="checkbox" id="item-delete-transparent-image" name="delete_transparent_image" value="1">
+                                                        <label for="item-delete-transparent-image">Удалить картинку без фона</label>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Описание</label>
                                                 <textarea class="form-control" name="description" rows="5">{{ $item->description }}</textarea>
                                             </div>
@@ -153,6 +171,23 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Опыт навыка за удар</label>
                                                 <input type="number" class="form-control" name="skill_exp" value="{{ $item->skill_exp }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Время добычи, сек.</label>
+                                                <input type="number" min="1" class="form-control" name="gathering_time_seconds" value="{{ $item->gathering_time_seconds }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Время респавна, сек.</label>
+                                                <input type="number" min="1" class="form-control" name="gathering_respawn_seconds" value="{{ $item->gathering_respawn_seconds }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Инструмент для добычи</label>
+                                                <select name="gathering_tool_share_item_id" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
+                                                    <option value=""></option>
+                                                    @foreach($gatheringTools as $tool)
+                                                        <option value="{{ $tool->id }}" @selected($item->gathering_tool_share_item_id === $tool->id)>[{{ $tool->id }}] {{ $tool->name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
 
@@ -688,6 +723,15 @@
         const file = this.files[0];
         if (file) {
             const preview = document.getElementById('item-image-preview');
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        }
+    });
+
+    document.getElementById('transparent_image').addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const preview = document.getElementById('item-transparent-image-preview');
             preview.src = URL.createObjectURL(file);
             preview.style.display = 'block';
         }

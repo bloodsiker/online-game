@@ -10,6 +10,7 @@ final class ShopCartDTO
         protected readonly Collection $items,
         protected readonly int $totalDiamond,
         protected readonly int $totalPrice,
+        protected readonly array $requirementTotals = [],
     ) {}
 
     public function getItems(): Collection
@@ -25,5 +26,13 @@ final class ShopCartDTO
     public function getTotalPrice(): int
     {
         return $this->totalPrice;
+    }
+
+    /**
+     * @return list<array{item: object, quantity: int}>
+     */
+    public function getRequirementTotals(): array
+    {
+        return $this->requirementTotals;
     }
 }

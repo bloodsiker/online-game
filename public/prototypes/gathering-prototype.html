@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прототип: добыча ресурсов (мирные профессии)</title>
+<style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+        min-height: 100vh;
+        color: #211b14;
+        font-family: Tahoma, Arial, sans-serif;
+        font-size: 14px;
+        background: #3b3128 url('/img/bg/bg.gif') fixed;
+    }
+    a { color: #000; }
+    .wrap { max-width: 1060px; margin: 0 auto; padding: 14px 10px 30px; }
+
+    .proto-note {
+        margin: 0 auto 12px;
+        max-width: 1010px;
+        padding: 6px 10px;
+        font-size: 11px;
+        color: #f0e2bd;
+        background: rgba(20, 16, 12, .78);
+        border: 1px solid rgba(214, 186, 130, .55);
+        text-align: center;
+    }
+    .proto-note b { color: #ffd98a; }
+
+    /* --- Рамка в стиле игры --- */
+    .frame {
+        border: 2px ridge #9c815b;
+        background: #c8b792;
+        box-shadow: inset 0 0 0 2px #e8ddc4, 0 2px 8px rgba(0, 0, 0, .35);
+    }
+    .frame-head, .frame-foot {
+        padding: 6px 9px;
+        border: 1px solid #826c4f;
+        background: linear-gradient(#efe5cf, #cdbb98);
+        font-size: 12px;
+    }
+    .frame-foot { border-top: 0; background: #eee3ca; font-size: 11px; }
+    .frame-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .frame-head .title { color: #6e160f; font-weight: 700; letter-spacing: .2px; }
+    .frame-head .meta { color: #4c4031; font-size: 11px; white-space: nowrap; }
+
+    .layout { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+    .col-main { flex: 1 1 640px; min-width: 0; }
+    .col-side { flex: 0 1 300px; min-width: 260px; display: flex; flex-direction: column; gap: 12px; }
+
+    .loc-title { text-align: center; font-size: 14px; margin-bottom: 8px; color: #f4e6c4; text-shadow: 0 1px 2px #000; }
+    .loc-title span { color: #d8c7ad; }
+    .loc-desc {
+        max-width: 660px; margin: 0 auto 12px; padding: 0 4px;
+        font-size: 12px; line-height: 1.5; color: #efe3c6; text-shadow: 0 1px 2px rgba(0,0,0,.7);
+    }
+
+    /* --- Поле с ресурсами --- */
+    .field {
+        position: relative;
+        min-height: 380px;
+        overflow: hidden;
+        border: 1px solid #7e6b4e;
+        border-top: 0;
+        background:
+            radial-gradient(ellipse at 50% 100%, rgba(105,91,44,.73) 0 16%, transparent 48%),
+            radial-gradient(circle at 9% 88%, rgba(37,83,37,.92) 0 9%, transparent 10%),
+            radial-gradient(circle at 85% 84%, rgba(33,79,35,.95) 0 12%, transparent 13%),
+            linear-gradient(180deg, #a8c4cd 0 26%, #8ba96c 27% 58%, #5a6f36 59% 100%);
+    }
+    .field::before {
+        content: "";
+        position: absolute; inset: 0; pointer-events: none; opacity: .3;
+        background:
+            linear-gradient(112deg, transparent 0 20%, rgba(255,255,210,.3) 20.5% 21%, transparent 21.5% 100%),
+            repeating-linear-gradient(173deg, transparent 0 19px, rgba(35,53,24,.18) 20px 21px);
+    }
+    .help {
+        position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+        z-index: 4; padding: 4px 9px; white-space: nowrap;
+        font-size: 10px; color: #f7eacb;
+        background: rgba(31,27,22,.78); border: 1px solid rgba(236,214,167,.5);
+    }
+
+    /* Кружок ресурса */
+    .gnode {
+        position: absolute; z-index: 3;
+        width: 68px; height: 68px; padding: 0;
+        border: 0; border-radius: 50%;
+        background: transparent; cursor: pointer;
+        user-select: none; -webkit-user-select: none;
+        font: inherit;
+    }
+    .gnode .ring {
+        position: absolute; inset: 0;
+        display: grid; place-items: center;
+        border-radius: 50%;
+        border: 3px solid #d9ba69;
+        background: radial-gradient(circle, rgba(24,29,18,.28) 0 44%, rgba(37,31,22,.9) 46% 100%);
+        box-shadow: 0 0 0 2px rgba(63,43,18,.9), 0 0 13px rgba(255,220,111,.38), inset 0 0 8px rgba(0,0,0,.85);
+        animation: pulse 2.1s ease-in-out infinite;
+        transition: transform .12s ease;
+    }
+    .gnode:hover .ring, .gnode:focus-visible .ring {
+        border-color: #fff0a4; transform: scale(1.07);
+        box-shadow: 0 0 0 2px #5b391b, 0 0 18px rgba(255,237,143,.8), inset 0 0 8px rgba(0,0,0,.8);
+    }
+    .gnode .icon { font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.8)); }
+    .gnode .badge {
+        position: absolute; right: -6px; bottom: -3px;
+        min-width: 26px; padding: 2px 4px;
+        color: #fff; background: #701c13; border: 1px solid #f3c47d; border-radius: 8px;
+        font-size: 9px; font-weight: 700; text-align: center; pointer-events: none;
+    }
+    .gnode .name {
+        position: absolute; top: 72px; left: 50%; transform: translateX(-50%);
+        width: 116px; padding: 2px 3px;
+        color: #fff0c5; background: rgba(20,19,15,.74); border: 1px solid rgba(233,210,159,.34);
+        font-size: 10px; font-weight: 700; text-align: center; text-shadow: 0 1px #000;
+        pointer-events: none;
+    }
+    .gnode.is-busy { cursor: progress; }
+    .gnode.is-busy .ring {
+        border-color: #f4f0bc;
+        animation: spin 1.2s linear infinite;
+        box-shadow: 0 0 0 2px #5b391b, 0 0 16px rgba(255,237,143,.9), inset 0 0 8px rgba(0,0,0,.8);
+    }
+    .gnode.is-cooldown { cursor: default; }
+    .gnode.is-cooldown .ring {
+        border-color: #7f7b72;
+        background: radial-gradient(circle, rgba(47,48,43,.55), rgba(22,22,20,.88));
+        box-shadow: 0 0 0 2px rgba(43,42,39,.9), inset 0 0 9px rgba(0,0,0,.9);
+        animation: none; filter: grayscale(1); opacity: .72;
+    }
+    .gnode.is-cooldown .badge { background: #454545; border-color: #8a8a8a; }
+    .gnode.is-locked .ring {
+        border-color: #a3938a;
+        background: radial-gradient(circle, rgba(40,34,28,.5), rgba(20,17,14,.92));
+        animation: none;
+    }
+    .gnode.is-locked .badge { background: #5a2b12; }
+    .gnode.is-locked .icon { filter: grayscale(.7) brightness(.8); }
+    .gnode.is-locked .name { color: #d7b9a5; }
+
+    /* Панель работы (прогресс) */
+    .work {
+        position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 8;
+        display: none; padding: 7px;
+        color: #f8ebcf; background: rgba(24,20,16,.9);
+        border: 1px solid #c5a86d; box-shadow: 0 2px 7px rgba(0,0,0,.5);
+    }
+    .work.is-visible { display: block; }
+    .work-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; font-size: 11px; }
+    .work-row .pct { font-variant-numeric: tabular-nums; }
+    .track { height: 15px; overflow: hidden; border: 1px solid #c9b98d; background: #1d1a16; box-shadow: inset 0 1px 3px #000; }
+    .fill {
+        width: 0; height: 100%;
+        background: repeating-linear-gradient(135deg, #789331 0 8px, #96b641 8px 16px);
+        box-shadow: inset 0 1px rgba(255,255,255,.25);
+    }
+
+    .log-mark { color: #28712d; font-weight: 700; }
+    body.is-gathering .log-mark { color: #b8860b; }
+    .log-line.is-fail .log-mark { color: #a03024; }
+    .log-line.is-good .log-mark { color: #2b7a2f; }
+    .log-line.is-warn .log-mark { color: #b8860b; }
+
+    /* Дебаг-панель */
+    .debug { position: absolute; top: 6px; right: 6px; z-index: 9; display: flex; gap: 5px; }
+    .debug button {
+        padding: 3px 7px; font-size: 10px; cursor: pointer;
+        color: #f0e2bd; background: rgba(24,20,16,.85); border: 1px dashed rgba(214,186,130,.7);
+    }
+    .debug button:hover { background: rgba(60,48,34,.9); }
+
+    /* Переходы */
+    .moves { margin-top: 12px; }
+    .moves table { border-collapse: collapse; }
+    .moves td { padding: 3px 8px; }
+    .moves a {
+        display: inline-block; padding: 2px 10px; text-decoration: none;
+        color: #3a2c18; background: linear-gradient(#efe5cf, #cdbb98);
+        border: 1px solid #826c4f; border-radius: 3px; font-size: 12px;
+        box-shadow: 0 1px 0 #fff inset;
+    }
+    .moves a:hover { border-color: #5b4a30; }
+    body.is-gathering .moves a { border-style: dashed; }
+    .moves .hint { font-size: 10px; color: #efe3c6; text-shadow: 0 1px 2px #000; margin-top: 4px; }
+
+    /* Правая колонка */
+    .side-title { color: #6e160f; font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+    .skill-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+    .skill-row .lvl { font-weight: 700; }
+    .skill-block { margin-bottom: 10px; }
+    .skill-block:last-child { margin-bottom: 0; }
+    .xp-track { height: 12px; border: 1px solid #826c4f; background: #f5ecd6; box-shadow: inset 0 1px 2px rgba(0,0,0,.25); }
+    .xp-fill { height: 100%; width: 0; background: linear-gradient(#9fc24a, #6f942e); transition: width .4s ease; }
+    .xp-fill.mining { background: linear-gradient(#c9c9c9, #8a8a8a); }
+    .xp-fill.fish { background: linear-gradient(#7fb6d9, #4a7fa5); }
+    .side-note { font-size: 10px; color: #5c4f3c; margin-top: 5px; line-height: 1.4; }
+
+    .bag { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+    .bag li { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px dashed #b3a480; }
+    .bag li:last-child { border-bottom: 0; }
+    .bag .ico { font-size: 16px; }
+    .bag .cnt { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .bag .empty { color: #7a6a52; font-style: italic; border-bottom: 0; }
+
+    /* Тултип */
+    .tip {
+        position: fixed; z-index: 50; display: none;
+        max-width: 240px; padding: 7px 9px;
+        color: #f4e9cd; background: rgba(22,19,14,.95);
+        border: 1px solid #c9ab72; box-shadow: 0 3px 10px rgba(0,0,0,.55);
+        font-size: 11px; line-height: 1.5; pointer-events: none;
+    }
+    .tip b { color: #ffd98a; }
+    .tip .row { display: flex; justify-content: space-between; gap: 10px; }
+    .tip .row span:last-child { font-weight: 700; }
+    .tip .ok { color: #9fd06a; }
+    .tip .no { color: #ff9c8a; }
+    .tip hr { border: 0; border-top: 1px solid rgba(201,171,114,.4); margin: 4px 0; }
+
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    @keyframes spawn { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .gnode.shake { animation: shake .3s ease 2; }
+    .gnode.is-gone { display: none; }
+    .gnode.is-spawning .ring { animation: spawn .55s ease; }
+    .gnode.is-spawning:hover .ring { animation: spin 1.2s linear infinite; }
+
+    @media (max-width: 720px) {
+        .field { min-height: 400px; }
+        .gnode { width: 58px; height: 58px; }
+        .gnode .icon { font-size: 26px; }
+        .gnode .name { width: 92px; font-size: 9px; top: 60px; }
+        .help { white-space: normal; text-align: center; width: 78%; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="proto-note">
+        <b>Прототип</b> · мирные профессии. Поле добычи <b>одно на всю карту</b> — на любой локации карты
+        этот блок один и тот же; на поле ресурсы разных профессий (травы, камни, рыба). Двойной клик — начать
+        добычу, время добычи задано <b>у предмета</b>. Добытый ресурс <b>сразу исчезает</b> с карты, а в момент
+        респауна появляется в <b>случайном месте</b>. Опыт — <b>только за успех</b>. Инструмент обязателен.
+        Переход на другую локацию <b>обрывает добычу</b>.
+    </div>
+
+    <div class="loc-title"><b>Тихая поляна</b> <span>(118) · карта «Заросшая дорога»</span></div>
+    <div class="loc-desc">У ручья, среди высокой травы и валунов, находится богатое угодье: здесь растут лечебные травы, торчат жилы медной руды, а в заводи водится рыба. Угодье общее для всей карты — добытые ресурсы появляются в новых местах.</div>
+
+    <div class="layout">
+        <div class="col-main">
+            <div class="frame">
+                <div class="frame-head">
+                    <span class="title">Угодье карты · добыча ресурсов</span>
+                    <span class="meta" id="head-meta"></span>
+                </div>
+
+                <div class="field" id="field">
+                    <div class="help">Наведите — описание ресурса · двойной клик — начать добычу</div>
+
+                    <div class="debug">
+                        <button type="button" id="btn-level" title="Поднять уровень всех профессий (для проверки блокировок)">+1 ур. всем</button>
+                        <button type="button" id="btn-reset" title="Сбросить состояние прототипа">Сброс</button>
+                    </div>
+
+                    <button class="gnode" type="button" data-node="herb1">
+                        <span class="ring"><span class="icon">🌿</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Лечебная трава</span>
+                    </button>
+                    <button class="gnode" type="button" data-node="herb2">
+                        <span class="ring"><span class="icon">🫚</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Старый корень</span>
+                    </button>
+                    <button class="gnode" type="button" data-node="flower">
+                        <span class="ring"><span class="icon">🌸</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Лунный цветок</span>
+                    </button>
+                    <button class="gnode" type="button" data-node="ore1">
+                        <span class="ring"><span class="icon">⛏</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Медная руда</span>
+                    </button>
+                    <button class="gnode" type="button" data-node="ore2">
+                        <span class="ring"><span class="icon">🪨</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Железная руда</span>
+                    </button>
+                    <button class="gnode" type="button" data-node="fish1">
+                        <span class="ring"><span class="icon">🐟</span></span>
+                        <span class="badge"></span>
+                        <span class="name">Речной окунь</span>
+                    </button>
+
+                    <div class="work" id="work" aria-live="polite">
+                        <div class="work-row">
+                            <strong id="work-name">Добыча</strong>
+                            <span class="pct" id="work-time">0.0 / 0 сек. (0%)</span>
+                        </div>
+                        <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="fill" id="work-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="frame-foot" aria-live="polite">
+                    <span class="log-mark">●</span>
+                    <span class="log" id="log">Ресурсы разбросаны по угодью. Дважды нажмите на кружок, чтобы начать добычу.</span>
+                </div>
+            </div>
+
+            <div class="moves">
+                <table>
+                    <tr>
+                        <td></td>
+                        <td align="center"><a href="#" data-move="up">Север</a></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td align="right"><a href="#" data-move="west">Запад</a></td>
+                        <td align="center" style="color:#d8c7ad; font-size:10px;">вы здесь</td>
+                        <td><a href="#" data-move="east">Восток</a></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td align="center"><a href="#" data-move="down">Юг</a></td>
+                        <td></td>
+                    </tr>
+                </table>
+                <div class="hint">Переход внутри карты: угодье то же самое, но добытые ресурсы в новом месте. Переход <b>обрывает добычу</b> — без предмета и опыта.</div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="frame">
+                <div class="frame-head"><span class="title">Профессии</span></div>
+                <div class="frame-foot" style="border-top:1px solid #826c4f;" id="skills-box"></div>
+            </div>
+
+            <div class="frame">
+                <div class="frame-head"><span class="title">Рюкзак</span></div>
+                <div class="frame-foot" style="border-top:1px solid #826c4f;">
+                    <ul class="bag" id="bag"><li class="empty">пусто</li></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ===== Профессии (эмуляция skills.type=peaceful) =====
+    const PROFESSIONS = {
+        herb:   { name: 'Травник',     icon: '🌿', level: 12, exp: 130, fillClass: '' },
+        mining: { name: 'Горное дело', icon: '⛏',  level: 3,  exp: 20,  fillClass: 'mining' },
+        fish:   { name: 'Рыболовство', icon: '🎣', level: 1,  exp: 0,   fillClass: 'fish' },
+    };
+    const PROF_START = JSON.parse(JSON.stringify(PROFESSIONS));
+
+    // ===== "Серверные данные": предметы-ресурсы (эмуляция share_items + gathering_nodes) =====
+    // gatherTime в реальной игре будет колонкой share_items (время задаётся у предмета)
+    const NODES = {
+        herb1:  { id: 'herb1',  name: 'Лечебная трава', icon: '🌿', prof: 'herb',   gatherTime: 6,  respawn: 15, percent: 95, reqLevel: 1,  exp: 3,  tool: 'Серп' },
+        herb2:  { id: 'herb2',  name: 'Старый корень',  icon: '🫚', prof: 'herb',   gatherTime: 9,  respawn: 20, percent: 85, reqLevel: 5,  exp: 5,  tool: 'Серп' },
+        flower: { id: 'flower', name: 'Лунный цветок',  icon: '🌸', prof: 'herb',   gatherTime: 18, respawn: 45, percent: 60, reqLevel: 20, exp: 15, tool: 'Серп' },
+        ore1:   { id: 'ore1',   name: 'Медная руда',    icon: '⛏',  prof: 'mining', gatherTime: 8,  respawn: 18, percent: 90, reqLevel: 1,  exp: 4,  tool: 'Кирка' },
+        ore2:   { id: 'ore2',   name: 'Железная руда',  icon: '🪨', prof: 'mining', gatherTime: 14, respawn: 30, percent: 75, reqLevel: 10, exp: 9,  tool: 'Кирка' },
+        fish1:  { id: 'fish1',  name: 'Речной окунь',   icon: '🐟', prof: 'fish',   gatherTime: 10, respawn: 22, percent: 85, reqLevel: 1,  exp: 5,  tool: 'Удочка' },
+    };
+    const FAIL_COOLDOWN = 3; // сек пауза на кружке после провала
+
+    const state = {
+        professions: JSON.parse(JSON.stringify(PROFESSIONS)),
+        inventory: {},
+        gathering: null,   // { nodeId, startedAt }
+        progressRaf: null, // id анимации прогресса (для отмены при переходе)
+        gen: 0,            // счётчик прерываний (переход инвалидирует отложенные вызовы)
+    };
+
+    // ===== DOM =====
+    const el = {
+        field: document.getElementById('field'),
+        work: document.getElementById('work'),
+        workName: document.getElementById('work-name'),
+        workTime: document.getElementById('work-time'),
+        workFill: document.getElementById('work-fill'),
+        track: document.querySelector('.track'),
+        log: document.getElementById('log'),
+        logMark: document.querySelector('.frame-foot .log-mark'),
+        foot: document.querySelector('.frame-foot'),
+        headMeta: document.getElementById('head-meta'),
+        skillsBox: document.getElementById('skills-box'),
+        bag: document.getElementById('bag'),
+        tip: document.getElementById('tip'),
+    };
+
+    const nodes = {}; // id -> { data, el, badge, state, remaining, timer }
+    document.querySelectorAll('.gnode').forEach(function (nodeEl) {
+        const id = nodeEl.dataset.node;
+        nodes[id] = { data: NODES[id], el: nodeEl, badge: nodeEl.querySelector('.badge'), state: 'available', remaining: 0, timer: null };
+    });
+
+    const expForLevel = (level) => level * 20;
+
+    const fmt = (sec) => {
+        const m = Math.floor(sec / 60), s = sec % 60;
+        return (m > 0 ? m + ':' + String(s).padStart(2, '0') : String(s) + ' с');
+    };
+
+    // ===== Случайная позиция кружка (без пересечений с другими и с панелью прогресса) =====
+    function randomPosition(n) {
+        const fieldW = el.field.clientWidth;
+        const fieldH = el.field.clientHeight;
+        const nodeW = 68, nodeH = 96; // кружок + подпись под ним
+        const pad = 10;
+        const bottomGap = 78; // место под панель прогресса
+        const maxX = Math.max(pad, fieldW - nodeW - pad);
+        const maxY = Math.max(pad, fieldH - nodeH - bottomGap);
+        let best = null, bestDist = -1;
+        for (let attempt = 0; attempt < 60; attempt++) {
+            const x = pad + Math.random() * (maxX - pad);
+            const y = pad + 16 + Math.random() * Math.max(1, maxY - pad - 16);
+            let minDist = Infinity;
+            Object.keys(nodes).forEach(function (otherId) {
+                const other = nodes[otherId];
+                if (other === n || other.state === 'gone') { return; }
+                const ox = parseFloat(other.el.style.left) || pad;
+                const oy = parseFloat(other.el.style.top) || pad;
+                minDist = Math.min(minDist, Math.hypot(ox - x, oy - y));
+            });
+            if (minDist > bestDist) { bestDist = minDist; best = { x: x, y: y }; }
+            if (minDist >= 100) { break; }
+        }
+        n.el.style.left = Math.round(best.x) + 'px';
+        n.el.style.top = Math.round(best.y) + 'px';
+    }
+
+    function spawnAtRandomPlace(n) {
+        n.el.classList.remove('is-gone');
+        randomPosition(n);
+        n.el.classList.add('is-spawning');
+        setTimeout(function () { n.el.classList.remove('is-spawning'); }, 700);
+    }
+
+    // ===== Рендер =====
+    function renderProfessions() {
+        el.headMeta.textContent = Object.keys(state.professions).map(function (key) {
+            return state.professions[key].name + ' ' + state.professions[key].level;
+        }).join(' · ');
+
+        el.skillsBox.innerHTML = Object.keys(state.professions).map(function (key) {
+            const p = state.professions[key];
+            const need = expForLevel(p.level);
+            const pct = Math.min(100, p.exp / need * 100).toFixed(1);
+            return '<div class="skill-block">' +
+                '<div class="skill-row"><span>' + p.icon + ' ' + p.name + ' <span class="lvl">' + p.level + ' ур.</span></span>' +
+                '<span>' + p.exp + ' / ' + need + '</span></div>' +
+                '<div class="xp-track"><div class="xp-fill ' + p.fillClass + '" style="width:' + pct + '%"></div></div>' +
+                '</div>';
+        }).join('');
+    }
+
+    function renderBag() {
+        const keys = Object.keys(state.inventory);
+        if (!keys.length) {
+            el.bag.innerHTML = '<li class="empty">пусто</li>';
+            return;
+        }
+        el.bag.innerHTML = keys.map(function (name) {
+            return '<li><span class="ico">' + NODES[name.split('::')[0]].icon + '</span> ' +
+                name.split('::')[1] + '<span class="cnt">×' + state.inventory[name] + '</span></li>';
+        }).join('');
+    }
+
+    function renderNode(id) {
+        const n = nodes[id], d = n.data;
+        const node = n.el;
+        const profLvl = state.professions[d.prof].level;
+        node.classList.remove('is-busy', 'is-cooldown', 'is-locked');
+        if (n.state === 'gone' || n.state === 'respawning') {
+            // Ресурса нет на карте до момента респауна
+            node.classList.add('is-gone');
+            return;
+        }
+        node.classList.remove('is-gone');
+        if (state.gathering && state.gathering.nodeId === id) {
+            node.classList.add('is-busy');
+            n.badge.textContent = '…';
+        } else if (n.state === 'cooldown') {
+            node.classList.add('is-cooldown');
+            n.badge.textContent = fmt(n.remaining);
+        } else if (profLvl < d.reqLevel) {
+            node.classList.add('is-locked');
+            n.badge.textContent = 'ур.' + d.reqLevel;
+        } else {
+            n.badge.textContent = d.gatherTime + ' с';
+        }
+    }
+
+    function renderAll() {
+        renderProfessions();
+        renderBag();
+        Object.keys(nodes).forEach(renderNode);
+    }
+
+    // ===== Лог =====
+    function log(text, kind) {
+        el.log.textContent = text;
+        el.foot.classList.remove('is-fail', 'is-good', 'is-warn');
+        if (kind) el.foot.classList.add(kind);
+        el.logMark.textContent = '●';
+    }
+
+    // ===== Опыт и уровни =====
+    function gainExp(profKey, amount) {
+        const p = state.professions[profKey];
+        p.exp += amount;
+        let leveled = false;
+        while (p.exp >= expForLevel(p.level)) {
+            p.exp -= expForLevel(p.level);
+            p.level += 1;
+            leveled = true;
+        }
+        renderProfessions();
+        Object.keys(nodes).forEach(renderNode); // могут открыться заблокированные узлы
+        return leveled;
+    }
+
+    // ===== "Сетевые" вызовы (эмуляция API) =====
+    function fakeServerCall(ms) {
+        return new Promise(function (resolve) { setTimeout(resolve, ms); });
+    }
+
+    async function startGathering(id) {
+        const n = nodes[id], d = n.data;
+        const prof = state.professions[d.prof];
+        if (state.gathering) { log('Сначала завершите текущую добычу.', 'is-warn'); return false; }
+        if (n.state !== 'available') { return false; }
+        if (prof.level < d.reqLevel) {
+            log('«' + d.name + '» требует «' + prof.name + '» ' + d.reqLevel + ' ур.', 'is-warn');
+            n.el.classList.remove('shake'); void n.el.offsetWidth; n.el.classList.add('shake');
+            return false;
+        }
+        log('Начинаем добычу: ' + d.name + '…');
+        const myGen = state.gen;
+        await fakeServerCall(150); // имитация round-trip до сервера
+        if (state.gathering || state.gen !== myGen) { return false; } // уже добывает / переход прервал старт
+        state.gathering = { nodeId: id, startedAt: performance.now() };
+        document.body.classList.add('is-gathering');
+        el.work.classList.add('is-visible');
+        el.workName.textContent = 'Добыча: ' + d.name + ' (' + d.tool + ')';
+        renderNode(id);
+        tickProgress();
+        return true;
+    }
+
+    function tickProgress() {
+        if (!state.gathering) { return; }
+        const d = nodes[state.gathering.nodeId].data;
+        const elapsed = (performance.now() - state.gathering.startedAt) / 1000;
+        const p = Math.min(elapsed / d.gatherTime, 1);
+        el.workFill.style.width = (p * 100).toFixed(2) + '%';
+        el.track.setAttribute('aria-valuenow', String(Math.round(p * 100)));
+        el.workTime.textContent = Math.min(elapsed, d.gatherTime).toFixed(1) + ' / ' + d.gatherTime + ' сек. (' + Math.round(p * 100) + '%)';
+        if (p < 1) {
+            state.progressRaf = requestAnimationFrame(tickProgress);
+            return;
+        }
+        state.progressRaf = null;
+        completeGathering();
+    }
+
+    async function completeGathering() {
+        const g = state.gathering;
+        const n = nodes[g.nodeId], d = n.data;
+        document.body.classList.remove('is-gathering');
+        el.work.classList.remove('is-visible');
+        el.workFill.style.width = '0%';
+        el.track.setAttribute('aria-valuenow', '0');
+        n.el.classList.remove('is-busy');
+
+        await fakeServerCall(120); // имитация завершения на сервере
+
+        if (state.gathering !== g) { return; } // переход прервал добычу в этот момент
+        state.gathering = null;
+
+        const success = Math.random() * 100 <= d.percent;
+        if (success) {
+            const key = d.id + '::' + d.name;
+            state.inventory[key] = (state.inventory[key] || 0) + 1;
+            const leveled = gainExp(d.prof, d.exp);
+            renderBag();
+            log('Получено: ' + d.icon + ' ' + d.name + ' ×1 · ' + state.professions[d.prof].name + ' +' + d.exp +
+                (leveled ? ' · уровень ' + state.professions[d.prof].level + '!' : '') +
+                '. Ресурс появится в новом месте через ' + fmt(d.respawn) + '.', 'is-good');
+            // Ресурс сразу исчезает с карты; в момент респауна появится в случайном месте
+            enterCountdown(n, 'gone', d.respawn);
+        } else {
+            log('Не удалось добыть «' + d.name + '» · опыта нет (он только за успех)', 'is-fail');
+            enterCountdown(n, 'cooldown', FAIL_COOLDOWN);
+        }
+    }
+
+    // Отмена добычи (переход на другую локацию): без предмета и опыта, ресурс остаётся на месте
+    function abortGathering() {
+        if (!state.gathering) { return; }
+        const n = nodes[state.gathering.nodeId];
+        if (state.progressRaf) { cancelAnimationFrame(state.progressRaf); state.progressRaf = null; }
+        state.gathering = null;
+        state.gen += 1;
+        document.body.classList.remove('is-gathering');
+        el.work.classList.remove('is-visible');
+        el.workFill.style.width = '0%';
+        el.track.setAttribute('aria-valuenow', '0');
+        n.el.classList.remove('is-busy');
+        n.state = 'available';
+        renderNode(n.data.id);
+    }
+
+    function enterCountdown(n, stateName, seconds) {
+        n.state = stateName;
+        n.remaining = seconds;
+        renderNode(n.data.id);
+        if (n.timer) { clearInterval(n.timer); }
+        n.timer = setInterval(function () {
+            n.remaining -= 1;
+            if (n.remaining <= 0) {
+                clearInterval(n.timer);
+                n.timer = null;
+                n.state = 'available';
+                spawnAtRandomPlace(n);
+                renderNode(n.data.id);
+                log(n.data.name + ' появился в новом месте на угодье.');
+            } else {
+                renderNode(n.data.id);
+            }
+        }, 1000);
+    }
+
+    // ===== События =====
+    Object.keys(nodes).forEach(function (id) {
+        const n = nodes[id];
+        n.el.addEventListener('click', function () {
+            if (state.gathering) { return; }
+            if (n.state === 'gone' || n.state === 'cooldown') { return; }
+            const d = n.data;
+            if (state.professions[d.prof].level < d.reqLevel) {
+                log('«' + d.name + '» требует «' + state.professions[d.prof].name + '» ' + d.reqLevel + ' ур. (сейчас ' + state.professions[d.prof].level + ').', 'is-warn');
+                return;
+            }
+            log(d.name + ': двойной клик начнёт добычу (' + d.gatherTime + ' сек., шанс ' + d.percent + '%).');
+        });
+        n.el.addEventListener('dblclick', function (e) {
+            e.preventDefault();
+            startGathering(id);
+        });
+        n.el.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startGathering(id); }
+        });
+    });
+
+    // Тултип
+    document.addEventListener('pointerover', function (e) {
+        const nodeEl = e.target.closest ? e.target.closest('.gnode') : null;
+        if (!nodeEl) { el.tip.style.display = 'none'; return; }
+        const d = nodes[nodeEl.dataset.node].data;
+        const prof = state.professions[d.prof];
+        const hasLevel = prof.level >= d.reqLevel;
+        el.tip.innerHTML =
+            '<b>' + d.icon + ' ' + d.name + '</b><hr>' +
+            '<div class="row"><span>Профессия</span><span>' + prof.name + ' ' + d.reqLevel + ' ур. <span class="' + (hasLevel ? 'ok' : 'no') + '">' + (hasLevel ? '✓' : '✗') + '</span></span></div>' +
+            '<div class="row"><span>Время добычи</span><span>' + d.gatherTime + ' сек.</span></div>' +
+            '<div class="row"><span>Шанс успеха</span><span>' + d.percent + '%</span></div>' +
+            '<div class="row"><span>Опыт (за успех)</span><span>+' + d.exp + '</span></div>' +
+            '<div class="row"><span>Респаун</span><span>' + fmt(d.respawn) + ' · новое место</span></div>' +
+            '<div class="row"><span>Инструмент</span><span class="ok">' + d.tool + ' ✓</span></div>';
+        el.tip.style.display = 'block';
+        const pad = 12;
+        let x = e.clientX + pad, y = e.clientY + pad;
+        const r = el.tip.getBoundingClientRect();
+        if (x + r.width > window.innerWidth - 8) { x = e.clientX - r.width - pad; }
+        if (y + r.height > window.innerHeight - 8) { y = e.clientY - r.height - pad; }
+        el.tip.style.left = x + 'px';
+        el.tip.style.top = y + 'px';
+    });
+    document.addEventListener('pointerout', function (e) {
+        if (e.target.closest && e.target.closest('.gnode')) { el.tip.style.display = 'none'; }
+    });
+
+    // Переходы: обрывают активную добычу
+    document.querySelectorAll('[data-move]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            const wasGathering = state.gathering !== null;
+            abortGathering();
+            log('Переход «' + a.textContent + '»: та же карта, то же угодье (в прототипе не реализован).' +
+                (wasGathering ? ' Добыча прервана — предмет не получен, опыта нет.' : ''), wasGathering ? 'is-warn' : undefined);
+        });
+    });
+
+    // Дебаг
+    document.getElementById('btn-level').addEventListener('click', function () {
+        Object.keys(state.professions).forEach(function (key) {
+            const p = state.professions[key];
+            p.exp = 0;
+            p.level += 1;
+        });
+        renderProfessions();
+        Object.keys(nodes).forEach(renderNode);
+        log('Дебаг: все профессии +1 уровень.', 'is-good');
+    });
+    document.getElementById('btn-reset').addEventListener('click', function () {
+        abortGathering();
+        state.professions = JSON.parse(JSON.stringify(PROF_START));
+        state.inventory = {};
+        state.gathering = null;
+        document.body.classList.remove('is-gathering');
+        el.work.classList.remove('is-visible');
+        el.workFill.style.width = '0%';
+        Object.keys(nodes).forEach(function (id) {
+            const n = nodes[id];
+            if (n.timer) { clearInterval(n.timer); n.timer = null; }
+            n.state = 'available';
+            spawnAtRandomPlace(n);
+        });
+        renderAll();
+        log('Состояние сброшено. Ресурсы разбросаны по угодью.');
+    });
+
+    // Начальная раскладка: случайные позиции, затем первичный рендер
+    Object.keys(nodes).forEach(function (id) { randomPosition(nodes[id]); });
+    renderAll();
+})();
+</script>
+</body>
+</html>

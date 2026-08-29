@@ -36,4 +36,16 @@ enum ItemRarity: string
             self::HEROIC => 'Героический',
         };
     }
+
+    public function defaultGatheringSeconds(): int
+    {
+        return match ($this) {
+            self::COMMON => 5,
+            self::UNCOMMON => 8,
+            self::RARE => 12,
+            self::EPIC => 18,
+            self::LEGENDARY => 30,
+            self::HEROIC => 45,
+        };
+    }
 }

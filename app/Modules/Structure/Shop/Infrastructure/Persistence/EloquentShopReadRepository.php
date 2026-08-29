@@ -19,11 +19,30 @@ class EloquentShopReadRepository implements ShopReadRepository
 
     public function getShopItems(int $structureId, ?int $categoryId = null): Collection
     {
-        return ShopItem::with(['item', 'requirements.item'])
+        return ShopItem::with(['item.requirements', 'requirements.item'])
             ->where('structure_id', $structureId)
             ->when($categoryId !== null, fn ($query) => $query->where('share_structure_category_id', $categoryId))
             ->orderByDesc('sort_order')
             ->get();
+    }
+
+    public function getBackpackShareItemCounts(int $userId, array $shareItemIds): Collection
+    {
+        if ($shareItemIds === []) {
+            return collect();
+        }
+
+        return Backpack::query()
+            ->selectRaw('items.share_item_id, SUM(backpacks.count) as quantity')
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->where('backpacks.user_id', $userId)
+            ->where('backpacks.equipped', 0)
+            ->whereIn('items.share_item_id', $shareItemIds)
+            ->groupBy('items.share_item_id')
+            ->get()
+            ->mapWithKeys(static fn (Backpack $item): array => [
+                (int) $item->share_item_id => (int) $item->quantity,
+            ]);
     }
 
     public function findResourceBackpackItem(int $userId, int $shareItemId): ?Backpack

@@ -13,7 +13,16 @@ class ShopItemRequirement extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['share_item_id', 'quantity'];
+    protected $fillable = ['shop_item_id', 'share_item_id', 'quantity'];
+
+    protected $casts = [
+        'quantity' => 'integer',
+    ];
+
+    public function shopItem(): BelongsTo
+    {
+        return $this->belongsTo(ShopItem::class);
+    }
 
     public function item(): BelongsTo
     {

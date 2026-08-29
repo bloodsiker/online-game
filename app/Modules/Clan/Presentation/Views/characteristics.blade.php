@@ -12,14 +12,25 @@
         .clan-stats { width: 100%; border: 1px solid #DB9F73; border-collapse: collapse; }
         .clan-stats th { width: 42%; padding: 6px 10px; text-align: left; border: 1px solid #DB9F73; }
         .clan-stats td { padding: 6px 10px; border: 1px solid #DB9F73; }
-        .progress-bar { position: relative; width: 100%; height: 17px; margin: 4px 0; }
+        .progress-bar { position: relative; width: 100%; height: 17px; }
         .progress-bar__bg { position: absolute; right: 3px; left: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -51px repeat-x; }
         .progress-bar__red { position: absolute; right: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -68px repeat-x; }
         .progress-bar__cover { position: absolute; left: 20px; right: 20px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 0 repeat-x; }
         .progress-bar__left { position: absolute; left: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -17px no-repeat; }
         .progress-bar__right { position: absolute; right: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -34px no-repeat; }
         .progress-bar__marker { position: absolute; top: 0; width: 5px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -85px no-repeat; }
-        .progress-bar__txt { position: absolute; left: 3px; right: 3px; top: 3px; color: #fff; font-size: 10px; text-align: center; text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444, -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303; }
+        .progress-bar__txt {
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            top: 3px;
+            color: #fff;
+            font-size: 10px;
+            line-height: 11px;
+            text-align: center;
+            text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444,
+                         -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303;
+        }
         .progress-bar__txt span { color: #fff; }
         .muted { color: #765C4A; }
         .level-value { color: #8D2616; font-size: 15px; font-weight: bold; }
@@ -72,10 +83,7 @@
                                         <div class="progress-bar__cover"></div>
                                         <div class="progress-bar__left"></div>
                                         <div class="progress-bar__right"></div>
-                            {{-- At less than 1%, the 5px marker would protrude beyond the left cap. --}}
-                            @if ($progress >= 1)
-                                <div class="progress-bar__marker" style="right: {{ 100 - $progress }}%;"></div>
-                            @endif
+                                        <div class="progress-bar__marker" style="right: {{ 100 - $progress }}%;"></div>
                                         <div class="progress-bar__txt"><span>{{ number_format($levelExperience, 2, '.', ' ') }}/{{ number_format($levelExperienceRequired, 2, '.', ' ') }}</span></div>
                                     </div>
                                 </td>

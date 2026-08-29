@@ -39,6 +39,11 @@ class BattleDetail extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function battle(): BelongsTo
+    {
+        return $this->belongsTo(Battle::class);
+    }
+
     public function locationMonster(): BelongsTo
     {
         return $this->belongsTo(MonsterOnLocation::class, 'location_monster_id')->with(['monster']);

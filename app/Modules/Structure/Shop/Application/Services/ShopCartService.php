@@ -12,9 +12,13 @@ use Illuminate\Support\Facades\DB;
 
 class ShopCartService
 {
-    public function addItem(User $user, int $shopItemId, int $quantity = 1): ShopCart
+    public function addItem(User $user, int $shopItemId, int $quantity = 1, ?int $structureId = null): ShopCart
     {
-        ShopItem::where('id', $shopItemId)->firstOrFail();
+        ShopItem::query()
+            ->whereKey($shopItemId)
+            ->when($structureId !== null, fn ($query) => $query->where('structure_id', $structureId))
+            ->firstOrFail();
+        $quantity = max(1, $quantity);
 
         return DB::transaction(function () use ($user, $shopItemId, $quantity) {
             $cartItem = ShopCart::where('user_id', $user->id)
@@ -55,16 +59,23 @@ class ShopCartService
         });
     }
 
-    public function removeItem(User $user, int $shopItemId): bool
+    public function removeItem(User $user, int $cartId, ?int $structureId = null): bool
     {
         return ShopCart::where('user_id', $user->id)
-            ->where('id', $shopItemId)
+            ->where('id', $cartId)
+            ->when(
+                $structureId !== null,
+                fn ($query) => $query->whereHas(
+                    'shopItem',
+                    fn ($shopItemQuery) => $shopItemQuery->where('structure_id', $structureId),
+                ),
+            )
             ->delete() > 0;
     }
 
     public function getCart(User $user, int $structureId): ShopCartDTO
     {
-        $cartItems = ShopCart::with(['shopItem', 'shopItem.item'])
+        $cartItems = ShopCart::with(['shopItem', 'shopItem.item', 'shopItem.requirements.item'])
             ->join('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
             ->where('shop_items.structure_id', $structureId)
             ->where('shop_carts.user_id', $user->id)
@@ -74,10 +85,25 @@ class ShopCartService
         $totalPrice = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->price);
         $totalDiamond = $cartItems->sum(fn ($item) => $item->quantity * $item->shopItem->diamond);
 
+        $requirementTotals = $cartItems
+            ->flatMap(fn ($cartItem) => $cartItem->shopItem->requirements->map(fn ($requirement): array => [
+                'item' => $requirement->item,
+                'quantity' => (int) $requirement->quantity * (int) $cartItem->quantity,
+            ]))
+            ->filter(fn (array $requirement): bool => $requirement['item'] !== null)
+            ->groupBy(fn (array $requirement): int => (int) $requirement['item']->id)
+            ->map(fn ($requirements): array => [
+                'item' => $requirements->first()['item'],
+                'quantity' => $requirements->sum('quantity'),
+            ])
+            ->values()
+            ->all();
+
         return new ShopCartDTO(
             items: $cartItems,
             totalDiamond: $totalDiamond,
             totalPrice: $totalPrice,
+            requirementTotals: $requirementTotals,
         );
     }
 

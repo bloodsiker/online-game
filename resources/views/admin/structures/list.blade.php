@@ -10,6 +10,9 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
+                    <div class="mb-3">
+                        <a href="{{ route('admin.structure.create') }}" class="btn btn-primary">Добавить построение</a>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered mb-none">
                             <thead>

@@ -6,6 +6,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Application\DTOs\MoveResultDTO;
+use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -151,6 +152,7 @@ final readonly class PlayerMovementService
 
     private function applyMove(User $user, int $newLocationId): void
     {
+        GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
         $user->prev_location_id = $user->location_id;
         $user->location_id = $newLocationId;
         $user->save();

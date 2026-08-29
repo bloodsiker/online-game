@@ -24,6 +24,8 @@ class Structure extends Model
 
     public const TYPE_SHOP = 'shop';
 
+    public const TYPE_BARTER_SHOP = 'barter_shop';
+
     public const TYPE_AUCTION = 'auction';
 
     public const TYPE_HEAL = 'heal';
@@ -38,6 +40,8 @@ class Structure extends Model
 
     public const TYPE_BLACKSMITH = 'blacksmith';
 
+    public const TYPE_WORKSHOP = 'workshop';
+
     public const TYPE_EXCHANGE = 'exchange';
 
     public const TYPE_AUCTION_EXCHANGE = 'auction_exchange';
@@ -48,6 +52,7 @@ class Structure extends Model
 
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
+        self::TYPE_BARTER_SHOP => 'Бартерный магазин',
         self::TYPE_AUCTION => 'Аукцион',
         self::TYPE_HEAL => 'Восстановление',
         self::TYPE_WAREHOUSE => 'Хранилище',
@@ -55,6 +60,7 @@ class Structure extends Model
         self::TYPE_BANK => 'Банк',
         self::TYPE_CLAN_BANK => 'Клановая казна',
         self::TYPE_BLACKSMITH => 'Кузня',
+        self::TYPE_WORKSHOP => 'Мастерской дом',
         self::TYPE_EXCHANGE => 'Обмен',
         self::TYPE_AUCTION_EXCHANGE => 'Биржа',
         self::TYPE_REPUTATION_EXCHANGE => 'Обмен на репутацию',
@@ -123,6 +129,11 @@ class Structure extends Model
         return $this->type === self::TYPE_SHOP;
     }
 
+    public function isBarterShop(): bool
+    {
+        return $this->type === self::TYPE_BARTER_SHOP;
+    }
+
     public function isExchange(): bool
     {
         return $this->type === self::TYPE_EXCHANGE;
@@ -156,6 +167,11 @@ class Structure extends Model
     public function isBlacksmith(): bool
     {
         return $this->type === self::TYPE_BLACKSMITH;
+    }
+
+    public function isWorkshop(): bool
+    {
+        return $this->type === self::TYPE_WORKSHOP;
     }
 
     public function isBank(): bool

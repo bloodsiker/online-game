@@ -12,7 +12,7 @@
            ячеек рамки — картинки лейбла получали строчный отступ под базовую линию,
            строка вырастала выше 22px, а угловые спрайты (no-repeat, 22px) не тянулись,
            из-за чего появлялся разрыв рамки. */
-        body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 12px; }
+        body { height: 100%; margin: 0; color: #461c0b; font-family: Tahoma; font-size: 11px; }
         a, a:link, a:visited, a:active { text-decoration: none; color: #461C0B; }
         table.coll { border-collapse: collapse; border-spacing: 0; }
         .brd2-all { border: 1px solid #DB9F73; }
@@ -20,97 +20,119 @@
         .w100 { width: 100%; }
 
         .section-title {
-            background-image: url(/img/bg/info/tbl-usi_label-center.gif);
-            background-repeat: repeat-x;
-            color: #FCF5B7;
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            margin: 0 0 5px;
+            padding: 4px 8px;
+            border: 1px solid #c49485;
+            background: #f3d6b7 url(/img/bg/info/bg_l.gif) repeat;
+            color: #955c4a;
             font-weight: bold;
             font-size: 11px;
-            padding: 3px 10px 5px;
-            margin-bottom: 6px;
-            display: block;
+            line-height: 14px;
+            text-align: left;
         }
 
-        /* Active quest card */
         .active-quest {
-            border: 1px solid #c8990a;
-            background: #fffbe8;
-            border-radius: 3px;
-            padding: 8px 10px;
-            margin-bottom: 10px;
+            margin-bottom: 7px;
+            padding: 6px 8px;
+            border: 1px solid #c49485;
+            border-left: 3px solid #a36a35;
+            background: #fffbd6 url(/img/bg/info/bg_l.gif) repeat;
         }
         .active-quest .quest-title {
-            font-size: 12px;
+            margin: -6px -8px 5px;
+            padding: 4px 8px;
+            border-bottom: 1px solid #db9f73;
+            background: rgba(219, 159, 115, .18);
             font-weight: bold;
+            font-size: 11px;
             color: #461c0b;
-            margin-bottom: 4px;
         }
         .active-quest .quest-acceptor {
-            color: #7a5a00;
+            color: #955c4a;
             margin-bottom: 6px;
         }
-        .progress-row { margin-bottom: 5px; }
-        .progress-label { color: #333; margin-bottom: 2px; }
-        .progress-bar-wrap {
-            background: #e0c090;
-            border: 1px solid #b08040;
-            height: 10px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            background: linear-gradient(to bottom, #e8b030, #c8900a);
-            height: 100%;
-            min-width: 2px;
-        }
-        .progress-nums { color: #666; text-align: right; margin-top: 1px; }
-
-        /* Available quest cards */
-        .quest-card {
-            border: 1px solid #DB9F73;
-            border-radius: 3px;
-            background-image: url(/img/bg/info/bg_l.gif);
-            padding: 6px 8px;
-            margin-bottom: 5px;
-        }
-        .quest-card .q-title { font-weight: bold; color: #461c0b; font-size: 12px; }
-        .quest-card .q-desc  { color: #555; margin: 2px 0 4px; line-height: 1.4; }
-        .quest-card .q-obj   { color: #8B0000; margin-bottom: 1px; }
-        .quest-card .q-reward { color: #2a7a2a; font-weight: bold; }
-        .quest-card .q-cooldown { color: #666; font-style: italic; }
-        .badge-clan {
-            display: inline-block;
-            background: #c8990a;
+        .progress-row { margin: 0 0 6px; }
+        .progress-label { color: #461c0b; margin-bottom: 2px; }
+        .progress-bar { position: relative; width: 100%; height: 17px; }
+        .progress-bar__bg { position: absolute; right: 3px; left: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -51px repeat-x; }
+        .progress-bar__red { position: absolute; right: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -68px repeat-x; }
+        .progress-bar__cover { position: absolute; left: 20px; right: 20px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 0 repeat-x; }
+        .progress-bar__left { position: absolute; left: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -17px no-repeat; }
+        .progress-bar__right { position: absolute; right: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -34px no-repeat; }
+        .progress-bar__marker { position: absolute; top: 0; width: 5px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -85px no-repeat; }
+        .progress-bar__txt {
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            top: 3px;
             color: #fff;
+            font-size: 10px;
+            line-height: 11px;
+            text-align: center;
+            text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444,
+                         -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303;
+        }
+
+        .quest-card {
+            margin-bottom: 6px;
+            padding: 6px 8px;
+            border: 1px solid #DB9F73;
+            background-color: #fff8ec;
+        }
+        .quest-card:hover {
+            border-color: #c49485;
+        }
+        .quest-card .q-title {
+            margin: -6px -8px 5px;
+            padding: 4px 8px;
+            border-bottom: 1px solid #DB9F73;
+            background: rgba(219, 159, 115, .14);
+            color: #461c0b;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .quest-card .q-desc,
+        .quest-card .q-desc p { color: #631c0b; margin: 2px 0 5px; line-height: 1.35; }
+        .quest-card .q-obj { color: #8b0000; margin-bottom: 2px; }
+        .q-reward { color: #114d01; font-weight: bold; }
+        .quest-card .q-cooldown { color: #666; font-style: italic; }
+        .badge-clan,
+        .badge-active,
+        .badge-cooldown {
+            display: inline-block;
+            margin-right: 4px;
+            padding: 0 4px 1px;
+            border: 1px solid #c49485;
+            background: #f5dfc7 url(/img/bg/info/bg_l.gif) repeat;
+            color: #8b0000;
             font-size: 9px;
             font-weight: bold;
-            padding: 1px 4px;
-            border-radius: 2px;
-            margin-right: 4px;
+            line-height: 12px;
             vertical-align: middle;
         }
         .badge-active {
-            display: inline-block;
-            background: #2a7a2a;
-            color: #fff;
-            font-size: 9px;
-            padding: 1px 4px;
-            border-radius: 2px;
             margin-left: 4px;
-            vertical-align: middle;
+            border-color: #8eaa78;
+            color: #114d01;
         }
         .badge-cooldown {
-            display: inline-block;
-            background: #888;
-            color: #fff;
-            font-size: 9px;
-            padding: 1px 4px;
-            border-radius: 2px;
             margin-left: 4px;
-            vertical-align: middle;
+            border-color: #aaa08e;
+            color: #666;
         }
-        .separator { border: none; border-top: 1px solid #DB9F73; margin: 8px 0; }
+        .separator { border: 0; height: 5px; margin: 0; }
+        .empty-state {
+            margin-bottom: 7px;
+            padding: 7px 9px;
+            border: 1px solid #DB9F73;
+            background: #fff8ec url(/img/bg/info/bg_l.gif) repeat;
+            color: #955c4a;
+            font-style: italic;
+        }
 
-        /* History table */
         table.history-tbl {
             border-top: 1px solid #DB9F73;
             border-left: 1px solid #DB9F73;
@@ -120,22 +142,13 @@
         .history-tbl td, .history-tbl th {
             border-right: 1px solid #DB9F73;
             border-bottom: 1px solid #DB9F73;
+            height: 17px;
             padding: 3px 6px;
             color: #461c0b;
+            vertical-align: middle;
         }
-        .history-tbl th { color: #955c4a; white-space: nowrap; background-image: url(/img/bg/info/bg_l.gif); }
+        .history-tbl th { color: #955c4a; white-space: nowrap; background: #f3d6b7 url(/img/bg/info/bg_l.gif) repeat; }
         .history-tbl tr.bg_l td { background-image: url(/img/bg/info/bg_l.gif); }
-
-        .cancel-btn {
-            cursor: pointer;
-            color: #8B0000;
-            border: 1px solid #c49485;
-            background-image: url(/img/bg/info/bg_l.gif);
-            padding: 2px 6px;
-            border-radius: 2px;
-            font-size: 10px;
-        }
-        .cancel-btn:hover { background-color: #f5ddd0; }
     </style>
 </head>
 <body class="regblk">
@@ -163,7 +176,7 @@
                 </tr>
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
-                    <td class="tbl-usi_bg" valign="top" style="padding: 8px 10px;">
+                    <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px;">
 
                         {{-- ===== ACTIVE QUESTS ===== --}}
                         <span class="section-title">Активные квесты</span>
@@ -199,10 +212,15 @@
                                                 @endif
                                                 {{ $obj->questObjective->description }}
                                             </div>
-                                            <div class="progress-bar-wrap">
-                                                <div class="progress-bar-fill" style="width:{{ $pct }}%;"></div>
+                                            <div class="progress-bar">
+                                                <div class="progress-bar__bg"></div>
+                                                <div class="progress-bar__red" style="width: {{ 100 - $pct }}%;"></div>
+                                                <div class="progress-bar__cover"></div>
+                                                <div class="progress-bar__left"></div>
+                                                <div class="progress-bar__right"></div>
+                                                <div class="progress-bar__marker" style="right: {{ 100 - $pct }}%;"></div>
+                                                <div class="progress-bar__txt">{{ $done }} / {{ $need }} ({{ $pct }}%)</div>
                                             </div>
-                                            <div class="progress-nums">{{ $done }} / {{ $need }} ({{ $pct }}%)</div>
                                         </div>
                                     @endforeach
                                 @endif
@@ -239,7 +257,7 @@
                                 @endif
                             </div>
                         @empty
-                            <div class="brd2-all" style="padding:8px 10px; color:#888; font-style:italic; margin-bottom:10px;">
+                            <div class="empty-state">
                                 Нет активных клановых квестов. Любой член клана может взять квест у NPC.
                             </div>
                         @endforelse
@@ -317,7 +335,7 @@
                                 @endif
                             </div>
                         @empty
-                            <div style="color:#888; font-style:italic;">Нет доступных клановых квестов.</div>
+                            <div class="empty-state">Нет доступных клановых квестов.</div>
                         @endforelse
 
                         <hr class="separator">
@@ -337,7 +355,7 @@
                                 </thead>
                                 <tbody>
                                 @foreach($history as $record)
-                                    <tr class="bg_l">
+                                    <tr>
                                         <td>{{ $record->quest->title }}</td>
                                         <td>{{ $record->user->name }}</td>
                                         <td nowrap>{{ $record->completed_at?->format('d.m.Y H:i') }}</td>
@@ -357,7 +375,7 @@
                                 </tbody>
                             </table>
                         @else
-                            <div style="color:#888; font-style:italic;">История пуста.</div>
+                            <div class="empty-state">История пуста.</div>
                         @endif
 
                     </td>
