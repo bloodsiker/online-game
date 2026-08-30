@@ -96,13 +96,13 @@ class MapController extends Controller
 
         $allMaps = Map::where('id', '!=', $map->id)->orderBy('name')->get();
         $locations = Location::where('map_id', $map->id)->orderByDesc('id')->get();
-        $mapResources = $map->gatheringResources()->with(['resource.skill', 'resource.gatheringTool', 'nodes.attempts'])->orderBy('id')->get();
+        $mapResources = $map->gatheringResources()->with(['resource.skill', 'nodes.attempts'])->orderBy('id')->get();
         $gatheringResources = ShareItem::query()
             ->where('type', ShareItemType::RESOURCE->value)
             ->whereNotNull('gathering_time_seconds')
             ->whereNotNull('gathering_respawn_seconds')
-            ->whereNotNull('gathering_tool_share_item_id')
-            ->with(['skill', 'gatheringTool'])
+            ->whereNotNull('gathering_tool_family')
+            ->with('skill')
             ->orderBy('name')
             ->get();
 

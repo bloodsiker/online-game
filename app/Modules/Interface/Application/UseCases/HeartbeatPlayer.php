@@ -24,16 +24,18 @@ final readonly class HeartbeatPlayer
         private HeroPageViewMapper $heroMapper,
     ) {}
 
-    public function execute(User $user): PlayerHeartbeatDTO
+    public function execute(User $user, bool $touchOnline = true): PlayerHeartbeatDTO
     {
-        return DB::transaction(function () use ($user): PlayerHeartbeatDTO {
+        return DB::transaction(function () use ($user, $touchOnline): PlayerHeartbeatDTO {
             $now = now();
             $player = Player::query()
                 ->whereKey($user->player->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $user->forceFill(['last_online_at' => $now])->saveQuietly();
+            if ($touchOnline) {
+                $user->forceFill(['last_online_at' => $now])->saveQuietly();
+            }
 
             $sheet = $this->statService->resolve($player);
             if ((int) $player->hp_now > 0) {

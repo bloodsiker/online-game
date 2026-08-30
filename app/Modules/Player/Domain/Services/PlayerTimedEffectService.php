@@ -45,9 +45,11 @@ final class PlayerTimedEffectService
             $lastTickAt = $activeEffect->last_tick_at
                 ?? $activeEffect->applied_at
                 ?? $activeEffect->created_at;
+            $tickSeconds = max(1, (int) ($activeEffect->effect?->tick_interval ?: $fallbackTickSeconds));
 
             if ($lastTickAt === null) {
                 $activeEffect->last_tick_at = $now;
+                $activeEffect->next_tick_at = $now->copy()->addSeconds($tickSeconds);
                 $activeEffect->save();
                 $effectsChanged = true;
 
@@ -57,7 +59,6 @@ final class PlayerTimedEffectService
             $tickUntil = $activeEffect->expires_at !== null && $activeEffect->expires_at->lt($now)
                 ? $activeEffect->expires_at
                 : $now;
-            $tickSeconds = max(1, (int) ($activeEffect->effect?->tick_interval ?: $fallbackTickSeconds));
             $elapsedSeconds = max(0, (int) $lastTickAt->diffInSeconds($tickUntil));
             $dueTicks = intdiv($elapsedSeconds, $tickSeconds);
 
@@ -98,7 +99,12 @@ final class PlayerTimedEffectService
             if ($isExhaustedBattleEffect || $isExpiredTimedEffect) {
                 $activeEffect->delete();
                 $effectsChanged = true;
-            } elseif ($dueTicks > 0) {
+            } elseif ($dueTicks > 0
+                || $activeEffect->next_tick_at === null
+                || $activeEffect->next_tick_at->lte($now)) {
+                $activeEffect->next_tick_at = $activeEffect->last_tick_at
+                    ->copy()
+                    ->addSeconds($tickSeconds);
                 $activeEffect->save();
             }
         }

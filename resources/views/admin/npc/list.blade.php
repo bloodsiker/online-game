@@ -30,7 +30,7 @@
                                     <td>{{ $npc->id }}</td>
                                     <td>
                                         @if($npc->image)
-                                            <img src="{{ $npc->image }}" style="width:36px;height:36px;object-fit:contain;" alt="">
+                                            <img src="{{ $npc->image }}" style="width:50px;height:50px;object-fit:contain;" alt="">
                                         @endif
                                     </td>
                                     <td><a href="{{ route('admin.npc.info', $npc->id) }}">{{ $npc->name }}</a></td>

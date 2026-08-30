@@ -139,10 +139,13 @@
         quests: 4, dungeon: 5, maps: 6, friends: 2, rating: 7, referral: 2, premium: 8,
         events: 9, post: 10, fights: 11, infoportal: 12
     };
+    var menuButtonBlinkStates = {};
 
     // Мигание кнопки из родителя:
     // document.getElementById('menu-frame').contentWindow.blinkButton('quests', true)
     function blinkButton(name, status) {
+        menuButtonBlinkStates[name] = !!status;
+
         if (window.top_mnu && buttonIds[name]) {
             window.top_mnu.blinkButton(buttonIds[name], !!status);
         }
@@ -241,6 +244,12 @@
         canvas.app.CanvasTopMenu.prototype.ready = function () {
             topMenuReady.call(this);
             this.main.x = Math.round((this.par.width - this.main.view.items.length * 55) / 2);
+
+            Object.keys(menuButtonBlinkStates).forEach(function (name) {
+                if (buttonIds[name]) {
+                    this.blinkButton(buttonIds[name], menuButtonBlinkStates[name]);
+                }
+            }, this);
         };
 
         // Пульсация иконки мигающего пункта (увеличение/уменьшение) — эффект «пришло новое»

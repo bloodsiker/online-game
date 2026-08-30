@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\Post;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Post\Application\Services\BroadcastMailboxUnreadState;
 use App\Modules\Post\Application\UseCases\BulkLetters;
+use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
@@ -71,7 +73,10 @@ class BulkLettersBatchLoadingTest extends TestCase
         DB::enableQueryLog();
 
         try {
-            $affected = (new BulkLetters($backpackService))->execute($user, [1, 2, 3, 4, 5], 'claim');
+            $affected = (new BulkLetters(
+                $backpackService,
+                new BroadcastMailboxUnreadState(new GetMailbox),
+            ))->execute($user, [1, 2, 3, 4, 5], 'claim');
         } finally {
             Model::preventLazyLoading($wasPreventingLazyLoading);
         }

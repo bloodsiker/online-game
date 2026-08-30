@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Post\Application\UseCases;
 
+use App\Modules\Post\Application\Services\BroadcastMailboxUnreadState;
 use App\Modules\Post\Infrastructure\Persistence\Models\PostLetter;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class ReadLetter
 {
+    public function __construct(private readonly BroadcastMailboxUnreadState $unreadState) {}
+
     /**
      * Открыть письмо. Получателю при первом открытии отмечается прочтение;
      * приложенные деньги зачисляются отдельно — кнопкой «Забрать».
@@ -31,6 +34,7 @@ class ReadLetter
         if ($isRecipient && $letter->read_at === null) {
             $letter->read_at = now();
             $letter->save();
+            $this->unreadState->sync($user);
         }
 
         return $letter;

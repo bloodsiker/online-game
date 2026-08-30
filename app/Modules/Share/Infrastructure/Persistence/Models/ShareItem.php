@@ -53,7 +53,9 @@ use Illuminate\Support\Carbon;
  * @property int|null $skill_exp
  * @property int|null $gathering_time_seconds
  * @property int|null $gathering_respawn_seconds
- * @property int|null $gathering_tool_share_item_id
+ * @property string|null $tool_family
+ * @property int $gathering_speed_bonus_percent
+ * @property string|null $gathering_tool_family
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
  * @property-read Collection|ShareItemStat[] $stats
@@ -115,6 +117,7 @@ class ShareItem extends Model
         'rarity' => ItemRarity::class,
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
+        'gathering_speed_bonus_percent' => 'integer',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -127,11 +130,6 @@ class ShareItem extends Model
     public function magicSkillBook(): HasOne
     {
         return $this->hasOne(MagicSkillBook::class, 'share_item_id');
-    }
-
-    public function gatheringTool(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'gathering_tool_share_item_id');
     }
 
     public function mapGatheringResources(): HasMany

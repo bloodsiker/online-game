@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Post\Application\UseCases;
 
 use App\Modules\Post\Application\DTOs\PostActionResultDTO;
+use App\Modules\Post\Application\Services\BroadcastMailboxUnreadState;
 use App\Modules\Post\Infrastructure\Persistence\Models\PostLetter;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class SendLetter
 
     public function __construct(
         private readonly GetMailbox $mailbox,
+        private readonly BroadcastMailboxUnreadState $unreadState,
     ) {}
 
     public function execute(User $sender, string $nick, string $subject, string $text, int $money): PostActionResultDTO
@@ -63,6 +65,8 @@ class SendLetter
                 'money' => $money,
             ]);
         });
+
+        $this->unreadState->markUnread($recipient);
 
         return new PostActionResultDTO(true, 'Письмо отправлено персонажу '.$recipient->name.'.');
     }

@@ -106,7 +106,9 @@ class PeacefulProfessionDemoSeederTest extends TestCase
             $table->integer('skill_exp')->nullable();
             $table->integer('gathering_time_seconds')->nullable();
             $table->integer('gathering_respawn_seconds')->nullable();
-            $table->unsignedBigInteger('gathering_tool_share_item_id')->nullable();
+            $table->string('tool_family')->nullable();
+            $table->unsignedTinyInteger('gathering_speed_bonus_percent')->default(0);
+            $table->string('gathering_tool_family')->nullable();
             $table->string('rarity')->default('common');
             $table->timestamps();
         });

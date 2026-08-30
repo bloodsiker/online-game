@@ -10,6 +10,7 @@ use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
@@ -67,15 +68,11 @@ class ItemController extends Controller
     public function create(): View
     {
         $skills = Skill::orderBy('name')->get();
-        $gatheringTools = ShareItem::query()
-            ->where('type', ShareItemType::TOOL)
-            ->where('slot', ShareItemSlot::HAND)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        $toolFamilies = GatheringToolFamily::cases();
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
 
-        return view('admin.item.create', compact('skills', 'gatheringTools', 'magicSkills', 'claimedMagicSkillIds'));
+        return view('admin.item.create', compact('skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -116,14 +113,10 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook', 'gatheringTool']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook']);
 
         $skills = Skill::orderBy('name')->get();
-        $gatheringTools = ShareItem::query()
-            ->where('type', ShareItemType::TOOL)
-            ->where('slot', ShareItemSlot::HAND)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+        $toolFamilies = GatheringToolFamily::cases();
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $claimedMagicSkillIds = MagicSkillBook::where('share_item_id', '!=', $item->id)->pluck('magic_skill_id')->all();
         $statTypes = ShareItemStatType::cases();
@@ -132,7 +125,7 @@ class ItemController extends Controller
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
 
-        return view('admin.item.info', compact('item', 'skills', 'gatheringTools', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
     }
 
     public function drop(ShareItem $item): View
@@ -307,7 +300,9 @@ class ItemController extends Controller
             'max_drop_level_difference' => ['nullable', 'integer', 'between:0,255'],
             'gathering_time_seconds' => ['nullable', 'integer', 'min:1', 'max:86400'],
             'gathering_respawn_seconds' => ['nullable', 'integer', 'min:1', 'max:604800'],
-            'gathering_tool_share_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
+            'gathering_tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
+            'tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
+            'gathering_speed_bonus_percent' => ['nullable', 'integer', 'between:0,100'],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -366,9 +361,15 @@ class ItemController extends Controller
         $item->gathering_respawn_seconds = $type === ShareItemType::RESOURCE
             ? ($request->filled('gathering_respawn_seconds') ? (int) $request->input('gathering_respawn_seconds') : 60)
             : null;
-        $item->gathering_tool_share_item_id = $type === ShareItemType::RESOURCE && $request->filled('gathering_tool_share_item_id')
-            ? (int) $request->input('gathering_tool_share_item_id')
+        $item->gathering_tool_family = $type === ShareItemType::RESOURCE && $request->filled('gathering_tool_family')
+            ? $request->input('gathering_tool_family')
             : null;
+        $item->tool_family = $type === ShareItemType::TOOL && $request->filled('tool_family')
+            ? $request->input('tool_family')
+            : null;
+        $item->gathering_speed_bonus_percent = $type === ShareItemType::TOOL
+            ? min(100, max(0, (int) $request->input('gathering_speed_bonus_percent', 0)))
+            : 0;
 
         // Свиток заточки
         $item->upgrade_scroll_type = $request->filled('upgrade_scroll_type')

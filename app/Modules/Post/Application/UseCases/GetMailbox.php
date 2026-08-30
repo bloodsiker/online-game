@@ -48,13 +48,13 @@ class GetMailbox
             ->count();
     }
 
-    public function unreadCount(User $user): int
+    public function hasUnread(User $user): bool
     {
         return PostLetter::query()
             ->where('recipient_user_id', $user->id)
             ->whereNull('recipient_deleted_at')
             ->whereNull('read_at')
-            ->count();
+            ->exists();
     }
 
     /**

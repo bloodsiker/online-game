@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Post\Application\UseCases;
 
 use App\Modules\Post\Application\DTOs\PostActionResultDTO;
+use App\Modules\Post\Application\Services\BroadcastMailboxUnreadState;
 use App\Modules\Post\Infrastructure\Persistence\Models\PostLetter;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class SendSystemLetter
 {
+    public function __construct(private readonly BroadcastMailboxUnreadState $unreadState) {}
+
     /**
      * Системное письмо от администрации: одному игроку (по нику) или всем сразу.
      * Приходит без налога и без учёта вместимости ящика; можно вложить деньги
@@ -63,6 +66,10 @@ class SendSystemLetter
                 ]);
             }
         });
+
+        foreach ($recipientIds as $recipientId) {
+            $this->unreadState->markUnread((int) $recipientId);
+        }
 
         return new PostActionResultDTO(
             true,

@@ -91,7 +91,7 @@
                                     <td>{{ $item->id }}</td>
                                     <td>
                                         @if($item->image)
-                                            <img src="{{ $item->image }}" style="width:36px;height:36px;object-fit:contain;" alt="">
+                                            <img src="{{ $item->image }}" style="width:50px;height:50px;object-fit:contain;" alt="">
                                         @endif
                                     </td>
                                     <td><a href="{{ route('admin.item.info', $item->id) }}">{{ $item->name }}</a></td>

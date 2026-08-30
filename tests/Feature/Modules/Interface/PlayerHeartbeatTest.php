@@ -9,6 +9,8 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Interface\Application\Listeners\UpdatePlayerPresenceFromSocket;
+use App\Modules\Interface\Domain\Events\PlayerStateUpdated;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
@@ -17,8 +19,16 @@ use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Reverb\Application;
+use Laravel\Reverb\Connection;
+use Laravel\Reverb\Contracts\WebSocketConnection;
+use Laravel\Reverb\Events\MessageReceived;
+use Laravel\Reverb\Protocols\Pusher\Channels\Channel;
+use Laravel\Reverb\Protocols\Pusher\Contracts\ChannelManager;
+use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -118,6 +128,257 @@ class PlayerHeartbeatTest extends TestCase
     public function test_heartbeat_requires_authentication(): void
     {
         $this->postJson(route('player.heartbeat'))->assertUnauthorized();
+    }
+
+    public function test_server_tick_processes_due_poison_and_broadcasts_private_player_state(): void
+    {
+        $now = Carbon::parse('2026-08-21 14:00:00');
+        Carbon::setTestNow($now);
+
+        $race = (new Race)->forceFill([
+            'name' => 'Human',
+            'strength' => 1,
+            'agility' => 1,
+            'intuition' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 1,
+            'free_stats' => 0,
+        ]);
+        $race->save();
+        $user = (new User)->forceFill([
+            'name' => 'Socket Tester',
+            'email' => 'socket@example.test',
+            'password' => Hash::make('secret'),
+        ]);
+        $user->save();
+        $player = (new Player)->forceFill([
+            'user_id' => $user->id,
+            'race_id' => $race->id,
+            'lvl' => 8,
+            'exp' => 0,
+            'exp_up' => 100,
+            'exp_diff' => 100,
+            'strength' => 1,
+            'agility' => 1,
+            'intuition' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 3,
+            'hp_now' => 100,
+            'hp_max' => 100,
+            'mp_now' => 10,
+            'mp_max' => 10,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'free_stats' => 0,
+            'last_regen_at' => $now,
+        ]);
+        $player->save();
+        $user->forceFill(['player_id' => $player->id])->save();
+        $battle = Battle::query()->create(['status' => 1]);
+        PlayerActiveEffect::query()->create([
+            'player_id' => $player->id,
+            'battle_id' => $battle->id,
+            'type' => ActiveEffectType::POISON,
+            'applied_at' => $now->copy()->subSeconds(10),
+            'last_tick_at' => $now->copy()->subSeconds(10),
+            'stacks' => 2,
+            'current_value' => 7,
+        ]);
+
+        Event::fake([PlayerStateUpdated::class]);
+
+        $this->artisan('players:process-state')->assertSuccessful();
+
+        $this->assertSame(93, $player->fresh()->hp_now);
+        $this->assertNull($user->fresh()->last_online_at);
+        Event::assertDispatched(
+            PlayerStateUpdated::class,
+            fn (PlayerStateUpdated $event): bool => $event->playerId === $player->id
+                && $event->state['hp']['current'] === 93
+                && $event->state['effect_damage'] === 7,
+        );
+    }
+
+    public function test_server_tick_regenerates_active_player_against_resolved_hp_max(): void
+    {
+        $now = Carbon::parse('2026-08-21 14:15:00');
+        Carbon::setTestNow($now);
+
+        $race = (new Race)->forceFill([
+            'name' => 'Human',
+            'strength' => 1,
+            'agility' => 1,
+            'intuition' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 1,
+            'free_stats' => 0,
+        ]);
+        $race->save();
+        $user = (new User)->forceFill([
+            'name' => 'Regeneration Tester',
+            'email' => 'regeneration@example.test',
+            'password' => Hash::make('secret'),
+            'last_online_at' => $now,
+        ]);
+        $user->save();
+        $player = (new Player)->forceFill([
+            'user_id' => $user->id,
+            'race_id' => $race->id,
+            'lvl' => 8,
+            'exp' => 0,
+            'exp_up' => 100,
+            'exp_diff' => 100,
+            'strength' => 1,
+            'agility' => 1,
+            'intuition' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 60,
+            'hp_now' => 150,
+            'hp_max' => 100,
+            'mp_now' => 10,
+            'mp_max' => 10,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'free_stats' => 0,
+            'last_regen_at' => $now->copy()->subSeconds(Player::REGEN_INTERVAL),
+        ]);
+        $player->save();
+        $user->forceFill(['player_id' => $player->id])->save();
+
+        Event::fake([PlayerStateUpdated::class]);
+
+        $this->artisan('players:process-state')->assertSuccessful();
+
+        $this->assertSame(151, $player->fresh()->hp_now);
+        Event::assertDispatched(
+            PlayerStateUpdated::class,
+            fn (PlayerStateUpdated $event): bool => $event->playerId === $player->id
+                && $event->state['hp'] === ['current' => 151, 'max' => 271],
+        );
+    }
+
+    public function test_game_page_subscribes_to_player_websocket_without_periodic_heartbeat(): void
+    {
+        $user = (new User)->forceFill([
+            'name' => 'Socket View Tester',
+            'email' => 'socket-view@example.test',
+            'password' => Hash::make('secret'),
+            'player_id' => 77,
+        ]);
+        $user->save();
+        $this->withoutVite();
+
+        $response = $this->actingAs($user)->get(route('game'));
+
+        $response->assertOk()
+            ->assertSee('window.Echo.private(playerStateChannelName)', false)
+            ->assertSee(".listen('.player.state.updated'", false)
+            ->assertSee(".listen('.post.unread.updated'", false)
+            ->assertSee("whisper('player-presence'", false)
+            ->assertDontSee('setInterval(syncPlayerHeartbeat', false)
+            ->assertDontSee('post/unread-count', false);
+    }
+
+    public function test_menu_keeps_blink_state_until_canvas_menu_is_ready(): void
+    {
+        $response = $this->get(route('menu'));
+
+        $response->assertOk()
+            ->assertSee('var menuButtonBlinkStates = {};', false)
+            ->assertSee('menuButtonBlinkStates[name] = !!status;', false)
+            ->assertSee('Object.keys(menuButtonBlinkStates).forEach', false);
+    }
+
+    public function test_authenticated_socket_presence_updates_online_timestamp(): void
+    {
+        $now = Carbon::parse('2026-08-21 14:30:00');
+        Carbon::setTestNow($now);
+        $user = (new User)->forceFill([
+            'name' => 'Socket Presence Tester',
+            'email' => 'socket-presence@example.test',
+            'password' => Hash::make('secret'),
+            'player_id' => 91,
+        ]);
+        $user->save();
+
+        $application = new Application(
+            id: 'test-app',
+            key: 'test-key',
+            secret: 'test-secret',
+            pingInterval: 60,
+            activityTimeout: 30,
+            allowedOrigins: ['*'],
+            maxMessageSize: 10_000,
+        );
+        $socket = new class implements WebSocketConnection
+        {
+            public function id(): int|string
+            {
+                return 1;
+            }
+
+            public function send(mixed $message): void {}
+
+            public function close(mixed $message = null): void {}
+        };
+        $connection = new Connection($socket, $application, null);
+        $channel = Mockery::mock(Channel::class);
+        $channel->shouldReceive('subscribed')->once()->with($connection)->andReturnTrue();
+        $channels = Mockery::mock(ChannelManager::class);
+        $channels->shouldReceive('for')->once()->with($application)->andReturnSelf();
+        $channels->shouldReceive('find')->once()->with('private-player.91')->andReturn($channel);
+        $event = new MessageReceived($connection, json_encode([
+            'event' => 'client-player-presence',
+            'channel' => 'private-player.91',
+            'data' => ['sent_at' => 1],
+        ], JSON_THROW_ON_ERROR));
+
+        (new UpdatePlayerPresenceFromSocket($channels))->handle($event);
+
+        $this->assertTrue($user->fresh()->last_online_at->equalTo($now));
+
+        Carbon::setTestNow($now->copy()->addMinute());
+        $unauthorizedChannel = Mockery::mock(Channel::class);
+        $unauthorizedChannel->shouldReceive('subscribed')->once()->with($connection)->andReturnFalse();
+        $unauthorizedChannels = Mockery::mock(ChannelManager::class);
+        $unauthorizedChannels->shouldReceive('for')->once()->with($application)->andReturnSelf();
+        $unauthorizedChannels->shouldReceive('find')->once()->with('private-player.91')->andReturn($unauthorizedChannel);
+
+        (new UpdatePlayerPresenceFromSocket($unauthorizedChannels))->handle($event);
+
+        $this->assertTrue($user->fresh()->last_online_at->equalTo($now));
+    }
+
+    public function test_player_can_authorize_only_own_private_state_channel(): void
+    {
+        $user = (new User)->forceFill([
+            'name' => 'Channel Tester',
+            'email' => 'channel@example.test',
+            'password' => Hash::make('secret'),
+            'player_id' => 77,
+        ]);
+        $user->save();
+        config()->set('broadcasting.default', 'reverb');
+        config()->set('broadcasting.connections.reverb.key', 'test-key');
+        config()->set('broadcasting.connections.reverb.secret', 'test-secret');
+        config()->set('broadcasting.connections.reverb.app_id', 'test-app');
+        require base_path('routes/channels.php');
+
+        $this->actingAs($user)
+            ->postJson('/broadcasting/auth', [
+                'socket_id' => '123.456',
+                'channel_name' => 'private-player.77',
+            ])
+            ->assertOk();
+
+        $this->postJson('/broadcasting/auth', [
+            'socket_id' => '123.456',
+            'channel_name' => 'private-player.78',
+        ])->assertForbidden();
     }
 
     public function test_poison_can_kill_afk_player_and_finalize_battle_death_once(): void
@@ -272,6 +533,13 @@ class PlayerHeartbeatTest extends TestCase
             $table->rememberToken();
             $table->timestamps();
         });
+        Schema::connection('sqlite')->create('post_letters', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('recipient_user_id');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamp('recipient_deleted_at')->nullable();
+            $table->timestamps();
+        });
         Schema::connection('sqlite')->create('races', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -377,6 +645,7 @@ class PlayerHeartbeatTest extends TestCase
             $table->string('type')->nullable();
             $table->timestamp('applied_at')->nullable();
             $table->timestamp('last_tick_at')->nullable();
+            $table->timestamp('next_tick_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->integer('stacks')->default(0);
             $table->float('current_value')->nullable();

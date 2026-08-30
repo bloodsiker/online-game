@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,3 +12,8 @@ Artisan::command('inspire', function () {
 Schedule::command('items:delete-expired-location')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::call(static fn (): int => app(ProcessDuePlayerStates::class)->execute(now()))
+    ->name('players:process-state')
+    ->everySecond()
+    ->withoutOverlapping(1);

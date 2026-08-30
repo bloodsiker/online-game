@@ -10,6 +10,7 @@ use App\Modules\Interface\Application\UseCases\GetHeroPage;
 use App\Modules\Interface\Application\UseCases\GetOnMapPage;
 use App\Modules\Interface\Application\UseCases\GetWhoPage;
 use App\Modules\Interface\Application\UseCases\HeartbeatPlayer;
+use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,21 +23,22 @@ class InterfaceController extends Controller
         private readonly GetWhoPage $getWhoPage,
         private readonly GetHeroPage $getHeroPage,
         private readonly HeartbeatPlayer $heartbeatPlayer,
+        private readonly GetMailbox $mailbox,
     ) {}
 
     public function index()
     {
-        return view('interface::index');
+        return $this->gameView();
     }
 
     public function main()
     {
-        return view('interface::index');
+        return $this->gameView();
     }
 
     public function game()
     {
-        return view('interface::index');
+        return $this->gameView();
     }
 
     public function interface()
@@ -90,5 +92,15 @@ class InterfaceController extends Controller
         }
 
         return response()->json($payload);
+    }
+
+    private function gameView()
+    {
+        /** @var ?User $user */
+        $user = Auth::user();
+
+        return view('interface::index', [
+            'hasUnreadMail' => $user instanceof User && $this->mailbox->hasUnread($user),
+        ]);
     }
 }

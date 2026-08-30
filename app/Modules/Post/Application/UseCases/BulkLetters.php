@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Post\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Post\Application\Services\BroadcastMailboxUnreadState;
 use App\Modules\Post\Infrastructure\Persistence\Models\PostLetter;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ class BulkLetters
 {
     public function __construct(
         private readonly BackpackService $backpackService,
+        private readonly BroadcastMailboxUnreadState $unreadState,
     ) {}
 
     /**
@@ -37,8 +39,9 @@ class BulkLetters
             ->get();
 
         $affected = 0;
+        $unreadRecipientDeleted = false;
 
-        DB::transaction(function () use ($letters, $user, $action, &$affected): void {
+        DB::transaction(function () use ($letters, $user, $action, &$affected, &$unreadRecipientDeleted): void {
             foreach ($letters as $letter) {
                 $isRecipient = $letter->recipient_user_id === $user->id && $letter->recipient_deleted_at === null;
 
@@ -56,6 +59,7 @@ class BulkLetters
 
                 if (in_array($action, ['delete', 'claim_delete'], strict: true)) {
                     if ($isRecipient) {
+                        $unreadRecipientDeleted = $unreadRecipientDeleted || $letter->read_at === null;
                         $letter->recipient_deleted_at = now();
                     } else {
                         $letter->sender_deleted_at = now();
@@ -68,6 +72,10 @@ class BulkLetters
                 }
             }
         });
+
+        if ($unreadRecipientDeleted) {
+            $this->unreadState->sync($user);
+        }
 
         return $affected;
     }

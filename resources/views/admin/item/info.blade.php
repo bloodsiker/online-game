@@ -181,13 +181,28 @@
                                                 <input type="number" min="1" class="form-control" name="gathering_respawn_seconds" value="{{ $item->gathering_respawn_seconds }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Инструмент для добычи</label>
-                                                <select name="gathering_tool_share_item_id" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
+                                                <label class="col-form-label">Семейство инструмента для добычи</label>
+                                                <select name="gathering_tool_family" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбрано", "allowClear": true }'>
                                                     <option value=""></option>
-                                                    @foreach($gatheringTools as $tool)
-                                                        <option value="{{ $tool->id }}" @selected($item->gathering_tool_share_item_id === $tool->id)>[{{ $tool->id }}] {{ $tool->name }}</option>
+                                                    @foreach($toolFamilies as $family)
+                                                        <option value="{{ $family->value }}" @selected($item->gathering_tool_family === $family->value)>{{ $family->label() }}</option>
                                                     @endforeach
                                                 </select>
+                                                <small class="form-text text-muted">Для ресурса: подойдёт любой инструмент этого семейства, тир только ускоряет добычу.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Семейство инструмента (если это инструмент)</label>
+                                                <select name="tool_family" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбрано", "allowClear": true }'>
+                                                    <option value=""></option>
+                                                    @foreach($toolFamilies as $family)
+                                                        <option value="{{ $family->value }}" @selected($item->tool_family === $family->value)>{{ $family->label() }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Бонус скорости добычи, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="gathering_speed_bonus_percent" value="{{ $item->gathering_speed_bonus_percent }}">
+                                                <small class="form-text text-muted">На сколько % быстрее добывается ресурс с этим инструментом в руке. 0 — обычная скорость.</small>
                                             </div>
                                         </div>
 

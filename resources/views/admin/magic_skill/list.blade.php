@@ -45,7 +45,7 @@
                                     <td>{{ $skill->id }}</td>
                                     <td class="text-center">
                                         @if($skill->image)
-                                            <img src="{{ $skill->image }}" alt="{{ $skill->name }}" style="width:36px;height:36px;object-fit:contain;">
+                                            <img src="{{ $skill->image }}" alt="{{ $skill->name }}" style="width:50px;height:50px;object-fit:contain;">
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif

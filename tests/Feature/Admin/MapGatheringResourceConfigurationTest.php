@@ -95,7 +95,8 @@ class MapGatheringResourceConfigurationTest extends TestCase
                 'skill_lvl' => null,
                 'gathering_time_seconds' => null,
                 'gathering_respawn_seconds' => null,
-                'gathering_tool_share_item_id' => null,
+                'tool_family' => 'sickle',
+                'gathering_tool_family' => null,
             ],
             [
                 'id' => 100,
@@ -105,7 +106,8 @@ class MapGatheringResourceConfigurationTest extends TestCase
                 'skill_lvl' => 1,
                 'gathering_time_seconds' => 5,
                 'gathering_respawn_seconds' => 30,
-                'gathering_tool_share_item_id' => 99,
+                'tool_family' => null,
+                'gathering_tool_family' => 'sickle',
             ],
         ]);
         DB::table('map_gathering_resources')->insert([
@@ -151,7 +153,9 @@ class MapGatheringResourceConfigurationTest extends TestCase
             $table->integer('skill_lvl')->nullable();
             $table->integer('gathering_time_seconds')->nullable();
             $table->integer('gathering_respawn_seconds')->nullable();
-            $table->unsignedBigInteger('gathering_tool_share_item_id')->nullable();
+            $table->string('tool_family')->nullable();
+            $table->unsignedTinyInteger('gathering_speed_bonus_percent')->default(0);
+            $table->string('gathering_tool_family')->nullable();
         });
         Schema::create('map_gathering_resources', function (Blueprint $table): void {
             $table->id();

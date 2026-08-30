@@ -1027,7 +1027,7 @@
         <td width="48" height="48">
             <div class="a1" style="">
                 <div id="u51">
-                    <div id="l51" class="s2box br bt bb">
+                    <div id="l51" class="s2box br bt bl">
                         <s id="z51">0</s><a name="51"></a>
                         <em>51</em>
                         <cite>Гильдия мастеров</cite>

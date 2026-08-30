@@ -34,7 +34,13 @@
                             @foreach($players as $player)
                                 <tr style="vertical-align: middle">
                                     <td>{{ $player->id }}</td>
-                                    <td>{{ $player->user?->name ?? '—' }}</td>
+                                    <td>
+                                        @if($player->user)
+                                            <a href="{{ route('admin.player.info', $player->id) }}">{{ $player->user->name }}</a>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
                                     <td>{{ $player->user?->email ?? '—' }}</td>
                                     <td>{{ $player->race?->name ?? '—' }}</td>
                                     <td>{{ $player->lvl }}</td>

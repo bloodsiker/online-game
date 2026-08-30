@@ -21,12 +21,13 @@ class PlayerActiveEffect extends Model
     protected $fillable = [
         'player_id', 'effect_id', 'battle_id', 'type',
         'source_player_id', 'source_magic_skill_id',
-        'applied_at', 'last_tick_at', 'expires_at', 'stacks', 'current_value', 'tick_remainder',
+        'applied_at', 'last_tick_at', 'next_tick_at', 'expires_at', 'stacks', 'current_value', 'tick_remainder',
     ];
 
     protected $casts = [
         'applied_at' => 'datetime',
         'last_tick_at' => 'datetime',
+        'next_tick_at' => 'datetime',
         'expires_at' => 'datetime',
         'type' => ActiveEffectType::class,
         'stacks' => 'integer',

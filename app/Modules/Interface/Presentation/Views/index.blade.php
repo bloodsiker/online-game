@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Онлайн Игра</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    @vite('resources/js/app.js')
     <style>
         html {
             height: 100%;
@@ -1267,26 +1268,62 @@
         toLocation(routes[direction]);
     }
 
-    // Мигание кнопки «Почта» в верхнем меню при новых непрочитанных письмах
-    function checkUnreadMail() {
-        fetch('{{ route('post.unread-count') }}')
-            .then(r => r.json())
-            .then(data => {
-                const menuFrame = document.getElementById('menu-frame');
-                menuFrame?.contentWindow?.blinkButton?.('post', data.unread > 0);
-            })
-            .catch(() => {});
+    // Начальное состояние отдано вместе со страницей; последующие обновления приходят по WebSocket.
+    const userId = @js((int) (auth()->id() ?? 0));
+    const userChannelName = 'App.Models.User.' + userId;
+    let hasUnreadMail = @js((bool) ($hasUnreadMail ?? false));
+    let mailboxChannel = null;
+
+    function applyUnreadMailState(hasUnread) {
+        hasUnreadMail = Boolean(hasUnread);
+        const menuFrame = document.getElementById('menu-frame');
+        menuFrame?.contentWindow?.blinkButton?.('post', hasUnreadMail);
     }
 
-    checkUnreadMail();
-    setInterval(checkUnreadMail, 60000);
+    function subscribeToMailboxUnread() {
+        if (! window.Echo || userId <= 0 || mailboxChannel) return;
 
-    // Единый heartbeat: онлайн, серверная регенерация, периодический урон
-    // и синхронизация HP/MP/эффектов во всех игровых фреймах.
-    const playerHeartbeatInterval = {{ (int) config('game.player_heartbeat_seconds', 10) * 1000 }};
+        mailboxChannel = window.Echo.private(userChannelName)
+            .listen('.post.unread.updated', event => applyUnreadMailState(event.has_unread));
+    }
+
+    // Регенерация и периодические эффекты обрабатываются серверным scheduler.
+    // WebSocket доставляет готовое состояние во все игровые фреймы.
+    const playerId = @js((int) (auth()->user()?->player_id ?? 0));
+    const playerStateChannelName = 'player.' + playerId;
+    const playerStateFallbackInterval = 30000;
+    const playerPresenceInterval = 120000;
     let playerHeartbeatInFlight = false;
+    let playerStateFallbackTimer = null;
+    let playerPresenceTimer = null;
+    let playerStateChannel = null;
 
-    async function syncPlayerHeartbeat() {
+    function applyPlayerState(state) {
+        if (!state) return;
+
+        const message = {
+            type: 'playerState',
+            hp: state.hp,
+            mp: state.mp,
+            effects: state.effects,
+            effectDamage: state.effect_damage,
+            serverTime: state.server_time,
+        };
+
+        sendToFrame('character-frame', message, window.location.origin);
+        const gameFrame = document.getElementById('game-frame');
+        gameFrame?.contentWindow?.postMessage(message, window.location.origin);
+
+        if (state.dead && state.death_url && gameFrame?.contentWindow) {
+            if (state.death_message) {
+                showErrorIframe(state.death_message);
+            }
+
+            gameFrame.contentWindow.location.replace(state.death_url);
+        }
+    }
+
+    async function syncPlayerState() {
         if (playerHeartbeatInFlight) return;
 
         playerHeartbeatInFlight = true;
@@ -1304,38 +1341,100 @@
 
             if (!response.ok) return;
 
-            const state = await response.json();
-            const message = {
-                type: 'playerState',
-                hp: state.hp,
-                mp: state.mp,
-                effects: state.effects,
-                effectDamage: state.effect_damage,
-                serverTime: state.server_time,
-            };
-
-            sendToFrame('character-frame', message, window.location.origin);
-            const gameFrame = document.getElementById('game-frame');
-            gameFrame?.contentWindow?.postMessage(message, window.location.origin);
-
-            if (state.dead && state.death_url && gameFrame?.contentWindow) {
-                if (state.death_message) {
-                    showErrorIframe(state.death_message);
-                }
-
-                gameFrame.contentWindow.location.replace(state.death_url);
-            }
+            applyPlayerState(await response.json());
         } catch (error) {
-            // Следующий heartbeat восстановит состояние после временной ошибки сети.
+            // WebSocket или следующий fallback-запрос восстановит состояние.
         } finally {
             playerHeartbeatInFlight = false;
         }
     }
 
-    syncPlayerHeartbeat();
-    setInterval(syncPlayerHeartbeat, playerHeartbeatInterval);
+    function startPlayerStateFallback() {
+        if (playerStateFallbackTimer !== null) return;
+        playerStateFallbackTimer = window.setInterval(syncPlayerState, playerStateFallbackInterval);
+    }
+
+    function stopPlayerStateFallback() {
+        if (playerStateFallbackTimer === null) return;
+        window.clearInterval(playerStateFallbackTimer);
+        playerStateFallbackTimer = null;
+    }
+
+    function sendPlayerPresence() {
+        if (!playerStateChannel) return;
+        playerStateChannel.whisper('player-presence', {sent_at: Date.now()});
+    }
+
+    function startPlayerPresence() {
+        if (playerPresenceTimer !== null) return;
+        sendPlayerPresence();
+        playerPresenceTimer = window.setInterval(sendPlayerPresence, playerPresenceInterval);
+    }
+
+    function stopPlayerPresence() {
+        if (playerPresenceTimer === null) return;
+        window.clearInterval(playerPresenceTimer);
+        playerPresenceTimer = null;
+    }
+
+    function subscribeToPlayerState() {
+        if (!window.Echo || playerId <= 0) {
+            startPlayerStateFallback();
+            return;
+        }
+
+        playerStateChannel = window.Echo.private(playerStateChannelName)
+            .listen('.player.state.updated', function (event) {
+                applyPlayerState(event.state);
+            })
+            .subscribed(function () {
+                startPlayerPresence();
+            });
+
+        const connection = window.Echo.connector?.pusher?.connection;
+        if (!connection) {
+            startPlayerStateFallback();
+            return;
+        }
+
+        connection.bind('connected', function () {
+            stopPlayerStateFallback();
+            syncPlayerState();
+        });
+        connection.bind('disconnected', function () {
+            stopPlayerPresence();
+            startPlayerStateFallback();
+        });
+        connection.bind('unavailable', function () {
+            stopPlayerPresence();
+            startPlayerStateFallback();
+        });
+        connection.bind('failed', function () {
+            stopPlayerPresence();
+            startPlayerStateFallback();
+        });
+
+        if (connection.state === 'connected') {
+            stopPlayerStateFallback();
+        } else {
+            startPlayerStateFallback();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuFrame = document.getElementById('menu-frame');
+        menuFrame?.addEventListener('load', () => applyUnreadMailState(hasUnreadMail));
+        applyUnreadMailState(hasUnreadMail);
+        subscribeToMailboxUnread();
+        syncPlayerState();
+        subscribeToPlayerState();
+    });
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) syncPlayerHeartbeat();
+        if (!document.hidden) syncPlayerState();
+    });
+    window.addEventListener('pagehide', function () {
+        stopPlayerPresence();
+        if (window.Echo && playerId > 0) window.Echo.leave(playerStateChannelName);
     });
 
     function attackMonster(id, monsterId, action) {

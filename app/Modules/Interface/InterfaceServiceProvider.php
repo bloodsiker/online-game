@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Interface;
 
+use App\Modules\Interface\Application\Listeners\UpdatePlayerPresenceFromSocket;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
 use App\Modules\Interface\Infrastructure\Persistence\EloquentInterfaceReadRepository;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Reverb\Events\MessageReceived;
 
 class InterfaceServiceProvider extends ServiceProvider
 {
@@ -18,6 +21,8 @@ class InterfaceServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Event::listen(MessageReceived::class, UpdatePlayerPresenceFromSocket::class);
+
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'interface');
 
         Route::middleware(['web'])

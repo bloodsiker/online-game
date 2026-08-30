@@ -18,6 +18,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
@@ -67,7 +68,6 @@ class GatheringService
             ->where(fn ($query) => $query->whereNull('respawn_at')->orWhere('respawn_at', '<=', now()))
             ->with([
                 'mapResource.resource.skill',
-                'mapResource.resource.gatheringTool',
                 'attempts' => fn ($query) => $query->where('expires_at', '>', now()),
             ])
             ->orderBy('id')
@@ -117,7 +117,7 @@ class GatheringService
                 $node = GatheringNode::query()
                     ->whereKey($nodeId)
                     ->lockForUpdate()
-                    ->with(['mapResource.resource.skill', 'mapResource.resource.gatheringTool'])
+                    ->with(['mapResource.resource.skill'])
                     ->first();
                 if ($node === null || (int) $node->mapResource->map_id !== (int) $location->map_id) {
                     return $this->failure('Ресурс не найден на этой карте.', 404);
@@ -133,7 +133,8 @@ class GatheringService
                     return $this->failure($resourceBlock, 422);
                 }
 
-                $seconds = max(1, (int) $resource->gathering_time_seconds);
+                $bonusPercent = $this->equippedToolBonusPercent($lockedPlayer, (string) $resource->gathering_tool_family) ?? 0;
+                $seconds = $this->effectiveGatheringSeconds($resource, $bonusPercent);
                 $completesAt = now()->addSeconds($seconds);
                 $attempt = GatheringAttempt::create([
                     'player_id' => $lockedPlayer->id,
@@ -178,7 +179,7 @@ class GatheringService
             $attempt = GatheringAttempt::query()
                 ->where('player_id', $user->player->id)
                 ->lockForUpdate()
-                ->with(['node.mapResource.resource.skill', 'node.mapResource.resource.gatheringTool'])
+                ->with(['node.mapResource.resource.skill'])
                 ->first();
 
             if ($attempt === null) {
@@ -222,7 +223,7 @@ class GatheringService
             $node = GatheringNode::query()
                 ->whereKey($attempt->gathering_node_id)
                 ->lockForUpdate()
-                ->with(['mapResource.resource.skill', 'mapResource.resource.gatheringTool'])
+                ->with(['mapResource.resource.skill'])
                 ->firstOrFail();
             if ($node->respawn_at !== null && $node->respawn_at->isFuture()) {
                 $attempt->delete();
@@ -333,6 +334,10 @@ class GatheringService
             fn (GatheringAttempt $attempt): bool => (int) $attempt->player_id !== (int) $user->player->id,
         );
 
+        $bonusPercent = $resource->gathering_tool_family !== null
+            ? ($this->equippedToolBonusPercent($user->player, $resource->gathering_tool_family) ?? 0)
+            : 0;
+
         return [
             'id' => (int) $node->id,
             'name' => (string) $resource->name,
@@ -343,13 +348,13 @@ class GatheringService
             'rarityColor' => $resource->rarity->color(),
             'x' => (float) $node->x_percent,
             'y' => (float) $node->y_percent,
-            'gatherTime' => max(1, (int) $resource->gathering_time_seconds),
+            'gatherTime' => $this->effectiveGatheringSeconds($resource, $bonusPercent),
             'respawnTime' => max(1, (int) $resource->gathering_respawn_seconds),
             'requiredLevel' => max(1, (int) $resource->skill_lvl),
             'experience' => max(1, (int) $resource->skill_exp),
             'professionId' => (int) $resource->skill_id,
             'professionName' => (string) $resource->skill?->name,
-            'toolName' => (string) $resource->gatheringTool?->name,
+            'toolName' => $this->toolFamilyLabel($resource->gathering_tool_family),
             'busy' => $gatheredByOtherPlayer,
             'gatheringPlayersCount' => $node->attempts->count(),
             'ownedByPlayer' => $node->attempts->contains(
@@ -372,7 +377,7 @@ class GatheringService
             || $resource->skill->type !== 'peaceful'
             || $resource->gathering_time_seconds === null
             || $resource->gathering_respawn_seconds === null
-            || $resource->gathering_tool_share_item_id === null) {
+            || $resource->gathering_tool_family === null) {
             return 'Ресурс настроен не полностью.';
         }
 
@@ -381,8 +386,8 @@ class GatheringService
             return sprintf('Требуется %s %d уровня.', $resource->skill->name, max(1, (int) $resource->skill_lvl));
         }
 
-        if (! $this->hasToolInHands($player, (int) $resource->gathering_tool_share_item_id)) {
-            return sprintf('Возьмите в руку инструмент «%s».', $resource->gatheringTool?->name ?? 'неизвестный инструмент');
+        if ($this->equippedToolBonusPercent($player, $resource->gathering_tool_family) === null) {
+            return sprintf('Возьмите в руку инструмент «%s».', $this->toolFamilyLabel($resource->gathering_tool_family));
         }
 
         return null;
@@ -409,17 +414,32 @@ class GatheringService
         return null;
     }
 
-    private function hasToolInHands(Player $player, int $toolShareItemId): bool
+    /** Наибольший gathering_speed_bonus_percent среди инструментов нужного семейства в руках игрока, либо null, если такого инструмента нет. */
+    private function equippedToolBonusPercent(Player $player, string $toolFamily): ?int
     {
         $equipment = PlayerEquipment::query()
             ->where('player_id', $player->id)
             ->with(['handLeft.itemInfo', 'handRight.itemInfo'])
             ->first();
 
-        return in_array($toolShareItemId, [
-            $equipment?->handLeft?->share_item_id,
-            $equipment?->handRight?->share_item_id,
-        ], true);
+        $bonuses = collect([$equipment?->handLeft?->itemInfo, $equipment?->handRight?->itemInfo])
+            ->filter(fn (?ShareItem $item): bool => $item !== null && $item->tool_family === $toolFamily)
+            ->map(fn (ShareItem $item): int => max(0, (int) $item->gathering_speed_bonus_percent));
+
+        return $bonuses->isEmpty() ? null : $bonuses->max();
+    }
+
+    private function effectiveGatheringSeconds(ShareItem $resource, int $bonusPercent): int
+    {
+        $base = max(1, (int) $resource->gathering_time_seconds);
+        $multiplier = 1 - min(100, max(0, $bonusPercent)) / 100;
+
+        return max(1, (int) round($base * $multiplier));
+    }
+
+    private function toolFamilyLabel(?string $toolFamily): string
+    {
+        return GatheringToolFamily::tryFrom((string) $toolFamily)?->label() ?? 'неизвестный инструмент';
     }
 
     private function hasActiveBattle(int $userId, int $locationId): bool

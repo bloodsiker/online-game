@@ -16,6 +16,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
         [
             'profession' => 'Травник',
             'tool' => 'Серп',
+            'tool_family' => 'sickle',
             'tool_description' => 'Простой бесконечный инструмент для сбора трав.',
             'tool_image' => '/img/resource/gathering/sickle.svg',
             'resource' => 'Лечебная трава',
@@ -28,6 +29,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
         [
             'profession' => 'Рыбак',
             'tool' => 'Удочка',
+            'tool_family' => 'rod',
             'tool_description' => 'Простой бесконечный инструмент для рыбалки.',
             'tool_image' => '/img/resource/gathering/fishing-rod.svg',
             'resource' => 'Речной окунь',
@@ -40,6 +42,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
         [
             'profession' => 'Геолог',
             'tool' => 'Кирка',
+            'tool_family' => 'pickaxe',
             'tool_description' => 'Простой бесконечный инструмент для добычи руды.',
             'tool_image' => '/img/resource/gathering/pickaxe.svg',
             'resource' => 'Медная руда',
@@ -95,7 +98,8 @@ class PeacefulProfessionDemoSeeder extends Seeder
                     'skill_exp' => null,
                     'gathering_time_seconds' => null,
                     'gathering_respawn_seconds' => null,
-                    'gathering_tool_share_item_id' => null,
+                    'tool_family' => $entry['tool_family'],
+                    'gathering_speed_bonus_percent' => 0,
                     'rarity' => 'common',
                 ]);
 
@@ -120,7 +124,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
                     'skill_exp' => $entry['experience'],
                     'gathering_time_seconds' => $entry['gathering_time'],
                     'gathering_respawn_seconds' => $entry['respawn_time'],
-                    'gathering_tool_share_item_id' => $toolId,
+                    'gathering_tool_family' => $entry['tool_family'],
                     'rarity' => 'common',
                 ]);
 

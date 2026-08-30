@@ -160,7 +160,7 @@
                                                 <tr>
                                                     <td><a href="{{ route('admin.item.info', $configuration->resource->id) }}">[{{ $configuration->resource->id }}] {{ $configuration->resource->name }}</a></td>
                                                     <td>{{ $configuration->resource->skill?->name }} {{ $configuration->resource->skill_lvl }} ур.</td>
-                                                    <td>{{ $configuration->resource->gatheringTool?->name ?? 'не настроен' }}</td>
+                                                    <td>{{ \App\Modules\Share\Domain\Enums\GatheringToolFamily::tryFrom((string) $configuration->resource->gathering_tool_family)?->label() ?? 'не настроен' }}</td>
                                                     <td>{{ $configuration->resource->gathering_time_seconds }} / {{ $configuration->resource->gathering_respawn_seconds }} сек.</td>
                                                     <td>
                                                         <div class="input-group input-group-sm">

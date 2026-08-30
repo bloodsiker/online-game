@@ -11,7 +11,6 @@ use App\Modules\Post\Application\UseCases\DeleteLetter;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Post\Application\UseCases\ReadLetter;
 use App\Modules\Post\Application\UseCases\SendLetter;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -76,11 +75,6 @@ final class PostController
             'letter' => $letter,
             'itemTooltipScript' => $letter->shareItem ? $this->tooltipCollector->renderScript() : '',
         ]);
-    }
-
-    public function unreadCount(Request $request): JsonResponse
-    {
-        return response()->json(['unread' => $this->mailbox->unreadCount($request->user())]);
     }
 
     public function bulk(Request $request): RedirectResponse

@@ -114,6 +114,27 @@ class PeacefulProfessionFlowTest extends TestCase
         );
     }
 
+    public function test_tool_speed_bonus_percent_reduces_gathering_time(): void
+    {
+        Carbon::setTestNow('2026-08-29 12:00:00');
+        $this->seedGatheringResource();
+        DB::table('share_items')->where('id', 20)->update(['gathering_speed_bonus_percent' => 50]);
+
+        $backpack = Mockery::mock(BackpackService::class);
+        $service = new GatheringService($backpack);
+        $user = User::query()->findOrFail(1);
+
+        $state = $service->state($user);
+        $this->assertSame(3, $state['nodes'][0]['gatherTime']);
+
+        $nodeId = $state['nodes'][0]['id'];
+        $this->assertTrue($service->start($user, $nodeId)->ok);
+        $this->assertDatabaseHas('gathering_attempts', [
+            'player_id' => 1,
+            'completes_at' => '2026-08-29 12:00:03',
+        ]);
+    }
+
     public function test_required_tool_is_accepted_in_either_hand(): void
     {
         $this->seedGatheringResource();
@@ -260,9 +281,9 @@ class PeacefulProfessionFlowTest extends TestCase
 
     private function seedGatheringResource(): void
     {
-        DB::table('share_items')->insert(['id' => 20, 'type' => 'tool', 'name' => 'Серп', 'image' => '/serp.png', 'slot' => 'hand', 'rarity' => 'common']);
-        DB::table('share_items')->insert(['id' => 21, 'type' => 'tool', 'name' => 'Кирка', 'image' => '/pick.png', 'slot' => 'hand', 'rarity' => 'common']);
-        DB::table('share_items')->insert(['id' => 10, 'type' => 'resource', 'name' => 'Лечебная трава', 'image' => '/herb.png', 'transparent_image' => '/herb-transparent.png', 'rarity' => 'common', 'skill_id' => 10, 'skill_lvl' => 1, 'skill_exp' => 7, 'gathering_time_seconds' => 5, 'gathering_respawn_seconds' => 30, 'gathering_tool_share_item_id' => 20]);
+        DB::table('share_items')->insert(['id' => 20, 'type' => 'tool', 'name' => 'Серп', 'image' => '/serp.png', 'slot' => 'hand', 'rarity' => 'common', 'tool_family' => 'sickle', 'gathering_speed_bonus_percent' => 0]);
+        DB::table('share_items')->insert(['id' => 21, 'type' => 'tool', 'name' => 'Кирка', 'image' => '/pick.png', 'slot' => 'hand', 'rarity' => 'common', 'tool_family' => 'pickaxe', 'gathering_speed_bonus_percent' => 0]);
+        DB::table('share_items')->insert(['id' => 10, 'type' => 'resource', 'name' => 'Лечебная трава', 'image' => '/herb.png', 'transparent_image' => '/herb-transparent.png', 'rarity' => 'common', 'skill_id' => 10, 'skill_lvl' => 1, 'skill_exp' => 7, 'gathering_time_seconds' => 5, 'gathering_respawn_seconds' => 30, 'gathering_tool_family' => 'sickle']);
         DB::table('items')->insert(['id' => 200, 'share_item_id' => 20]);
         DB::table('player_equipments')->insert(['player_id' => 1, 'hand_left' => null, 'hand_right' => 200]);
         DB::table('map_gathering_resources')->insert(['id' => 1, 'map_id' => 1, 'share_item_id' => 10, 'max_active' => 1, 'min_x' => 10, 'max_x' => 90, 'min_y' => 20, 'max_y' => 70]);
@@ -369,7 +390,9 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->integer('skill_exp')->nullable();
             $table->integer('gathering_time_seconds')->nullable();
             $table->integer('gathering_respawn_seconds')->nullable();
-            $table->unsignedBigInteger('gathering_tool_share_item_id')->nullable();
+            $table->string('tool_family')->nullable();
+            $table->unsignedTinyInteger('gathering_speed_bonus_percent')->default(0);
+            $table->string('gathering_tool_family')->nullable();
             $table->boolean('is_stackable')->default(true);
             $table->integer('count_use')->default(0);
             $table->timestamps();
