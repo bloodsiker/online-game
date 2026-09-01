@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Blacksmith\Infrastructure\Persistence;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
@@ -33,8 +34,10 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->with(['item'])
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->join('share_recipes', 'share_recipes.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('share_items.type', ShareItemType::RECIPE->value)
+            ->where('share_recipes.unlock_type', RecipeUnlockType::SINGLE_USE->value)
             ->get();
     }
 
@@ -46,7 +49,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->join('backpacks', 'backpacks.item_id', '=', 'items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.type', ShareItemType::RESOURCE)
+            ->whereIn('share_items.type', ShareItemType::values(ShareItemType::gatheringResources()))
             ->get()
             ->map(fn ($item) => [
                 'id' => $item->id,

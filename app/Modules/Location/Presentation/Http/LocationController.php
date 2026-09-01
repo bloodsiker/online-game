@@ -86,6 +86,14 @@ class LocationController extends Controller
         ]);
     }
 
+    public function gatheringAvailability(): JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return response()->json($this->gatheringService->availability($user));
+    }
+
     public function gatheringState(): JsonResponse
     {
         /** @var User $user */

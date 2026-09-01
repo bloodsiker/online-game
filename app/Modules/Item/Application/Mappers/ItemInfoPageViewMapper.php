@@ -67,7 +67,15 @@ class ItemInfoPageViewMapper
         array $runes = [],
         int $upgradeLvl = 0,
     ): ItemInfoPageDTO {
-        $shareItem->loadMissing('stats', 'effects', 'requirements.skill');
+        $shareItem->loadMissing('stats', 'effects', 'requirements.skill', 'skill');
+
+        $gatheringRequirement = null;
+        if ($shareItem->type->isGatheringResource() && $shareItem->skill !== null) {
+            $gatheringRequirement = [
+                'skillName' => (string) $shareItem->skill->name,
+                'level' => max(1, (int) $shareItem->skill_lvl),
+            ];
+        }
 
         $requirements = [];
         foreach ($shareItem->requirements as $requirement) {
@@ -92,6 +100,7 @@ class ItemInfoPageViewMapper
             noSell: ! $shareItem->is_sell,
             gateLocations: $this->buildGateLocations((int) $shareItem->id),
             stats: ItemTooltipStatsBuilder::build($shareItem, $upgradeLvl),
+            gatheringRequirement: $gatheringRequirement,
             requirements: $requirements,
             handOverUrl: $handOverUrl,
             dropUrl: $dropUrl,

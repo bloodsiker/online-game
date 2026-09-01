@@ -261,6 +261,64 @@ class PlayerHeartbeatTest extends TestCase
         );
     }
 
+    public function test_low_hp_regeneration_keeps_fractional_progress_between_server_ticks(): void
+    {
+        $startedAt = Carbon::parse('2026-08-21 14:20:00');
+        Carbon::setTestNow($startedAt);
+
+        $player = (new Player)->forceFill([
+            'user_id' => 1,
+            'race_id' => 1,
+            'lvl' => 1,
+            'exp' => 0,
+            'exp_up' => 100,
+            'exp_diff' => 100,
+            'strength' => 1,
+            'agility' => 1,
+            'intuition' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 1,
+            'hp_now' => 1,
+            'hp_max' => 52,
+            'mp_now' => 13,
+            'mp_max' => 13,
+            'min_dmg' => 1,
+            'max_dmg' => 2,
+            'free_stats' => 0,
+            'last_regen_at' => $startedAt,
+            'regen_hp_start' => 1,
+            'regen_mp_start' => 13,
+        ]);
+        $player->save();
+
+        Carbon::setTestNow($startedAt->copy()->addSeconds(5));
+        $player->fresh()->regenerate(52, 13);
+
+        $this->assertSame(1, $player->fresh()->hp_now);
+        $this->assertTrue($player->fresh()->last_regen_at->equalTo($startedAt));
+
+        Carbon::setTestNow($startedAt->copy()->addSeconds(20));
+        $player->fresh()->regenerate(52, 13);
+
+        $this->assertSame(2, $player->fresh()->hp_now);
+        $this->assertSame(1, $player->fresh()->regen_hp_start);
+        $this->assertTrue($player->fresh()->last_regen_at->equalTo($startedAt));
+
+        $damagedAt = $startedAt->copy()->addSeconds(20);
+        $player = $player->fresh();
+        $player->hp_now = 1;
+        $player->save();
+
+        $this->assertSame(1, $player->regen_hp_start);
+        $this->assertTrue($player->last_regen_at->equalTo($damagedAt));
+
+        Carbon::setTestNow($damagedAt->copy()->addSeconds(5));
+        $player->fresh()->regenerate(52, 13);
+
+        $this->assertSame(1, $player->fresh()->hp_now);
+    }
+
     public function test_game_page_subscribes_to_player_websocket_without_periodic_heartbeat(): void
     {
         $user = (new User)->forceFill([
@@ -577,6 +635,8 @@ class PlayerHeartbeatTest extends TestCase
             $table->integer('death')->default(0);
             $table->float('experience_multiplier')->default(1.0);
             $table->timestamp('last_regen_at')->nullable();
+            $table->unsignedInteger('regen_hp_start')->nullable();
+            $table->unsignedInteger('regen_mp_start')->nullable();
             $table->timestamps();
         });
         Schema::connection('sqlite')->create('player_equipments', function (Blueprint $table): void {

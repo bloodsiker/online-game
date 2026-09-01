@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\Jobs\BroadcastChatMessageExpiration;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Application\UseCases\SendSystemMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Events\ChatMessageCreated;
+use App\Modules\Chat\Domain\Events\ChatMessageExpired;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
@@ -16,6 +19,7 @@ use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -54,6 +58,9 @@ class QuestItemNotificationTest extends TestCase
 
     public function test_quest_item_notification_is_visible_only_to_its_recipient_in_main_chat(): void
     {
+        Event::fake([ChatMessageCreated::class]);
+        Bus::fake([BroadcastChatMessageExpiration::class]);
+
         DB::connection('sqlite')->table('users')->insert([
             ['id' => 1, 'name' => 'Победитель'],
             ['id' => 2, 'name' => 'Другой игрок'],
@@ -96,6 +103,24 @@ class QuestItemNotificationTest extends TestCase
         $this->assertCount(1, $recipientMessages);
         $this->assertSame($message->id, $recipientMessages[0]->id);
         $this->assertCount(0, $otherUserMessages);
+        Event::assertDispatched(
+            ChatMessageCreated::class,
+            fn (ChatMessageCreated $event): bool => $event->messageId === $message->id
+                && $event->targetUserId === $recipient->id,
+        );
+        Bus::assertDispatched(
+            BroadcastChatMessageExpiration::class,
+            fn (BroadcastChatMessageExpiration $job): bool => $job->messageId === $message->id,
+        );
+
+        Event::fake([ChatMessageExpired::class]);
+        (new BroadcastChatMessageExpiration((int) $message->id))->handle();
+
+        Event::assertDispatched(
+            ChatMessageExpired::class,
+            fn (ChatMessageExpired $event): bool => $event->messageId === $message->id,
+        );
+        $this->assertTrue(ChatMessage::query()->whereKey($message->id)->exists());
     }
 
     public function test_quest_item_drop_event_is_dispatched_only_after_successful_transaction_commit(): void

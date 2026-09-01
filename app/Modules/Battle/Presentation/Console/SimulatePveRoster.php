@@ -194,6 +194,11 @@ final class RosterReferenceFighter implements FightHitInterface
         return 0;
     }
 
+    public function getMagicCriticalChance(): int
+    {
+        return 0;
+    }
+
     public function getCombatClass(): CombatClass
     {
         return $this->mage ? CombatClass::TANK : (($this->stats['strength'] >= $this->stats['agility'] && $this->stats['strength'] >= $this->stats['intuition']) ? CombatClass::TANK : ($this->stats['agility'] >= $this->stats['intuition'] ? CombatClass::DODGE : CombatClass::CRIT));

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
+            $table->string('transparent_image')->nullable();
             $table->integer('count_use')->default(0);
             $table->unsignedTinyInteger('max_drop_level_difference')->nullable()->comment('Maximum player level above monster level for monster drops; null means no restriction');
             $table->boolean('is_active')->default(true);

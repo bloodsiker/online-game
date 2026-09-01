@@ -1,183 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>Крафт</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        * {
-            font-family: Tahoma, Geneva, sans-serif;
-            font-size: 11px;
-        }
-        .bg {
-            background-color: #000;
-            background-image: url({{ asset('img/bg/bg.gif') }});
-            background-attachment: fixed;
-            background-position: 0 5px;
-        }
-        .tbl-sts b {
-            background: url({{ asset('img/bg/tbl-sts.png') }}) no-repeat;
-            display: block;
-            height: 19px;
-            overflow: hidden;
-            width: 19px;
-        }
-        .tbl-sts-lt b {
-            background-position: 0 -50px;
-        }
-        .tbl-sts-rt b {
-            background-position: 0 -100px;
-        }
-        .tbl-sts-lb b {
-            background-position: 0 -170px;
-        }
-        .tbl-sts-rb b {
-            background-position: 0 -219px;
-        }
-        .tbl-sts-ltb b {
-            background-position: 0 -69px;
-            height: 20px;
-        }
-        .tbl-sts-lbt b {
-            background-position: 0 -150px;
-            height: 20px;
-        }
-        .tbl-sts-rtb b {
-            background-position: 0 -119px;
-            height: 20px;
-        }
-        .tbl-sts-rbt b {
-            background-position: 0 -200px;
-            height: 20px;
-        }
-        .tbl-sts_left {
-            background-image: url({{ asset('img/bg/tbl-sts_left.gif') }});
-            background-repeat: repeat-y;
-            width: 19px;
-            background-position: right;
-        }
-        .tbl-sts_right {
-            background-image: url({{ asset('img/bg/tbl-sts_right.gif') }});
-            background-repeat: repeat-y;
-            width: 19px;
-        }
-        .bgg {
-            background-image: url({{ asset('img/bg/bgg.gif') }});
-        }
+        html, body { min-height: 100%; margin: 0; font-family: Tahoma, Arial, sans-serif; font-size: 11px; color: #000; }
+        table.coll { border-collapse: collapse; border-spacing: 0; }
+        .tbl-usi_bg { background: url('/img/bg/tbl-usi_bg.gif') repeat; }
+        .brd2-all { border: 1px solid #db9f73; }
+        .bg_l { background-image: url('/img/bg/info/bg_l.gif'); }
+        .p10h, .p10h td { padding-left: 10px; padding-right: 10px; }
+        .p2v, .p2v td { padding-top: 2px; padding-bottom: 2px; }
+        .pointer, .pointer input { cursor: pointer; }
 
-
-
-        table.coll {
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-        .brd2-all {
-            border: 1px solid #db9f73;
-        }
-        .brd2-top {
-            border-top: 1px solid #db9f73;
-        }
-        .brd2, .brd2 td {
-            border: 1px solid #db9f73;
-        }
-        .w100 {
-            width: 100%;
-        }
-        .p10h, .p10h td {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-        .p2v, .p2v td {
-            padding-top: 2px;
-            padding-bottom: 2px;
-        }
-        .regblk, .regblk * {
-            color: #49382d;
-        }
-        .bg_l {
-            background-image: url(/img/bg/bg_l.gif);
-        }
-        .p6h, .p6h td {
-            padding-left: 6px;
-            padding-right: 6px;
-        }
-
-
-        .btn_1 {
-            color: #461c0b !important;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 11px;
-        }
-        .btn_2 {
-            color: #ffe9ba !important;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 11px;
-        }
-        .collections-title, .collection-body {
-            padding: 5px;
-        }
-        .collections-divider {
-            display: block;
-            height: 5px;
-            margin: 0 0 5px;
-            font-size: 0;
-            border-bottom: #db9f73 1px solid;
-        }
-        .collection-slot {
-            display: inline-block;
-            position: relative;
-            width: 52px;
-            height: 70px;
-            overflow: hidden;
-            vertical-align: top;
-        }
-        .collection-slot__img {
-            display: block;
-            width: 50px;
-            height: 50px;
-            padding: 1px;
-            background: url(../images/slot-empty.png) no-repeat;
-        }
-        .collection-slot.active .collection-slot__qty, .collection-slot.active .collection-slot__qty-current {
-            color: #489200;
-        }
-        .collection-slot__img.grayscale {
-            background: #000;
-        }
-        .collection-slot__img.grayscale img {
-            opacity: .3;
-        }
-        .collection-slot__qty {
-            display: block;
-            font-weight: 700;
-            text-align: center;
-        }
-        .collection-slot__qty, .collection-slot__qty-current {
-            font-size: 11px;
-        }
-        .collection-slot__qty-current {
-            color: #c00000;
-        }
-        .collection-ico {
-            display: inline-block;
-            height: 65px;
-            padding: 5px 0 0;
-            vertical-align: top;
-            font-weight: 700;
-            font-size: 40px;
-        }
-        .collection-resource-img {
-            width: 100%;
-        }
-        .regcolor, .regcolor * {
-            color: #955c4a;
-        }
+        .craft-summary { margin-bottom: 10px; }
+        .craft-hint { margin: 0 0 10px; color: #49382d; text-align: center; }
+        .craft-grid { margin: -6px; font-size: 0; text-align: center; }
+        .craft-card { display: inline-block; vertical-align: top; width: 270px; min-height: 340px; margin: 6px; padding: 8px; box-sizing: border-box; font-size: 11px; text-align: center; background: url('/img/bg/bgg.gif') repeat; border-radius: 5px; box-shadow: 0 0 3px rgba(0,0,0,.9); }
+        .craft-title { min-height: 30px; color: #7a3010; font-size: 13px; font-weight: bold; }
+        .craft-chance { display: block; margin-top: 2px; color: #8d2616; font-weight: bold; }
+        .craft-icons { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 5px; }
+        .upgrade-icon { display: inline-block; width: 60px; height: 60px; padding: 5px 6px 6px; background: url('/main/images/user-reward-frame.png') no-repeat; cursor: pointer; }
+        .upgrade-icon img { width: 60px; height: 60px; object-fit: contain; }
+        .craft-arrow { color: #8d2616; font-size: 24px; font-weight: bold; }
+        .craft-names { min-height: 34px; margin: 4px 0 7px; color: #49382d; line-height: 15px; }
+        .craft-names strong { font-weight: bold; }
+        .craft-requirements { min-height: 104px; padding: 5px; box-sizing: border-box; text-align: left; background: url('/img/bg/tbl-usi_bg.gif') repeat; border: 2px solid #e3b360; border-radius: 5px; line-height: 16px; }
+        .requirements-title { color: #553e20; font-weight: bold; text-align: center; }
+        .requirement-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 4px; }
+        .requirement-item { width: 48px; text-align: center; line-height: 12px; cursor: pointer; }
+        .requirement-item img { width: 36px; height: 36px; object-fit: contain; border: 1px solid #9a713e; vertical-align: middle; background: url('/img/bg/empty_slot.gif') center / 36px 36px; }
+        .requirement-name { display: block; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+        .requirement-count { display: block; margin-top: 1px; font-size: 10px; white-space: nowrap; }
+        .req-ok { color: #247327 !important; font-weight: bold; }
+        .req-fail { color: #a02020 !important; font-weight: bold; }
+        .craft-action { margin-top: 7px; }
+        .butt2.disabled, .butt2.disabled input { cursor: default; opacity: .55; }
+        .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid #8d2616; color: #8d2616; font-weight: bold; }
+        .empty-list { padding: 25px; color: #49382d; font-size: 12px; text-align: center; }
     </style>
 </head>
-<body class="regcolor" leftmargin="0" rightmargin="0">
+<body>
 
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
@@ -190,161 +55,132 @@
     </tr>
     <tr>
         <td class="tbl-shp-sides ls">&nbsp;</td>
-        <td class="tbl-usi_bg" valign="top" align="left" style="padding: 10 6 10 6">
-
-            <table class="w100" border="0" width="100%">
-                <tbody>
-                <tr height="5">
-                    <td align="left" width="33%" nowrap=""></td>
-                </tr>
-                </tbody>
-            </table>
-
-            <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
-                <tbody>
-                <tr class="bg_l">
-                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                    &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+        <td class="tbl-usi_bg" valign="top" style="padding:8px 10px; text-align:center;">
+            <table class="coll brd2-all bg_l p10h p2v craft-summary" width="100%">
+                <tbody><tr>
+                    <td align="left"><b>Кузня:</b> Крафтить</td>
+                    <td align="right" style="color:#955c4a;">
+                        <b>Монеты:</b>
+                        <b class="redd"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->money) }}</b>
+                        &nbsp;&nbsp;<b>Бриллианты:</b>
+                        <b class="redd"><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->diamond) }}</b>
                     </td>
-                </tr>
-                </tbody>
+                </tr></tbody>
             </table>
 
-            <br>
+            @if(session('message'))
+                <div class="message">{{ session('message') }}</div>
+            @endif
 
-            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tbody>
-                @foreach($recipes as $recipe)
-                    <tr class="collection-group-13">
-                        <input type="hidden" name="collection_id" value="202" disabled="">
-                        <td colspan="3">
-                            <table class="coll w100 p10h p2v brd2-all">
-                                <tbody>
-                                <tr class="bg_l">
-                                    <td>
-                                        <div class="collections-title">
-                                            <b class="collection-name" style="color: #3300ff">{{ $recipe['recipeName'] }}</b>
-                                        </div>
-                                        <span class="collections-divider"></span>
-                                        <div class="collections-body">
-                                            <table>
-                                                <tbody>
-                                                <tr>
-                                                    <td>
-                                                    <span class="collection-slot">
-                                                        <span class="collection-slot__img">
-                                                            <a href="{{ $recipe['recipeItemId'] }}" class="collection-resource redd"
-                                                               data-id="{{ $recipe['recipeItemId'] }}"
-                                                               onmouseover="showItemInfo(this,event,2)"
-                                                               onmouseout="showItemInfo(this,event,0)">
-                                                                <img src="{{ $recipe['recipeImage'] }}" class="collection-resource-img" alt="">
-                                                            </a>
-                                                        </span>
-                                                         <span class="collection-slot__qty">{{ $recipe['chancePercent'] }}%</span>
-                                                    </span>
-                                                    </td>
-                                                    <td>
-                                                        <b class="collection-ico">+</b>
-                                                    </td>
-                                                    <td>
-                                                        @foreach($recipe['ingredients'] as $item)
-                                                            <span class="collection-slot @if($item['active'])active @endif" style="cursor:pointer;">
-                                                                <span class="collection-slot__img @if(!$item['active'])grayscale @endif">
-                                                                    <a href=""
-                                                                       data-id="{{ $item['id'] }}"
-                                                                       onmouseover="showItemInfo(this,event,2)"
-                                                                       onmouseout="showItemInfo(this,event,0)">
-                                                                        <img src="{{ $item['image'] }}" class="collection-resource-img" alt="">
-                                                                    </a>
-                                                                </span>
-                                                                <span class="collection-slot__qty"><b class="collection-slot__qty-current">{{ $item['availableCount'] }}</b>/{{ $item['requiredCount'] }}</span>
-                                                            </span>
-                                                        @endforeach
-                                                    </td>
-                                                    <td>
-                                                        <b class="collection-ico">=</b>
-                                                    </td>
-                                                    <td>
-                                                        <span class="collection-slot">
-                                                            <span class="collection-slot__img">
-                                                                <a href="#" class="collection-resource redd">
-                                                                    <img src="{{ $recipe['resultImage'] }}" class="collection-resource-img" alt="">
-                                                                </a>
-                                                            </span>
-                                                            <span class="collection-slot__qty"></span>
-                                                            <div class="collect-btn">
-                                                                @if(!$recipe['canCraft'])
-                                                                <b class="butt2 pointer disabled">
-                                                                    <b>
-                                                                        <button type="button" class="pointer kraft-item" style="width: 36px;">крафт</button>
-                                                                    </b>
-                                                                </b>
-                                                                @else
-                                                                <b class="butt2 pointer">
-                                                                    <b>
-                                                                        <button type="button" class="pointer kraft-item" data-href="{{ route('blacksmith.kraft', ['id' => $recipe['recipeItemId']]) }}" style="width: 36px;">крафт</button>
-                                                                    </b>
-                                                                </b>
-                                                                @endif
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr class="canc-sort">
-                        <td colspan="3"><img src="{{ asset('img/bg/blank.gif') }}" height="5" alt=""></td>
-                    </tr>
-                @endforeach
+            <p class="craft-hint">Выберите доступный рецепт и создайте предмет из собранных материалов.</p>
 
-                </tbody>
-            </table>
+            <div class="craft-grid">
+                @forelse($recipes as $recipe)
+                    <div class="craft-card">
+                        <div class="craft-title">
+                            {{ $recipe['resultName'] }}
+                            <span class="craft-chance">Шанс создания: {{ $recipe['chancePercent'] }}%</span>
+                        </div>
+
+                        <div class="craft-icons">
+                            <span class="upgrade-icon"
+                                  data-id="{{ $recipe['recipeItemId'] }}"
+                                  onmouseover="showItemInfo(this,event,2)"
+                                  onmouseout="showItemInfo(this,event,0)">
+                                <img src="{{ $recipe['recipeImage'] }}" alt="{{ $recipe['recipeName'] }}">
+                            </span>
+                            <span class="craft-arrow">→</span>
+                            <span class="upgrade-icon"
+                                  data-id="{{ $recipe['resultId'] }}"
+                                  onmouseover="showItemInfo(this,event,2)"
+                                  onmouseout="showItemInfo(this,event,0)">
+                                <img src="{{ $recipe['resultImage'] }}" alt="{{ $recipe['resultName'] }}">
+                            </span>
+                        </div>
+
+                        <div class="craft-names">
+                            <strong style="color:{{ $recipe['recipeRarityColor'] }}">{{ $recipe['recipeName'] }}</strong><br>
+                            <span style="color:#8d2616">создаёт</span><br>
+                            <strong style="color:{{ $recipe['resultRarityColor'] }}">{{ $recipe['resultName'] }}</strong>
+                        </div>
+
+                        <div class="craft-requirements">
+                            <div class="requirements-title">Материалы для крафта</div>
+                            @if(count($recipe['ingredients']) > 0)
+                                <div class="requirement-items">
+                                    @foreach($recipe['ingredients'] as $item)
+                                        <div class="requirement-item" title="{{ $item['name'] }}"
+                                             data-id="{{ $item['id'] }}"
+                                             onmouseover="showItemInfo(this,event,2)"
+                                             onmouseout="showItemInfo(this,event,0)">
+                                            <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}">
+                                            <span class="requirement-name">{{ $item['name'] }}</span>
+                                            <span class="requirement-count {{ $item['active'] ? 'req-ok' : 'req-fail' }}">
+                                                {{ $item['availableCount'] }} / {{ $item['requiredCount'] }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="req-ok" style="margin-top:5px; text-align:center;">Материалы не требуются</div>
+                            @endif
+                        </div>
+
+                        <div class="craft-action">
+                            <b class="butt2 pointer {{ $recipe['canCraft'] ? '' : 'disabled' }}">
+                                <b>
+                                    <input type="button"
+                                           class="kraft-item"
+                                           value="Создать"
+                                           @if($recipe['canCraft'])
+                                               data-href="{{ route('blacksmith.kraft', ['id' => $recipe['recipeItemId']]) }}"
+                                           @else
+                                               disabled
+                                           @endif>
+                                </b>
+                            </b>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-list"><b>В рюкзаке нет доступных рецептов для крафта.</b></div>
+                @endforelse
+            </div>
         </td>
         <td class="tbl-shp-sides rs">&nbsp;</td>
     </tr>
     <tr height="18">
-        <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
-        <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
-        <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+        <td width="20" class="tbl-shp-sml lb"><b></b></td>
+        <td class="tbl-shp-sml bb">&nbsp;</td>
+        <td width="20" class="tbl-shp-sml rb"><b></b></td>
     </tr>
     </tbody>
 </table>
 
 <script>
+    function equalizeCraftRequirements() {
+        const requirements = Array.from(document.querySelectorAll('.craft-requirements'));
+        if (requirements.length === 0) return;
 
-
-    // document.removeEventListener('keydown', handleKeydown);
-
-    function sendDataToGame(url) {
-        window.parent.postMessage({ url: url }, '*');
+        requirements.forEach((element) => { element.style.height = ''; });
+        const maxHeight = Math.max(...requirements.map((element) => element.offsetHeight));
+        requirements.forEach((element) => { element.style.height = maxHeight + 'px'; });
     }
 
-    document.querySelectorAll('.kraft-item').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const href = this.getAttribute('data-href');
-            if (href) {
-                window.location.href = href;  // Переход по URL
-            }
+    document.querySelectorAll('.kraft-item[data-href]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            window.location.href = this.dataset.href;
         });
     });
 
-    @if (session()->has('message'))
-        window.parent.showErrorIframe('{{ session('message') }}')
-    @endif
+    window.addEventListener('load', equalizeCraftRequirements);
+    window.addEventListener('resize', equalizeCraftRequirements);
 </script>
 
 {!! $playerStatsScript !!}
-    {!! $itemTooltipScript !!}
-
+{!! $itemTooltipScript !!}
 <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
-
+@if(session()->has('message'))
+    <script>window.parent.showErrorIframe(@json(session('message')));</script>
+@endif
 </body>
 </html>

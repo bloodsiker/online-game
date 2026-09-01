@@ -30,7 +30,7 @@ class GetMessages
     {
         $messages = $this->repository->getForChannel($user, $channel, $afterId, $limit);
 
-        return array_map(fn (ChatMessage $msg) => $this->mapToDTO($msg, $user), $messages);
+        return array_map(fn (ChatMessage $msg) => $this->mapToDTO($msg, $user, $channel), $messages);
     }
 
     public function filterValidIds(User $user, ChatChannel $channel, array $ids): array
@@ -38,7 +38,7 @@ class GetMessages
         return $this->repository->filterValidIds($user, $channel, $ids);
     }
 
-    private function mapToDTO(ChatMessage $msg, User $user): ChatMessageDTO
+    private function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel): ChatMessageDTO
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
@@ -74,6 +74,19 @@ class GetMessages
             sender_level: $msg->sender?->player?->lvl,
             sender_clan_icon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
             sender_clan_id: $clan?->id,
+            expires_at: $this->expirationTime($msg, $viewChannel),
         );
+    }
+
+    private function expirationTime(ChatMessage $message, ChatChannel $viewChannel): ?string
+    {
+        $expiresAt = match (true) {
+            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(30),
+            $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(10),
+            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(10),
+            default => null,
+        };
+
+        return $expiresAt?->toIso8601String();
     }
 }

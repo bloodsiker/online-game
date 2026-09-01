@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/dd', [HomeController::class, 'gebug'])->name('gebug');
 Route::get('/map', [HomeController::class, 'map'])->name('map');
 Route::get('/map/{map}/monsters', [HomeController::class, 'publicMapMonsters'])->name('map.monsters');
+Route::get('/map/{map}/resources', [HomeController::class, 'publicMapResources'])->name('map.resources');
 Route::get('/map/{slug}', [HomeController::class, 'publicMap'])->name('map.public');
 Route::get('/map2', [HomeController::class, 'map2'])->name('map2');
 Route::get('/map3', [HomeController::class, 'map3'])->name('map3');
@@ -69,7 +70,6 @@ Route::group([], function () {
     Route::post('/hotbar/set', [HotbarController::class, 'set'])->name('hotbar.set');
     Route::post('/hotbar/use', [HotbarController::class, 'use'])->name('hotbar.use');
     Route::delete('/hotbar/clear/{slot}', [HotbarController::class, 'clear'])->name('hotbar.clear');
-
 });
 
 Route::get('/heal/{id}', [HealthController::class, 'index'])->name('heal');

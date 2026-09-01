@@ -8,6 +8,7 @@ final readonly class ItemInfoPageDTO
 {
     /**
      * @param  list<array{title: string, value: string}>  $stats
+     * @param  array{skillName: string, level: int}|null  $gatheringRequirement
      * @param  list<array{label: string, value: int, met: bool}>  $requirements
      * @param  list<array{title: string, value: string}>  $gems
      * @param  list<array{title: string, value: string}>  $runes
@@ -26,6 +27,7 @@ final readonly class ItemInfoPageDTO
         public bool $noSell,
         public ?string $gateLocations,
         public array $stats,
+        public ?array $gatheringRequirement,
         public array $requirements,
         public string $handOverUrl,
         public string $dropUrl,

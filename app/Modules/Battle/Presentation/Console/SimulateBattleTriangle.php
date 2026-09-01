@@ -302,6 +302,11 @@ class SimFighter implements FightHitInterface
         return 0;
     }
 
+    public function getMagicCriticalChance(): int
+    {
+        return 0;
+    }
+
     public function getCombatClass(): CombatClass
     {
         return match (true) {

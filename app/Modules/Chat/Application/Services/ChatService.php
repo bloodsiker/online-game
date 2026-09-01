@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Application\UseCases\SendSystemMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Events\ChatMessagesInvalidated;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -52,10 +53,14 @@ class ChatService
             return;
         }
 
-        ChatMessage::query()
+        $deleted = ChatMessage::query()
             ->whereKey($messageId)
             ->where('target_user_id', $user->id)
             ->delete();
+
+        if ($deleted > 0) {
+            ChatMessagesInvalidated::dispatch((int) $user->id);
+        }
     }
 
     public function sendQuestToUser(User $user, string $message): ChatMessage

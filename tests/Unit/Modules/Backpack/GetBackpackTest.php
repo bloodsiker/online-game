@@ -9,6 +9,7 @@ use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Domain\Contracts\ItemReadRepository;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -57,6 +58,8 @@ class GetBackpackTest extends TestCase
             ->once()
             ->with(10)
             ->andReturn([324]);
+        $itemReadRepository = Mockery::mock(ItemReadRepository::class);
+        $itemReadRepository->shouldReceive('getOnlineUsersOnLocation')->once()->andReturn(new Collection);
 
         $player = new Player;
         $player->setRelation('playerEquip', null);
@@ -65,7 +68,7 @@ class GetBackpackTest extends TestCase
         $user->location_id = 10;
         $user->setRelation('player', $player);
 
-        $result = (new GetBackpack($backpackService, $collector, $locationReadRepository))
+        $result = (new GetBackpack($backpackService, $collector, $locationReadRepository, $itemReadRepository))
             ->execute($user, ['group' => 'key']);
 
         $this->assertSame([100], $result['teleportUseKeyItemIds']);

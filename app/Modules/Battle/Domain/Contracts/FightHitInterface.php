@@ -21,6 +21,9 @@ interface FightHitInterface
     /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/жезл и т.п.) — интеллект считается отдельно */
     public function getMagicAttack(): int;
 
+    /** Шанс крита заклинания, % — база 0, даёт только экипировка (жезл); множитель — общий getCritDamage() */
+    public function getMagicCriticalChance(): int;
+
     public function getArmor(): int;
 
     public function getCombatClass(): CombatClass;

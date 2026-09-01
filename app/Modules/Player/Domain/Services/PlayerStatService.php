@@ -128,6 +128,8 @@ class PlayerStatService
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
             'magic_attack' => 0.0,
+            // Как и блок щитом — целиком с экипировки (жезл), базы своей нет
+            'magic_critical' => 0.0,
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
             'crit_damage' => PlayerStatFormulas::CRIT_DAMAGE_BASE
                 + PlayerStatFormulas::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
@@ -171,6 +173,7 @@ class PlayerStatService
         $sheet->rightMinDmg = $computed['right_min_dmg'];
         $sheet->rightMaxDmg = $computed['right_max_dmg'];
         $sheet->magicAttack = $computed['magic_attack'];
+        $sheet->magicCritical = $computed['magic_critical'];
         $sheet->critDamage = $computed['crit_damage'];
         $sheet->blockChance = $computed['block_chance'];
         $sheet->blockFlat = $computed['block_flat'];
@@ -261,6 +264,7 @@ class PlayerStatService
                     ShareItemStatType::CRITICAL => 'critical',
                     ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
                     ShareItemStatType::MAGIC_RESISTANCE => 'magic_resistance',
+                    ShareItemStatType::MAGIC_CRITICAL => 'magic_critical',
                     ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
                     ShareItemStatType::ENDURANCE => 'endurance',
                     ShareItemStatType::BLOCK_CHANCE => 'block_chance',
@@ -326,41 +330,50 @@ class PlayerStatService
         // Weapon damage — flat modifiers that replace the zero base
         if ($equip->handLeft instanceof Item) {
             $source = 'equipment:'.$equip->handLeft->itemInfo->name;
+            $weaponMinDamage = 0.0;
+            $weaponMaxDamage = 0.0;
+
             foreach ($equip->handLeft->itemInfo->stats as $stat) {
-                match ($stat->stat_type) {
-                    ShareItemStatType::ATTACK_MIN => $modifiers[] = new StatModifier('left_min_dmg', $stat->value, false, $source),
-                    ShareItemStatType::ATTACK_MAX => $modifiers[] = new StatModifier('left_max_dmg', $stat->value, false, $source),
-                    default => null,
-                };
+                if ($stat->stat_type === ShareItemStatType::ATTACK_MIN) {
+                    $weaponMinDamage += $stat->value;
+                    $modifiers[] = new StatModifier('left_min_dmg', $stat->value, false, $source);
+                } elseif ($stat->stat_type === ShareItemStatType::ATTACK_MAX) {
+                    $weaponMaxDamage += $stat->value;
+                    $modifiers[] = new StatModifier('left_max_dmg', $stat->value, false, $source);
+                }
             }
 
-            // Upgrade bonus: each +1 on weapon adds 5% to damage
+            // Each +1 adds 5% of THIS weapon's own damage. The bonus is flat so
+            // it does not multiply base player damage, gems, runes or flat buffs.
             $upgradeLvl = $equip->handLeft->upgrade_lvl ?? 0;
             if ($upgradeLvl > 0) {
-                $upgradePct = (float) ($upgradeLvl * 5);
                 $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handLeft->itemInfo->name);
-                $modifiers[] = new StatModifier('left_min_dmg', $upgradePct, true, $upgradeSource);
-                $modifiers[] = new StatModifier('left_max_dmg', $upgradePct, true, $upgradeSource);
+                $modifiers[] = new StatModifier('left_min_dmg', $weaponMinDamage * $upgradeLvl * 0.05, false, $upgradeSource);
+                $modifiers[] = new StatModifier('left_max_dmg', $weaponMaxDamage * $upgradeLvl * 0.05, false, $upgradeSource);
             }
         }
 
         if ($equip->handRight instanceof Item) {
             $source = 'equipment:'.$equip->handRight->itemInfo->name;
+            $weaponMinDamage = 0.0;
+            $weaponMaxDamage = 0.0;
+
             foreach ($equip->handRight->itemInfo->stats as $stat) {
-                match ($stat->stat_type) {
-                    ShareItemStatType::ATTACK_MIN => $modifiers[] = new StatModifier('right_min_dmg', $stat->value, false, $source),
-                    ShareItemStatType::ATTACK_MAX => $modifiers[] = new StatModifier('right_max_dmg', $stat->value, false, $source),
-                    default => null,
-                };
+                if ($stat->stat_type === ShareItemStatType::ATTACK_MIN) {
+                    $weaponMinDamage += $stat->value;
+                    $modifiers[] = new StatModifier('right_min_dmg', $stat->value, false, $source);
+                } elseif ($stat->stat_type === ShareItemStatType::ATTACK_MAX) {
+                    $weaponMaxDamage += $stat->value;
+                    $modifiers[] = new StatModifier('right_max_dmg', $stat->value, false, $source);
+                }
             }
 
-            // Upgrade bonus: each +1 on weapon adds 5% to damage
+            // Same isolated weapon-only bonus for the right hand.
             $upgradeLvl = $equip->handRight->upgrade_lvl ?? 0;
             if ($upgradeLvl > 0) {
-                $upgradePct = (float) ($upgradeLvl * 5);
                 $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handRight->itemInfo->name);
-                $modifiers[] = new StatModifier('right_min_dmg', $upgradePct, true, $upgradeSource);
-                $modifiers[] = new StatModifier('right_max_dmg', $upgradePct, true, $upgradeSource);
+                $modifiers[] = new StatModifier('right_min_dmg', $weaponMinDamage * $upgradeLvl * 0.05, false, $upgradeSource);
+                $modifiers[] = new StatModifier('right_max_dmg', $weaponMaxDamage * $upgradeLvl * 0.05, false, $upgradeSource);
             }
         }
 

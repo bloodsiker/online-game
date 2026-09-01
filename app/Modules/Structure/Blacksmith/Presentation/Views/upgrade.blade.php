@@ -65,6 +65,8 @@
         .gp-frame-l { background-position: 0 0; }
         .gp-frame-r { background-position: 100% 0; }
         .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
+        .upgrade-icon { display: inline-block; width: 60px; height: 60px; padding: 5px 6px 6px; background: url('/main/images/user-reward-frame.png') no-repeat; cursor: pointer; }
+        .upgrade-icon img { width: 60px; height: 60px; object-fit: contain; }
         .upgrade-chance-bar { height: 10px; background: #ddd; border: 1px solid #b08060; margin: 3px 0; }
         .upgrade-chance-fill { height: 100%; background: #55aa33; }
         .upgrade-chance-fill.medium { background: #ddaa00; }
@@ -109,9 +111,10 @@
             <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
                 <tbody>
                 <tr class="bg_l">
-                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    <td align="left"><b>Кузня:</b> Заточка</td>
+                    <td align="right" nowrap="" style="color:#955c4a;">
+                        <b>Монеты:</b> <b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }}</b>
+                        &nbsp;&nbsp;<b>Бриллианты:</b> <b class="redd"><span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }}</b>
                     </td>
                 </tr>
                 </tbody>
@@ -417,10 +420,20 @@
         const chance = luckyActive ? d.successChanceLucky : d.successChance;
         const chanceClass = chance >= 70 ? '' : (chance >= 40 ? 'medium' : 'low');
 
+        const itemHtml = `
+            <span class="upgrade-icon"
+                  data-id="${itemId}"
+                  onmouseover="showItemInfo(this,event,2)"
+                  onmouseout="showItemInfo(this,event,0)">
+                <img src="${d.image}" alt="">
+            </span><br>
+            <b>${d.name}</b><br>
+        `;
+
         let html = '';
 
         if (d.isMax) {
-            html = `<div class="lvl-max">Максимальный уровень +15<br>Заточка невозможна.</div>`;
+            html = `${itemHtml}<div class="lvl-max">Максимальный уровень +15<br>Заточка невозможна.</div>`;
         } else {
             const scroll = selectedBaseScrollId ? baseScrollData[selectedBaseScrollId] : null;
             const scrollHtml = scroll
@@ -433,8 +446,7 @@
                 : `<span style="color:#888;">— не выбран —</span>`;
 
             html = `
-                <img src="${d.image}" width="40" height="40" style="margin-bottom:4px;"><br>
-                <b>${d.name}</b><br>
+                ${itemHtml}
                 <span>Уровень: <b class="lvl-badge">+${d.level}</b> &rarr; <b class="lvl-badge">+${d.level + 1}</b></span><br><br>
                 <span>Шанс успеха: <b>${chance.toFixed(0)}%</b></span><br>
                 <div class="upgrade-chance-bar"><div class="upgrade-chance-fill ${chanceClass}" style="width:${Math.min(chance,100)}%"></div></div>

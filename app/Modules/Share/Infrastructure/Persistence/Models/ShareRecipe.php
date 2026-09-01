@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class ShareRecipe extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'unlock_type' => RecipeUnlockType::class,
+    ];
+
+    public function isLearnable(): bool
+    {
+        return $this->unlock_type === RecipeUnlockType::LEARNABLE;
+    }
 
     public function itemInfo(): BelongsTo
     {

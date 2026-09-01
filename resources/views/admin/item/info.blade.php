@@ -17,6 +17,9 @@
                             <li class="nav-item active">
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-rarity-upgrade" href="#tab-rarity-upgrade" data-bs-toggle="tab">Апгрейд редкости</a>
+                            </li>
                             @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::GEM)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-gem" href="#tab-gem" data-bs-toggle="tab">Камень</a>
@@ -155,7 +158,7 @@
 
                                         <div class="col-lg-3">
                                             <div class="form-group">
-                                                <label class="col-form-label">Навык</label>
+                                                <label class="col-form-label">Навык / профессия</label>
                                                 <select name="skill_id" class="form-control" data-plugin-selectTwo
                                                         data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
                                                     <option value=""></option>
@@ -169,7 +172,7 @@
                                                 <input type="number" class="form-control" name="skill_lvl" value="{{ $item->skill_lvl }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Опыт навыка за удар</label>
+                                                <label class="col-form-label">Опыт навыка за действие</label>
                                                 <input type="number" class="form-control" name="skill_exp" value="{{ $item->skill_exp }}">
                                             </div>
                                             <div class="form-group">
@@ -262,6 +265,30 @@
                                                     <option value="0" @selected(!$item->is_slot_usable)>Нет</option>
                                                     <option value="1" @selected($item->is_slot_usable)>Да</option>
                                                 </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="tab-rarity-upgrade" class="tab-pane">
+                                    <div class="row pt-3 pb-3">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label">Предмет после апгрейда</label>
+                                                <select name="upgrade_to_share_item_id" class="form-control" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не настроен", "allowClear": true }'>
+                                                    <option value=""></option>
+                                                    @foreach($upgradeTargets as $target)
+                                                        <option value="{{ $target->id }}" @selected($item->upgrade_to_share_item_id === $target->id)>
+                                                            [{{ $target->id }}] {{ $target->name }} — {{ $target->rarity->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Экземпляр предмета превратится в выбранный предмет, сохранив заточку, камни и руны.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Стоимость в монетах</label>
+                                                <input type="number" min="0" class="form-control" name="upgrade_gold_cost" value="{{ old('upgrade_gold_cost', $item->upgrade_gold_cost) }}">
+                                                <small class="form-text text-muted">Материалы добавляются ниже после сохранения предмета.</small>
                                             </div>
                                         </div>
                                     </div>
@@ -546,6 +573,101 @@
         </div>
     </div>
 
+    {{-- БАФФЫ ПРИ ИСПОЛЬЗОВАНИИ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Баффы при использовании</h2>
+                    <p class="card-subtitle text-muted">Все баффы из списка накладываются на игрока при использовании предмета.</p>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form action="{{ route('admin.item.buff.add', $item->id) }}" method="post">
+                                {{ csrf_field() }}
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Бафф</label>
+                                    <select name="effect_id" class="form-control" data-plugin-selectTwo required>
+                                        @forelse($buffEffects as $buffEffect)
+                                            <option value="{{ $buffEffect->id }}">{{ $buffEffect->name }}</option>
+                                        @empty
+                                            <option value="" disabled>Сначала создайте бафф в разделе «Эффекты»</option>
+                                        @endforelse
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Длительность, сек.</label>
+                                    <input type="number" class="form-control" name="duration_seconds" value="60" min="1" max="604800" required>
+                                </div>
+                                <button class="btn btn-primary btn-sm" @disabled($buffEffects->isEmpty())>Добавить бафф</button>
+                            </form>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-hover table-bordered mb-none">
+                                <thead>
+                                <tr>
+                                    <th>Бафф</th>
+                                    <th>Описание</th>
+                                    <th width="130">Длительность</th>
+                                    <th width="70"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse($item->buffs as $buff)
+                                    <tr style="vertical-align: middle">
+                                        <td>{{ $buff->effect->name }}</td>
+                                        <td>{{ $buff->effect->description ?: '—' }}</td>
+                                        <td>{{ $buff->duration_seconds }} сек.</td>
+                                        <td>
+                                            <a href="{{ route('admin.item.buff.delete', ['item' => $item->id, 'buff' => $buff->id]) }}"
+                                               class="btn btn-xs btn-danger"
+                                               onclick="return confirm('Удалить?')">Удалить</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center text-muted">Нет баффов</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    {{-- ДЕБАФФЫ ПРИ ИСПОЛЬЗОВАНИИ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Дебаффы на цель</h2>
+                    <p class="card-subtitle text-muted">При использовании игрок выбирает другого активного игрока в своей локации.</p>
+                </header>
+                <div class="card-body"><div class="row">
+                    <div class="col-md-4">
+                        <form action="{{ route('admin.item.debuff.add', $item->id) }}" method="post">
+                            {{ csrf_field() }}
+                            <div class="form-group mb-2"><label class="col-form-label">Дебафф</label>
+                                <select name="effect_id" class="form-control" data-plugin-selectTwo required>
+                                    @forelse($debuffEffects as $debuffEffect)<option value="{{ $debuffEffect->id }}">{{ $debuffEffect->name }}</option>
+                                    @empty<option value="" disabled>Сначала создайте дебафф в разделе «Эффекты»</option>@endforelse
+                                </select>
+                            </div>
+                            <div class="form-group mb-2"><label class="col-form-label">Длительность, сек.</label><input type="number" class="form-control" name="duration_seconds" value="60" min="1" max="604800" required></div>
+                            <button class="btn btn-danger btn-sm" @disabled($debuffEffects->isEmpty())>Добавить дебафф</button>
+                        </form>
+                    </div>
+                    <div class="col-md-8"><table class="table table-hover table-bordered mb-none"><thead><tr><th>Дебафф</th><th>Описание</th><th width="130">Длительность</th><th width="70"></th></tr></thead><tbody>
+                        @forelse($item->debuffs as $debuff)<tr style="vertical-align: middle"><td>{{ $debuff->effect->name }}</td><td>{{ $debuff->effect->description ?: '—' }}</td><td>{{ $debuff->duration_seconds }} сек.</td><td><a href="{{ route('admin.item.debuff.delete', ['item' => $item->id, 'debuff' => $debuff->id]) }}" class="btn btn-xs btn-danger" onclick="return confirm('Удалить?')">Удалить</a></td></tr>
+                        @empty<tr><td colspan="4" class="text-center text-muted">Нет дебаффов</td></tr>@endforelse
+                    </tbody></table></div>
+                </div></div>
+            </section>
+        </div>
+    </div>
+
     {{-- ТРЕБОВАНИЯ --}}
     <div class="row">
         <div class="col-md-12">
@@ -632,6 +754,62 @@
         </div>
     </div>
 
+    {{-- МАТЕРИАЛЫ АПГРЕЙДА РЕДКОСТИ --}}
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Материалы для апгрейда редкости</h2>
+                    <p class="card-subtitle text-muted">Списываются вместе с монетами при превращении предмета в настроенный результат.</p>
+                </header>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <form action="{{ route('admin.item.rarity_upgrade.material.add', $item->id) }}" method="post">
+                                @csrf
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Материал</label>
+                                    <select name="share_item_id" class="form-control" data-plugin-selectTwo required>
+                                        @foreach($upgradeTargets as $target)
+                                            <option value="{{ $target->id }}">[{{ $target->id }}] {{ $target->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Количество</label>
+                                    <input type="number" min="1" name="count" value="1" class="form-control" required>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Добавить материал</button>
+                            </form>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-hover table-bordered mb-none">
+                                <thead><tr><th width="45"></th><th>Материал</th><th width="110">Количество</th><th width="70"></th></tr></thead>
+                                <tbody>
+                                @forelse($item->rarityUpgradeMaterials as $material)
+                                    <tr style="vertical-align: middle">
+                                        <td><img src="{{ $material->image }}" width="36" alt=""></td>
+                                        <td><a href="{{ route('admin.item.info', $material->id) }}">{{ $material->name }}</a></td>
+                                        <td>{{ $material->pivot->count }}</td>
+                                        <td>
+                                            <form action="{{ route('admin.item.rarity_upgrade.material.delete', ['item' => $item->id, 'material' => $material->id]) }}" method="post">
+                                                @csrf @method('DELETE')
+                                                <button class="btn btn-xs btn-danger" onclick="return confirm('Удалить?')">Удалить</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="text-center text-muted">Материалы не требуются</td></tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
     {{-- РЕЦЕПТ (только для типа RECIPE) --}}
     @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
         <div class="row">
@@ -656,6 +834,18 @@
                                     <div class="form-group">
                                         <label class="col-form-label">Процент успеха (%)</label>
                                         <input type="number" class="form-control" name="percent" value="{{ $item->recipe->percent }}" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-form-label">Использование рецепта</label>
+                                        <select name="unlock_type" class="form-control">
+                                            @foreach(\App\Modules\Share\Domain\Enums\RecipeUnlockType::cases() as $unlockType)
+                                                <option value="{{ $unlockType->value }}"
+                                                        @selected(old('unlock_type', $item->recipe->unlock_type?->value ?? \App\Modules\Share\Domain\Enums\RecipeUnlockType::SINGLE_USE->value) === $unlockType->value)>
+                                                    {{ $unlockType->label() }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="form-text text-muted">Изучаемый рецепт расходуется при изучении и затем навсегда доступен в мастерской. Одноразовый расходуется при крафте в кузнице.</small>
                                     </div>
                                     <button class="btn btn-primary btn-sm">Сохранить рецепт</button>
                                 </form>

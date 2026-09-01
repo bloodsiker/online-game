@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -14,11 +15,14 @@ use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemBuff;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemDebuff;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
@@ -113,7 +117,7 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'requirements.skill', 'magicSkillBook']);
+        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'buffs.effect', 'debuffs.effect', 'requirements.skill', 'magicSkillBook', 'rarityUpgradeTarget', 'rarityUpgradeMaterials']);
 
         $skills = Skill::orderBy('name')->get();
         $toolFamilies = GatheringToolFamily::cases();
@@ -124,8 +128,14 @@ class ItemController extends Controller
         $requirementTypes = ShareItemRequirementType::cases();
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
+        $buffEffects = Effect::query()->where('type', 'buff')->orderBy('name')->get();
+        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name')->get();
+        $upgradeTargets = ShareItem::query()
+            ->whereKeyNot($item->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'type', 'rarity']);
 
-        return view('admin.item.info', compact('item', 'skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities'));
+        return view('admin.item.info', compact('item', 'skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities', 'buffEffects', 'debuffEffects', 'upgradeTargets'));
     }
 
     public function drop(ShareItem $item): View
@@ -174,6 +184,8 @@ class ItemController extends Controller
         $item->load([
             'stats',
             'effects',
+            'buffs',
+            'debuffs',
             'requirements',
             'recipe.items',
             'itemHasItems',
@@ -191,6 +203,14 @@ class ItemController extends Controller
 
             foreach ($item->effects as $effect) {
                 $copy->effects()->save($effect->replicate());
+            }
+
+            foreach ($item->buffs as $buff) {
+                $copy->buffs()->save($buff->replicate());
+            }
+
+            foreach ($item->debuffs as $debuff) {
+                $copy->debuffs()->save($debuff->replicate());
             }
 
             foreach ($item->requirements as $requirement) {
@@ -218,7 +238,7 @@ class ItemController extends Controller
             return $copy;
         });
 
-        $message = 'Предмет скопирован вместе с его характеристиками, эффектами, требованиями и составом.';
+        $message = 'Предмет скопирован вместе с его характеристиками, эффектами, бафами, дебаффами, требованиями и составом.';
         if ($item->magicSkillBook !== null) {
             $message .= ' Привязка к заклинанию не скопирована: одно заклинание может быть связано только с одной книгой.';
         }
@@ -265,10 +285,71 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Эффект удалён.');
     }
 
+    public function addBuff(Request $request, ShareItem $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'effect_id' => ['required', 'integer', 'exists:effects,id'],
+            'duration_seconds' => ['required', 'integer', 'min:1', 'max:604800'],
+        ]);
+
+        $effect = Effect::query()->whereKey($data['effect_id'])->where('type', 'buff')->first();
+        if ($effect === null) {
+            return redirect()->back()->with('error', 'Для предмета можно выбрать только бафф.');
+        }
+
+        ShareItemBuff::query()->updateOrCreate(
+            ['share_item_id' => $item->id, 'effect_id' => $effect->id],
+            ['duration_seconds' => $data['duration_seconds']],
+        );
+
+        return redirect()->back()->with('success', 'Бафф добавлен.');
+    }
+
+    public function deleteBuff(ShareItem $item, ShareItemBuff $buff): RedirectResponse
+    {
+        abort_unless($buff->share_item_id === $item->id, 404);
+        $buff->delete();
+
+        return redirect()->back()->with('success', 'Бафф удалён.');
+    }
+
+    public function addDebuff(Request $request, ShareItem $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'effect_id' => ['required', 'integer', 'exists:effects,id'],
+            'duration_seconds' => ['required', 'integer', 'min:1', 'max:604800'],
+        ]);
+        $effect = Effect::query()->whereKey($data['effect_id'])->where('type', 'debuff')->first();
+        if ($effect === null) {
+            return redirect()->back()->with('error', 'Для предмета можно выбрать только дебафф.');
+        }
+        ShareItemDebuff::query()->updateOrCreate(
+            ['share_item_id' => $item->id, 'effect_id' => $effect->id],
+            ['duration_seconds' => $data['duration_seconds']],
+        );
+
+        return redirect()->back()->with('success', 'Дебафф добавлен.');
+    }
+
+    public function deleteDebuff(ShareItem $item, ShareItemDebuff $debuff): RedirectResponse
+    {
+        abort_unless($debuff->share_item_id === $item->id, 404);
+        $debuff->delete();
+
+        return redirect()->back()->with('success', 'Дебафф удалён.');
+    }
+
     public function updateRecipe(Request $request, ShareRecipe $recipe): RedirectResponse
     {
-        $recipe->kraft_item_id = $request->filled('kraft_item_id') ? (int) $request->input('kraft_item_id') : null;
-        $recipe->percent = (int) $request->input('percent', 100);
+        $data = $request->validate([
+            'kraft_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
+            'percent' => ['required', 'integer', 'min:0', 'max:100'],
+            'unlock_type' => ['required', 'string', 'in:'.implode(',', array_column(RecipeUnlockType::cases(), 'value'))],
+        ]);
+
+        $recipe->kraft_item_id = $data['kraft_item_id'] ?? null;
+        $recipe->percent = $data['percent'];
+        $recipe->unlock_type = RecipeUnlockType::from($data['unlock_type']);
         $recipe->save();
 
         return redirect()->back()->with('success', 'Рецепт обновлён.');
@@ -291,6 +372,31 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Ресурс удалён.');
     }
 
+    public function addRarityUpgradeMaterial(Request $request, ShareItem $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
+            'count' => ['required', 'integer', 'min:1', 'max:999999'],
+        ]);
+
+        if ((int) $data['share_item_id'] === (int) $item->id) {
+            return redirect()->back()->with('error', 'Исходный предмет нельзя добавить в собственные материалы.');
+        }
+
+        $item->rarityUpgradeMaterials()->syncWithoutDetaching([
+            (int) $data['share_item_id'] => ['count' => (int) $data['count']],
+        ]);
+
+        return redirect()->back()->with('success', 'Материал для апгрейда добавлен.');
+    }
+
+    public function deleteRarityUpgradeMaterial(ShareItem $item, ShareItem $material): RedirectResponse
+    {
+        $item->rarityUpgradeMaterials()->detach($material->id);
+
+        return redirect()->back()->with('success', 'Материал для апгрейда удалён.');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
 
     private function fillItem(ShareItem $item, Request $request): void
@@ -303,6 +409,8 @@ class ItemController extends Controller
             'gathering_tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
             'tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
             'gathering_speed_bonus_percent' => ['nullable', 'integer', 'between:0,100'],
+            'upgrade_to_share_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
+            'upgrade_gold_cost' => ['nullable', 'integer', 'min:0', 'max:2147483647'],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -335,6 +443,13 @@ class ItemController extends Controller
             ? ShareItemSlot::HAND
             : ($request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null);
         $item->price = (int) $request->input('price', 0);
+        $item->upgrade_to_share_item_id = $request->filled('upgrade_to_share_item_id')
+            ? (int) $request->input('upgrade_to_share_item_id')
+            : null;
+        if ($item->upgrade_to_share_item_id === $item->id) {
+            $item->upgrade_to_share_item_id = null;
+        }
+        $item->upgrade_gold_cost = max(0, (int) $request->input('upgrade_gold_cost', 0));
         $item->break_crystal = (int) $request->input('break_crystal', 0);
         $item->count_use = (int) $request->input('count_use', 0);
         $item->max_drop_level_difference = $request->filled('max_drop_level_difference')
@@ -353,15 +468,19 @@ class ItemController extends Controller
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
-        $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
-        $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
-        $item->gathering_time_seconds = $type === ShareItemType::RESOURCE
+        $item->skill_lvl = $request->filled('skill_lvl')
+            ? (int) $request->input('skill_lvl')
+            : ($type->isGatheringResource() ? $item->rarity->gatheringRequiredSkillLevel() : null);
+        $item->skill_exp = $request->filled('skill_exp')
+            ? (int) $request->input('skill_exp')
+            : ($type->isGatheringResource() ? $item->rarity->gatheringExperience() : null);
+        $item->gathering_time_seconds = $type->isGatheringResource()
             ? ($request->filled('gathering_time_seconds') ? (int) $request->input('gathering_time_seconds') : $item->rarity->defaultGatheringSeconds())
             : null;
-        $item->gathering_respawn_seconds = $type === ShareItemType::RESOURCE
+        $item->gathering_respawn_seconds = $type->isGatheringResource()
             ? ($request->filled('gathering_respawn_seconds') ? (int) $request->input('gathering_respawn_seconds') : 60)
             : null;
-        $item->gathering_tool_family = $type === ShareItemType::RESOURCE && $request->filled('gathering_tool_family')
+        $item->gathering_tool_family = $type->isGatheringResource() && $request->filled('gathering_tool_family')
             ? $request->input('gathering_tool_family')
             : null;
         $item->tool_family = $type === ShareItemType::TOOL && $request->filled('tool_family')

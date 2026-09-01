@@ -282,9 +282,11 @@
         @foreach($page->activeEffects as $effect)
         @if($effect->duration > 0)
         {{ $effect->isCurse ? 'addCurse' : 'addBlessing' }}(
-            '{{ $effect->id }}',
-            '{{ addslashes($effect->name) }}',
-            {{ $effect->duration }}
+            @js($effect->id),
+            @js($effect->name),
+            {{ $effect->duration }},
+            @js($effect->image),
+            @js($effect->description),
         );
         @endif
         @endforeach
@@ -307,7 +309,29 @@
         container.style.display = (hasBlessings || hasCurses) ? 'block' : 'none';
     }
 
-    function upsertTimedEffect(id, name, duration, type) {
+    function updateEffectElement(element, effect) {
+        element.title = effect.name;
+        element.querySelector('.effect-tooltip-name').textContent = effect.name;
+        element.querySelector('.effect-tooltip-description').textContent = effect.description || 'Активный эффект.';
+
+        const image = element.querySelector('.effect-icon img');
+        const fallback = element.querySelector('.effect-icon-fallback');
+        const source = effect.image || '{{ asset('main/images/effects-unavailable.png') }}';
+
+        element.classList.remove('effect-item-ready');
+        image.style.display = '';
+        image.alt = effect.name;
+        fallback.textContent = effect.name.slice(0, 1).toUpperCase();
+
+        if (image.src !== new URL(source, window.location.href).href) {
+            image.src = source;
+        } else if (image.complete) {
+            image.style.display = image.naturalWidth > 0 ? '' : 'none';
+            element.classList.add('effect-item-ready');
+        }
+    }
+
+    function upsertTimedEffect(id, name, duration, type, image = null, description = null) {
         if (!id || duration <= 0) return;
 
         const target = type === 'curse' ? activeEffects.curses : activeEffects.blessings;
@@ -318,12 +342,12 @@
             existing.name = name;
             existing.endTime = endTime;
             existing.duration = duration * 1000;
+            existing.image = image;
+            existing.description = description;
 
             const element = document.querySelector(`[data-effect-id="${id}"]`);
             if (element) {
-                element.title = name;
-                const nameElement = element.querySelector('.effect-name');
-                if (nameElement) nameElement.textContent = name;
+                updateEffectElement(element, existing);
             }
 
             return;
@@ -333,7 +357,9 @@
             id,
             name,
             endTime,
-            duration: duration * 1000
+            duration: duration * 1000,
+            image,
+            description,
         });
 
         updateSectionsVisibility();
@@ -342,13 +368,13 @@
     }
 
     // Додати благословення
-    function addBlessing(id, name, duration) {
-        upsertTimedEffect(id, name, duration, 'blessing');
+    function addBlessing(id, name, duration, image = null, description = null) {
+        upsertTimedEffect(id, name, duration, 'blessing', image, description);
     }
 
     // Додати прокляття
-    function addCurse(id, name, duration) {
-        upsertTimedEffect(id, name, duration, 'curse');
+    function addCurse(id, name, duration, image = null, description = null) {
+        upsertTimedEffect(id, name, duration, 'curse', image, description);
     }
 
     // Сервер присылает полный актуальный список. Между heartbeat таймеры
@@ -372,21 +398,21 @@
                 existing.name = effect.name;
                 existing.endTime = Date.now() + durationMs;
                 existing.duration = Math.max(existing.duration, durationMs);
+                existing.image = effect.image ?? null;
+                existing.description = effect.description ?? null;
 
                 const element = document.querySelector(`[data-effect-id="${effect.id}"]`);
                 if (element) {
-                    element.title = effect.name;
-                    const nameElement = element.querySelector('.effect-name');
-                    if (nameElement) nameElement.textContent = effect.name;
+                    updateEffectElement(element, existing);
                 }
 
                 return;
             }
 
             if (type === 'curse') {
-                addCurse(effect.id, effect.name, effect.duration);
+                addCurse(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null);
             } else {
-                addBlessing(effect.id, effect.name, effect.duration);
+                addBlessing(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null);
             }
         });
 
@@ -469,22 +495,59 @@
         return s + 'с';
     }
 
+    function positionEffectTooltip(element) {
+        const tooltip = element.querySelector('.effect-tooltip');
+        if (!tooltip) return;
+
+        const padding = 6;
+        const gap = 7;
+        const icon = element.getBoundingClientRect();
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        const left = Math.min(
+            Math.max(padding, icon.left + (icon.width - tooltipWidth) / 2),
+            window.innerWidth - tooltipWidth - padding,
+        );
+        const top = icon.top - tooltipHeight - gap >= padding
+            ? icon.top - tooltipHeight - gap
+            : Math.min(window.innerHeight - tooltipHeight - padding, icon.bottom + gap);
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${Math.max(padding, top)}px`;
+    }
+
     function createEffectElement(effect) {
         const div = document.createElement('div');
         div.className = 'effect-item';
         div.dataset.effectId = effect.id;
-        div.title = effect.name;
+        div.tabIndex = 0;
 
-        const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
-        const timerHtml = remaining > 0
-            ? `<span class="effect-timer${remaining <= 10 ? ' warning' : ''}" data-timer-id="${effect.id}">${formatEffectTime(remaining)}</span>`
-            : '';
-        const percent = effect.duration > 0 ? Math.min(100, (effect.endTime - Date.now()) / effect.duration * 100) : 0;
-        const barHtml = remaining > 0
-            ? `<span class="effect-bar"><span class="effect-bar-fill" data-bar-id="${effect.id}" style="width: ${percent}%"></span></span>`
-            : '';
+        const timeline = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        timeline.setAttribute('class', 'effect-timeline');
+        timeline.setAttribute('viewBox', '0 0 40 40');
+        timeline.setAttribute('aria-hidden', 'true');
+        timeline.innerHTML = '<rect class="effect-timeline-track" x="2" y="2" width="36" height="36" rx="5" pathLength="100"></rect><rect class="effect-timeline-progress" x="2" y="2" width="36" height="36" rx="5" pathLength="100" data-timeline-id="' + effect.id + '"></rect>';
 
-        div.innerHTML = `<span class="effect-name">${effect.name}</span>${timerHtml}${barHtml}`;
+        const icon = document.createElement('span');
+        icon.className = 'effect-icon';
+        const image = document.createElement('img');
+        image.onload = () => div.classList.add('effect-item-ready');
+        image.onerror = () => {
+            image.style.display = 'none';
+            div.classList.add('effect-item-ready');
+        };
+        const fallback = document.createElement('span');
+        fallback.className = 'effect-icon-fallback';
+        icon.append(image, fallback);
+
+        const tooltip = document.createElement('span');
+        tooltip.className = 'effect-tooltip';
+        tooltip.innerHTML = '<span class="effect-tooltip-name"></span><span class="effect-tooltip-description"></span><span class="effect-tooltip-duration" data-tooltip-duration-id="' + effect.id + '"></span>';
+
+        div.append(timeline, icon, tooltip);
+        updateEffectElement(div, effect);
+        div.addEventListener('mouseenter', () => positionEffectTooltip(div));
+        div.addEventListener('focusin', () => positionEffectTooltip(div));
 
         return div;
     }
@@ -499,15 +562,17 @@
 
         const updateTimer = () => {
             const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
-            const timerElement = document.querySelector(`[data-timer-id="${id}"]`);
-            if (!timerElement) return;
+            const timeline = document.querySelector(`[data-timeline-id="${id}"]`);
+            if (!timeline) return;
 
-            timerElement.textContent = formatEffectTime(remaining);
-            remaining <= 10 ? timerElement.classList.add('warning') : timerElement.classList.remove('warning');
+            const percent = effect.duration > 0
+                ? Math.max(0, Math.min(100, (effect.endTime - Date.now()) / effect.duration * 100))
+                : 0;
+            timeline.style.strokeDasharray = `${percent} 100`;
 
-            const barElement = document.querySelector(`[data-bar-id="${id}"]`);
-            if (barElement && effect.duration > 0) {
-                barElement.style.width = Math.max(0, (effect.endTime - Date.now()) / effect.duration * 100) + '%';
+            const duration = document.querySelector(`[data-tooltip-duration-id="${id}"]`);
+            if (duration) {
+                duration.textContent = `Осталось: ${formatEffectTime(remaining)}`;
             }
 
             if (remaining <= 0) {
@@ -575,11 +640,23 @@
         }
 
         if (blessing !== undefined) {
-            addBlessing(blessing.id, blessing.name, blessing.duration);
+            addBlessing(
+                blessing.id,
+                blessing.name,
+                blessing.duration,
+                blessing.image ?? null,
+                blessing.description ?? null,
+            );
         }
 
         if (curse !== undefined) {
-            addCurse(curse.id, curse.name, curse.duration);
+            addCurse(
+                curse.id,
+                curse.name,
+                curse.duration,
+                curse.image ?? null,
+                curse.description ?? null,
+            );
         }
 
         if (Array.isArray(appliedEffects)) {
@@ -587,9 +664,21 @@
                 if (!effect) return;
 
                 if (effect.is_curse) {
-                    addCurse(effect.id, effect.name, effect.duration);
+                    addCurse(
+                        effect.id,
+                        effect.name,
+                        effect.duration,
+                        effect.image ?? null,
+                        effect.description ?? null,
+                    );
                 } else {
-                    addBlessing(effect.id, effect.name, effect.duration);
+                    addBlessing(
+                        effect.id,
+                        effect.name,
+                        effect.duration,
+                        effect.image ?? null,
+                        effect.description ?? null,
+                    );
                 }
             });
         }

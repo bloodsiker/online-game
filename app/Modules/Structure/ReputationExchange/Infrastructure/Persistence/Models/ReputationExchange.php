@@ -42,4 +42,13 @@ class ReputationExchange extends Model
     {
         return $currentPoints >= $this->min_reputation && $currentPoints < $this->max_reputation;
     }
+
+    /**
+     * На первом ранге можно сдавать любой реликт: даже более редкий всё равно
+     * даёт стандартные 5 очков. После 500 действуют пороги самого реликта.
+     */
+    public function isAcceptedAt(int $currentPoints): bool
+    {
+        return $currentPoints < 500 || $this->isInBracket($currentPoints);
+    }
 }

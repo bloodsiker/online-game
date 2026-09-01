@@ -23,8 +23,9 @@
         .map-node:hover { border-color: #7b451e; background: linear-gradient(#fff7df, #e9b970); color: #6b2d0b; }
         .map-node--current { border-color: #658c31; background: linear-gradient(#eff7c9, #bad577); color: #345016; box-shadow: inset 0 0 0 1px #f9ffe0, 0 0 5px rgba(91, 139, 37, .65); }
         .map-node--current:hover { border-color: #4b741f; background: linear-gradient(#f6ffd8, #c9e586); color: #294212; }
-        .map-monsters-button { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; min-height: 26px; margin-left: 4px; padding: 2px 5px; border: 1px solid #a96d3a; border-radius: 3px; background: linear-gradient(#ffe5ae, #d9994d); color: #542506; cursor: pointer; font: 16px/1 Georgia, serif; text-shadow: 0 1px #fff0c5; vertical-align: middle; }
-        .map-monsters-button:hover { border-color: #754014; background: linear-gradient(#fff0c2, #e9ad59); color: #321403; }
+        .map-monsters-button, .map-resources-button { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; min-height: 26px; margin-left: 4px; padding: 2px 5px; border: 1px solid #a96d3a; border-radius: 3px; background: linear-gradient(#ffe5ae, #d9994d); color: #542506; cursor: pointer; font: 16px/1 Georgia, serif; text-shadow: 0 1px #fff0c5; vertical-align: middle; }
+        .map-monsters-button:hover, .map-resources-button:hover { border-color: #754014; background: linear-gradient(#fff0c2, #e9ad59); color: #321403; }
+        .map-resources-button img { width: 17px; height: 17px; object-fit: contain; }
         .map-tree-empty { padding: 18px; border: 1px solid #a8784d; border-top: 0; background: #ead7bc; text-align: center; }
     </style>
 </head>
@@ -77,11 +78,35 @@
                         modalHost.openMapMonstersModal({map: button.dataset.mapName, error: 'Не удалось загрузить список монстров.'});
                     });
             }
+
+            const resourcesButton = event.target.closest('.map-resources-button');
+            if (resourcesButton) {
+                if (typeof modalHost.openMapResourcesModal !== 'function') {
+                    return;
+                }
+
+                modalHost.openMapResourcesModal({map: resourcesButton.dataset.mapName});
+
+                fetch(resourcesButton.dataset.resourcesUrl, {headers: {'Accept': 'application/json'}})
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Не удалось загрузить список ресурсов.');
+                        }
+
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        modalHost.openMapResourcesModal({map: data.map, resources: data.resources || []});
+                    })
+                    .catch(function () {
+                        modalHost.openMapResourcesModal({map: resourcesButton.dataset.mapName, error: 'Не удалось загрузить список ресурсов.'});
+                    });
+            }
         });
 
         document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && typeof modalHost.closeMapMonstersModal === 'function') {
-                modalHost.closeMapMonstersModal();
+            if (event.key === 'Escape' && typeof modalHost.closeMapCatalogModal === 'function') {
+                modalHost.closeMapCatalogModal();
             }
         });
     })();

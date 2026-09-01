@@ -23,6 +23,32 @@
     <link rel="stylesheet" href="{{ asset('admin/css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('admin/css/skins/default.css') }}" />
     <link rel="stylesheet" href="{{ asset('admin/css/custom.css') }}" />
+    <style>
+        .admin-floating-save {
+            position: fixed;
+            z-index: 1100;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 16px;
+            border: 1px solid #2f7e2f;
+            border-radius: 4px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-floating-save[hidden] {
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            .admin-floating-save {
+                right: 12px;
+            }
+        }
+    </style>
 
     @stack('styles')
 
@@ -56,6 +82,10 @@
     </div>
 </section>
 
+<button id="admin-floating-save" type="button" class="btn btn-success admin-floating-save" hidden>
+    <i class="fas fa-save"></i> Сохранить
+</button>
+
 <script src="{{ asset('admin/vendor/jquery/jquery.js') }}"></script>
 <script src="{{ asset('admin/vendor/jquery-browser-mobile/jquery.browser.mobile.js') }}"></script>
 <script src="{{ asset('admin/vendor/popper/umd/popper.min.js') }}"></script>
@@ -72,6 +102,40 @@
 <script src="{{ asset('admin/js/custom.js') }}"></script>
 <script src="{{ asset('admin/js/theme.init.js') }}"></script>
 <script src="{{ asset('admin/js/modals.js') }}"></script>
+
+<script>
+    function initializeFloatingSave() {
+        const floatingSave = document.getElementById('admin-floating-save');
+        if (!floatingSave || floatingSave.dataset.initialized === 'true') return;
+
+        const submitButton = Array.from(document.querySelectorAll('.content-body form button, .content-body form input[type="submit"]'))
+            .find(function (button) {
+                const label = button.tagName === 'INPUT' ? button.value : button.textContent;
+
+                return button.type !== 'button'
+                    && !button.disabled
+                    && /^(сохранить|создать)\b/i.test(label.trim());
+            });
+
+        if (!submitButton) return;
+
+        floatingSave.dataset.initialized = 'true';
+        floatingSave.hidden = false;
+        floatingSave.addEventListener('click', function () {
+            const form = submitButton.form;
+            if (!form) return;
+
+            form.requestSubmit(submitButton);
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeFloatingSave);
+    } else {
+        initializeFloatingSave();
+    }
+    window.addEventListener('load', initializeFloatingSave);
+</script>
 
 @stack('footer_scripts')
 

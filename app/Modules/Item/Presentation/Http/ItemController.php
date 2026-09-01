@@ -6,6 +6,8 @@ namespace App\Modules\Item\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
 use App\Modules\Item\Application\UseCases\DropItem;
 use App\Modules\Item\Application\UseCases\EquipItem;
@@ -19,6 +21,7 @@ use App\Modules\Item\Application\UseCases\PickUpInChest;
 use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -39,6 +42,7 @@ class ItemController extends Controller
         private readonly PickUpInChest $pickUpInChest,
         private readonly GetItemInfoPage $getItemInfoPage,
         private readonly PlayerStatService $statService,
+        private readonly BattleEffectService $battleEffectService,
         private readonly LocationReadRepository $locationReadRepository,
     ) {}
 
@@ -163,13 +167,13 @@ class ItemController extends Controller
         ]);
     }
 
-    public function useItem(int $id): JsonResponse
+    public function useItem(Request $request, int $id): JsonResponse
     {
         /** @var User $user */
         $user = Auth::user();
         $player = $user->player;
 
-        $backpack = Backpack::with('item.itemInfo.effects')
+        $backpack = Backpack::with(['item.itemInfo.effects', 'item.itemInfo.buffs.effect', 'item.itemInfo.debuffs.effect'])
             ->where('user_id', $user->id)
             ->where('item_id', $id)
             ->where('equipped', 0)
@@ -206,12 +210,32 @@ class ItemController extends Controller
         $instantEffects = $backpack->item->itemInfo->effects->filter(
             fn ($e) => $e->effect_type->isInstant()
         );
+        $itemBuffs = $backpack->item->itemInfo->buffs;
+        $itemDebuffs = $backpack->item->itemInfo->debuffs;
 
-        if ($instantEffects->isEmpty()) {
+        if ($instantEffects->isEmpty() && $itemBuffs->isEmpty() && $itemDebuffs->isEmpty()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Этот предмет нельзя использовать здесь.',
             ], 422);
+        }
+
+        $target = null;
+        if ($itemDebuffs->isNotEmpty()) {
+            $target = Player::query()
+                ->whereKey($request->integer('target_player_id'))
+                ->whereKeyNot($player->id)
+                ->whereHas('user', fn ($query) => $query
+                    ->where('location_id', $user->location_id)
+                    ->where('last_online_at', '>=', now()->subMinutes(10)))
+                ->first();
+
+            if ($target === null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Выберите другого игрока в вашей локации.',
+                ], 422);
+            }
         }
 
         $stats = $this->statService->resolve($player);
@@ -220,6 +244,27 @@ class ItemController extends Controller
             $effect = $effectModel->toValueObject();
             $strategy = ItemEffectStrategyFactory::make($effect->type);
             $strategy->apply($player, $effect, $stats->getHpMax(), $stats->getMpMax());
+        }
+
+        $effectResult = new AttackResultDTO;
+        foreach ($itemBuffs as $itemBuff) {
+            $this->battleEffectService->applyEffectToPlayer(
+                $itemBuff->effect,
+                $player,
+                null,
+                $effectResult,
+                $itemBuff->duration_seconds,
+            );
+        }
+
+        foreach ($itemDebuffs as $itemDebuff) {
+            $this->battleEffectService->applyEffectToPlayer(
+                $itemDebuff->effect,
+                $target,
+                null,
+                $effectResult,
+                $itemDebuff->duration_seconds,
+            );
         }
 
         ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
@@ -235,6 +280,10 @@ class ItemController extends Controller
             'hp_max' => $stats->getHpMax(),
             'mp_now' => $player->mp_now,
             'mp_max' => $stats->getMpMax(),
+            'blessings' => array_map(
+                static fn ($effect): array => $effect->toArray(),
+                $effectResult->getPlayerEffects(),
+            ),
         ]);
     }
 

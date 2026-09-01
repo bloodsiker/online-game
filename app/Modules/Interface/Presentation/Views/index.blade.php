@@ -1642,8 +1642,8 @@
     }
 
     function closePtsModal() {
-        if (_ptsModalMode === 'map-monsters') {
-            closeMapMonstersModal();
+        if (_ptsModalMode === 'map-monsters' || _ptsModalMode === 'map-resources') {
+            closeMapCatalogModal();
             return;
         }
 
@@ -1727,12 +1727,83 @@
     }
 
     function closeMapMonstersModal() {
+        closeMapCatalogModal();
+    }
+
+    function closeMapCatalogModal() {
         _ptsModalMode = 'points';
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display = 'none';
         document.getElementById('pts-modal-title').textContent = 'Распределение очков';
         document.getElementById('pts-modal-points-content').style.display = '';
         document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
+    }
+
+    function openMapResourcesModal(data) {
+        const title = document.getElementById('pts-modal-title');
+        const pointsContent = document.getElementById('pts-modal-points-content');
+        const resourcesContent = document.getElementById('pts-modal-map-monsters-content');
+
+        _ptsModalMode = 'map-resources';
+        title.textContent = 'Ресурсы: ' + data.map;
+        pointsContent.style.display = 'none';
+        resourcesContent.style.display = '';
+        resourcesContent.replaceChildren();
+
+        if (data.error) {
+            resourcesContent.textContent = data.error;
+        } else if (!Array.isArray(data.resources)) {
+            resourcesContent.textContent = 'Загрузка…';
+        } else if (data.resources.length === 0) {
+            resourcesContent.textContent = 'На этой карте добываемые ресурсы не настроены.';
+        } else {
+            const list = document.createElement('ul');
+            list.style.cssText = 'margin:0;padding:7px;list-style:none;';
+
+            data.resources.forEach(function (resource) {
+                const item = document.createElement(resource.info_url ? 'a' : 'li');
+                item.style.cssText = 'display:flex;align-items:center;gap:7px;min-height:36px;padding:4px;border-bottom:1px solid rgba(166,115,69,.35);color:inherit;text-decoration:none;';
+
+                if (resource.info_url) {
+                    item.href = resource.info_url;
+                    item.title = 'Открыть информацию о ресурсе';
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+                    });
+                }
+
+                if (resource.image) {
+                    const image = document.createElement('img');
+                    image.src = resource.image;
+                    image.alt = '';
+                    image.style.cssText = 'width:30px;height:30px;object-fit:contain;';
+                    item.appendChild(image);
+                }
+
+                const details = document.createElement('span');
+                details.style.cssText = 'display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;';
+
+                const name = document.createElement('span');
+                name.textContent = resource.name;
+                name.style.cssText = 'color:#48250f;font-weight:bold;';
+                details.appendChild(name);
+
+                const skill = document.createElement('span');
+                skill.textContent = resource.skill_name + ' ' + resource.required_level + ' ур.';
+                skill.style.cssText = 'color:#89552e;font-size:10px;';
+                details.appendChild(skill);
+
+                item.appendChild(details);
+                list.appendChild(item);
+            });
+
+            resourcesContent.appendChild(list);
+        }
+
+        document.getElementById('pts-overlay').style.display = 'block';
+        document.getElementById('pts-modal').style.display = 'block';
     }
 
     function openGameMessageModal(data) {

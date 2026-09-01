@@ -22,7 +22,7 @@ class BackpackService
     public function getBaseQuery(User $user)
     {
         return Backpack::select('backpacks.*')
-            ->with(['item', 'item.itemInfo'])
+            ->with(['item', 'item.itemInfo.debuffs', 'item.itemInfo.recipe'])
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
@@ -55,7 +55,13 @@ class BackpackService
     public function groupItemsByType(Collection $backpack): Collection
     {
         return $backpack->groupBy(
-            fn ($item) => $item->item->itemInfo->type
+            static function (Backpack $item): string {
+                $type = $item->item->itemInfo->type;
+
+                return $type->isGatheringResource()
+                    ? ShareItemType::RESOURCE->value
+                    : $type->value;
+            }
         );
     }
 

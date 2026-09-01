@@ -20,5 +20,6 @@ final readonly class ChatMessageDTO
         public ?int $sender_level,
         public ?string $sender_clan_icon,
         public ?int $sender_clan_id,
+        public ?string $expires_at,
     ) {}
 }

@@ -1949,6 +1949,11 @@
     <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">Отправить в чат</div>
     <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">Выкинуть</div>
 </div>
+<div id="debuff-target-dialog" style="display:none; position:fixed; z-index:10000; top:50%; left:50%; transform:translate(-50%,-50%); width:260px; padding:14px; background:#f5e9d0; border:2px solid #9d3829; border-radius:4px; box-shadow:2px 2px 12px rgba(0,0,0,.5); font:12px Tahoma; color:#461c0b;">
+    <div style="font-weight:bold;margin-bottom:10px">Выберите цель для дебаффа</div>
+    <select id="debuff-target-select" style="width:100%;margin-bottom:10px"></select>
+    <div style="text-align:right"><button type="button" onclick="closeDebuffTargetDialog()">Отмена</button> <button type="button" onclick="confirmDebuffTarget()">Применить</button></div>
+</div>
 <style>
     .ctx-item { padding: 6px 14px; cursor: pointer; color: #461c0b; border-bottom: 1px solid #e0ccb0; }
     .ctx-item:last-child { border-bottom: none; }
@@ -1976,6 +1981,10 @@
     var _ctxItemDroppable = false;
     var _teleportUseKeyItemIds = @json($teleportUseKeyItemIds ?? []);
     var _droppableItemIds = @json($droppableItemIds ?? []);
+    var _debuffTargetItemIds = @json($debuffTargetItemIds ?? []);
+    var _learnableRecipeItemIds = @json($learnableRecipeItemIds ?? []);
+    var _debuffTargets = @json($debuffTargets ?? []);
+    var _debuffItemId = null;
 
     function showCtxMenu(el, event) {
         event.stopPropagation();
@@ -1996,6 +2005,7 @@
         var usable     = ['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1;
         var isBook     = type === 'book';
         var isRecipe   = type === 'recipe';
+        var isLearnableRecipe = isRecipe && _learnableRecipeItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         if (type === 'key') {
             usable = _teleportUseKeyItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         }
@@ -2003,7 +2013,7 @@
         document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
         document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
         document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
-        document.getElementById('ctx-learn').style.display   = (isBook || isRecipe) ? '' : 'none';
+        document.getElementById('ctx-learn').style.display   = (isBook || isLearnableRecipe) ? '' : 'none';
         document.getElementById('ctx-drop').style.display    = _ctxItemDroppable ? '' : 'none';
 
         var menu = document.getElementById('item-ctx-menu');
@@ -2030,6 +2040,8 @@
             case 'use':
                 if (_ctxItemType === 'chest') {
                     location.href = base + '/open-chest/' + id;
+                } else if (_debuffTargetItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                    openDebuffTargetDialog(id);
                 } else {
                     useItemAjax(id);
                 }
@@ -2052,13 +2064,44 @@
         }
     }
 
-    function useItemAjax(itemId) {
+    function openDebuffTargetDialog(itemId) {
+        if (!_debuffTargets.length) {
+            try { window.top.showErrorIframe('В этой локации нет другого активного игрока.'); } catch(e) {}
+            return;
+        }
+        _debuffItemId = itemId;
+        var select = document.getElementById('debuff-target-select');
+        select.innerHTML = '';
+        _debuffTargets.forEach(function(target) {
+            var option = document.createElement('option');
+            option.value = target.id;
+            option.textContent = target.name;
+            select.appendChild(option);
+        });
+        document.getElementById('debuff-target-dialog').style.display = 'block';
+    }
+
+    function closeDebuffTargetDialog() {
+        _debuffItemId = null;
+        document.getElementById('debuff-target-dialog').style.display = 'none';
+    }
+
+    function confirmDebuffTarget() {
+        var targetId = document.getElementById('debuff-target-select').value;
+        var itemId = _debuffItemId;
+        closeDebuffTargetDialog();
+        if (itemId && targetId) useItemAjax(itemId, targetId);
+    }
+
+    function useItemAjax(itemId, targetPlayerId) {
         fetch('{{ route('items.use', ['id' => '__ID__']) }}'.replace('__ID__', itemId), {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
+            body: targetPlayerId ? JSON.stringify({ target_player_id: targetPlayerId }) : null,
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -2100,6 +2143,9 @@
                 mp: { current: data.mp_now, max: data.mp_max },
             };
             try { window.top.sendToFrame('character-frame', hpMp); } catch(e) {}
+            if (data.blessings && data.blessings.length) {
+                try { window.top.sendToFrame('character-frame', { appliedEffects: data.blessings }); } catch(e) {}
+            }
             try { window.top.refreshHotbar(); } catch(e) {}
         })
         .catch(function() {

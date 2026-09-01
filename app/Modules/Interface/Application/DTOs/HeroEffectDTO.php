@@ -11,5 +11,7 @@ final readonly class HeroEffectDTO
         public string $name,
         public int $duration,
         public bool $isCurse,
+        public ?string $image,
+        public ?string $description,
     ) {}
 }

@@ -19,7 +19,6 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
-use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
@@ -29,7 +28,7 @@ use Illuminate\Support\Facades\DB;
 
 class GatheringService
 {
-    private const PROFESSION_NAMES = ['Травник', 'Рыбак', 'Геолог'];
+    private const PROFESSION_NAMES = ['Травник', 'Рыбак', 'Геолог', 'Лесоруб'];
 
     public function __construct(
         private readonly BackpackService $backpackService,
@@ -88,6 +87,32 @@ class GatheringService
                 'completesAt' => $activeAttempt->completes_at->toIso8601String(),
                 'expiresAt' => $activeAttempt->expires_at->toIso8601String(),
             ],
+        ];
+    }
+
+    /** @return array{available: bool, message: ?string} */
+    public function availability(User $user): array
+    {
+        $user->loadMissing('currentLocation.map');
+        $location = $user->currentLocation;
+
+        if ($location === null || $location->map_id === null || $location->map === null || ! $location->map->has_gathering_field) {
+            return [
+                'available' => false,
+                'message' => 'На этой локации невозможно добывать ресурсы.',
+            ];
+        }
+
+        if ($location->dungeon_id !== null) {
+            return [
+                'available' => false,
+                'message' => 'В инстансах добыча ресурсов недоступна.',
+            ];
+        }
+
+        return [
+            'available' => true,
+            'message' => null,
         ];
     }
 
@@ -372,7 +397,7 @@ class GatheringService
 
     private function resourceBlockReason(Player $player, ShareItem $resource): ?string
     {
-        if ($resource->type !== ShareItemType::RESOURCE
+        if (! $resource->type->isGatheringResource()
             || $resource->skill === null
             || $resource->skill->type !== 'peaceful'
             || $resource->gathering_time_seconds === null
@@ -505,7 +530,7 @@ class GatheringService
         return Skill::query()
             ->where('type', 'peaceful')
             ->whereIn('name', self::PROFESSION_NAMES)
-            ->orderByRaw("CASE name WHEN 'Травник' THEN 1 WHEN 'Рыбак' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE name WHEN 'Травник' THEN 1 WHEN 'Рыбак' THEN 2 WHEN 'Геолог' THEN 3 WHEN 'Лесоруб' THEN 4 ELSE 5 END")
             ->get()
             ->map(fn (Skill $skill): array => $this->professionState($this->ensureProfession($player, $skill)))
             ->all();

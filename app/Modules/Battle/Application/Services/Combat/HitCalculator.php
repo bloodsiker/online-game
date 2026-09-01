@@ -6,6 +6,7 @@ use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 
 readonly class HitCalculator
 {
@@ -30,11 +31,6 @@ readonly class HitCalculator
 
     /** Знаменатель формулы брони на референсном уровне: митигция = A/(A+armor) */
     private const ARMOR_CONSTANT = 220.0;
-
-    /** Софткап критурона: рост выше базы асимптотически ограничен CRIT_DAMAGE_CAP */
-    private const CRIT_DAMAGE_BASE = 175.0;
-
-    private const CRIT_DAMAGE_CAP = 300.0;
 
     /** Контра «Танк > Уворот»: максимальное срезание шанса уворота (при чистом танке) */
     private const DODGE_COUNTER = 0.27;
@@ -130,19 +126,10 @@ readonly class HitCalculator
         return $armor * (1 - $pierce);
     }
 
-    /** Критурон с мягким потолком: 175% → асимптотически к 300% */
+    /** Критурон с мягким потолком: 175% → асимптотически к 300% (формула общая с MagicHitCalculator, см. PlayerStatFormulas) */
     private function effectiveCritDamage(FightHitInterface $attacker): float
     {
-        $raw = (float) $attacker->getCritDamage();
-
-        if ($raw <= self::CRIT_DAMAGE_BASE) {
-            return $raw;
-        }
-
-        $growth = $raw - self::CRIT_DAMAGE_BASE;
-        $span = self::CRIT_DAMAGE_CAP - self::CRIT_DAMAGE_BASE;
-
-        return self::CRIT_DAMAGE_BASE + $span * $growth / ($growth + $span);
+        return PlayerStatFormulas::effectiveCritDamage($attacker->getCritDamage());
     }
 
     /**

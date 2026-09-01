@@ -82,8 +82,14 @@ Route::post('/item/{item}/stat', [ItemController::class, 'addStat'])->name('item
 Route::get('/item/{item}/stat/{stat}/delete', [ItemController::class, 'deleteStat'])->name('item.stat.delete');
 Route::post('/item/{item}/effect', [ItemController::class, 'addEffect'])->name('item.effect.add');
 Route::get('/item/{item}/effect/{effect}/delete', [ItemController::class, 'deleteEffect'])->name('item.effect.delete');
+Route::post('/item/{item}/buff', [ItemController::class, 'addBuff'])->name('item.buff.add');
+Route::get('/item/{item}/buff/{buff}/delete', [ItemController::class, 'deleteBuff'])->name('item.buff.delete');
+Route::post('/item/{item}/debuff', [ItemController::class, 'addDebuff'])->name('item.debuff.add');
+Route::get('/item/{item}/debuff/{debuff}/delete', [ItemController::class, 'deleteDebuff'])->name('item.debuff.delete');
 Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'])->name('item.requirement.add');
 Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::class, 'deleteRequirement'])->name('item.requirement.delete');
+Route::post('/item/{item}/rarity-upgrade/material', [ItemController::class, 'addRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.add');
+Route::delete('/item/{item}/rarity-upgrade/material/{material}', [ItemController::class, 'deleteRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.delete');
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');
@@ -161,6 +167,7 @@ Route::get('/npc/{npc}/dialogue/node/{node}/option/{option}/delete', [NpcControl
 Route::match(['GET', 'POST'], '/npc/{npc}', [NpcController::class, 'info'])->name('npc.info');
 
 Route::match(['GET', 'POST'], '/skill/create', [SkillController::class, 'create'])->name('skill.create');
+Route::post('/skill/{skill}/peaceful-requirements', [SkillController::class, 'updatePeacefulProfessionRequirements'])->name('skill.peaceful-requirements.update');
 Route::match(['GET', 'POST'], '/skill/{skill}', [SkillController::class, 'info'])->name('skill.info');
 Route::get('/skills', [SkillController::class, 'list'])->name('skills');
 

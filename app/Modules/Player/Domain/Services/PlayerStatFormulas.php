@@ -50,6 +50,9 @@ final class PlayerStatFormulas
     /** Рост множителя критического урона за очко интуиции, % */
     public const CRIT_DAMAGE_PER_INT = 1;
 
+    /** Софткап множителя крита: рост выше CRIT_DAMAGE_BASE асимптотически ограничен этим значением */
+    public const CRIT_DAMAGE_CAP = 300.0;
+
     /**
      * Бонус урона от силы, нормированный по уровню: «типичный танк» любого
      * уровня получает одинаковый процент (иначе линейный рост стат к 500 lvl
@@ -73,5 +76,25 @@ final class PlayerStatFormulas
         $levelScale = max(1.0, $level / 12);
 
         return max(0, ($intuition - 1) * self::CRIT_DAMAGE_PER_INT) / $levelScale;
+    }
+
+    /**
+     * Итоговый множитель крита с мягким потолком: до CRIT_DAMAGE_BASE растёт
+     * линейно, дальше — асимптотически к CRIT_DAMAGE_CAP. Общая формула для
+     * физической (HitCalculator) и магической (MagicHitCalculator) боёвки —
+     * «насколько сильно бьёт крит» одно и то же понятие независимо от типа урона.
+     */
+    public static function effectiveCritDamage(int $rawCritDamage): float
+    {
+        $raw = (float) $rawCritDamage;
+
+        if ($raw <= self::CRIT_DAMAGE_BASE) {
+            return $raw;
+        }
+
+        $growth = $raw - self::CRIT_DAMAGE_BASE;
+        $span = self::CRIT_DAMAGE_CAP - self::CRIT_DAMAGE_BASE;
+
+        return self::CRIT_DAMAGE_BASE + $span * $growth / ($growth + $span);
     }
 }

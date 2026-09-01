@@ -3,6 +3,7 @@
         {{ $node->name }}
     </a>
     <button class="map-monsters-button" type="button" title="Монстры карты" aria-label="Монстры карты {{ $node->name }}" data-map-name="{{ $node->name }}" data-monsters-url="{{ route('map.monsters', ['map' => $node->id]) }}">⚔</button>
+    <button class="map-resources-button" type="button" title="Ресурсы карты" aria-label="Ресурсы карты {{ $node->name }}" data-map-name="{{ $node->name }}" data-resources-url="{{ route('map.resources', ['map' => $node->id]) }}"><img src="{{ asset('data/canvas/ui/mining.webp') }}" alt=""></button>
 
     @if($node->children !== [])
         <ul>

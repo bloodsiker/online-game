@@ -149,6 +149,11 @@ class Monster extends Model implements FightHitInterface
         return max(0, (int) $this->magic_attack);
     }
 
+    public function getMagicCriticalChance(): int
+    {
+        return 0;
+    }
+
     public function usesMagicAttack(): bool
     {
         return ($this->attack_type ?? MonsterAttackType::PHYSICAL)->isMagic();

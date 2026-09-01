@@ -68,4 +68,30 @@ class MagicHitCalculatorTest extends TestCase
 
         $this->assertSame(58, $healed);
     }
+
+    public function test_zero_magic_critical_chance_never_crits(): void
+    {
+        $calc = new MagicHitCalculator;
+        $attacker = new StubCombatant(level: 12, magicCriticalChance: 0);
+        $defender = new StubCombatant(level: 12);
+
+        $hit = $calc->hit($attacker, $defender, minDamage: 10, maxDamage: 10, powerCoefficient: 0.3);
+
+        $this->assertFalse($hit->isCritical());
+        $this->assertSame(10, $hit->getDamage());
+    }
+
+    public function test_guaranteed_magic_critical_chance_applies_crit_damage_multiplier(): void
+    {
+        $calc = new MagicHitCalculator;
+        // StubCombatant::getCritDamage() = 175 (= CRIT_DAMAGE_BASE, ниже софткапа) -> множитель 175%
+        $attacker = new StubCombatant(level: 12, magicCriticalChance: 100);
+        $defender = new StubCombatant(level: 12);
+
+        // rawDamage = 10 (без интеллекта/magic_attack), крит: 10 * 1.75 = 17.5 -> round 18
+        $hit = $calc->hit($attacker, $defender, minDamage: 10, maxDamage: 10, powerCoefficient: 0.3);
+
+        $this->assertTrue($hit->isCritical());
+        $this->assertSame(18, $hit->getDamage());
+    }
 }

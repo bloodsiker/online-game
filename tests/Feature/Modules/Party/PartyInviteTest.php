@@ -101,6 +101,28 @@ class PartyInviteTest extends TestCase
         $this->assertNotSame($firstUuid, PartyInvite::query()->sole()->uuid);
     }
 
+    public function test_create_party_requests_immediate_chat_channel_refresh(): void
+    {
+        $response = $this->actingAs($this->candidate)->post(route('party.create'), [
+            'max_size' => 5,
+        ]);
+
+        $response
+            ->assertRedirect(route('who.party'))
+            ->assertSessionHas('party_success', 'Группа создана.');
+
+        $candidatePartyId = DB::table('party_members')
+            ->where('user_id', $this->candidate->id)
+            ->value('party_id');
+
+        $this->assertNotNull($candidatePartyId);
+        $this->assertDatabaseHas('parties', [
+            'id' => $candidatePartyId,
+            'leader_user_id' => $this->candidate->id,
+            'status' => 'open',
+        ]);
+    }
+
     public function test_accept_adds_member_and_notifies_party_in_chat(): void
     {
         $service = app(PartyService::class);

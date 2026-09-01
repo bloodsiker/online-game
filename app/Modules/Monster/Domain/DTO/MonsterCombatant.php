@@ -89,4 +89,9 @@ final readonly class MonsterCombatant implements FightHitInterface
     {
         return $this->monster->getMagicAttack();
     }
+
+    public function getMagicCriticalChance(): int
+    {
+        return 0;
+    }
 }

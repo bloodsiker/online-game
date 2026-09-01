@@ -82,7 +82,7 @@
                                 <th width="150">Тип</th>
                                 <th width="110">Редкость</th>
                                 <th width="120">Слот</th>
-                                <th width="70"></th>
+                                <th width="190"></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -99,6 +99,10 @@
                                     <td><span class="badge" style="background-color:{{ $item->rarity->color() }};color:#fff;">{{ $item->rarity->label() }}</span></td>
                                     <td>{{ $item->slot?->label() ?? '—' }}</td>
                                     <td>
+                                        <a href="{{ route('items.info.share', $item->id) }}"
+                                           class="btn btn-xs btn-info"
+                                           target="_blank"
+                                           rel="noopener">Посмотреть</a>
                                         <a href="{{ route('admin.item.info', $item->id) }}" class="btn btn-xs btn-primary">Изменить</a>
                                         <form action="{{ route('admin.item.duplicate', $item->id) }}" method="post" class="d-inline">
                                             @csrf

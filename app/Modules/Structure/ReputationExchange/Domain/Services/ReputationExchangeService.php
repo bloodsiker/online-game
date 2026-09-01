@@ -47,7 +47,7 @@ readonly class ReputationExchangeService
         $player = $user->player;
         $currentPoints = $this->reputationService->getOrCreate($player, $exchange->reputation)->points;
 
-        if (! $exchange->isInBracket($currentPoints)) {
+        if (! $exchange->isAcceptedAt($currentPoints)) {
             throw new DomainException('Хальдор бегло осматривает находку и качает головой — сейчас его орден ищет не такие реликты.');
         }
 

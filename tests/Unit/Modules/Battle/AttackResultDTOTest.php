@@ -17,6 +17,8 @@ class AttackResultDTOTest extends TestCase
             name: 'Отравление',
             duration: 6,
             isCurse: true,
+            image: '/storage/effects/poison.png',
+            description: 'Наносит периодический урон.',
         );
         $source = (new AttackResultDTO)->notifyPlayerEffect($notification);
 
@@ -28,6 +30,8 @@ class AttackResultDTOTest extends TestCase
             'name' => 'Отравление',
             'duration' => 6,
             'is_curse' => true,
+            'image' => '/storage/effects/poison.png',
+            'description' => 'Наносит периодический урон.',
         ], $notification->jsonSerialize());
     }
 

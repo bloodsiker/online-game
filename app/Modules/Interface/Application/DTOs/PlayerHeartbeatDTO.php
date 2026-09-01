@@ -33,6 +33,8 @@ final readonly class PlayerHeartbeatDTO
                 'name' => $effect->name,
                 'duration' => $effect->duration,
                 'is_curse' => $effect->isCurse,
+                'image' => $effect->image,
+                'description' => $effect->description,
             ], $this->effects),
         ];
     }

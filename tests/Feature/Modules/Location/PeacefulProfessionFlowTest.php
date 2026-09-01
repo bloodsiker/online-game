@@ -13,6 +13,7 @@ use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
 use App\Modules\Location\Domain\Events\GatheringMapUpdated;
 use App\Modules\Location\Domain\Services\GatheringService;
 use App\Modules\Player\Application\Services\HotbarService;
+use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Structure\Workshop\Application\UseCases\CraftProfessionItem;
 use App\Modules\Structure\Workshop\Application\UseCases\LearnRecipe;
@@ -259,10 +260,24 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $backpack = Mockery::mock(BackpackService::class);
         $backpack->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
-        $crafted = (new CraftProfessionItem($backpack))->execute($user, 1, 1);
+        $crafted = (new CraftProfessionItem($backpack, new PeacefulProfessionExperienceService))->execute($user, 1, 1);
 
         $this->assertTrue($crafted->ok);
         $this->assertDatabaseMissing('backpacks', ['item_id' => 401]);
+        $this->assertDatabaseHas('player_skills', ['player_id' => 1, 'skill_id' => 10, 'exp' => 7]);
+    }
+
+    public function test_single_use_recipe_cannot_be_learned_or_consumed(): void
+    {
+        $this->seedRecipe('single_use');
+        $user = User::query()->findOrFail(1);
+
+        $result = (new LearnRecipe)->execute($user, 30);
+
+        $this->assertFalse($result->ok);
+        $this->assertSame('Этот рецепт является одноразовым и не может быть изучен.', $result->message);
+        $this->assertDatabaseMissing('player_recipes', ['player_id' => 1, 'share_recipe_id' => 1]);
+        $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 301, 'count' => 1]);
     }
 
     private function seedPlayerAndProfession(): void
@@ -297,12 +312,12 @@ class PeacefulProfessionFlowTest extends TestCase
         DB::table('player_equipments')->insert(['player_id' => 2, 'hand_left' => null, 'hand_right' => 202]);
     }
 
-    private function seedRecipe(): void
+    private function seedRecipe(string $unlockType = 'learnable'): void
     {
-        DB::table('share_items')->insert(['id' => 30, 'type' => 'recipe', 'name' => 'Рецепт настоя', 'image' => '/recipe.png', 'rarity' => 'common', 'skill_id' => 10, 'skill_lvl' => 1]);
+        DB::table('share_items')->insert(['id' => 30, 'type' => 'recipe', 'name' => 'Рецепт настоя', 'image' => '/recipe.png', 'rarity' => 'common', 'skill_id' => 10, 'skill_lvl' => 1, 'skill_exp' => 7]);
         DB::table('share_items')->insert(['id' => 31, 'type' => 'potion', 'name' => 'Травяной настой', 'image' => '/potion.png', 'rarity' => 'common']);
         DB::table('share_items')->insert(['id' => 32, 'type' => 'resource', 'name' => 'Трава', 'image' => '/herb.png', 'rarity' => 'common']);
-        DB::table('share_recipes')->insert(['id' => 1, 'share_item_id' => 30, 'kraft_item_id' => 31, 'percent' => 1]);
+        DB::table('share_recipes')->insert(['id' => 1, 'share_item_id' => 30, 'kraft_item_id' => 31, 'percent' => 1, 'unlock_type' => $unlockType]);
         DB::table('share_recipe_has_items')->insert(['share_recipe_id' => 1, 'share_item_id' => 32, 'count' => 2]);
         DB::table('items')->insert([
             ['id' => 301, 'share_item_id' => 30],
@@ -465,6 +480,7 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->integer('percent')->default(100);
+            $table->string('unlock_type')->default('single_use');
             $table->timestamps();
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {

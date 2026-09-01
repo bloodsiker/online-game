@@ -131,12 +131,21 @@ class BattleEffectService
             default => null,
         };
 
+        // HoT тикает раз за боевой раунд в processPlayerEffects() через
+        // stacks-- (не по реальному времени, в отличие от DoT/heartbeat) —
+        // stacks должен быть бюджетом тиков на весь durationSeconds, иначе
+        // (0 по умолчанию) эффект удаляется после первого же лечения.
+        $stacks = $type?->isHoT()
+            ? max(1, intdiv($effectiveDuration, max(1, (int) $effect->tick_interval)))
+            : 0;
+
         if ($existing) {
             $existing->effect_id = $effect->id;
             $existing->type = $type;
             $existing->applied_at = now();
             $existing->expires_at = $expiresAt;
             $existing->last_tick_at = now();
+            $existing->stacks = $stacks;
             $existing->current_value = $tickValueOverride ?? (float) $effect->value_per_tick;
             $existing->tick_remainder = 0;
             $existing->save();
@@ -150,7 +159,7 @@ class BattleEffectService
                 'applied_at' => now(),
                 'last_tick_at' => now(),
                 'expires_at' => $expiresAt,
-                'stacks' => 0,
+                'stacks' => $stacks,
                 'current_value' => $tickValueOverride ?? (float) $effect->value_per_tick,
                 'tick_remainder' => 0,
             ]);
@@ -252,6 +261,8 @@ class BattleEffectService
             name: $definition?->name ?? ($type?->label() ?? 'Эффект'),
             duration: $durationSeconds,
             isCurse: $isCurse,
+            image: $definition?->image,
+            description: $definition?->description,
         ));
     }
 

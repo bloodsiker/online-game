@@ -7,8 +7,10 @@ namespace App\Modules\Structure\Workshop\Application\UseCases;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Workshop\Application\DTOs\WorkshopResultDTO;
@@ -19,6 +21,7 @@ class CraftProfessionItem
 {
     public function __construct(
         private readonly BackpackService $backpackService,
+        private readonly PeacefulProfessionExperienceService $professionExperienceService,
     ) {}
 
     public function execute(User $user, int $structureId, int $recipeId): WorkshopResultDTO
@@ -36,6 +39,9 @@ class CraftProfessionItem
             $recipe = ShareRecipe::query()->whereKey($recipeId)->with(['itemInfo.skill', 'kraftItem', 'items'])->first();
             if ($recipe === null || $recipe->kraftItem === null) {
                 return new WorkshopResultDTO(false, 'Рецепт не найден.', 404);
+            }
+            if ($recipe->unlock_type !== RecipeUnlockType::LEARNABLE) {
+                return new WorkshopResultDTO(false, 'Одноразовый рецепт нельзя использовать в мастерской.', 422);
             }
             if ($recipe->itemInfo->skill === null || $recipe->itemInfo->skill->type !== 'peaceful') {
                 return new WorkshopResultDTO(false, 'У рецепта не настроена мирная профессия.', 422);
@@ -90,8 +96,15 @@ class CraftProfessionItem
             }
 
             $this->backpackService->addItemByShareItem($user, $recipe->kraftItem, 1);
+            $experience = max(1, (int) $recipe->itemInfo->skill_exp);
+            $this->professionExperienceService->award($player, $recipe->itemInfo->skill, $experience);
 
-            return new WorkshopResultDTO(true, sprintf('Создано: «%s» ×1.', $recipe->kraftItem->name));
+            return new WorkshopResultDTO(true, sprintf(
+                'Создано: «%s» ×1. %s: опыт +%d.',
+                $recipe->kraftItem->name,
+                $recipe->itemInfo->skill->name,
+                $experience,
+            ));
         });
     }
 }

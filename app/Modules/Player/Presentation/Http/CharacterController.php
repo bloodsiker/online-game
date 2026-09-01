@@ -7,6 +7,7 @@ namespace App\Modules\Player\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Player\Application\UseCases\AllocateStats;
 use App\Modules\Player\Application\UseCases\GetCharacter;
+use App\Modules\Player\Application\UseCases\GetProfessionsPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class CharacterController extends Controller
     public function __construct(
         private readonly GetCharacter $getCharacter,
         private readonly AllocateStats $allocateStats,
+        private readonly GetProfessionsPage $getProfessionsPage,
     ) {}
 
     public function index(Request $request): View
@@ -35,6 +37,16 @@ class CharacterController extends Controller
         $character = $this->getCharacter->execute($player);
 
         return view('player::points', compact('character'));
+    }
+
+    public function professions(Request $request): View
+    {
+        $page = $this->getProfessionsPage->execute(
+            Auth::user()->player,
+            $request->integer('profession') ?: null,
+        );
+
+        return view('player::professions', compact('page'));
     }
 
     public function pointSave(Request $request): RedirectResponse|JsonResponse

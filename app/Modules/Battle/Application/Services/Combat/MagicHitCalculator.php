@@ -6,12 +6,18 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
+use App\Modules\Player\Domain\Services\PlayerStatFormulas;
 
 /**
  * Отдельный урон-калькулятор для магии — НЕ переиспользует HitCalculator::hit().
- * Магия не уворачивается, не критует и не блокируется щитом (см. спеку
+ * Магия не уворачивается и не блокируется щитом (см. спеку
  * docs/superpowers/specs/2026-08-22-magic-combat-system-design.md, правило 1) —
- * единственная защита цели — magic_resistance.
+ * единственная защита цели — magic_resistance. Крит магии — отдельное от
+ * физического правило: не контестуется со статой защитника (в отличие от
+ * HitCalculator::isCritical()), а даётся исключительно экипировкой атакующего
+ * (getMagicCriticalChance(), база 0 — по умолчанию маг без такого оружия не
+ * критует вовсе); множитель урона крита переиспользует общую формулу
+ * PlayerStatFormulas::effectiveCritDamage(), как и физический крит.
  */
 readonly class MagicHitCalculator
 {
@@ -35,6 +41,13 @@ readonly class MagicHitCalculator
 
         $rolled = random_int(min($minDamage, $maxDamage), max($minDamage, $maxDamage));
         $rawDamage = $rolled + (int) round($this->magicPower($attacker) * $powerCoefficient);
+
+        $isCrit = $attacker->getMagicCriticalChance() > 0
+            && random_int(1, 100) <= $attacker->getMagicCriticalChance();
+        if ($isCrit) {
+            $dto->setCritical(true);
+            $rawDamage = (int) round($rawDamage * PlayerStatFormulas::effectiveCritDamage($attacker->getCritDamage()) / 100);
+        }
 
         $resistConstant = self::MAGIC_RESIST_CONSTANT * $this->levelScale($attacker, $defender);
         $damageMultiplier = $resistConstant / ($resistConstant + $defender->getMagicResistance());

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Workshop\Application\UseCases;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -24,6 +25,7 @@ class GetWorkshopPage
             ->pluck('lvl', 'skill_id');
 
         $recipes = ShareRecipe::query()
+            ->where('unlock_type', RecipeUnlockType::LEARNABLE->value)
             ->whereHas('players', fn ($query) => $query->where('players.id', $user->player->id))
             ->whereHas('itemInfo.skill', fn ($query) => $query->where('type', 'peaceful'))
             ->whereNotNull('kraft_item_id')

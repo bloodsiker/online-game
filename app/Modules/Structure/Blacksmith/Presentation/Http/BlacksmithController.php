@@ -12,8 +12,10 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\BreakItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\CraftItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetBreakPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetKraftPage;
+use App\Modules\Structure\Blacksmith\Application\UseCases\GetRarityUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItem;
+use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItemRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +31,8 @@ class BlacksmithController extends Controller
         private readonly BreakItem $breakItem,
         private readonly GetUpgradePage $getUpgradePage,
         private readonly UpgradeItem $upgradeItem,
+        private readonly GetRarityUpgradePage $getRarityUpgradePage,
+        private readonly UpgradeItemRarity $upgradeItemRarity,
     ) {}
 
     public function index(Request $request, mixed $id): mixed
@@ -128,5 +132,32 @@ class BlacksmithController extends Controller
         session()->flash('upgrade_destroyed', $result->destroyed);
 
         return redirect()->route('blacksmith.upgrade', ['id' => $id]);
+    }
+
+    public function rarityUpgrade(int $id): View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $page = $this->getRarityUpgradePage->execute($user, $id);
+
+        return view('blacksmith::rarity-upgrade', [
+            'blacksmith' => $page->blacksmith,
+            'user' => $user,
+            'items' => $page->items,
+            'itemTooltipScript' => $page->itemTooltipScript,
+        ]);
+    }
+
+    public function rarityUpgradeProcess(Request $request, int $id): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $request->validate(['item_id' => ['required', 'integer']]);
+
+        $result = $this->upgradeItemRarity->execute($user, $id, $request->integer('item_id'));
+        session()->flash('message', $result->message);
+        session()->flash('rarity_upgrade_success', $result->success);
+
+        return redirect()->route('blacksmith.rarity_upgrade', ['id' => $id]);
     }
 }

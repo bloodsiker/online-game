@@ -129,7 +129,7 @@
 
                                         <div class="col-lg-3">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="skill_id">Навык</label>
+                                                <label class="col-form-label" for="skill_id">Навык / профессия</label>
                                                 <select id="skill_id" name="skill_id" data-plugin-selectTwo class="form-control populate placeholder" data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }'>
                                                     <option value=""></option>
                                                     @foreach($skills as $skill)
@@ -138,11 +138,11 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label" for="skill_lvl">Уровень навыка</label>
+                                                <label class="col-form-label" for="skill_lvl">Необходимый уровень</label>
                                                 <input type="text" class="form-control" id="skill_lvl" name="skill_lvl" value="{{ old('skill_lvl') }}">
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label" for="skill_exp">Опыт навыка за удар</label>
+                                                <label class="col-form-label" for="skill_exp">Опыт навыка за действие</label>
                                                 <input type="text" class="form-control" id="skill_exp" name="skill_exp" value="{{ old('skill_exp') }}">
                                             </div>
                                             <div class="form-group">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -182,6 +183,31 @@ class HomeController extends Controller
         return response()->json([
             'map' => $map->name,
             'monsters' => $monsters,
+        ]);
+    }
+
+    public function publicMapResources(Map $map): JsonResponse
+    {
+        $resources = MapGatheringResource::query()
+            ->where('map_id', $map->id)
+            ->with('resource.skill')
+            ->get()
+            ->pluck('resource')
+            ->filter()
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->map(static fn ($resource): array => [
+                'name' => (string) $resource->name,
+                'image' => $resource->transparent_image ?? $resource->image,
+                'skill_name' => (string) ($resource->skill?->name ?? 'Умение'),
+                'required_level' => max(1, (int) $resource->skill_lvl),
+                'info_url' => route('items.info.share', ['id' => $resource->id]),
+            ]);
+
+        return response()->json([
+            'map' => $map->name,
+            'resources' => $resources,
         ]);
     }
 

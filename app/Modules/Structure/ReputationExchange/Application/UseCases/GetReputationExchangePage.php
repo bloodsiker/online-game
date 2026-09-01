@@ -53,7 +53,7 @@ class GetReputationExchangePage
                 minReputation: (int) $item->min_reputation,
                 maxReputation: (int) $item->max_reputation,
                 availableCount: $availableCounts[(int) $item->share_item_id] ?? 0,
-                isCurrentBracket: $item->isInBracket($currentPoints),
+                isCurrentBracket: $item->isAcceptedAt($currentPoints),
             )
         )->all();
 

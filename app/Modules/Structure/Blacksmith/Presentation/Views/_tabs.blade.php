@@ -7,11 +7,12 @@
     $btnRight2  = 'img/bg/btn/btn-right2.gif';
 
     $tabs = [
-        ['key' => 'kraft',   'label' => 'Крафтить',       'route' => route('blacksmith',        ['id' => $blacksmith->id]), 'width' => 90],
-        ['key' => 'break',   'label' => 'Разбить предмет','route' => route('blacksmith.break',  ['id' => $blacksmith->id]), 'width' => 120],
-        ['key' => 'upgrade', 'label' => 'Заточка',        'route' => route('blacksmith.upgrade',['id' => $blacksmith->id]), 'width' => 100],
-        ['key' => 'gems',    'label' => 'Камни',           'route' => route('blacksmith.gems',  ['id' => $blacksmith->id]), 'width' => 80],
-        ['key' => 'runes',   'label' => 'Руны',            'route' => route('blacksmith.runes', ['id' => $blacksmith->id]), 'width' => 80],
+        ['key' => 'kraft',   'label' => 'Крафтить',       'route' => route('blacksmith',        ['id' => $blacksmith->id]), 'width' => 80],
+        ['key' => 'break',   'label' => 'Разбить предмет','route' => route('blacksmith.break',  ['id' => $blacksmith->id]), 'width' => 110],
+        ['key' => 'upgrade', 'label' => 'Заточка',        'route' => route('blacksmith.upgrade',['id' => $blacksmith->id]), 'width' => 70],
+        ['key' => 'rarity-upgrade', 'label' => 'Апгрейд', 'route' => route('blacksmith.rarity_upgrade', ['id' => $blacksmith->id]), 'width' => 70],
+        ['key' => 'gems',    'label' => 'Камни',           'route' => route('blacksmith.gems',  ['id' => $blacksmith->id]), 'width' => 65],
+        ['key' => 'runes',   'label' => 'Руны',            'route' => route('blacksmith.runes', ['id' => $blacksmith->id]), 'width' => 55],
     ];
 @endphp
 

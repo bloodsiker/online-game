@@ -38,4 +38,56 @@
         </div>
     </div>
 
+    @if($skill->type === 'peaceful')
+        <section class="card mt-3">
+            <div class="card-body">
+                <h4 class="mb-1">Шкала мирной профессии</h4>
+                <p class="text-muted mb-3">
+                    Укажите суммарный опыт для перехода с каждого уровня на следующий. Разница опыта рассчитывается автоматически.
+                </p>
+
+                <form action="{{ route('admin.skill.peaceful-requirements.update', $skill) }}" method="post">
+                    @csrf
+                    <div class="table-responsive" style="max-height: 640px; overflow-y: auto;">
+                        <table class="table table-bordered table-hover table-sm mb-0">
+                            <thead>
+                            <tr>
+                                <th style="width: 120px;">Уровень</th>
+                                <th>Суммарный опыт для перехода</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @for($level = 1; $level <= 300; $level++)
+                                <tr>
+                                    <td>{{ $level }}</td>
+                                    <td>
+                                        <input
+                                            class="form-control @error('requirements.'.$level) is-invalid @enderror"
+                                            type="number"
+                                            min="1"
+                                            max="4294967295"
+                                            name="requirements[{{ $level }}]"
+                                            value="{{ old('requirements.'.$level, $requirements->get($level)?->exp_required) }}"
+                                            required
+                                        >
+                                        @error('requirements.'.$level)
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
+                                </tr>
+                            @endfor
+                            </tbody>
+                        </table>
+                    </div>
+                    @error('requirements')
+                        <div class="text-danger mt-2">{{ $message }}</div>
+                    @enderror
+                    <div class="mt-3">
+                        <button class="btn btn-primary">Сохранить шкалу</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    @endif
+
 @endsection

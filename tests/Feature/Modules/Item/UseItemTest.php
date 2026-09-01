@@ -33,6 +33,16 @@ class UseItemTest extends TestCase
             'hp_max' => 10,
             'mp_now' => 0,
             'mp_max' => 0,
+            'lvl' => 1,
+            'strength' => 1,
+            'intuition' => 1,
+            'agility' => 1,
+            'wisdom' => 1,
+            'intelligence' => 1,
+            'endurance' => 1,
+            'min_dmg' => 0,
+            'max_dmg' => 0,
+            'free_stats' => 0,
         ]);
         DB::table('users')->insert([
             'id' => 1,
@@ -113,6 +123,57 @@ class UseItemTest extends TestCase
             ]);
         $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 103]);
         $this->assertDatabaseHas('users', ['id' => 1, 'location_id' => 11]);
+    }
+
+    public function test_item_applies_all_configured_buffs_and_is_consumed(): void
+    {
+        $this->giveKey(450, 104);
+        DB::table('effects')->insert([
+            ['id' => 1, 'name' => 'Сила медведя', 'slug' => 'bear_strength', 'type' => 'buff', 'stat_modifiers' => json_encode([['type' => 'strength', 'value' => 5]])],
+            ['id' => 2, 'name' => 'Каменная кожа', 'slug' => 'stone_skin', 'type' => 'buff', 'stat_modifiers' => json_encode([['type' => 'armor', 'value' => 10]])],
+        ]);
+        DB::table('share_item_buffs')->insert([
+            ['share_item_id' => 450, 'effect_id' => 1, 'duration_seconds' => 60],
+            ['share_item_id' => 450, 'effect_id' => 2, 'duration_seconds' => 120],
+        ]);
+
+        $response = $this->postJson(route('items.use', 104));
+
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonCount(2, 'blessings')
+            ->assertJsonPath('blessings.0.name', 'Сила медведя')
+            ->assertJsonPath('blessings.1.name', 'Каменная кожа');
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 104]);
+        $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 1]);
+        $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 2]);
+    }
+
+    public function test_item_applies_configured_debuffs_to_selected_player_only(): void
+    {
+        $this->giveKey(451, 106);
+        DB::table('players')->insert([
+            'id' => 2, 'user_id' => 2, 'race_id' => 1, 'hp_now' => 10, 'hp_max' => 10, 'mp_now' => 0, 'mp_max' => 0,
+            'lvl' => 1, 'strength' => 1, 'intuition' => 1, 'agility' => 1, 'wisdom' => 1, 'intelligence' => 1, 'endurance' => 1,
+            'min_dmg' => 0, 'max_dmg' => 0, 'free_stats' => 0,
+        ]);
+        DB::table('users')->insert([
+            'id' => 2, 'player_id' => 2, 'name' => 'Цель', 'email' => 'target@example.test', 'password' => 'password',
+            'location_id' => 10, 'last_online_at' => now(),
+        ]);
+        DB::table('effects')->insert([
+            'id' => 3, 'name' => 'Отравление', 'slug' => 'item_poison', 'type' => 'debuff', 'active_type' => 'poison',
+        ]);
+        DB::table('share_item_debuffs')->insert([
+            'share_item_id' => 451, 'effect_id' => 3, 'duration_seconds' => 60,
+        ]);
+
+        $response = $this->postJson(route('items.use', 106), ['target_player_id' => 2]);
+
+        $response->assertOk()->assertJsonPath('status', 'success');
+        $this->assertDatabaseHas('player_active_effects', ['player_id' => 2, 'effect_id' => 3]);
+        $this->assertDatabaseMissing('player_active_effects', ['player_id' => 1, 'effect_id' => 3]);
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 106]);
     }
 
     public function test_non_droppable_item_cannot_be_dropped_from_backpack(): void
@@ -218,6 +279,16 @@ class UseItemTest extends TestCase
             $table->integer('hp_max');
             $table->integer('mp_now');
             $table->integer('mp_max');
+            $table->integer('lvl')->default(1);
+            $table->integer('strength')->default(1);
+            $table->integer('intuition')->default(1);
+            $table->integer('agility')->default(1);
+            $table->integer('wisdom')->default(1);
+            $table->integer('intelligence')->default(1);
+            $table->integer('endurance')->default(1);
+            $table->integer('min_dmg')->default(0);
+            $table->integer('max_dmg')->default(0);
+            $table->integer('free_stats')->default(0);
         });
 
         Schema::create('users', function (Blueprint $table): void {
@@ -228,6 +299,7 @@ class UseItemTest extends TestCase
             $table->string('password');
             $table->unsignedBigInteger('location_id')->nullable();
             $table->unsignedBigInteger('prev_location_id')->nullable();
+            $table->timestamp('last_online_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -258,7 +330,21 @@ class UseItemTest extends TestCase
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
+            $table->integer('upgrade_lvl')->default(0);
             $table->integer('count_use')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('item_action_logs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('share_item_id');
+            $table->string('item_name');
+            $table->integer('upgrade_lvl')->default(0);
+            $table->string('action');
+            $table->integer('count')->default(1);
+            $table->integer('money')->nullable();
+            $table->unsignedBigInteger('target_user_id')->nullable();
             $table->timestamps();
         });
 
@@ -299,6 +385,112 @@ class UseItemTest extends TestCase
             $table->integer('value');
             $table->string('value_type');
             $table->unsignedInteger('duration_seconds')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('effects', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug');
+            $table->string('type');
+            $table->string('active_type')->nullable();
+            $table->string('damage_scaling_type')->nullable();
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
+            $table->integer('chance')->default(0);
+            $table->boolean('is_stackable')->default(false);
+            $table->integer('max_stacks')->default(1);
+            $table->integer('tick_interval')->default(1);
+            $table->integer('value_per_tick')->nullable();
+            $table->json('stat_modifiers')->nullable();
+            $table->boolean('is_dispellable')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('share_item_buffs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->unsignedInteger('duration_seconds');
+            $table->timestamps();
+        });
+
+        Schema::create('share_item_debuffs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->unsignedInteger('duration_seconds');
+            $table->timestamps();
+        });
+
+        Schema::create('player_active_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('effect_id')->nullable();
+            $table->unsignedBigInteger('battle_id')->nullable();
+            $table->string('type')->nullable();
+            $table->timestamp('applied_at');
+            $table->timestamp('last_tick_at')->nullable();
+            $table->timestamp('next_tick_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->integer('stacks')->default(0);
+            $table->float('current_value')->nullable();
+            $table->float('tick_remainder')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('player_item_buffs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->string('effect_type');
+            $table->integer('value');
+            $table->string('value_type');
+            $table->timestamp('expires_at');
+            $table->timestamps();
+        });
+
+        Schema::create('player_equipments', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->timestamps();
+        });
+
+        Schema::create('magic_skills', function (Blueprint $table): void {
+            $table->id();
+            $table->boolean('is_passive')->default(false);
+            $table->json('effects')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('player_magic_skills', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('magic_skill_id');
+            $table->timestamp('cooldown_end_at')->nullable();
+            $table->boolean('is_equipped')->default(false);
+            $table->integer('sort_order')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('magic_skill_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('magic_skill_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->integer('chance')->default(100);
+            $table->integer('duration_seconds')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('skills', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('player_skills', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('skill_id');
             $table->timestamps();
         });
     }

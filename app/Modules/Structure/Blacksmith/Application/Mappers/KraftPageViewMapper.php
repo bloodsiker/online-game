@@ -24,10 +24,17 @@ class KraftPageViewMapper
     public function map(Structure $blacksmith, Collection $recipes, array $resources): KraftPageDTO
     {
         $ingredientItems = $recipes->flatMap(fn ($recipe) => $recipe->item->itemInfo->recipe?->items ?? collect());
+        $resultItems = $recipes
+            ->map(fn ($recipe) => $recipe->item->itemInfo->recipe?->kraftItem)
+            ->filter();
+        $shareItems = $ingredientItems
+            ->concat($resultItems)
+            ->unique('id')
+            ->values();
 
         $itemTooltipScript = $this->collector
             ->collectFrom(new BackpackItemTooltipStrategy($recipes))
-            ->collectFrom(new ShareItemTooltipStrategy($ingredientItems))
+            ->collectFrom(new ShareItemTooltipStrategy($shareItems))
             ->renderScript();
 
         $recipeViews = $recipes->map(function ($recipe) use ($resources) {
@@ -48,9 +55,13 @@ class KraftPageViewMapper
                 'recipeItemId' => $recipe->item->id,
                 'recipeName' => $recipe->item->itemInfo->name,
                 'recipeImage' => $recipe->item->itemInfo->image,
+                'recipeRarityColor' => $recipe->item->itemInfo->rarity->color(),
                 'chancePercent' => $recipe->item->itemInfo->recipe->percent,
                 'ingredients' => $ingredients,
+                'resultId' => $recipe->item->itemInfo->recipe->kraftItem->id,
+                'resultName' => $recipe->item->itemInfo->recipe->kraftItem->name,
                 'resultImage' => $recipe->item->itemInfo->recipe->kraftItem->image,
+                'resultRarityColor' => $recipe->item->itemInfo->recipe->kraftItem->rarity->color(),
                 'canCraft' => collect($ingredients)->every(fn ($ingredient) => $ingredient['active']),
             ];
         })->values()->all();

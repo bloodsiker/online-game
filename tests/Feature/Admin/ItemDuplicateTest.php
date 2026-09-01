@@ -7,6 +7,8 @@ namespace Tests\Feature\Admin;
 use App\Http\Controllers\Admin\ItemController;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemBuff;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemDebuff;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
@@ -44,6 +46,7 @@ class ItemDuplicateTest extends TestCase
             $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
             $table->boolean('is_droppable')->default(true);
+            $table->boolean('is_stackable')->default(false);
             $table->boolean('is_weight')->default(true);
             $table->boolean('is_slot_usable')->default(false);
             $table->unsignedBigInteger('skill_id')->nullable();
@@ -72,6 +75,27 @@ class ItemDuplicateTest extends TestCase
             $table->integer('duration_seconds')->nullable();
             $table->timestamps();
         });
+        Schema::create('effects', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug');
+            $table->string('type');
+            $table->timestamps();
+        });
+        Schema::create('share_item_buffs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->unsignedInteger('duration_seconds');
+            $table->timestamps();
+        });
+        Schema::create('share_item_debuffs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('effect_id');
+            $table->unsignedInteger('duration_seconds');
+            $table->timestamps();
+        });
         Schema::create('share_item_requirements', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
@@ -86,6 +110,7 @@ class ItemDuplicateTest extends TestCase
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->integer('percent')->default(100);
+            $table->string('unlock_type')->default('single_use');
             $table->timestamps();
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
@@ -129,12 +154,16 @@ class ItemDuplicateTest extends TestCase
 
         ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => 'attack_min', 'value' => 3, 'value_type' => 'flat']);
         ShareItemEffect::create(['share_item_id' => $item->id, 'effect_type' => 'heal_hp', 'value' => 7, 'value_type' => 'percent', 'duration_seconds' => 5]);
+        DB::table('effects')->insert(['id' => 1, 'name' => 'Сила медведя', 'slug' => 'bear_strength', 'type' => 'buff']);
+        ShareItemBuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 60]);
+        ShareItemDebuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 30]);
         ShareItemRequirement::create(['share_item_id' => $item->id, 'type' => 'level', 'min_value' => 10]);
 
         $recipe = new ShareRecipe;
         $recipe->share_item_id = $item->id;
         $recipe->kraft_item_id = $craftedItem->id;
         $recipe->percent = 83;
+        $recipe->unlock_type = 'learnable';
         $recipe->save();
         $recipe->items()->attach($ingredient->id, ['count' => 4]);
         $item->itemHasItems()->attach($containedItem->id, ['min_count' => 2, 'max_count' => 5, 'drop_chance' => 35]);
@@ -142,7 +171,7 @@ class ItemDuplicateTest extends TestCase
         (new ItemController)->duplicate($item);
 
         $copy = ShareItem::where('name', 'Сундук мастера (копия)')->firstOrFail();
-        $copy->load(['stats', 'effects', 'requirements', 'recipe.items', 'itemHasItems']);
+        $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems']);
 
         $this->assertNotSame($item->id, $copy->id);
         $this->assertSame($item->description, $copy->description);
@@ -150,10 +179,14 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame($item->price, $copy->price);
         $this->assertSame(3, $copy->stats->sole()->value);
         $this->assertSame(7, $copy->effects->sole()->value);
+        $this->assertSame(60, $copy->buffs->sole()->duration_seconds);
+        $this->assertSame(1, $copy->buffs->sole()->effect_id);
+        $this->assertSame(30, $copy->debuffs->sole()->duration_seconds);
         $this->assertSame(10, $copy->requirements->sole()->min_value);
         $this->assertNotNull($copy->recipe);
         $this->assertSame($craftedItem->id, $copy->recipe->kraft_item_id);
         $this->assertSame(83, $copy->recipe->percent);
+        $this->assertTrue($copy->recipe->isLearnable());
         $this->assertSame(4, $copy->recipe->items->sole()->pivot->count);
         $this->assertSame($ingredient->id, $copy->recipe->items->sole()->id);
         $this->assertSame($containedItem->id, $copy->itemHasItems->sole()->id);

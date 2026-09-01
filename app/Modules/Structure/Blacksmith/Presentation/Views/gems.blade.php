@@ -48,6 +48,8 @@
         .gp-frame-l { background-position: 0 0; }
         .gp-frame-r { background-position: 100% 0; }
         .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
+        .upgrade-icon { display: inline-block; width: 60px; height: 60px; padding: 5px 6px 6px; background: url('/main/images/user-reward-frame.png') no-repeat; cursor: pointer; }
+        .upgrade-icon img { width: 60px; height: 60px; object-fit: contain; }
 
         /* Socket visualization */
         .socket-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
@@ -101,9 +103,10 @@
             <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
                 <tbody>
                 <tr class="bg_l">
-                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                    <td align="left"><b>Кузня:</b> Камни</td>
+                    <td align="right" nowrap="" style="color:#955c4a;">
+                        <b>Монеты:</b> <b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }}</b>
+                        &nbsp;&nbsp;<b>Бриллианты:</b> <b class="redd"><span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }}</b>
                     </td>
                 </tr>
                 </tbody>
@@ -471,7 +474,9 @@ function renderGemPanel() {
 
     // Item header
     html += `<div style="margin-bottom:6px;">`;
-    html += `<img src="${item.image}" width="50" height="50" style="border:1px solid #c8a060;"><br>`;
+    html += `<span class="upgrade-icon" data-id="${item.id}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">`;
+    html += `<img src="${item.image}" alt="">`;
+    html += `</span><br>`;
     html += `<b>${item.name}</b><br>`;
     html += `<span style="color:#888;">${item.socketCount === 0 ? 'Нет сокетов' : 'Сокетов: ' + item.socketCount}</span>`;
     html += `</div>`;

@@ -7,6 +7,7 @@ namespace App\Modules\Structure\Workshop\Application\UseCases;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Workshop\Application\DTOs\WorkshopResultDTO;
@@ -21,6 +22,9 @@ class LearnRecipe
         $recipe = ShareRecipe::query()->where('share_item_id', $shareItemId)->with('itemInfo.skill')->first();
         if ($recipe === null || $recipe->itemInfo?->type !== ShareItemType::RECIPE) {
             return new WorkshopResultDTO(false, 'Это не книга рецепта.', 422);
+        }
+        if ($recipe->unlock_type !== RecipeUnlockType::LEARNABLE) {
+            return new WorkshopResultDTO(false, 'Этот рецепт является одноразовым и не может быть изучен.', 422);
         }
         if ($recipe->itemInfo->skill === null || $recipe->itemInfo->skill->type !== 'peaceful') {
             return new WorkshopResultDTO(false, 'У рецепта не настроена мирная профессия.', 422);

@@ -8,6 +8,7 @@
 
     $tabs = [
         ['group' => 'character',   'route' => 'character',        'params' => ['group' => 'character'],   'label' => 'Персонаж'],
+        ['group' => 'professions', 'route' => 'character.professions', 'params' => [],                    'label' => 'Профессии'],
         ['group' => 'magic_skill', 'route' => 'magic_skill',      'params' => ['group' => 'magic_skill'], 'label' => 'Книга заклинаний'],
         ['group' => 'slots',       'route' => 'slots',            'params' => ['group' => 'slots'],       'label' => 'Слоты'],
         ['group' => 'reputation',  'route' => 'reputation.list',  'params' => ['group' => 'reputation'],  'label' => 'Репутации'],

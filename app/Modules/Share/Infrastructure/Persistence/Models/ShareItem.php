@@ -47,6 +47,8 @@ use Illuminate\Support\Carbon;
  * @property RuneRarity|null $rune_rarity
  * @property array|null $rune_stat_pool
  * @property ItemRarity $rarity
+ * @property int|null $upgrade_to_share_item_id
+ * @property int $upgrade_gold_cost
  * @property ShareItemSlot|null $slot
  * @property int|null $skill_id
  * @property int|null $skill_lvl
@@ -58,6 +60,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $gathering_tool_family
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
+ * @property-read Collection|ShareItemBuff[] $buffs
+ * @property-read Collection|ShareItemDebuff[] $debuffs
  * @property-read Collection|ShareItemStat[] $stats
  * @property-read Collection|ShareItemRequirement[] $requirements
  */
@@ -118,6 +122,7 @@ class ShareItem extends Model
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
         'gathering_speed_bonus_percent' => 'integer',
+        'upgrade_gold_cost' => 'integer',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -142,9 +147,36 @@ class ShareItem extends Model
         return $this->belongsTo(Skill::class, 'skill_id');
     }
 
+    /** Предмет, в который превращается экземпляр при апгрейде редкости. */
+    public function rarityUpgradeTarget(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'upgrade_to_share_item_id');
+    }
+
+    /** Материалы, дополнительно требуемые для апгрейда этого предмета. */
+    public function rarityUpgradeMaterials(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'share_item_upgrade_materials',
+            'share_item_id',
+            'required_share_item_id',
+        )->withPivot('count')->withTimestamps();
+    }
+
     public function effects(): HasMany
     {
         return $this->hasMany(ShareItemEffect::class);
+    }
+
+    public function buffs(): HasMany
+    {
+        return $this->hasMany(ShareItemBuff::class);
+    }
+
+    public function debuffs(): HasMany
+    {
+        return $this->hasMany(ShareItemDebuff::class);
     }
 
     public function stats(): HasMany

@@ -30,6 +30,7 @@ class PlayerStatServiceOptimizationTest extends TestCase
         Schema::connection('sqlite')->create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
+            $table->unsignedInteger('upgrade_lvl')->default(0);
         });
         Schema::connection('sqlite')->create('item_gems', function (Blueprint $table): void {
             $table->id();
@@ -166,6 +167,59 @@ class PlayerStatServiceOptimizationTest extends TestCase
         $this->assertNotSame($firstSheet, $updatedSheet);
         $this->assertSame(5, $updatedSheet->getStrength());
         $this->assertCount($firstResolveQueries * 2, DB::getQueryLog());
+    }
+
+    public function test_weapon_upgrade_scales_only_the_weapons_own_damage(): void
+    {
+        DB::table('share_items')->insert([
+            ['id' => 101, 'name' => 'Sword'],
+            ['id' => 102, 'name' => 'Strong Rune'],
+        ]);
+        DB::table('items')->insert([
+            'id' => 11,
+            'share_item_id' => 101,
+            'upgrade_lvl' => 2,
+        ]);
+        DB::table('share_item_stats')->insert([
+            [
+                'share_item_id' => 101,
+                'stat_type' => 'attack_min',
+                'value' => 10,
+                'value_type' => 'flat',
+            ],
+            [
+                'share_item_id' => 101,
+                'stat_type' => 'attack_max',
+                'value' => 20,
+                'value_type' => 'flat',
+            ],
+        ]);
+        DB::table('item_runes')->insert([
+            'id' => 1,
+            'item_id' => 11,
+            'share_item_id' => 102,
+            'slot_index' => 0,
+            'stats' => json_encode([
+                ['stat' => 'attack', 'value' => 100, 'is_percent' => false],
+            ], JSON_THROW_ON_ERROR),
+        ]);
+
+        $equipment = (new PlayerEquipment)->forceFill([
+            'id' => 1,
+            'player_id' => 1,
+            'hand_left' => 11,
+        ]);
+        $equipment->exists = true;
+
+        $player = $this->player();
+        $player->setRelation('playerEquip', $equipment);
+
+        $sheet = app(PlayerStatService::class)->resolve($player);
+
+        // Base 1–2 + weapon 10–20 + rune 100 + 10% of weapon 1–2.
+        // The old implementation also multiplied the rune and player base by 10%.
+        $this->assertSame(112, $sheet->getLeftHandMinDmg());
+        $this->assertSame(124, $sheet->getLeftHandMaxDmg());
     }
 
     public function test_item_buff_invalidates_cached_stat_sheet(): void

@@ -98,7 +98,7 @@ class MapController extends Controller
         $locations = Location::where('map_id', $map->id)->orderByDesc('id')->get();
         $mapResources = $map->gatheringResources()->with(['resource.skill', 'nodes.attempts'])->orderBy('id')->get();
         $gatheringResources = ShareItem::query()
-            ->where('type', ShareItemType::RESOURCE->value)
+            ->whereIn('type', ShareItemType::values(ShareItemType::gatheringResources()))
             ->whereNotNull('gathering_time_seconds')
             ->whereNotNull('gathering_respawn_seconds')
             ->whereNotNull('gathering_tool_family')
@@ -130,7 +130,7 @@ class MapController extends Controller
         ]);
 
         $resource = ShareItem::query()->findOrFail($data['share_item_id']);
-        abort_unless($resource->type === ShareItemType::RESOURCE, 422);
+        abort_unless($resource->type->isGatheringResource(), 422);
 
         $configuration = MapGatheringResource::query()->updateOrCreate(
             ['map_id' => $map->id, 'share_item_id' => $resource->id],

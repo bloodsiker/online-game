@@ -68,7 +68,7 @@
         .chat-user:hover  { color: #990000; }
         .player-link      { color: #990000; font-weight: bold; }
         .player-link:hover { text-decoration: underline; }
-        .chat-clan-icon   { vertical-align: middle;}
+        .chat-clan-icon   { vertical-align: middle; margin-right: 3px; }
         .chat-level       { color: #666; font-weight: normal; }
 
         /* Clan channel */
@@ -113,7 +113,11 @@
                         };
                         $showArrow = in_array($msg->type, ['private', 'mention']);
                     @endphp
-                    <div class="message msg-{{ $msg->type }}{{ $chClass }}" data-id="{{ $msg->id }}">
+                    <div
+                        class="message msg-{{ $msg->type }}{{ $chClass }}"
+                        data-id="{{ $msg->id }}"
+                        @if($msg->expires_at) data-expires-at="{{ $msg->expires_at }}" @endif
+                    >
 
                         @if ($msg->type === 'private' && $msg->reply_to)
                             <small class="msg-time-reply"
@@ -177,6 +181,17 @@
     var ignoreUrl = '{{ route('chat.ignore.add') }}';
     var csrfToken = '{{ csrf_token() }}';
     var lastMessageId = getLastMessageId();
+    var realtime = @json($realtime);
+    var realtimeInitialized = false;
+    var realtimeCurrentChannelName = null;
+    var realtimeCurrentChannel = null;
+    var realtimePersonalChannel = null;
+    var realtimeSystemChannel = null;
+    var realtimeSyncTimer = null;
+    var realtimeFullSyncPending = false;
+    var realtimeFallbackTimer = null;
+    var realtimeReconnectRequired = false;
+    var messageExpirationTimer = null;
 
     function scrollToBottom() {
         window.scrollTo(0, document.body.scrollHeight);
@@ -331,6 +346,7 @@
         var div = document.createElement('div');
         div.className = 'message msg-' + msg.type + (chClass[msg.channel] || '');
         div.setAttribute('data-id', String(msg.id));
+        if (msg.expires_at) div.setAttribute('data-expires-at', msg.expires_at);
         div.innerHTML = buildMessageHtml(msg);
         return div;
     }
@@ -350,6 +366,21 @@
         for (var i = 0; i < removeCount; i++) {
             nodes[i].remove();
         }
+    }
+
+    function removeExpiredMessages() {
+        var now = Date.now();
+        var removed = false;
+
+        document.querySelectorAll('#content [data-expires-at]').forEach(function (el) {
+            var expiresAt = Date.parse(el.getAttribute('data-expires-at'));
+            if (!Number.isNaN(expiresAt) && expiresAt <= now) {
+                el.remove();
+                removed = true;
+            }
+        });
+
+        if (removed) lastMessageId = getLastMessageId();
     }
 
     function syncMessages(serverMessages) {
@@ -427,11 +458,140 @@
             .catch(function () {});
     }
 
-    function poll() { fetchMessages(null, true); }
     function fullSync() { fetchMessages(null, false); }
 
-    setInterval(poll, 2000);
-    setInterval(fullSync, 30000);
+    function realtimeEcho() {
+        try {
+            return window.top && window.top.Echo ? window.top.Echo : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function realtimeChannelName(selectedChannel) {
+        if (selectedChannel === 'main') return 'chat.main';
+        if (selectedChannel === 'trade') return 'chat.trade';
+        if (selectedChannel === 'location' && realtime.mapId) return 'chat.location.' + realtime.mapId;
+        if (selectedChannel === 'clan' && realtime.clanId) return 'chat.clan.' + realtime.clanId;
+        if (selectedChannel === 'party' && realtime.partyId) return 'chat.party.' + realtime.partyId;
+        return null;
+    }
+
+    function scheduleRealtimeSync(full) {
+        realtimeFullSyncPending = realtimeFullSyncPending || full;
+        if (realtimeSyncTimer) window.clearTimeout(realtimeSyncTimer);
+        realtimeSyncTimer = window.setTimeout(function () {
+            realtimeSyncTimer = null;
+            var runFullSync = realtimeFullSyncPending;
+            realtimeFullSyncPending = false;
+            fetchMessages(null, !runFullSync);
+        }, 50);
+    }
+
+    function handleRealtimeMessage() {
+        scheduleRealtimeSync(false);
+    }
+
+    function handleRealtimeInvalidation() {
+        scheduleRealtimeSync(true);
+    }
+
+    function handleRealtimeExpiration(event) {
+        if (!event || !event.message_id) return;
+        if (event.preserve_in_private && channel === 'private') return;
+
+        var message = document.querySelector('#content [data-id="' + parseInt(event.message_id, 10) + '"]');
+        if (!message) return;
+
+        message.remove();
+        lastMessageId = getLastMessageId();
+    }
+
+    function stopFallbackPolling() {
+        if (!realtimeFallbackTimer) return;
+        window.clearInterval(realtimeFallbackTimer);
+        realtimeFallbackTimer = null;
+    }
+
+    function startFallbackPolling() {
+        if (realtimeFallbackTimer) return;
+        realtimeFallbackTimer = window.setInterval(function () {
+            fetchMessages(null, true);
+        }, 5000);
+    }
+
+    function subscribeCurrentRealtimeChannel() {
+        var echo = realtimeEcho();
+        if (!echo) return;
+
+        var nextName = realtimeChannelName(channel);
+        if (nextName === realtimeCurrentChannelName) return;
+
+        if (realtimeCurrentChannel) {
+            realtimeCurrentChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            echo.leave(realtimeCurrentChannelName);
+        }
+
+        realtimeCurrentChannelName = nextName;
+        realtimeCurrentChannel = nextName
+            ? echo.private(nextName).listen('.chat.message.created', handleRealtimeMessage)
+            : null;
+    }
+
+    function initializeRealtime() {
+        if (realtimeInitialized) return;
+
+        var echo = realtimeEcho();
+        if (!echo || !realtime.userId) {
+            startFallbackPolling();
+            window.setTimeout(initializeRealtime, 1000);
+            return;
+        }
+
+        realtimeInitialized = true;
+        realtimePersonalChannel = echo.private('App.Models.User.' + realtime.userId)
+            .listen('.chat.message.created', handleRealtimeMessage)
+            .listen('.chat.message.expired', handleRealtimeExpiration)
+            .listen('.chat.messages.invalidated', handleRealtimeInvalidation);
+        realtimeSystemChannel = echo.private('chat.system')
+            .listen('.chat.message.created', handleRealtimeMessage)
+            .listen('.chat.message.expired', handleRealtimeExpiration);
+        subscribeCurrentRealtimeChannel();
+
+        var connection = echo.connector && echo.connector.pusher
+            ? echo.connector.pusher.connection
+            : null;
+
+        if (!connection) {
+            startFallbackPolling();
+            return;
+        }
+
+        connection.bind('connected', function () {
+            stopFallbackPolling();
+            scheduleRealtimeSync(realtimeReconnectRequired);
+            realtimeReconnectRequired = false;
+        });
+        ['disconnected', 'unavailable', 'failed'].forEach(function (state) {
+            connection.bind(state, function () {
+                realtimeReconnectRequired = true;
+                startFallbackPolling();
+            });
+        });
+
+        if (connection.state === 'connected') {
+            stopFallbackPolling();
+            scheduleRealtimeSync(false);
+        } else {
+            window.setTimeout(function () {
+                if (connection.state !== 'connected') startFallbackPolling();
+            }, 3000);
+        }
+    }
+
+    initializeRealtime();
+    removeExpiredMessages();
+    messageExpirationTimer = window.setInterval(removeExpiredMessages, 1000);
 
     // Switch channel without reloading the iframe
     window.addEventListener('message', function (event) {
@@ -443,7 +603,30 @@
         document.getElementById('content').innerHTML = '';
         lastMessageId = 0;
 
+        subscribeCurrentRealtimeChannel();
         fetchMessages(scrollToBottom, false);
+    });
+
+    window.addEventListener('beforeunload', function () {
+        var echo = realtimeEcho();
+        stopFallbackPolling();
+        if (realtimeSyncTimer) window.clearTimeout(realtimeSyncTimer);
+        if (messageExpirationTimer) window.clearInterval(messageExpirationTimer);
+
+        if (realtimePersonalChannel) {
+            realtimePersonalChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            realtimePersonalChannel.stopListening('.chat.message.expired', handleRealtimeExpiration);
+            realtimePersonalChannel.stopListening('.chat.messages.invalidated', handleRealtimeInvalidation);
+        }
+        if (realtimeSystemChannel) {
+            realtimeSystemChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            realtimeSystemChannel.stopListening('.chat.message.expired', handleRealtimeExpiration);
+            if (echo) echo.leave('chat.system');
+        }
+        if (realtimeCurrentChannel) {
+            realtimeCurrentChannel.stopListening('.chat.message.created', handleRealtimeMessage);
+            if (echo && realtimeCurrentChannelName) echo.leave(realtimeCurrentChannelName);
+        }
     });
 
     // Click on player name → insert prv[NAME] or to[NAME] prefix into the message input

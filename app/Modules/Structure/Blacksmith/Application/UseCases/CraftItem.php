@@ -25,9 +25,16 @@ class CraftItem
     {
         $recipeItem = $this->inventoryRepository->findRecipeSlot($data->user, $data->recipeItemId);
         abort_unless($recipeItem !== null, 404);
-        $resources = $this->readRepository->getResourceCounts($data->user);
 
         $recipe = $recipeItem->item->itemInfo->recipe;
+        if ($recipe->isLearnable()) {
+            return new BlacksmithActionResultDTO(
+                ok: false,
+                message: 'Изучаемый рецепт нужно сначала изучить, а затем использовать в мастерской.',
+            );
+        }
+
+        $resources = $this->readRepository->getResourceCounts($data->user);
         $craftResult = $this->craftService->craft($recipe, $resources);
 
         if (! $craftResult->resourcesConsumed) {

@@ -209,6 +209,14 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endforeach
 
+                                                                            @if ($page->gatheringRequirement !== null)
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Требуемое умение</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->gatheringRequirement['skillName'] }} {{ $page->gatheringRequirement['level'] }} ур.</b></td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                            @endif
+
                                                                             @if (count($page->requirements) > 0)
                                                                                 <tr>
                                                                                     <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Требования:</b></td>
@@ -296,7 +304,7 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
-                                                                            @if ($page->stats === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
+                                                                            @if ($page->stats === [] && $page->gatheringRequirement === null && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
                                                                                 <tr>
                                                                                     <td class="tbl-sts_bg-light" colspan="2">Обычный предмет без особых свойств.</td>
                                                                                 </tr>

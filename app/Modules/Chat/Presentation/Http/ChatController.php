@@ -40,11 +40,18 @@ class ChatController extends Controller
         $channel = $this->availableChannel($request);
         $user = auth()->user();
         $messages = $this->getMessages->execute($user, $channel);
+        $party = $this->partyRepository->findActiveByUser((int) $user->id);
 
         return view('chat::chat', [
             'messages' => $messages,
             'channel' => $channel,
             'ignoredUserIds' => $friendRepository->getIgnoredUserIdsByPlayerId((int) $user->player_id),
+            'realtime' => [
+                'userId' => (int) $user->id,
+                'mapId' => $user->currentLocation?->map_id === null ? null : (int) $user->currentLocation->map_id,
+                'clanId' => $user->clanMembership?->clan_id === null ? null : (int) $user->clanMembership->clan_id,
+                'partyId' => $party?->id === null ? null : (int) $party->id,
+            ],
         ]);
     }
 

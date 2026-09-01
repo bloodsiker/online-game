@@ -41,6 +41,8 @@ class HeroPageViewMapper
                 name: $name,
                 duration: max(0, $remainingSeconds),
                 isCurse: $isCurse,
+                image: $activeEffect->effect?->image,
+                description: $activeEffect->effect?->description,
             );
         })->values()->all();
     }

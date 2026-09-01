@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Infrastructure\Persistence;
 
+use App\Modules\Chat\Application\Jobs\BroadcastChatMessageExpiration;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
+use App\Modules\Chat\Domain\Events\ChatMessageCreated;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
@@ -23,7 +25,29 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
     public function create(array $data): ChatMessage
     {
-        return ChatMessage::create($data);
+        $message = ChatMessage::create($data);
+        ChatMessageCreated::dispatch($message);
+        $this->scheduleExpirationBroadcast($message);
+
+        return $message;
+    }
+
+    private function scheduleExpirationBroadcast(ChatMessage $message): void
+    {
+        $expiresAt = match (true) {
+            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(30),
+            $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(10),
+            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(10),
+            default => null,
+        };
+
+        if ($expiresAt === null) {
+            return;
+        }
+
+        BroadcastChatMessageExpiration::dispatch((int) $message->id)
+            ->delay($expiresAt)
+            ->afterCommit();
     }
 
     /** @return ChatMessage[] */

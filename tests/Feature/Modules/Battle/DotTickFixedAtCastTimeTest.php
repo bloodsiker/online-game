@@ -14,6 +14,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -60,6 +61,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->string('type')->default('debuff');
             $table->string('active_type')->nullable();
             $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->integer('chance')->default(0);
             $table->boolean('is_stackable')->default(false);
             $table->integer('max_stacks')->default(1);
@@ -170,6 +172,8 @@ class DotTickFixedAtCastTimeTest extends TestCase
             'slug' => 'monster_bleed',
             'type' => 'debuff',
             'active_type' => 'bleed',
+            'description' => 'Наносит периодический урон.',
+            'image' => 'effects/monster-bleed.png',
             'value_per_tick' => 999,
         ]);
 
@@ -195,6 +199,8 @@ class DotTickFixedAtCastTimeTest extends TestCase
         $this->assertSame('Кровотечение от моба', $notification->name);
         $this->assertSame(3, $notification->duration);
         $this->assertTrue($notification->isCurse);
+        $this->assertSame(Storage::disk('public')->url('effects/monster-bleed.png'), $notification->image);
+        $this->assertSame('Наносит периодический урон.', $notification->description);
     }
 
     public function test_same_runtime_dot_type_refreshes_instead_of_stacking(): void

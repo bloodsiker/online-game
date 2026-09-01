@@ -1,186 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>Разбор предметов</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        * {
-            font-family: Tahoma, Geneva, sans-serif;
-            font-size: 11px;
-        }
-        .bg {
-            background-color: #000;
-            background-image: url({{ asset('img/bg/bg.gif') }});
-            background-attachment: fixed;
-            background-position: 0 5px;
-        }
-        .tbl-sts b {
-            background: url({{ asset('img/bg/tbl-sts.png') }}) no-repeat;
-            display: block;
-            height: 19px;
-            overflow: hidden;
-            width: 19px;
-        }
-        .tbl-sts-lt b {
-            background-position: 0 -50px;
-        }
-        .tbl-sts-rt b {
-            background-position: 0 -100px;
-        }
-        .tbl-sts-lb b {
-            background-position: 0 -170px;
-        }
-        .tbl-sts-rb b {
-            background-position: 0 -219px;
-        }
-        .tbl-sts-ltb b {
-            background-position: 0 -69px;
-            height: 20px;
-        }
-        .tbl-sts-lbt b {
-            background-position: 0 -150px;
-            height: 20px;
-        }
-        .tbl-sts-rtb b {
-            background-position: 0 -119px;
-            height: 20px;
-        }
-        .tbl-sts-rbt b {
-            background-position: 0 -200px;
-            height: 20px;
-        }
-        .tbl-sts_left {
-            background-image: url({{ asset('img/bg/tbl-sts_left.gif') }});
-            background-repeat: repeat-y;
-            width: 19px;
-            background-position: right;
-        }
-        .tbl-sts_right {
-            background-image: url({{ asset('img/bg/tbl-sts_right.gif') }});
-            background-repeat: repeat-y;
-            width: 19px;
-        }
-        .bgg {
-            background-image: url({{ asset('img/bg/bgg.gif') }});
-        }
+        html, body { min-height: 100%; margin: 0; font-family: Tahoma, Arial, sans-serif; font-size: 11px; color: #000; }
+        table.coll { border-collapse: collapse; border-spacing: 0; }
+        .tbl-usi_bg { background: url('/img/bg/tbl-usi_bg.gif') repeat; }
+        .brd2-all { border: 1px solid #db9f73; }
+        .bg_l { background-image: url('/img/bg/info/bg_l.gif'); }
+        .p10h, .p10h td { padding-left: 10px; padding-right: 10px; }
+        .p2v, .p2v td { padding-top: 2px; padding-bottom: 2px; }
+        .pointer, .pointer input { cursor: pointer; }
 
-
-
-        table.coll {
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-        .brd2-all {
-            border: 1px solid #db9f73;
-        }
-        .brd2-top {
-            border-top: 1px solid #db9f73;
-        }
-        .brd2, .brd2 td {
-            border: 1px solid #db9f73;
-        }
-        .w100 {
-            width: 100%;
-        }
-        .p10h, .p10h td {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-        .p2v, .p2v td {
-            padding-top: 2px;
-            padding-bottom: 2px;
-        }
-        .regblk, .regblk * {
-            color: #49382d;
-        }
-        .bg_l {
-            background-image: url(/img/bg/bg_l.gif);
-        }
-        .p6h, .p6h td {
-            padding-left: 6px;
-            padding-right: 6px;
-        }
-
-        .pointer, .pointer input {
-            cursor: pointer;
-        }
-
-        .btn_1 {
-            color: #461c0b !important;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 11px;
-        }
-        .btn_2 {
-            color: #ffe9ba !important;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 11px;
-        }
-        .collections-title, .collection-body {
-            padding: 5px;
-        }
-        .collections-divider {
-            display: block;
-            height: 5px;
-            margin: 0 0 5px;
-            font-size: 0;
-            border-bottom: #db9f73 1px solid;
-        }
-        .collection-slot {
-            display: inline-block;
-            position: relative;
-            width: 52px;
-            height: 70px;
-            overflow: hidden;
-            vertical-align: top;
-        }
-        .collection-slot__img {
-            display: block;
-            width: 50px;
-            height: 50px;
-            padding: 1px;
-            background: url(../images/slot-empty.png) no-repeat;
-        }
-        .collection-slot.active .collection-slot__qty, .collection-slot.active .collection-slot__qty-current {
-            color: #489200;
-        }
-        .collection-slot__img.grayscale {
-            background: #000;
-        }
-        .collection-slot__img.grayscale img {
-            opacity: .3;
-        }
-        .collection-slot__qty {
-            display: block;
-            font-weight: 700;
-            text-align: center;
-        }
-        .collection-slot__qty, .collection-slot__qty-current {
-            font-size: 11px;
-        }
-        .collection-slot__qty-current {
-            color: #c00000;
-        }
-        .collection-ico {
-            display: inline-block;
-            height: 65px;
-            padding: 5px 0 0;
-            vertical-align: top;
-            font-weight: 700;
-            font-size: 40px;
-        }
-        .collection-resource-img {
-            width: 100%;
-        }
-        .regcolor, .regcolor * {
-            color: #955c4a;
-        }
+        .break-summary { margin-bottom: 10px; }
+        .break-hint { margin: 0 0 10px; color: #49382d; text-align: center; }
+        .break-grid { margin: -6px; font-size: 0; text-align: center; }
+        .break-card { display: inline-block; vertical-align: top; width: 270px; min-height: 320px; margin: 6px; padding: 8px; box-sizing: border-box; font-size: 11px; text-align: center; background: url('/img/bg/bgg.gif') repeat; border-radius: 5px; box-shadow: 0 0 3px rgba(0,0,0,.9); }
+        .break-title { min-height: 30px; color: #7a3010; font-size: 13px; font-weight: bold; }
+        .break-yield { display: block; margin-top: 2px; color: #8d2616; font-weight: bold; }
+        .break-icons { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 5px; }
+        .upgrade-icon { display: inline-block; width: 60px; height: 60px; padding: 5px 6px 6px; background: url('/main/images/user-reward-frame.png') no-repeat; cursor: pointer; }
+        .upgrade-icon img { width: 60px; height: 60px; object-fit: contain; }
+        .break-arrow { color: #8d2616; font-size: 24px; font-weight: bold; }
+        .break-names { min-height: 34px; margin: 4px 0 7px; color: #49382d; line-height: 15px; }
+        .break-names strong { font-weight: bold; }
+        .break-result { min-height: 104px; padding: 5px; box-sizing: border-box; text-align: left; background: url('/img/bg/tbl-usi_bg.gif') repeat; border: 2px solid #e3b360; border-radius: 5px; line-height: 16px; }
+        .result-title { color: #553e20; font-weight: bold; text-align: center; }
+        .result-item { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 6px; cursor: pointer; }
+        .result-item img { width: 36px; height: 36px; object-fit: contain; border: 1px solid #9a713e; background: url('/img/bg/empty_slot.gif') center / 36px 36px; }
+        .result-details { min-width: 105px; color: #49382d; line-height: 14px; text-align: left; }
+        .result-count { display: block; color: #247327; font-weight: bold; }
+        .break-warning { margin-top: 5px; color: #a02020; font-size: 10px; text-align: center; }
+        .break-action { margin-top: 7px; }
+        .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid #8d2616; color: #8d2616; font-weight: bold; }
+        .empty-list { padding: 25px; color: #49382d; font-size: 12px; text-align: center; }
     </style>
 </head>
-<body class="regcolor" leftmargin="0" rightmargin="0">
+<body>
 
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
@@ -193,127 +52,120 @@
     </tr>
     <tr>
         <td class="tbl-shp-sides ls">&nbsp;</td>
-        <td class="tbl-usi_bg" valign="top" align="left" style="padding: 10 6 10 6">
-
-            <table class="w100" border="0" width="100%">
-                <tbody>
-                <tr height="5">
-                    <td align="left" width="33%" nowrap=""></td>
-                </tr>
-                </tbody>
-            </table>
-
-            <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
-                <tbody>
-                <tr class="bg_l">
-                    <td align="left" width="33%" nowrap=""><b>Монет:</b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+        <td class="tbl-usi_bg" valign="top" style="padding:8px 10px; text-align:center;">
+            <table class="coll brd2-all bg_l p10h p2v break-summary" width="100%">
+                <tbody><tr>
+                    <td align="left"><b>Кузня:</b> Разбить предмет</td>
+                    <td align="right" style="color:#955c4a;">
+                        <b>Монеты:</b>
+                        <b class="redd"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->money) }}</b>
+                        &nbsp;&nbsp;<b>Бриллианты:</b>
+                        <b class="redd"><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->diamond) }}</b>
                     </td>
-                </tr>
-                </tbody>
+                </tr></tbody>
             </table>
 
-            <br>
+            @if(session('message'))
+                <div class="message">{{ session('message') }}</div>
+            @endif
 
-            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                <tbody>
-                @foreach($items as $item)
-                    <tr class="collection-group-13">
-                        <input type="hidden" name="collection_id" value="202" disabled="">
-                        <td colspan="3">
-                            <table class="coll w100 p10h p2v brd2-all">
-                                <tbody>
-                                <tr class="bg_l">
-                                    <td>
-                                        <div class="collections-title">
-                                            <b class="collection-name" style="color: #3300ff">{{ $item['name'] }}</b>
-                                        </div>
-                                        <span class="collections-divider"></span>
-                                        <div class="collections-body">
-                                            <table>
-                                                <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <span class="collection-slot">
-                                                            <span class="collection-slot__img">
-                                                                <a href="{{ $item['itemId'] }}" class="collection-resource redd">
-                                                                    <img src="{{ $item['image'] }}" class="collection-resource-img" alt="">
-                                                                </a>
-                                                            </span>
-                                                             <span class="collection-slot__qty"></span>
-                                                            <div class="collect-btn">
-                                                                <b class="butt2 pointer">
-                                                                    <b>
-                                                                        <button type="button" class="pointer break-item" data-href="{{ route('blacksmith.break', ['id' => $blacksmith->id, 'iid' => $item['itemId']]) }}" style="width: 36px;">сломать</button>
-                                                                    </b>
-                                                                </b>
-                                                            </div>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <b class="collection-ico">=</b>
-                                                    </td>
-                                                    <td>
-                                                        <span class="collection-slot">
-                                                            <span class="collection-slot__img">
-                                                                <a href="#" class="collection-resource redd">
-                                                                    <img src="{{ $crystal->image }}" class="collection-resource-img" alt="">
-                                                                </a>
-                                                            </span>
-                                                             <span class="collection-slot__qty">{{ $item['breakCrystal'] }}</span>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr class="canc-sort">
-                        <td colspan="3"><img src="{{ asset('img/bg/blank.gif') }}" height="5" alt=""></td>
-                    </tr>
-                @endforeach
+            <p class="break-hint">Разберите ненужный предмет и получите кристаллы.</p>
 
-                </tbody>
-            </table>
+            <div class="break-grid">
+                @forelse($items as $item)
+                    <div class="break-card">
+                        <div class="break-title">
+                            {{ $item['name'] }}
+                            <span class="break-yield">Результат: {{ $item['breakCrystal'] }} шт.</span>
+                        </div>
+
+                        <div class="break-icons">
+                            <span class="upgrade-icon"
+                                  data-id="{{ $item['itemId'] }}"
+                                  onmouseover="showItemInfo(this,event,2)"
+                                  onmouseout="showItemInfo(this,event,0)">
+                                <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}">
+                            </span>
+                            <span class="break-arrow">→</span>
+                            <span class="upgrade-icon"
+                                  data-id="{{ $crystal->id }}"
+                                  onmouseover="showItemInfo(this,event,2)"
+                                  onmouseout="showItemInfo(this,event,0)">
+                                <img src="{{ $crystal->transparent_image ?? $crystal->image }}" alt="{{ $crystal->name }}">
+                            </span>
+                        </div>
+
+                        <div class="break-names">
+                            <strong style="color:{{ $item['rarityColor'] }}">{{ $item['name'] }}</strong><br>
+                            <span style="color:#8d2616">будет разобран на</span><br>
+                            <strong style="color:{{ $crystal->rarity->color() }}">{{ $crystal->name }}</strong>
+                        </div>
+
+                        <div class="break-result">
+                            <div class="result-title">Результат разборки</div>
+                            <div class="result-item"
+                                 data-id="{{ $crystal->id }}"
+                                 onmouseover="showItemInfo(this,event,2)"
+                                 onmouseout="showItemInfo(this,event,0)">
+                                <img src="{{ $crystal->transparent_image ?? $crystal->image }}" alt="{{ $crystal->name }}">
+                                <span class="result-details">
+                                    {{ $crystal->name }}
+                                    <span class="result-count">{{ $item['breakCrystal'] }} шт.</span>
+                                </span>
+                            </div>
+                            <div class="break-warning">Предмет будет уничтожен без возможности восстановления.</div>
+                        </div>
+
+                        <div class="break-action">
+                            <b class="butt2 pointer">
+                                <b>
+                                    <input type="button"
+                                           class="break-item"
+                                           value="Разобрать"
+                                           data-href="{{ route('blacksmith.break', ['id' => $blacksmith->id, 'iid' => $item['itemId']]) }}">
+                                </b>
+                            </b>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-list"><b>В рюкзаке нет предметов, доступных для разбора.</b></div>
+                @endforelse
+            </div>
         </td>
         <td class="tbl-shp-sides rs">&nbsp;</td>
     </tr>
     <tr height="18">
-        <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
-        <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
-        <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+        <td width="20" class="tbl-shp-sml lb"><b></b></td>
+        <td class="tbl-shp-sml bb">&nbsp;</td>
+        <td width="20" class="tbl-shp-sml rb"><b></b></td>
     </tr>
     </tbody>
 </table>
 
 <script>
+    function equalizeBreakResults() {
+        const results = Array.from(document.querySelectorAll('.break-result'));
+        if (results.length === 0) return;
 
-
-    // document.removeEventListener('keydown', handleKeydown);
-
-    function sendDataToGame(url) {
-        window.parent.postMessage({ url: url }, '*');
+        results.forEach((element) => { element.style.height = ''; });
+        const maxHeight = Math.max(...results.map((element) => element.offsetHeight));
+        results.forEach((element) => { element.style.height = maxHeight + 'px'; });
     }
 
-    document.querySelectorAll('.break-item').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const href = this.getAttribute('data-href');
-            if (href) {
-                window.location.href = href;  // Переход по URL
-            }
+    document.querySelectorAll('.break-item[data-href]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            window.location.href = this.dataset.href;
         });
     });
 
-    @if (session()->has('message'))
-        window.parent.showErrorIframe('{{ session('message') }}')
-    @endif
+    window.addEventListener('load', equalizeBreakResults);
+    window.addEventListener('resize', equalizeBreakResults);
 </script>
 
+{!! $itemTooltipScript !!}
+<script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
+@if(session()->has('message'))
+    <script>window.parent.showErrorIframe(@json(session('message')));</script>
+@endif
 </body>
 </html>

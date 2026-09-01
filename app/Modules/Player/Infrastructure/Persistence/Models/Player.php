@@ -25,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
+ * @property Carbon|null $last_regen_at
+ * @property int|null $regen_hp_start
+ * @property int|null $regen_mp_start
  * @property float $experience_multiplier
  * @property-read User $user
  * @property-read Race $race
@@ -41,14 +44,31 @@ class Player extends Model
 
     public const FULL_REGEN_TIME = 900;
 
+    private bool $savingRegenerationProgress = false;
+
     protected $casts = [
         'experience_multiplier' => 'float',
         'last_regen_at' => 'datetime',
+        'regen_hp_start' => 'integer',
+        'regen_mp_start' => 'integer',
     ];
 
     protected $attributes = [
         'experience_multiplier' => 1.0,
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $player): void {
+            if ($player->savingRegenerationProgress
+                || ! $player->hasRegenerationBaselineColumns()
+                || ! $player->isDirty(['hp_now', 'mp_now', 'hp_max', 'mp_max'])) {
+                return;
+            }
+
+            $player->restartRegenerationBaseline();
+        });
+    }
 
     public function user(): BelongsTo
     {
@@ -240,6 +260,70 @@ class Player extends Model
         $mpMax = $mpMax ?? $this->mp_max;
         $now = Carbon::now();
 
+        if (! $this->hasRegenerationBaselineColumns()) {
+            $this->regenerateLegacy($hpMax, $mpMax, $now);
+
+            return;
+        }
+
+        $baselineInitialized = false;
+        if ($this->last_regen_at === null) {
+            $this->last_regen_at = $now;
+            $baselineInitialized = true;
+        }
+        if ($this->regen_hp_start === null) {
+            $this->regen_hp_start = (int) $this->hp_now;
+            $baselineInitialized = true;
+        }
+        if ($this->regen_mp_start === null) {
+            $this->regen_mp_start = (int) $this->mp_now;
+            $baselineInitialized = true;
+        }
+
+        $elapsedSeconds = max(0, (int) $this->last_regen_at->diffInSeconds($now, false));
+        $regenerationSeconds = min(self::FULL_REGEN_TIME, $elapsedSeconds);
+        $hpNow = min($hpMax, (int) $this->regen_hp_start + (int) floor($hpMax * $regenerationSeconds / self::FULL_REGEN_TIME));
+        $mpNow = min($mpMax, (int) $this->regen_mp_start + (int) floor($mpMax * $regenerationSeconds / self::FULL_REGEN_TIME));
+
+        if (! $baselineInitialized && $hpNow === (int) $this->hp_now && $mpNow === (int) $this->mp_now) {
+            return;
+        }
+
+        $this->hp_now = $hpNow;
+        $this->mp_now = $mpNow;
+        $this->saveRegenerationProgress();
+    }
+
+    public function restartRegenerationBaseline(?Carbon $startedAt = null): void
+    {
+        if (! $this->hasRegenerationBaselineColumns()) {
+            return;
+        }
+
+        $this->last_regen_at = $startedAt ?? Carbon::now();
+        $this->regen_hp_start = (int) $this->hp_now;
+        $this->regen_mp_start = (int) $this->mp_now;
+    }
+
+    private function hasRegenerationBaselineColumns(): bool
+    {
+        return array_key_exists('regen_hp_start', $this->attributes)
+            && array_key_exists('regen_mp_start', $this->attributes);
+    }
+
+    private function saveRegenerationProgress(): void
+    {
+        $this->savingRegenerationProgress = true;
+
+        try {
+            $this->save();
+        } finally {
+            $this->savingRegenerationProgress = false;
+        }
+    }
+
+    private function regenerateLegacy(int $hpMax, int $mpMax, Carbon $now): void
+    {
         if (! $this->last_regen_at) {
             $this->last_regen_at = $now;
             $this->save();
@@ -249,17 +333,12 @@ class Player extends Model
 
         $seconds = (int) $this->last_regen_at->diffInSeconds($now);
         $ticks = intdiv($seconds, self::REGEN_INTERVAL);
-
         if ($ticks <= 0) {
             return;
         }
 
-        $totalTicks = self::FULL_REGEN_TIME / self::REGEN_INTERVAL;
-        $hpPerTick = $hpMax / $totalTicks;
-        $mpPerTick = $mpMax / $totalTicks;
-
-        $this->hp_now = min($hpMax, (int) floor($this->hp_now + ($hpPerTick * $ticks)));
-        $this->mp_now = min($mpMax, (int) floor($this->mp_now + ($mpPerTick * $ticks)));
+        $this->hp_now = min($hpMax, (int) floor($this->hp_now + ($hpMax * $ticks * self::REGEN_INTERVAL / self::FULL_REGEN_TIME)));
+        $this->mp_now = min($mpMax, (int) floor($this->mp_now + ($mpMax * $ticks * self::REGEN_INTERVAL / self::FULL_REGEN_TIME)));
         $this->last_regen_at = $this->last_regen_at->addSeconds($ticks * self::REGEN_INTERVAL);
         $this->save();
     }

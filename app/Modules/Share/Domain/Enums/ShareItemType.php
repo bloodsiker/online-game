@@ -7,6 +7,10 @@ namespace App\Modules\Share\Domain\Enums;
 enum ShareItemType: string
 {
     case RESOURCE = 'resource';
+    case FISH = 'fish';
+    case PRECIOUS_GEM = 'precious_gem';
+    case PLANT = 'plant';
+    case WOOD = 'wood';
     case TOOL = 'tool';
     case WEAPON = 'weapon';
     case SHIELD = 'shield';
@@ -45,10 +49,31 @@ enum ShareItemType: string
         ], true);
     }
 
+    public function isGatheringResource(): bool
+    {
+        return in_array($this, self::gatheringResources(), true);
+    }
+
+    /** @return list<self> */
+    public static function gatheringResources(): array
+    {
+        return [
+            self::RESOURCE,
+            self::FISH,
+            self::PRECIOUS_GEM,
+            self::PLANT,
+            self::WOOD,
+        ];
+    }
+
     public function label(): string
     {
         return match ($this) {
             self::RESOURCE => 'Ресурсы',
+            self::FISH => 'Рыба',
+            self::PRECIOUS_GEM => 'Драгоценные камни',
+            self::PLANT => 'Растения',
+            self::WOOD => 'Дерево',
             self::TOOL => 'Инструмент',
             self::WEAPON => 'Оружие',
             self::SHIELD => 'Щит',
@@ -85,6 +110,10 @@ enum ShareItemType: string
                 self::BELT,
                 self::BAG,
                 self::RESOURCE,
+                self::FISH,
+                self::PRECIOUS_GEM,
+                self::PLANT,
+                self::WOOD,
                 self::RECIPE,
                 self::BOOK,
                 self::SCROLL,

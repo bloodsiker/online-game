@@ -20,7 +20,7 @@
             height: 100%;
         }
         #top_mnu_cont {
-            width: 670px;
+            width: 745px;
             height: 78px;
         }
 
@@ -87,7 +87,9 @@
 {{-- Fallback: обычное HTML-меню, включается если канвас не стартовал --}}
 <div class="menu-wrap" id="html-menu">
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('location') }}'); return false;">Перемещение</a>
+    <a class="menu-btn" href="#" onclick="goToGathering(); return false;">Добыча</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">Персонаж</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('character.professions') }}', true); return false;">Профессии</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">Вещи</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Клан</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
@@ -109,10 +111,37 @@
         window.top.toLocation(url, hideHero);
     }
 
+    async function goToGathering() {
+        try {
+            var response = await fetch('{{ route('gathering.availability') }}', {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+            });
+            var availability = await response.json();
+
+            if (!response.ok || !availability.available) {
+                window.top.openGameMessageModal({
+                    title: 'Добыча ресурсов',
+                    message: availability.message || 'На этой локации невозможно добывать ресурсы.',
+                });
+                return;
+            }
+
+            menuGo(false, '{{ route('gathering') }}', true);
+        } catch (error) {
+            window.top.openGameMessageModal({
+                title: 'Добыча ресурсов',
+                message: 'Не удалось проверить доступность добычи. Попробуйте ещё раз.',
+            });
+        }
+    }
+
     // Команды из public/data/locale/ru/topMenu.xml → роуты игры
     var menuCommands = {
         m_location:    function () { menuGo(true,  '{{ route('location') }}'); },
+        m_gathering:   function () { goToGathering(); },
         m_character:   function () { menuGo(true,  '{{ route('character') }}', true); },
+        m_professions: function () { menuGo(false, '{{ route('character.professions') }}', true); },
         m_backpack:    function () { menuGo(false, '{{ route('backpack') }}', true); },
         m_clan:        function () { menuGo(false, '{{ route('clan.member') }}', true); },
         m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
@@ -133,11 +162,11 @@
         if (menuCommands[command]) menuCommands[command]();
     }
 
-    // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 2)
+    // Пункты подменю «Персонаж» (21-25) мигать не умеют — вместо них мигает родитель (id 3)
     var buttonIds = {
-        location: 1, character: 2, backpack: 3, clan: 2,
-        quests: 4, dungeon: 5, maps: 6, friends: 2, rating: 7, referral: 2, premium: 8,
-        events: 9, post: 10, fights: 11, infoportal: 12
+        location: 1, gathering: 2, character: 3, backpack: 4, clan: 3,
+        quests: 5, dungeon: 6, maps: 7, friends: 3, rating: 8, referral: 3, premium: 9,
+        events: 10, post: 11, fights: 12, infoportal: 13
     };
     var menuButtonBlinkStates = {};
 
@@ -175,17 +204,20 @@
         C.isMobile = canvas.isMobile();
         C.initLang('ru');
 
-        // Иконок почты и квестов нет в наборе top/ атласа — подменяем на иконки
-        // из правой панели (right/mail_image, right/quest_image), они уже есть в этом же атласе
+        // Часть иконок верхнего меню загружается отдельными WebP-файлами.
         var getImage = canvas.ResourceLoader.getImage;
-        var topIconOverrides = {
-            'top/post': 'right/mail_image',
-            'top/quest': 'right/quest_image',
-            'top/char_portrait': 'right/character_portrait_image',
+        var externalTopIconPaths = {
+            'top/mining': '/data/canvas/ui/mining.webp',
+            'top/quest': '/data/canvas/ui/quest.webp',
+            'top/inst': '/data/canvas/ui/dungeon.webp',
+            'top/char_portrait': '/data/canvas/ui/player.webp',
+            'top/prof': '/data/canvas/ui/prof.webp',
+            'top/post': '/data/canvas/ui/mail.webp',
+            'top/world': '/data/canvas/ui/map.webp',
         };
         canvas.ResourceLoader.getImage = function (atlas, frame) {
-            if (topIconOverrides[frame]) {
-                return getImage.call(canvas.ResourceLoader, 'ui', topIconOverrides[frame]);
+            if (externalTopIconPaths[frame]) {
+                return canvas.px.Texture.fromImage(externalTopIconPaths[frame]);
             }
             return getImage.apply(canvas.ResourceLoader, arguments);
         };
@@ -197,7 +229,9 @@
         var itemViewInit = ItemView.prototype.init;
         ItemView.prototype.init = function () {
             itemViewInit.call(this);
-            if (!this.isSmall && this.image) {
+            var isExternalTopIcon = ['mining', 'quest', 'inst', 'post', 'world', 'prof'].indexOf(this.data.pict) >= 0;
+            var needsExternalTopIconFit = ['mining', 'quest', 'inst'].indexOf(this.data.pict) >= 0;
+            if (!this.isSmall && this.image && !isExternalTopIcon) {
                 this.image.width = 57;
                 this.image.height = 59;
                 this.image.anchor.set(0.5, 0.5);
@@ -207,28 +241,50 @@
                 // его как «базовый», чтобы пульсация отталкивалась именно от него.
                 this.image.baseScaleX = this.image.scale.x;
                 this.image.baseScaleY = this.image.scale.y;
-                // Иконка почты (right/mail_image) в состоянии покоя слишком крупная — уменьшаем
-                if (this.data.pict === 'post') {
-                    this.image.baseScaleX *= 0.85;
-                    this.image.baseScaleY *= 0.85;
-                }
-                if (this.data.pict === 'quest') {
-                    this.image.baseScaleX *= 0.90;
-                    this.image.baseScaleY *= 0.90;
-                }
-                if (this.data.pict === 'inst') {
-                    this.image.baseScaleX *= 0.95;
-                    this.image.baseScaleY *= 0.95;
+            }
+            // Внешние WebP-иконки загружаются отдельными файлами, не из атласа.
+            // Не задаём размеры до события loaded: при нулевых размерах текстуры
+            // Pixi вычисляет бесконечный scale и изображение перекрывает меню.
+            if (!this.isSmall && this.image && needsExternalTopIconFit) {
+                var externalIconImage = this.image;
+                var fitExternalTopIcon = function () {
+                    externalIconImage.width = 57;
+                    externalIconImage.height = 59;
+                    externalIconImage.anchor.set(0.5, 0.5);
+                    externalIconImage.position.set(6 + 57 / 2, 59 / 2);
+                    externalIconImage.baseScaleX = externalIconImage.scale.x;
+                    externalIconImage.baseScaleY = externalIconImage.scale.y;
+                };
+                if (externalIconImage.texture.baseTexture.hasLoaded) {
+                    fitExternalTopIcon();
+                } else {
+                    externalIconImage.texture.baseTexture.once('loaded', fitExternalTopIcon);
                 }
             }
-            // Иконка «Персонаж» в подменю (right/character_portrait_image) в исходнике
-            // крупнее подложки item_back_small (43x42) — вписываем и центрируем её,
-            // как остальные мелкие иконки подменю.
+            // Для почты и карты не меняем размер или якорь WebP-иконки.
+            // Запоминаем лишь исходный масштаб, чтобы пульсация непрочитанных писем работала.
+            if (!this.isSmall && this.image && ['post', 'world'].indexOf(this.data.pict) >= 0) {
+                var rawExternalIcon = this.image;
+                var rememberRawExternalIconScale = function () {
+                    rawExternalIcon.baseScaleX = rawExternalIcon.scale.x;
+                    rawExternalIcon.baseScaleY = rawExternalIcon.scale.y;
+                };
+                if (rawExternalIcon.texture.baseTexture.hasLoaded) {
+                    rememberRawExternalIconScale();
+                } else {
+                    rawExternalIcon.texture.baseTexture.once('loaded', rememberRawExternalIconScale);
+                }
+            }
             if (this.isSmall && this.image && this.data.pict === 'char_portrait') {
-                this.image.width = 43;
-                this.image.height = 42;
-                this.image.anchor.set(0.5, 0.5);
-                this.image.position.set(8 + 43 / 2, 8 + 42 / 2 - 2);
+                this.image.y += 3;
+                this.image.x -= 3;
+            }
+            if (this.isSmall && this.image && this.data.pict === 'prof') {
+                this.image.y += 3;
+                this.image.x -= 3;
+            }
+            if (!this.isSmall && this.image && this.data.pict === 'post') {
+                this.image.y += 3;
             }
         };
 
@@ -237,6 +293,23 @@
         ItemView.prototype.startBlink = function () {
             if (this.data.pict === 'post') return;
             itemViewStartBlink.call(this);
+        };
+
+        // Пульсация непрочитанных писем не должна перехватывать обычный hover пункта.
+        var itemViewOverHandler = ItemView.prototype.overHandler;
+        ItemView.prototype.overHandler = function () {
+            if (this.data.pict === 'post') {
+                this.mailHovering = true;
+            }
+            itemViewOverHandler.call(this);
+        };
+
+        var itemViewOutHandler = ItemView.prototype.outHandler;
+        ItemView.prototype.outHandler = function () {
+            if (this.data.pict === 'post') {
+                this.mailHovering = false;
+            }
+            itemViewOutHandler.call(this);
         };
 
         // Ряд иконок центрируется по ширине канваса (движок прижимает его влево)
@@ -252,10 +325,13 @@
             }, this);
         };
 
-        // Пульсация иконки мигающего пункта (увеличение/уменьшение) — эффект «пришло новое»
+        // Пульсация иконки мигающего пункта (увеличение/уменьшение) — эффект «пришло новое».
+        // Почта использует плавный hover-подобный эффект всей кнопки.
         var PULSE_BASE_SCALE = 1.1;
         var PULSE_AMPLITUDE = 0.08;
         var PULSE_SPEED = 0.004;
+        var MAIL_HOVER_SPEED = 0.0024;
+        var MAIL_HOVER_SCALE = 0.08;
         canvas.EventManager.addEventListener(canvas.app.topMenu.Event.ENTER_FRAME, null, function () {
             var model = canvas.app.topMenu.model;
             if (!model || !window.top_mnu) return;
@@ -264,23 +340,38 @@
                 var item = items[i];
                 if (!item.image || item.image.baseScaleX === undefined) continue;
                 var base = item.image.baseScaleX;
-                if (model.blinkIds.indexOf(item.data.id) >= 0) {
-                    item.image.scale.set(base * (PULSE_BASE_SCALE + PULSE_AMPLITUDE * Math.sin(Date.now() * PULSE_SPEED)));
-                } else if (item.image.scale.x !== base) {
+                var isBlinking = model.blinkIds.indexOf(item.data.id) >= 0;
+                if (item.data.pict === 'post') {
                     item.image.scale.set(base);
+                    item.image.rotation = 0;
+                    if (isBlinking && !item.mailHovering) {
+                        var mailHoverProgress = (Math.sin(Date.now() * MAIL_HOVER_SPEED) + 1) / 2;
+                        item.targetAlpha = 0.25 + 0.75 * mailHoverProgress;
+                        item.targetScale = 1 + MAIL_HOVER_SCALE * mailHoverProgress;
+                    } else if (!item.mailHovering) {
+                        item.targetAlpha = 0;
+                        item.targetScale = 1;
+                    }
+                    canvas.EventManager.addEventListener(canvas.app.topMenu.Event.ENTER_FRAME, null, item.frameHandler, item);
+                } else {
+                    if (isBlinking) {
+                        item.image.scale.set(base * (PULSE_BASE_SCALE + PULSE_AMPLITUDE * Math.sin(Date.now() * PULSE_SPEED)));
+                    } else if (item.image.scale.x !== base) {
+                        item.image.scale.set(base);
+                    }
                 }
             }
         });
 
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои',
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои|добыча|профессии',
             dragDropItems: '0',
-            configXml: '/data/locale/ru/topMenu.xml',
+            configXml: '/data/locale/ru/topMenu.xml?v=3',
             blink: '',
             js_popup: '1',
             lang: 'ru',
             locale_file: 'data/locale/ru/flash_translate.xml',
-            width: 670,
+            width: 745,
             height: 78
         }, document.getElementById('top_mnu_cont'));
     } catch (e) {
