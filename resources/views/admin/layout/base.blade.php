@@ -32,8 +32,7 @@
             transform: translateY(-50%);
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 11px 16px;
+            padding: 11px;
             border: 1px solid #2f7e2f;
             border-radius: 4px;
             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
@@ -82,8 +81,8 @@
     </div>
 </section>
 
-<button id="admin-floating-save" type="button" class="btn btn-success admin-floating-save" hidden>
-    <i class="fas fa-save"></i> Сохранить
+<button id="admin-floating-save" type="button" class="btn btn-success admin-floating-save" aria-label="Сохранить" title="Сохранить" hidden>
+    <i class="fas fa-save" aria-hidden="true"></i>
 </button>
 
 <script src="{{ asset('admin/vendor/jquery/jquery.js') }}"></script>
@@ -108,13 +107,17 @@
         const floatingSave = document.getElementById('admin-floating-save');
         if (!floatingSave || floatingSave.dataset.initialized === 'true') return;
 
-        const submitButton = Array.from(document.querySelectorAll('.content-body form button, .content-body form input[type="submit"]'))
+        const designatedForm = document.querySelector('.content-body form[data-floating-save-form]');
+        const submitButtons = designatedForm
+            ? designatedForm.querySelectorAll('button, input[type="submit"]')
+            : document.querySelectorAll('.content-body form button, .content-body form input[type="submit"]');
+        const submitButton = Array.from(submitButtons)
             .find(function (button) {
                 const label = button.tagName === 'INPUT' ? button.value : button.textContent;
 
                 return button.type !== 'button'
                     && !button.disabled
-                    && /^(сохранить|создать)\b/i.test(label.trim());
+                    && /^(сохранить|создать)(?:\s|$)/i.test(label.trim());
             });
 
         if (!submitButton) return;

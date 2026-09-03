@@ -42,7 +42,7 @@
                             @endif
                         </ul>
 
-                        <form action="{{ route('admin.item.info', $item->id) }}" method="post" enctype="multipart/form-data">
+                        <form id="item-info-form" action="{{ route('admin.item.info', $item->id) }}" method="post" enctype="multipart/form-data" data-floating-save-form>
                             {{ csrf_field() }}
                             <div class="tab-content">
 

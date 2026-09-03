@@ -55,6 +55,32 @@
             padding-bottom: 3px;
             outline: none;
         }
+        .rep-divider {
+            position: relative;
+            width: 88%;
+            height: 11px;
+            margin: 7px auto 5px;
+        }
+        .rep-divider::before {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            left: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #9a704f 18%, #9a704f 82%, transparent);
+            content: '';
+        }
+        .rep-divider::after {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            border: 1px solid #895936;
+            background: #d4aa70;
+            content: '';
+            transform: translateX(-50%) rotate(45deg);
+        }
     </style>
 </head>
 <body>
@@ -247,6 +273,9 @@
                                                     </div>
                                                 @endforeach
                                                 @foreach($page->structures as $structure)
+                                                    @if(! $loop->first && count($page->structures) > 1)
+                                                        <div class="rep-divider" aria-hidden="true"></div>
+                                                    @endif
                                                     <div class="structures" style="margin: 5px">
                                                         <span class="butt1 pointer"><span><button class="butt1 shop" @if($structure->isHeal) data-heal-url="{{ $structure->entryUrl }}" @else data-href="{{ $structure->entryUrl }}" @endif type="submit">{{ $structure->name }}</button></span></span>
                                                         @if($structure->actions !== [])
