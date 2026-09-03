@@ -10,6 +10,7 @@ final readonly class ReputationListPageDTO
 {
     public function __construct(
         public Collection $playerReputations,
+        public int $reputationRating,
         public string $group,
     ) {}
 }

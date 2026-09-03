@@ -207,6 +207,11 @@
                                                 <input type="number" min="0" max="100" class="form-control" name="gathering_speed_bonus_percent" value="{{ $item->gathering_speed_bonus_percent }}">
                                                 <small class="form-text text-muted">На сколько % быстрее добывается ресурс с этим инструментом в руке. 0 — обычная скорость.</small>
                                             </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Шанс двойной добычи, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="gathering_double_chance_percent" value="{{ $item->gathering_double_chance_percent }}">
+                                                <small class="form-text text-muted">Шанс получить ×2 ресурса за одну добычу с этим инструментом в руке. 0 — без шанса.</small>
+                                            </div>
                                         </div>
 
                                         <div class="col-lg-2">

@@ -113,5 +113,8 @@ class StructureServiceProvider extends ServiceProvider
 
         Route::middleware(['web'])
             ->group(__DIR__.'/Workshop/Presentation/Http/Route/web.php');
+
+        Route::middleware(['web'])
+            ->group(__DIR__.'/ToolWorkshop/Presentation/Http/Route/web.php');
     }
 }

@@ -42,6 +42,8 @@ class Structure extends Model
 
     public const TYPE_WORKSHOP = 'workshop';
 
+    public const TYPE_TOOL_WORKSHOP = 'tool_workshop';
+
     public const TYPE_EXCHANGE = 'exchange';
 
     public const TYPE_AUCTION_EXCHANGE = 'auction_exchange';
@@ -61,6 +63,7 @@ class Structure extends Model
         self::TYPE_CLAN_BANK => 'Клановая казна',
         self::TYPE_BLACKSMITH => 'Кузня',
         self::TYPE_WORKSHOP => 'Мастерской дом',
+        self::TYPE_TOOL_WORKSHOP => 'Мастерская инструментов',
         self::TYPE_EXCHANGE => 'Обмен',
         self::TYPE_AUCTION_EXCHANGE => 'Биржа',
         self::TYPE_REPUTATION_EXCHANGE => 'Обмен на репутацию',
@@ -172,6 +175,11 @@ class Structure extends Model
     public function isWorkshop(): bool
     {
         return $this->type === self::TYPE_WORKSHOP;
+    }
+
+    public function isToolWorkshop(): bool
+    {
+        return $this->type === self::TYPE_TOOL_WORKSHOP;
     }
 
     public function isBank(): bool

@@ -288,6 +288,7 @@
 
     const currentLocationId = {{ $page->locationId }};
     parent.sendToFrame('map-frame', { currentLocationId });
+    window.top.postMessage({ type: 'playerLocationChanged', locationId: currentLocationId }, window.location.origin);
 
     (function () {
         const users = {!! $page->locationUsersJson !!};

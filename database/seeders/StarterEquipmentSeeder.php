@@ -16,6 +16,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Seeder;
 
 /**
@@ -46,9 +47,10 @@ use Illuminate\Database\Seeder;
  * Оружие/щит — три РАЗНЫХ стиля боя, не просто три стата одной вещи:
  * Танк — меч + щит (OneHandWeaponStrategy, 1 удар, броня щита); Уворот — два
  * одинаковых меча (DualWieldStrategy, 2 удара за раунд, урон каждого меча
- * вдвое меньше — см. DUAL_WIELD_DAMAGE_SHARE); Крит — двуручный топор
- * (is_two_hand, блокирует вторую руку, 1 удар, но сильнее — см.
- * TWO_HAND_DAMAGE_MULTIPLIER). Щит поэтому существует только в Танк-варианте.
+ * ниже — см. DUAL_WIELD_DAMAGE_SHARE); Крит выбирает между двумя «Мечами
+ * палача» и двуручным топором (is_two_hand, блокирует вторую руку, 1 удар,
+ * но сильнее — см. TWO_HAND_DAMAGE_MULTIPLIER). Щит поэтому существует только
+ * в Танк-варианте.
  *
  * Урон даёт ТОЛЬКО оружие — кулаки фиксированы на 1-2 (см. PlayerFactory) и
  * не растут, это осознанно. Броня Тира1 распределена поровну между всеми
@@ -68,6 +70,11 @@ use Illuminate\Database\Seeder;
  */
 class StarterEquipmentSeeder extends Seeder
 {
+    /** «Магазин снаряжения» и его категория оружия. */
+    private const SHOP_STRUCTURE_ID = 2;
+
+    private const SHOP_CATEGORY_WEAPON = 1;
+
     private const LEVEL_CHECKPOINTS = [1, 2, 4, 7, 10, 13, 16, 20];
 
     /** Материал по индексу чекпоинта — мужской род (меч, доспех, шлем, щит) */
@@ -275,6 +282,17 @@ class StarterEquipmentSeeder extends Seeder
     /** Картинка для двуручного топора Тир2-Крит («Топор палача») */
     private const TIER2_AXE_IMAGE = '/img/resource/palach/start_krit_3.gif';
 
+    /** Альтернатива топору: два одноручных меча из того же сета. */
+    private const TIER2_EXECUTIONER_SWORD_NAME = 'Меч палача';
+
+    private const TIER2_EXECUTIONER_SWORD_IMAGE = '/img/resource/sword_2.jpg';
+
+    private const TIER2_EXECUTIONER_SWORD_CRITICAL = 3;
+
+    private const SWORD_SKILL_NAME = 'Владение мечом';
+
+    private const AXE_SKILL_NAME = 'Владение топором';
+
     /** Оружие Тир2-Танк («Кастет «Мамонт»») и Тир2-Уворот («Сумеречный Дайто») */
     private const TIER2_TANK_WEAPON_NAME = 'Кастет «Мамонт»';
 
@@ -346,6 +364,27 @@ class StarterEquipmentSeeder extends Seeder
     /** Гейт по навыку только у Тир2-щита; Тир1-щит (16 lvl) свободен, иначе навык негде начать качать */
     private const TIER2_SHIELD_SKILL_REQUIREMENT = 79;
 
+    /**
+     * Пороги рассчитаны симуляцией пути 1→20 по актуальной ExperienceCurve и
+     * стартовым мобам: Крит-мечник делает ≈327 боёв / 4445 раундов и приходит
+     * с навыком ≈25 (≈5570 опыта), топорщик с «Секирой ополчения» — ≈326 боёв /
+     * 6857 раундов и навыком ≈46 (≈19362 опыта; секира даёт 3 опыта за удар).
+     *
+     * Требования ниже добавляют обеим веткам сопоставимую докачку на младших
+     * мобах после 20 уровня: мечу ≈1967 успешных ударов (≈2070 раундов),
+     * топору ≈2132 успешных удара (≈2245 раундов). Это около 35–38 минут
+     * чистого боя при штатном cooldownDuration=1000 мс, без переходов и лечения.
+     */
+    private const TIER2_EXECUTIONER_SWORD_SKILL_REQUIREMENT = 33;
+
+    private const TIER2_EXECUTIONER_AXE_SKILL_REQUIREMENT = 54;
+
+    /** Младшее оружие, на котором можно прокачать «Владение топором» до гейта Палача. */
+    private const EXECUTIONER_AXE_TRAINING_WEAPONS = [
+        'Топор наёмника',
+        'Секира ополчения',
+    ];
+
     /** Стартовое оружие («Тесак Головореза») даёт 1 опыт навыка за удар */
     private const TIER1_SKILL_EXP_STARTER = 1;
 
@@ -381,7 +420,426 @@ class StarterEquipmentSeeder extends Seeder
 
         $created += $this->runTier2();
 
+        if ($this->createTier2ExecutionerSword()) {
+            $created++;
+        }
+
+        $this->synchronizeExecutionerAxeSkill();
+        $this->synchronizeExecutionerWeaponRequirements();
+        $this->synchronizeExecutionerAxeTrainingWeaponsInShop();
+        $this->synchronizeExecutionerUncommonSet();
+        $this->synchronizeExecutionerRareSet();
+        $this->synchronizeExecutionerHigherSet(ItemRarity::RARE, ItemRarity::EPIC, 'Закалённ', 'Эпическ');
+        $this->synchronizeExecutionerHigherSet(ItemRarity::EPIC, ItemRarity::LEGENDARY, 'Эпическ', 'Легендарн');
+
         $this->command?->info("StarterEquipmentSeeder: создано предметов — {$created}");
+    }
+
+    /**
+     * Одноручная альтернатива «Топору палача» для Крит-билда.
+     *
+     * Два меча дают 24–34 бонусного урона за раунд против 26–37 у топора,
+     * но делают два отдельных удара и суммарно дают +6 крита против +5.
+     * skill_exp=1 на каждом клинке сохраняет тот же темп навыка: 2 опыта за
+     * полный раунд с парой мечей против 2 опыта за один удар топором.
+     */
+    private function createTier2ExecutionerSword(): bool
+    {
+        $level = self::TIER2_SLOT_LEVEL['weapon'];
+        $fullWeaponPrice = (int) round(80 * $level ** 1.5);
+        $swordPrice = (int) ceil($fullWeaponPrice / 2);
+        $swordSkillId = Skill::where('name', self::SWORD_SKILL_NAME)->value('id');
+
+        $item = ShareItem::firstOrCreate(
+            ['name' => self::TIER2_EXECUTIONER_SWORD_NAME],
+            [
+                'description' => 'Одноручный клинок сета «Палач». Используйте два меча для быстрого стиля боя или выберите двуручный топор для более сильного единичного удара.',
+                'type' => ShareItemType::WEAPON,
+                'slot' => ShareItemSlot::HAND,
+                'rarity' => ItemRarity::COMMON,
+                'price' => $swordPrice,
+                'is_two_hand' => 0,
+                'image' => self::TIER2_EXECUTIONER_SWORD_IMAGE,
+                'skill_id' => $swordSkillId,
+                'skill_exp' => 1,
+            ]
+        );
+
+        if ($item->wasRecentlyCreated) {
+            [$min, $max] = EquipmentStatFormulas::weaponDamage($level);
+            $min = max(1, (int) round($min * self::DUAL_WIELD_DAMAGE_SHARE));
+            $max = max($min + 1, (int) round($max * self::DUAL_WIELD_DAMAGE_SHARE));
+
+            ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => ShareItemStatType::ATTACK_MIN, 'value' => $min, 'value_type' => ItemEffectValueType::FLAT]);
+            ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => ShareItemStatType::ATTACK_MAX, 'value' => $max, 'value_type' => ItemEffectValueType::FLAT]);
+            ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => ShareItemStatType::CRITICAL, 'value' => self::TIER2_EXECUTIONER_SWORD_CRITICAL, 'value_type' => ItemEffectValueType::FLAT]);
+
+            ShareItemRequirement::create(['share_item_id' => $item->id, 'type' => ShareItemRequirementType::LEVEL, 'min_value' => $level]);
+            ShareItemRequirement::create([
+                'share_item_id' => $item->id,
+                'type' => ShareItemRequirementType::STAT,
+                'stat_key' => PlayerStatKey::INTUITION->value,
+                'min_value' => max(1, (int) round($level * 0.6)),
+            ]);
+
+            $item->forceFill(['is_auction_sellable' => true])->save();
+        }
+
+        ShopItem::firstOrCreate(
+            [
+                'structure_id' => self::SHOP_STRUCTURE_ID,
+                'share_item_id' => $item->id,
+            ],
+            [
+                'share_structure_category_id' => self::SHOP_CATEGORY_WEAPON,
+                'price' => $swordPrice,
+                'sort_order' => $level,
+            ]
+        );
+
+        return $item->wasRecentlyCreated;
+    }
+
+    /** Исправляет старую привязку топора к навыку мечей, не затрагивая остальные поля предмета. */
+    private function synchronizeExecutionerAxeSkill(): void
+    {
+        $swordSkillId = Skill::where('name', self::SWORD_SKILL_NAME)->value('id');
+        $axeSkillId = Skill::where('name', self::AXE_SKILL_NAME)->value('id');
+
+        if ($swordSkillId === null || $axeSkillId === null) {
+            return;
+        }
+
+        ShareItem::query()
+            ->where('name', self::TIER2_AXE_NAME)
+            ->where('skill_id', $swordSkillId)
+            ->update([
+                'skill_id' => $axeSkillId,
+                'skill_exp' => self::TIER1_SKILL_EXP_ADVANCED,
+                'updated_at' => now(),
+            ]);
+    }
+
+    /**
+     * Добавляет реальные требования из share_item_requirements. Поле
+     * share_items.skill_lvl для экипировки больше не используется.
+     */
+    private function synchronizeExecutionerWeaponRequirements(): void
+    {
+        foreach ([
+            self::TIER2_EXECUTIONER_SWORD_NAME => [self::SWORD_SKILL_NAME, self::TIER2_EXECUTIONER_SWORD_SKILL_REQUIREMENT],
+            self::TIER2_AXE_NAME => [self::AXE_SKILL_NAME, self::TIER2_EXECUTIONER_AXE_SKILL_REQUIREMENT],
+        ] as $itemName => [$skillName, $requiredLevel]) {
+            $itemId = ShareItem::where('name', $itemName)->value('id');
+            $skillId = Skill::where('name', $skillName)->value('id');
+
+            if ($itemId === null || $skillId === null) {
+                continue;
+            }
+
+            ShareItemRequirement::updateOrCreate(
+                [
+                    'share_item_id' => $itemId,
+                    'type' => ShareItemRequirementType::SKILL,
+                    'skill_id' => $skillId,
+                ],
+                [
+                    'stat_key' => null,
+                    'min_value' => $requiredLevel,
+                ],
+            );
+        }
+    }
+
+    /**
+     * Без младшего топора игрок не может создать первую строку player_skills
+     * для «Владения топором», поэтому гейт «Топора палача» был бы недостижим.
+     */
+    private function synchronizeExecutionerAxeTrainingWeaponsInShop(): void
+    {
+        ShareItem::query()
+            ->whereIn('name', self::EXECUTIONER_AXE_TRAINING_WEAPONS)
+            ->get()
+            ->each(function (ShareItem $item): void {
+                ShopItem::firstOrCreate(
+                    [
+                        'structure_id' => self::SHOP_STRUCTURE_ID,
+                        'share_item_id' => $item->id,
+                    ],
+                    [
+                        'share_structure_category_id' => self::SHOP_CATEGORY_WEAPON,
+                        'price' => $item->price,
+                        'sort_order' => 1,
+                    ],
+                );
+            });
+    }
+
+    /**
+     * Создаёт необычный тир сета «Палач» и связывает обычные предметы с ним.
+     * Цели апгрейда намеренно не попадают в магазин: получить их можно через
+     * кузницу. Картинка оставляется пустой, чтобы её можно было загрузить в
+     * админке отдельно (в том числе прозрачный вариант).
+     */
+    private function synchronizeExecutionerUncommonSet(): void
+    {
+        $sourceNames = [
+            'Меч палача',
+            'Топор палача',
+            'Жилет палача',
+            'Сапоги палача',
+            'Наручи палача',
+            'Маска палача',
+            'Поножи палача',
+            'Наплечники палача',
+            'Рубаха палача',
+        ];
+
+        foreach ($sourceNames as $sourceName) {
+            $source = ShareItem::query()
+                ->where('name', $sourceName)
+                ->with(['stats', 'requirements'])
+                ->first();
+
+            if ($source === null) {
+                continue;
+            }
+
+            $targetName = $this->executionerUncommonName($sourceName);
+            // Совместимость с первым запуском этой синхронизации, где для
+            // предметов во множественном числе использовалось «Усиленный».
+            ShareItem::query()
+                ->where('name', 'Усиленный '.$sourceName)
+                ->update(['name' => $targetName, 'updated_at' => now()]);
+
+            $target = ShareItem::firstOrCreate(
+                ['name' => $targetName],
+                [
+                    'description' => trim(($source->description ?? '').' Необычная версия сета «Палач».'),
+                    'type' => $source->type,
+                    'slot' => $source->slot,
+                    'rarity' => ItemRarity::UNCOMMON,
+                    'price' => max(1, (int) ceil($source->price * 1.15)),
+                    'is_two_hand' => $source->is_two_hand,
+                    'skill_id' => $source->skill_id,
+                    'skill_exp' => $source->skill_exp,
+                    'image' => null,
+                    'transparent_image' => null,
+                    'is_active' => $source->is_active,
+                    'is_sell' => $source->is_sell,
+                    'is_auction_sellable' => $source->is_auction_sellable,
+                    'is_give' => $source->is_give,
+                    'is_droppable' => $source->is_droppable,
+                    'is_stackable' => $source->is_stackable,
+                    'is_slot_usable' => $source->is_slot_usable,
+                    'is_weight' => $source->is_weight,
+                ],
+            );
+
+            // Не перезаписываем загруженную администратором картинку при повторном запуске.
+            if ($target->wasRecentlyCreated) {
+                foreach ($source->stats as $stat) {
+                    $value = max(1, (int) ceil($stat->value * 1.15));
+                    ShareItemStat::updateOrCreate(
+                        ['share_item_id' => $target->id, 'stat_type' => $stat->stat_type],
+                        ['value' => $value, 'value_type' => $stat->value_type],
+                    );
+                }
+
+                foreach ($source->requirements as $requirement) {
+                    ShareItemRequirement::updateOrCreate(
+                        [
+                            'share_item_id' => $target->id,
+                            'type' => $requirement->type,
+                            'stat_key' => $requirement->stat_key,
+                            'skill_id' => $requirement->skill_id,
+                        ],
+                        ['min_value' => $requirement->min_value],
+                    );
+                }
+            }
+
+            $source->forceFill([
+                'upgrade_to_share_item_id' => $target->id,
+                'upgrade_gold_cost' => max(1, (int) round($source->price * 3)),
+            ])->save();
+
+            // Базовый набор материалов для перехода в необычный тир. Если
+            // администратор уже настроил свои материалы, не заменяем их.
+            if ($source->rarityUpgradeMaterials()->count() === 0) {
+                $materialIds = ShareItem::query()
+                    ->whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])
+                    ->pluck('id');
+
+                if ($materialIds->isNotEmpty()) {
+                    $source->rarityUpgradeMaterials()->syncWithoutDetaching(
+                        $materialIds->mapWithKeys(fn (int $id): array => [$id => ['count' => 1]])->all(),
+                    );
+                }
+            }
+        }
+    }
+
+    private function executionerUncommonName(string $sourceName): string
+    {
+        return match ($sourceName) {
+            'Сапоги палача', 'Наручи палача', 'Поножи палача', 'Наплечники палача' => 'Усиленные '.$sourceName,
+            'Маска палача', 'Рубаха палача' => 'Усиленная '.$sourceName,
+            default => 'Усиленный '.$sourceName,
+        };
+    }
+
+    /** Создаёт редкий тир поверх необычного сета Палача. */
+    private function synchronizeExecutionerRareSet(): void
+    {
+        $sources = ShareItem::query()
+            ->where('rarity', ItemRarity::UNCOMMON)
+            ->where(function ($query): void {
+                $query->where('name', 'like', 'Усиленный%палача')
+                    ->orWhere('name', 'like', 'Усиленные%палача')
+                    ->orWhere('name', 'like', 'Усиленная%палача');
+            })
+            ->with(['stats', 'requirements'])
+            ->get();
+
+        foreach ($sources as $source) {
+            $targetName = preg_replace('/^Усиленн(ый|ые|ая)/u', 'Закалённ$1', $source->name);
+            if (! is_string($targetName)) {
+                continue;
+            }
+
+            ShareItem::query()
+                ->where('name', preg_replace('/^Усиленн(ый|ые|ая)/u', 'Закалён$1', $source->name))
+                ->where('rarity', ItemRarity::RARE)
+                ->update(['name' => $targetName, 'updated_at' => now()]);
+
+            $target = ShareItem::firstOrCreate(
+                ['name' => $targetName, 'rarity' => ItemRarity::RARE],
+                [
+                    'description' => trim(($source->description ?? '').' Редкая версия сета «Палач». '),
+                    'type' => $source->type,
+                    'slot' => $source->slot,
+                    'rarity' => ItemRarity::RARE,
+                    'price' => max(1, (int) ceil($source->price * 1.15)),
+                    'is_two_hand' => $source->is_two_hand,
+                    'skill_id' => $source->skill_id,
+                    'skill_exp' => $source->skill_exp,
+                    'image' => null,
+                    'transparent_image' => null,
+                    'is_active' => $source->is_active,
+                    'is_sell' => $source->is_sell,
+                    'is_auction_sellable' => $source->is_auction_sellable,
+                    'is_give' => $source->is_give,
+                    'is_droppable' => $source->is_droppable,
+                    'is_stackable' => $source->is_stackable,
+                    'is_slot_usable' => $source->is_slot_usable,
+                    'is_weight' => $source->is_weight,
+                ],
+            );
+
+            if ($target->wasRecentlyCreated) {
+                foreach ($source->stats as $stat) {
+                    ShareItemStat::updateOrCreate(
+                        ['share_item_id' => $target->id, 'stat_type' => $stat->stat_type],
+                        ['value' => max(1, (int) ceil($stat->value * 1.15)), 'value_type' => $stat->value_type],
+                    );
+                }
+                foreach ($source->requirements as $requirement) {
+                    ShareItemRequirement::updateOrCreate(
+                        ['share_item_id' => $target->id, 'type' => $requirement->type, 'stat_key' => $requirement->stat_key, 'skill_id' => $requirement->skill_id],
+                        ['min_value' => $requirement->min_value],
+                    );
+                }
+            }
+
+            $source->forceFill([
+                'upgrade_to_share_item_id' => $target->id,
+                'upgrade_gold_cost' => max(1, (int) round($source->price * 3)),
+            ])->save();
+
+            if ($source->rarityUpgradeMaterials()->count() === 0) {
+                $materialIds = ShareItem::query()
+                    ->whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])
+                    ->pluck('id');
+                if ($materialIds->isNotEmpty()) {
+                    $source->rarityUpgradeMaterials()->syncWithoutDetaching(
+                        $materialIds->mapWithKeys(fn (int $id): array => [$id => ['count' => 1]])->all(),
+                    );
+                }
+            }
+        }
+    }
+
+    /** Создаёт последующий тир (эпический или легендарный) сета Палача. */
+    private function synchronizeExecutionerHigherSet(
+        ItemRarity $sourceRarity,
+        ItemRarity $targetRarity,
+        string $sourcePrefix,
+        string $targetPrefix,
+    ): void {
+        $sources = ShareItem::query()
+            ->where('rarity', $sourceRarity)
+            ->where(function ($query) use ($sourcePrefix): void {
+                $query->where('name', 'like', $sourcePrefix.'%палача');
+            })
+            ->with(['stats', 'requirements'])
+            ->get();
+
+        foreach ($sources as $source) {
+            $targetName = str_replace(
+                ['Закалённый', 'Закалённые', 'Закалённая', 'Эпический', 'Эпические', 'Эпическая'],
+                $targetPrefix === 'Эпическ'
+                    ? ['Эпический', 'Эпические', 'Эпическая', 'Эпический', 'Эпические', 'Эпическая']
+                    : ['Легендарный', 'Легендарные', 'Легендарная', 'Легендарный', 'Легендарные', 'Легендарная'],
+                $source->name,
+            );
+            if (! is_string($targetName)) {
+                continue;
+            }
+
+            $target = ShareItem::firstOrCreate(
+                ['name' => $targetName, 'rarity' => $targetRarity],
+                [
+                    'description' => trim(($source->description ?? '').' Версия сета «Палач». '),
+                    'type' => $source->type,
+                    'slot' => $source->slot,
+                    'rarity' => $targetRarity,
+                    'price' => max(1, (int) ceil($source->price * 1.15)),
+                    'is_two_hand' => $source->is_two_hand,
+                    'skill_id' => $source->skill_id,
+                    'skill_exp' => $source->skill_exp,
+                    'image' => null,
+                    'transparent_image' => null,
+                ],
+            );
+
+            if ($target->wasRecentlyCreated) {
+                foreach ($source->stats as $stat) {
+                    ShareItemStat::updateOrCreate(
+                        ['share_item_id' => $target->id, 'stat_type' => $stat->stat_type],
+                        ['value' => max(1, (int) ceil($stat->value * 1.15)), 'value_type' => $stat->value_type],
+                    );
+                }
+                foreach ($source->requirements as $requirement) {
+                    ShareItemRequirement::updateOrCreate(
+                        ['share_item_id' => $target->id, 'type' => $requirement->type, 'stat_key' => $requirement->stat_key, 'skill_id' => $requirement->skill_id],
+                        ['min_value' => $requirement->min_value],
+                    );
+                }
+            }
+
+            $source->forceFill([
+                'upgrade_to_share_item_id' => $target->id,
+                'upgrade_gold_cost' => max(1, (int) round($source->price * 3)),
+            ])->save();
+
+            if ($source->rarityUpgradeMaterials()->count() === 0) {
+                $ids = ShareItem::whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])->pluck('id');
+                if ($ids->isNotEmpty()) {
+                    $source->rarityUpgradeMaterials()->syncWithoutDetaching($ids->mapWithKeys(fn (int $id): array => [$id => ['count' => 1]])->all());
+                }
+            }
+        }
     }
 
     private function createTier1WeaponUpgrade(): bool

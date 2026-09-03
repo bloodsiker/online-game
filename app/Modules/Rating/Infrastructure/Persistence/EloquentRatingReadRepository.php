@@ -53,6 +53,15 @@ class EloquentRatingReadRepository implements RatingReadRepository
             ->withQueryString();
     }
 
+    public function paginateReputationRating(int $perPage): LengthAwarePaginator
+    {
+        return Player::with(['user.clanMembership.clan'])
+            ->orderByDesc('reputation_rating')
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
     public function paginateSkillRating(int $skillId, int $perPage): LengthAwarePaginator
     {
         return PlayerSkill::with('player.user.clanMembership.clan')
@@ -94,6 +103,14 @@ class EloquentRatingReadRepository implements RatingReadRepository
                 ->join('users', 'players.user_id', '=', 'users.id')
                 ->orderByDesc('users.money')
                 ->select('players.*'),
+            $nick,
+        );
+    }
+
+    public function findReputationRatingPosition(string $nick): ?int
+    {
+        return $this->findPlayerPosition(
+            Player::with('user')->orderByDesc('reputation_rating')->orderByDesc('id'),
             $nick,
         );
     }

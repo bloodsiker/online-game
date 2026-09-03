@@ -2,6 +2,7 @@
 <html lang="ru-UA" class="lang-ru ru isGuest">
 <head>
     <title>New Online game</title>
+    @vite('resources/js/app.js')
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="New Online game">
@@ -256,7 +257,7 @@
         <div class="b-nav-lvl-1__logo">
             <a class="b-auth-button" style="position: relative;left: 24px;top: 7px;">
 					<span class="b-auth-button__content">
-					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">Online: {{ $onlineCount }}</span>
+					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">Online: <span data-online-count>{{ $onlineCount }}</span></span>
 				</span>
             </a>
 

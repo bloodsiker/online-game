@@ -6,7 +6,7 @@
     $btnCenter2 = 'img/bg/btn/btn-cent2.gif';
     $btnRight2  = 'img/bg/btn/btn-right2.gif';
 
-    $tabs = [
+    $tabs = $tabs ?? [
         ['key' => 'kraft',   'label' => 'Крафтить',       'route' => route('blacksmith',        ['id' => $blacksmith->id]), 'width' => 80],
         ['key' => 'break',   'label' => 'Разбить предмет','route' => route('blacksmith.break',  ['id' => $blacksmith->id]), 'width' => 110],
         ['key' => 'upgrade', 'label' => 'Заточка',        'route' => route('blacksmith.upgrade',['id' => $blacksmith->id]), 'width' => 70],

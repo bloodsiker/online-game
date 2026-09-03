@@ -168,6 +168,11 @@
                                                 </tr>
                                                 </tbody>
                                             </table>
+                                            <div style="margin-top:4px; color:#5d3b28; font-size:11px; text-align:center;">
+                                                <img src="{{ asset('main/images/data/rating/rat_rep.png') }}" width="20" height="16" alt="" style="vertical-align:middle;">
+                                                Репутационный рейтинг:
+                                                <b class="redd">{{ number_format($user->player->reputation_rating, 0, '.', ' ') }}</b>
+                                            </div>
                                             <div style="height:6px;font-size:1px;">&nbsp;</div>
 
                                             @php

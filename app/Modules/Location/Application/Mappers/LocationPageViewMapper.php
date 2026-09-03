@@ -221,6 +221,7 @@ class LocationPageViewMapper
             $structure->isAuctionExchange() => route('auction.exchange', ['id' => $structure->id]),
             $structure->isBlacksmith() => route('blacksmith', ['id' => $structure->id]),
             $structure->isWorkshop() => route('workshop', ['id' => $structure->id]),
+            $structure->isToolWorkshop() => route('tool_workshop', ['id' => $structure->id]),
             $structure->isHeal() => route('heal', ['id' => $structure->id]),
             default => null,
         };

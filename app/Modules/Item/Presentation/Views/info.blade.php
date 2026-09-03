@@ -292,7 +292,7 @@
 
                                                                             @if ($page->description)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">{{ $page->description }}</td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">{!! $page->description !!}</td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif

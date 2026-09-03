@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $hp_max
  * @property int $mp_now
  * @property int $mp_max
+ * @property int $reputation_rating
  * @property Carbon|null $last_regen_at
  * @property int|null $regen_hp_start
  * @property int|null $regen_mp_start
@@ -51,10 +52,12 @@ class Player extends Model
         'last_regen_at' => 'datetime',
         'regen_hp_start' => 'integer',
         'regen_mp_start' => 'integer',
+        'reputation_rating' => 'integer',
     ];
 
     protected $attributes = [
         'experience_multiplier' => 1.0,
+        'reputation_rating' => 0,
     ];
 
     protected static function booted(): void

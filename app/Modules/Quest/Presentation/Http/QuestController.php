@@ -917,6 +917,8 @@ class QuestController extends Controller
                 'completed_at' => now(),
                 'reset_at' => $resetAt,
             ]);
+
+            $this->reputationService->syncReputationRating($player);
         });
 
         // Send personal system chat notification about quest completion

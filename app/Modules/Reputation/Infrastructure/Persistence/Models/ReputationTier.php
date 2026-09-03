@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReputationTier extends Model
 {
+    public const REGULAR_MEDAL_RATING = [
+        500 => 10,
+        1000 => 20,
+        2000 => 50,
+        3000 => 100,
+    ];
+
+    public const FEAT_MEDAL_RATING = 300;
+
     protected $table = 'reputation_tiers';
 
     protected $fillable = [
@@ -43,5 +52,15 @@ class ReputationTier extends Model
     public function quests(): HasMany
     {
         return $this->hasMany(ReputationTierQuest::class, 'tier_id');
+    }
+
+    public function regularMedalRating(): int
+    {
+        return self::REGULAR_MEDAL_RATING[$this->min_points] ?? 0;
+    }
+
+    public function featMedalRating(): int
+    {
+        return $this->feat_medal_name ? self::FEAT_MEDAL_RATING : 0;
     }
 }

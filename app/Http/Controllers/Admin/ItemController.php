@@ -409,6 +409,7 @@ class ItemController extends Controller
             'gathering_tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
             'tool_family' => ['nullable', 'string', 'in:'.implode(',', array_column(GatheringToolFamily::cases(), 'value'))],
             'gathering_speed_bonus_percent' => ['nullable', 'integer', 'between:0,100'],
+            'gathering_double_chance_percent' => ['nullable', 'integer', 'between:0,100'],
             'upgrade_to_share_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
             'upgrade_gold_cost' => ['nullable', 'integer', 'min:0', 'max:2147483647'],
         ]);
@@ -488,6 +489,9 @@ class ItemController extends Controller
             : null;
         $item->gathering_speed_bonus_percent = $type === ShareItemType::TOOL
             ? min(100, max(0, (int) $request->input('gathering_speed_bonus_percent', 0)))
+            : 0;
+        $item->gathering_double_chance_percent = $type === ShareItemType::TOOL
+            ? min(100, max(0, (int) $request->input('gathering_double_chance_percent', 0)))
             : 0;
 
         // Свиток заточки

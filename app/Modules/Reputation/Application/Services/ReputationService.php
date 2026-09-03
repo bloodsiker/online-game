@@ -128,8 +128,53 @@ class ReputationService
             $pr->update(['last_completed_at' => now()]);
         }
         $pr->refresh();
+        $this->syncReputationRating($player);
 
         return $pr;
+    }
+
+    public function calculateReputationRating(Player $player): int
+    {
+        return (int) PlayerReputation::query()
+            ->where('player_id', $player->id)
+            ->with('reputation.tiers')
+            ->get()
+            ->sum(function (PlayerReputation $playerReputation) use ($player): int {
+                $reputation = $playerReputation->reputation;
+                if (! $reputation) {
+                    return 0;
+                }
+
+                $regularRating = $this->getEarnedMedals(
+                    $reputation,
+                    $playerReputation->points,
+                    $player,
+                )->sum(fn (ReputationTier $tier): int => $tier->regularMedalRating());
+
+                $featRating = $this->getEarnedFeatMedals(
+                    $reputation,
+                    $playerReputation->points,
+                    $player,
+                )->sum(fn (ReputationTier $tier): int => $tier->featMedalRating());
+
+                return $regularRating + $featRating;
+            });
+    }
+
+    public function syncReputationRating(Player $player): int
+    {
+        return DB::transaction(function () use ($player): int {
+            $lockedPlayer = Player::query()->lockForUpdate()->findOrFail($player->id);
+            $rating = $this->calculateReputationRating($lockedPlayer);
+
+            if ((int) $lockedPlayer->reputation_rating !== $rating) {
+                $lockedPlayer->forceFill(['reputation_rating' => $rating])->save();
+            }
+
+            $player->setAttribute('reputation_rating', $rating);
+
+            return $rating;
+        });
     }
 
     public function getCooldownDiff(Player $player, Reputation $reputation): ?string

@@ -33,6 +33,6 @@ class GetReputationListPage
             ];
         });
 
-        return new ReputationListPageDTO($playerReputations, 'reputation');
+        return new ReputationListPageDTO($playerReputations, (int) $player->reputation_rating, 'reputation');
     }
 }

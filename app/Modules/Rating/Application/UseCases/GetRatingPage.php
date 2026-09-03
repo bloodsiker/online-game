@@ -42,6 +42,11 @@ class GetRatingPage
                 'name' => 'Монеты',
                 'column' => 'user.money',
             ],
+            'reputation' => [
+                'title' => 'По репутационному рейтингу',
+                'name' => 'Репутационный рейтинг',
+                'column' => 'reputation_rating',
+            ],
         ];
 
         foreach ($this->ratingReadRepository->getSkills() as $skill) {
@@ -66,6 +71,7 @@ class GetRatingPage
                 'victories' => $this->ratingReadRepository->paginateVictoriesRating(40),
                 'deaths' => $this->ratingReadRepository->paginateDeathsRating(40),
                 'wealth' => $this->ratingReadRepository->paginateWealthRating(40),
+                'reputation' => $this->ratingReadRepository->paginateReputationRating(40),
                 default => $this->ratingReadRepository->paginateLevelRating(40),
             };
         }

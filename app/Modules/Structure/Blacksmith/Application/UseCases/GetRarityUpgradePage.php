@@ -8,26 +8,39 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Blacksmith\Application\DTOs\RarityUpgradePageDTO;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class GetRarityUpgradePage
 {
     public function __construct(private readonly ItemTooltipCollector $collector) {}
 
-    public function execute(User $user, int $blacksmithId): RarityUpgradePageDTO
-    {
-        $blacksmith = Structure::query()->findOrFail($blacksmithId);
-        abort_unless($blacksmith->isBlacksmith(), 404);
+    public function execute(
+        User $user,
+        int $structureId,
+        string $expectedStructureType = Structure::TYPE_BLACKSMITH,
+        ?ShareItemType $itemType = null,
+    ): RarityUpgradePageDTO {
+        $blacksmith = Structure::query()->findOrFail($structureId);
+        abort_unless($blacksmith->type === $expectedStructureType, 404);
         abort_unless((int) $blacksmith->location_id === (int) $user->location_id, 403);
 
         $slots = Backpack::query()
             ->with(['item.itemInfo.rarityUpgradeTarget', 'item.itemInfo.rarityUpgradeMaterials'])
             ->where('user_id', $user->id)
             ->where('equipped', false)
-            ->whereHas('item.itemInfo', fn ($query) => $query->whereNotNull('upgrade_to_share_item_id'))
+            ->whereHas('item.itemInfo', function ($query) use ($itemType): void {
+                $query->whereNotNull('upgrade_to_share_item_id');
+
+                if ($itemType !== null) {
+                    $query->where('type', $itemType->value);
+                }
+            })
             ->get();
 
         $counts = DB::table('backpacks')
@@ -38,41 +51,24 @@ class GetRarityUpgradePage
             ->selectRaw('items.share_item_id, SUM(backpacks.count) as count')
             ->pluck('count', 'share_item_id');
 
-        $items = $slots->map(function (Backpack $slot) use ($counts, $user): array {
+        $tooltipItems = collect();
+
+        $items = $slots->map(function (Backpack $slot) use ($counts, $user, $tooltipItems): array {
             $source = $slot->item->itemInfo;
-            $materials = $source->rarityUpgradeMaterials->map(fn ($material): array => [
-                'id' => (int) $material->id,
-                'name' => $material->name,
-                'image' => $material->transparent_image ?? $material->image,
-                'needed' => (int) $material->pivot->count,
-                'available' => (int) ($counts[$material->id] ?? 0),
-            ])->values()->all();
+
+            $steps = $this->buildUpgradeSteps($source, $counts, $user, $tooltipItems);
+            $firstStep = $steps[0];
 
             return [
                 'itemId' => (int) $slot->item_id,
-                'name' => $source->name,
-                'image' => $source->transparent_image ?? $source->image,
-                'rarity' => $source->rarity->label(),
-                'rarityColor' => $source->rarity->color(),
-                'targetId' => (int) $source->rarityUpgradeTarget->id,
-                'targetName' => $source->rarityUpgradeTarget->name,
-                'targetImage' => $source->rarityUpgradeTarget->transparent_image ?? $source->rarityUpgradeTarget->image,
-                'targetRarity' => $source->rarityUpgradeTarget->rarity->label(),
-                'targetRarityColor' => $source->rarityUpgradeTarget->rarity->color(),
-                'gold' => (int) $source->upgrade_gold_cost,
-                'materials' => $materials,
-                'canUpgrade' => $user->money >= $source->upgrade_gold_cost
-                    && collect($materials)->every(fn (array $material) => $material['available'] >= $material['needed']),
+                'name' => $firstStep['name'],
+                'steps' => $steps,
             ];
         })->values()->all();
 
         $shareItemsForTooltips = $slots
-            ->flatMap(function (Backpack $slot) {
-                $source = $slot->item->itemInfo;
-
-                return collect([$source->rarityUpgradeTarget])
-                    ->merge($source->rarityUpgradeMaterials);
-            })
+            ->flatMap(fn (Backpack $slot) => collect([$slot->item->itemInfo]))
+            ->merge($tooltipItems)
             ->filter()
             ->unique('id')
             ->values();
@@ -85,5 +81,57 @@ class GetRarityUpgradePage
                 ->collectFrom(new ShareItemTooltipStrategy($shareItemsForTooltips))
                 ->renderScript(),
         );
+    }
+
+    /**
+     * @param  Collection<int, int>  $counts
+     * @param  Collection<int, ShareItem>  $tooltipItems
+     * @return list<array<string, mixed>>
+     */
+    private function buildUpgradeSteps(ShareItem $source, Collection $counts, User $user, Collection $tooltipItems): array
+    {
+        $steps = [];
+        $visited = [];
+        $current = $source;
+
+        while ($current !== null && ! isset($visited[$current->id])) {
+            $visited[$current->id] = true;
+            $current->loadMissing(['rarityUpgradeTarget', 'rarityUpgradeMaterials']);
+
+            $target = $current->rarityUpgradeTarget;
+            if ($target === null) {
+                break;
+            }
+
+            $materials = $current->rarityUpgradeMaterials->map(fn (ShareItem $material): array => [
+                'id' => (int) $material->id,
+                'name' => $material->name,
+                'image' => $material->transparent_image ?? $material->image,
+                'needed' => (int) $material->pivot->count,
+                'available' => (int) ($counts[$material->id] ?? 0),
+            ])->values()->all();
+
+            $steps[] = [
+                'name' => $current->name,
+                'image' => $current->transparent_image ?? $current->image,
+                'rarity' => $current->rarity->label(),
+                'rarityColor' => $current->rarity->color(),
+                'targetId' => (int) $target->id,
+                'targetName' => $target->name,
+                'targetImage' => $target->transparent_image ?? $target->image,
+                'targetRarity' => $target->rarity->label(),
+                'targetRarityColor' => $target->rarity->color(),
+                'gold' => (int) $current->upgrade_gold_cost,
+                'materials' => $materials,
+                'canUpgrade' => $user->money >= $current->upgrade_gold_cost
+                    && collect($materials)->every(fn (array $material) => $material['available'] >= $material['needed']),
+            ];
+
+            $tooltipItems->push($target);
+            $tooltipItems->push(...$current->rarityUpgradeMaterials);
+            $current = $target;
+        }
+
+        return $steps;
     }
 }

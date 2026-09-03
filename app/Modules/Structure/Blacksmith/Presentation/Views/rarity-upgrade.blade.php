@@ -21,6 +21,13 @@
         .upgrade-hint { margin: 0 0 10px; color: #49382d; text-align: center; }
         .upgrade-grid { margin: -6px; font-size: 0; text-align: center; }
         .upgrade-card { display: inline-block; vertical-align: top; width: 270px; min-height: 340px; margin: 6px; padding: 8px; box-sizing: border-box; font-size: 11px; text-align: center; background: url('/img/bg/bgg.gif') repeat; border-radius: 5px; box-shadow: 0 0 3px rgba(0,0,0,.9); }
+        .upgrade-stage { display: none; }
+        .upgrade-stage.active { display: block; }
+        .upgrade-steps { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 22px; margin-bottom: 2px; }
+        .upgrade-step-button { width: 22px; height: 20px; padding: 0; border: 1px solid #9a713e; border-radius: 3px; color: #6b2d13; font-size: 16px; font-weight: bold; line-height: 15px; background: #f4d99d; cursor: pointer; }
+        .upgrade-step-button:disabled { opacity: .4; cursor: default; }
+        .upgrade-step-progress { min-width: 62px; color: #7a3010; font-size: 10px; font-weight: bold; }
+        .upgrade-next-hint { margin-top: 9px; color: #806147; font-size: 10px; line-height: 13px; }
         .upgrade-title { min-height: 30px; color: #7a3010; font-size: 13px; font-weight: bold; }
         .upgrade-level { display: block; margin-top: 2px; color: #8d2616; font-weight: bold; }
         .upgrade-icons { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 5px; }
@@ -53,7 +60,19 @@
     <tr height="22">
         <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
         <td class="tbl-shp-sml tt" valign="top" align="left">
-            @include('blacksmith::_tabs', ['activeTab' => 'rarity-upgrade'])
+            @if($isToolWorkshop ?? false)
+                @include('blacksmith::_tabs', [
+                    'activeTab' => 'tool-workshop',
+                    'tabs' => [[
+                        'key' => 'tool-workshop',
+                        'label' => 'Мастерская',
+                        'route' => route('tool_workshop', ['id' => $blacksmith->id]),
+                        'width' => 90,
+                    ]],
+                ])
+            @else
+                @include('blacksmith::_tabs', ['activeTab' => 'rarity-upgrade'])
+            @endif
         </td>
         <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
     </tr>
@@ -62,7 +81,7 @@
         <td class="tbl-usi_bg" valign="top" style="padding:8px 10px; text-align:center;">
             <table class="coll brd2-all bg_l p10h p2v upgrade-summary" width="100%">
                 <tbody><tr>
-                    <td align="left"><b>Кузня:</b> Апгрейд</td>
+                    <td align="left"><b>{{ $buildingTitle ?? 'Кузня' }}:</b> Апгрейд</td>
                     <td align="right" style="color:#955c4a;">
                         <b>Монеты:</b>
                         <b class="redd"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->money) }}</b>
@@ -76,77 +95,96 @@
                 <div class="message {{ session('rarity_upgrade_success', false) ? 'success' : 'error' }}">{{ session('message') }}</div>
             @endif
 
-            <p class="upgrade-hint">Выберите вещь для повышения редкости. Заточка, камни и руны сохраняются.</p>
+            <p class="upgrade-hint">{{ $upgradeHint ?? 'Выберите вещь для повышения редкости. Заточка, камни и руны сохраняются.' }}</p>
 
             <div class="upgrade-grid">
                 @forelse($items as $item)
                     <div class="upgrade-card">
-                        <div class="upgrade-title">
-                            {{ $item['targetName'] }}
-                            <span class="upgrade-level">{{ $item['rarity'] }} → {{ $item['targetRarity'] }}</span>
-                        </div>
-
-                        <div class="upgrade-icons">
-                            <span class="upgrade-icon"
-                                  data-id="{{ $item['itemId'] }}"
-                                  onmouseover="showItemInfo(this,event,2)"
-                                  onmouseout="showItemInfo(this,event,0)">
-                                <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}">
-                            </span>
-                            <span class="upgrade-arrow">→</span>
-                            <span class="upgrade-icon"
-                                  data-id="{{ $item['targetId'] }}"
-                                  onmouseover="showItemInfo(this,event,2)"
-                                  onmouseout="showItemInfo(this,event,0)">
-                                <img src="{{ $item['targetImage'] }}" alt="{{ $item['targetName'] }}">
-                            </span>
-                        </div>
-
-                        <div class="upgrade-names">
-                            <strong style="color:{{ $item['rarityColor'] }}">{{ $item['name'] }}</strong><br>
-                            <span style="color:#8d2616">превратится в</span><br>
-                            <strong style="color:{{ $item['targetRarityColor'] }}">{{ $item['targetName'] }}</strong>
-                        </div>
-
-                        <div class="upgrade-requirements">
-                            <div class="requirements-title">Требования для апгрейда</div>
-                            <div>
-                                Монеты:
-                                <span class="{{ $user->money >= $item['gold'] ? 'req-ok' : 'req-fail' }}">
-                                    {{ format_money($user->money) }} / {{ format_money($item['gold']) }}
-                                </span>
+                        @if(count($item['steps']) > 1)
+                            <div class="upgrade-steps" data-upgrade-steps>
+                                <button type="button" class="upgrade-step-button" data-upgrade-previous disabled aria-label="Предыдущая ступень">‹</button>
+                                <span class="upgrade-step-progress" data-upgrade-step-progress>Ступень 1 / {{ count($item['steps']) }}</span>
+                                <button type="button" class="upgrade-step-button" data-upgrade-next aria-label="Следующая ступень">›</button>
                             </div>
+                        @endif
 
-                            @if(count($item['materials']) > 0)
-                                <div class="requirement-items">
-                                    @foreach($item['materials'] as $material)
-                                        <div class="requirement-item" title="{{ $material['name'] }}"
-                                             data-id="{{ $material['id'] }}"
-                                             onmouseover="showItemInfo(this,event,2)"
-                                             onmouseout="showItemInfo(this,event,0)">
-                                            <img src="{{ $material['image'] }}" alt="{{ $material['name'] }}">
-                                            <span class="requirement-name">{{ $material['name'] }}</span>
-                                            <span class="requirement-count {{ $material['available'] >= $material['needed'] ? 'req-ok' : 'req-fail' }}">
-                                                {{ $material['available'] }} / {{ $material['needed'] }}
-                                            </span>
-                                        </div>
-                                    @endforeach
+                        @foreach($item['steps'] as $stepIndex => $step)
+                            <div class="upgrade-stage {{ $stepIndex === 0 ? 'active' : '' }}" data-upgrade-stage="{{ $stepIndex }}">
+                                <div class="upgrade-title">
+                                    {{ $step['targetName'] }}
+                                    <span class="upgrade-level">{{ $step['rarity'] }} → {{ $step['targetRarity'] }}</span>
                                 </div>
-                            @elseif($item['gold'] === 0)
-                                <div class="req-ok" style="text-align:center; margin-top:5px;">Дополнительные ресурсы не требуются</div>
-                            @endif
-                        </div>
 
-                        <form class="upgrade-action" action="{{ route('blacksmith.rarity_upgrade.process', ['id' => $blacksmith->id]) }}" method="post">
-                            @csrf
-                            <input type="hidden" name="item_id" value="{{ $item['itemId'] }}">
-                            <b class="butt2 pointer {{ $item['canUpgrade'] ? '' : 'disabled' }}">
-                                <b><input type="submit" value="Улучшить" @disabled(! $item['canUpgrade'])></b>
-                            </b>
-                        </form>
+                                <div class="upgrade-icons">
+                                    <span class="upgrade-icon"
+                                          data-id="{{ $stepIndex === 0 ? $item['itemId'] : $item['steps'][$stepIndex - 1]['targetId'] }}"
+                                          onmouseover="showItemInfo(this,event,2)"
+                                          onmouseout="showItemInfo(this,event,0)"
+                                          onclick="window.open('{{ $stepIndex === 0 ? route('items.info', ['id' => $item['itemId']]) : route('items.info.share', ['id' => $item['steps'][$stepIndex - 1]['targetId']]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                        <img src="{{ $step['image'] }}" alt="{{ $step['name'] }}">
+                                    </span>
+                                    <span class="upgrade-arrow">→</span>
+                                    <span class="upgrade-icon"
+                                          data-id="{{ $step['targetId'] }}"
+                                          onmouseover="showItemInfo(this,event,2)"
+                                          onmouseout="showItemInfo(this,event,0)"
+                                          onclick="window.open('{{ route('items.info.share', ['id' => $step['targetId']]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                        <img src="{{ $step['targetImage'] }}" alt="{{ $step['targetName'] }}">
+                                    </span>
+                                </div>
+
+                                <div class="upgrade-names">
+                                    <strong style="color:{{ $step['rarityColor'] }}">{{ $step['name'] }}</strong><br>
+                                    <span style="color:#8d2616">превратится в</span><br>
+                                    <strong style="color:{{ $step['targetRarityColor'] }}">{{ $step['targetName'] }}</strong>
+                                </div>
+
+                                <div class="upgrade-requirements">
+                                    <div class="requirements-title">Требования для апгрейда</div>
+                                    <div>
+                                        Монеты:
+                                        <span class="{{ $user->money >= $step['gold'] ? 'req-ok' : 'req-fail' }}">
+                                            {{ format_money($user->money) }} / {{ format_money($step['gold']) }}
+                                        </span>
+                                    </div>
+
+                                    @if(count($step['materials']) > 0)
+                                        <div class="requirement-items">
+                                            @foreach($step['materials'] as $material)
+                                                <div class="requirement-item" title="{{ $material['name'] }}"
+                                                     data-id="{{ $material['id'] }}"
+                                                     onmouseover="showItemInfo(this,event,2)"
+                                                     onmouseout="showItemInfo(this,event,0)"
+                                                     onclick="window.open('{{ route('items.info.share', ['id' => $material['id']]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                                    <img src="{{ $material['image'] }}" alt="{{ $material['name'] }}">
+                                                    <span class="requirement-name">{{ $material['name'] }}</span>
+                                                    <span class="requirement-count {{ $material['available'] >= $material['needed'] ? 'req-ok' : 'req-fail' }}">
+                                                        {{ $material['available'] }} / {{ $material['needed'] }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif($step['gold'] === 0)
+                                        <div class="req-ok" style="text-align:center; margin-top:5px;">Дополнительные ресурсы не требуются</div>
+                                    @endif
+                                </div>
+
+                                @if($stepIndex === 0)
+                                    <form class="upgrade-action" action="{{ $upgradeProcessUrl ?? route('blacksmith.rarity_upgrade.process', ['id' => $blacksmith->id]) }}" method="post">
+                                        @csrf
+                                        <input type="hidden" name="item_id" value="{{ $item['itemId'] }}">
+                                        <b class="butt2 pointer {{ $step['canUpgrade'] ? '' : 'disabled' }}">
+                                            <b><input type="submit" value="Улучшить" @disabled(! $step['canUpgrade'])></b>
+                                        </b>
+                                    </form>
+                                @else
+                                    <div class="upgrade-next-hint">Сначала улучшите предмет до предыдущей ступени.</div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 @empty
-                    <div class="empty-list"><b>В рюкзаке нет вещей с настроенным апгрейдом редкости.</b></div>
+                    <div class="empty-list"><b>{{ $emptyListMessage ?? 'В рюкзаке нет вещей с настроенным апгрейдом редкости.' }}</b></div>
                 @endforelse
             </div>
         </td>
@@ -162,13 +200,35 @@
 
 <script>
     function equalizeUpgradeRequirements() {
-        const requirements = Array.from(document.querySelectorAll('.upgrade-requirements'));
+        const requirements = Array.from(document.querySelectorAll('.upgrade-stage.active .upgrade-requirements'));
         if (requirements.length === 0) return;
 
         requirements.forEach((element) => { element.style.height = ''; });
         const maxHeight = Math.max(...requirements.map((element) => element.offsetHeight));
         requirements.forEach((element) => { element.style.height = maxHeight + 'px'; });
     }
+
+    document.querySelectorAll('.upgrade-card').forEach((card) => {
+        const stages = Array.from(card.querySelectorAll('[data-upgrade-stage]'));
+        const previous = card.querySelector('[data-upgrade-previous]');
+        const next = card.querySelector('[data-upgrade-next]');
+        const progress = card.querySelector('[data-upgrade-step-progress]');
+
+        if (stages.length < 2 || previous === null || next === null || progress === null) return;
+
+        let activeIndex = 0;
+        const showStage = (index) => {
+            activeIndex = Math.max(0, Math.min(index, stages.length - 1));
+            stages.forEach((stage, stageIndex) => stage.classList.toggle('active', stageIndex === activeIndex));
+            previous.disabled = activeIndex === 0;
+            next.disabled = activeIndex === stages.length - 1;
+            progress.textContent = `Ступень ${activeIndex + 1} / ${stages.length}`;
+            equalizeUpgradeRequirements();
+        };
+
+        previous.addEventListener('click', () => showStage(activeIndex - 1));
+        next.addEventListener('click', () => showStage(activeIndex + 1));
+    });
 
     window.addEventListener('load', equalizeUpgradeRequirements);
     window.addEventListener('resize', equalizeUpgradeRequirements);

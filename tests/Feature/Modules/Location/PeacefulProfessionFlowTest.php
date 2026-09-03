@@ -136,6 +136,28 @@ class PeacefulProfessionFlowTest extends TestCase
         ]);
     }
 
+    public function test_guaranteed_double_chance_awards_two_resources(): void
+    {
+        Carbon::setTestNow('2026-08-29 12:00:00');
+        $this->seedGatheringResource();
+        DB::table('share_items')->where('id', 20)->update(['gathering_double_chance_percent' => 100]);
+
+        $backpack = Mockery::mock(BackpackService::class);
+        $backpack->shouldReceive('addItemByShareItem')->once()->with(Mockery::any(), Mockery::any(), 2)->andReturn(new Backpack);
+        $service = new GatheringService($backpack);
+        $user = User::query()->findOrFail(1);
+        $nodeId = $service->state($user)['nodes'][0]['id'];
+
+        $this->assertTrue($service->start($user, $nodeId)->ok);
+
+        Carbon::setTestNow('2026-08-29 12:00:05');
+        $completed = $service->complete($user);
+
+        $this->assertTrue($completed->ok);
+        $this->assertSame(2, $completed->data['reward']['count']);
+        $this->assertTrue($completed->data['reward']['isDouble']);
+    }
+
     public function test_required_tool_is_accepted_in_either_hand(): void
     {
         $this->seedGatheringResource();
@@ -407,6 +429,7 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->integer('gathering_respawn_seconds')->nullable();
             $table->string('tool_family')->nullable();
             $table->unsignedTinyInteger('gathering_speed_bonus_percent')->default(0);
+            $table->unsignedTinyInteger('gathering_double_chance_percent')->default(0);
             $table->string('gathering_tool_family')->nullable();
             $table->boolean('is_stackable')->default(true);
             $table->integer('count_use')->default(0);

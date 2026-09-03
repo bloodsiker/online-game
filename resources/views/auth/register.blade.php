@@ -15,6 +15,7 @@
           content="Легенда: Спадок драконів, офіційний, український, двар, легенда, український сервер, Бесплатна онлайн гра Двар, Український офіційний сервер легенди, прайм, мінор"/>
     <meta name="keywords"
           content="dwar, маріуполь, АЗОВСТАЛЬ, mariupol, azovstal, український, двар, офіційний, онлайн ігри, ігри онлайн, грати ігри, група, ментори, дракони вічності, браузерна гра, mmorpg, дракони, магмари, арена, apeha, online, двар, прайм, мінор"/>
+    @vite('resources/js/app.js')
     <meta property="og:title" content="Гра Легенда спадок драконів Український сервер"/>
     <meta property="og:image" content="/new_design/img/logo_tshare.png"/>
     <meta property="og:type" content="article"/>
@@ -111,7 +112,7 @@
                     <a class="b-auth-button" style="position: relative;left: 24px;top: 7px;">
                     <span class="b-auth-button__content">
                     <span class="b-aside__impo-link"
-                          style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">В игре сейчас: {{ $onlineCount }}</span>
+                          style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">В игре сейчас: <span data-online-count>{{ $onlineCount }}</span></span>
                     </span>
                     </a>
                 </div>

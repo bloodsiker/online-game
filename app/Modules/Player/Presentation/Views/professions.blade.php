@@ -23,12 +23,18 @@
         .btn_1 { color: #461c0b !important; text-decoration: none; font-weight: 700; font-size: 11px; }
         .btn_2 { color: #ffe9ba !important; text-decoration: none; font-weight: 700; font-size: 11px; }
         .professions-wrap { padding: 10px; }
-        .profession-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; padding: 6px; border: 1px solid #bca68e; background: rgba(245, 236, 223, .78); }
-        .profession-tab { border: 1px solid #a98d6c; border-radius: 2px; padding: 5px 9px; color: #563e2f; background: linear-gradient(#f5ead6, #d8c19e); font: bold 11px Tahoma, sans-serif; cursor: pointer; }
-        .profession-tab:hover { background: linear-gradient(#fff4df, #e1c9a4); }
-        .profession-tab.active { color: #fff0c7; border-color: #75472e; background: linear-gradient(#9b6442, #704029); text-shadow: 0 1px #3b2115; }
-        .profession-count { display: inline-block; min-width: 16px; margin-left: 4px; padding: 0 4px; border-radius: 8px; color: #6d4b36; background: rgba(255,255,255,.6); text-align: center; font-size: 9px; }
-        .profession-tab.active .profession-count { color: #633b25; background: #f2d8a4; }
+        .profession-tabs { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 6px; margin-bottom: 10px; padding: 7px; border: 1px solid #987049; border-radius: 4px; background: #d6bf99 url({{ asset('img/bg/common-bg.png') }}) repeat; box-shadow: inset 0 0 0 1px rgba(255,239,196,.85), inset 0 0 8px rgba(80,42,19,.22), 0 1px 2px rgba(63,34,18,.24); }
+        .profession-tab { position: relative; min-height: 44px; overflow: hidden; border: 1px solid #9c744c; border-radius: 4px; padding: 6px 38px 6px 11px; color: #58311c; background: linear-gradient(#f8e8c5 0%, #e5c895 52%, #cda874 100%); box-shadow: inset 0 1px rgba(255,255,255,.8), inset 0 -1px rgba(104,59,27,.24), 0 1px 2px rgba(72,39,19,.2); font: bold 11px Tahoma, sans-serif; text-align: left; text-shadow: 0 1px rgba(255,248,224,.75); cursor: pointer; transition: transform .12s ease, filter .12s ease, box-shadow .12s ease; }
+        .profession-tab::before { position: absolute; inset: 3px; border: 1px solid rgba(119,72,35,.25); border-radius: 2px; content: ''; pointer-events: none; }
+        .profession-tab:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: inset 0 1px rgba(255,255,255,.9), inset 0 -1px rgba(104,59,27,.24), 0 2px 4px rgba(72,39,19,.28); }
+        .profession-tab:focus-visible { outline: 2px solid #9a4f2f; outline-offset: 1px; }
+        .profession-tab.active { color: #ffe9b6; border-color: #612d1c; background: linear-gradient(#a75b3b 0%, #874128 48%, #642b1c 100%); box-shadow: inset 0 1px rgba(255,220,159,.38), inset 0 -2px rgba(52,20,11,.4), 0 2px 4px rgba(68,28,15,.34); text-shadow: 0 1px #3d160d; transform: translateY(-1px); }
+        .profession-tab.active::before { border-color: rgba(255,218,150,.3); }
+        .profession-tab-name { position: relative; z-index: 1; display: block; font-size: 12px; line-height: 15px; }
+        .profession-tab-caption { position: relative; z-index: 1; display: block; margin-top: 1px; color: #866344; font-size: 9px; font-weight: normal; line-height: 11px; }
+        .profession-tab.active .profession-tab-caption { color: #e7c590; }
+        .profession-count { position: absolute; z-index: 1; top: 50%; right: 9px; display: flex; width: 23px; height: 23px; align-items: center; justify-content: center; margin-top: -12px; border: 1px solid #9c744c; border-radius: 50%; color: #704326; background: linear-gradient(#fff1cb, #d8b47b); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35), 0 1px 2px rgba(74,40,19,.28); text-align: center; font-size: 9px; }
+        .profession-tab.active .profession-count { color: #60331d; border-color: #d4a85f; background: linear-gradient(#ffe9ad, #d8a452); box-shadow: inset 0 0 0 2px rgba(255,247,206,.32), 0 0 5px rgba(255,198,88,.28); text-shadow: none; }
         .profession-panel { display: none; }
         .profession-panel.active { display: block; }
         .profession-summary { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #bca68e; border-radius: 3px; background: #f4ecdf url({{ asset('img/bg/common-bg.png') }}) repeat; }
@@ -56,6 +62,8 @@
         .recipe-result a { color: #5f3f2e; font-weight: bold; text-decoration: none; }
         .empty-recipes { padding: 24px; border: 1px dashed #b9a187; color: #77675b; background: rgba(255,248,234,.6); text-align: center; }
         .empty-page { padding: 35px; text-align: center; color: #75644d; }
+        @media (max-width: 700px) { .profession-tabs { grid-template-columns: repeat(2, minmax(120px, 1fr)); } }
+        @media (max-width: 380px) { .profession-tabs { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -75,13 +83,16 @@
                         @if($page['professions'] === [])
                             <div class="empty-page">Мирные профессии ещё не настроены.</div>
                         @else
-                            <nav class="profession-tabs" aria-label="Мирные профессии">
+                            <nav class="profession-tabs" aria-label="Мирные профессии" role="tablist">
                                 @foreach($page['professions'] as $profession)
                                     <button type="button"
                                             class="profession-tab @if($profession['id'] === $page['activeProfessionId']) active @endif"
                                             data-profession-tab="{{ $profession['id'] }}"
+                                            role="tab"
                                             aria-selected="{{ $profession['id'] === $page['activeProfessionId'] ? 'true' : 'false' }}">
-                                        {{ $profession['name'] }} <span class="profession-count">{{ $profession['recipesCount'] }}</span>
+                                        <span class="profession-tab-name">{{ $profession['name'] }}</span>
+                                        <span class="profession-tab-caption">изученные рецепты</span>
+                                        <span class="profession-count">{{ $profession['recipesCount'] }}</span>
                                     </button>
                                 @endforeach
                             </nav>

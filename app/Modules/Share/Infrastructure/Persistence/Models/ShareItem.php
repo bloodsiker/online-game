@@ -57,6 +57,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $gathering_respawn_seconds
  * @property string|null $tool_family
  * @property int $gathering_speed_bonus_percent
+ * @property int $gathering_double_chance_percent
  * @property string|null $gathering_tool_family
  * @property-read Skill|null $skill
  * @property-read Collection|ShareItemEffect[] $effects
@@ -122,6 +123,7 @@ class ShareItem extends Model
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
         'gathering_speed_bonus_percent' => 'integer',
+        'gathering_double_chance_percent' => 'integer',
         'upgrade_gold_cost' => 'integer',
     ];
 

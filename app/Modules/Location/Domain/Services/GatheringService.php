@@ -269,7 +269,11 @@ class GatheringService
                 return $this->failure($resourceBlock, 422);
             }
 
-            $this->backpackService->addItemByShareItem($lockedUser, $resource, 1);
+            $doubleChance = $this->equippedToolDoubleChancePercent($player, (string) $resource->gathering_tool_family) ?? 0;
+            $isDouble = $doubleChance > 0 && random_int(1, 100) <= $doubleChance;
+            $count = $isDouble ? 2 : 1;
+
+            $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
             $profession = $this->awardExperience($player, $resource->skill, max(1, (int) $resource->skill_exp));
 
             [$x, $y] = $this->randomPosition($node->mapResource, (float) $node->x_percent, (float) $node->y_percent);
@@ -286,13 +290,16 @@ class GatheringService
 
             return new GatheringActionResultDTO(
                 ok: true,
-                message: sprintf('Получено: %s ×1 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp)),
+                message: $isDouble
+                    ? sprintf('Удача! Получено: %s ×2 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp))
+                    : sprintf('Получено: %s ×1 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp)),
                 data: [
                     'reward' => [
                         'shareItemId' => (int) $resource->id,
                         'name' => (string) $resource->name,
                         'image' => $this->gatheringImage($resource),
-                        'count' => 1,
+                        'count' => $count,
+                        'isDouble' => $isDouble,
                     ],
                     'profession' => $profession,
                     'respawnAt' => $node->respawn_at->toIso8601String(),
@@ -452,6 +459,21 @@ class GatheringService
             ->map(fn (ShareItem $item): int => max(0, (int) $item->gathering_speed_bonus_percent));
 
         return $bonuses->isEmpty() ? null : $bonuses->max();
+    }
+
+    /** Наибольший gathering_double_chance_percent среди инструментов нужного семейства в руках игрока, либо null, если такого инструмента нет. */
+    private function equippedToolDoubleChancePercent(Player $player, string $toolFamily): ?int
+    {
+        $equipment = PlayerEquipment::query()
+            ->where('player_id', $player->id)
+            ->with(['handLeft.itemInfo', 'handRight.itemInfo'])
+            ->first();
+
+        $chances = collect([$equipment?->handLeft?->itemInfo, $equipment?->handRight?->itemInfo])
+            ->filter(fn (?ShareItem $item): bool => $item !== null && $item->tool_family === $toolFamily)
+            ->map(fn (ShareItem $item): int => max(0, (int) $item->gathering_double_chance_percent));
+
+        return $chances->isEmpty() ? null : $chances->max();
     }
 
     private function effectiveGatheringSeconds(ShareItem $resource, int $bonusPercent): int

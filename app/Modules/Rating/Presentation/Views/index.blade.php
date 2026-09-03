@@ -188,7 +188,7 @@
                             <tr>
                                 <th align="left" width="50">№</th>
                                 <th align="left">Ник игрока</th>
-                                <th width="140"><span class="user-rating-progress">{{ $page->columnName }}</span></th>
+                                <th width="140"><span class="{{ $page->type === 'reputation' ? 'user-rating-reputation' : 'user-rating-progress' }}">{{ $page->columnName }}</span></th>
                             </tr>
                             <tr></tr>
                             </thead>

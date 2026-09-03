@@ -129,10 +129,11 @@
 
             <br>
             <hr>
-            <center><b style="color:green">Онлайн: {{ $page->countOnlineInGame }}</b></center>
+            <center><b style="color:green">Онлайн: <span id="global-online-count">{{ $page->countOnlineInGame }}</span></b></center>
 
-            @foreach($page->onlineInGame as $user)
-                <div class="info">
+            <div id="online-users">
+                @foreach($page->onlineInGame as $user)
+                    <div class="info">
                     <span class="time">{{ $user->time }}</span>
                     <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
                          onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
@@ -147,8 +148,9 @@
                        class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                        title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                     <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
-                </div>
-            @endforeach
+                    </div>
+                @endforeach
+            </div>
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
     </tr>
@@ -191,6 +193,50 @@
         return false;
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function buildUsersHtml(users) {
+        var html = '';
+
+        users.forEach(function (u) {
+            var name = String(u.name || '');
+            var safeName = escapeHtml(name);
+            var safeClanName = escapeHtml(u.clan_name || '');
+            var safeTime = escapeHtml(u.time || '');
+            var safeInfoUrl = escapeHtml(u.info_url || '');
+            var privateArgument = escapeHtml(JSON.stringify(name));
+            var offCls = u.is_online ? '' : ' user_offline';
+            var opacity = u.is_online ? '' : 'opacity:.6;';
+
+            var clan = '';
+            if (u.clan_icon && u.clan_id) {
+                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;">'
+                    + '<img class="clan-icon" src="' + escapeHtml(u.clan_icon) + '" title="' + safeClanName + '" alt="' + safeClanName + '" style="' + opacity + '"></a>';
+            } else if (u.clan_name) {
+                clan = '<span class="clan-tag">[' + safeClanName + ']</span>';
+            }
+
+            html += '<div class="info">'
+                +   '<span class="' + offCls.trim() + '">'
+                +     '<span class="time">' + safeTime + '</span> '
+                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
+                +     clan
+                +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="Информация о персонаже"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
+                +     '<a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
+                +   '</span>'
+                + '</div>';
+        });
+
+        return html;
+    }
+
     function renderLocationUsers(users) {
         var container = document.getElementById('location-users');
         var countEl   = document.getElementById('location-count');
@@ -199,38 +245,30 @@
         var online = users.filter(function (u) { return u.is_online; });
         if (countEl) countEl.textContent = online.length;
 
-        var html = '';
-        users.forEach(function (u) {
-            var offCls = u.is_online ? '' : ' user_offline';
-            var opacity = u.is_online ? '' : 'opacity:.6;';
+        container.innerHTML = buildUsersHtml(users);
+    }
 
-            var clan = '';
-            if (u.clan_icon && u.clan_id) {
-                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;">'
-                    + '<img class="clan-icon" src="' + u.clan_icon + '" title="' + u.clan_name + '" alt="' + u.clan_name + '" style="' + opacity + '"></a>';
-            } else if (u.clan_name) {
-                clan = '<span class="clan-tag">[' + u.clan_name + ']</span>';
-            }
-
-            html += '<div class="info">'
-                +   '<span class="' + offCls.trim() + '">'
-                +     '<span class="time">' + u.time + '</span> '
-                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(\'' + u.name.replace(/'/g, "\\'") + '\')" alt="Приват"> '
-                +     clan
-                +     '<a href="' + u.info_url + '" target="_blank" class="pnick' + offCls + '" data-uid="' + u.id + '" data-name="' + u.name.replace(/"/g, '&quot;') + '" title="Информация о персонаже"><b>' + u.name + ' [' + u.lvl + ']</b></a>'
-                +     '<a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo(' + u.id + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
-                +   '</span>'
-                + '</div>';
-        });
-
-        container.innerHTML = html;
+    function renderOnlineUsers(users, count) {
+        var container = document.getElementById('online-users');
+        var globalCount = document.getElementById('global-online-count');
+        var bottomCount = document.getElementById('chat_user_count');
+        if (container) container.innerHTML = buildUsersHtml(users);
+        if (globalCount) globalCount.textContent = count;
+        if (bottomCount) bottomCount.textContent = count;
     }
 
     window.addEventListener('message', function (e) {
         if (e.data && e.data.type === 'locationUsers') {
             renderLocationUsers(e.data.users);
+        } else if (e.data && e.data.type === 'onlinePresenceSnapshot') {
+            var users = Array.isArray(e.data.users) ? e.data.users : [];
+            var currentLocationId = Number(e.data.viewerLocationId || {{ (int) auth()->user()->location_id }});
+            renderOnlineUsers(users, Number(e.data.count ?? users.length));
+            renderLocationUsers(users.filter(function (u) { return Number(u.location_id) === currentLocationId; }));
         }
     });
+
+    window.top.postMessage({ type: 'requestOnlinePresence' }, window.location.origin);
 
     // ── Контекстное меню персонажа (как на проде: ПКМ по нику) ──────────────
     initPlayerMenu({

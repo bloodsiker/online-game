@@ -85,6 +85,7 @@
             font-size: 11px;
             color: #999;
         }
+        .medal-rating { margin-left: 3px; color: #9a2517; font-size: 10px; }
         .msg-success { color: #2a7a2a; font-weight: bold; padding: 4px 6px; }
         .msg-error   { color: #a00000; font-weight: bold; padding: 4px 6px; }
     </style>
@@ -137,6 +138,7 @@
                             <tr class="bg_l">
                                 <td class="brd2-top brd2-bt" colspan="3" style="padding: 6px 10px;">
                                     <b>Очки репутации: {{ $page->pr->points }}</b>
+                                    &nbsp;|&nbsp;<b>Репутационный рейтинг: {{ number_format($page->player->reputation_rating, 0, '.', ' ') }}</b>
                                     @if($page->currentTier)
                                         &nbsp;—&nbsp;<span style="color:#461C0B;">{{ $page->currentTier->medal_name ?? 'Без звания' }}</span>
                                         @php
@@ -176,18 +178,24 @@
                                         <b style="font-size:11px; color:#461C0B;">Медали:</b><br>
                                         @foreach($tiersWithMedals as $tier)
                                             @if($tier->medal_name)
-                                                @php $isEarned = $page->earnedMedals->contains('id', $tier->id); @endphp
+                                                @php
+                                                    $isEarned = $page->earnedMedals->contains('id', $tier->id);
+                                                    $regularRatingReward = $tier->regularMedalRating();
+                                                @endphp
                                                 @if($isEarned)
                                                     <span class="medal-earned" title="Получена при {{ $tier->min_points }} очках{{ $tier->feat_quest_id && !$tier->feat_medal_name ? ' и выполненном подвиге' : '' }}">
                                                         @if($tier->medal_icon)🏅 @endif{{ $tier->medal_name }}
+                                                        @if($regularRatingReward > 0)<span class="medal-rating">+{{ $regularRatingReward }}</span>@endif
                                                     </span>
                                                 @elseif($tier->feat_quest_id && !$tier->feat_medal_name && $page->pr->points >= $tier->min_points)
                                                     <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
                                                         ⚔ {{ $tier->medal_name }} — требуется подвиг
+                                                        @if($regularRatingReward > 0)<span class="medal-rating">+{{ $regularRatingReward }}</span>@endif
                                                     </span>
                                                 @else
                                                     <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках{{ $tier->feat_quest_id && !$tier->feat_medal_name ? '. Подвиг: ' . ($tier->feat_description ?? '') : '' }}">
                                                         🔒 {{ $tier->medal_name }} ({{ $tier->min_points }}@if($tier->feat_quest_id && !$tier->feat_medal_name) + подвиг @endif)
+                                                        @if($regularRatingReward > 0)<span class="medal-rating">+{{ $regularRatingReward }}</span>@endif
                                                     </span>
                                                 @endif
                                             @endif
@@ -195,15 +203,15 @@
                                             @if($tier->feat_medal_name)
                                                 @if($page->earnedFeatMedals->contains('id', $tier->id))
                                                     <span class="medal-earned" title="Получена за подвиг: {{ $tier->feat_description ?? $tier->feat_medal_name }}">
-                                                        @if($tier->feat_medal_icon)🏅 @endif{{ $tier->feat_medal_name }}
+                                                        @if($tier->feat_medal_icon)🏅 @endif{{ $tier->feat_medal_name }} <span class="medal-rating">+{{ $tier->featMedalRating() }}</span>
                                                     </span>
                                                 @elseif($page->pr->points >= $tier->min_points)
                                                     <span class="medal-locked" title="{{ $tier->feat_description ?? 'Выполните подвиг у НПС' }}">
-                                                        ⚔ {{ $tier->feat_medal_name }} — требуется подвиг
+                                                        ⚔ {{ $tier->feat_medal_name }} — требуется подвиг <span class="medal-rating">+{{ $tier->featMedalRating() }}</span>
                                                     </span>
                                                 @else
                                                     <span class="medal-locked" title="Откроется при {{ $tier->min_points }} очках. Подвиг: {{ $tier->feat_description ?? '' }}">
-                                                        🔒 {{ $tier->feat_medal_name }} ({{ $tier->min_points }} + подвиг)
+                                                        🔒 {{ $tier->feat_medal_name }} ({{ $tier->min_points }} + подвиг) <span class="medal-rating">+{{ $tier->featMedalRating() }}</span>
                                                     </span>
                                                 @endif
                                             @endif

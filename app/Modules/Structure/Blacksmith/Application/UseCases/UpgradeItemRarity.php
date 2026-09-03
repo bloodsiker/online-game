@@ -7,6 +7,7 @@ namespace App\Modules\Structure\Blacksmith\Application\UseCases;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Domain\Enums\ItemRarity;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BlacksmithActionResultDTO;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -14,15 +15,20 @@ use Illuminate\Support\Facades\DB;
 
 class UpgradeItemRarity
 {
-    public function execute(User $user, int $blacksmithId, int $itemId): BlacksmithActionResultDTO
-    {
-        return DB::transaction(function () use ($user, $blacksmithId, $itemId): BlacksmithActionResultDTO {
-            $blacksmith = Structure::query()->whereKey($blacksmithId)->lockForUpdate()->first();
-            if ($blacksmith === null || ! $blacksmith->isBlacksmith()) {
-                return new BlacksmithActionResultDTO(false, 'Кузнец не найден.');
+    public function execute(
+        User $user,
+        int $structureId,
+        int $itemId,
+        string $expectedStructureType = Structure::TYPE_BLACKSMITH,
+        ?ShareItemType $expectedItemType = null,
+    ): BlacksmithActionResultDTO {
+        return DB::transaction(function () use ($user, $structureId, $itemId, $expectedStructureType, $expectedItemType): BlacksmithActionResultDTO {
+            $blacksmith = Structure::query()->whereKey($structureId)->lockForUpdate()->first();
+            if ($blacksmith === null || $blacksmith->type !== $expectedStructureType) {
+                return new BlacksmithActionResultDTO(false, 'Мастерская не найдена.');
             }
             if ((int) $blacksmith->location_id !== (int) $user->location_id) {
-                return new BlacksmithActionResultDTO(false, 'Для апгрейда нужно находиться у кузнеца.');
+                return new BlacksmithActionResultDTO(false, 'Для апгрейда нужно находиться у нужного здания.');
             }
 
             $slot = Backpack::query()
@@ -38,6 +44,9 @@ class UpgradeItemRarity
 
             $source = $slot->item->itemInfo;
             $target = $source->rarityUpgradeTarget;
+            if ($expectedItemType !== null && ($source->type !== $expectedItemType || $target?->type !== $expectedItemType)) {
+                return new BlacksmithActionResultDTO(false, 'В этой мастерской можно улучшать только инструменты.');
+            }
             if ($target === null) {
                 return new BlacksmithActionResultDTO(false, 'Для этого предмета апгрейд не настроен.');
             }

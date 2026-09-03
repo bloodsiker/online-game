@@ -1297,6 +1297,10 @@
     let playerStateFallbackTimer = null;
     let playerPresenceTimer = null;
     let playerStateChannel = null;
+    let onlinePresenceChannel = null;
+    let onlinePresenceReady = false;
+    let onlinePresenceLocationId = @js((int) (auth()->user()?->location_id ?? 0));
+    const onlinePresenceUsers = new Map();
 
     function applyPlayerState(state) {
         if (!state) return;
@@ -1363,6 +1367,7 @@
     function sendPlayerPresence() {
         if (!playerStateChannel) return;
         playerStateChannel.whisper('player-presence', {sent_at: Date.now()});
+        syncPublicOnlineCount();
     }
 
     function startPlayerPresence() {
@@ -1421,6 +1426,109 @@
         }
     }
 
+    function normalizeOnlineUser(user) {
+        if (!user || Number(user.id) <= 0) return null;
+
+        return {
+            id: Number(user.id),
+            name: String(user.name || ''),
+            lvl: Number(user.lvl || 0),
+            location_id: Number(user.location_id || 0),
+            time: String(user.time || ''),
+            is_online: true,
+            clan_id: user.clan_id ? Number(user.clan_id) : null,
+            clan_name: user.clan_name || null,
+            clan_icon: user.clan_icon || null,
+            info_url: user.info_url || ('{{ url('/info/u') }}/' + Number(user.id)),
+        };
+    }
+
+    function sendOnlinePresenceSnapshot(targetWindow = null) {
+        if (!onlinePresenceReady) return;
+
+        const users = Array.from(onlinePresenceUsers.values())
+            .sort((left, right) => left.name.localeCompare(right.name, 'ru'));
+        const message = {
+            type: 'onlinePresenceSnapshot',
+            count: users.length,
+            viewerLocationId: onlinePresenceLocationId,
+            users,
+        };
+
+        if (targetWindow) {
+            targetWindow.postMessage(message, window.location.origin);
+            return;
+        }
+
+        try {
+            const chatFrame = document.getElementById('chat-frame');
+            const whoFrame = chatFrame?.contentDocument?.getElementById('who-frame');
+            whoFrame?.contentWindow?.postMessage(message, window.location.origin);
+        } catch (error) {
+            // Фрейм списка ещё не загрузился; он запросит снимок после загрузки.
+        }
+    }
+
+    function syncPublicOnlineCount() {
+        if (!onlinePresenceReady || !onlinePresenceChannel || onlinePresenceUsers.size === 0) return;
+
+        const leaderId = Math.min(...onlinePresenceUsers.keys());
+        if (Number(userId) === leaderId) {
+            onlinePresenceChannel.whisper('online-count-sync', {});
+        }
+    }
+
+    function subscribeToOnlinePresence() {
+        if (!window.Echo || userId <= 0 || onlinePresenceChannel) return;
+
+        onlinePresenceChannel = window.Echo.join('online')
+            .here(function (users) {
+                onlinePresenceUsers.clear();
+                users.forEach(function (user) {
+                    const normalized = normalizeOnlineUser(user);
+                    if (normalized) onlinePresenceUsers.set(normalized.id, normalized);
+                });
+                onlinePresenceReady = true;
+                sendOnlinePresenceSnapshot();
+                syncPublicOnlineCount();
+            })
+            .joining(function (user) {
+                const normalized = normalizeOnlineUser(user);
+                if (normalized) onlinePresenceUsers.set(normalized.id, normalized);
+                sendOnlinePresenceSnapshot();
+                syncPublicOnlineCount();
+            })
+            .leaving(function (user) {
+                onlinePresenceUsers.delete(Number(user.id));
+                sendOnlinePresenceSnapshot();
+                syncPublicOnlineCount();
+            });
+    }
+
+    function refreshOnlinePresenceLocation(locationId) {
+        const nextLocationId = Number(locationId || 0);
+        if (nextLocationId <= 0 || nextLocationId === onlinePresenceLocationId) return;
+
+        onlinePresenceLocationId = nextLocationId;
+        if (window.Echo && onlinePresenceChannel) {
+            window.Echo.leave('online');
+            onlinePresenceChannel = null;
+            onlinePresenceReady = false;
+            onlinePresenceUsers.clear();
+        }
+        subscribeToOnlinePresence();
+    }
+
+    window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin || !event.data) return;
+
+        if (event.data.type === 'requestOnlinePresence') {
+            sendOnlinePresenceSnapshot(event.source);
+        } else if (event.data.type === 'playerLocationChanged') {
+            refreshOnlinePresenceLocation(event.data.locationId);
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const menuFrame = document.getElementById('menu-frame');
         menuFrame?.addEventListener('load', () => applyUnreadMailState(hasUnreadMail));
@@ -1428,6 +1536,7 @@
         subscribeToMailboxUnread();
         syncPlayerState();
         subscribeToPlayerState();
+        subscribeToOnlinePresence();
     });
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) syncPlayerState();
@@ -1435,6 +1544,7 @@
     window.addEventListener('pagehide', function () {
         stopPlayerPresence();
         if (window.Echo && playerId > 0) window.Echo.leave(playerStateChannelName);
+        if (window.Echo && onlinePresenceChannel) window.Echo.leave('online');
     });
 
     function attackMonster(id, monsterId, action) {
