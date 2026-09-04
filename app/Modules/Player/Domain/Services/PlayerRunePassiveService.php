@@ -21,7 +21,7 @@ class PlayerRunePassiveService
     ) {}
 
     /**
-     * @return list<array{type: RunePassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>
+     * @return list<array{type: RunePassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>
      */
     public function resolve(Player $player): array
     {
@@ -60,6 +60,7 @@ class PlayerRunePassiveService
                     'type' => RunePassiveType::from($rune->passive_skill['type']),
                     'value' => (int) $rune->passive_skill['value'],
                     'runeName' => $rune->runeInfo->name,
+                    'runeShareItemId' => $rune->runeInfo->id,
                     'itemName' => $item->itemInfo->name,
                     'handSide' => $handSide,
                 ];
@@ -76,6 +77,7 @@ class PlayerRunePassiveService
                     'type' => RunePassiveType::from($rune->passive_skill['type']),
                     'value' => (int) $rune->passive_skill['value'],
                     'runeName' => $rune->runeInfo->name,
+                    'runeShareItemId' => $rune->runeInfo->id,
                     'itemName' => $item->itemInfo->name,
                     'handSide' => null,
                 ];
@@ -100,7 +102,7 @@ class PlayerRunePassiveService
      * специально: руна оружия в руке всё равно должна сработать, даже если
      * урон в этот раз нанесён заклинанием, а не самим оружием.
      *
-     * @param  list<array{type: RunePassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>  $passives
+     * @param  list<array{type: RunePassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>  $passives
      */
     public function totalValue(array $passives, RunePassiveType $type, ?string $requiredHandSide = null): int
     {

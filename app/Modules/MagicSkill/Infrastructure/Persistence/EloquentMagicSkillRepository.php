@@ -59,6 +59,7 @@ class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSki
             ->map(fn (array $p) => [
                 'itemName' => $p['itemName'],
                 'runeName' => $p['runeName'],
+                'runeShareItemId' => $p['runeShareItemId'],
                 'label' => $p['type']->label(),
                 'description' => $p['type']->description($p['value']),
             ]);

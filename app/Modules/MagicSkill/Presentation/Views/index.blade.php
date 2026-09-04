@@ -134,6 +134,7 @@
             align-items: center;
             gap: 4px;
         }
+        .equip-label.is-saving { cursor: wait; opacity: .65; }
 
         /* Passive skill pills */
         .passive-list {
@@ -189,11 +190,6 @@
             padding: 16px 10px;
             color: #888;
             font-style: italic;
-            text-align: center;
-        }
-
-        .save-row {
-            padding: 6px 10px 10px;
             text-align: center;
         }
 
@@ -284,6 +280,220 @@
         .drag-handle:active { cursor: grabbing; }
         .skill-card.sortable-ghost { opacity: 0.4; }
         .skill-card.sortable-chosen { box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+
+        /* Spellbook redesign: preserve the game's parchment and wooden-frame visual language. */
+        body {
+            background: #e9dfcf url({{ asset('img/bg/bgg.gif') }}) repeat;
+            color: #4a2a16;
+        }
+        .spellbook {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+        .spellbook-hero {
+            position: relative;
+            display: grid;
+            grid-template-columns: 190px minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            column-gap: 12px;
+            overflow: hidden;
+            margin: 0 0 12px;
+            padding: 7px 14px;
+            color: #592a12;
+            border: 1px solid #b57a4c;
+            border-radius: 5px;
+            border-bottom: 1px solid #c58c59;
+            background: linear-gradient(to bottom, rgba(255, 241, 195, .9), rgba(223, 177, 119, .72));
+            box-shadow: inset 0 1px rgba(255, 255, 255, .65);
+        }
+        .spellbook-hero:before {
+            position: absolute;
+            bottom: 3px;
+            left: 12px;
+            width: 40px;
+            height: 20px;
+            content: '';
+            pointer-events: none;
+            background: url({{ asset('main/images/magic_sep.png') }}) left top no-repeat;
+        }
+        .spellbook-title-plate {
+            grid-row: 1 / span 2;
+            width: 190px;
+            height: 47px;
+            align-self: center;
+            box-sizing: border-box;
+            padding: 12px 12px 0;
+            background: url({{ asset('main/images/magic_backing.png') }}) center no-repeat;
+        }
+        .spellbook-title {
+            margin: 0;
+            color: #6a200e;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 15px;
+            letter-spacing: .2px;
+            text-align: center;
+            text-shadow: 0 1px #ffe8bd;
+            white-space: nowrap;
+        }
+        .spellbook-subtitle {
+            align-self: end;
+            margin: 0;
+            color: #6a4125;
+            font-size: 11px;
+        }
+        .spellbook-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 5px;
+        }
+        .spellbook-stat {
+            padding: 3px 7px 1px;
+            color: #ffe9ba;
+            border: 1px solid #743216;
+            border-radius: 10px;
+            background: #8b3517;
+            font-size: 10px;
+            line-height: 12px;
+            font-weight: bold;
+        }
+        .spell-section {
+            margin: 0 0 12px;
+            border: 1px solid #c08a59;
+            border-radius: 5px;
+            background: rgba(255, 248, 216, .35) url({{ asset('img/bg/common-bg.png') }}) repeat;
+            box-shadow: inset 0 0 0 2px rgba(255, 246, 209, .48);
+        }
+        .section-header {
+            position: relative;
+            gap: 7px;
+            margin: 0;
+            padding: 7px 10px 6px;
+            border: 0;
+            border-bottom: 1px solid #c58c59;
+            background: linear-gradient(to bottom, rgba(255, 241, 195, .9), rgba(223, 177, 119, .72));
+            box-shadow: inset 0 1px rgba(255, 255, 255, .65);
+        }
+        .section-header:after {
+            position: absolute;
+            top: 50%;
+            right: 9px;
+            width: 43px;
+            height: 20px;
+            content: '';
+            margin-top: -10px;
+            background: url({{ asset('main/images/magic_sep.png') }}) right top no-repeat;
+        }
+        .section-header:before {
+            width: 22px;
+            height: 20px;
+            content: '';
+            background: url({{ asset('main/images/magic_sep.png') }}) 0 0 no-repeat;
+        }
+        .section-header span {
+            color: #54230e;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 13px;
+            letter-spacing: .2px;
+            text-shadow: 0 1px rgba(255, 255, 255, .6);
+        }
+        .section-count {
+            min-width: 14px;
+            padding: 1px 5px;
+            color: #ffe9ba !important;
+            border: 1px solid #743216;
+            border-radius: 10px;
+            background: #8b3517;
+            font-family: Tahoma, sans-serif !important;
+            font-size: 10px !important;
+            line-height: 13px;
+            text-align: center;
+            text-shadow: none !important;
+        }
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+            gap: 9px;
+            padding: 10px;
+        }
+        .skill-card {
+            width: auto;
+            min-height: 155px;
+            border: 1px solid #a8693f;
+            border-radius: 4px;
+            background: #f7e9bc url({{ asset('img/bg/bgg.gif') }}) repeat;
+            box-shadow: 0 1px 2px rgba(72, 31, 10, .23), inset 0 0 0 2px rgba(255, 251, 221, .44);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .skill-card:hover {
+            z-index: 1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(72, 31, 10, .28), inset 0 0 0 2px rgba(255, 251, 221, .5);
+        }
+        .skill-card-header {
+            min-height: 45px;
+            padding: 5px 7px 5px 5px;
+            color: #ffe6b3;
+            border-bottom-color: #6d2c14;
+            background: #ff000021;
+        }
+        .skill-icon {
+            display: flex;
+            width: 38px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #ffe6b3;
+            border: 1px solid #d9a66d;
+            border-radius: 3px;
+            background: #3b160c;
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .22);
+            font-family: Georgia, serif;
+            font-size: 23px;
+            flex: 0 0 38px;
+        }
+        .skill-icon img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .skill-icon--attack { color: #ffd09c; background: #742111; }
+        .skill-icon--buff { color: #d9f4b0; background: #2d6122; }
+        .skill-icon--heal { color: #c6f5ff; background: #17616d; }
+        .skill-card-name { margin-left: 5px; color: #5a260f; font-size: 12px; }
+        a.skill-card-name { text-decoration: none; }
+        a.skill-card-name:hover { color: #9a3014; text-decoration: underline; }
+        .mana-badge { padding: 2px 5px; border: 1px solid #7ea8d6; background: #315e94; box-shadow: inset 0 1px rgba(255,255,255,.22); }
+        .skill-type-badge { padding: 2px 5px; border: 1px solid rgba(255,255,255,.26); border-radius: 8px; }
+        .drag-handle { order: 4; margin-left: 3px; color: #5b1a0d; }
+        .skill-card-body { padding: 7px 8px; }
+        .skill-dmg { margin-bottom: 5px; padding: 3px 5px; border-left: 3px solid #a83c22; background: rgba(145, 56, 23, .08); }
+        .skill-dmg-value { color: #8d2616; font-size: 12px; }
+        .skill-desc { min-height: 30px; margin-bottom: 6px; color: #5d4530; line-height: 1.35; }
+        .skill-effect-row { padding: 2px 0; border-bottom: 1px dotted rgba(138, 91, 51, .35); }
+        .skill-effect-name { color: #346c22; }
+        .skill-cooldown-info { margin: 5px 0; color: #765236; }
+        .skill-equip-row, .skill-use-row { border-top-color: #d3a270; }
+        .skill-equip-row { margin-top: 5px; }
+        .skill-use-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+        .skill-use-row select { flex: 1 1 100%; border-color: #ba8554; background: #fff3cf; }
+        .btn-use { padding: 3px 11px; border-color: #315f1d; border-radius: 2px; background: linear-gradient(to bottom, #79a94c, #3e7722); box-shadow: inset 0 1px rgba(255,255,255,.28); }
+        .passive-list { gap: 7px; padding: 10px; }
+        .passive-card { padding: 7px 9px; border-color: #b47a4c; border-radius: 3px; background: rgba(255, 248, 214, .65); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
+        .passive-icon { width: 11px; height: 11px; margin-top: 2px; border: 1px solid #9f5a27; background: radial-gradient(circle at 35% 35%, #fff3af, #cf752f); box-shadow: 0 0 3px rgba(173,82,26,.65); }
+        .passive-name { color: #5a260f; }
+        a.passive-name { text-decoration: none; }
+        a.passive-name:hover { color: #9a3014; text-decoration: underline; }
+        .effect-badge { border: 1px solid #215d16; background: #337b24; box-shadow: inset 0 1px rgba(255,255,255,.2); }
+        .empty-state { padding: 18px 10px; color: #806144; }
+        @media (max-width: 640px) {
+            .spellbook { padding: 6px; }
+            .spellbook-hero { grid-template-columns: 1fr; row-gap: 5px; }
+            .spellbook-title-plate { grid-row: auto; justify-self: center; }
+            .spellbook-subtitle { text-align: center; }
+            .spellbook-stats { justify-content: center; }
+            .skill-grid { grid-template-columns: 1fr; padding: 7px; }
+            .spellbook-title { font-size: 17px; }
+        }
     </style>
 </head>
 <body>
@@ -310,7 +520,21 @@
                             $buffSkills   = $page->activeSkills->filter(fn($s) => $s->isBuffSkill());
                         @endphp
 
+                        <div class="spellbook">
+                            <div class="spellbook-hero">
+                                <div class="spellbook-title-plate">
+                                    <h1 class="spellbook-title">Книга заклинаний</h1>
+                                </div>
+                                <p class="spellbook-subtitle">Настройте боевые приёмы и управляйте магией в бою.</p>
+                                <div class="spellbook-stats">
+                                    <span class="spellbook-stat">Боевых: {{ $combatSkills->count() }}</span>
+                                    <span class="spellbook-stat">Поддержки: {{ $buffSkills->count() }}</span>
+                                    <span class="spellbook-stat">Пассивных: {{ $page->passiveSkills->count() + $page->runePassives->count() }}</span>
+                                </div>
+                            </div>
+
                         {{-- Combat skills --}}
+                        <section class="spell-section">
                         <div class="section-header">
                             <span>Боевые заклинания</span>
                             <span class="section-count">{{ $combatSkills->count() }}</span>
@@ -323,8 +547,16 @@
                                 @foreach($combatSkills as $skill)
                                     <div class="skill-card" data-id="{{ $skill->id }}">
                                         <div class="skill-card-header">
+                                            <span class="skill-icon skill-icon--attack">
+                                                @if($skill->image)
+                                                    <img src="{{ $skill->image }}" alt="">
+                                                @else
+                                                    ✦
+                                                @endif
+                                            </span>
                                             <span class="drag-handle" title="Перетащить">⠿</span>
-                                            <span class="skill-card-name" title="{{ $skill->name }}">{{ $skill->name }}</span>
+                                            <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
+                                               onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
                                             @if($skill->mana_cost > 0)
                                                 <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
                                             @endif
@@ -356,14 +588,11 @@
                                 @endforeach
                             </div>
 
-                            <div class="save-row">
-                                <span class="butt1 pointer">
-                                    <span><input value="Сохранить" type="button" onclick="saveCombos();"></span>
-                                </span>
-                            </div>
                         @endif
+                        </section>
 
                         {{-- Buff / Heal skills --}}
+                        <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
                             <span>Баффы и исцеление</span>
                             <span class="section-count">{{ $buffSkills->count() }}</span>
@@ -376,8 +605,16 @@
                                 @foreach($buffSkills as $skill)
                                     <div class="skill-card" data-id="{{ $skill->id }}">
                                         <div class="skill-card-header">
+                                            <span class="skill-icon {{ $skill->type === 'heal' ? 'skill-icon--heal' : 'skill-icon--buff' }}">
+                                                @if($skill->image)
+                                                    <img src="{{ $skill->image }}" alt="">
+                                                @else
+                                                    {{ $skill->type === 'heal' ? '✚' : '✹' }}
+                                                @endif
+                                            </span>
                                             <span class="drag-handle" title="Перетащить">⠿</span>
-                                            <span class="skill-card-name" title="{{ $skill->name }}">{{ $skill->name }}</span>
+                                            <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
+                                               onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
                                             @if($skill->mana_cost > 0)
                                                 <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
                                             @endif
@@ -433,8 +670,10 @@
                                 @endforeach
                             </div>
                         @endif
+                        </section>
 
                         {{-- Passive skills --}}
+                        <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
                             <span>Пассивные навыки</span>
                             <span class="section-count">{{ $page->passiveSkills->count() }}</span>
@@ -462,7 +701,8 @@
                                         <div class="passive-icon"></div>
                                         <div>
                                             <div>
-                                                <span class="passive-name">{{ $skill->name }}</span>
+                                                <a href="{{ route('magic_skill.info', $skill->id) }}" class="passive-name"
+                                                   onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
                                                 <span class="passive-desc">{{ $skill->description ?: '—' }}</span>
                                             </div>
                                             @if(!empty($skill->effects))
@@ -480,8 +720,10 @@
                                 @endforeach
                             </div>
                         @endif
+                        </section>
 
                         {{-- Пассивки от рун --}}
+                        <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
                             <span>Пассивки от рун</span>
                             <span class="section-count">{{ $page->runePassives->count() }}</span>
@@ -496,7 +738,9 @@
                                         <div class="passive-icon"></div>
                                         <div>
                                             <div>
-                                                <span class="passive-name">{{ $runePassive['label'] }}</span>
+                                                <a href="{{ route('items.info.share', ['id' => $runePassive['runeShareItemId']]) }}" class="passive-name"
+                                                   title="Открыть информацию о руне «{{ $runePassive['runeName'] }}»"
+                                                   onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $runePassive['label'] }}</a>
                                                 <span class="passive-desc">{{ $runePassive['description'] }}</span>
                                             </div>
                                             <div class="passive-effects">
@@ -507,6 +751,8 @@
                                 @endforeach
                             </div>
                         @endif
+                        </section>
+                        </div>
 
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -591,11 +837,18 @@
         });
     });
 
-    function saveCombos() {
+    function updateEquippedSkills(input) {
+        const label = input.closest('.equip-label');
+        const previousChecked = !input.checked;
+        const inputs = Array.from(document.querySelectorAll('.combo-in-fight'));
         const params = { skills: [] };
-        document.querySelectorAll('.combo-in-fight').forEach(el => {
+
+        inputs.forEach(el => {
             if (el.checked) params.skills.push(el.value);
         });
+
+        inputs.forEach(el => { el.disabled = true; });
+        if (label) label.classList.add('is-saving');
 
         fetch('{{ route('magic_skill.update') }}', {
             method: 'POST',
@@ -605,10 +858,30 @@
             },
             body: JSON.stringify(params)
         })
-        .then(r => r.json())
-        .then(data => window.parent.showErrorIframe(data.message || 'Сохранено'))
-        .catch(() => window.parent.showErrorIframe('Ошибка при сохранении'));
+        .then(async r => {
+            const data = await r.json();
+
+            if (!r.ok) throw new Error(data.message || 'Ошибка при сохранении');
+
+            return data;
+        })
+        .catch(error => {
+            input.checked = previousChecked;
+            window.parent.showErrorIframe(error.message || 'Ошибка при сохранении');
+        })
+        .finally(() => {
+            inputs.forEach(el => { el.disabled = false; });
+            if (label) label.classList.remove('is-saving');
+        });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.combo-in-fight').forEach(function (input) {
+            input.addEventListener('change', function () {
+                updateEquippedSkills(input);
+            });
+        });
+    });
 
     @if(session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

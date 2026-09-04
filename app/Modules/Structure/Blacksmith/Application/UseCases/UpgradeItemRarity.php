@@ -44,6 +44,9 @@ class UpgradeItemRarity
 
             $source = $slot->item->itemInfo;
             $target = $source->rarityUpgradeTarget;
+            if ($expectedStructureType === Structure::TYPE_BLACKSMITH && $source->type === ShareItemType::TOOL) {
+                return new BlacksmithActionResultDTO(false, 'Инструменты улучшаются в мастерской инструментов.');
+            }
             if ($expectedItemType !== null && ($source->type !== $expectedItemType || $target?->type !== $expectedItemType)) {
                 return new BlacksmithActionResultDTO(false, 'В этой мастерской можно улучшать только инструменты.');
             }

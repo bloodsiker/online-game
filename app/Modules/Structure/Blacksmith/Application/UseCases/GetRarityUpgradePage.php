@@ -39,6 +39,8 @@ class GetRarityUpgradePage
 
                 if ($itemType !== null) {
                     $query->where('type', $itemType->value);
+                } else {
+                    $query->where('type', '!=', ShareItemType::TOOL->value);
                 }
             })
             ->get();
