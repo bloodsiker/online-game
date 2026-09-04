@@ -23,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
+            if (str_starts_with($view->getName(), 'battle::')) {
+                // Бойові в'юхи playerStatsScript не використовують —
+                // не тягнемо skills на кожен удар.
+                $view->with('playerStatsScript', '');
+
+                return;
+            }
+
             if (! auth()->check()) {
                 $view->with('playerStatsScript', '');
 

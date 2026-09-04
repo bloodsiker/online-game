@@ -82,6 +82,7 @@ final readonly class ProcessDuePlayerStates
                     ->orWhere('expires_at', '<=', $now);
             })
             ->distinct()
+            ->limit(2000)
             ->pluck('player_id')
             ->map(static fn (mixed $playerId): int => (int) $playerId);
     }
@@ -101,6 +102,7 @@ final readonly class ProcessDuePlayerStates
                 $query->whereNull('last_regen_at')
                     ->orWhere('last_regen_at', '<=', $now->copy()->subSeconds(Player::REGEN_INTERVAL));
             })
+            ->limit(2000)
             ->pluck('id')
             ->map(static fn (mixed $playerId): int => (int) $playerId);
     }

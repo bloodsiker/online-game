@@ -15,5 +15,7 @@ Schedule::command('items:delete-expired-location')
 
 Schedule::call(static fn (): int => app(ProcessDuePlayerStates::class)->execute(now()))
     ->name('players:process-state')
-    ->everySecond()
+    // Реген налаштований раз на REGEN_INTERVAL=5с (див. Player::REGEN_INTERVAL),
+    // щосекундний тік лише сканує таблиці без користі.
+    ->everyFiveSeconds()
     ->withoutOverlapping(1);

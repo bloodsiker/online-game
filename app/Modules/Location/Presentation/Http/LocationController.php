@@ -15,6 +15,7 @@ use App\Modules\Location\Domain\Services\GatheringService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class LocationController extends Controller
 {
@@ -50,6 +51,9 @@ class LocationController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! Cache::add('cd:move:'.$user->id, 1, 1)) {
+            abort(429, 'Слишком быстро. Подождите секунду.');
+        }
 
         return view('location::index', [
             'page' => $this->moveToLocation->execute($user, $direction),
@@ -60,6 +64,9 @@ class LocationController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! Cache::add('cd:move:'.$user->id, 1, 1)) {
+            abort(429, 'Слишком быстро. Подождите секунду.');
+        }
 
         return view('location::index', [
             'page' => $this->passThroughGate->execute($user, $gateId),

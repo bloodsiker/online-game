@@ -40,15 +40,19 @@ readonly class FightOrchestrator
             $battleLocation = $user->currentLocation;
             $fightDTO = new FightDTO;
 
-            $battle = $this->battleRepository->getOneById($id);
+            // Лочимо рядок бою: другий паралельний attack чекає тут,
+            // тому increment('rounds') і round_number послідовні.
+            $battle = Battle::query()->whereKey($id)->lockForUpdate()->firstOrFail();
             $battle->increment('rounds');
 
             $attackedMonster = BattleDetail::with(['locationMonster.monster.effects'])
-                ->where(['location_monster_id' => $monsterId])
+                ->where(['battle_id' => $battle->id, 'location_monster_id' => $monsterId])
                 ->lockForUpdate()
-                ->first();
+                ->firstOrFail();
 
-            $attackedPlayer = BattleDetail::with('user')
+            // Юзер тут не потрібен (фіналізатор смерті його не читає) —
+            // вантажимо лише рядок учасника, щоб не тягнути users+player+race на кожен удар.
+            $attackedPlayer = BattleDetail::query()
                 ->where([
                     'battle_id' => $battle->id,
                     'user_id' => $user->id,

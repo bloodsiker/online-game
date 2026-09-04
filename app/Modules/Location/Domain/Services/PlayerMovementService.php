@@ -14,6 +14,8 @@ use App\Modules\Player\Domain\Services\PlayerEquipmentLoader;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 final readonly class PlayerMovementService
 {
@@ -152,10 +154,25 @@ final readonly class PlayerMovementService
 
     private function applyMove(User $user, int $newLocationId): void
     {
-        GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
-        $user->prev_location_id = $user->location_id;
-        $user->location_id = $newLocationId;
-        $user->save();
+        $oldLocationId = (int) $user->location_id;
+
+        DB::transaction(function () use ($user, $newLocationId): void {
+            $freshUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
+
+            $freshUser->prev_location_id = $freshUser->location_id;
+            $freshUser->location_id = $newLocationId;
+            $freshUser->save();
+
+            // Синхронізуємо передану модель: після move() вона читається мапером.
+            $user->prev_location_id = $freshUser->prev_location_id;
+            $user->location_id = $freshUser->location_id;
+        });
+
+        // Інвалідуємо список "хто на локації" для обох локацій.
+        Cache::forget('who:users_on_location:'.$oldLocationId);
+        Cache::forget('who:users_on_location:'.$newLocationId);
     }
 
     private function getSpeedModifier(int $used, int $capacity): float

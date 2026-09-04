@@ -494,6 +494,10 @@ readonly class AttackService
 
     public function handleMonsterDeath(Player $player, MonsterOnLocation $locationMonster, BattleDetail $attackedMonster, AttackResultDTO $result)
     {
+        // Юзер потрібен свіжим (нагороди пишуть гроші), але без глобального
+        // каскаду player+race — ці сутності в бою вже завантажені.
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')]);
+
         $locationMonster->active = 0;
         $locationMonster->save();
 

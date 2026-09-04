@@ -14,6 +14,7 @@ use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class FightController extends Controller
 {
@@ -35,7 +36,7 @@ class FightController extends Controller
 
         }
 
-        $randomAttackedMonster = BattleDetail::with(['locationMonster'])
+        $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
             ->whereNotNull('location_monster_id')
             ->where(['battle_id' => $battle->id])
             ->where('status', 1)
@@ -51,12 +52,18 @@ class FightController extends Controller
 
         $playerDecorator = $this->statService->resolve($player);
 
+        $battle->loadMissing(['detailsWithMonsters.locationMonster.monster', 'detailsWithUsers.user']);
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')]);
+
         return view('battle::index', compact('battle', 'randomAttackedMonster', 'lastRound', 'player', 'playerDecorator'));
     }
 
     public function attack(int $id, int $monsterId, int $action)
     {
         $user = Auth::user();
+        if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
+            abort(429, 'Слишком быстро. Подождите секунду.');
+        }
         if ($this->expireDungeonSession->execute($user)) {
             session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
 
@@ -69,13 +76,21 @@ class FightController extends Controller
         $player = $fightDTO->getPlayer();
         $playerDecorator = $this->statService->resolve($player);
 
+        // Свіжий юзер для в'юхи (гроші/діаманти), без каскаду player+race.
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')]);
+
         if ($fightDTO->isPlayerDead()) {
             $attackedMonster = $fightDTO->getAttackedMonster();
 
             return view('battle::death', compact('battle', 'player', 'playerDecorator', 'round', 'attackedMonster', 'fightDTO'));
         }
 
-        $randomAttackedMonster = BattleDetail::with(['locationMonster'])
+        // Учасники для side_panel одним заходом: інакше кожен моб тягне
+        // monsters окремим запитом. На завершеному бою зв'язки вже
+        // завантажені фініш-сервісом, loadMissing тоді нічого не робить.
+        $battle->loadMissing(['detailsWithMonsters.locationMonster.monster', 'detailsWithUsers.user']);
+
+        $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
             ->whereNotNull('location_monster_id')
             ->where(['battle_id' => $battle->id, 'status' => 1])
             ->inRandomOrder()
@@ -87,17 +102,23 @@ class FightController extends Controller
     public function attackMonster($id)
     {
         $user = Auth::user();
+        if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
+            abort(429, 'Слишком быстро. Подождите секунду.');
+        }
         $player = $user->player;
 
         //        $battle = $this->battleOrchestrator->handlePlayerAttack($user->currentLocation, $id);
         $battle = $this->battleService->attackMonster($user->currentLocation, $id);
 
-        $randomAttackedMonster = BattleDetail::with(['locationMonster'])
+        $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
             ->where(['location_monster_id' => $id])
             ->where('status', 1)
             ->first();
 
         $playerDecorator = $this->statService->resolve($player);
+
+        $battle->loadMissing(['detailsWithMonsters.locationMonster.monster', 'detailsWithUsers.user']);
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')]);
 
         return view('battle::index', compact('battle', 'randomAttackedMonster', 'player', 'playerDecorator'));
     }
@@ -116,6 +137,9 @@ class FightController extends Controller
     public function runAway($id)
     {
         $user = Auth::user();
+        if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
+            abort(429, 'Слишком быстро. Подождите секунду.');
+        }
         $player = $user->player;
         $prevLocation = $user->prev_location_id;
 
@@ -146,7 +170,7 @@ class FightController extends Controller
                     $battleRound->save();
                 }
             } else {
-                $randomAttackedMonster = BattleDetail::with(['locationMonster'])
+                $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
                     ->whereNotNull('location_monster_id')
                     ->where(['battle_id' => $battle->id])
                     ->where('status', 1)
