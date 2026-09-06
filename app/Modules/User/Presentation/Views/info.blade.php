@@ -62,7 +62,7 @@
         .online-status { color: #4C9A50 !important; font-weight: 700; }
         a { color: #955c4a; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .hero-itm { display: block; padding: 0; width: 50px; height: 50px; border: 0; }
+        .hero-itm { display: block; padding: 0; width: 60px; height: 60px; border: 0; }
         .hero-itm.equipped { background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); cursor: pointer; }
         td.item-hero { position: relative; line-height: 0; }
         .equip-grid { border-collapse: separate; border-spacing: 2px; }

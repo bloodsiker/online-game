@@ -30,7 +30,7 @@
         .tbl-shp-sides.ls { background-position: left top; background-repeat: repeat-y; }
         .tbl-shp-sides.rs { background-position: right top; background-repeat: repeat-y; }
         .tbl-usi_bg { background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }}); background-repeat: repeat; }
-        .relic-img { width: 50px; height: 50px; object-fit: contain; background: rgba(0,0,0,.05); }
+        .relic-img { width: 60px; height: 60px; object-fit: contain; background: rgba(0,0,0,.05); }
         .relic-badge { font-weight: 700; padding: 1px 5px; border-radius: 3px; color: #fff; font-size: 10px; }
         .relic-badge.active { background: #489200; }
         .relic-badge.inactive { background: #999; }

@@ -7,3 +7,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/tool-workshop/{id}', [ToolWorkshopController::class, 'index'])->name('tool_workshop');
 Route::post('/tool-workshop/{id}/upgrade', [ToolWorkshopController::class, 'upgrade'])->name('tool_workshop.upgrade.process');
+Route::post('/tool-workshop/{id}/craft/{recipe}', [ToolWorkshopController::class, 'craft'])->name('tool_workshop.craft');

@@ -27,8 +27,8 @@
 <table class="frames" cellspacing="0" cellpadding="0">
     <tbody>
     <tr>
-        <td width="290px" valign="top">
-            <iframe id="equip-frame" name="equip" src="{{ route('backpack.equip') }}"></iframe>
+        <td width="330px" valign="top">
+            <iframe id="equip-frame" name="equip" scrolling="no" src="{{ route('backpack.equip') }}"></iframe>
         </td>
         <td valign="top">
             <iframe id="bag-frame" name="bag" src="{{ route('backpack.bag', array_filter(['group' => request('group', 'main'), 'sid' => request('sid')])) }}"></iframe>

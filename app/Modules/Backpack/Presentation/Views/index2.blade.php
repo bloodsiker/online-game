@@ -23,8 +23,8 @@
         }
         .hero-itm {
             padding: 1px;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
         }
         td.itm {
@@ -32,8 +32,8 @@
             white-space: nowrap;
         }
         img.itm {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
             margin: 0px 10px 0px 0px;
             padding: 0px;

@@ -113,9 +113,9 @@
                 </tr>
                 @forelse($claims as $claim)
                     <tr height="17" class="brd2-top brd2 claim-highlight" align="center">
-                        <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
+                        <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
                             @if($claim->item->itemInfo->image)
-                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="margin: 1px; background: url({{ asset($claim->item->itemInfo->image) }}); background-size: 50px 50px;">
+                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="margin: 1px; background: url({{ asset($claim->item->itemInfo->image) }}); background-size: 60px 60px;">
                                     <tbody>
                                     <tr>
                                         <td valign="bottom">

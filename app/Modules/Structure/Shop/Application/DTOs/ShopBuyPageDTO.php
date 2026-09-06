@@ -14,6 +14,7 @@ final readonly class ShopBuyPageDTO
         public int $shopId,
         public string $shopType,
         public string $shopName,
+        public ?string $shopDescription,
         public int $money,
         public int $diamonds,
         public array $items,

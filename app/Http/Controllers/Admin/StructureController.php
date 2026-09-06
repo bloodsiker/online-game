@@ -21,6 +21,7 @@ class StructureController extends Controller
         if ($request->isMethod('POST')) {
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
+                'description' => ['nullable', 'string'],
                 'type' => ['required', 'string', 'in:'.implode(',', array_keys(Structure::TYPES))],
                 'location_id' => ['nullable', 'integer', 'exists:locations,id'],
                 'npc_id' => ['nullable', 'integer', 'exists:npcs,id'],
@@ -28,6 +29,7 @@ class StructureController extends Controller
 
             $structure = new Structure;
             $structure->name = $data['name'];
+            $structure->description = $data['description'] ?? null;
             $structure->type = $data['type'];
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
@@ -55,6 +57,7 @@ class StructureController extends Controller
     {
         if ($request->isMethod('POST')) {
             $structure->name = $request->input('name');
+            $structure->description = $request->input('description') ?: null;
             $structure->type = $request->input('type');
             $structure->location_id = $request->input('location_id') ?: null;
             $structure->npc_id = $request->input('npc_id') ?: null;

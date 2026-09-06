@@ -140,15 +140,15 @@
         .collection-slot {
             display: inline-block;
             position: relative;
-            width: 52px;
-            height: 70px;
+            width: 62px;
+            height: 80px;
             overflow: hidden;
             vertical-align: top;
         }
         .collection-slot__img {
             display: block;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             padding: 1px;
             background: url(../images/slot-empty.png) no-repeat;
         }

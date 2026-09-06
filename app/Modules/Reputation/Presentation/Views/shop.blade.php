@@ -102,8 +102,8 @@
                             <tbody>
                             <tr>
                                 <td align="left" width="60" valign="top">
-                                    <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover; width: 50px; height: 50px;">
-                                        <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index:10;">
+                                    <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover; width: 60px; height: 60px;">
+                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index:10;">
                                             <tbody>
                                             <tr>
                                                 <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">&nbsp;</td>

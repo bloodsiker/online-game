@@ -232,8 +232,8 @@
                                 </span>
                                 </div>
                             </td>
-                            <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                                <img src="{{ $item->image }}" style="width: 50px; height: 50px" alt="">
+                            <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
+                                <img src="{{ $item->image }}" style="width: 60px; height: 60px" alt="">
                             </td>
                             <td align="left" >
                                 <a href="{{ $item->infoUrl }}"

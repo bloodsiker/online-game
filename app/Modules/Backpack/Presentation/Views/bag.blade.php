@@ -27,8 +27,8 @@
         }
         .hero-itm {
             padding: 1px;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
         }
         td.itm {
@@ -36,8 +36,8 @@
             white-space: nowrap;
         }
         img.itm {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
             margin: 0px 10px 0px 0px;
             padding: 0px;
@@ -273,8 +273,8 @@
                             }
                             .backpack_list li {
                                 list-style: none;
-                                height: 50px;
-                                width: 50px;
+                                height: 60px;
+                                width: 60px;
                                 margin: 1px;
                                 float: left;
                                 position: relative;
@@ -986,7 +986,7 @@
                                                                         @foreach($data->getWeapon() as $item)
                                                                             <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
                                                                                         <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
@@ -1017,7 +1017,7 @@
                                                                         @foreach($data->getShield() as $item)
                                                                             <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
@@ -1045,7 +1045,7 @@
                                                                     @if($data->hasTool())
                                                                         @foreach($data->getTool() as $item)
                                                                             <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
@@ -1087,7 +1087,7 @@
                                                                     @foreach($data->getArmor() as $item)
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1139,7 +1139,7 @@
                                                                         @foreach($data->getBag() as $item)
                                                                             <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
                                                                                         <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
@@ -1170,7 +1170,7 @@
                                                                         @foreach($data->getBelt() as $item)
                                                                             <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
@@ -1222,7 +1222,7 @@
                                                                     @foreach($data->getPotion() as $item)
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1273,7 +1273,7 @@
                                                                     @foreach($data->getFood() as $item)
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1324,7 +1324,7 @@
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1374,7 +1374,7 @@
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1426,7 +1426,7 @@
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1478,7 +1478,7 @@
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1527,7 +1527,7 @@
                                                                         <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
 
-                                                                            <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
@@ -1561,7 +1561,7 @@
                                                             @foreach($data->getBackpack() as $item)
                                                                 <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
 
-                                                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0"
+                                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
                                                                            style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                         <tbody>
                                                                         <tr>
@@ -2199,7 +2199,7 @@
         var base = '{{ url("/items") }}';
         gebi('action_title_amount').innerHTML = 'Выброс предмета';
         gebi('ask_amount_title').innerHTML    = 'Вы уверены, что хотите выбросить предмет?';
-        gebi('art_amount').innerHTML          = _ctxItemImage ? '<img src="' + _ctxItemImage + '" style="width:50px;height:50px;">' : '';
+        gebi('art_amount').innerHTML          = _ctxItemImage ? '<img src="' + _ctxItemImage + '" style="width:60px;height:60px;">' : '';
         gebi('ask_confirm_title_amount').innerHTML = _ctxItemName;
 
         var qtyRow = gebi('drop-qty-row');

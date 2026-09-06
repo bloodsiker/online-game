@@ -58,6 +58,7 @@ class ShopBuyPageViewMapper
             shopId: (int) $shop->id,
             shopType: (string) $shop->type,
             shopName: (string) $shop->name,
+            shopDescription: $shop->description !== null && trim((string) $shop->description) !== '' ? (string) $shop->description : null,
             money: (int) $user->money,
             diamonds: (int) $user->diamond,
             items: $shopItems->map(

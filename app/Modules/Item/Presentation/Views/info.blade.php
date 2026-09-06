@@ -217,6 +217,46 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
+                                                                            @if ($page->recipeCraft !== null)
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Изготавливает</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b><a href="{{ $page->recipeCraft['resultUrl'] }}" style="color: {{ $page->recipeCraft['resultColor'] }};" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $page->recipeCraft['resultName'] }}</a></b></td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Требуемое умение</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->recipeCraft['profession'] }} {{ $page->recipeCraft['level'] }} ур.</b></td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                                @if (count($page->recipeCraft['ingredients']) > 0)
+                                                                                    <tr>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Ингредиенты:</b></td>
+                                                                                    </tr>
+                                                                                    @php $light = ! $light; @endphp
+                                                                                    @foreach ($page->recipeCraft['ingredients'] as $ingredient)
+                                                                                        <tr>
+                                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><a href="{{ $ingredient['url'] }}" style="color: {{ $ingredient['color'] }};" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $ingredient['name'] }}</a></td>
+                                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $ingredient['count'] }} шт.</b></td>
+                                                                                        </tr>
+                                                                                        @php $light = ! $light; @endphp
+                                                                                    @endforeach
+                                                                                @endif
+                                                                            @endif
+
+                                                                            @if (count($page->craftUsages) > 0)
+                                                                                <tr>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Используется в рецептах:</b></td>
+                                                                                </tr>
+                                                                                @php $light = ! $light; @endphp
+                                                                                @foreach ($page->craftUsages as $usage)
+                                                                                    <tr>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><a href="{{ $usage['resultUrl'] }}" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $usage['resultName'] }}</a></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $usage['profession'] }} {{ $usage['level'] }} ур.</b></td>
+                                                                                    </tr>
+                                                                                    @php $light = ! $light; @endphp
+                                                                                @endforeach
+                                                                            @endif
+
                                                                             @if (count($page->requirements) > 0)
                                                                                 <tr>
                                                                                     <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Требования:</b></td>
@@ -304,7 +344,7 @@
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
-                                                                            @if ($page->stats === [] && $page->gatheringRequirement === null && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
+                                                                            @if ($page->stats === [] && $page->gatheringRequirement === null && $page->recipeCraft === null && $page->craftUsages === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
                                                                                 <tr>
                                                                                     <td class="tbl-sts_bg-light" colspan="2">Обычный предмет без особых свойств.</td>
                                                                                 </tr>

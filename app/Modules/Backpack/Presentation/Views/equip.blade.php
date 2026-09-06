@@ -28,8 +28,8 @@
         .hero-itm {
             display: block;
             padding: 0;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
         }
         td.itm {
@@ -37,8 +37,8 @@
             white-space: nowrap;
         }
         img.itm {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border: 0px;
             margin: 0px 10px 0px 0px;
             padding: 0px;
@@ -138,7 +138,7 @@
             left: 0;
             text-align: center;
             background: url({{ asset('img/bg/backpack/slot_button.png') }}) center center / 100% 100% no-repeat;
-            width: 50px;
+            width: 60px;
             height: 13px;
             line-height: 11px;
             text-decoration: none;

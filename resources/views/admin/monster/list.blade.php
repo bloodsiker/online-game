@@ -103,7 +103,7 @@
                                     <td>{{ $monster->id }}</td>
                                     <td>
                                         @if($monster->image)
-                                            <img src="{{ $monster->image }}" style="width:50px;height:50px;object-fit:contain;" alt="">
+                                            <img src="{{ $monster->image }}" style="width:60px;height:60px;object-fit:contain;" alt="">
                                         @endif
                                     </td>
                                     <td>

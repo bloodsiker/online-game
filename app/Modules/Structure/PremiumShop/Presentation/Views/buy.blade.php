@@ -503,11 +503,12 @@
                             <br>
                         </form>
 
-                        <br>
-                        <div class="p10h p2v brd2-all bg_l" align="left">
-                            В магазине Вы можете приобрести необходимую Вам экипировку, снадобья и прочие предметы,
-                            которые помогут Вашему персонажу.
-                        </div>
+                        @if(filled($shop->description))
+                            <br>
+                            <div class="p10h p2v brd2-all bg_l" align="left">
+                                {!! nl2br(e($shop->description)) !!}
+                            </div>
+                        @endif
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
                 </tr>

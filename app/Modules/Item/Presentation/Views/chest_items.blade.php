@@ -14,7 +14,7 @@
         .l0 { background-color: #FFF8EA; }
         .t0 { background: url({{ asset('img/bg/table-header2.jpg') }}) repeat-x top left; background-color: #EDD5C3; }
         td.itm { padding: 0px 10px 0px 0px; white-space: nowrap; }
-        img.itm { width: 50px; height: 50px; border: 0px; margin: 0px 10px 0px 0px; padding: 0px; vertical-align: middle; border-right: 1px solid #CEBBAA; }
+        img.itm { width: 60px; height: 60px; border: 0px; margin: 0px 10px 0px 0px; padding: 0px; vertical-align: middle; border-right: 1px solid #CEBBAA; }
     </style>
 </head>
 <body>

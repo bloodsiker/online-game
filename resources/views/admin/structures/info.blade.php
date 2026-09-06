@@ -67,6 +67,15 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label class="col-form-label">Описание</label>
+                                                <textarea class="form-control" name="description" rows="3">{{ $structure->description }}</textarea>
+                                                <small class="text-muted">Показывается игроку на странице построения. Если пусто — используется стандартный текст.</small>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row mb-3">
                                         <div class="col-sm-12">
                                             <button class="btn btn-primary">Сохранить</button>

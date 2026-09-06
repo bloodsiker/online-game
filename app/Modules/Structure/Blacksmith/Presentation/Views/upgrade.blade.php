@@ -25,7 +25,7 @@
             width: 52px; height: 76px; overflow: hidden; vertical-align: top;
         }
         .collection-slot__img {
-            display: block; width: 50px; height: 50px;
+            display: block; width: 60px; height: 60px;
             padding: 1px; background: url(../images/slot-empty.png) no-repeat;
         }
         .collection-slot__qty {

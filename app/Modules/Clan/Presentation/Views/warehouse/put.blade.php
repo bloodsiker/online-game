@@ -97,9 +97,9 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
-                                <div style="background: url('{{ $item->item->itemInfo->image }}'); background-size: cover; width: 50px; height: 50px; position: relative;">
-                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index: 10;">
+                            <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
+                                <div style="background: url('{{ $item->item->itemInfo->image }}'); background-size: cover; width: 60px; height: 60px; position: relative;">
+                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index: 10;">
                                         <tbody>
                                         <tr>
                                             <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">

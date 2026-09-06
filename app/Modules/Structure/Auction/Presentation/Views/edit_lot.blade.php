@@ -222,7 +222,7 @@
                                         <table class="coll w100" border="0" style="margin-top:6px">
                                             <tbody><tr>
                                                 <td class="p6h" width="60" valign="top">
-                                                    <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url({{ asset($itemEdit->item->itemInfo->image) }}); background-size: 50px 50px;">
+                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url({{ asset($itemEdit->item->itemInfo->image) }}); background-size: 60px 60px;">
                                                         <tbody>
                                                         <tr><td valign="bottom">&nbsp;</td></tr>
                                                         </tbody>

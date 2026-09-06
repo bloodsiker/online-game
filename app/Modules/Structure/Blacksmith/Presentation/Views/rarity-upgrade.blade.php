@@ -62,8 +62,8 @@
         <td class="tbl-shp-sml tt" valign="top" align="left">
             @if($isToolWorkshop ?? false)
                 @include('blacksmith::_tabs', [
-                    'activeTab' => 'tool-workshop',
-                    'tabs' => [[
+                    'activeTab' => $activeTab ?? 'tool-workshop',
+                    'tabs' => $tabs ?? [[
                         'key' => 'tool-workshop',
                         'label' => 'Мастерская',
                         'route' => route('tool_workshop', ['id' => $blacksmith->id]),

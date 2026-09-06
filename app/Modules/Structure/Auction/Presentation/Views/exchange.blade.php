@@ -195,9 +195,9 @@
                 </tr>
                 @forelse($orders as $order)
                     <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
-                        <td class="brd2-top brd2" style="padding: 0" width="50" height="50">
+                        <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
                             @if($order->shareItem->image)
-                                <table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="margin: 1px; background: url({{ asset($order->shareItem->image) }}); background-size: 50px 50px;">
+                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="margin: 1px; background: url({{ asset($order->shareItem->image) }}); background-size: 60px 60px;">
                                     <tbody><tr><td valign="bottom">&nbsp;</td></tr></tbody>
                                 </table>
                             @endif

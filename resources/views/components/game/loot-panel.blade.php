@@ -204,9 +204,9 @@
 
     .loot-icon {
         position: relative;
-        width: 56px;
-        height: 56px;
-        flex: 0 0 56px;
+        width: 60px;
+        height: 60px;
+        flex: 0 0 60px;
         margin-right: 9px;
         border: 1px solid #ad865f;
         background: #ead4b4;
@@ -215,9 +215,9 @@
 
     .loot-icon > img {
         display: block;
-        width: 50px;
-        height: 50px;
-        margin: 3px;
+        width: 60px;
+        height: 60px;
+        margin: 0;
         object-fit: contain;
     }
 

@@ -11,8 +11,10 @@ use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 
 class ItemInfoPageViewMapper
 {
@@ -108,7 +110,87 @@ class ItemInfoPageViewMapper
             backpackUrl: route('backpack'),
             gems: $gems,
             runes: $runes,
+            craftUsages: $this->buildCraftUsages($shareItem),
+            recipeCraft: $this->buildRecipeCraft($shareItem),
         );
+    }
+
+    /**
+     * Для книги рецепта показываем, что по нему изготавливается: результат,
+     * профессию с уровнем и список ингредиентов.
+     *
+     * @return array{profession: string, level: int, resultName: string, resultColor: string, resultUrl: string, ingredients: list<array{name: string, color: string, url: string, count: int}>}|null
+     */
+    private function buildRecipeCraft(ShareItem $shareItem): ?array
+    {
+        if ($shareItem->type !== ShareItemType::RECIPE) {
+            return null;
+        }
+
+        $recipe = ShareRecipe::query()
+            ->where('share_item_id', $shareItem->id)
+            ->with(['kraftItem', 'items'])
+            ->first();
+
+        if ($recipe === null || $recipe->kraftItem === null) {
+            return null;
+        }
+
+        $ingredients = [];
+        foreach ($recipe->items as $ingredient) {
+            $ingredients[] = [
+                'name' => (string) $ingredient->name,
+                'color' => $ingredient->rarity?->color() ?? '#333333',
+                'url' => route('items.info.share', ['id' => $ingredient->id]),
+                'count' => max(1, (int) $ingredient->pivot->count),
+            ];
+        }
+
+        return [
+            'profession' => (string) ($shareItem->skill?->name ?? 'Профессия'),
+            'level' => max(1, (int) $shareItem->skill_lvl),
+            'resultName' => (string) $recipe->kraftItem->name,
+            'resultColor' => $recipe->kraftItem->rarity?->color() ?? '#333333',
+            'resultUrl' => route('items.info.share', ['id' => $recipe->kraftItem->id]),
+            'ingredients' => $ingredients,
+        ];
+    }
+
+    /**
+     * Ресурс сам по себе не имеет профессии, поэтому показываем, в рецептах
+     * какой профессии и какого уровня он используется.
+     *
+     * @return list<array{profession: string, level: int, resultName: string, resultUrl: string}>
+     */
+    private function buildCraftUsages(ShareItem $shareItem): array
+    {
+        if (! $shareItem->type->isGatheringResource()) {
+            return [];
+        }
+
+        $recipes = ShareRecipe::query()
+            ->whereHas('items', fn ($query) => $query->where('share_items.id', $shareItem->id))
+            ->with(['itemInfo.skill', 'kraftItem'])
+            ->get();
+
+        $usages = [];
+        foreach ($recipes as $recipe) {
+            $skill = $recipe->itemInfo?->skill;
+            if ($skill === null || $recipe->kraftItem === null) {
+                continue;
+            }
+
+            $usages[] = [
+                'profession' => (string) $skill->name,
+                'level' => max(1, (int) $recipe->itemInfo->skill_lvl),
+                'resultName' => (string) $recipe->kraftItem->name,
+                'resultUrl' => route('items.info.share', ['id' => $recipe->kraftItem->id]),
+            ];
+        }
+
+        usort($usages, static fn (array $a, array $b) => [$a['profession'], $a['level']] <=> [$b['profession'], $b['level']]);
+
+        return $usages;
     }
 
     private function buildGateLocations(int $shareItemId): ?string

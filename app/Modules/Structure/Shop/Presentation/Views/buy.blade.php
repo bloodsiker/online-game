@@ -307,7 +307,7 @@
                                         <tr @if($isBarterShop) class="barter-store-item__main-row" @endif>
                                             <td align="left" width="60" @unless($isBarterShop) valign="top" @endunless>
                                                 <div class="{{ $isBarterShop ? 'barter-store-item__image' : '' }}"
-                                                     style="position: relative; margin: 8px; background-image: url('{{ $item->image }}'); @unless($isBarterShop) background-size: cover; width: 50px; height: 50px; @endunless">
+                                                     style="position: relative; margin: 8px; background-image: url('{{ $item->image }}'); @unless($isBarterShop) background-size: cover; width: 60px; height: 60px; @endunless">
                                                     <table width="{{ $isBarterShop ? 60 : 50 }}" height="{{ $isBarterShop ? 60 : 50 }}" cellpadding="0" cellspacing="0" border="0" style="position: absolute; inset: 0; z-index: 10;">
                                                         <tbody>
                                                         <tr>
@@ -586,15 +586,12 @@
                                         <br>
                                     </form>
 
-                                    <br>
-                                    <div class="p10h p2v brd2-all bg_l" align="left">
-                                        @if($isBarterShop)
-                                            В «{{ $page->shopName }}» товары можно приобретать за монеты, алмазы и указанные предметы. Все составляющие цены списываются одновременно.
-                                        @else
-                                            В магазине Вы можете приобрести необходимую Вам экипировку, снадобья и прочие предметы,
-                                            которые помогут Вашему персонажу.
-                                        @endif
-                                    </div>
+                                    @if($page->shopDescription !== null)
+                                        <br>
+                                        <div class="p10h p2v brd2-all bg_l" align="left">
+                                            {!! nl2br(e($page->shopDescription)) !!}
+                                        </div>
+                                    @endif
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
                 </tr>

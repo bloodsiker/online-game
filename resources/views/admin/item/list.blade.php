@@ -82,6 +82,8 @@
                                 <th width="150">Тип</th>
                                 <th width="110">Редкость</th>
                                 <th width="120">Слот</th>
+                                <th width="100">Цена</th>
+                                <th width="110">Статус</th>
                                 <th width="190"></th>
                             </tr>
                             </thead>
@@ -91,13 +93,15 @@
                                     <td>{{ $item->id }}</td>
                                     <td>
                                         @if($item->image)
-                                            <img src="{{ $item->image }}" style="width:50px;height:50px;object-fit:contain;" alt="">
+                                            <img src="{{ $item->image }}" style="width:60px;height:60px;object-fit:contain;" alt="">
                                         @endif
                                     </td>
                                     <td><a href="{{ route('admin.item.info', $item->id) }}">{{ $item->name }}</a></td>
                                     <td><span class="badge badge-info">{{ $item->getTypeName() }}</span></td>
                                     <td><span class="badge" style="background-color:{{ $item->rarity->color() }};color:#fff;">{{ $item->rarity->label() }}</span></td>
                                     <td>{{ $item->slot?->label() ?? '—' }}</td>
+                                    <td>{{ format_money($item->price) }}</td>
+                                    <td><span class="badge {{ $item->is_active ? 'badge-success' : 'badge-default' }}">{{ $item->is_active ? 'Активен' : 'Не активен' }}</span></td>
                                     <td>
                                         <a href="{{ route('items.info.share', $item->id) }}"
                                            class="btn btn-xs btn-info"
@@ -111,7 +115,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7" class="text-center text-muted">Нет предметов</td></tr>
+                                <tr><td colspan="9" class="text-center text-muted">Нет предметов</td></tr>
                             @endforelse
                             </tbody>
                         </table>

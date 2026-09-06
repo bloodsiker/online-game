@@ -24,11 +24,11 @@ class CraftProfessionItem
         private readonly PeacefulProfessionExperienceService $professionExperienceService,
     ) {}
 
-    public function execute(User $user, int $structureId, int $recipeId): WorkshopResultDTO
+    public function execute(User $user, int $structureId, int $recipeId, string $expectedStructureType = Structure::TYPE_WORKSHOP): WorkshopResultDTO
     {
-        return DB::transaction(function () use ($user, $structureId, $recipeId): WorkshopResultDTO {
+        return DB::transaction(function () use ($user, $structureId, $recipeId, $expectedStructureType): WorkshopResultDTO {
             $workshop = Structure::query()->whereKey($structureId)->lockForUpdate()->first();
-            if ($workshop === null || ! $workshop->isWorkshop()) {
+            if ($workshop === null || $workshop->type !== $expectedStructureType) {
                 return new WorkshopResultDTO(false, 'Мастерская не найдена.', 404);
             }
             if ((int) $workshop->location_id !== (int) $user->location_id) {

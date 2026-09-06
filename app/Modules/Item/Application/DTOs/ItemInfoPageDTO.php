@@ -12,6 +12,8 @@ final readonly class ItemInfoPageDTO
      * @param  list<array{label: string, value: int, met: bool}>  $requirements
      * @param  list<array{title: string, value: string}>  $gems
      * @param  list<array{title: string, value: string}>  $runes
+     * @param  list<array{profession: string, level: int, resultName: string, resultUrl: string}>  $craftUsages
+     * @param  array{profession: string, level: int, resultName: string, resultColor: string, resultUrl: string, ingredients: list<array{name: string, color: string, url: string, count: int}>}|null  $recipeCraft
      */
     public function __construct(
         public int $itemId,
@@ -35,5 +37,7 @@ final readonly class ItemInfoPageDTO
         public string $backpackUrl,
         public array $gems = [],
         public array $runes = [],
+        public array $craftUsages = [],
+        public ?array $recipeCraft = null,
     ) {}
 }

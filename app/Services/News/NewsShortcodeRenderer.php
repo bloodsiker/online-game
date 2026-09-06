@@ -150,7 +150,7 @@ final class NewsShortcodeRenderer
             : '&nbsp;';
 
         return sprintf(
-            '<a href="%s" class="news-shortcode-item" onmouseover="artifactAltSimple(%s, 2, event);" onmouseout="artifactAltSimple(%s, 0, event);" style="display:inline-block;vertical-align:middle;text-decoration:none;"><table width="50" height="50" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:1px;background:url(%s);background-size:50px 50px;background-repeat:no-repeat;background-position:center;"><tr><td valign="bottom">%s</td></tr></table></a>',
+            '<a href="%s" class="news-shortcode-item" onmouseover="artifactAltSimple(%s, 2, event);" onmouseout="artifactAltSimple(%s, 0, event);" style="display:inline-block;vertical-align:middle;text-decoration:none;"><table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:1px;background:url(%s);background-size:60px 60px;background-repeat:no-repeat;background-position:center;"><tr><td valign="bottom">%s</td></tr></table></a>',
             e(route('items.info.share', ['id' => $item->id])),
             e(json_encode($tooltipId, JSON_UNESCAPED_UNICODE)),
             e(json_encode($tooltipId, JSON_UNESCAPED_UNICODE)),

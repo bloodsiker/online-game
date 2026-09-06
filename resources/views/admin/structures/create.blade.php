@@ -28,6 +28,10 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    <label class="col-form-label">Описание</label>
+                                    <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
+                                </div>
+                                <div class="form-group">
                                     <label class="col-form-label">Локация</label>
                                     <select id="sel-location" name="location_id" class="form-control"></select>
                                 </div>
