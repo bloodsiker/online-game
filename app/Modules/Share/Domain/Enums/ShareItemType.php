@@ -46,6 +46,7 @@ enum ShareItemType: string
             self::ARMOR,
             self::BELT,
             self::BAG,
+            self::ARTIFACT,
         ], true);
     }
 

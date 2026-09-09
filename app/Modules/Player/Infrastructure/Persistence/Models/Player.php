@@ -89,6 +89,11 @@ class Player extends Model
         return $this->hasOne(PlayerEquipment::class, 'player_id');
     }
 
+    public function artifacts(): HasMany
+    {
+        return $this->hasMany(PlayerArtifact::class, 'player_id')->with('item.itemInfo.stats');
+    }
+
     public function skills(): HasMany
     {
         return $this->hasMany(PlayerSkill::class, 'player_id')->with('skill');

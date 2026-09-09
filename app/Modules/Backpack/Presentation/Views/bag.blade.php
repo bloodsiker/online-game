@@ -186,33 +186,33 @@
                             @endphp
                             <tr height="21">
                                 <td width="19"><img id="left_1" src="{{ asset($data->getGroup() === 'main' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_1" align="center" style="background: url({{ asset($data->getGroup() === 'main' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_1" align="center" style="background: url({{ asset($data->getGroup() === 'main' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_1" href="{{ route('backpack.bag', ['group' => 'main']) }}" title="Доспехи, инструменты, амулеты и прочие полезные вещи" class="{{ $data->getGroup() === 'main' ? 'btn_2' : 'btn_1' }}">Вещи</a>
                                 </td>
                                 <td width="19"><img id="right_1" src="{{ asset($data->getGroup() === 'main' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_misc" href="{{ route('backpack.bag', ['group' => 'misc']) }}" title="Разное" class="{{ $data->getGroup() === 'misc' ? 'btn_2' : 'btn_1' }}">Разное</a></td>
                                 <td width="19"><img id="right_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'key' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_2" href="{{ route('backpack.bag', ['group' => 'key']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'key' ? 'btn_2' : 'btn_1' }}">Ключи</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'key' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'quest' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'quest' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'quest' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_2" href="{{ route('backpack.bag', ['group' => 'quest']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'quest' ? 'btn_2' : 'btn_1' }}">Квесты</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'quest' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_3" align="center" style="background: url({{ asset($data->getGroup() === 'artifact' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_3" align="center" style="background: url({{ asset($data->getGroup() === 'artifact' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_3" href="{{ route('backpack.bag', ['group' => 'artifact']) }}" title="Артефакты" class="{{ $data->getGroup() === 'artifact' ? 'btn_2' : 'btn_1' }}">Артефакты</a></td>
                                 <td width="19"><img id="right_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_4" src="{{ asset($data->getGroup() === 'gift' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_4" align="center" style="background: url({{ asset($data->getGroup() === 'gift' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_4" align="center" style="background: url({{ asset($data->getGroup() === 'gift' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_4" href="{{ route('backpack.bag', ['group' => 'gift']) }}" title="Подаренные Вам подарки" class="{{ $data->getGroup() === 'gift' ? 'btn_2' : 'btn_1' }}">Подарки</a></td>
                                 <td width="19"><img id="right_4" src="{{ asset($data->getGroup() === 'gift' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
                             </tr>
@@ -269,12 +269,12 @@
                             .backpack_list {
                                 margin: 0;
                                 padding: 0;
-                                min-height: 60px;
+                                min-height: 71px;
                             }
                             .backpack_list li {
                                 list-style: none;
-                                height: 60px;
-                                width: 60px;
+                                height: 71px;
+                                width: 68px;
                                 margin: 1px;
                                 float: left;
                                 position: relative;
@@ -283,6 +283,23 @@
                             .backpack_list li.item {
                                 zoom: 1;
                                 cursor: pointer;
+                            }
+                            .backpack_list li.item > table {
+                                position: absolute;
+                                top: 5px;
+                                left: 6px;
+                                z-index: 1;
+                                margin: 0 !important;
+                            }
+                            .backpack_list li.item::after {
+                                content: '';
+                                position: absolute;
+                                inset: 0;
+                                z-index: 2;
+                                width: 72px;
+                                height: 71px;
+                                background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+                                pointer-events: none;
                             }
                             .backpack_list li.empty {
                                 clear: both;
@@ -989,7 +1006,7 @@
                                                                                 <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1021,7 +1038,7 @@
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1049,7 +1066,7 @@
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">{{ $item->count }}</div>
@@ -1091,7 +1108,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1142,7 +1159,7 @@
                                                                                 <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1174,7 +1191,7 @@
                                                                                        style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                     <tbody>
                                                                                     <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                             &nbsp;
                                                                                             @if($item->count > 1)
                                                                                                 <div class="bpdig">
@@ -1226,7 +1243,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1277,7 +1294,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1328,7 +1345,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1378,7 +1395,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1430,7 +1447,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1482,7 +1499,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1531,7 +1548,7 @@
                                                                                    style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                                 <tbody>
                                                                                 <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                         &nbsp;
                                                                                         @if($item->count > 1)
                                                                                             <div class="bpdig">
@@ -1565,7 +1582,7 @@
                                                                            style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
                                                                         <tbody>
                                                                         <tr>
-                                                                            <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                            <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
                                                                                 &nbsp;
                                                                                 @if($item->count > 1)
                                                                                     <div class="bpdig">
@@ -2000,12 +2017,17 @@
         _ctxItemDroppable = _droppableItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;
         var type     = _ctxItemType;
         var equipped = el.getAttribute('data-equipped') === '1';
+        // Артефакт-талисман (медальон и т.п., см. share_items.count_use === 0) надевается,
+        // а не расходуется — в отличие от артефактов-расходников вроде Сферы возрождения.
+        var wearable = el.getAttribute('data-wearable') === '1';
 
-        var equippable = ['tool','weapon','shield','armor','belt','bag'].indexOf(type) !== -1;
+        var equippable = ['tool','weapon','shield','armor','belt','bag'].indexOf(type) !== -1
+            || wearable;
         // is_use — фолбэк для предметов с инстант-эффектом, чей тип не входит
         // в этот список (например misc): см. share_items.is_use.
-        var usable     = ['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1
-            || el.getAttribute('data-is-use') === '1';
+        var usable     = (['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1
+            || el.getAttribute('data-is-use') === '1')
+            && !wearable;
         var isBook     = type === 'book';
         var isRecipe   = type === 'recipe';
         var isLearnableRecipe = isRecipe && _learnableRecipeItemIds.indexOf(parseInt(_ctxItemId, 10)) !== -1;

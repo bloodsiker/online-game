@@ -270,8 +270,8 @@ let renderItemInfo = (id) => {
     content += '<td width="14" class="aa-tr"><img src="/img/icon/d.gif" width="14" height="24"><br></td></tr>';
     content += '<tr><td class="aa-l" style="padding:0;"></td><td style="padding:0;">';
     content += '<table width="275" style=" margin: 3px" border="0" cellspacing="0" cellpadding="0" class="aa-table-t"><tr>';
-    content += '<td align="center" valign="top" width="60">';
-    content += '<table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="margin:2px; background-image: url(' + a.image + '); background-size: cover; background-position: center;"><tr><td valign="bottom">';
+    content += '<td align="center" valign="top" width="72">';
+    content += '<table width="72" height="71" cellpadding="0" cellspacing="0" border="0" style="margin:2px; background-image: url(/main/images/user-reward-frame.png), url(' + a.image + '); background-size: 72px 71px, 60px 60px; background-position: 0 0, 6px 5px; background-repeat: no-repeat;"><tr><td valign="bottom">';
     if (a.count && a.count !== undefined) {
         content += '<div class="bpdig">' + a.count + '</div>';
     } else if ((a.enchant_icon && a.enchant_icon !== undefined) || (a.oprava && a.oprava !== undefined)) {

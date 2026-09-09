@@ -13,6 +13,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerInjuryService;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerArtifact;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerInjury;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
@@ -210,11 +211,31 @@ class ItemService
             return $error;
         }
 
+        $typeItem = $shareItem->type;
+        $itemId = $backpackItem->item->id;
+
+        if ($typeItem === ShareItemType::ARTIFACT) {
+            $alreadyEquipped = PlayerArtifact::where('player_id', $user->player->id)
+                ->where('share_item_id', $shareItem->id)
+                ->exists();
+            if ($alreadyEquipped) {
+                return 'У вас уже надет артефакт этого типа.';
+            }
+
+            PlayerArtifact::create([
+                'player_id' => $user->player->id,
+                'share_item_id' => $shareItem->id,
+                'item_id' => $itemId,
+            ]);
+            $backpackItem->equipped = 1;
+            $backpackItem->save();
+
+            return null;
+        }
+
         $playerEquip = $user->player->playerEquip;
         $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
-        $typeItem = $shareItem->type;
         $slot = $shareItem->slot;
-        $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
             $leftInjury = $injuriesBySlot->get('hand_left');
@@ -354,9 +375,21 @@ class ItemService
             return;
         }
 
-        $playerEquip = $user->player->playerEquip;
-        $slot = $backpackItem->item->itemInfo->slot;
+        $shareItem = $backpackItem->item->itemInfo;
         $itemId = $backpackItem->item->id;
+
+        if ($shareItem->type === ShareItemType::ARTIFACT) {
+            PlayerArtifact::where('player_id', $user->player->id)
+                ->where('item_id', $itemId)
+                ->delete();
+            $backpackItem->equipped = 0;
+            $backpackItem->save();
+
+            return;
+        }
+
+        $playerEquip = $user->player->playerEquip;
+        $slot = $shareItem->slot;
 
         if ($slot === ShareItemSlot::HAND) {
             if ($playerEquip->hand_left === $itemId) {

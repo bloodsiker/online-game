@@ -21,7 +21,7 @@ enum ItemRarity: string
             self::RARE => '#3300ff',
             self::EPIC => '#990099',
             self::LEGENDARY => '#ff0000',
-            self::HEROIC => '#e09100',
+            self::HEROIC => '#fa6809',
         };
     }
 

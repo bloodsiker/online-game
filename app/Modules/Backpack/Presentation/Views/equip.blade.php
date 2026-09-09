@@ -11,13 +11,22 @@
         }
         html {
             height: 100%;
+            overflow-y: auto;
+            scrollbar-width: none;
         }
         body {
             height: 100%;
             margin: 0;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
             color: #000;
             font-family: Tahoma;
             font-size: 11px;
+        }
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
         }
         a {
             color: #000000;
@@ -134,7 +143,7 @@
             font-size: 11px;
             position: absolute;
             padding: 0;
-            top: 18px;
+            top: 21px;
             left: 0;
             text-align: center;
             background: url({{ asset('img/bg/backpack/slot_button.png') }}) center center / 100% 100% no-repeat;
@@ -150,15 +159,24 @@
             text-decoration: none;
             color: #955C4A;
         }
-        td.item-hero {
+        .item-hero {
             position: relative;
         }
-        td.item-hero:hover .item-put-off {
+        .item-hero:hover .item-put-off {
             display: block;
         }
         .equip-grid {
             border-collapse: separate;
             border-spacing: 2px;
+        }
+        .artifact-grid {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            gap: 2px;
+        }
+        .artifact-grid .item-hero {
+            width: 60px;
         }
     </style>
 
@@ -371,6 +389,28 @@
                 </tr>
                 </tbody>
             </table>
+
+            @if($playerArtifacts->isNotEmpty())
+                <div style="height:15px;font-size:1px;">&nbsp;</div>
+                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                    <tbody>
+                    <tr height="22">
+                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                        <td align="center" class="tbl-usi-hdr mbg">Артефакты</td>
+                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="artifact-grid">
+                    @foreach($playerArtifacts as $playerArtifact)
+                        <div class="item-hero" data-id="{{ $playerArtifact->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                            <img src="{{ $playerArtifact->item->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
+                            <a href="{{ route('items.put_off', ['id' => $playerArtifact->item->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                        </div>
+                    @endforeach
+                </div>
+                <div style="height:10px;font-size:1px;">&nbsp;</div>
+            @endif
         </td>
     </tr>
     </tbody>

@@ -33,6 +33,7 @@ final class UserController
         $user = User::with([
             'player.race',
             'player.playerEquip',
+            'player.artifacts.item.itemInfo',
             'player.skills',
             'player.reputations.reputation.tiers',
             'clanMembership.clan',
@@ -41,8 +42,12 @@ final class UserController
         ])->findOrFail($id);
         $stats = $this->statService->resolve($user->player);
         $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
+        $playerArtifacts = $user->player->artifacts;
         $this->tooltipCollector
-            ->collectFrom(new ItemModelTooltipStrategy($this->equippedItems($user)))
+            ->collectFrom(new ItemModelTooltipStrategy([
+                ...$this->equippedItems($user),
+                ...$playerArtifacts->pluck('item')->filter()->values()->all(),
+            ]))
             ->collectFrom(new PlayerInjuryTooltipStrategy($injuriesBySlot));
 
         $isOnline = $user->last_online_at !== null
@@ -52,6 +57,7 @@ final class UserController
             'user' => $user,
             'stats' => $stats,
             'injuriesBySlot' => $injuriesBySlot,
+            'playerArtifacts' => $playerArtifacts,
             'age' => $this->formatAge($user->created_at),
             'isOnline' => $isOnline,
             'locationPath' => $this->buildLocationPath($user),

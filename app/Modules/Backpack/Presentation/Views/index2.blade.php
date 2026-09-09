@@ -282,33 +282,33 @@
                             @endphp
                             <tr height="21">
                                 <td width="19"><img id="left_1" src="{{ asset($data->getGroup() === 'main' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_1" align="center" style="background: url({{ asset($data->getGroup() === 'main' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_1" align="center" style="background: url({{ asset($data->getGroup() === 'main' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_1" href="{{ route('backpack', ['group' => 'main']) }}" title="Доспехи, инструменты, амулеты и прочие полезные вещи" class="{{ $data->getGroup() === 'main' ? 'btn_2' : 'btn_1' }}">Вещи</a>
                                 </td>
                                 <td width="19"><img id="right_1" src="{{ asset($data->getGroup() === 'main' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_misc" href="{{ route('backpack', ['group' => 'misc']) }}" title="Разное" class="{{ $data->getGroup() === 'misc' ? 'btn_2' : 'btn_1' }}">Разное</a></td>
                                 <td width="19"><img id="right_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'key' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_2" href="{{ route('backpack', ['group' => 'key']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'key' ? 'btn_2' : 'btn_1' }}">Ключи</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'key' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'quest' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'quest' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'quest' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_2" href="{{ route('backpack', ['group' => 'quest']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'quest' ? 'btn_2' : 'btn_1' }}">Квесты</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'quest' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_3" align="center" style="background: url({{ asset($data->getGroup() === 'artifact' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_3" align="center" style="background: url({{ asset($data->getGroup() === 'artifact' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_3" href="{{ route('backpack', ['group' => 'artifact']) }}" title="Артефакты" class="{{ $data->getGroup() === 'artifact' ? 'btn_2' : 'btn_1' }}">Артефакты</a></td>
                                 <td width="19"><img id="right_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_4" src="{{ asset($data->getGroup() === 'gift' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-                                <td id="tab_4" align="center" style="background: url({{ asset($data->getGroup() === 'gift' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 3px;">
+                                <td id="tab_4" align="center" style="background: url({{ asset($data->getGroup() === 'gift' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
                                     <a id="center_4" href="{{ route('backpack', ['group' => 'gift']) }}" title="Подаренные Вам подарки" class="{{ $data->getGroup() === 'gift' ? 'btn_2' : 'btn_1' }}">Подарки</a></td>
                                 <td width="19"><img id="right_4" src="{{ asset($data->getGroup() === 'gift' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
                             </tr>

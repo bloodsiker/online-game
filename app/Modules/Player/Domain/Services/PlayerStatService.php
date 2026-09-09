@@ -57,6 +57,7 @@ class PlayerStatService
 
         $modifiers = [
             ...$this->fromEquipment($player),
+            ...$this->fromArtifacts($player),
             ...$this->fromPassiveSkills($player),
             ...$this->fromBuffs($player),
             ...$this->fromInjuries($player),
@@ -254,25 +255,7 @@ class PlayerStatService
             };
 
             foreach ($item->itemInfo->stats as $stat) {
-                $mappedStat = match ($stat->stat_type) {
-                    ShareItemStatType::ARMOR => 'armor',
-                    ShareItemStatType::HP_MAX => 'hp_max',
-                    ShareItemStatType::AGILITY => 'agility',
-                    ShareItemStatType::INTUITION => 'intuition',
-                    ShareItemStatType::WISDOM => 'wisdom',
-                    ShareItemStatType::INTELLIGENCE => 'intelligence',
-                    ShareItemStatType::DODGE => 'dodge',
-                    ShareItemStatType::CRITICAL => 'critical',
-                    ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
-                    ShareItemStatType::MAGIC_RESISTANCE => 'magic_resistance',
-                    ShareItemStatType::MAGIC_CRITICAL => 'magic_critical',
-                    ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
-                    ShareItemStatType::ENDURANCE => 'endurance',
-                    ShareItemStatType::BLOCK_CHANCE => 'block_chance',
-                    ShareItemStatType::BLOCK_FLAT => 'block_flat',
-                    ShareItemStatType::BLOCK_PERCENT => 'block_percent',
-                    default => null,
-                };
+                $mappedStat = $this->mapStatType($stat->stat_type);
 
                 if ($mappedStat !== null) {
                     $modifiers[] = new StatModifier(
@@ -375,6 +358,59 @@ class PlayerStatService
                 $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handRight->itemInfo->name);
                 $modifiers[] = new StatModifier('right_min_dmg', $weaponMinDamage * $upgradeLvl * 0.05, false, $upgradeSource);
                 $modifiers[] = new StatModifier('right_max_dmg', $weaponMaxDamage * $upgradeLvl * 0.05, false, $upgradeSource);
+            }
+        }
+
+        return $modifiers;
+    }
+
+    private function mapStatType(ShareItemStatType $statType): ?string
+    {
+        return match ($statType) {
+            ShareItemStatType::ARMOR => 'armor',
+            ShareItemStatType::HP_MAX => 'hp_max',
+            ShareItemStatType::AGILITY => 'agility',
+            ShareItemStatType::INTUITION => 'intuition',
+            ShareItemStatType::WISDOM => 'wisdom',
+            ShareItemStatType::INTELLIGENCE => 'intelligence',
+            ShareItemStatType::DODGE => 'dodge',
+            ShareItemStatType::CRITICAL => 'critical',
+            ShareItemStatType::MAGIC_ATTACK => 'magic_attack',
+            ShareItemStatType::MAGIC_RESISTANCE => 'magic_resistance',
+            ShareItemStatType::MAGIC_CRITICAL => 'magic_critical',
+            ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
+            ShareItemStatType::ENDURANCE => 'endurance',
+            ShareItemStatType::BLOCK_CHANCE => 'block_chance',
+            ShareItemStatType::BLOCK_FLAT => 'block_flat',
+            ShareItemStatType::BLOCK_PERCENT => 'block_percent',
+            default => null,
+        };
+    }
+
+    /** @return StatModifier[] */
+    private function fromArtifacts(Player $player): array
+    {
+        $modifiers = [];
+
+        foreach ($player->artifacts as $playerArtifact) {
+            $item = $playerArtifact->item;
+            if ($item === null) {
+                continue;
+            }
+
+            $source = 'artifact:'.$item->itemInfo->name;
+            foreach ($item->itemInfo->stats as $stat) {
+                $mappedStat = $this->mapStatType($stat->stat_type);
+                if ($mappedStat === null) {
+                    continue;
+                }
+
+                $modifiers[] = new StatModifier(
+                    stat: $mappedStat,
+                    value: $stat->value,
+                    isPercent: $stat->value_type === ItemEffectValueType::PERCENT,
+                    source: $source,
+                );
             }
         }
 
