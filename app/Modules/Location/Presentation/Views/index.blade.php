@@ -177,7 +177,7 @@
                                 @else
                                     <a href="{{ $monster->infoUrl }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $monster->name }}</a>
                                 @endif
-                                [<a href="{{ $monster->attackUrl }}">атаковать</a>]
+                                [<a href="{{ $monster->attackUrl }}" onclick="return parent.navigateGameAction?.(this.href) ?? true;">атаковать</a>]
                             </div>
                         @endforeach
                     </div>
@@ -331,10 +331,25 @@
         } catch (e) {}
     })();
 
+    // Родитель читает это поле у текущего фрейма локации, когда отложенный
+    // переход срывается с кулдауна: направления берутся уже с новой локации.
+    window.availableMoves = @js(array_values(array_keys(array_filter(
+        $page->moves,
+        static fn ($move): bool => $move->available,
+    ))));
+
     function actionGoTo(button, direction) {
+        // См. комментарий в battle::index — родитель может быть старее фрейма.
+        if (typeof parent.queueMove === 'function') {
+            parent.queueMove(direction);
+
+            return;
+        }
+
         parent.queueAction(() => {
-            parent.goTo(direction);
-            parent.startCooldown();
+            if (parent.goTo(direction) !== false) {
+                parent.startCooldown();
+            }
         });
     }
 

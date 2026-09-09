@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Item\Application\ItemTooltip;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
@@ -16,6 +17,30 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
  */
 final class ItemTooltipStatsBuilder
 {
+    /** @return array<int, array{title: string, value: string}> */
+    public static function buildForTooltip(ShareItem $item, int $upgradeLvl = 0): array
+    {
+        return array_values(array_filter(
+            self::build($item, $upgradeLvl),
+            static fn (array $stat): bool => $stat['title'] !== ItemEffectType::RESTORE_LOST_EXP->label(),
+        ));
+    }
+
+    /** @return list<array{title: string, value: string}> */
+    public static function buildSpecialInfo(ShareItem $item): array
+    {
+        return $item->effects
+            ->filter(static fn ($effect): bool => $effect->effect_type === ItemEffectType::RESTORE_LOST_EXP)
+            ->map(static fn ($effect): array => [
+                'title' => $effect->effect_type->label(),
+                'value' => $effect->value_type === ItemEffectValueType::PERCENT
+                    ? $effect->value.'%'
+                    : (string) $effect->value,
+            ])
+            ->values()
+            ->all();
+    }
+
     /**
      * @return array<int, array{title: string, value: string}>
      */

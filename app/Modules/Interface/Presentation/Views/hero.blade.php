@@ -287,6 +287,7 @@
             {{ $effect->duration }},
             @js($effect->image),
             @js($effect->description),
+            {{ $effect->totalDuration }},
         );
         @endif
         @endforeach
@@ -312,16 +313,14 @@
     function updateEffectElement(element, effect) {
         element.title = effect.name;
         element.querySelector('.effect-tooltip-name').textContent = effect.name;
-        element.querySelector('.effect-tooltip-description').textContent = effect.description || 'Активный эффект.';
+        element.querySelector('.effect-tooltip-description').innerHTML = effect.description || 'Активный эффект.';
 
         const image = element.querySelector('.effect-icon img');
-        const fallback = element.querySelector('.effect-icon-fallback');
         const source = effect.image || '{{ asset('main/images/effects-unavailable.png') }}';
 
         element.classList.remove('effect-item-ready');
         image.style.display = '';
         image.alt = effect.name;
-        fallback.textContent = effect.name.slice(0, 1).toUpperCase();
 
         if (image.src !== new URL(source, window.location.href).href) {
             image.src = source;
@@ -329,19 +328,29 @@
             image.style.display = image.naturalWidth > 0 ? '' : 'none';
             element.classList.add('effect-item-ready');
         }
+
+        // Контент міг змінити розмір тултипа (HTML-опис) — перераховуємо
+        // позицію, якщо курсор зараз над ефектом.
+        if (element.matches(':hover')) {
+            positionEffectTooltip(element);
+        }
     }
 
-    function upsertTimedEffect(id, name, duration, type, image = null, description = null) {
+    function upsertTimedEffect(id, name, duration, type, image = null, description = null, totalDuration = null) {
         if (!id || duration <= 0) return;
 
         const target = type === 'curse' ? activeEffects.curses : activeEffects.blessings;
         const endTime = Date.now() + (duration * 1000);
+        // Повна тривалість для кільця: за замовчуванням свіжий ефект
+        // (залишок дорівнює повній), з сервера приходить окремо.
+        const total = totalDuration > 0 ? totalDuration * 1000 : duration * 1000;
         const existing = target.get(id);
 
         if (existing) {
             existing.name = name;
             existing.endTime = endTime;
             existing.duration = duration * 1000;
+            existing.total = total;
             existing.image = image;
             existing.description = description;
 
@@ -358,6 +367,7 @@
             name,
             endTime,
             duration: duration * 1000,
+            total,
             image,
             description,
         });
@@ -368,13 +378,13 @@
     }
 
     // Додати благословення
-    function addBlessing(id, name, duration, image = null, description = null) {
-        upsertTimedEffect(id, name, duration, 'blessing', image, description);
+    function addBlessing(id, name, duration, image = null, description = null, totalDuration = null) {
+        upsertTimedEffect(id, name, duration, 'blessing', image, description, totalDuration);
     }
 
     // Додати прокляття
-    function addCurse(id, name, duration, image = null, description = null) {
-        upsertTimedEffect(id, name, duration, 'curse', image, description);
+    function addCurse(id, name, duration, image = null, description = null, totalDuration = null) {
+        upsertTimedEffect(id, name, duration, 'curse', image, description, totalDuration);
     }
 
     // Сервер присылает полный актуальный список. Между heartbeat таймеры
@@ -396,10 +406,18 @@
 
             if (existing) {
                 existing.name = effect.name;
-                existing.endTime = Date.now() + durationMs;
-                existing.duration = Math.max(existing.duration, durationMs);
                 existing.image = effect.image ?? null;
                 existing.description = effect.description ?? null;
+                existing.total = effect.total_duration > 0 ? effect.total_duration * 1000 : durationMs;
+
+                // Heartbeat присылает оставшееся, а не исходное время эффекта.
+                // Не сбрасываем кольцо к 100% на каждом обновлении: продлеваем
+                // клиентский таймер только если сервер действительно обновил эффект.
+                const localRemainingMs = Math.max(0, existing.endTime - Date.now());
+                if (durationMs > localRemainingMs + 1500) {
+                    existing.endTime = Date.now() + durationMs;
+                    existing.duration = durationMs;
+                }
 
                 const element = document.querySelector(`[data-effect-id="${effect.id}"]`);
                 if (element) {
@@ -410,9 +428,9 @@
             }
 
             if (type === 'curse') {
-                addCurse(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null);
+                addCurse(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null, effect.total_duration ?? null);
             } else {
-                addBlessing(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null);
+                addBlessing(effect.id, effect.name, effect.duration, effect.image ?? null, effect.description ?? null, effect.total_duration ?? null);
             }
         });
 
@@ -501,19 +519,36 @@
 
         const padding = 6;
         const gap = 7;
+
+        // Межі блока ефектів: тултип не виходить за них ні ліворуч, ні праворуч,
+        // замість цього звужується і росте по висоті.
+        const block = element.closest('.effects-container') || document.getElementById('effectsContainer');
+        const blockRect = block ? block.getBoundingClientRect() : null;
+        const blockLeft = Math.max(padding, blockRect ? blockRect.left : padding);
+        const blockRight = Math.min(window.innerWidth - padding, blockRect ? blockRect.right : window.innerWidth - padding);
+
+        tooltip.style.maxWidth = '';
+        const availWidth = blockRight - blockLeft - padding * 2;
+        tooltip.style.maxWidth = `${Math.max(120, availWidth)}px`;
+
         const icon = element.getBoundingClientRect();
         const tooltipWidth = tooltip.offsetWidth;
         const tooltipHeight = tooltip.offsetHeight;
+
+        // Клампимо в межі блока навіть якщо тултип ширший за нього.
+        const maxLeft = Math.max(blockLeft, blockRight - tooltipWidth);
         const left = Math.min(
-            Math.max(padding, icon.left + (icon.width - tooltipWidth) / 2),
-            window.innerWidth - tooltipWidth - padding,
+            Math.max(blockLeft, icon.left + (icon.width - tooltipWidth) / 2),
+            maxLeft,
         );
-        const top = icon.top - tooltipHeight - gap >= padding
+
+        const maxTop = Math.max(padding, window.innerHeight - tooltipHeight - padding);
+        let top = icon.top - tooltipHeight - gap >= padding
             ? icon.top - tooltipHeight - gap
-            : Math.min(window.innerHeight - tooltipHeight - padding, icon.bottom + gap);
+            : icon.bottom + gap;
 
         tooltip.style.left = `${left}px`;
-        tooltip.style.top = `${Math.max(padding, top)}px`;
+        tooltip.style.top = `${Math.min(Math.max(padding, top), maxTop)}px`;
     }
 
     function createEffectElement(effect) {
@@ -536,9 +571,7 @@
             image.style.display = 'none';
             div.classList.add('effect-item-ready');
         };
-        const fallback = document.createElement('span');
-        fallback.className = 'effect-icon-fallback';
-        icon.append(image, fallback);
+        icon.append(image);
 
         const tooltip = document.createElement('span');
         tooltip.className = 'effect-tooltip';
@@ -562,13 +595,14 @@
 
         const updateTimer = () => {
             const remaining = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
-            const timeline = document.querySelector(`[data-timeline-id="${id}"]`);
+            const timeline = document.querySelector(`[data-effect-id="${id}"] [data-timeline-id="${id}"]`);
             if (!timeline) return;
 
-            const percent = effect.duration > 0
-                ? Math.max(0, Math.min(100, (effect.endTime - Date.now()) / effect.duration * 100))
+            const percent = effect.total > 0
+                ? Math.max(0, Math.min(100, (effect.endTime - Date.now()) / effect.total * 100))
                 : 0;
-            timeline.style.strokeDasharray = `${percent} 100`;
+            timeline.style.strokeDasharray = '100 100';
+            timeline.style.strokeDashoffset = String(percent - 100);
 
             const duration = document.querySelector(`[data-tooltip-duration-id="${id}"]`);
             if (duration) {
@@ -596,7 +630,7 @@
         if (event.origin !== window.location.origin) return;
 
         // console.log('Получены данные в character:', event.data);
-        const { hp, mp, experience, lvl, blessing, curse, money, diamond, effects, appliedEffects } = event.data;
+        const { hp, mp, experience, lvl, blessing, curse, money, diamond, effects, appliedEffects, removedEffects } = event.data;
 
         if (hp !== undefined) {
             const hpBar = document.getElementById('hpBar');
@@ -646,6 +680,7 @@
                 blessing.duration,
                 blessing.image ?? null,
                 blessing.description ?? null,
+                blessing.total_duration ?? null,
             );
         }
 
@@ -656,6 +691,7 @@
                 curse.duration,
                 curse.image ?? null,
                 curse.description ?? null,
+                curse.total_duration ?? null,
             );
         }
 
@@ -670,6 +706,7 @@
                         effect.duration,
                         effect.image ?? null,
                         effect.description ?? null,
+                        effect.total_duration ?? null,
                     );
                 } else {
                     addBlessing(
@@ -678,7 +715,22 @@
                         effect.duration,
                         effect.image ?? null,
                         effect.description ?? null,
+                        effect.total_duration ?? null,
                     );
+                }
+            });
+        }
+
+        if (Array.isArray(removedEffects)) {
+            // Снимаем иконку сразу по ответу использования предмета, не
+            // дожидаясь ближайшего heartbeat (см. RestoreLostExpStrategy).
+            removedEffects.forEach(id => {
+                if (!id) return;
+
+                if (activeEffects.blessings.has(id)) {
+                    removeEffect(id, 'blessing');
+                } else if (activeEffects.curses.has(id)) {
+                    removeEffect(id, 'curse');
                 }
             });
         }

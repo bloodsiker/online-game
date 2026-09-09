@@ -1232,8 +1232,25 @@
         window.postMessage({ url: url }, '*');
     }
 
+    function isGameActionUrl(url) {
+        return /\/(?:location\/(?:move|gate)|fight\/(?:attack|run-away))\b/.test(url);
+    }
+
     function toLocation(url) {
+        if (isGameActionUrl(url)) {
+            const now = Date.now();
+            if (parent.actionRequestLockedUntil > now) {
+                return false;
+            }
+
+            // Серверный cooldown — 1 секунда. Запас учитывает доставку
+            // запроса, поэтому повторный клик не превращается в HTTP 429.
+            parent.actionRequestLockedUntil = now + 1200;
+        }
+
         document.getElementById('game-frame').contentWindow.location.href = url;
+
+        return true;
     }
 
     function updateIframeWho() {
@@ -1265,7 +1282,7 @@
             south: "{{ route('move-to', ['direction' => 'south']) }}",
         };
 
-        toLocation(routes[direction]);
+        return toLocation(routes[direction]);
     }
 
     // Начальное состояние отдано вместе со страницей; последующие обновления приходят по WebSocket.
@@ -1549,10 +1566,18 @@
 
     function attackMonster(id, monsterId, action) {
         let routeTemplate = "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
-        document.getElementById('game-frame').contentWindow.location.href = routeTemplate
+        return toLocation(routeTemplate
             .replace(':id', id)
             .replace(':monsterId', monsterId)
-            .replace(':action', action);
+            .replace(':action', action));
+    }
+
+    function navigateGameAction(url) {
+        if (!toLocation(url)) return false;
+
+        startCooldown();
+
+        return false;
     }
 
     // Глобальні змінні в головному вікні (parent)
@@ -1560,8 +1585,9 @@
         parent.isCooldown = false;
     }
     if (typeof parent.cooldownDuration === 'undefined') {
-        parent.cooldownDuration = 1000;
+        parent.cooldownDuration = 1200;
     }
+    parent.actionRequestLockedUntil = parent.actionRequestLockedUntil || 0;
 
     parent.pendingAction = null;
 
@@ -1571,6 +1597,93 @@
         } else {
             parent.pendingAction = fn;
         }
+    }
+
+    /**
+     * Доступно ли направление на локации, которая открыта в игровом фрейме
+     * ПРЯМО СЕЙЧАС. Вызывается в момент запуска отложенного перехода, поэтому
+     * читает уже новую локацию, а не ту, где игрок нажал клавишу.
+     */
+    function isMoveAvailable(direction) {
+        try {
+            const moves = document.getElementById('game-frame')?.contentWindow?.availableMoves;
+
+            // Во фрейме открыта не локация (магазин, кузня и т.п.) — не мешаем.
+            return Array.isArray(moves) ? moves.includes(direction) : true;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    /**
+     * Кулдаун может кончиться раньше, чем догрузится новая локация: тогда
+     * availableMoves ещё от старой страницы. Ждём загрузку фрейма, но не
+     * дольше страховочного таймаута.
+     */
+    function whenGameFrameReady(callback) {
+        const frame = document.getElementById('game-frame');
+        if (!frame) return callback();
+
+        let done = false;
+        let timer = null;
+        const run = () => {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            frame.removeEventListener('load', run);
+            callback();
+        };
+
+        try {
+            if (frame.contentDocument?.readyState === 'complete') return run();
+        } catch (e) {
+            return run();
+        }
+
+        frame.addEventListener('load', run);
+        timer = setTimeout(run, 2000);
+    }
+
+    /**
+     * Переход с учётом кулдауна. Отложенный переход проверяет направление
+     * повторно: если на новой локации такого выхода нет — молча отменяем,
+     * вместо перехода с ошибкой «невозможно перейти».
+     */
+    function queueMove(direction) {
+        parent.queueAction(() => {
+            whenGameFrameReady(() => {
+                if (!isMoveAvailable(direction)) return;
+
+                if (parent.goTo(direction) !== false) {
+                    parent.startCooldown();
+                }
+            });
+        });
+    }
+
+    /**
+     * Атака с учётом кулдауна. Цель берётся из боевой страницы, открытой во
+     * фрейме ПРЯМО СЕЙЧАС: отложенный удар срабатывает уже в другом раунде,
+     * где id монстра может быть другим, а бой — вообще закончиться.
+     */
+    function queueAttack(action) {
+        parent.queueAction(() => {
+            whenGameFrameReady(() => {
+                let target = null;
+                try {
+                    target = document.getElementById('game-frame')?.contentWindow?.battleTarget ?? null;
+                } catch (e) {
+                    return;
+                }
+
+                // Бой уже не идёт (монстр убит, побег, смерть) — молча отменяем.
+                if (!target) return;
+
+                if (parent.attackMonster(target.battleId, target.monsterId, action) !== false) {
+                    parent.startCooldown();
+                }
+            });
+        });
     }
 
     function startCooldown() {

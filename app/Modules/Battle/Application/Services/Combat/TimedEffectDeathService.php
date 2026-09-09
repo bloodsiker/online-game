@@ -50,7 +50,7 @@ final readonly class TimedEffectDeathService
             '<p><font color="red"><b>'.$escapedEffectName.'</b></font> наносит смертельный урон.</p>',
         );
 
-        if (! $this->deathFinalizer->finalize($player, $participant, $result)) {
+        if (! $this->deathFinalizer->finalize($player, $participant, $result, $battle)) {
             return false;
         }
 

@@ -137,6 +137,27 @@
             background-image: url(/img/bg/tbl-usi_bg.gif);
             background-repeat: repeat;
         }
+        .shop-item-frame {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 8px;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+        }
+        .shop-item-frame__image {
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .shop-item-frame__hitbox {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            width: 72px;
+            height: 71px;
+        }
     </style>
 
     {!! $playerStatsScript !!}
@@ -196,11 +217,11 @@
                                         <tbody>
                                         <tr>
                                             <td align="left" width="60" valign="top">
-                                                <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover;  width: 60px; height: 60px;">
-                                                    <div class="art-item-bg">
-                                                    </div>
-                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                           style="position: absolute; z-index:10;">
+                                                <div class="shop-item-frame">
+                                                    @if($item->item->image)
+                                                        <img class="shop-item-frame__image" src="{{ asset($item->item->image) }}" alt="{{ $item->item->name }}">
+                                                    @endif
+                                                    <table class="shop-item-frame__hitbox" width="72" height="71" cellpadding="0" cellspacing="0" border="0">
                                                         <tbody>
                                                         <tr>
                                                             <td data-id="{{ $item->item->id }}"
@@ -225,7 +246,7 @@
                                                         <td colspan="3">
                                                             <a href="{{ route('items.info.share', ['id' => $item->item->id]) }}"
                                                                onclick="window.open('{{ route('items.info.share', ['id' => $item->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
-                                                               style="color:#ff0000; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;"
+                                                               style="color: {{ $item->item->rarity->color() }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;"
                                                                class="b">{{ $item->item->name }}</a>
                                                         </td>
                                                     </tr>

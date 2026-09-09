@@ -11,6 +11,7 @@ enum ItemEffectType: string
     case BUFF_ATTACK = 'buff_attack';
     case BUFF_DEFENSE = 'buff_armor';
     case DAMAGE_HP = 'damage_hp';
+    case RESTORE_LOST_EXP = 'restore_lost_exp';
 
     public function label(): string
     {
@@ -20,13 +21,14 @@ enum ItemEffectType: string
             self::BUFF_ATTACK => 'Бафф атаки',
             self::BUFF_DEFENSE => 'Бафф защиты',
             self::DAMAGE_HP => 'Урон',
+            self::RESTORE_LOST_EXP => 'Возврат потерянного при смерти опыта',
         };
     }
 
     public function isInstant(): bool
     {
         return match ($this) {
-            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP => true,
+            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP => true,
             default => false,
         };
     }

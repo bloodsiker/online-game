@@ -74,4 +74,15 @@ class PlayerActiveEffect extends Model
     {
         return $this->type?->isDoT() ?? false;
     }
+
+    /**
+     * Идентификатор, под которым эффект живёт в клиентском effectsContainer
+     * (см. HeroPageViewMapper::mapEffects() и hero.blade.php). Вынесен сюда,
+     * чтобы код, снимающий эффект досрочно (не дожидаясь heartbeat), мог
+     * сослаться на ту же иконку, не задваивая формат строки.
+     */
+    public function frontendId(): string
+    {
+        return ($this->effect?->slug ?? 'effect').'_'.$this->id;
+    }
 }

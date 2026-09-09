@@ -5,7 +5,7 @@ namespace App\Modules\Item\Application\ItemTooltip;
 final class ItemTooltipDto
 {
     public function __construct(
-        public int $id,
+        public int|string $id,
         public string $title,
         public string $color,
         public string $image,
@@ -23,6 +23,8 @@ final class ItemTooltipDto
         public array $requirements = [], // требования для надевания: [{title, value}]
         public array $gems = [],         // установленные камни: [{title, value}]
         public array $runes = [],        // установленные руны: [{title, value}]
+        public ?int $remainingUses = null,
+        public array $specialInfo = [],
     ) {}
 
     public function toArray(): array
@@ -46,6 +48,8 @@ final class ItemTooltipDto
             'requirements' => $this->requirements,
             'gems' => $this->gems,
             'runes' => $this->runes,
+            'remainingUses' => $this->remainingUses,
+            'specialInfo' => $this->specialInfo,
         ];
     }
 }

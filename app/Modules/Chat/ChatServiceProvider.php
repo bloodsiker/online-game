@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Chat;
 
 use App\Modules\Chat\Application\Listeners\SendLevelUpSystemMessage;
+use App\Modules\Chat\Application\Listeners\SendPlayerInjuryMessage;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
+use App\Modules\Player\Domain\Events\PlayerInjured;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
 use Illuminate\Support\Facades\Event;
@@ -27,6 +29,7 @@ class ChatServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(PlayerLeveledUp::class, SendLevelUpSystemMessage::class);
+        Event::listen(PlayerInjured::class, SendPlayerInjuryMessage::class);
         Event::listen(QuestItemDropped::class, SendQuestItemDropMessage::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'chat');

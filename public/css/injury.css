@@ -1,0 +1,72 @@
+.injury-bandage {
+    position: relative;
+    display: block;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+    box-sizing: border-box;
+    cursor: help;
+    background:
+        radial-gradient(circle at 50% 48%, rgba(131, 29, 20, .28) 0 6px, transparent 7px),
+        url('/img/bg/empty_slot.gif') center / cover no-repeat;
+    box-shadow: inset 0 0 7px rgba(70, 31, 15, .42);
+}
+
+.injury-bandage::before {
+    content: '';
+    position: absolute;
+    width: 82px;
+    height: 27px;
+    left: -11px;
+    top: 16px;
+    transform: rotate(-12deg);
+    border-top: 2px solid #c2a47c;
+    border-bottom: 2px solid #9d7a52;
+    background:
+        repeating-linear-gradient(0deg, rgba(107, 76, 43, .13) 0 1px, transparent 1px 5px),
+        linear-gradient(180deg, #f1dfb9, #cdb084 55%, #ead4a7);
+    box-shadow: 0 2px 4px rgba(48, 20, 8, .42);
+}
+
+.injury-bandage::after {
+    content: '+';
+    position: absolute;
+    left: 22px;
+    top: 17px;
+    color: #8d2118;
+    font: bold 24px/24px Georgia, serif;
+    text-shadow: 0 1px #f2d6b1;
+    transform: rotate(-12deg);
+}
+
+.injury-bandage--with-image::before,
+.injury-bandage--with-image::after {
+    display: none;
+}
+
+.injury-bandage__image {
+    display: block;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.injury-bandage__timer {
+    position: absolute;
+    z-index: 1;
+    right: 2px;
+    bottom: 2px;
+    padding: 1px 3px;
+    border: 1px solid rgba(73, 33, 17, .7);
+    color: #fff3d2;
+    background: rgba(58, 25, 13, .82);
+    font: bold 9px/11px Tahoma, sans-serif;
+}
+
+.injury-bandage--2 {
+    box-shadow: inset 0 0 9px rgba(128, 54, 12, .66);
+}
+
+.injury-bandage--3 {
+    box-shadow: inset 0 0 11px rgba(139, 0, 0, .8), 0 0 3px rgba(139, 0, 0, .65);
+}

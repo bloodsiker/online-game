@@ -6,9 +6,7 @@ namespace App\Modules\Player;
 
 use App\Modules\Player\Application\Listeners\RecalculatePlayerModification;
 use App\Modules\Player\Application\Listeners\RecalculatePlayerStats;
-use App\Modules\Player\Application\Listeners\RemoveExpOnDeathListener;
 use App\Modules\Player\Domain\Events\PlayerChangeStat;
-use App\Modules\Player\Domain\Events\PlayerDied;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Player\Domain\Repositories\PlayerRepositoryInterface;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -33,7 +31,6 @@ class PlayerServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(PlayerChangeStat::class, RecalculatePlayerModification::class);
-        Event::listen(PlayerDied::class, RemoveExpOnDeathListener::class);
         Event::listen(PlayerLeveledUp::class, RecalculatePlayerStats::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'player');

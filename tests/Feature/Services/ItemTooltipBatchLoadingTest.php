@@ -7,6 +7,7 @@ namespace Tests\Feature\Services;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -34,6 +35,38 @@ class ItemTooltipBatchLoadingTest extends TestCase
 
         $this->assertSame($singleItemQueries, $sixItemQueries);
         $this->assertLessThanOrEqual(6, $sixItemQueries);
+    }
+
+    public function test_tooltip_contains_remaining_item_uses(): void
+    {
+        DB::table('share_items')->where('id', 1)->update(['count_use' => 5]);
+        DB::table('items')->where('id', 1)->update(['count_use' => 3]);
+        $backpack = Backpack::query()->with('item.itemInfo')->findOrFail(1);
+
+        DB::table('share_item_effects')->insert([
+            'share_item_id' => 1,
+            'effect_type' => 'restore_lost_exp',
+            'value' => 100,
+            'value_type' => 'percent',
+        ]);
+
+        $collector = Mockery::mock(ItemTooltipCollector::class);
+        $collector->shouldReceive('add')
+            ->once()
+            ->with(Mockery::on(
+                fn (ItemTooltipDto $tooltip): bool => $tooltip->toArray()['remainingUses'] === 3
+                    && $tooltip->toArray()['specialInfo'] === [[
+                        'title' => 'Возврат потерянного при смерти опыта',
+                        'value' => '100%',
+                    ]]
+                    && collect($tooltip->toArray()['stats'])->doesntContain('title', 'Возврат потерянного при смерти опыта'),
+            ));
+
+        (new BackpackItemTooltipStrategy([$backpack]))->collect($collector);
+
+        $tooltipScript = file_get_contents(public_path('js/item_tooltip.js'));
+        $this->assertStringContainsString('Количество использований', $tooltipScript);
+        $this->assertGreaterThan(strpos($tooltipScript, 'a.nosell'), strpos($tooltipScript, 'a.remainingUses'));
     }
 
     /**
@@ -95,6 +128,7 @@ class ItemTooltipBatchLoadingTest extends TestCase
             $table->boolean('is_sell')->default(true);
             $table->boolean('is_weight')->default(true);
             $table->integer('price')->default(0);
+            $table->integer('count_use')->default(0);
             $table->timestamps();
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
@@ -107,6 +141,7 @@ class ItemTooltipBatchLoadingTest extends TestCase
             $table->id();
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedInteger('upgrade_lvl')->default(0);
+            $table->integer('count_use')->default(0);
             $table->timestamps();
         });
         Schema::create('backpacks', function (Blueprint $table): void {

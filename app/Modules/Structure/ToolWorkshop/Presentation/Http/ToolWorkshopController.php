@@ -32,6 +32,7 @@ class ToolWorkshopController extends Controller
         'cook' => ['Кулинар', 'Повар'],
         'sorcerer' => ['Колдун'],
         'jeweler' => ['Ювелир'],
+        'craftsman' => ['Ремесленник'],
     ];
 
     private const TAB_LABELS = [
@@ -40,6 +41,7 @@ class ToolWorkshopController extends Controller
         'cook' => 'Кулинар',
         'sorcerer' => 'Колдун',
         'jeweler' => 'Ювелир',
+        'craftsman' => 'Ремесленник',
     ];
 
     public function __construct(

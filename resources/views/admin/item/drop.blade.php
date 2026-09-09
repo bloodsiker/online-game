@@ -35,10 +35,10 @@
                             @forelse($item->monsters->groupBy('name') as $monsterName => $monsters)
                                 @foreach($monsters as $monster)
                                     <tr style="vertical-align: middle">
-                                        <td>{{ $monster->id }}</td>
+                                        <td><a href="{{ route('admin.monster.info', $monster->id) }}">{{ $monster->id }}</a></td>
                                         @if($loop->first)
                                             <td rowspan="{{ $monsters->count() }}" style="vertical-align: middle">
-                                                <strong>{{ $monsterName }}</strong>
+                                                <a href="{{ route('admin.monster.info', $monster->id) }}"><strong>{{ $monsterName }}</strong></a>
                                                 @if($monsters->count() > 1)
                                                     <span class="badge badge-info ms-1">{{ $monsters->count() }} ур.</span>
                                                 @endif

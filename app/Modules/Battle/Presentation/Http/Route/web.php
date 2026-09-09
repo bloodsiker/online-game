@@ -13,12 +13,12 @@ Route::middleware(['auth'])->group(function (): void {
 
     // Мутації стану бою: throttle проти автоклікерів (клієнтський кулдаун обходиться).
     Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])
-        ->middleware('throttle:30,1')
+        ->middleware('throttle:120,1')
         ->name('fight.run-away');
     Route::get('/fight/attack/monster/{id}', [FightController::class, 'attackMonster'])
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:120,1')
         ->name('fight.attack.monster');
     Route::get('/fight/attack/{id}/{monsterId}/{action}', [FightController::class, 'attack'])
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:120,1')
         ->name('fight.attack');
 });

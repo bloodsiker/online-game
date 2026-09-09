@@ -191,12 +191,13 @@
         el.progress.style.width = (progress * 100).toFixed(2) + '%'; el.progressTrack.setAttribute('aria-valuenow', percent); el.workTime.textContent = percent + '%'; if (progress < 1) { window.requestAnimationFrame(updateProgress); return; } if (!state.completing) completeGathering();
     }
     function completeGathering() {
-        state.completing = true; request(urls.complete, 'POST').then(function (data) { state.attempt = null; state.completing = false; state.lastResult = data.ok ? null : data.message; if (data.reward) state.inventory[data.reward.shareItemId] = { ...data.reward, count: (state.inventory[data.reward.shareItemId]?.count || 0) + data.reward.count }; setLog(data.message); renderSelection(); renderBag(); return refreshState(); }).catch(function (error) { state.completing = false; state.lastResult = error.message || 'Не удалось завершить добычу.'; renderSelection(); setLog(state.lastResult, 'is-error'); refreshState(); });
+        state.completing = true; request(urls.complete, 'POST').then(function (data) { state.attempt = null; state.completing = false; state.lastResult = data.ok ? null : data.message; if (data.reward) addRewardToInventory(data.reward); (data.bonusRewards || []).forEach(addRewardToInventory); setLog(data.message); renderSelection(); renderBag(); return refreshState(); }).catch(function (error) { state.completing = false; state.lastResult = error.message || 'Не удалось завершить добычу.'; renderSelection(); setLog(state.lastResult, 'is-error'); refreshState(); });
     }
     function cancelGathering() {
         if (!state.attempt || state.completing) return;
         state.completing = true; el.cancel.disabled = true; request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; el.cancel.disabled = false; setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { state.completing = false; el.cancel.disabled = false; setLog(error.message || 'Не удалось отменить добычу.', 'is-error'); });
     }
+    function addRewardToInventory(item) { state.inventory[item.shareItemId] = { ...item, count: (state.inventory[item.shareItemId]?.count || 0) + item.count }; }
     function renderBag() { const items = Object.values(state.inventory); el.bag.innerHTML = items.length ? items.map(function (item) { return '<li><img src="' + escapeHtml(item.image) + '" alt=""><span>' + escapeHtml(item.name) + '</span><span class="gathering-bag-count">×' + item.count + '</span></li>'; }).join('') : '<li class="empty">пока ничего</li>'; }
     function refreshState() {
         if (state.refreshing) return state.refreshing;

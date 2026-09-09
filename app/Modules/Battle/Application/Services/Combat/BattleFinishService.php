@@ -3,6 +3,8 @@
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\Services\DropService;
+use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
+use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
@@ -19,6 +21,10 @@ readonly class BattleFinishService
 
     public function checkAndFinish(Battle $battle, Location $location, User $dropRecipient): object
     {
+        if ($battle->status->isFinish()) {
+            return (object) ['battle' => $battle];
+        }
+
         $active = BattleDetail::where('battle_id', $battle->id)
             ->whereHas('locationMonster', fn ($q) => $q->where('active', 1))
             ->exists();
@@ -46,5 +52,27 @@ readonly class BattleFinishService
         }
 
         return (object) ['battle' => $battle];
+    }
+
+    /**
+     * Завершает бой без награды, когда в нём не осталось живых игроков.
+     * Монстры при этом остаются активными на локации и могут начать новый бой.
+     */
+    public function finishIfNoLivingPlayers(Battle $battle): bool
+    {
+        $hasLivingPlayers = BattleDetail::query()
+            ->where('battle_id', $battle->id)
+            ->whereNotNull('user_id')
+            ->where('status', BattleDetailStatus::LIFE)
+            ->exists();
+
+        if ($hasLivingPlayers) {
+            return false;
+        }
+
+        $battle->status = BattleStatus::FINISH;
+        $battle->save();
+
+        return true;
     }
 }

@@ -20,8 +20,10 @@ use App\Modules\Item\Application\UseCases\OpenChest;
 use App\Modules\Item\Application\UseCases\PickUpInChest;
 use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
+use App\Modules\Player\Domain\Services\PlayerRevivalService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -44,6 +46,7 @@ class ItemController extends Controller
         private readonly PlayerStatService $statService,
         private readonly BattleEffectService $battleEffectService,
         private readonly LocationReadRepository $locationReadRepository,
+        private readonly PlayerRevivalService $revivalService,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -220,6 +223,26 @@ class ItemController extends Controller
             ], 422);
         }
 
+        $restoresLostExp = $instantEffects->contains(
+            fn ($e) => $e->effect_type === ItemEffectType::RESTORE_LOST_EXP
+        );
+        $revivalEffectId = null;
+        if ($restoresLostExp) {
+            $revivalActive = $this->revivalService->findActiveRedeemable($player);
+            if ($revivalActive === null) {
+                // Проверяем здесь, а не только внутри стратегии: предмет
+                // многоразовый, и заряд не должен списываться впустую.
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Эффект «Возрождение» неактивен — потерянного при смерти опыта для возврата нет.',
+                ], 422);
+            }
+
+            // Берём id до апдейта: стратегия сама удаляет строку эффекта,
+            // а фронту нужно знать, какую иконку снять из effectsContainer.
+            $revivalEffectId = $revivalActive->frontendId();
+        }
+
         $target = null;
         if ($itemDebuffs->isNotEmpty()) {
             $target = Player::query()
@@ -239,6 +262,7 @@ class ItemController extends Controller
         }
 
         $stats = $this->statService->resolve($player);
+        $expBefore = (int) $player->exp;
 
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
@@ -271,6 +295,7 @@ class ItemController extends Controller
 
         $player->refresh();
         $stats = $this->statService->resolve($player);
+        $expRestored = $restoresLostExp ? max(0, (int) $player->exp - $expBefore) : 0;
 
         return response()->json([
             'status' => 'success',
@@ -280,10 +305,21 @@ class ItemController extends Controller
             'hp_max' => $stats->getHpMax(),
             'mp_now' => $player->mp_now,
             'mp_max' => $stats->getMpMax(),
+            'lvl' => $player->lvl,
+            'experience' => $player->getPercentExp(),
+            'exp_restored' => $expRestored,
+            'message' => $expRestored > 0
+                ? sprintf('Возвращено потерянного опыта: %s.', number_format($expRestored, 0, '.', ' '))
+                : null,
             'blessings' => array_map(
                 static fn ($effect): array => $effect->toArray(),
                 $effectResult->getPlayerEffects(),
             ),
+            // Иконки effectsContainer на странице героя, которые нужно снять
+            // сразу, не дожидаясь ближайшего heartbeat — см. RestoreLostExpStrategy.
+            'removed_effects' => $revivalEffectId !== null && $expRestored > 0
+                ? [$revivalEffectId]
+                : [],
         ]);
     }
 

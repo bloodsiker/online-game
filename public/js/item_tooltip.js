@@ -438,6 +438,16 @@ let renderItemInfo = (id) => {
         content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2" class="dark b">' + a.nosell + '</td></tr>';
         bg = !bg;
     }
+    if (a.remainingUses !== null && a.remainingUses !== undefined) {
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td><b>Количество использований</b></td><td class="red b" align="right">' + a.remainingUses + '</td></tr>';
+        bg = !bg;
+    }
+    if (a.specialInfo && a.specialInfo.length > 0) {
+        for (i in a.specialInfo) {
+            content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td class="dark b">' + a.specialInfo[i].title + '</td><td class="red b" align="right">' + a.specialInfo[i].value + '</td></tr>';
+            bg = !bg;
+        }
+    }
     if (a.nofreeze && a.nofreeze != undefined) {
         content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color: #0969a2;">' + a.nofreeze + '</td></tr>';
         bg = !bg;

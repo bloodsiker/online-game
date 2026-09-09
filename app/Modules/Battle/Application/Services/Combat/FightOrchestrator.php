@@ -43,12 +43,11 @@ readonly class FightOrchestrator
             // Лочимо рядок бою: другий паралельний attack чекає тут,
             // тому increment('rounds') і round_number послідовні.
             $battle = Battle::query()->whereKey($id)->lockForUpdate()->firstOrFail();
-            $battle->increment('rounds');
-
-            $attackedMonster = BattleDetail::with(['locationMonster.monster.effects'])
-                ->where(['battle_id' => $battle->id, 'location_monster_id' => $monsterId])
-                ->lockForUpdate()
-                ->firstOrFail();
+            abort_if(
+                $battle->status->isFinish() || (int) $battle->location_id !== (int) $user->location_id,
+                409,
+                'Вы уже покинули этот бой.',
+            );
 
             // Юзер тут не потрібен (фіналізатор смерті його не читає) —
             // вантажимо лише рядок учасника, щоб не тягнути users+player+race на кожен удар.
@@ -59,6 +58,18 @@ readonly class FightOrchestrator
                 ])
                 ->lockForUpdate()
                 ->first();
+            abort_if(
+                $attackedPlayer === null || $attackedPlayer->status->isDeath(),
+                409,
+                'Вы уже покинули этот бой.',
+            );
+
+            $battle->increment('rounds');
+
+            $attackedMonster = BattleDetail::with(['locationMonster.monster.effects'])
+                ->where(['battle_id' => $battle->id, 'location_monster_id' => $monsterId])
+                ->lockForUpdate()
+                ->firstOrFail();
 
             $battleRound = $this->createRound(
                 $battle,

@@ -120,6 +120,8 @@
         window.gebi = window.gebi || function (id) { return document.getElementById(id); };
     </script>
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
+    <script src="{{ asset('js/injury_timer.js') }}?v={{ filemtime(public_path('js/injury_timer.js')) }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/injury.css') }}">
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
@@ -190,45 +192,81 @@
                                                 <tr>
                                                     <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
                                                     <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
-                                                    <td {!! $slotAttrs($equip?->helmetSlot) !!} align="center">
-                                                        <img src="{{ $slotImage($equip?->helmetSlot) }}" class="hero-itm @if($equip?->helmetSlot) equipped @endif" id="i2n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('helmet') ? null : $equip?->helmetSlot) !!} align="center">
+                                                        @if($injury = $injuriesBySlot->get('helmet'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->helmetSlot) }}" class="hero-itm @if($equip?->helmetSlot) equipped @endif" id="i2n1">
+                                                        @endif
                                                     </td>
                                                     <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
                                                     <td class="item-hero" align="center"><img src="{{ $emptySlotImage }}" class="hero-itm"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td {!! $slotAttrs($equip?->shoulderSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->shoulderSlot) }}" class="hero-itm @if($equip?->shoulderSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('shoulder') ? null : $equip?->shoulderSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('shoulder'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->shoulderSlot) }}" class="hero-itm @if($equip?->shoulderSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
                                                     <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
                                                         <img src="{{ asset('img/avatar/dark_elf.jpg') }}" width="130" height="170" border="0" hspace="0" vspace="0">
                                                     </td>
-                                                    <td {!! $slotAttrs($equip?->forearmSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->forearmSlot) }}" class="hero-itm @if($equip?->forearmSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('forearm') ? null : $equip?->forearmSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('forearm'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->forearmSlot) }}" class="hero-itm @if($equip?->forearmSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td {!! $slotAttrs($equip?->handLeft) !!}>
-                                                        <img src="{{ $slotImage($equip?->handLeft) }}" class="hero-itm @if($equip?->handLeft) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_left') ? null : $equip?->handLeft) !!}>
+                                                        @if($injury = $injuriesBySlot->get('hand_left'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->handLeft) }}" class="hero-itm @if($equip?->handLeft) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
-                                                    <td {!! $slotAttrs($equip?->handRight) !!}>
-                                                        <img src="{{ $slotImage($equip?->handRight) }}" class="hero-itm @if($equip?->handRight) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('hand_right') ? null : $equip?->handRight) !!}>
+                                                        @if($injury = $injuriesBySlot->get('hand_right'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->handRight) }}" class="hero-itm @if($equip?->handRight) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td {!! $slotAttrs($equip?->armorSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->armorSlot) }}" class="hero-itm @if($equip?->armorSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('armor') ? null : $equip?->armorSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('armor'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->armorSlot) }}" class="hero-itm @if($equip?->armorSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
-                                                    <td {!! $slotAttrs($equip?->leggingSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->leggingSlot) }}" class="hero-itm @if($equip?->leggingSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('legging') ? null : $equip?->leggingSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('legging'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->leggingSlot) }}" class="hero-itm @if($equip?->leggingSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td {!! $slotAttrs($equip?->chainArmorSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->chainArmorSlot) }}" class="hero-itm @if($equip?->chainArmorSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('chain_armor') ? null : $equip?->chainArmorSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('chain_armor'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->chainArmorSlot) }}" class="hero-itm @if($equip?->chainArmorSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
-                                                    <td {!! $slotAttrs($equip?->shoesSlot) !!}>
-                                                        <img src="{{ $slotImage($equip?->shoesSlot) }}" class="hero-itm @if($equip?->shoesSlot) equipped @endif" id="i4n1">
+                                                    <td {!! $slotAttrs($injuriesBySlot->has('shoes') ? null : $equip?->shoesSlot) !!}>
+                                                        @if($injury = $injuriesBySlot->get('shoes'))
+                                                            @include('backpack::partials.injury_slot', compact('injury'))
+                                                        @else
+                                                            <img src="{{ $slotImage($equip?->shoesSlot) }}" class="hero-itm @if($equip?->shoesSlot) equipped @endif" id="i4n1">
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -369,15 +407,15 @@
                                                             <tbody>
                                                             <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Сила</td>
-                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->strength }}</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getStrength() }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="brd2-top brd2-bt b">Ловкость</td>
-                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->agility }}</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getAgility() }}</td>
                                                             </tr>
                                                             <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Интуиция</td>
-                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->intuition }}</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getInt() }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="brd2-top brd2-bt b">Выносливость</td>
@@ -385,11 +423,11 @@
                                                             </tr>
                                                             <tr class="bg_l">
                                                                 <td class="brd2-top brd2-bt b">Мудрость</td>
-                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->wisdom }}</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getMud() }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="brd2-top brd2-bt b">Интеллект</td>
-                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ (int) $user->player->intelligence }}</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getIntelligence() }}</td>
                                                             </tr>
                                                             </tbody>
                                                         </table>

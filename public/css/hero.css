@@ -415,8 +415,10 @@
 .effect-timeline {
     position: absolute;
     inset: 0;
+    z-index: 2;
     width: 100%;
     height: 100%;
+    overflow: visible;
     transform: rotate(-90deg);
     pointer-events: none;
 }
@@ -434,8 +436,10 @@
 .effect-timeline-progress {
     stroke: #8fd354;
     stroke-linecap: round;
+    stroke-dasharray: 100 100;
+    stroke-dashoffset: 0;
     filter: drop-shadow(0 0 1px rgba(174, 242, 104, 0.75));
-    transition: stroke-dasharray 0.2s linear;
+    transition: stroke-dashoffset 0.1s linear;
 }
 
 .curses .effect-timeline-progress {
@@ -461,14 +465,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.effect-icon-fallback {
-    grid-area: 1 / 1;
-    color: #ffe0a0;
-    font-size: 16px;
-    font-weight: bold;
-    text-shadow: 0 1px 2px #000;
 }
 
 .effect-item.removing {

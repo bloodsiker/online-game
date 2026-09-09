@@ -169,19 +169,19 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Необходим уровень навыка</label>
-                                                <input type="number" class="form-control" name="skill_lvl" value="{{ $item->skill_lvl }}">
+                                                <input type="number" class="form-control" name="skill_lvl" value="{{ $item->skill_lvl }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Опыт навыка за действие</label>
-                                                <input type="number" class="form-control" name="skill_exp" value="{{ $item->skill_exp }}">
+                                                <input type="number" class="form-control" name="skill_exp" value="{{ $item->skill_exp }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Время добычи, сек.</label>
-                                                <input type="number" min="1" class="form-control" name="gathering_time_seconds" value="{{ $item->gathering_time_seconds }}">
+                                                <input type="number" min="1" class="form-control" name="gathering_time_seconds" value="{{ $item->gathering_time_seconds }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Время респавна, сек.</label>
-                                                <input type="number" min="1" class="form-control" name="gathering_respawn_seconds" value="{{ $item->gathering_respawn_seconds }}">
+                                                <input type="number" min="1" class="form-control" name="gathering_respawn_seconds" value="{{ $item->gathering_respawn_seconds }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Семейство инструмента для добычи</label>
@@ -270,6 +270,14 @@
                                                     <option value="0" @selected(!$item->is_slot_usable)>Нет</option>
                                                     <option value="1" @selected($item->is_slot_usable)>Да</option>
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Пункт «Использовать» в рюкзаке</label>
+                                                <select class="form-control" name="is_use">
+                                                    <option value="0" @selected(!$item->is_use)>По типу предмета</option>
+                                                    <option value="1" @selected($item->is_use)>Всегда показывать</option>
+                                                </select>
+                                                <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
                                         </div>
                                     </div>
@@ -815,6 +823,104 @@
         </div>
     </div>
 
+    {{-- СОДЕРЖИМОЕ / ПОБОЧНЫЙ ДРОП --}}
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST || $item->type->isGatheringResource())
+        <div class="row">
+            <div class="col-md-12">
+                <section class="card">
+                    <header class="card-header">
+                        <h2 class="card-title">Содержимое / побочный дроп</h2>
+                        <p class="card-subtitle text-muted">
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+                                При открытии сундука каждый предмет разыгрывается независимо с указанным шансом.
+                            @else
+                                При добыче этого ресурса каждый предмет ниже может дополнительно выпасть независимо, с указанным шансом (например, смола вместе с бревном).
+                            @endif
+                        </p>
+                    </header>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <form action="{{ route('admin.item.chest_content.add', $item->id) }}" method="post">
+                                    @csrf
+                                    <div class="form-group mb-2">
+                                        <label class="col-form-label" for="sel-chest-content-item">Предмет</label>
+                                        <select id="sel-chest-content-item" name="share_item_id" class="form-control" required></select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label class="col-form-label" for="chest-drop-chance">Шанс, %</label>
+                                        <input id="chest-drop-chance" type="number" class="form-control" name="drop_chance" value="100" min="0" max="100" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-2">
+                                                <label class="col-form-label" for="chest-min-count">Мин. количество</label>
+                                                <input id="chest-min-count" type="number" class="form-control" name="min_count" value="1" min="1" max="999999" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-2">
+                                                <label class="col-form-label" for="chest-max-count">Макс. количество</label>
+                                                <input id="chest-max-count" type="number" class="form-control" name="max_count" value="1" min="1" max="999999" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm">Добавить предмет</button>
+                                </form>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered mb-none">
+                                        <thead>
+                                        <tr>
+                                            <th width="45"></th>
+                                            <th>Предмет</th>
+                                            <th width="105">Шанс, %</th>
+                                            <th width="105">Мин.</th>
+                                            <th width="105">Макс.</th>
+                                            <th width="145"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @forelse($item->itemHasItems as $containedItem)
+                                            @php $updateFormId = 'chest-content-update-'.$containedItem->id; @endphp
+                                            <tr style="vertical-align: middle">
+                                                <td>
+                                                    <a href="{{ route('admin.item.info', $containedItem->id) }}" title="Открыть предмет">
+                                                        <img src="{{ $containedItem->image }}" width="36" height="36" style="object-fit:contain" alt="{{ $containedItem->name }}">
+                                                    </a>
+                                                </td>
+                                                <td><a href="{{ route('admin.item.info', $containedItem->id) }}">[{{ $containedItem->id }}] {{ $containedItem->name }}</a></td>
+                                                <td><input form="{{ $updateFormId }}" type="number" class="form-control" name="drop_chance" value="{{ $containedItem->pivot->drop_chance }}" min="0" max="100" required></td>
+                                                <td><input form="{{ $updateFormId }}" type="number" class="form-control" name="min_count" value="{{ $containedItem->pivot->min_count }}" min="1" max="999999" required></td>
+                                                <td><input form="{{ $updateFormId }}" type="number" class="form-control" name="max_count" value="{{ $containedItem->pivot->max_count }}" min="1" max="999999" required></td>
+                                                <td class="text-nowrap">
+                                                    <form id="{{ $updateFormId }}" action="{{ route('admin.item.chest_content.update', ['item' => $item->id, 'containedItem' => $containedItem->id]) }}" method="post" class="d-inline">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="btn btn-xs btn-warning">Сохранить</button>
+                                                    </form>
+                                                    <form action="{{ route('admin.item.chest_content.delete', ['item' => $item->id, 'containedItem' => $containedItem->id]) }}" method="post" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-xs btn-danger" onclick="return confirm('Удалить предмет из сундука?')">Удалить</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="6" class="text-center text-muted">Содержимое не настроено</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    @endif
+
     {{-- РЕЦЕПТ (только для типа RECIPE) --}}
     @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
         <div class="row">
@@ -1018,6 +1124,26 @@
     $('#sel-recipe-item').select2({
         theme: 'bootstrap',
         dropdownParent: $('#modalAddResource'),
+        placeholder: 'Выберите предмет',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+    @endif
+
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+    $('#sel-chest-content-item').select2({
+        theme: 'bootstrap',
         placeholder: 'Выберите предмет',
         allowClear: true,
         ajax: {

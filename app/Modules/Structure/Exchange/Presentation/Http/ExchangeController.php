@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Exchange\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Exchange\Application\DTOs\ExchangeActionDTO;
 use App\Modules\Structure\Exchange\Application\UseCases\ApplyExchange;
 use App\Modules\Structure\Exchange\Application\UseCases\GetExchangePage;
@@ -19,6 +22,7 @@ class ExchangeController extends Controller
     public function __construct(
         private readonly GetExchangePage $getExchangePage,
         private readonly ApplyExchange $applyExchange,
+        private readonly ItemTooltipCollector $tooltipCollector,
     ) {}
 
     public function index(int $id): mixed
@@ -34,8 +38,16 @@ class ExchangeController extends Controller
             return redirect()->back();
         }
 
+        $shareItemIds = collect($page->items)
+            ->flatMap(static fn ($item): array => [$item->fromItemId, $item->toItemId])
+            ->unique()
+            ->values();
+        $shareItems = ShareItem::query()->whereIn('id', $shareItemIds)->get();
+        $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($shareItems));
+
         return view('exchange::index', [
             'page' => $page,
+            'itemTooltipScript' => $this->tooltipCollector->renderScript(),
         ]);
     }
 

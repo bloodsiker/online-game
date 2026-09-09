@@ -10,6 +10,7 @@ final readonly class HeroEffectDTO
         public string $id,
         public string $name,
         public int $duration,
+        public int $totalDuration,
         public bool $isCurse,
         public ?string $image,
         public ?string $description,

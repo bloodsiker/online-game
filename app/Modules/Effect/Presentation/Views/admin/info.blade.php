@@ -28,7 +28,7 @@
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="3">{{ $effect->description }}</textarea>
+                            <textarea id="effect-description-editor" class="form-control" name="description" rows="3">{{ $effect->description }}</textarea>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Картинка</label>
@@ -197,5 +197,11 @@
             </section>
         </div>
     </div>
+
+    @include('admin.layout.summernote', [
+        'selector' => '#effect-description-editor',
+        'height' => 160,
+        'placeholder' => 'Введите описание эффекта',
+    ])
 
 @endsection

@@ -21,14 +21,14 @@
             <div class="fight-body">
 
                 <div class="fight-act">
-                    <b class="butt1 pointer"><b><button type="button" class="butt1" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', 0); return false;">&#9876; Атаковать оружием</button></b></b>
+                    <b class="butt1 pointer"><b><button type="button" class="butt1" id="weapon-attack" title="Атаковать оружием (Q)" onclick="actionAttack(0); return false;">&#9876; Атаковать оружием</button></b></b>
                 </div>
 
                 @if($player->hasEquippedMagicSkill())
                     <div class="fight-spell-label">Сотворить заклинание:</div>
                     @foreach($player->activeMagicSkills as $magicSkill)
                         <div class="fight-act">
-                            <b class="butt1 pointer"><b><button type="button" class="butt1" id="s{{ $loop->index }}" onclick="actionAttack('{{ $battle->id }}', '{{ $randomAttackedMonster->locationMonster->id }}', '{{ $magicSkill->id }}'); return false;">{{ $magicSkill->name }} <span class="fight-mana">{{ $magicSkill->mana_cost }}</span></button></b></b>
+                            <b class="butt1 pointer"><b><button type="button" class="butt1" id="s{{ $loop->index }}" onclick="actionAttack('{{ $magicSkill->id }}'); return false;">{{ $magicSkill->name }} <span class="fight-mana">{{ $magicSkill->mana_cost }}</span></button></b></b>
                         </div>
                     @endforeach
                 @endif
@@ -65,3 +65,12 @@
     </tr>
     </tbody>
 </table>
+
+<script>
+    // Родитель перечитывает цель отсюда в момент запуска отложенной атаки:
+    // к этому времени раунд уже другой, и id из onclick устарели.
+    window.battleTarget = {
+        battleId: {{ $battle->id }},
+        monsterId: {{ $randomAttackedMonster->locationMonster->id }},
+    };
+</script>

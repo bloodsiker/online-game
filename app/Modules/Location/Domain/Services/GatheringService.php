@@ -248,7 +248,7 @@ class GatheringService
             $node = GatheringNode::query()
                 ->whereKey($attempt->gathering_node_id)
                 ->lockForUpdate()
-                ->with(['mapResource.resource.skill'])
+                ->with(['mapResource.resource.skill', 'mapResource.resource.itemHasItems'])
                 ->firstOrFail();
             if ($node->respawn_at !== null && $node->respawn_at->isFuture()) {
                 $attempt->delete();
@@ -274,6 +274,7 @@ class GatheringService
             $count = $isDouble ? 2 : 1;
 
             $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
+            $bonusRewards = $this->rollBonusResources($lockedUser, $resource);
             $profession = $this->awardExperience($player, $resource->skill, max(1, (int) $resource->skill_exp));
 
             [$x, $y] = $this->randomPosition($node->mapResource, (float) $node->x_percent, (float) $node->y_percent);
@@ -288,11 +289,19 @@ class GatheringService
                 ->delay($node->respawn_at)
                 ->afterCommit();
 
+            $message = $isDouble
+                ? sprintf('Удача! Получено: %s ×2 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp))
+                : sprintf('Получено: %s ×1 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp));
+            if ($bonusRewards !== []) {
+                $message .= ' Также найдено: '.implode(', ', array_map(
+                    fn (array $bonus): string => sprintf('%s ×%d', $bonus['name'], $bonus['count']),
+                    $bonusRewards,
+                )).'.';
+            }
+
             return new GatheringActionResultDTO(
                 ok: true,
-                message: $isDouble
-                    ? sprintf('Удача! Получено: %s ×2 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp))
-                    : sprintf('Получено: %s ×1 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp)),
+                message: $message,
                 data: [
                     'reward' => [
                         'shareItemId' => (int) $resource->id,
@@ -301,6 +310,7 @@ class GatheringService
                         'count' => $count,
                         'isDouble' => $isDouble,
                     ],
+                    'bonusRewards' => $bonusRewards,
                     'profession' => $profession,
                     'respawnAt' => $node->respawn_at->toIso8601String(),
                 ],
@@ -395,6 +405,37 @@ class GatheringService
             'canGather' => $blocked === null,
             'blockedReason' => $blocked,
         ];
+    }
+
+    /**
+     * Побочные предметы, которые могут выпасть вместе с основным ресурсом
+     * (например, смола вместе с бревном) — использует тот же `itemHasItems`,
+     * что и содержимое сундуков.
+     *
+     * @return list<array{shareItemId: int, name: string, image: string, count: int}>
+     */
+    private function rollBonusResources(User $user, ShareItem $resource): array
+    {
+        $bonuses = [];
+
+        foreach ($resource->itemHasItems as $bonusItem) {
+            $chance = min(100, max(0, (int) $bonusItem->pivot->drop_chance));
+            if (random_int(1, 100) > $chance) {
+                continue;
+            }
+
+            $count = random_int((int) $bonusItem->pivot->min_count, (int) $bonusItem->pivot->max_count);
+            $this->backpackService->addItemByShareItem($user, $bonusItem, $count);
+
+            $bonuses[] = [
+                'shareItemId' => (int) $bonusItem->id,
+                'name' => (string) $bonusItem->name,
+                'image' => $this->gatheringImage($bonusItem),
+                'count' => $count,
+            ];
+        }
+
+        return $bonuses;
     }
 
     private function gatheringImage(ShareItem $resource): string

@@ -118,15 +118,13 @@
 	                                                    <h2 class="card-title" style="font-size: 14px;">
 	                                                        {{ $category->name }}
 	                                                        <span class="badge badge-primary">{{ $categoryItems->count() }}</span>
-	                                                        @if($structure->isBarterShop())
-	                                                            <form action="{{ route('admin.structure.info.category.delete', [$structure->id, $category->id]) }}"
-	                                                                  method="post" class="d-inline ms-2"
-	                                                                  onsubmit="return confirm('Убрать категорию из магазина? Товары останутся без категории.');">
-	                                                                @csrf
-	                                                                @method('DELETE')
-	                                                                <button class="btn btn-xs btn-danger">Убрать категорию</button>
-	                                                            </form>
-	                                                        @endif
+	                                                        <form action="{{ route('admin.structure.info.category.delete', [$structure->id, $category->id]) }}"
+	                                                              method="post" class="d-inline ms-2"
+	                                                              onsubmit="return confirm('Убрать категорию из магазина? Товары останутся без категории.');">
+	                                                            @csrf
+	                                                            @method('DELETE')
+	                                                            <button class="btn btn-xs btn-danger">Удалить категорию</button>
+	                                                        </form>
 	                                                    </h2>
 	                                                </header>
 	                                                <div class="card-body p-0">

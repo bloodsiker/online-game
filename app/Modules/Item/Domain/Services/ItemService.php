@@ -12,6 +12,8 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Player\Application\Services\HotbarService;
+use App\Modules\Player\Domain\Services\PlayerInjuryService;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerInjury;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
@@ -23,6 +25,7 @@ class ItemService
     public function __construct(
         private readonly BackpackService $backpackService,
         private readonly HotbarService $hotbarService,
+        private readonly PlayerInjuryService $injuryService,
         private readonly ItemRequirementService $requirementService,
         private readonly QuestProgressService $questProgressService,
         private readonly ItemActionLogger $itemActionLogger,
@@ -208,11 +211,15 @@ class ItemService
         }
 
         $playerEquip = $user->player->playerEquip;
+        $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
         $typeItem = $shareItem->type;
         $slot = $shareItem->slot;
         $itemId = $backpackItem->item->id;
 
         if ($slot === ShareItemSlot::HAND) {
+            $leftInjury = $injuriesBySlot->get('hand_left');
+            $rightInjury = $injuriesBySlot->get('hand_right');
+
             if ($typeItem === ShareItemType::TOOL
                 && ($playerEquip->handLeft?->itemInfo?->type === ShareItemType::TOOL
                     || $playerEquip->handRight?->itemInfo?->type === ShareItemType::TOOL)) {
@@ -224,6 +231,10 @@ class ItemService
             }
 
             if ($shareItem->is_two_hand) {
+                if ($leftInjury !== null || $rightInjury !== null) {
+                    return $this->injuryEquipError($leftInjury ?? $rightInjury);
+                }
+
                 if ($playerEquip->hand_left || $playerEquip->hand_right) {
                     return 'Нужны обе свободные руки';
                 }
@@ -237,24 +248,32 @@ class ItemService
             }
 
             if (in_array($typeItem, [ShareItemType::TOOL, ShareItemType::WEAPON], true)
-                && $playerEquip->hand_left && $playerEquip->hand_right) {
+                && ($playerEquip->hand_left || $leftInjury !== null)
+                && ($playerEquip->hand_right || $rightInjury !== null)) {
+                if ($leftInjury !== null || $rightInjury !== null) {
+                    return $this->injuryEquipError($leftInjury ?? $rightInjury);
+                }
+
                 return 'Слот занят';
+            }
+            if ($typeItem === ShareItemType::SHIELD && $rightInjury !== null) {
+                return $this->injuryEquipError($rightInjury);
             }
             if ($typeItem === ShareItemType::SHIELD && $playerEquip->hand_right) {
                 return 'Слот занят';
             }
 
-            if ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_left) {
+            if ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_left && $leftInjury === null) {
                 $playerEquip->hand_left = $itemId;
-            } elseif ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_right) {
+            } elseif ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_right && $rightInjury === null) {
                 $playerEquip->hand_right = $itemId;
-            } elseif (! $playerEquip->hand_left && $typeItem === ShareItemType::WEAPON) {
+            } elseif (! $playerEquip->hand_left && $leftInjury === null && $typeItem === ShareItemType::WEAPON) {
                 $playerEquip->hand_left = $itemId;
-            } elseif (! $playerEquip->hand_right && $playerEquip->hand_left !== $itemId
+            } elseif (! $playerEquip->hand_right && $rightInjury === null && $playerEquip->hand_left !== $itemId
                 && in_array($typeItem, [ShareItemType::WEAPON, ShareItemType::SHIELD], true)) {
                 $playerEquip->hand_right = $itemId;
             } else {
-                return null;
+                return $this->injuryEquipError($leftInjury ?? $rightInjury);
             }
 
             $playerEquip->save();
@@ -266,6 +285,9 @@ class ItemService
 
         if (in_array($slot, ShareItemSlot::armorSlots(), true)) {
             $slotName = $slot->value;
+            if ($injury = $injuriesBySlot->get($slotName)) {
+                return $this->injuryEquipError($injury);
+            }
             if ($playerEquip->$slotName) {
                 return 'Слот занят';
             }
@@ -308,6 +330,18 @@ class ItemService
         }
 
         return null;
+    }
+
+    private function injuryEquipError(?PlayerInjury $injury): string
+    {
+        if ($injury === null) {
+            return 'Нет свободного слота для этого предмета.';
+        }
+
+        return sprintf(
+            'Нельзя надеть предмет: травмирована часть тела «%s», бинт ещё действует.',
+            mb_strtolower($injury->body_part->label()),
+        );
     }
 
     public function unequip(User $user, int $itemId): void

@@ -24,6 +24,10 @@
                             <input type="checkbox" id="hide-location" name="hide_location" value="1" @checked(old('hide_location'))>
                             <label for="hide-location">Скрывать местоположение в информации об НПС</label>
                         </div>
+                        <div class="checkbox-custom checkbox-default mt-2">
+                            <input type="checkbox" id="is-active" name="is_active" value="1" @checked(old('is_active', true))>
+                            <label for="is-active">Активен и отображается на локации</label>
+                        </div>
                         <div class="form-group">
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="5">{{ old('description') }}</textarea>

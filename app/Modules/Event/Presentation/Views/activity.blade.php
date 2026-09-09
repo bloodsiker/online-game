@@ -46,9 +46,12 @@
                                          data-id="{{ $activity->rewardItemId }}"
                                          onmouseover="showItemInfo(this,event,2)"
                                          onmouseout="showItemInfo(this,event,0)"
-                                         style="display:inline-block;">
-                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                               background="{{ asset($activity->icon) }}">
+                                         onclick="window.open('{{ route('items.info.share', ['id' => $activity->rewardItemId]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');"
+                                         style="display:inline-block; cursor:pointer;">
+                                        <img class="user-rewards__item-image"
+                                             src="{{ asset($activity->icon) }}"
+                                             alt="{{ $activity->title }}">
+                                        <table class="user-rewards__item-overlay" width="60" height="60" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
                                                 <td valign="bottom" style="position:relative; z-index:1;">
                                                     <div class="bpdig">{{ $activity->iconCount }}</div>

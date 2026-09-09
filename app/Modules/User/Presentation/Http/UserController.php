@@ -7,6 +7,8 @@ namespace App\Modules\User\Presentation\Http;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Player\Application\ItemTooltip\PlayerInjuryTooltipStrategy;
+use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Reputation\Application\Services\ReputationService;
@@ -21,6 +23,7 @@ final class UserController
 {
     public function __construct(
         private readonly PlayerStatService $statService,
+        private readonly PlayerInjuryService $injuryService,
         private readonly ItemTooltipCollector $tooltipCollector,
         private readonly ReputationService $reputationService,
     ) {}
@@ -37,7 +40,10 @@ final class UserController
             'currentLocation.map',
         ])->findOrFail($id);
         $stats = $this->statService->resolve($user->player);
-        $this->tooltipCollector->collectFrom(new ItemModelTooltipStrategy($this->equippedItems($user)));
+        $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
+        $this->tooltipCollector
+            ->collectFrom(new ItemModelTooltipStrategy($this->equippedItems($user)))
+            ->collectFrom(new PlayerInjuryTooltipStrategy($injuriesBySlot));
 
         $isOnline = $user->last_online_at !== null
             && Carbon::parse($user->last_online_at)->gt(Carbon::now()->subMinutes(10));
@@ -45,6 +51,7 @@ final class UserController
         return response()->view('user::info', [
             'user' => $user,
             'stats' => $stats,
+            'injuriesBySlot' => $injuriesBySlot,
             'age' => $this->formatAge($user->created_at),
             'isOnline' => $isOnline,
             'locationPath' => $this->buildLocationPath($user),

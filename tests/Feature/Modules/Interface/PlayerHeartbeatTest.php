@@ -547,6 +547,7 @@ class PlayerHeartbeatTest extends TestCase
         $this->assertSame(70, $player->fresh()->exp);
         $this->assertSame(100, $player->fresh()->hp_now);
         $this->assertSame($respawnLocationId, $user->fresh()->location_id);
+        $this->assertSame(0, $battle->fresh()->status->value);
         $this->assertSame(1, $battle->fresh()->rounds);
         $this->assertDatabaseCount('player_active_effects', 0);
         $this->assertDatabaseCount('battle_rounds', 1);
@@ -633,6 +634,7 @@ class PlayerHeartbeatTest extends TestCase
             $table->integer('free_stats');
             $table->integer('victory')->default(0);
             $table->integer('death')->default(0);
+            $table->unsignedBigInteger('reputation_rating')->default(0);
             $table->float('experience_multiplier')->default(1.0);
             $table->timestamp('last_regen_at')->nullable();
             $table->unsignedInteger('regen_hp_start')->nullable();

@@ -87,6 +87,19 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->get();
     }
 
+    public function getOwnedItemsByName(User $user, string $name): Collection
+    {
+        return Backpack::select('backpacks.*')
+            ->with(['item'])
+            ->join('items', 'backpacks.item_id', '=', 'items.id')
+            ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
+            ->where('backpacks.user_id', $user->id)
+            ->where('backpacks.equipped', 0)
+            ->where('share_items.name', $name)
+            ->where('share_items.type', ShareItemType::MISC->value)
+            ->get();
+    }
+
     public function getBaseScrolls(User $user): Collection
     {
         return Backpack::select('backpacks.*')

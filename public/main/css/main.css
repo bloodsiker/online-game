@@ -3321,3 +3321,9 @@ span.color > a.artifact_info:active {color: inherit;}
 .brd2.tr_act_last, .tr_act_last, .tr_act_last td {border-bottom: 0 !important;}
 
 .hr {display: block; height: 0; font-size: 0; border-top: #c5b17e 1px solid; border-bottom: #fffbd3 1px solid;}
+
+#artifact_alt .aa-table p {
+    margin: 0;
+    margin-block-start: 0;
+    margin-block-end: 6px;
+}

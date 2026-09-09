@@ -82,6 +82,12 @@
                             <span>Лог предметов</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.injury_types', 'admin.injury_type.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.injury_types') }}">
+                            <i class="bx bx-band-aid" aria-hidden="true"></i>
+                            <span>Травмы</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.players', 'admin.player.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.players') }}">
                             <i class="bx bx-user" aria-hidden="true"></i>

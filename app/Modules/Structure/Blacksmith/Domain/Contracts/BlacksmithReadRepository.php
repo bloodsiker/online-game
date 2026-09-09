@@ -28,6 +28,9 @@ interface BlacksmithReadRepository
     public function getUpgradeableItems(User $user): Collection;
 
     /** @return Collection<int, mixed> */
+    public function getOwnedItemsByName(User $user, string $name): Collection;
+
+    /** @return Collection<int, mixed> */
     public function getBaseScrolls(User $user): Collection;
 
     /** @return Collection<int, mixed> */

@@ -40,10 +40,12 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $shareItem->is_give,
                 noweight: ! $shareItem->is_weight,
                 nosell: ! $shareItem->is_sell,
-                stats: ItemTooltipStatsBuilder::build($shareItem),
+                stats: ItemTooltipStatsBuilder::buildForTooltip($shareItem),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($shareItem),
                 gems: [],
                 runes: [],
+                remainingUses: (int) $shareItem->count_use > 0 ? (int) $shareItem->count_use : null,
+                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($shareItem),
             ));
         }
     }

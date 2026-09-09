@@ -179,7 +179,9 @@
         }
     </script>
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
+    <script src="{{ asset('js/injury_timer.js') }}?v={{ filemtime(public_path('js/injury_timer.js')) }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/injury.css') }}">
 </head>
 <body class="regcolor">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0; top: 0"></div>
@@ -194,8 +196,10 @@
                     <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
                     <td align="center"><img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm"></td>
                     <td class="item-hero" align="center"
-                        @if($playerEquip->helmet) data-id="{{ $playerEquip->helmetSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->helmet)
+                        @if(!$injuriesBySlot->has('helmet') && $playerEquip->helmet) data-id="{{ $playerEquip->helmetSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('helmet'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->helmet)
                             <img src="{{ $playerEquip->helmetSlot->itemInfo->image }}" class="hero-itm" id="i2n1" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->helmetSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -207,8 +211,10 @@
                 </tr>
                 <tr>
                     <td class="item-hero"
-                        @if($playerEquip->shoulder) data-id="{{ $playerEquip->shoulderSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->shoulder)
+                        @if(!$injuriesBySlot->has('shoulder') && $playerEquip->shoulder) data-id="{{ $playerEquip->shoulderSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('shoulder'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->shoulder)
                             <img src="{{ $playerEquip->shoulderSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->shoulderSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -219,8 +225,10 @@
                         <img src="https://game.elders.com.ua/img/avatar/dark_elf.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->forearm) data-id="{{ $playerEquip->forearmSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->forearm)
+                        @if(!$injuriesBySlot->has('forearm') && $playerEquip->forearm) data-id="{{ $playerEquip->forearmSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('forearm'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->forearm)
                             <img src="{{ $playerEquip->forearmSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->forearmSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -230,8 +238,10 @@
                 </tr>
                 <tr>
                     <td class="item-hero"
-                        @if($playerEquip->handLeft || $playerEquip->hand_left_mirror) data-id="{{ ($playerEquip->handLeft ?? $playerEquip->hand_left_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->handLeft)
+                        @if(!$injuriesBySlot->has('hand_left') && ($playerEquip->handLeft || $playerEquip->hand_left_mirror)) data-id="{{ ($playerEquip->handLeft ?? $playerEquip->hand_left_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('hand_left'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->handLeft)
                             <img src="{{ $playerEquip->handLeft->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handLeft->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @elseif($playerEquip->hand_left_mirror)
@@ -242,8 +252,10 @@
                         @endif
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->handRight || $playerEquip->hand_right_mirror) data-id="{{ ($playerEquip->handRight ?? $playerEquip->hand_right_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->handRight)
+                        @if(!$injuriesBySlot->has('hand_right') && ($playerEquip->handRight || $playerEquip->hand_right_mirror)) data-id="{{ ($playerEquip->handRight ?? $playerEquip->hand_right_mirror)->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('hand_right'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->handRight)
                             <img src="{{ $playerEquip->handRight->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->handRight->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @elseif($playerEquip->hand_right_mirror)
@@ -256,8 +268,10 @@
                 </tr>
                 <tr>
                     <td class="item-hero"
-                        @if($playerEquip->armor) data-id="{{ $playerEquip->armorSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->armor)
+                        @if(!$injuriesBySlot->has('armor') && $playerEquip->armor) data-id="{{ $playerEquip->armorSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('armor'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->armor)
                             <img src="{{ $playerEquip->armorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->armorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -265,8 +279,10 @@
                         @endif
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->legging) data-id="{{ $playerEquip->leggingSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->legging)
+                        @if(!$injuriesBySlot->has('legging') && $playerEquip->legging) data-id="{{ $playerEquip->leggingSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('legging'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->legging)
                             <img src="{{ $playerEquip->leggingSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->leggingSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -276,8 +292,10 @@
                 </tr>
                 <tr>
                     <td class="item-hero"
-                        @if($playerEquip->chain_armor) data-id="{{ $playerEquip->chainArmorSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->chain_armor)
+                        @if(!$injuriesBySlot->has('chain_armor') && $playerEquip->chain_armor) data-id="{{ $playerEquip->chainArmorSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('chain_armor'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->chain_armor)
                             <img src="{{ $playerEquip->chainArmorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->chainArmorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else
@@ -285,8 +303,10 @@
                         @endif
                     </td>
                     <td class="item-hero"
-                        @if($playerEquip->shoes) data-id="{{ $playerEquip->shoesSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
-                        @if($playerEquip->shoes)
+                        @if(!$injuriesBySlot->has('shoes') && $playerEquip->shoes) data-id="{{ $playerEquip->shoesSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
+                        @if($injury = $injuriesBySlot->get('shoes'))
+                            @include('backpack::partials.injury_slot', compact('injury'))
+                        @elseif($playerEquip->shoes)
                             <img src="{{ $playerEquip->shoesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
                             <a href="{{ route('items.put_off', ['id' => $playerEquip->shoesSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
                         @else

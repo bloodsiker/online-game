@@ -802,4 +802,10 @@ b.butt1 input, b.butt1 button.butt1, b.butt1.disabled input, b.butt1.disabled bu
 #confirm_ms {
     color: #ba0000;
 }
+
+#artifact_alt .aa-table p {
+    margin: 0;
+    margin-block-start: 0;
+    margin-block-end: 6px;
+}
 /***** END MODAL ******/

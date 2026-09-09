@@ -7,6 +7,7 @@ namespace App\Modules\Structure\Blacksmith\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Structure\Blacksmith\Application\DTOs\BreakItemDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\CraftItemDTO;
+use App\Modules\Structure\Blacksmith\Application\DTOs\TransferUpgradeDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\UpgradeItemDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\BreakItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\CraftItem;
@@ -14,6 +15,8 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\GetBreakPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetKraftPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetRarityUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradePage;
+use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradeTransferPage;
+use App\Modules\Structure\Blacksmith\Application\UseCases\TransferUpgrade;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItemRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -33,6 +36,8 @@ class BlacksmithController extends Controller
         private readonly UpgradeItem $upgradeItem,
         private readonly GetRarityUpgradePage $getRarityUpgradePage,
         private readonly UpgradeItemRarity $upgradeItemRarity,
+        private readonly GetUpgradeTransferPage $getUpgradeTransferPage,
+        private readonly TransferUpgrade $transferUpgrade,
     ) {}
 
     public function index(Request $request, mixed $id): mixed
@@ -159,5 +164,44 @@ class BlacksmithController extends Controller
         session()->flash('rarity_upgrade_success', $result->success);
 
         return redirect()->route('blacksmith.rarity_upgrade', ['id' => $id]);
+    }
+
+    public function upgradeTransfer(int $id): View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $page = $this->getUpgradeTransferPage->execute($user, $id);
+
+        return view('blacksmith::upgrade-transfer', [
+            'blacksmith' => $page->blacksmith,
+            'user' => $user,
+            'sourceItems' => $page->sourceItems,
+            'targetItems' => $page->targetItems,
+            'transgressors' => $page->transgressors,
+            'itemTooltipScript' => $page->itemTooltipScript,
+        ]);
+    }
+
+    public function upgradeTransferProcess(Request $request, int $id): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $data = $request->validate([
+            'source_item_id' => ['required', 'integer', 'different:target_item_id'],
+            'target_item_id' => ['required', 'integer', 'different:source_item_id'],
+            'transgressor_share_item_id' => ['required', 'integer'],
+        ]);
+
+        $result = $this->transferUpgrade->execute(new TransferUpgradeDTO(
+            user: $user,
+            sourceItemId: (int) $data['source_item_id'],
+            targetItemId: (int) $data['target_item_id'],
+            transgressorShareItemId: (int) $data['transgressor_share_item_id'],
+        ));
+
+        session()->flash('message', $result->message);
+        session()->flash('upgrade_transfer_success', $result->success);
+
+        return redirect()->route('blacksmith.upgrade_transfer', ['id' => $id]);
     }
 }

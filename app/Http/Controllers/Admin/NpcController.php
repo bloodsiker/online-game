@@ -163,6 +163,7 @@ class NpcController extends Controller
         $npc->description = $request->input('description');
         $npc->location_id = $request->input('location_id') ?: null;
         $npc->hide_location = (bool) $request->input('hide_location', false);
+        $npc->is_active = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
             $oldImage = $npc->getRawOriginal('image');

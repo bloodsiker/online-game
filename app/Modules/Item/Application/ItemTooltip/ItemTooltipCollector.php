@@ -6,7 +6,7 @@ use App\Modules\Item\Application\ItemTooltip\Strategy\ItemTooltipStrategyInterfa
 
 class ItemTooltipCollector
 {
-    /** @var array<int, ItemTooltipDto> */
+    /** @var array<int|string, ItemTooltipDto> */
     private array $items = [];
 
     public function __construct(private readonly ItemTooltipRenderer $renderer) {}

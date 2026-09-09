@@ -134,6 +134,27 @@
             background-image: url(/img/bg/tbl-usi_bg.gif);
             background-repeat: repeat;
         }
+        .shop-item-frame {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 8px;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+        }
+        .shop-item-frame__image {
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .shop-item-frame__hitbox {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            width: 72px;
+            height: 71px;
+        }
         .barter-store-grid {
             margin: -6px;
         }
@@ -161,14 +182,6 @@
         }
         .barter-store-item__main-row {
             height: 76px;
-        }
-        .barter-store-item__image {
-            width: 60px;
-            height: 60px;
-            margin: 8px;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: contain;
         }
         .barter-store-item__details {
             width: 100%;
@@ -306,9 +319,11 @@
                                         <tbody>
                                         <tr @if($isBarterShop) class="barter-store-item__main-row" @endif>
                                             <td align="left" width="60" @unless($isBarterShop) valign="top" @endunless>
-                                                <div class="{{ $isBarterShop ? 'barter-store-item__image' : '' }}"
-                                                     style="position: relative; margin: 8px; background-image: url('{{ $item->image }}'); @unless($isBarterShop) background-size: cover; width: 60px; height: 60px; @endunless">
-                                                    <table width="{{ $isBarterShop ? 60 : 50 }}" height="{{ $isBarterShop ? 60 : 50 }}" cellpadding="0" cellspacing="0" border="0" style="position: absolute; inset: 0; z-index: 10;">
+                                                <div class="shop-item-frame">
+                                                    @if($item->image)
+                                                        <img class="shop-item-frame__image" src="{{ $item->image }}" alt="{{ $item->name }}">
+                                                    @endif
+                                                    <table class="shop-item-frame__hitbox" width="72" height="71" cellpadding="0" cellspacing="0" border="0">
                                                         <tbody>
                                                         <tr>
                                                             <td data-id="{{ $item->itemId }}" style="cursor:pointer;"

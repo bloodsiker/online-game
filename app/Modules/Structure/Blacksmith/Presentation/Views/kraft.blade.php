@@ -37,7 +37,8 @@
         .req-ok { color: #247327 !important; font-weight: bold; }
         .req-fail { color: #a02020 !important; font-weight: bold; }
         .craft-action { margin-top: 7px; }
-        .butt2.disabled, .butt2.disabled input { cursor: default; opacity: .55; }
+        .butt1.pointer.disabled { cursor: default; opacity: .5; }
+        .butt1.pointer.disabled input { cursor: default; }
         .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid #8d2616; color: #8d2616; font-weight: bold; }
         .empty-list { padding: 25px; color: #49382d; font-size: 12px; text-align: center; }
     </style>
@@ -127,18 +128,18 @@
                         </div>
 
                         <div class="craft-action">
-                            <b class="butt2 pointer {{ $recipe['canCraft'] ? '' : 'disabled' }}">
-                                <b>
+                            <span class="butt1 pointer {{ $recipe['canCraft'] ? '' : 'disabled' }}">
+                                <span>
                                     <input type="button"
-                                           class="kraft-item"
+                                           class="grnn kraft-item"
                                            value="Создать"
                                            @if($recipe['canCraft'])
                                                data-href="{{ route('blacksmith.kraft', ['id' => $recipe['recipeItemId']]) }}"
                                            @else
                                                disabled
                                            @endif>
-                                </b>
-                            </b>
+                                </span>
+                            </span>
                         </div>
                     </div>
                 @empty

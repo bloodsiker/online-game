@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read PlayerEquipment $playerEquip
  * @property-read Collection|PlayerSkill[] $skills
  * @property-read Collection|MagicSkill[] $magicSkills
+ * @property-read Collection|PlayerInjury[] $injuries
  * @property-read Collection|QuestPlayer[] $quests
  */
 class Player extends Model
@@ -91,6 +92,11 @@ class Player extends Model
     public function skills(): HasMany
     {
         return $this->hasMany(PlayerSkill::class, 'player_id')->with('skill');
+    }
+
+    public function injuries(): HasMany
+    {
+        return $this->hasMany(PlayerInjury::class, 'player_id');
     }
 
     public function magicSkills()

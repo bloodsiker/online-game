@@ -56,6 +56,19 @@ class Item extends Model
         return $this->itemInfo->name;
     }
 
+    public function remainingUses(): ?int
+    {
+        $configuredUses = max(0, (int) $this->itemInfo->count_use);
+
+        if ($configuredUses === 0) {
+            return null;
+        }
+
+        return (int) $this->count_use > 0
+            ? (int) $this->count_use
+            : $configuredUses;
+    }
+
     public function itemInfo(): BelongsTo
     {
         return $this->belongsTo(ShareItem::class, 'share_item_id')->with(['recipe', 'recipe.items']);

@@ -51,6 +51,7 @@ class GatheringPageTest extends TestCase
         $this->assertStringContainsString('gathering-tooltip-head', $html);
         $this->assertStringContainsString('Требуется умение', $html);
         $this->assertStringContainsString('Math.round(progress)', $html);
+        $this->assertStringContainsString('(data.bonusRewards || []).forEach(addRewardToInventory)', $html);
         $this->assertStringContainsString('gathering-busy-pulse', $html);
         $this->assertStringContainsString('gathering-node-gatherers', $html);
         $this->assertStringContainsString('id="gathering-notice"', $html);

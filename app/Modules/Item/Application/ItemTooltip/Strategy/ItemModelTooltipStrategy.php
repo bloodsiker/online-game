@@ -49,10 +49,12 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $itemInfo->is_give,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
-                stats: ItemTooltipStatsBuilder::build($itemInfo, $upgradeLvl),
+                stats: ItemTooltipStatsBuilder::buildForTooltip($itemInfo, $upgradeLvl),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
                 gems: ItemTooltipStatsBuilder::buildGems($item),
                 runes: ItemTooltipStatsBuilder::buildRunes($item),
+                remainingUses: $item->remainingUses(),
+                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
             ));
         }
     }

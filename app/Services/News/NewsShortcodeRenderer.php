@@ -113,12 +113,14 @@ final class NewsShortcodeRenderer
             'lev' => $levelRequirement
                 ? ['title' => ' Уровень ', 'value' => (string) $levelRequirement->min_value]
                 : null,
-            'skills' => ItemTooltipStatsBuilder::build($item),
+            'skills' => ItemTooltipStatsBuilder::buildForTooltip($item),
             'skills_e' => $this->requirementsForTooltip($item),
             'desc' => $item->description ?? '',
             'nogive' => ! $item->is_sell ? 'Предмет нельзя передать!' : '',
             'noweight' => ! $item->is_weight ? 'Предмет не занимает места в рюкзаке' : '',
             'nosell' => ! $item->is_sell ? 'Предмет нельзя сдать в скупку' : '',
+            'remainingUses' => (int) $item->count_use > 0 ? (int) $item->count_use : null,
+            'specialInfo' => ItemTooltipStatsBuilder::buildSpecialInfo($item),
         ];
     }
 

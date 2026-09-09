@@ -20,6 +20,7 @@
             KeyF: 'f',
             KeyI: 'i',
             KeyC: 'c',
+            KeyQ: 'q',
             Space: 'space',
         }[event.code];
         const key = typeof event.key === 'string' ? event.key.toLowerCase() : '';
@@ -33,6 +34,8 @@
             f: 'f',
             'ф': 'f',
             'а': 'f',
+            q: 'q',
+            'й': 'q',
             ' ': 'space',
             spacebar: 'space',
         }[key];
@@ -42,12 +45,17 @@
             return;
         }
 
+        if (shortcut === 'q' && event.repeat) {
+            return;
+        }
+
         const actionElementIds = {
             arrowup: 'move-north',
             arrowdown: 'move-south',
             arrowleft: 'move-west',
             arrowright: 'move-east',
             f: 'take-item',
+            q: 'weapon-attack',
             space: 'attack',
         };
 
@@ -105,6 +113,7 @@
                 const bindFrameDocument = function () {
                     try {
                         bindDocument(frame.contentDocument, options.routes, options.navigate, getActionDocument);
+                        frame.contentDocument.querySelectorAll('iframe').forEach(bindFrame);
                     } catch (error) {
                         // Iframe может быть загружен с другого origin.
                     }

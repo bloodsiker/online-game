@@ -897,7 +897,9 @@
             <div class="a1" style="">
                 <div id="u28">
                     <div id="l28" class="s2box bb br">
-                        <s id="z28">0</s><a name="28"></a>28
+                        <s id="z28">0</s><a name="28"></a>
+                        <em>28</em>
+                        <cite>Клановый зал</cite>
                     </div>
                 </div>
             </div>

@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\Player;
 
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Player\Domain\Enums\InjuryBodyPart;
+use App\Modules\Player\Domain\Enums\InjurySeverity;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\InjuryType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerInjury;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -45,6 +49,7 @@ class PlayerStatServiceDebuffClampTest extends TestCase
             $table->integer('hp_now')->default(10);
             $table->unsignedInteger('free_stats')->default(0);
             $table->float('experience_multiplier')->default(1.0);
+            $table->integer('reputation_rating')->default(0);
             $table->timestamps();
         });
 
@@ -103,6 +108,30 @@ class PlayerStatServiceDebuffClampTest extends TestCase
             $table->string('effect_type');
             $table->float('value');
             $table->string('value_type');
+            $table->timestamp('expires_at');
+            $table->timestamps();
+        });
+        Schema::create('injury_types', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->string('body_part');
+            $table->unsignedTinyInteger('severity');
+            $table->string('image')->nullable();
+            $table->unsignedInteger('duration_seconds');
+            $table->unsignedInteger('drop_weight')->default(1);
+            $table->json('stat_modifiers')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+        Schema::create('player_injuries', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('injury_type_id')->nullable();
+            $table->string('body_part');
+            $table->unsignedTinyInteger('severity');
+            $table->timestamp('applied_at');
             $table->timestamp('expires_at');
             $table->timestamps();
         });
@@ -176,6 +205,50 @@ class PlayerStatServiceDebuffClampTest extends TestCase
         $sheet = app(PlayerStatService::class)->resolve($player);
 
         $this->assertSame(4, $sheet->getArmor());
+    }
+
+    public function test_active_injury_reduces_only_affected_primary_stats(): void
+    {
+        config()->set('injuries.enabled', true);
+        $player = $this->player([
+            'strength' => 20,
+            'intuition' => 20,
+            'agility' => 20,
+            'wisdom' => 20,
+            'intelligence' => 20,
+        ]);
+
+        $injuryType = InjuryType::query()->create([
+            'name' => 'Тяжёлая травма головы',
+            'slug' => 'severe-head',
+            'body_part' => InjuryBodyPart::HEAD,
+            'severity' => InjurySeverity::SEVERE,
+            'duration_seconds' => 3600,
+            'drop_weight' => 10,
+            'stat_modifiers' => [
+                ['stat' => 'intuition', 'value' => -15, 'is_percent' => true],
+                ['stat' => 'wisdom', 'value' => -15, 'is_percent' => true],
+                ['stat' => 'intelligence', 'value' => -15, 'is_percent' => true],
+            ],
+            'is_active' => true,
+        ]);
+
+        PlayerInjury::query()->create([
+            'player_id' => $player->id,
+            'injury_type_id' => $injuryType->id,
+            'body_part' => InjuryBodyPart::HEAD,
+            'severity' => InjurySeverity::SEVERE,
+            'applied_at' => now(),
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $sheet = app(PlayerStatService::class)->resolve($player);
+
+        $this->assertSame(17, $sheet->intuition);
+        $this->assertSame(17, $sheet->wisdom);
+        $this->assertSame(17, $sheet->intelligence);
+        $this->assertSame(20, $sheet->strength);
+        $this->assertSame(20, $sheet->agility);
     }
 
     /**

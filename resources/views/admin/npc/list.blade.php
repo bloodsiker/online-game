@@ -21,6 +21,7 @@
                                 <th width="45"></th>
                                 <th>Имя</th>
                                 <th>Локация</th>
+                                <th width="90">Активен</th>
                                 <th width="70"></th>
                             </tr>
                             </thead>
@@ -35,12 +36,17 @@
                                     </td>
                                     <td><a href="{{ route('admin.npc.info', $npc->id) }}">{{ $npc->name }}</a></td>
                                     <td>{{ $npc->location ? '[' . $npc->location_id . '] ' . $npc->location->name : '—' }}</td>
+                                    <td class="text-center">
+                                        <span class="badge {{ $npc->is_active ? 'badge-success' : 'badge-secondary' }}">
+                                            {{ $npc->is_active ? 'да' : 'нет' }}
+                                        </span>
+                                    </td>
                                     <td>
                                         <a href="{{ route('admin.npc.info', $npc->id) }}" class="btn btn-xs btn-primary">Изменить</a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="text-center text-muted">Нет НПС</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted">Нет НПС</td></tr>
                             @endforelse
                             </tbody>
                         </table>

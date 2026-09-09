@@ -19,7 +19,10 @@ class EloquentLocationReadRepository implements LocationReadRepository
 {
     public function findLocationOrFail(int $locationId): Location
     {
-        return Location::with(['npcs', 'structures.actions'])->findOrFail($locationId);
+        return Location::with([
+            'npcs' => static fn ($query) => $query->where('is_active', true),
+            'structures.actions',
+        ])->findOrFail($locationId);
     }
 
     public function getMonstersOnLocation(int $locationId): Collection

@@ -59,6 +59,7 @@ class PlayerStatService
             ...$this->fromEquipment($player),
             ...$this->fromPassiveSkills($player),
             ...$this->fromBuffs($player),
+            ...$this->fromInjuries($player),
             ...$this->fromActiveEffects($player),
         ];
 
@@ -447,6 +448,31 @@ class PlayerStatService
                 );
             } else {
                 $modifiers[] = new StatModifier($stat, (float) $buff->value, $isPercent, $source);
+            }
+        }
+
+        return $modifiers;
+    }
+
+    /** @return StatModifier[] */
+    private function fromInjuries(Player $player): array
+    {
+        if (! config('injuries.enabled', true)) {
+            return [];
+        }
+
+        $modifiers = [];
+
+        foreach ($player->injuries()->with('injuryType')->active()->get() as $injury) {
+            $source = 'injury:'.$injury->body_part->value;
+
+            foreach ($injury->statModifiers() as $modifier) {
+                $modifiers[] = new StatModifier(
+                    stat: (string) $modifier['stat'],
+                    value: (float) ($modifier['value'] ?? 0),
+                    isPercent: (bool) ($modifier['is_percent'] ?? false),
+                    source: $source,
+                );
             }
         }
 

@@ -6,6 +6,7 @@ namespace Tests\Feature\Modules\Location;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Item\Domain\Services\ItemService;
@@ -14,6 +15,7 @@ use App\Modules\Location\Domain\Events\GatheringMapUpdated;
 use App\Modules\Location\Domain\Services\GatheringService;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
+use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Structure\Workshop\Application\UseCases\CraftProfessionItem;
 use App\Modules\Structure\Workshop\Application\UseCases\LearnRecipe;
@@ -158,6 +160,47 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertTrue($completed->data['reward']['isDouble']);
     }
 
+    public function test_bonus_resources_respect_zero_and_hundred_percent_chances(): void
+    {
+        Carbon::setTestNow('2026-08-29 12:00:00');
+        $this->seedGatheringResource();
+        DB::table('share_items')->insert([
+            ['id' => 11, 'type' => 'resource', 'name' => 'Смола', 'image' => '/resin.png', 'rarity' => 'common'],
+            ['id' => 12, 'type' => 'resource', 'name' => 'Кора', 'image' => '/bark.png', 'rarity' => 'common'],
+        ]);
+        DB::table('share_item_has_items')->insert([
+            ['parent_item_id' => 10, 'share_item_id' => 11, 'min_count' => 2, 'max_count' => 2, 'drop_chance' => 100],
+            ['parent_item_id' => 10, 'share_item_id' => 12, 'min_count' => 1, 'max_count' => 1, 'drop_chance' => 0],
+        ]);
+
+        $backpack = Mockery::mock(BackpackService::class);
+        $backpack->shouldReceive('addItemByShareItem')
+            ->once()
+            ->with(Mockery::any(), Mockery::on(fn ($item): bool => (int) $item->id === 10), 1)
+            ->andReturn(new Backpack);
+        $backpack->shouldReceive('addItemByShareItem')
+            ->once()
+            ->with(Mockery::any(), Mockery::on(fn ($item): bool => (int) $item->id === 11), 2)
+            ->andReturn(new Backpack);
+
+        $service = new GatheringService($backpack);
+        $user = User::query()->findOrFail(1);
+        $nodeId = $service->state($user)['nodes'][0]['id'];
+        $this->assertTrue($service->start($user, $nodeId)->ok);
+
+        Carbon::setTestNow('2026-08-29 12:00:05');
+        $completed = $service->complete($user);
+
+        $this->assertTrue($completed->ok);
+        $this->assertSame([[
+            'shareItemId' => 11,
+            'name' => 'Смола',
+            'image' => '/resin.png',
+            'count' => 2,
+        ]], $completed->data['bonusRewards']);
+        $this->assertStringContainsString('Также найдено: Смола ×2', $completed->message);
+    }
+
     public function test_required_tool_is_accepted_in_either_hand(): void
     {
         $this->seedGatheringResource();
@@ -223,10 +266,12 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $requirements = Mockery::mock(ItemRequirementService::class);
         $requirements->shouldReceive('check')->once()->andReturnNull();
+        $injuries = new PlayerInjuryService(Mockery::mock(RandomizerInterface::class));
 
         $service = new ItemService(
             Mockery::mock(BackpackService::class),
             Mockery::mock(HotbarService::class),
+            $injuries,
             $requirements,
             Mockery::mock(QuestProgressService::class),
             Mockery::mock(ItemActionLogger::class),
@@ -244,6 +289,59 @@ class PeacefulProfessionFlowTest extends TestCase
             'item_id' => 201,
             'equipped' => false,
         ]);
+    }
+
+    public function test_item_cannot_be_equipped_into_hands_blocked_by_injuries(): void
+    {
+        config()->set('injuries.enabled', true);
+        $this->seedGatheringResource();
+        DB::table('player_equipments')->where('player_id', 1)->update(['hand_right' => null]);
+        DB::table('items')->insert(['id' => 201, 'share_item_id' => 21]);
+        DB::table('backpacks')->insert([
+            'user_id' => 1,
+            'item_id' => 201,
+            'equipped' => false,
+            'count' => 1,
+        ]);
+        DB::table('player_injuries')->insert([
+            [
+                'player_id' => 1,
+                'injury_type_id' => 1,
+                'body_part' => 'left_hand',
+                'severity' => 1,
+                'applied_at' => now(),
+                'expires_at' => now()->addMinutes(15),
+            ],
+            [
+                'player_id' => 1,
+                'injury_type_id' => 2,
+                'body_part' => 'right_hand',
+                'severity' => 1,
+                'applied_at' => now(),
+                'expires_at' => now()->addMinutes(15),
+            ],
+        ]);
+
+        $requirements = Mockery::mock(ItemRequirementService::class);
+        $requirements->shouldReceive('check')->once()->andReturnNull();
+        $service = new ItemService(
+            Mockery::mock(BackpackService::class),
+            Mockery::mock(HotbarService::class),
+            new PlayerInjuryService(Mockery::mock(RandomizerInterface::class)),
+            $requirements,
+            Mockery::mock(QuestProgressService::class),
+            Mockery::mock(ItemActionLogger::class),
+        );
+
+        $error = $service->equip(User::query()->findOrFail(1), 201);
+
+        $this->assertStringContainsString('бинт ещё действует', $error);
+        $this->assertDatabaseHas('player_equipments', [
+            'player_id' => 1,
+            'hand_left' => null,
+            'hand_right' => null,
+        ]);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 201, 'equipped' => false]);
     }
 
     public function test_stale_active_battle_on_another_location_does_not_block_gathering(): void
@@ -435,6 +533,15 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->integer('count_use')->default(0);
             $table->timestamps();
         });
+        Schema::create('share_item_has_items', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('parent_item_id');
+            $table->unsignedBigInteger('share_item_id');
+            $table->integer('min_count');
+            $table->integer('max_count');
+            $table->integer('drop_chance');
+            $table->timestamps();
+        });
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
@@ -455,6 +562,29 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->unsignedBigInteger('player_id');
             $table->unsignedBigInteger('hand_left')->nullable();
             $table->unsignedBigInteger('hand_right')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('player_injuries', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('injury_type_id')->nullable();
+            $table->string('body_part');
+            $table->unsignedTinyInteger('severity');
+            $table->timestamp('applied_at');
+            $table->timestamp('expires_at');
+            $table->timestamps();
+        });
+        Schema::create('injury_types', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->string('body_part');
+            $table->unsignedTinyInteger('severity');
+            $table->string('image')->nullable();
+            $table->unsignedInteger('duration_seconds');
+            $table->unsignedInteger('drop_weight')->default(1);
+            $table->json('stat_modifiers')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
         Schema::create('map_gathering_resources', function (Blueprint $table): void {

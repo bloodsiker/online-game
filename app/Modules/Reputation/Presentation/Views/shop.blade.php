@@ -31,6 +31,27 @@
             width: 340px; height: 90px; border: 1px solid #DB9F73; border-radius: 5px;
             background-image: url(/img/bg/tbl-usi_bg.gif); background-repeat: repeat;
         }
+        .shop-item-frame {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin: 8px;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+        }
+        .shop-item-frame__image {
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .shop-item-frame__hitbox {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            width: 72px;
+            height: 71px;
+        }
     </style>
 
     {!! $page->itemTooltipScript !!}
@@ -102,8 +123,11 @@
                             <tbody>
                             <tr>
                                 <td align="left" width="60" valign="top">
-                                    <div style="margin: 8px; background: url('{{ asset($item->item->image) }}'); background-size: cover; width: 60px; height: 60px;">
-                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="position: absolute; z-index:10;">
+                                    <div class="shop-item-frame">
+                                        @if($item->item->image)
+                                            <img class="shop-item-frame__image" src="{{ asset($item->item->image) }}" alt="{{ $item->item->name }}">
+                                        @endif
+                                        <table class="shop-item-frame__hitbox" width="72" height="71" cellpadding="0" cellspacing="0" border="0">
                                             <tbody>
                                             <tr>
                                                 <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">&nbsp;</td>

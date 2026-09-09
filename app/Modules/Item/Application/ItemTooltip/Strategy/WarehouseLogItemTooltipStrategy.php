@@ -5,6 +5,7 @@ namespace App\Modules\Item\Application\ItemTooltip\Strategy;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 
 readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -13,7 +14,7 @@ readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInt
     public function collect(ItemTooltipCollector $collector): void
     {
         $logs = ItemTooltipRelationLoader::load($this->items, [
-            'item.itemInfo',
+            'item.itemInfo.effects',
         ]);
 
         foreach ($logs as $log) {
@@ -34,6 +35,8 @@ readonly class WarehouseLogItemTooltipStrategy implements ItemTooltipStrategyInt
                 nogive: true,
                 noweight: true,
                 nosell: true,
+                remainingUses: $item->remainingUses(),
+                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
             ));
         }
     }

@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_droppable
  * @property bool $is_stackable
  * @property bool $is_slot_usable
+ * @property bool $is_use Показывать пункт «Использовать» независимо от типа предмета — фолбэк для типов вроде misc, не входящих в белый список usable-типов на клиенте.
  * @property bool $is_weight
  * @property int $price
  * @property int $break_crystal
@@ -99,6 +100,7 @@ class ShareItem extends Model
         'is_droppable' => true,
         'is_stackable' => false,
         'is_slot_usable' => false,
+        'is_use' => false,
         'is_weight' => true,
         'break_crystal' => 0,
         'price' => 0,
@@ -106,6 +108,7 @@ class ShareItem extends Model
 
     protected $casts = [
         'is_slot_usable' => 'boolean',
+        'is_use' => 'boolean',
         'is_weight' => 'boolean',
         'is_sell' => 'boolean',
         'is_give' => 'boolean',

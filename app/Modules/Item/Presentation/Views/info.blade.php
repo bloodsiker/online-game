@@ -73,6 +73,25 @@
         .tbl-usi_brd-bottom { border-bottom: 1px solid #DB9F73; }
         .tbl_red { font-size: 11px; color: #BA0000; font-family: Tahoma; text-decoration: none; }
         .tbl-shp_item-ico { margin-left: 0; margin-right: 6px; border: 0; }
+        .item-picture-frame {
+            float: left;
+            width: 60px;
+            height: 60px;
+            margin: 1px;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+        }
+        .item-picture-frame img {
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .item-description p {
+            margin: 0;
+            margin-block-start: 0;
+            margin-block-end: 6px;
+        }
     </style>
 </head>
 <body class="regcolor">
@@ -123,14 +142,11 @@
                                                                             <tbody>
                                                                             <tr>
                                                                                 <td rowspan="4" valign="top" align="center" width="60">
-                                                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                           style="float: left; margin: 1px; {{ $page->image ? 'background: url('.$page->image.') no-repeat center; background-size: cover;' : '' }}">
-                                                                                        <tbody>
-                                                                                        <tr>
-                                                                                            <td title="{{ $page->name }}" valign="bottom">&nbsp;</td>
-                                                                                        </tr>
-                                                                                        </tbody>
-                                                                                    </table>
+                                                                                    <div class="item-picture-frame" title="{{ $page->name }}">
+                                                                                        @if($page->image)
+                                                                                            <img src="{{ $page->image }}" alt="{{ $page->name }}">
+                                                                                        @endif
+                                                                                    </div>
                                                                                 </td>
                                                                                 <td rowspan="5" width="12">&nbsp;</td>
                                                                                 <td colspan="3">
@@ -332,7 +348,7 @@
 
                                                                             @if ($page->description)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">{!! $page->description !!}</td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom item-description" colspan="2">{!! $page->description !!}</td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif

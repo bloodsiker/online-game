@@ -41,8 +41,10 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $itemInfo->is_give,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
-                stats: ItemTooltipStatsBuilder::build($itemInfo),
+                stats: ItemTooltipStatsBuilder::buildForTooltip($itemInfo),
                 requirements: ItemTooltipStatsBuilder::buildRequirements($itemInfo),
+                remainingUses: (int) $itemInfo->count_use > 0 ? (int) $itemInfo->count_use : null,
+                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
             ));
         }
     }

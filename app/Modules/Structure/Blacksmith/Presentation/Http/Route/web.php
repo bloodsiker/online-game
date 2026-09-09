@@ -20,6 +20,8 @@ Route::get('/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])
 Route::get('/blacksmith/{id}/break', [BlacksmithController::class, 'breakItem'])->name('blacksmith.break');
 Route::get('/blacksmith/{id}/upgrade', [BlacksmithController::class, 'upgrade'])->name('blacksmith.upgrade');
 Route::post('/blacksmith/{id}/upgrade', [BlacksmithController::class, 'upgradeProcess'])->name('blacksmith.upgrade.process');
+Route::get('/blacksmith/{id}/upgrade-transfer', [BlacksmithController::class, 'upgradeTransfer'])->name('blacksmith.upgrade_transfer');
+Route::post('/blacksmith/{id}/upgrade-transfer', [BlacksmithController::class, 'upgradeTransferProcess'])->name('blacksmith.upgrade_transfer.process');
 Route::get('/blacksmith/{id}/rarity-upgrade', [BlacksmithController::class, 'rarityUpgrade'])->name('blacksmith.rarity_upgrade');
 Route::post('/blacksmith/{id}/rarity-upgrade', [BlacksmithController::class, 'rarityUpgradeProcess'])->name('blacksmith.rarity_upgrade.process');
 Route::get('/blacksmith/{id}', [BlacksmithController::class, 'index'])->name('blacksmith');

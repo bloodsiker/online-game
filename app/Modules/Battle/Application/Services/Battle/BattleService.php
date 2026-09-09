@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
@@ -11,6 +12,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Repositories\MonsterOnLocationRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +55,14 @@ class BattleService
 
                 $action = "<p><span class='text-red'><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>";
                 $this->battleRepository->createBattleRound($battle, $action, $user);
+            } elseif ($battleDetails->status->isDeath()) {
+                $battleDetails->status = BattleDetailStatus::LIFE;
+                $battleDetails->save();
+                $this->battleRepository->createBattleRound(
+                    $battle,
+                    '<p><b>Игрок вернулся в бой после возрождения.</b></p>',
+                    $user,
+                );
             }
         } else {
             $this->bossRespawnService->respawnIfDue($location, $dungeonSessionId);
@@ -156,18 +166,56 @@ class BattleService
     {
         $monsterAttacked = MonsterOnLocation::with(['monster'])->where(['id' => $id, 'active' => 1])->first();
 
-        if ($monsterAttacked instanceof MonsterOnLocation) {
-            $user = Auth::user();
-
-            $battle = $this->battleRepository->createBattle($location);
-            $this->battleRepository->createBattleDetails($battle, $user);
-
-            $this->battleRepository->createBattleDetails($battle, null, $monsterAttacked);
-
-            $action = sprintf('<p>Вы напали на врага - <b>%s...</b></p>', $monsterAttacked->monster->name);
-            $this->battleRepository->createBattleRound($battle, $action, $user);
+        if (! $monsterAttacked instanceof MonsterOnLocation) {
+            return null;
         }
 
-        return $battle ?? null;
+        $user = Auth::user();
+
+        // На локации бой может уже идти: моб напал первым или дерётся другой
+        // игрок. Заводить второй бой нельзя — findActiveBattleOnLocation()
+        // отдаёт старший, и удары уходят не в тот бой, что показан игроку.
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location);
+
+        if ($battle instanceof Battle) {
+            $this->joinExistingBattle($battle, $user);
+        } else {
+            $battle = $this->battleRepository->createBattle($location);
+            $this->battleRepository->createBattleDetails($battle, $user);
+        }
+
+        if (! $this->isMonsterInBattle($battle, $monsterAttacked)) {
+            $this->battleRepository->createBattleDetails($battle, null, $monsterAttacked);
+        }
+
+        $action = sprintf('<p>Вы напали на врага - <b>%s...</b></p>', $monsterAttacked->monster->name);
+        $this->battleRepository->createBattleRound($battle, $action, $user);
+
+        return $battle;
+    }
+
+    /**
+     * Подключает игрока к уже идущему бою: новичку заводит запись участника,
+     * ранее убитому возвращает статус «жив».
+     */
+    private function joinExistingBattle(Battle $battle, User $user): void
+    {
+        $detail = BattleDetail::where(['battle_id' => $battle->id, 'user_id' => $user->id])->first();
+
+        if (! $detail instanceof BattleDetail) {
+            $this->battleRepository->createBattleDetails($battle, $user);
+
+            return;
+        }
+
+        if ($detail->status->isDeath()) {
+            $detail->status = BattleDetailStatus::LIFE;
+            $detail->save();
+        }
+    }
+
+    private function isMonsterInBattle(Battle $battle, MonsterOnLocation $monster): bool
+    {
+        return BattleDetail::where(['battle_id' => $battle->id, 'location_monster_id' => $monster->id])->exists();
     }
 }

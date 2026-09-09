@@ -46,7 +46,8 @@
         .req-ok { color: #247327 !important; font-weight: bold; }
         .req-fail { color: #a02020 !important; font-weight: bold; }
         .upgrade-action { margin-top: 7px; }
-        .butt2.disabled, .butt2.disabled input { cursor: default; opacity: .55; }
+        .butt1.pointer.disabled { cursor: default; opacity: .5; }
+        .butt1.pointer.disabled input { cursor: default; }
         .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid; font-weight: bold; }
         .message.success { color: #247327; border-color: #247327; }
         .message.error { color: #a02020; border-color: #a02020; }
@@ -173,9 +174,9 @@
                                     <form class="upgrade-action" action="{{ $upgradeProcessUrl ?? route('blacksmith.rarity_upgrade.process', ['id' => $blacksmith->id]) }}" method="post">
                                         @csrf
                                         <input type="hidden" name="item_id" value="{{ $item['itemId'] }}">
-                                        <b class="butt2 pointer {{ $step['canUpgrade'] ? '' : 'disabled' }}">
-                                            <b><input type="submit" value="Улучшить" @disabled(! $step['canUpgrade'])></b>
-                                        </b>
+                                        <span class="butt1 pointer {{ $step['canUpgrade'] ? '' : 'disabled' }}">
+                                            <span><input type="submit" value="Улучшить" class="grnn" @disabled(! $step['canUpgrade'])></span>
+                                        </span>
                                     </form>
                                 @else
                                     <div class="upgrade-next-hint">Сначала улучшите предмет до предыдущей ступени.</div>

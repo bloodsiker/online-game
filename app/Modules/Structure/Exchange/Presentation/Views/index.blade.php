@@ -140,8 +140,8 @@
         .collection-slot {
             display: inline-block;
             position: relative;
-            width: 62px;
-            height: 80px;
+            width: 72px;
+            height: 88px;
             overflow: hidden;
             vertical-align: top;
         }
@@ -149,8 +149,9 @@
             display: block;
             width: 60px;
             height: 60px;
-            padding: 1px;
-            background: url(../images/slot-empty.png) no-repeat;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+            cursor: pointer;
         }
         .collection-slot.active .collection-slot__qty, .collection-slot.active .collection-slot__qty-current {
             color: #489200;
@@ -181,7 +182,10 @@
             font-size: 40px;
         }
         .collection-resource-img {
-            width: 100%;
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
         }
         .regcolor, .regcolor * {
             color: #955c4a;
@@ -192,6 +196,8 @@
             padding: 0 4px;
         }
     </style>
+    {!! $itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
@@ -276,8 +282,10 @@
                                                     <tr>
                                                         <td>
                                                             <span class="collection-slot">
-                                                                <span class="collection-slot__img">
-                                                                    <a href="#" class="collection-resource redd">
+                                                                <span class="collection-slot__img" data-id="{{ $item->fromItemId }}"
+                                                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                                                    <a href="{{ route('items.info.share', ['id' => $item->fromItemId]) }}" class="collection-resource redd"
+                                                                       onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
                                                                         <img src="{{ asset($item->fromItemImage) }}" class="collection-resource-img" alt="{{ $item->fromItemName }}">
                                                                     </a>
                                                                 </span>
@@ -299,8 +307,10 @@
                                                         </td>
                                                         <td>
                                                             <span class="collection-slot">
-                                                                <span class="collection-slot__img">
-                                                                    <a href="#" class="collection-resource redd">
+                                                                <span class="collection-slot__img" data-id="{{ $item->toItemId }}"
+                                                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                                                    <a href="{{ route('items.info.share', ['id' => $item->toItemId]) }}" class="collection-resource redd"
+                                                                       onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
                                                                         <img src="{{ asset($item->toItemImage) }}" class="collection-resource-img" alt="{{ $item->toItemName }}">
                                                                     </a>
                                                                 </span>
@@ -312,8 +322,10 @@
                                                         </td>
                                                         <td>
                                                             <span class="collection-slot">
-                                                                <span class="collection-slot__img">
-                                                                    <a href="#" class="collection-resource redd">
+                                                                <span class="collection-slot__img" data-id="{{ $item->toItemId }}"
+                                                                      onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
+                                                                    <a href="{{ route('items.info.share', ['id' => $item->toItemId]) }}" class="collection-resource redd"
+                                                                       onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
                                                                         <img src="{{ asset($item->toItemImage) }}" class="collection-resource-img" alt="{{ $item->toItemName }}">
                                                                     </a>
                                                                 </span>

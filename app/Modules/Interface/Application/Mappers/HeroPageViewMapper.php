@@ -33,13 +33,21 @@ class HeroPageViewMapper
                 ? (int) $now->diffInSeconds($activeEffect->expires_at, false)
                 : $this->remainingBattleEffectSeconds($activeEffect, $now);
 
+            // Повна тривалість для таймлайна: щоб після перезавантаження
+            // кільце продовжувалось з середини, а не стартувало повним.
+            $appliedAt = $activeEffect->applied_at ?? null;
+            $totalSeconds = ($activeEffect->expires_at && $appliedAt)
+                ? (int) $appliedAt->diffInSeconds($activeEffect->expires_at, false)
+                : $remainingSeconds;
+
             $isCurse = $activeEffect->type?->isDoT() || $activeEffect->type?->isControl()
                 || ($activeEffect->effect && in_array($activeEffect->effect->type, ['debuff']));
 
             return new HeroEffectDTO(
-                id: ($activeEffect->effect?->slug ?? 'effect').'_'.$activeEffect->id,
+                id: $activeEffect->frontendId(),
                 name: $name,
                 duration: max(0, $remainingSeconds),
+                totalDuration: max(1, $remainingSeconds, $totalSeconds),
                 isCurse: $isCurse,
                 image: $activeEffect->effect?->image,
                 description: $activeEffect->effect?->description,

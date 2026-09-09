@@ -62,7 +62,7 @@ class FightController extends Controller
     {
         $user = Auth::user();
         if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
-            abort(429, 'Слишком быстро. Подождите секунду.');
+            return redirect()->route('fight', ['id' => $id]);
         }
         if ($this->expireDungeonSession->execute($user)) {
             session()->flash('message', 'Время в подземелье истекло! Вы возвращены к входу.');
@@ -103,7 +103,7 @@ class FightController extends Controller
     {
         $user = Auth::user();
         if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
-            abort(429, 'Слишком быстро. Подождите секунду.');
+            return redirect()->route('location');
         }
         $player = $user->player;
 
@@ -138,7 +138,7 @@ class FightController extends Controller
     {
         $user = Auth::user();
         if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
-            abort(429, 'Слишком быстро. Подождите секунду.');
+            return redirect()->route('fight', ['id' => $id]);
         }
         $player = $user->player;
         $prevLocation = $user->prev_location_id;

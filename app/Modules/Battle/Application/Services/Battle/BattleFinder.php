@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Battle;
 
+use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
@@ -27,14 +28,20 @@ readonly class BattleFinder
         if (! $detail) {
             $this->battleRepository->createBattleDetails($battle, $user);
             $this->addJoinMessage($battle, $user);
+        } elseif ($detail->status->isDeath()) {
+            $detail->status = BattleDetailStatus::LIFE;
+            $detail->save();
+            $this->addJoinMessage($battle, $user, true);
         }
 
         return $battle;
     }
 
-    private function addJoinMessage(Battle $battle, $user): void
+    private function addJoinMessage(Battle $battle, $user, bool $returned = false): void
     {
-        $action = "<p><span class='text-red'><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>";
+        $action = $returned
+            ? '<p><b>Игрок вернулся в бой после возрождения.</b></p>'
+            : "<p><span class='text-red'><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>";
         $this->battleRepository->createBattleRound($battle, $action, $user);
     }
 }

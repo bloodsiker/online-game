@@ -420,14 +420,22 @@
 </script>
 
 <script>
-    function actionAttack(id, monsterId, action) {
-        if (parent.isCooldown) {
-            console.log('⏳ Attack is blocked, cooldown is active...');
+    function actionAttack(action) {
+        // Родительская страница /game живёт всю сессию и может быть старее
+        // этого фрейма: боевой iframe перезагружается каждый раунд, а вкладку
+        // никто не обновлял. Тогда parent.queueAttack ещё не существует —
+        // работаем по-старому, иначе кнопка и клавиша Q молча падают.
+        if (typeof parent.queueAttack === 'function') {
+            parent.queueAttack(action);
+
             return;
         }
 
-        parent.attackMonster(id, monsterId, action);
-        parent.startCooldown();
+        if (parent.isCooldown || !window.battleTarget) return;
+
+        if (parent.attackMonster(window.battleTarget.battleId, window.battleTarget.monsterId, action) !== false) {
+            parent.startCooldown();
+        }
     }
 </script>
 

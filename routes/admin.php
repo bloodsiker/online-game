@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
 use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\InjuryTypeController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LocationGateController;
 use App\Http\Controllers\Admin\MagicSkillController;
@@ -68,6 +69,13 @@ Route::get('/api/maps', [ApiController::class, 'maps'])->name('api.maps');
 
 Route::get('/item-logs', [ItemActionLogController::class, 'list'])->name('item_logs');
 
+Route::get('/injuries', [InjuryTypeController::class, 'index'])->name('injury_types');
+Route::get('/injury/create', [InjuryTypeController::class, 'create'])->name('injury_type.create');
+Route::post('/injury', [InjuryTypeController::class, 'store'])->name('injury_type.store');
+Route::get('/injury/{injuryType}', [InjuryTypeController::class, 'edit'])->name('injury_type.edit');
+Route::post('/injury/{injuryType}', [InjuryTypeController::class, 'update'])->name('injury_type.update');
+Route::delete('/injury/{injuryType}', [InjuryTypeController::class, 'destroy'])->name('injury_type.destroy');
+
 Route::get('/items', [ItemController::class, 'list'])->name('items');
 Route::get('/item/create', [ItemController::class, 'create'])->name('item.create');
 Route::post('/item/create', [ItemController::class, 'store'])->name('item.store');
@@ -90,6 +98,9 @@ Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'
 Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::class, 'deleteRequirement'])->name('item.requirement.delete');
 Route::post('/item/{item}/rarity-upgrade/material', [ItemController::class, 'addRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.add');
 Route::delete('/item/{item}/rarity-upgrade/material/{material}', [ItemController::class, 'deleteRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.delete');
+Route::post('/item/{item}/chest-content', [ItemController::class, 'addChestContent'])->name('item.chest_content.add');
+Route::patch('/item/{item}/chest-content/{containedItem}', [ItemController::class, 'updateChestContent'])->name('item.chest_content.update');
+Route::delete('/item/{item}/chest-content/{containedItem}', [ItemController::class, 'deleteChestContent'])->name('item.chest_content.delete');
 
 Route::match(['GET', 'POST'], '/monster/create', [MonsterController::class, 'create'])->name('monster.create');
 Route::post('/monster/{monster}/drop', [MonsterController::class, 'infoDrop'])->name('monster.info.drop');

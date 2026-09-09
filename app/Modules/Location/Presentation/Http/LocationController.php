@@ -52,7 +52,7 @@ class LocationController extends Controller
         /** @var User $user */
         $user = Auth::user();
         if (! Cache::add('cd:move:'.$user->id, 1, 1)) {
-            abort(429, 'Слишком быстро. Подождите секунду.');
+            return redirect()->route('location');
         }
 
         return view('location::index', [
@@ -65,7 +65,7 @@ class LocationController extends Controller
         /** @var User $user */
         $user = Auth::user();
         if (! Cache::add('cd:move:'.$user->id, 1, 1)) {
-            abort(429, 'Слишком быстро. Подождите секунду.');
+            return redirect()->route('location');
         }
 
         return view('location::index', [

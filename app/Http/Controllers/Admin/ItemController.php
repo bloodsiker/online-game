@@ -117,7 +117,20 @@ class ItemController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $item->load(['recipe', 'recipe.items', 'recipe.kraftItem', 'stats', 'effects', 'buffs.effect', 'debuffs.effect', 'requirements.skill', 'magicSkillBook', 'rarityUpgradeTarget', 'rarityUpgradeMaterials']);
+        $item->load([
+            'recipe',
+            'recipe.items',
+            'recipe.kraftItem',
+            'stats',
+            'effects',
+            'buffs.effect',
+            'debuffs.effect',
+            'requirements.skill',
+            'magicSkillBook',
+            'rarityUpgradeTarget',
+            'rarityUpgradeMaterials',
+            'itemHasItems' => fn ($query) => $query->orderBy('share_items.name'),
+        ]);
 
         $skills = Skill::orderBy('name')->get();
         $toolFamilies = GatheringToolFamily::cases();
@@ -397,7 +410,77 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Материал для апгрейда удалён.');
     }
 
+    public function addChestContent(Request $request, ShareItem $item): RedirectResponse
+    {
+        $this->ensureContentsSupported($item);
+        $data = $this->validateChestContent($request, includeItem: true);
+        $containedItemId = (int) $data['share_item_id'];
+
+        if ($containedItemId === (int) $item->id) {
+            return redirect()->back()->with('error', 'Предмет нельзя добавить в собственное содержимое.');
+        }
+
+        $item->itemHasItems()->syncWithoutDetaching([
+            $containedItemId => $this->chestContentPivot($data),
+        ]);
+
+        return redirect()->back()->with('success', 'Предмет добавлен.');
+    }
+
+    public function updateChestContent(Request $request, ShareItem $item, ShareItem $containedItem): RedirectResponse
+    {
+        $this->ensureContentsSupported($item);
+        abort_unless($item->itemHasItems()->whereKey($containedItem->id)->exists(), 404);
+
+        $data = $this->validateChestContent($request);
+        $item->itemHasItems()->updateExistingPivot($containedItem->id, $this->chestContentPivot($data));
+
+        return redirect()->back()->with('success', 'Параметры предмета обновлены.');
+    }
+
+    public function deleteChestContent(ShareItem $item, ShareItem $containedItem): RedirectResponse
+    {
+        $this->ensureContentsSupported($item);
+        $item->itemHasItems()->detach($containedItem->id);
+
+        return redirect()->back()->with('success', 'Предмет удалён.');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
+
+    /** @return array{share_item_id?: int|string, drop_chance: int|string, min_count: int|string, max_count: int|string} */
+    private function validateChestContent(Request $request, bool $includeItem = false): array
+    {
+        $rules = [
+            'drop_chance' => ['required', 'integer', 'between:0,100'],
+            'min_count' => ['required', 'integer', 'min:1', 'max:999999'],
+            'max_count' => ['required', 'integer', 'min:1', 'max:999999', 'gte:min_count'],
+        ];
+
+        if ($includeItem) {
+            $rules['share_item_id'] = ['required', 'integer', 'exists:share_items,id'];
+        }
+
+        return $request->validate($rules);
+    }
+
+    /**
+     * @param  array{drop_chance: int|string, min_count: int|string, max_count: int|string}  $data
+     * @return array{drop_chance: int, min_count: int, max_count: int}
+     */
+    private function chestContentPivot(array $data): array
+    {
+        return [
+            'drop_chance' => (int) $data['drop_chance'],
+            'min_count' => (int) $data['min_count'],
+            'max_count' => (int) $data['max_count'],
+        ];
+    }
+
+    private function ensureContentsSupported(ShareItem $item): void
+    {
+        abort_unless(in_array($item->type, [ShareItemType::CHEST, ShareItemType::RESOURCE], true), 404);
+    }
 
     private function fillItem(ShareItem $item, Request $request): void
     {
@@ -468,18 +551,15 @@ class ItemController extends Controller
             : (bool) $request->input('is_stackable', false);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
+        $item->is_use = (bool) $request->input('is_use', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
-        $item->skill_lvl = $request->filled('skill_lvl')
-            ? (int) $request->input('skill_lvl')
-            : ($type->isGatheringResource() ? $item->rarity->gatheringRequiredSkillLevel() : null);
-        $item->skill_exp = $request->filled('skill_exp')
-            ? (int) $request->input('skill_exp')
-            : ($type->isGatheringResource() ? $item->rarity->gatheringExperience() : null);
-        $item->gathering_time_seconds = $type->isGatheringResource()
-            ? ($request->filled('gathering_time_seconds') ? (int) $request->input('gathering_time_seconds') : $item->rarity->defaultGatheringSeconds())
+        $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
+        $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
+        $item->gathering_time_seconds = $type->isGatheringResource() && $request->filled('gathering_time_seconds')
+            ? (int) $request->input('gathering_time_seconds')
             : null;
-        $item->gathering_respawn_seconds = $type->isGatheringResource()
-            ? ($request->filled('gathering_respawn_seconds') ? (int) $request->input('gathering_respawn_seconds') : 60)
+        $item->gathering_respawn_seconds = $type->isGatheringResource() && $request->filled('gathering_respawn_seconds')
+            ? (int) $request->input('gathering_respawn_seconds')
             : null;
         $item->gathering_tool_family = $type->isGatheringResource() && $request->filled('gathering_tool_family')
             ? $request->input('gathering_tool_family')

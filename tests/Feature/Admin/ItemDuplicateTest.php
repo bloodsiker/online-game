@@ -14,6 +14,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -49,6 +50,7 @@ class ItemDuplicateTest extends TestCase
             $table->boolean('is_stackable')->default(false);
             $table->boolean('is_weight')->default(true);
             $table->boolean('is_slot_usable')->default(false);
+            $table->boolean('is_use')->default(false);
             $table->unsignedBigInteger('skill_id')->nullable();
             $table->integer('skill_lvl')->nullable();
             $table->integer('skill_exp')->nullable();
@@ -193,5 +195,69 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame(2, $copy->itemHasItems->sole()->pivot->min_count);
         $this->assertSame(5, $copy->itemHasItems->sole()->pivot->max_count);
         $this->assertSame(35, $copy->itemHasItems->sole()->pivot->drop_chance);
+    }
+
+    public function test_chest_content_can_be_added_updated_and_deleted(): void
+    {
+        $chest = ShareItem::create(['name' => 'Сундук', 'type' => ShareItemType::CHEST]);
+        $reward = ShareItem::create(['name' => 'Награда', 'type' => ShareItemType::RESOURCE]);
+        $controller = new ItemController;
+
+        $controller->addChestContent(Request::create('/', 'POST', [
+            'share_item_id' => $reward->id,
+            'drop_chance' => 35,
+            'min_count' => 2,
+            'max_count' => 5,
+        ]), $chest);
+
+        $this->assertDatabaseHas('share_item_has_items', [
+            'parent_item_id' => $chest->id,
+            'share_item_id' => $reward->id,
+            'drop_chance' => 35,
+            'min_count' => 2,
+            'max_count' => 5,
+        ]);
+
+        $controller->updateChestContent(Request::create('/', 'PATCH', [
+            'drop_chance' => 80,
+            'min_count' => 1,
+            'max_count' => 3,
+        ]), $chest, $reward);
+
+        $this->assertDatabaseHas('share_item_has_items', [
+            'parent_item_id' => $chest->id,
+            'share_item_id' => $reward->id,
+            'drop_chance' => 80,
+            'min_count' => 1,
+            'max_count' => 3,
+        ]);
+
+        $controller->deleteChestContent($chest, $reward);
+
+        $this->assertDatabaseMissing('share_item_has_items', [
+            'parent_item_id' => $chest->id,
+            'share_item_id' => $reward->id,
+        ]);
+    }
+
+    public function test_resource_bonus_drop_can_be_configured(): void
+    {
+        $resource = ShareItem::create(['name' => 'Сосновое бревно', 'type' => ShareItemType::RESOURCE]);
+        $resin = ShareItem::create(['name' => 'Смола', 'type' => ShareItemType::RESOURCE]);
+
+        (new ItemController)->addChestContent(Request::create('/', 'POST', [
+            'share_item_id' => $resin->id,
+            'drop_chance' => 20,
+            'min_count' => 1,
+            'max_count' => 1,
+        ]), $resource);
+
+        $this->assertDatabaseHas('share_item_has_items', [
+            'parent_item_id' => $resource->id,
+            'share_item_id' => $resin->id,
+            'drop_chance' => 20,
+            'min_count' => 1,
+            'max_count' => 1,
+        ]);
     }
 }

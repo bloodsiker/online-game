@@ -120,9 +120,10 @@
     };
     let experience = parseFloat('{{ $player->getPercentExp() }}');
     let lvl = parseInt('{{ $player->lvl }}');
+    const appliedEffects = @json($fightDTO->getPlayerEffects());
 
     function playerAction() {
-        parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
+        parent.sendToFrame('character-frame', { hp, mp, experience, lvl, appliedEffects });
 
         const currentLocationId = {{ $player->user->location_id }};
         parent.sendToFrame('map-frame', { currentLocationId });

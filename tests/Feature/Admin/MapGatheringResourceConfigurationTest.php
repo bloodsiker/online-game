@@ -82,6 +82,30 @@ class MapGatheringResourceConfigurationTest extends TestCase
         ])->assertNotFound();
     }
 
+    public function test_admin_can_choose_a_respawn_location_from_the_same_map(): void
+    {
+        DB::table('locations')->insert([
+            ['id' => 20, 'map_id' => 2, 'name' => 'Старая точка'],
+            ['id' => 21, 'map_id' => 2, 'name' => 'Новая точка'],
+            ['id' => 30, 'map_id' => 3, 'name' => 'Чужая точка'],
+        ]);
+        DB::table('maps')->where('id', 2)->update(['resp_location_id' => 20]);
+
+        $this->post(route('admin.map.info', 2), [
+            'name' => 'Шепчущий Лес',
+            'slug' => 'forest',
+            'folder' => 'forest',
+            'resp_location_id' => 21,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('maps', ['id' => 2, 'resp_location_id' => 21]);
+
+        $this->from(route('admin.map.info', 2))->post(route('admin.map.info', 2), [
+            'name' => 'Шепчущий Лес',
+            'resp_location_id' => 30,
+        ])->assertSessionHasErrors('resp_location_id');
+    }
+
     private function seedConfiguration(): void
     {
         DB::table('maps')->insert(['id' => 2, 'name' => 'Шепчущий Лес']);
@@ -135,6 +159,10 @@ class MapGatheringResourceConfigurationTest extends TestCase
             $table->string('slug')->nullable();
             $table->string('folder')->nullable();
             $table->unsignedBigInteger('parent_id')->nullable();
+            $table->unsignedBigInteger('resp_location_id')->nullable();
+            $table->boolean('has_gathering_field')->default(false);
+            $table->string('gathering_field_image')->nullable();
+            $table->timestamps();
         });
         Schema::create('locations', function (Blueprint $table): void {
             $table->id();

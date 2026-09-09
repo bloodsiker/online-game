@@ -23,7 +23,7 @@ readonly class PlayerDeathService
         BattleDetail $attackedMonster,
         AttackResultDTO $result
     ): FightDTO {
-        $this->deathFinalizer->finalize($player, $attackedPlayer, $result);
+        $this->deathFinalizer->finalize($player, $attackedPlayer, $result, $battle);
 
         $round->action = $result->getLog();
         $round->save();

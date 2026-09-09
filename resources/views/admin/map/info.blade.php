@@ -10,6 +10,16 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="tabs">
                         <ul class="nav nav-tabs">
                             <li class="nav-item active">
@@ -56,6 +66,17 @@
                                                         <option value="{{ $m->id }}" @selected($map->parent_id === $m->id)>{{ $m->name }} [{{ $m->id }}]</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Локация возрождения</label>
+                                                <select name="resp_location_id" class="form-control" required>
+                                                    @foreach($locations->sortBy('name') as $location)
+                                                        <option value="{{ $location->id }}" @selected((int) old('resp_location_id', $map->resp_location_id) === $location->id)>
+                                                            [{{ $location->id }}] {{ $location->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">После обычной смерти игрок перемещается в эту локацию.</small>
                                             </div>
                                         </div>
                                         <div class="col-md-4">

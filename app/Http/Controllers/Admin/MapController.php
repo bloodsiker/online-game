@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -74,10 +75,23 @@ class MapController extends Controller
     public function info(Request $request, Map $map): mixed
     {
         if ($request->isMethod('POST')) {
-            $map->name = $request->input('name');
-            $map->slug = $request->input('slug');
-            $map->folder = $request->input('folder');
-            $map->parent_id = $request->input('parent_id') ?: null;
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'slug' => ['nullable', 'string', 'max:100'],
+                'folder' => ['nullable', 'string', 'max:100'],
+                'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
+                'resp_location_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('locations', 'id')->where('map_id', $map->id),
+                ],
+            ]);
+
+            $map->name = $data['name'];
+            $map->slug = $data['slug'] ?? null;
+            $map->folder = $data['folder'] ?? null;
+            $map->parent_id = $data['parent_id'] ?? null;
+            $map->resp_location_id = (int) $data['resp_location_id'];
             $map->has_gathering_field = (bool) $request->input('has_gathering_field', false);
 
             if ($request->hasFile('gathering_field_image')) {

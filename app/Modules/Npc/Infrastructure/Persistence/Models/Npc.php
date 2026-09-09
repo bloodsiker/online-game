@@ -18,10 +18,11 @@ class Npc extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'image', 'location_id', 'hide_location'];
+    protected $fillable = ['name', 'description', 'image', 'location_id', 'hide_location', 'is_active'];
 
     protected $casts = [
         'hide_location' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     protected static function booted(): void

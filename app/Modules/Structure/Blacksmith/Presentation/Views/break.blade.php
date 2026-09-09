@@ -117,14 +117,14 @@
                         </div>
 
                         <div class="break-action">
-                            <b class="butt2 pointer">
-                                <b>
+                            <span class="butt1 pointer">
+                                <span>
                                     <input type="button"
-                                           class="break-item"
+                                           class="grnn break-item"
                                            value="Разобрать"
                                            data-href="{{ route('blacksmith.break', ['id' => $blacksmith->id, 'iid' => $item['itemId']]) }}">
-                                </b>
-                            </b>
+                                </span>
+                            </span>
                         </div>
                     </div>
                 @empty

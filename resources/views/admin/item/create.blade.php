@@ -139,19 +139,19 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="skill_lvl">Необходимый уровень</label>
-                                                <input type="text" class="form-control" id="skill_lvl" name="skill_lvl" value="{{ old('skill_lvl') }}">
+                                                <input type="text" class="form-control" id="skill_lvl" name="skill_lvl" value="{{ old('skill_lvl') }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="skill_exp">Опыт навыка за действие</label>
-                                                <input type="text" class="form-control" id="skill_exp" name="skill_exp" value="{{ old('skill_exp') }}">
+                                                <input type="text" class="form-control" id="skill_exp" name="skill_exp" value="{{ old('skill_exp') }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="gathering_time_seconds">Время добычи, сек.</label>
-                                                <input type="number" min="1" class="form-control" id="gathering_time_seconds" name="gathering_time_seconds" value="{{ old('gathering_time_seconds') }}">
+                                                <input type="number" min="1" class="form-control" id="gathering_time_seconds" name="gathering_time_seconds" value="{{ old('gathering_time_seconds') }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="gathering_respawn_seconds">Время респавна, сек.</label>
-                                                <input type="number" min="1" class="form-control" id="gathering_respawn_seconds" name="gathering_respawn_seconds" value="{{ old('gathering_respawn_seconds') }}">
+                                                <input type="number" min="1" class="form-control" id="gathering_respawn_seconds" name="gathering_respawn_seconds" value="{{ old('gathering_respawn_seconds') }}" autocomplete="off">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="gathering_tool_family">Семейство инструмента для добычи</label>
@@ -240,6 +240,14 @@
                                                     <option value="0" @selected(old('is_slot_usable', '0') === '0')>Нет</option>
                                                     <option value="1" @selected(old('is_slot_usable') === '1')>Да</option>
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="is_use">Пункт «Использовать» в рюкзаке</label>
+                                                <select class="form-control" name="is_use" id="is_use">
+                                                    <option value="0" @selected(old('is_use', '0') === '0')>По типу предмета</option>
+                                                    <option value="1" @selected(old('is_use') === '1')>Всегда показывать</option>
+                                                </select>
+                                                <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
                                         </div>
                                     </div>

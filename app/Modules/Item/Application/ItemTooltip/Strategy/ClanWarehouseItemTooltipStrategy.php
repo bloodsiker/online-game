@@ -41,7 +41,9 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
                 nogive: ! $itemInfo->is_sell,
                 noweight: ! $itemInfo->is_weight,
                 nosell: ! $itemInfo->is_sell,
-                stats: ItemTooltipStatsBuilder::build($itemInfo, $upgradeLvl),
+                stats: ItemTooltipStatsBuilder::buildForTooltip($itemInfo, $upgradeLvl),
+                remainingUses: $item->remainingUses(),
+                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
             ));
         }
     }

@@ -8,11 +8,24 @@ use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Events\ChatMessageCreated;
 use App\Modules\Chat\Domain\Events\ChatMessageExpired;
 use App\Modules\Chat\Domain\Models\ChatMessage;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ChatMessageCreatedTest extends TestCase
 {
+    public function test_created_message_is_broadcast_through_the_queue(): void
+    {
+        $event = new ChatMessageCreated((new ChatMessage)->forceFill([
+            'id' => 1,
+            'channel' => ChatChannel::Main->value,
+        ]));
+
+        $this->assertInstanceOf(ShouldBroadcast::class, $event);
+        $this->assertNotInstanceOf(ShouldBroadcastNow::class, $event);
+    }
+
     #[DataProvider('scopedChannels')]
     public function test_message_is_broadcast_only_to_its_relevant_scope(
         ChatChannel $channel,

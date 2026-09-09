@@ -35,11 +35,26 @@
 
         /* ── Карточки активностей ── */
         .user-rewards__item-pic {
+            position: relative;
             width: 60px;
             height: 60px;
             margin: 0 auto;
             padding: 5px 6px 6px;
             background: url(/main/images/user-reward-frame.png) 0 0 no-repeat;
+        }
+        .user-rewards__item-image {
+            display: block;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .user-rewards__item-overlay {
+            position: absolute;
+            top: 5px;
+            left: 6px;
+            z-index: 1;
+            width: 60px;
+            height: 60px;
         }
         .store-grid { font-size: 0; margin: -6px; }
         .store-grid .store-item {

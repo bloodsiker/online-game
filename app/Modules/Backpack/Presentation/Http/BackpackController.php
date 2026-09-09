@@ -9,6 +9,8 @@ use App\Modules\Backpack\Application\UseCases\GetBackpack;
 use App\Modules\Backpack\Application\UseCases\UpdateOrder;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
+use App\Modules\Player\Application\ItemTooltip\PlayerInjuryTooltipStrategy;
+use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +23,7 @@ class BackpackController extends Controller
     public function __construct(
         private readonly GetBackpack $getBackpack,
         private readonly UpdateOrder $updateOrder,
+        private readonly PlayerInjuryService $injuryService,
         private readonly PlayerStatService $statService,
     ) {}
 
@@ -49,11 +52,15 @@ class BackpackController extends Controller
             $playerEquip->bagFirstSlot,
             $playerEquip->bagSecondSlot,
         ])->filter();
+        $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
 
-        $tooltipCollector->collectFrom(new ItemModelTooltipStrategy($equippedItems));
+        $tooltipCollector
+            ->collectFrom(new ItemModelTooltipStrategy($equippedItems))
+            ->collectFrom(new PlayerInjuryTooltipStrategy($injuriesBySlot));
 
         return view('backpack::equip', [
             'playerEquip' => $playerEquip,
+            'injuriesBySlot' => $injuriesBySlot,
             'itemTooltipScript' => $tooltipCollector->renderScript(),
             'hpMp' => $this->buildHpMp($user),
         ]);
