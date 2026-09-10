@@ -193,7 +193,7 @@
             <td width="19"><img id="right_1" src="{{ asset($active ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
         @endforeach
 
-        <td></td>
+        <td width="100%"></td>
     </tr>
     </tbody>
 </table>

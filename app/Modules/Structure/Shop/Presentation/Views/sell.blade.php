@@ -153,10 +153,10 @@
             <a id="center_2" href="{{ route('shop.sell_item', ['id' => $page->shopId]) }}" title="Продать" class="btn_2">Продать</a></td>
         <td width="19"><img id="right_2" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
-        <td></td>
+        <td width="100%"></td>
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+        <td width="60" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
             <a id="center_4" href="{{ route('location') }}" title="Подаренные Вам подарки" class="btn_1">Выход</a></td>
         <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
