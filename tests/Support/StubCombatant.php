@@ -15,6 +15,8 @@ final class StubCombatant implements FightHitInterface
         private int $magicAttack = 0,
         private int $magicResistance = 0,
         private int $magicCriticalChance = 0,
+        private int $critDamage = 175,
+        private int $magicCritDamage = 175,
     ) {}
 
     public function getCritical(): int
@@ -44,7 +46,12 @@ final class StubCombatant implements FightHitInterface
 
     public function getCritDamage(): int
     {
-        return 175;
+        return $this->critDamage;
+    }
+
+    public function getMagicCritDamage(): int
+    {
+        return $this->magicCritDamage;
     }
 
     public function getLevel(): int

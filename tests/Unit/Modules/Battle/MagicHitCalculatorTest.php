@@ -81,17 +81,31 @@ class MagicHitCalculatorTest extends TestCase
         $this->assertSame(10, $hit->getDamage());
     }
 
-    public function test_guaranteed_magic_critical_chance_applies_crit_damage_multiplier(): void
+    public function test_magic_critical_ignores_physical_crit_damage(): void
     {
         $calc = new MagicHitCalculator;
-        // StubCombatant::getCritDamage() = 175 (= CRIT_DAMAGE_BASE, ниже софткапа) -> множитель 175%
-        $attacker = new StubCombatant(level: 12, magicCriticalChance: 100);
+        // critDamage (физический) = 300, но магический крит берёт свою отдельную
+        // стату magicCritDamage (база 175 по умолчанию) — физический тут роли не играет.
+        $attacker = new StubCombatant(level: 12, magicCriticalChance: 100, critDamage: 300);
         $defender = new StubCombatant(level: 12);
 
-        // rawDamage = 10 (без интеллекта/magic_attack), крит: 10 * 1.75 = 17.5 -> round 18
         $hit = $calc->hit($attacker, $defender, minDamage: 10, maxDamage: 10, powerCoefficient: 0.3);
 
         $this->assertTrue($hit->isCritical());
         $this->assertSame(18, $hit->getDamage());
+    }
+
+    public function test_magic_critical_scales_with_own_gear_driven_stat_and_softcaps(): void
+    {
+        $calc = new MagicHitCalculator;
+        // magicCritDamage = 300 (выше CRIT_DAMAGE_BASE=175) -> софткап к 237.5%
+        // (см. PlayerStatFormulas::effectiveCritDamage): 10 * 2.375 = 23.75 -> round 24.
+        $attacker = new StubCombatant(level: 12, magicCriticalChance: 100, magicCritDamage: 300);
+        $defender = new StubCombatant(level: 12);
+
+        $hit = $calc->hit($attacker, $defender, minDamage: 10, maxDamage: 10, powerCoefficient: 0.3);
+
+        $this->assertTrue($hit->isCritical());
+        $this->assertSame(24, $hit->getDamage());
     }
 }

@@ -625,6 +625,11 @@
 
 
 
+    // Форматирование числа как format_money() на бекенде: пробел между разрядами, без дробной части.
+    function formatMoney(value) {
+        return Math.trunc(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+
     // Обработка полученных данных
     window.addEventListener('message', function(event) {
         if (event.origin !== window.location.origin) return;
@@ -648,12 +653,12 @@
 
         if (money !== undefined) {
             const playerMoney = document.getElementById('playerMoney');
-            playerMoney.textContent = money;
+            playerMoney.textContent = formatMoney(money);
         }
 
         if (diamond !== undefined) {
             const playerDiamond = document.getElementById('playerDiamond');
-            playerDiamond.textContent = diamond;
+            playerDiamond.textContent = formatMoney(diamond);
         }
 
         if (lvl !== undefined) {

@@ -130,7 +130,9 @@
                                         <table class="shop-item-frame__hitbox" width="72" height="71" cellpadding="0" cellspacing="0" border="0">
                                             <tbody>
                                             <tr>
-                                                <td data-id="{{ $item->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">&nbsp;</td>
+                                                <td data-id="{{ $item->item->id }}" style="cursor: pointer;" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                    onclick="window.open('{{ route('items.info.share', ['id' => $item->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
+                                                    valign="bottom">&nbsp;</td>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -141,7 +143,9 @@
                                         <tbody>
                                         <tr>
                                             <td colspan="3">
-                                                <span class="b" style="color:#ff0000; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;">{{ $item->item->name }}</span>
+                                                <a href="{{ route('items.info.share', ['id' => $item->item->id]) }}"
+                                                   onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
+                                                   class="b" style="color: {{ $item->item->rarity?->color() ?? '#333333' }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;">{{ $item->item->name }}</a>
                                             </td>
                                         </tr>
                                         <tr>

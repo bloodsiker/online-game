@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -11,6 +12,7 @@ use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -47,6 +49,10 @@ use Illuminate\Support\Carbon;
  * @property array|null $gem_stats
  * @property RuneRarity|null $rune_rarity
  * @property array|null $rune_stat_pool
+ * @property RunePassiveType|null $innate_passive_type Встроенная пассивка (для оружия/брони без руны), см. PlayerRunePassiveService
+ * @property int|null $innate_passive_value
+ * @property int|null $required_active_effect_id Предмет выпадает с монстра только если у игрока активен этот эффект, см. DropService
+ * @property bool $drop_direct_to_backpack Выпадает прямо в рюкзак, минуя землю локации
  * @property ItemRarity $rarity
  * @property int|null $upgrade_to_share_item_id
  * @property int $upgrade_gold_cost
@@ -64,6 +70,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection|ShareItemEffect[] $effects
  * @property-read Collection|ShareItemBuff[] $buffs
  * @property-read Collection|ShareItemDebuff[] $debuffs
+ * @property-read ShareItemUseLimit|null $useLimit
  * @property-read Collection|ShareItemStat[] $stats
  * @property-read Collection|ShareItemRequirement[] $requirements
  */
@@ -97,6 +104,7 @@ class ShareItem extends Model
         'is_sell' => true,
         'is_auction_sellable' => false,
         'is_give' => true,
+        'is_clan_warehouse_allowed' => true,
         'is_droppable' => true,
         'is_stackable' => false,
         'is_slot_usable' => false,
@@ -112,6 +120,7 @@ class ShareItem extends Model
         'is_weight' => 'boolean',
         'is_sell' => 'boolean',
         'is_give' => 'boolean',
+        'is_clan_warehouse_allowed' => 'boolean',
         'is_droppable' => 'boolean',
         'is_stackable' => 'boolean',
         'is_active' => 'boolean',
@@ -122,12 +131,14 @@ class ShareItem extends Model
         'gem_stats' => 'array',
         'rune_rarity' => RuneRarity::class,
         'rune_stat_pool' => 'array',
+        'innate_passive_type' => RunePassiveType::class,
         'rarity' => ItemRarity::class,
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
         'gathering_speed_bonus_percent' => 'integer',
         'gathering_double_chance_percent' => 'integer',
         'upgrade_gold_cost' => 'integer',
+        'drop_direct_to_backpack' => 'boolean',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -135,6 +146,12 @@ class ShareItem extends Model
     public function recipe(): HasOne
     {
         return $this->hasOne(ShareRecipe::class, 'share_item_id');
+    }
+
+    /** Эффект, при активности которого у игрока этот предмет может выпасть с монстра (см. DropService). */
+    public function requiredActiveEffect(): BelongsTo
+    {
+        return $this->belongsTo(Effect::class, 'required_active_effect_id');
     }
 
     public function magicSkillBook(): HasOne
@@ -177,6 +194,11 @@ class ShareItem extends Model
     public function buffs(): HasMany
     {
         return $this->hasMany(ShareItemBuff::class);
+    }
+
+    public function useLimit(): HasOne
+    {
+        return $this->hasOne(ShareItemUseLimit::class);
     }
 
     public function debuffs(): HasMany

@@ -214,6 +214,13 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label" for="is_clan_warehouse_allowed">Можно положить в клановый банк</label>
+                                                <select class="form-control" name="is_clan_warehouse_allowed" id="is_clan_warehouse_allowed">
+                                                    <option value="1" @selected(old('is_clan_warehouse_allowed', '1') === '1')>Да</option>
+                                                    <option value="0" @selected(old('is_clan_warehouse_allowed') === '0')>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="is_droppable">Можно выбросить</label>
                                                 <select class="form-control" name="is_droppable" id="is_droppable">
                                                     <option value="1" @selected(old('is_droppable', '1') === '1')>Да</option>

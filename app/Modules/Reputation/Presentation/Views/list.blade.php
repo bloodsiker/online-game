@@ -134,19 +134,6 @@
             max-width: 60px;
             max-height: 60px;
         }
-        .rep-emblem-fallback {
-            width: 52px;
-            height: 52px;
-            border: 2px solid #8b542e;
-            border-radius: 50%;
-            background: #ca9e64;
-            color: #6b321e;
-            font-size: 25px;
-            font-weight: bold;
-            line-height: 52px;
-            text-align: center;
-            text-shadow: 0 1px #f6deb0;
-        }
         .rep-description {
             display: -webkit-box;
             min-height: 32px;
@@ -310,6 +297,7 @@
                                     $pr          = $entry['pr'];
                                     $currentTier = $entry['currentTier'];
                                     $nextTier    = $entry['nextTier'];
+                                    $earnedMedalTier = $entry['earnedMedalTier'];
                                     $maxPoints   = $nextTier?->min_points ?? $rep->tiers->max('min_points');
                                     $startPoints = $currentTier?->min_points ?? 0;
                                     $tierRange   = max(0, (int) $maxPoints - (int) $startPoints);
@@ -318,10 +306,7 @@
                                         ? min((int) round($tierPoints * 100 / $tierRange), 100)
                                         : 100;
                                     $currentRank = $currentTier?->medal_name ?? 'Нейтральный';
-                                    $emblemPath  = $rep->icon;
-                                    if (! $emblemPath || ! is_file(public_path(ltrim($emblemPath, '/')))) {
-                                        $emblemPath = $currentTier?->medal_icon ?? $nextTier?->medal_icon;
-                                    }
+                                    $emblemUrl = $earnedMedalTier?->medalIconUrl();
                                 @endphp
                                 <div class="rep-card">
                                     <div class="rep-card-header">
@@ -329,10 +314,10 @@
                                     </div>
                                     <div class="rep-card-body">
                                         <div class="rep-emblem">
-                                            @if($emblemPath)
-                                                <img src="{{ asset(ltrim($emblemPath, '/')) }}" alt="{{ $rep->name }}">
+                                            @if($emblemUrl)
+                                                <img src="{{ $emblemUrl }}" alt="{{ $rep->name }}">
                                             @else
-                                                <div class="rep-emblem-fallback">{{ mb_substr($rep->name, 0, 1) }}</div>
+                                                <img src="{{ asset('img/bg/empty_slot.gif') }}" width="60" height="60" alt="">
                                             @endif
                                         </div>
 

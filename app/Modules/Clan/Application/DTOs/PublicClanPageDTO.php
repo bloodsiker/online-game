@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Application\DTOs;
 
 use App\Modules\Clan\Domain\Models\Clan;
+use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,6 +19,7 @@ final readonly class PublicClanPageDTO
      *     role: ClanRole|null,
      *     is_online: bool
      * }> $members
+     * @param  Collection<int, ClanLearnedSkill>  $learnedSkills
      */
     public function __construct(
         public Clan $clan,
@@ -26,6 +28,7 @@ final readonly class PublicClanPageDTO
         public int $levelRank,
         public int $experienceRank,
         public Collection $members,
+        public Collection $learnedSkills,
         public LengthAwarePaginator $logs,
     ) {}
 }

@@ -5,11 +5,19 @@ declare(strict_types=1);
 namespace App\Modules\Player\Application\UseCases\Admin;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\InjuryType;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 final readonly class SaveInjuryType
 {
+    private AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function execute(
         InjuryType $injuryType,
         array $data,
@@ -31,7 +39,7 @@ final readonly class SaveInjuryType
         ]);
 
         if ($image !== null) {
-            $injuryType->image = $image->store('injuries', 'public');
+            $injuryType->image = $this->imageStorage->storeOnPublicDisk($image, 'injuries');
         } elseif ($deleteImage) {
             $injuryType->image = null;
         }

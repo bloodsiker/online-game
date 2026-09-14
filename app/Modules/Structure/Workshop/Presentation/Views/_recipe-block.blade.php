@@ -7,6 +7,7 @@
                        style="color: {{ $recipe['nameColor'] }};"
                        onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $recipe['name'] }}</a></b>&nbsp;&nbsp;
                 <b class="collection-status @if(!$recipe['canCraft']) disabled @endif">{{ $recipe['professionName'] }}: {{ $recipe['currentLevel'] }} ур. / требуется {{ $recipe['requiredLevel'] }} ур.@if(!($recipe['learned'] ?? true)) · рецепт не изучен@endif</b>
+                &nbsp;&nbsp;<b style="color: {{ $recipe['successChance'] >= 100 ? '#339900' : ($recipe['successChance'] >= 75 ? '#cc8400' : '#cc3300') }};">Шанс успеха: {{ $recipe['successChance'] }}%</b>
             </div>
             <span class="collections-divider"></span>
             <div class="collections-body">

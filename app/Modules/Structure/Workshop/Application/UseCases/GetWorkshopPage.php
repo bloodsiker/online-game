@@ -10,6 +10,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Workshop\Domain\Services\CraftSuccessChanceConfig;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -55,6 +56,7 @@ class GetWorkshopPage
                 $requiredLevel = max(1, (int) $recipe->itemInfo->skill_lvl);
                 $currentLevel = (int) ($skills[$recipe->itemInfo->skill_id] ?? 1);
                 $learned = in_array((int) $recipe->id, $learnedIds, true);
+                $successChance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel);
                 $ingredients = $recipe->items->map(function ($ingredient) use ($resources): array {
                     $available = (int) ($resources[$ingredient->id] ?? 0);
                     $required = (int) $ingredient->pivot->count;
@@ -81,6 +83,7 @@ class GetWorkshopPage
                     'professionName' => (string) ($recipe->itemInfo->skill?->name ?? 'Профессия'),
                     'requiredLevel' => $requiredLevel,
                     'currentLevel' => $currentLevel,
+                    'successChance' => $successChance,
                     'learned' => $learned,
                     'ingredients' => $ingredients,
                     'canCraft' => $learned && $currentLevel >= $requiredLevel && collect($ingredients)->every(fn ($item) => $item['enough']),

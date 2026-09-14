@@ -114,7 +114,38 @@
 
             <br>
 
+            <table class="coll w100 brd2-all" border="0" width="100%">
+                <tbody>
+                <tr class="bg_l">
+                    <td class="brd2 p6h" style="padding: 8px 10px;">
+                        <b>Ежемесячный налог:</b>
+                        @if($taxPaid)
+                            <span style="color:#397323;">оплачен до {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
+                        @else
+                            <span class="redd">просрочен — чат, навыки и хранилище заблокированы</span>
+                        @endif
+                        <br>
+                        <span style="color:#777;">
+                            Стоимость: {{ format_money($taxAmount) }} монет из казны за один месяц.
+                        </span>
+                    </td>
+                    @if($canPayTax)
+                        <td class="brd2 p6h" width="180" align="center" style="padding: 8px 10px;">
+                            <form action="{{ route('clan.treasury', ['id' => $clanWarehouse->id]) }}" method="post">
+                                @csrf
+                                <input type="hidden" name="action" value="pay_tax">
+                                <b class="butt1 pointer"><b><input type="submit" value="Оплатить налог" class="pointer btn_1"></b></b>
+                            </form>
+                        </td>
+                    @endif
+                </tr>
+                </tbody>
+            </table>
+
+            <br>
+
             {{-- Actions --}}
+            @if($taxPaid || $isLeader)
             <table class="coll w100 brd2-all" border="0" width="100%">
                 <tbody>
                 <tr class="bg_l">
@@ -152,6 +183,8 @@
                 </tr>
                 </tbody>
             </table>
+
+            @endif
 
             <br>
 

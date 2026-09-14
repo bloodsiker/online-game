@@ -6,8 +6,8 @@ namespace App\Modules\Clan\Application\UseCases;
 
 use App\Modules\Clan\Domain\Contracts\TransactionManager;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
-use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanTreasuryLog;
+use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use RuntimeException;
@@ -17,6 +17,7 @@ class DepositClanTreasury
     public function __construct(
         private readonly ResolveClanContext $resolveClanContext,
         private readonly TransactionManager $transactionManager,
+        private readonly ClanLogService $clanLogService,
     ) {}
 
     public function execute(User $user, int $structureId, int $amount): string
@@ -30,6 +31,10 @@ class DepositClanTreasury
 
         if (! $clanWarehouse->isClanBank()) {
             abort(404);
+        }
+
+        if (! $context->clan->hasPaidTax() && ! $context->membership->role->is_leader) {
+            throw new RuntimeException('До оплаты налога клановый банк доступен только главе.');
         }
 
         if ($amount > $user->money) {
@@ -51,12 +56,12 @@ class DepositClanTreasury
                 'balance_after' => $balance,
             ]);
 
-            ClanLog::create([
-                'clan_id' => $context->clan->id,
-                'user_id' => $user->id,
-                'action' => ClanLogAction::TREASURY_DEPOSIT,
-                'details' => (string) $amount,
-            ]);
+            $this->clanLogService->write(
+                $context->clan,
+                $user,
+                ClanLogAction::TREASURY_DEPOSIT,
+                (string) $amount,
+            );
         });
 
         return sprintf('Вы внесли %s монет в казну клана.', number_format($amount));

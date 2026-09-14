@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Clan\Domain\Models\Clan;
+use App\Modules\Clan\Domain\Models\ClanTaxPayment;
 use App\Modules\Clan\Domain\Models\ClanTreasuryLog;
 use App\Modules\Clan\Domain\Models\ClanWarehouse;
 use App\Modules\Clan\Domain\Models\ClanWarehouseLog;
@@ -47,6 +48,13 @@ class ClanController extends Controller
             ->limit(100)
             ->get();
 
-        return view('admin.clan.info', compact('clan', 'warehouse', 'treasuryLogs', 'warehouseLogs'));
+        $taxPayments = ClanTaxPayment::query()
+            ->where('clan_id', $clan->id)
+            ->with(['user', 'structure'])
+            ->orderByDesc('id')
+            ->limit(100)
+            ->get();
+
+        return view('admin.clan.info', compact('clan', 'warehouse', 'treasuryLogs', 'warehouseLogs', 'taxPayments'));
     }
 }

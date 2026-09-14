@@ -25,6 +25,14 @@ class GetClanTreasuryPage
             abort(404);
         }
 
+        $isLeader = (bool) $context->membership->role->is_leader;
+        $canPayTax = $context->membership->role->hasPermission(ClanPermission::PAY_TAX);
+        $taxPaid = $context->clan->hasPaidTax();
+
+        if (! $taxPaid && ! $isLeader && ! $canPayTax) {
+            throw new \RuntimeException('До оплаты налога клановый банк доступен только главе и участникам с правом оплаты налога.');
+        }
+
         $logs = ClanTreasuryLog::with('user')
             ->where('clan_id', $context->clan->id)
             ->where('structure_id', $clanWarehouse->id)
@@ -36,6 +44,10 @@ class GetClanTreasuryPage
             clan: $context->clan,
             membership: $context->membership,
             canWithdraw: $context->membership->role->hasPermission(ClanPermission::WITHDRAW_MONEY),
+            isLeader: $isLeader,
+            canPayTax: $canPayTax,
+            taxPaid: $taxPaid,
+            taxAmount: max(1, (int) config('game.clan_monthly_tax', 1000000)),
             logs: $logs,
         );
     }

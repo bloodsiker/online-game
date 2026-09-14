@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -15,6 +16,13 @@ use Illuminate\View\View;
 
 class LocationController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(): View
     {
         $listLocations = Location::with('map')->orderByDesc('id')->get();
@@ -113,6 +121,6 @@ class LocationController extends Controller
 
     private function storeImage(UploadedFile $file): string
     {
-        return $file->store('locations', 'public');
+        return $this->imageStorage->storeOnPublicDisk($file, 'locations');
     }
 }

@@ -94,6 +94,13 @@ class InterfaceController extends Controller
         return response()->json($payload);
     }
 
+    public function csrfToken(Request $request): JsonResponse
+    {
+        return response()->json([
+            'token' => $request->session()->token(),
+        ]);
+    }
+
     private function gameView()
     {
         /** @var ?User $user */

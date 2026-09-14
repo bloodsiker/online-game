@@ -8,7 +8,6 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
-use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -19,6 +18,10 @@ use Illuminate\Support\Facades\DB;
 
 class ClanSkillService
 {
+    public function __construct(
+        private readonly ClanLogService $clanLogService,
+    ) {}
+
     /**
      * Attempt to learn (or upgrade) a clan skill.
      * Returns null on success, or an error message string.
@@ -79,14 +82,14 @@ class ClanSkillService
                 $this->syncSkillForAllMembers($clan, $definition, $currentLevel, $nextLevel, $levelData);
 
                 $isNew = $currentLevel === 0;
-                ClanLog::create([
-                    'clan_id' => $clan->id,
-                    'user_id' => $player->user_id,
-                    'action' => $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
-                    'details' => $isNew
+                $this->clanLogService->write(
+                    $clan,
+                    $player->user_id,
+                    $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
+                    $isNew
                         ? "Изучен новый навык «{$definition->name}»"
                         : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
-                ]);
+                );
             });
         } catch (\RuntimeException $e) {
             return $e->getMessage();
@@ -246,5 +249,63 @@ class ClanSkillService
                 ->whereIn('magic_skill_id', $magicSkillIds)
                 ->delete();
         }
+    }
+
+    public function applyAllSkillsToClanMembers(Clan $clan): void
+    {
+        $playerIds = $clan->members()
+            ->with('user.player:id,user_id')
+            ->get()
+            ->pluck('user.player.id')
+            ->filter()
+            ->values();
+        $magicSkillIds = $this->currentMagicSkillIds($clan);
+
+        if ($playerIds->isEmpty() || $magicSkillIds->isEmpty()) {
+            return;
+        }
+
+        $rows = $playerIds->flatMap(fn ($playerId) => $magicSkillIds->map(fn ($magicSkillId) => [
+            'player_id' => $playerId,
+            'magic_skill_id' => $magicSkillId,
+            'is_equipped' => true,
+        ]))->all();
+
+        PlayerMagicSkill::upsert($rows, ['player_id', 'magic_skill_id'], ['is_equipped']);
+    }
+
+    public function removeAllSkillsFromClanMembers(Clan $clan): void
+    {
+        $playerIds = $clan->members()
+            ->with('user.player:id,user_id')
+            ->get()
+            ->pluck('user.player.id')
+            ->filter()
+            ->values();
+        $magicSkillIds = $this->currentMagicSkillIds($clan);
+
+        if ($playerIds->isEmpty() || $magicSkillIds->isEmpty()) {
+            return;
+        }
+
+        PlayerMagicSkill::query()
+            ->whereIn('player_id', $playerIds)
+            ->whereIn('magic_skill_id', $magicSkillIds)
+            ->delete();
+    }
+
+    private function currentMagicSkillIds(Clan $clan): Collection
+    {
+        return $clan->learnedSkills()
+            ->with('definition.levels')
+            ->get()
+            ->map(function ($learned) {
+                return $learned->definition->levels
+                    ->firstWhere('level', $learned->current_level)
+                    ?->magic_skill_id;
+            })
+            ->filter()
+            ->unique()
+            ->values();
     }
 }

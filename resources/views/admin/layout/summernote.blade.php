@@ -6,13 +6,29 @@
 
 @push('footer_scripts')
 @php
-    $toolbar = [
+    $basicToolbar = [
         ['history', ['undo', 'redo']],
         ['font', ['bold', 'italic', 'underline', 'clear']],
         ['color', ['forecolor']],
         ['insert', ! empty($imageUploadUrl) ? ['link', 'picture'] : ['link']],
         ['view', ['codeview']],
     ];
+
+    $extendedToolbar = [
+        ['history', ['undo', 'redo']],
+        ['style', ['style']],
+        ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+        ['fontname', ['fontname']],
+        ['fontsize', ['fontsize']],
+        ['color', ['color']],
+        ['paragraph', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']],
+        ['table', ['table']],
+        ['insert', ! empty($imageUploadUrl) ? ['link', 'picture', 'video', 'hr'] : ['link', 'video', 'hr']],
+        ['view', ['fullscreen', 'codeview', 'help']],
+    ];
+
+    $toolbar = ($toolbarPreset ?? 'basic') === 'extended' ? $extendedToolbar : $basicToolbar;
 @endphp
 <script src="{{ asset('admin/vendor/summernote/summernote-bs5.min.js') }}"></script>
 <script>

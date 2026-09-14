@@ -16,8 +16,9 @@ use App\Modules\Player\Domain\Services\PlayerStatFormulas;
  * физического правило: не контестуется со статой защитника (в отличие от
  * HitCalculator::isCritical()), а даётся исключительно экипировкой атакующего
  * (getMagicCriticalChance(), база 0 — по умолчанию маг без такого оружия не
- * критует вовсе); множитель урона крита переиспользует общую формулу
- * PlayerStatFormulas::effectiveCritDamage(), как и физический крит.
+ * критует вовсе); множитель урона крита — getMagicCritDamage(), отдельная от
+ * физического крита стата, растущая исключительно с экипировки (см.
+ * ShareItemStatType::MAGIC_CRIT_DAMAGE), без вклада от Интуиции.
  */
 readonly class MagicHitCalculator
 {
@@ -46,7 +47,7 @@ readonly class MagicHitCalculator
             && random_int(1, 100) <= $attacker->getMagicCriticalChance();
         if ($isCrit) {
             $dto->setCritical(true);
-            $rawDamage = (int) round($rawDamage * PlayerStatFormulas::effectiveCritDamage($attacker->getCritDamage()) / 100);
+            $rawDamage = (int) round($rawDamage * PlayerStatFormulas::effectiveCritDamage($attacker->getMagicCritDamage()) / 100);
         }
 
         $resistConstant = self::MAGIC_RESIST_CONSTANT * $this->levelScale($attacker, $defender);

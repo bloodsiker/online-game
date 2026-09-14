@@ -34,13 +34,18 @@ class ItemTooltipBatchLoadingTest extends TestCase
         $sixItemQueries = $this->collectTooltipsFor([1, 2, 3, 4, 5, 6]);
 
         $this->assertSame($singleItemQueries, $sixItemQueries);
-        $this->assertLessThanOrEqual(6, $sixItemQueries);
+        $this->assertLessThanOrEqual(7, $sixItemQueries);
     }
 
     public function test_tooltip_contains_remaining_item_uses(): void
     {
         DB::table('share_items')->where('id', 1)->update(['count_use' => 5]);
         DB::table('items')->where('id', 1)->update(['count_use' => 3]);
+        DB::table('share_item_use_limits')->insert([
+            'share_item_id' => 1,
+            'max_uses' => 2,
+            'period_seconds' => 86400,
+        ]);
         $backpack = Backpack::query()->with('item.itemInfo')->findOrFail(1);
 
         DB::table('share_item_effects')->insert([
@@ -59,7 +64,11 @@ class ItemTooltipBatchLoadingTest extends TestCase
                         'title' => 'Возврат потерянного при смерти опыта',
                         'value' => '100%',
                     ]]
-                    && collect($tooltip->toArray()['stats'])->doesntContain('title', 'Возврат потерянного при смерти опыта'),
+                    && collect($tooltip->toArray()['stats'])->doesntContain('title', 'Возврат потерянного при смерти опыта')
+                    && collect($tooltip->toArray()['stats'])->contains(fn (array $stat): bool => $stat === [
+                        'title' => 'Ограничение использования',
+                        'value' => '2 раза за 1 день',
+                    ]),
             ));
 
         (new BackpackItemTooltipStrategy([$backpack]))->collect($collector);
@@ -167,6 +176,13 @@ class ItemTooltipBatchLoadingTest extends TestCase
             $table->integer('value');
             $table->string('value_type');
             $table->unsignedInteger('duration_seconds')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('share_item_use_limits', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedSmallInteger('max_uses');
+            $table->unsignedInteger('period_seconds');
             $table->timestamps();
         });
         Schema::create('skills', function (Blueprint $table): void {

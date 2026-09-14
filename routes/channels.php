@@ -39,7 +39,10 @@ Broadcast::channel('chat.location.{mapId}', function ($user, $mapId) {
 });
 
 Broadcast::channel('chat.clan.{clanId}', function ($user, $clanId) {
-    return $user->clanMembership()->where('clan_id', (int) $clanId)->exists();
+    $user->loadMissing('clanMembership.clan');
+
+    return (int) ($user->clanMembership?->clan_id ?? 0) === (int) $clanId
+        && $user->clanMembership?->clan?->hasPaidTax() === true;
 });
 
 Broadcast::channel('chat.party.{partyId}', function ($user, $partyId) {

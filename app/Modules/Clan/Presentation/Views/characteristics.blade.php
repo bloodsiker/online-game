@@ -34,6 +34,8 @@
         .progress-bar__txt span { color: #fff; }
         .muted { color: #765C4A; }
         .level-value { color: #8D2616; font-size: 15px; font-weight: bold; }
+        .tax-paid { color: #397323; font-weight: bold; }
+        .tax-overdue { color: #8D2616; font-weight: bold; }
     </style>
 </head>
 <body class="regblk">
@@ -66,6 +68,18 @@
                         <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Клан</th><td><b>{{ $clan->name }}</b></td></tr>
                         <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Уровень клана</th><td><span class="level-value">{{ $clan->lvl }}</span></td></tr>
                         <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Общий опыт клана</th><td><b>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</b></td></tr>
+                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}">
+                            <th>Налог оплачен до</th>
+                            <td>
+                                @if($clan->hasPaidTax())
+                                    <span class="tax-paid">{{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
+                                @elseif($clan->tax_paid_until)
+                                    <span class="tax-overdue">Просрочен с {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
+                                @else
+                                    <span class="tax-overdue">Не оплачен</span>
+                                @endif
+                            </td>
+                        </tr>
                         @if($nextLevel)
                             <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Следующий уровень</th><td>{{ $nextLevel->level }} <span class="muted">(требуется {{ number_format((float) $nextLevel->experience_required, 2, '.', ' ') }} опыта)</span></td></tr>
                             <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>До следующего уровня</th><td><b>{{ number_format($experienceToNextLevel, 2, '.', ' ') }}</b></td></tr>

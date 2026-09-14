@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\News;
 
-use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
-use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,8 +14,7 @@ final class NewsShortcodeRenderer
     /** @var array<int, ShareItem> */
     private array $items = [];
 
-    /** @var array<string, array<string, mixed>> */
-    private array $tooltipItems = [];
+    public function __construct(private readonly ItemTooltipCollector $tooltipCollector) {}
 
     public function render(?string $html): string
     {
@@ -30,7 +29,11 @@ final class NewsShortcodeRenderer
             return $html;
         }
 
-        $this->loadItems(array_map('intval', $matches[1]));
+        $itemIds = array_map('intval', $matches[1]);
+        $this->loadItems($itemIds);
+        $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy(
+            array_values(array_intersect_key($this->items, array_flip($itemIds)))
+        ));
 
         return preg_replace_callback($this->pattern(), function (array $match): string {
             $itemId = (int) $match[1];
@@ -41,26 +44,13 @@ final class NewsShortcodeRenderer
                 return $match[0];
             }
 
-            $tooltipId = 'news_'.$item->id.'_'.$count;
-            $this->registerTooltip($item, $count, $tooltipId);
-
-            return $this->renderItem($item, $count, $tooltipId);
+            return $this->renderItem($item, $count);
         }, $html) ?? $html;
     }
 
     public function tooltipScript(): string
     {
-        if ($this->tooltipItems === []) {
-            return '';
-        }
-
-        $script = '<script>';
-
-        foreach ($this->tooltipItems as $id => $item) {
-            $script .= 'art_alt["AA_'.$id.'"] = '.json_encode($item, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG).';';
-        }
-
-        return $script.'</script>';
+        return $this->tooltipCollector->renderScript();
     }
 
     private function pattern(): string
@@ -91,71 +81,17 @@ final class NewsShortcodeRenderer
         }
     }
 
-    private function registerTooltip(ShareItem $item, int $count, string $tooltipId): void
-    {
-        if (isset($this->tooltipItems[$tooltipId])) {
-            return;
-        }
-
-        $levelRequirement = $item->requirements
-            ->first(fn ($requirement): bool => $requirement->type === ShareItemRequirementType::LEVEL);
-
-        $this->tooltipItems[$tooltipId] = [
-            'id' => (string) $item->id,
-            'title' => $item->name,
-            'color' => $item->rarity->color(),
-            'image' => asset($item->image),
-            'count' => $count > 1 ? $count : null,
-            'kind' => $item->getTypeName(),
-            'price' => $item->price
-                ? sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $item->price)
-                : '',
-            'lev' => $levelRequirement
-                ? ['title' => ' Уровень ', 'value' => (string) $levelRequirement->min_value]
-                : null,
-            'skills' => ItemTooltipStatsBuilder::buildForTooltip($item),
-            'skills_e' => $this->requirementsForTooltip($item),
-            'desc' => $item->description ?? '',
-            'nogive' => ! $item->is_sell ? 'Предмет нельзя передать!' : '',
-            'noweight' => ! $item->is_weight ? 'Предмет не занимает места в рюкзаке' : '',
-            'nosell' => ! $item->is_sell ? 'Предмет нельзя сдать в скупку' : '',
-            'remainingUses' => (int) $item->count_use > 0 ? (int) $item->count_use : null,
-            'specialInfo' => ItemTooltipStatsBuilder::buildSpecialInfo($item),
-        ];
-    }
-
-    /**
-     * @return array<int, array{title: string, value: string}>
-     */
-    private function requirementsForTooltip(ShareItem $item): array
-    {
-        $requirements = [];
-
-        foreach ($item->requirements as $requirement) {
-            if ($requirement->type === ShareItemRequirementType::LEVEL) {
-                continue;
-            }
-
-            $requirements[] = [
-                'title' => 'Требуется: '.$requirement->label(),
-                'value' => (string) $requirement->min_value,
-            ];
-        }
-
-        return $requirements;
-    }
-
-    private function renderItem(ShareItem $item, int $count, string $tooltipId): string
+    private function renderItem(ShareItem $item, int $count): string
     {
         $countHtml = $count > 1
-            ? '<div class="artifact-slot-qnt" style="float:right;margin:0 2px 2px 0;color:#fff;font:bold 11px Tahoma;text-shadow:1px 1px 1px #000;">'.$count.'</div>'
-            : '&nbsp;';
+            ? '<span class="artifact-slot-qnt" style="position:absolute;right:2px;bottom:2px;color:#fff;font:bold 11px Tahoma;text-shadow:1px 1px 1px #000;">'.$count.'</span>'
+            : '';
 
         return sprintf(
-            '<a href="%s" class="news-shortcode-item" onmouseover="artifactAltSimple(%s, 2, event);" onmouseout="artifactAltSimple(%s, 0, event);" style="display:inline-block;vertical-align:middle;text-decoration:none;"><table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:1px;background:url(%s);background-size:60px 60px;background-repeat:no-repeat;background-position:center;"><tr><td valign="bottom">%s</td></tr></table></a>',
+            '<a href="%s" class="news-shortcode-item" data-id="%s" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" onclick="window.open(this.href, \'\', \'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\'); return false;" style="display:inline-block;vertical-align:middle;text-decoration:none;"><span class="news-shortcode-item__image" style="position:relative;display:inline-block;width:72px;height:71px;margin:1px;vertical-align:middle;background-image:url(%s),url(%s);background-size:72px 71px,60px 60px;background-position:0 0,6px 5px;background-repeat:no-repeat;">%s</span></a>',
             e(route('items.info.share', ['id' => $item->id])),
-            e(json_encode($tooltipId, JSON_UNESCAPED_UNICODE)),
-            e(json_encode($tooltipId, JSON_UNESCAPED_UNICODE)),
+            e((string) $item->id),
+            e(asset('main/images/user-reward-frame.png')),
             e(asset($item->image)),
             $countHtml
         );

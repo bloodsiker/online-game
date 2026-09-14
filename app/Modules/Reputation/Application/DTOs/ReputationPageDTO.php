@@ -21,6 +21,7 @@ final readonly class ReputationPageDTO
         public ?string $cooldownDiff,
         public Collection $earnedMedals,
         public Collection $earnedFeatMedals,
+        public array $earnedMedalDates,
         public array $progressMap,
         public ?string $message,
         public string $messageType,

@@ -35,6 +35,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/timer.css') }}">
     <script language="javaScript" src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/art_alt.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/item_tooltip.css') }}?v={{ filemtime(public_path('css/item_tooltip.css')) }}">
     <script src="{{ asset('main/js/jquery-1.7.1.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('main/css/portal_desktop.min.css') }}"/>
@@ -219,6 +220,8 @@
 <div id="artifact_alt" style="left:0px;top:0px;width:300px; display:none; position:absolute; z-index: 1001;" onmouseover="this.style.display='none';"></div>
 <script language="javascript" type="text/javascript">var art_alt = new Array();</script>
 {!! $newsItemTooltipScript ?? '' !!}
+<script>window.gebi = window.gebi || function (id) { return document.getElementById(id); };</script>
+<script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 <script>
     var temp_effects = {};
     var strings = {
@@ -271,7 +274,7 @@
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
-                    <a class="b-aside__impo-link" href="#"
+                    <a class="b-aside__impo-link" href="{{ route('library.index') }}"
                        style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 8px;top: 8px;"><span>Библиотека</span></a>
                 </li>
 
@@ -1294,6 +1297,23 @@
 
 
                     <a class="b-link b-link--default" href="#">Все новости </a>
+                </div>
+            </div>
+
+            <div class="b-index">
+                <div class="b-index__content u-style-bg-gradient">
+                    <div class="b-shape__header">
+                        <div class="b-shape__decor"></div>
+                        <div class="cufon-mp ir font-head">Eternum</div>
+                    </div>
+                    <div class="b-shape__content" style="padding: 10px 14px; line-height: 1.6; color: #4b3423; background-image: linear-gradient(90deg, #dcaa68 10%, #ffcc89 50%, #dcaa68 90%); font-size: 11px;">
+                        <p>Когда-то время здесь не текло. Мир был совершенным и неизменным — эпохой, которую немногие помнящие зовут <b>Вечностью</b>. Ни старости, ни увядания, ни движения вперёд. Только покой, застывший навеки.</p>
+                        <p>Потом случилось <b>Раскалывание</b>.</p>
+                        <p>Вечность разбилась — на тысячи осколков, кристаллов, сердец и ядер, рассеянных по земле, воде и камню. Мир наконец начал стареть. Деревья пустили годовые кольца. Смерть перестала быть немыслимой. А вместе с ней пришло и то, чего Вечность никогда не знала — <b>рост</b>.</p>
+                        <p>Осколки не исчезли. Тот, кто находит фрагмент прежнего порядка и вплавляет его в клинок, доспех или собственную судьбу — на миг заимствует частицу утраченного бессмертия. Оружие «возвышается». Плоть закаляется. А самые редкие, не раскрошившиеся фрагменты Вечности становятся артефактами, за которые готовы убивать.</p>
+                        <p>Ты — один из <b>Искателей</b>. Не герой, не спаситель — просто ещё один, кто идёт по следу осколков. Одни хотят собрать их все и вернуть мир в неизменный покой. Другие — урвать частицу бессмертия для себя. Третьи считают, что Вечность и так забрала у мира слишком много, и её нужно похоронить окончательно, чтобы всё наконец могло по-настоящему закончиться.</p>
+                        <p>Выбор — за тобой. Осколки — не за горами.</p>
+                    </div>
                 </div>
             </div>
 

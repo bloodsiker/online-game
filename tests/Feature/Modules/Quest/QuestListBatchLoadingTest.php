@@ -6,6 +6,7 @@ namespace Tests\Feature\Modules\Quest;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Presentation\Http\QuestController;
@@ -48,6 +49,7 @@ class QuestListBatchLoadingTest extends TestCase
             Mockery::mock(ChatService::class),
             Mockery::mock(ExperienceService::class),
             Mockery::mock(ReputationService::class),
+            Mockery::mock(ClanLogService::class),
         );
 
         $view = $controller->list(Request::create('/quests', 'GET', ['tab' => 'started']));

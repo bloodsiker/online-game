@@ -7,6 +7,7 @@ namespace Tests\Feature\Modules\Item;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -55,6 +56,13 @@ class UseItemTest extends TestCase
 
         $this->actingAs(User::findOrFail(1));
         $this->withoutMiddleware(ValidateCsrfToken::class);
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
     }
 
     public function test_presence_pass_key_cannot_be_used_or_consumed_from_backpack(): void
@@ -147,6 +155,150 @@ class UseItemTest extends TestCase
         $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 104]);
         $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 1]);
         $this->assertDatabaseHas('player_active_effects', ['player_id' => 1, 'effect_id' => 2]);
+    }
+
+    public function test_item_can_be_used_only_configured_number_of_times_in_period_started_by_first_use(): void
+    {
+        Carbon::setTestNow('2026-09-13 10:00:00');
+        $this->giveKey(452, 107);
+        DB::table('backpacks')->where('item_id', 107)->update(['count' => 3]);
+        DB::table('effects')->insert([
+            'id' => 4,
+            'name' => 'Испытательный бафф',
+            'slug' => 'limited_test_buff',
+            'type' => 'buff',
+            'stat_modifiers' => json_encode([['type' => 'strength', 'value' => 1]]),
+        ]);
+        DB::table('share_item_buffs')->insert([
+            'share_item_id' => 452,
+            'effect_id' => 4,
+            'duration_seconds' => 60,
+            'reapply_policy' => 'refresh',
+        ]);
+        DB::table('share_item_use_limits')->insert([
+            'id' => 1,
+            'share_item_id' => 452,
+            'max_uses' => 2,
+            'period_seconds' => 86400,
+        ]);
+
+        $this->postJson(route('items.use', 107))->assertOk();
+        Carbon::setTestNow('2026-09-13 10:01:00');
+        $this->postJson(route('items.use', 107))->assertOk();
+        Carbon::setTestNow('2026-09-13 10:02:00');
+        $blocked = $this->postJson(route('items.use', 107));
+
+        $blocked->assertUnprocessable()
+            ->assertJsonPath('code', 'ITEM_USE_LIMIT_REACHED')
+            ->assertJsonPath('available_at', '2026-09-14T10:00:00+00:00');
+        $this->assertDatabaseHas('player_item_use_limit_states', [
+            'player_id' => 1,
+            'share_item_use_limit_id' => 1,
+            'period_started_at' => '2026-09-13 10:00:00',
+            'uses_count' => 2,
+        ]);
+        $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 107, 'count' => 1]);
+    }
+
+    public function test_blocked_reapplication_does_not_consume_item_or_usage_and_period_stays_anchored(): void
+    {
+        Carbon::setTestNow('2026-09-13 10:00:00');
+        $this->giveKey(453, 108);
+        DB::table('backpacks')->where('item_id', 108)->update(['count' => 2]);
+        DB::table('effects')->insert([
+            'id' => 5,
+            'name' => 'Кровавый прилив',
+            'slug' => 'blood_surge_test',
+            'type' => 'buff',
+            'stat_modifiers' => json_encode([['type' => 'strength', 'value' => 1]]),
+        ]);
+        DB::table('share_item_buffs')->insert([
+            'share_item_id' => 453,
+            'effect_id' => 5,
+            'duration_seconds' => 7200,
+            'reapply_policy' => 'block',
+        ]);
+        DB::table('share_item_use_limits')->insert([
+            'id' => 2,
+            'share_item_id' => 453,
+            'max_uses' => 2,
+            'period_seconds' => 86400,
+        ]);
+
+        $this->postJson(route('items.use', 108))->assertOk();
+        Carbon::setTestNow('2026-09-13 10:01:00');
+        $blocked = $this->postJson(route('items.use', 108));
+
+        $blocked->assertUnprocessable()
+            ->assertJsonPath('code', 'ITEM_EFFECT_ALREADY_ACTIVE');
+        $this->assertDatabaseHas('player_item_use_limit_states', [
+            'share_item_use_limit_id' => 2,
+            'uses_count' => 1,
+        ]);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 108, 'count' => 1]);
+
+        Carbon::setTestNow('2026-09-13 12:00:00');
+        $this->postJson(route('items.use', 108))->assertOk();
+        $this->assertDatabaseHas('player_item_use_limit_states', [
+            'share_item_use_limit_id' => 2,
+            'period_started_at' => '2026-09-13 10:00:00',
+            'uses_count' => 2,
+        ]);
+        $this->assertDatabaseMissing('backpacks', ['item_id' => 108]);
+    }
+
+    public function test_item_use_limit_resets_to_new_period_once_it_fully_expires(): void
+    {
+        Carbon::setTestNow('2026-09-13 10:00:00');
+        $this->giveKey(454, 109);
+        DB::table('backpacks')->where('item_id', 109)->update(['count' => 4]);
+        DB::table('effects')->insert([
+            'id' => 6,
+            'name' => 'Испытательный бафф 2',
+            'slug' => 'limited_test_buff_reset',
+            'type' => 'buff',
+            'stat_modifiers' => json_encode([['type' => 'strength', 'value' => 1]]),
+        ]);
+        DB::table('share_item_buffs')->insert([
+            'share_item_id' => 454,
+            'effect_id' => 6,
+            'duration_seconds' => 60,
+            'reapply_policy' => 'refresh',
+        ]);
+        DB::table('share_item_use_limits')->insert([
+            'id' => 3,
+            'share_item_id' => 454,
+            'max_uses' => 2,
+            'period_seconds' => 3600,
+        ]);
+
+        // Два использования занимают весь период, начавшийся в 10:00.
+        $this->postJson(route('items.use', 109))->assertOk();
+        Carbon::setTestNow('2026-09-13 10:01:00');
+        $this->postJson(route('items.use', 109))->assertOk();
+
+        Carbon::setTestNow('2026-09-13 10:02:00');
+        $blocked = $this->postJson(route('items.use', 109));
+        $blocked->assertUnprocessable()->assertJsonPath('code', 'ITEM_USE_LIMIT_REACHED');
+        $this->assertDatabaseHas('player_item_use_limit_states', [
+            'share_item_use_limit_id' => 3,
+            'period_started_at' => '2026-09-13 10:00:00',
+            'uses_count' => 2,
+        ]);
+        // Заблокированная попытка не расходует предмет.
+        $this->assertDatabaseHas('backpacks', ['item_id' => 109, 'count' => 2]);
+
+        // Период (10:00 + 3600с = 11:00) полностью истёк — следующее использование
+        // должно открыть НОВЫЙ период, а не остаться заблокированным.
+        Carbon::setTestNow('2026-09-13 11:00:01');
+        $this->postJson(route('items.use', 109))->assertOk();
+
+        $this->assertDatabaseHas('player_item_use_limit_states', [
+            'share_item_use_limit_id' => 3,
+            'period_started_at' => '2026-09-13 11:00:01',
+            'uses_count' => 1,
+        ]);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 109, 'count' => 1]);
     }
 
     public function test_item_applies_configured_debuffs_to_selected_player_only(): void
@@ -412,7 +564,26 @@ class UseItemTest extends TestCase
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('effect_id');
             $table->unsignedInteger('duration_seconds');
+            $table->string('reapply_policy')->default('refresh');
             $table->timestamps();
+        });
+
+        Schema::create('share_item_use_limits', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedSmallInteger('max_uses');
+            $table->unsignedInteger('period_seconds');
+            $table->timestamps();
+        });
+
+        Schema::create('player_item_use_limit_states', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('share_item_use_limit_id');
+            $table->timestamp('period_started_at');
+            $table->unsignedSmallInteger('uses_count')->default(0);
+            $table->timestamps();
+            $table->unique(['player_id', 'share_item_use_limit_id']);
         });
 
         Schema::create('share_item_debuffs', function (Blueprint $table): void {
@@ -452,6 +623,14 @@ class UseItemTest extends TestCase
         Schema::create('player_equipments', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('player_id');
+            $table->timestamps();
+        });
+
+        Schema::create('player_artifacts', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('item_id');
             $table->timestamps();
         });
 

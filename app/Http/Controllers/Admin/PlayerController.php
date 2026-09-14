@@ -7,7 +7,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,8 +23,12 @@ class PlayerController extends Controller
         return view('admin.player.list', compact('players'));
     }
 
-    public function info(Request $request, Player $player): mixed
-    {
+    public function info(
+        Request $request,
+        Player $player,
+        ReputationService $reputationService,
+        PlayerLevelUpService $levelUpService,
+    ): mixed {
         if ($request->isMethod('POST')) {
             $validated = $request->validate([
                 'experience_multiplier' => ['required', 'numeric', 'min:0', 'max:9999.9999'],
@@ -52,7 +58,20 @@ class PlayerController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $player->load(['user', 'race', 'skills.skill']);
+        $player->load(['user', 'race', 'skills.skill', 'reputations.reputation.tiers']);
+        $maxPlayerLevel = $levelUpService->maxLevel();
+
+        $playerReputations = $player->reputations
+            ->filter(fn ($playerReputation) => $playerReputation->reputation !== null)
+            ->sortBy(fn ($playerReputation) => $playerReputation->reputation->name)
+            ->map(fn ($playerReputation) => [
+                'record' => $playerReputation,
+                'currentTier' => $reputationService->getCurrentTier(
+                    $playerReputation->reputation,
+                    $playerReputation->points,
+                ),
+            ])
+            ->values();
 
         $backpack = Backpack::with('item.itemInfo')
             ->where('user_id', $player->user_id)
@@ -60,7 +79,27 @@ class PlayerController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('admin.player.info', compact('player', 'backpack'));
+        return view('admin.player.info', compact('player', 'backpack', 'playerReputations', 'maxPlayerLevel'));
+    }
+
+    public function levelUp(Request $request, Player $player, PlayerLevelUpService $levelUpService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'target_level' => [
+                'required',
+                'integer',
+                'min:'.($player->lvl + 1),
+                'max:'.$levelUpService->maxLevel(),
+            ],
+        ]);
+
+        $previousLevel = $player->lvl;
+        $leveledPlayer = $levelUpService->raiseToLevel($player, (int) $validated['target_level']);
+
+        return redirect()->back()->with(
+            'success',
+            "Уровень игрока повышен с {$previousLevel} до {$leveledPlayer->lvl}. Характеристики начислены за каждый уровень.",
+        );
     }
 
     public function backpackAdd(Request $request, Player $player, BackpackService $backpackService): RedirectResponse

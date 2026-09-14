@@ -19,6 +19,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
         $backpacks = ItemTooltipRelationLoader::load($this->items, [
             'item.itemInfo.stats',
             'item.itemInfo.effects',
+            'item.itemInfo.useLimit',
             'item.itemInfo.requirements.skill',
             'item.gems.gemInfo',
             'item.runes.runeInfo',

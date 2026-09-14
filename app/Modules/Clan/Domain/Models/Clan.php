@@ -11,15 +11,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Clan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'experience', 'warehouse_capacity', 'points', 'treasury'];
+    protected $fillable = ['name', 'description', 'news_1', 'news_2', 'news_3', 'icon', 'owner_id', 'lvl', 'experience', 'warehouse_capacity', 'points', 'treasury', 'tax_paid_until', 'tax_penalties_applied_at'];
 
     protected $casts = [
         'experience' => 'decimal:2',
+        'tax_paid_until' => 'datetime',
+        'tax_penalties_applied_at' => 'datetime',
     ];
 
     protected $attributes = [
@@ -48,10 +51,21 @@ class Clan extends Model
         return $this->hasMany(ClanLearnedSkill::class);
     }
 
+    public function taxPayments(): HasMany
+    {
+        return $this->hasMany(ClanTaxPayment::class);
+    }
+
     public function activeQuestProgress(): HasMany
     {
         return $this->hasMany(QuestClanProgress::class)
             ->where('status', QuestPlayerStatus::IN_PROGRESS)
             ->with('objectives.questObjective', 'quest', 'user');
+    }
+
+    public function hasPaidTax(?Carbon $at = null): bool
+    {
+        return $this->tax_paid_until !== null
+            && $this->tax_paid_until->isAfter($at ?? now());
     }
 }

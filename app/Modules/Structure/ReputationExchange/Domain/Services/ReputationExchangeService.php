@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\ReputationExchange\Domain\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Structure\ReputationExchange\Infrastructure\Persistence\Models\ReputationExchange;
@@ -16,6 +17,7 @@ readonly class ReputationExchangeService
 {
     public function __construct(
         private ReputationService $reputationService,
+        private ChatService $chatService,
     ) {}
 
     public function performExchange(User $user, int $structureId, int $shareItemId, int $count): void
@@ -24,7 +26,7 @@ readonly class ReputationExchangeService
             throw new DomainException('Неверное количество для обмена.');
         }
 
-        $exchange = ReputationExchange::with('reputation')
+        $exchange = ReputationExchange::with('reputation', 'shareItem')
             ->where('structure_id', $structureId)
             ->where('share_item_id', $shareItemId)
             ->first();
@@ -48,10 +50,12 @@ readonly class ReputationExchangeService
         $currentPoints = $this->reputationService->getOrCreate($player, $exchange->reputation)->points;
 
         if (! $exchange->isAcceptedAt($currentPoints)) {
-            throw new DomainException('Хальдор бегло осматривает находку и качает головой — сейчас его орден ищет не такие реликты.');
+            throw new DomainException('Этот предмет сейчас не принимают — попробуйте другой, подходящий вашему уровню репутации.');
         }
 
-        DB::transaction(function () use ($backpackItem, $count, $player, $exchange): void {
+        $earnedPoints = $exchange->points * $count;
+
+        DB::transaction(function () use ($backpackItem, $count, $player, $exchange, $earnedPoints): void {
             if ($backpackItem->count <= $count) {
                 Item::whereKey($backpackItem->item_id)->delete();
                 $backpackItem->delete();
@@ -60,7 +64,15 @@ readonly class ReputationExchangeService
                 $backpackItem->save();
             }
 
-            $this->reputationService->addPoints($player, $exchange->reputation, $exchange->points * $count, touchCooldown: false);
+            $this->reputationService->addPoints($player, $exchange->reputation, $earnedPoints, touchCooldown: false);
         });
+
+        $this->chatService->sendQuestToUser($user, sprintf(
+            'Вы сдали %d×«%s» и получили <b>+%d</b> репутации «%s».',
+            $count,
+            $exchange->shareItem->name,
+            $earnedPoints,
+            $exchange->reputation->name,
+        ));
     }
 }

@@ -25,6 +25,11 @@
                                     Навыки <span class="badge badge-primary">{{ $player->skills->count() }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-reputations" href="#tab-reputations" data-bs-toggle="tab">
+                                    Репутации <span class="badge badge-primary">{{ $playerReputations->count() }}</span>
+                                </a>
+                            </li>
                         </ul>
 
                         <div class="tab-content">
@@ -40,6 +45,15 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Уровень</label>
                                                 <input type="number" class="form-control" name="lvl" value="{{ $player->lvl }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                @if($player->lvl < $maxPlayerLevel)
+                                                    <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalPlayerLevelUp">
+                                                        Повысить до уровня
+                                                    </a>
+                                                @else
+                                                    <span class="badge badge-success">Достигнут максимальный уровень</span>
+                                                @endif
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Опыт</label>
@@ -244,12 +258,103 @@
                                 </div>
                             </div>
 
+                            {{-- РЕПУТАЦИИ --}}
+                            <div id="tab-reputations" class="tab-pane">
+                                <div class="table-responsive pt-3">
+                                    <table class="table table-hover table-bordered mb-none">
+                                        <thead>
+                                        <tr>
+                                            <th width="50">ID</th>
+                                            <th width="55"></th>
+                                            <th>Репутация</th>
+                                            <th width="130">Очки</th>
+                                            <th width="220">Текущий уровень</th>
+                                            <th width="165">Последнее задание</th>
+                                            <th width="165">Последнее подношение</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @forelse($playerReputations as $row)
+                                            @php
+                                                $playerReputation = $row['record'];
+                                                $reputation = $playerReputation->reputation;
+                                                $currentTier = $row['currentTier'];
+                                                $icon = $reputation->icon;
+                                            @endphp
+                                            <tr style="vertical-align: middle">
+                                                <td>{{ $reputation->id }}</td>
+                                                <td class="text-center">
+                                                    @if($icon)
+                                                        <img src="{{ str_starts_with($icon, 'http://') || str_starts_with($icon, 'https://') || str_starts_with($icon, '/') ? $icon : asset($icon) }}"
+                                                             style="width:40px;height:40px;object-fit:contain" alt="">
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('admin.reputation.info', $reputation->id) }}">
+                                                        {{ $reputation->name }}
+                                                    </a>
+                                                </td>
+                                                <td><strong>{{ number_format($playerReputation->points, 0, '', ' ') }}</strong></td>
+                                                <td>
+                                                    @if($currentTier)
+                                                        {{ $currentTier->medal_name ?: 'Уровень от '.number_format($currentTier->min_points, 0, '', ' ') }}
+                                                    @else
+                                                        <span class="text-muted">Не открыт</span>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $playerReputation->last_completed_at?->format('d.m.Y H:i') ?? '—' }}</td>
+                                                <td>{{ $playerReputation->last_offering_at?->format('d.m.Y H:i') ?? '—' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="7" class="text-center text-muted">У игрока нет репутаций</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+
+    {{-- Модалка: естественное последовательное повышение уровня --}}
+    @if($player->lvl < $maxPlayerLevel)
+        <div id="modalPlayerLevelUp" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+            <section class="card">
+                <form action="{{ route('admin.player.level_up', $player->id) }}" method="post">
+                    <header class="card-header"><h2 class="card-title">Повысить уровень персонажа</h2></header>
+                    <div class="card-body">
+                        {{ csrf_field() }}
+                        <div class="form-group">
+                            <label>Целевой уровень</label>
+                            <input type="number"
+                                   class="form-control @error('target_level') is-invalid @enderror"
+                                   name="target_level"
+                                   value="{{ old('target_level', $player->lvl + 1) }}"
+                                   min="{{ $player->lvl + 1 }}"
+                                   max="{{ $maxPlayerLevel }}"
+                                   required>
+                            @error('target_level')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">
+                                Доступно: от {{ $player->lvl + 1 }} до {{ $maxPlayerLevel }}. За каждый уровень будут начислены расовые характеристики и свободные очки.
+                            </small>
+                        </div>
+                    </div>
+                    <footer class="card-footer">
+                        <div class="col-md-12 text-end">
+                            <button class="btn btn-primary">Повысить уровень</button>
+                            <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                        </div>
+                    </footer>
+                </form>
+            </section>
+        </div>
+    @endif
 
     {{-- Модалка: добавить предмет в рюкзак --}}
     <div id="modalBackpackAdd" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">

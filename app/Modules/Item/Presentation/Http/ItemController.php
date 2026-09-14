@@ -19,6 +19,8 @@ use App\Modules\Item\Application\UseCases\HandOverToUser;
 use App\Modules\Item\Application\UseCases\OpenChest;
 use App\Modules\Item\Application\UseCases\PickUpInChest;
 use App\Modules\Item\Application\UseCases\UnequipItem;
+use App\Modules\Item\Domain\Exceptions\ItemUseBlockedException;
+use App\Modules\Item\Domain\Services\ItemUsagePolicyService;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerRevivalService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -29,6 +31,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ItemController extends Controller
 {
@@ -47,6 +50,7 @@ class ItemController extends Controller
         private readonly BattleEffectService $battleEffectService,
         private readonly LocationReadRepository $locationReadRepository,
         private readonly PlayerRevivalService $revivalService,
+        private readonly ItemUsagePolicyService $itemUsagePolicyService,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -174,12 +178,35 @@ class ItemController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $player = $user->player;
+
+        try {
+            return DB::transaction(fn (): JsonResponse => $this->performUseItem($request, $id, $user));
+        } catch (ItemUseBlockedException $exception) {
+            $remainingSeconds = $exception->availableAt !== null
+                ? max(0, (int) ceil(now()->diffInSeconds($exception->availableAt, false)))
+                : null;
+
+            return response()->json([
+                'status' => 'error',
+                'code' => $exception->errorCode,
+                'message' => $exception->getMessage(),
+                'available_at' => $exception->availableAt?->toIso8601String(),
+                'remaining_seconds' => $remainingSeconds,
+            ], 422);
+        }
+    }
+
+    private function performUseItem(Request $request, int $id, User $user): JsonResponse
+    {
+        // Одна стабильная блокировка на игрока сериализует параллельные попытки
+        // использования любых его предметов, включая создание первой строки лимита.
+        $player = Player::query()->whereKey($user->player_id)->lockForUpdate()->firstOrFail();
 
         $backpack = Backpack::with(['item.itemInfo.effects', 'item.itemInfo.buffs.effect', 'item.itemInfo.debuffs.effect'])
             ->where('user_id', $user->id)
             ->where('item_id', $id)
             ->where('equipped', 0)
+            ->lockForUpdate()
             ->first();
 
         if (! $backpack) {
@@ -192,6 +219,8 @@ class ItemController extends Controller
         );
 
         if ($gate !== null) {
+            $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
+
             $user->prev_location_id = $user->location_id;
             $user->location_id = $gate->to_location_id;
             $user->save();
@@ -260,6 +289,8 @@ class ItemController extends Controller
                 ], 422);
             }
         }
+
+        $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
 
         $stats = $this->statService->resolve($player);
         $expBefore = (int) $player->exp;

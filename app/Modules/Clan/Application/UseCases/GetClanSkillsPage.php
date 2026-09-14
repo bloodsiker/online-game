@@ -22,6 +22,10 @@ class GetClanSkillsPage
     {
         $context = $this->resolveClanContext->require($user);
 
+        if (! $context->clan->hasPaidTax()) {
+            throw new \RuntimeException('Клановые навыки заблокированы до оплаты ежемесячного налога.');
+        }
+
         $definitions = ClanSkillDefinition::with(['levels.itemRequirements.shareItem', 'levels.stoneItem', 'levels.magicSkill'])
             ->orderBy('sort_order')
             ->get();

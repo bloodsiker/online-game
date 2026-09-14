@@ -6,6 +6,7 @@ namespace App\Modules\Clan\Application\UseCases;
 
 use App\Modules\Clan\Application\DTOs\PublicClanPageDTO;
 use App\Modules\Clan\Domain\Models\Clan;
+use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
 use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use Carbon\CarbonImmutable;
@@ -38,6 +39,20 @@ class GetPublicClanPage
                 'is_online' => $member->user->last_online_at?->greaterThan($onlineThreshold) ?? false,
             ]);
 
+        $learnedSkills = $clan->learnedSkills()
+            ->with('definition.levels.magicSkill')
+            ->where('current_level', '>', 0)
+            ->get()
+            ->filter(static fn (ClanLearnedSkill $learnedSkill): bool => $learnedSkill->definition !== null)
+            ->sort(static fn (ClanLearnedSkill $left, ClanLearnedSkill $right): int => [
+                $left->definition->sort_order,
+                $left->definition->name,
+            ] <=> [
+                $right->definition->sort_order,
+                $right->definition->name,
+            ])
+            ->values();
+
         $levelRank = 1 + Clan::query()
             ->where('lvl', '>', $clan->lvl)
             ->count();
@@ -66,6 +81,7 @@ class GetPublicClanPage
             levelRank: $levelRank,
             experienceRank: $experienceRank,
             members: $members,
+            learnedSkills: $learnedSkills,
             logs: $logs,
         );
     }

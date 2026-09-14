@@ -54,6 +54,7 @@
         .tbl-usi_left { width: 20px; background: url('{{ asset('main/images/tbl-usi_left.gif') }}') right top repeat-y; }
         .tbl-usi_right { width: 20px; background: url('{{ asset('main/images/tbl-usi_right.gif') }}') repeat-y; }
         .tbl-usi_bg { background: url('{{ asset('main/images/tbl-usi_bg.gif') }}') repeat; }
+        .tbl-usi_label-center { height: 22px; padding: 0 10px 3px; color: #fcf5b7; font-weight: bold; background: url('{{ asset('img/bg/info/tbl-usi_label-center.gif') }}') repeat-x; }
 
         .btn_1 { color: #461c0b !important; font-weight: bold; }
         .btn_2 { color: #ffe9ba !important; font-weight: bold; }
@@ -78,9 +79,26 @@
         .clan-members th, .clan-history th { color: #955c4a; font-weight: normal; text-align: center; }
         .pagination { padding: 8px 0 2px; text-align: center; }
         .pagination a, .pagination span { margin: 0 2px; }
+        .clan-skills-grid { min-height: 62px; overflow: hidden; }
+        .clan-skill-icon { display: block; float: left; width: 60px; height: 60px; margin: 1px; border: 1px solid #b9774d; background: #2b1b14; }
+        .clan-skill-icon:hover { border-color: #f0d08a; }
+        .clan-skill-icon img { display: block; width: 60px; height: 60px; object-fit: contain; }
+        #clan_skill_alt .aa-table { border-radius: 30px 30px 0 0; box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2); font-size: 11px; }
+        .aa-tl { width: 14px; height: 24px; background: url('{{ asset('img/bg/item_info/tbl-pop_corner-top-left.gif') }}') no-repeat; }
+        .aa-t { height: 24px; background: url('{{ asset('img/bg/item_info/tbl-pop_top.gif') }}'); }
+        .aa-tr { width: 14px; height: 24px; background: url('{{ asset('img/bg/item_info/tbl-pop_corner-top-right.gif') }}') no-repeat; }
+        .aa-l { width: 14px; background: url('{{ asset('img/bg/item_info/tbl-pop_left.gif') }}') repeat-y; }
+        .aa-r { width: 14px; background: url('{{ asset('img/bg/item_info/tbl-pop_right.gif') }}') repeat-y; }
+        .aa-bl { width: 14px; height: 5px; background: url('{{ asset('img/bg/item_info/tbl-pop_corner-bottom-left.gif') }}') no-repeat; }
+        .aa-b { height: 5px; background: url('{{ asset('img/bg/item_info/tbl-pop_bottom.gif') }}') repeat-x; }
+        .aa-br { width: 14px; height: 5px; background: url('{{ asset('img/bg/item_info/tbl-pop_corner-bottom-right.gif') }}') no-repeat; }
+        .list_dark { background-color: #f4bb8a; }
+        .skill_list td { padding: 0 7px; }
     </style>
+    <script src="{{ asset('js/monster_ability_tooltip.js') }}?v={{ filemtime(public_path('js/monster_ability_tooltip.js')) }}"></script>
 </head>
 <body class="bg2 regcolor">
+<div id="clan_skill_alt" style="width: 300px; display: none; position: fixed; z-index: 10000002; left: 0; top: 0;"></div>
 @php
     $tabs = [
         'information' => 'Информация',
@@ -147,6 +165,8 @@
                                             <tr><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_exp.png') }}" alt="">Опыт</span></td><td>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</td><td>{{ $experienceRank }}-е место</td></tr>
                                             <tr class="bg_l"><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_rep.png') }}" alt="">Бонусные очки</span></td><td>{{ number_format((int) $clan->points, 0, '.', ' ') }}</td><td>—</td></tr>
                                         </tbody></table>
+
+                                        @include('clan::partials.learned-skills', ['skills' => $learnedSkills])
 
                                         <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Описание клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
                                         <table class="coll w100 p6v p10h brd2-all"><tbody><tr class="bg_l"><td class="clan-description">{{ $clan->description ?: 'Описание клана ещё не добавлено.' }}</td></tr></tbody></table>

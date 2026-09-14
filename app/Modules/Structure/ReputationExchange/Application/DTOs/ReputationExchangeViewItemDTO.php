@@ -7,6 +7,7 @@ namespace App\Modules\Structure\ReputationExchange\Application\DTOs;
 final readonly class ReputationExchangeViewItemDTO
 {
     public function __construct(
+        public int $id,
         public int $shareItemId,
         public string $name,
         public string $image,

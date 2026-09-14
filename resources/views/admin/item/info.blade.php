@@ -30,6 +30,11 @@
                                     <a class="nav-link" data-bs-target="#tab-rune" href="#tab-rune" data-bs-toggle="tab">Руна</a>
                                 </li>
                             @endif
+                            @if(in_array($item->type, [\App\Modules\Share\Domain\Enums\ShareItemType::WEAPON, \App\Modules\Share\Domain\Enums\ShareItemType::SHIELD], true))
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-target="#tab-innate-passive" href="#tab-innate-passive" data-bs-toggle="tab">Встроенная пассивка</a>
+                                </li>
+                            @endif
                             @if($item->upgrade_scroll_type !== null || $item->type === \App\Modules\Share\Domain\Enums\ShareItemType::SCROLL)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-scroll" href="#tab-scroll" data-bs-toggle="tab">Свиток заточки</a>
@@ -244,6 +249,13 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Можно положить в клановый банк</label>
+                                                <select class="form-control" name="is_clan_warehouse_allowed">
+                                                    <option value="1" @selected($item->is_clan_warehouse_allowed)>Да</option>
+                                                    <option value="0" @selected(!$item->is_clan_warehouse_allowed)>Нет</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Можно выбросить</label>
                                                 <select class="form-control" name="is_droppable">
                                                     <option value="1" @selected($item->is_droppable)>Да</option>
@@ -367,6 +379,45 @@
                                                         </div>
                                                     @endforeach
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- ВСТРОЕННАЯ ПАССИВКА (оружие/щит) --}}
+                                @if(in_array($item->type, [\App\Modules\Share\Domain\Enums\ShareItemType::WEAPON, \App\Modules\Share\Domain\Enums\ShareItemType::SHIELD], true))
+                                    <div id="tab-innate-passive" class="tab-pane">
+                                        <div class="row pt-3 pb-3">
+                                            <div class="col-lg-4">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Тип пассивки</label>
+                                                    <select class="form-control" name="innate_passive_type">
+                                                        <option value="">— нет —</option>
+                                                        @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType::cases() as $passiveType)
+                                                            <option value="{{ $passiveType->value }}"
+                                                                @selected(old('innate_passive_type', $item->innate_passive_type?->value) === $passiveType->value)>
+                                                                {{ $passiveType->label() }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <p class="text-muted small mt-1">Срабатывает прямо с этого предмета, без вставки руны в слот (складывается с руной, если она тоже стоит).</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Значение, %</label>
+                                                    <input type="number" class="form-control" name="innate_passive_value" min="1" max="100"
+                                                           value="{{ old('innate_passive_value', $item->innate_passive_value) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <label class="col-form-label">Все типы пассивок</label>
+                                                @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType::cases() as $passiveType)
+                                                    <div class="mb-1">
+                                                        <strong>{{ $passiveType->label() }}</strong>
+                                                        <span class="text-muted small"> — {{ $passiveType->description(0) }}</span>
+                                                    </div>
+                                                @endforeach
                                             </div>
                                         </div>
                                     </div>
@@ -511,6 +562,75 @@
         </div>
     </div>
 
+    {{-- ОГРАНИЧЕНИЕ ЧАСТОТЫ ИСПОЛЬЗОВАНИЯ --}}
+    @php
+        $useLimit = $item->useLimit;
+        $useLimitSeconds = (int) ($useLimit?->period_seconds ?? 86400);
+        if ($useLimitSeconds % 86400 === 0) {
+            $useLimitPeriodValue = max(1, intdiv($useLimitSeconds, 86400));
+            $useLimitPeriodUnit = 'days';
+        } elseif ($useLimitSeconds % 3600 === 0) {
+            $useLimitPeriodValue = max(1, intdiv($useLimitSeconds, 3600));
+            $useLimitPeriodUnit = 'hours';
+        } else {
+            $useLimitPeriodValue = max(1, (int) ceil($useLimitSeconds / 60));
+            $useLimitPeriodUnit = 'minutes';
+        }
+    @endphp
+    <div class="row">
+        <div class="col-md-12">
+            <section class="card">
+                <header class="card-header">
+                    <h2 class="card-title">Ограничение использования</h2>
+                    <p class="card-subtitle text-muted">Период начинается при первом использовании. Остальные применения не сдвигают время его окончания.</p>
+                </header>
+                <div class="card-body">
+                    <form action="{{ route('admin.item.use_limit.update', $item->id) }}" method="post">
+                        {{ csrf_field() }}
+                        <div class="row align-items-end">
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Ограничение включено</label>
+                                    <select name="enabled" class="form-control">
+                                        <option value="0" @selected($useLimit === null)>Нет</option>
+                                        <option value="1" @selected($useLimit !== null)>Да</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Количество использований</label>
+                                    <input type="number" name="max_uses" class="form-control" min="1" max="65535"
+                                           value="{{ old('max_uses', $useLimit?->max_uses ?? 1) }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Период</label>
+                                    <input type="number" name="period_value" class="form-control" min="1"
+                                           value="{{ old('period_value', $useLimitPeriodValue) }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Единица</label>
+                                    <select name="period_unit" class="form-control">
+                                        <option value="minutes" @selected(old('period_unit', $useLimitPeriodUnit) === 'minutes')>Минуты</option>
+                                        <option value="hours" @selected(old('period_unit', $useLimitPeriodUnit) === 'hours')>Часы</option>
+                                        <option value="days" @selected(old('period_unit', $useLimitPeriodUnit) === 'days')>Дни</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary btn-sm mb-2">Сохранить ограничение</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
     {{-- АКТИВНЫЕ ЭФФЕКТЫ --}}
     <div class="row">
         <div class="col-md-12">
@@ -613,6 +733,14 @@
                                     <label class="col-form-label">Длительность, сек.</label>
                                     <input type="number" class="form-control" name="duration_seconds" value="60" min="1" max="604800" required>
                                 </div>
+                                <div class="form-group mb-2">
+                                    <label class="col-form-label">Повторное применение</label>
+                                    <select name="reapply_policy" class="form-control">
+                                        @foreach(\App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy::cases() as $policy)
+                                            <option value="{{ $policy->value }}">{{ $policy->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <button class="btn btn-primary btn-sm" @disabled($buffEffects->isEmpty())>Добавить бафф</button>
                             </form>
                         </div>
@@ -623,6 +751,7 @@
                                     <th>Бафф</th>
                                     <th>Описание</th>
                                     <th width="130">Длительность</th>
+                                    <th width="220">Повторное применение</th>
                                     <th width="70"></th>
                                 </tr>
                                 </thead>
@@ -632,6 +761,7 @@
                                         <td>{{ $buff->effect->name }}</td>
                                         <td>{{ $buff->effect->description ?: '—' }}</td>
                                         <td>{{ $buff->duration_seconds }} сек.</td>
+                                        <td>{{ $buff->reapply_policy->label() }}</td>
                                         <td>
                                             <a href="{{ route('admin.item.buff.delete', ['item' => $item->id, 'buff' => $buff->id]) }}"
                                                class="btn btn-xs btn-danger"
@@ -639,7 +769,7 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="text-center text-muted">Нет баффов</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Нет баффов</td></tr>
                                 @endforelse
                                 </tbody>
                             </table>

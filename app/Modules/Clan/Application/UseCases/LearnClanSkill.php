@@ -25,6 +25,10 @@ class LearnClanSkill
             'У вас нет прав изучать навыки клана.'
         );
 
+        if (! $context->clan->hasPaidTax()) {
+            throw new RuntimeException('Клановые навыки заблокированы до оплаты ежемесячного налога.');
+        }
+
         $player = $user->player;
 
         if ($player === null) {

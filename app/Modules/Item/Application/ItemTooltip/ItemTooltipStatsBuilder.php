@@ -20,10 +20,65 @@ final class ItemTooltipStatsBuilder
     /** @return array<int, array{title: string, value: string}> */
     public static function buildForTooltip(ShareItem $item, int $upgradeLvl = 0): array
     {
-        return array_values(array_filter(
+        $stats = array_values(array_filter(
             self::build($item, $upgradeLvl),
             static fn (array $stat): bool => $stat['title'] !== ItemEffectType::RESTORE_LOST_EXP->label(),
         ));
+
+        if ($item->useLimit !== null) {
+            $stats[] = [
+                'title' => 'Ограничение использования',
+                'value' => sprintf(
+                    '%d %s за %s',
+                    $item->useLimit->max_uses,
+                    self::usesWord($item->useLimit->max_uses),
+                    self::formatDuration($item->useLimit->period_seconds),
+                ),
+            ];
+        }
+
+        return $stats;
+    }
+
+    private static function formatDuration(int $seconds): string
+    {
+        return match (true) {
+            $seconds % 86400 === 0 => self::formatAmount((int) ($seconds / 86400), 'день', 'дня', 'дней'),
+            $seconds % 3600 === 0 => self::formatAmount((int) ($seconds / 3600), 'час', 'часа', 'часов'),
+            $seconds % 60 === 0 => self::formatAmount((int) ($seconds / 60), 'минуту', 'минуты', 'минут'),
+            default => self::formatAmount($seconds, 'секунду', 'секунды', 'секунд'),
+        };
+    }
+
+    private static function formatAmount(int $value, string $one, string $few, string $many): string
+    {
+        $mod100 = $value % 100;
+        $mod10 = $value % 10;
+        $word = $mod100 >= 11 && $mod100 <= 14
+            ? $many
+            : match ($mod10) {
+                1 => $one,
+                2, 3, 4 => $few,
+                default => $many,
+            };
+
+        return $value.' '.$word;
+    }
+
+    private static function usesWord(int $count): string
+    {
+        $mod100 = $count % 100;
+        $mod10 = $count % 10;
+
+        if ($mod100 >= 11 && $mod100 <= 14) {
+            return 'раз';
+        }
+
+        return match ($mod10) {
+            1 => 'раз',
+            2, 3, 4 => 'раза',
+            default => 'раз',
+        };
     }
 
     /** @return list<array{title: string, value: string}> */

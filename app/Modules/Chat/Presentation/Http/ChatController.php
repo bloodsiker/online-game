@@ -31,7 +31,7 @@ class ChatController extends Controller
     {
         return view('chat::index', [
             'hasParty' => $this->partyRepository->findActiveByUser((int) auth()->id()) !== null,
-            'hasClan' => auth()->user()->clanMembership !== null,
+            'hasClan' => $this->hasActiveClan(auth()->user()),
         ]);
     }
 
@@ -49,7 +49,7 @@ class ChatController extends Controller
             'realtime' => [
                 'userId' => (int) $user->id,
                 'mapId' => $user->currentLocation?->map_id === null ? null : (int) $user->currentLocation->map_id,
-                'clanId' => $user->clanMembership?->clan_id === null ? null : (int) $user->clanMembership->clan_id,
+                'clanId' => $this->hasActiveClan($user) ? (int) $user->clanMembership->clan_id : null,
                 'partyId' => $party?->id === null ? null : (int) $party->id,
             ],
         ]);
@@ -112,8 +112,16 @@ class ChatController extends Controller
 
         $isPrivate = (bool) preg_match('/^prv\[/i', $raw);
 
-        if (! $isPrivate && $channel === ChatChannel::Clan && ! auth()->user()->clanMembership) {
-            return response()->json(['ok' => false, 'error' => 'Вы не состоите в клане.']);
+        if (! $isPrivate && $channel === ChatChannel::Clan) {
+            $membership = auth()->user()->clanMembership;
+
+            if ($membership === null) {
+                return response()->json(['ok' => false, 'error' => 'Вы не состоите в клане.']);
+            }
+
+            if (! $this->hasActiveClan(auth()->user())) {
+                return response()->json(['ok' => false, 'error' => 'Клановый чат заблокирован до оплаты ежемесячного налога.']);
+            }
         }
 
         if (! $isPrivate && $channel === ChatChannel::Party
@@ -133,6 +141,10 @@ class ChatController extends Controller
     public function messages(Request $request): JsonResponse
     {
         $requestedChannel = ChatChannel::tryFrom((string) $request->query('channel')) ?? ChatChannel::Main;
+        if ($requestedChannel === ChatChannel::Clan && ! $this->hasActiveClan(auth()->user())) {
+            return response()->json([]);
+        }
+
         if ($requestedChannel === ChatChannel::Party
             && $this->partyRepository->findActiveByUser((int) auth()->id()) === null) {
             return response()->json([]);
@@ -151,6 +163,7 @@ class ChatController extends Controller
     {
         return response()->json([
             'has_party' => $this->partyRepository->findActiveByUser((int) auth()->id()) !== null,
+            'has_clan' => $this->hasActiveClan(auth()->user()),
         ]);
     }
 
@@ -186,6 +199,17 @@ class ChatController extends Controller
             return ChatChannel::Main;
         }
 
+        if ($channel === ChatChannel::Clan && ! $this->hasActiveClan(auth()->user())) {
+            return ChatChannel::Main;
+        }
+
         return $channel;
+    }
+
+    private function hasActiveClan(User $user): bool
+    {
+        $user->loadMissing('clanMembership.clan');
+
+        return $user->clanMembership?->clan?->hasPaidTax() === true;
     }
 }

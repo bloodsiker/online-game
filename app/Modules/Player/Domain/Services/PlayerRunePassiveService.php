@@ -8,11 +8,12 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 
 /**
- * Пассивки вплавленных рун читаются live из экипировки игрока (см.
- * PlayerStatService::equipmentStatModifiers()) — единственный источник
- * правды это сама руна в слоте предмета, без синхронизации в отдельную
- * таблицу (в отличие от клановых скиллов, которые копируются в
- * player_magic_skills при вступлении в клан/прокачке).
+ * Пассивки читаются live из экипировки игрока (см.
+ * PlayerStatService::equipmentStatModifiers()), без синхронизации в
+ * отдельную таблицу (в отличие от клановых скиллов, которые копируются в
+ * player_magic_skills при вступлении в клан/прокачке). Источник — либо
+ * вплавленная в слот руна, либо встроенная пассивка самого предмета
+ * (ShareItem::innate_passive_type, премиум-оружие без нужды в руне).
  */
 class PlayerRunePassiveService
 {
@@ -49,6 +50,17 @@ class PlayerRunePassiveService
         foreach ($handSlots as $handSide => $item) {
             if (! $item) {
                 continue;
+            }
+
+            if ($item->itemInfo->innate_passive_type !== null) {
+                $passives[] = [
+                    'type' => $item->itemInfo->innate_passive_type,
+                    'value' => (int) $item->itemInfo->innate_passive_value,
+                    'runeName' => $item->itemInfo->name,
+                    'runeShareItemId' => $item->itemInfo->id,
+                    'itemName' => $item->itemInfo->name,
+                    'handSide' => $handSide,
+                ];
             }
 
             foreach ($item->runes as $rune) {

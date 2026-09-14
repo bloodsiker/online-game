@@ -11,7 +11,9 @@ use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Share\Application\UseCases\Admin\DeleteShareItem;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
+use App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
@@ -26,10 +28,13 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemDebuff;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemUseLimit;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -38,6 +43,13 @@ use Illuminate\View\View;
 
 class ItemController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(Request $request): View
     {
         $filters = [
@@ -124,6 +136,7 @@ class ItemController extends Controller
             'stats',
             'effects',
             'buffs.effect',
+            'useLimit',
             'debuffs.effect',
             'requirements.skill',
             'magicSkillBook',
@@ -198,6 +211,7 @@ class ItemController extends Controller
             'stats',
             'effects',
             'buffs',
+            'useLimit',
             'debuffs',
             'requirements',
             'recipe.items',
@@ -220,6 +234,10 @@ class ItemController extends Controller
 
             foreach ($item->buffs as $buff) {
                 $copy->buffs()->save($buff->replicate());
+            }
+
+            if ($item->useLimit !== null) {
+                $copy->useLimit()->save($item->useLimit->replicate());
             }
 
             foreach ($item->debuffs as $debuff) {
@@ -257,6 +275,17 @@ class ItemController extends Controller
         }
 
         return redirect()->route('admin.item.info', $copy->id)->with('success', $message);
+    }
+
+    public function destroy(ShareItem $item, DeleteShareItem $deleteItem): RedirectResponse
+    {
+        $name = $item->name;
+
+        if (! $deleteItem->execute($item)) {
+            return redirect()->back()->with('error', 'Нельзя удалить предмет «'.$name.'»: он используется в игровых настройках. Сначала удалите связанные записи или отключите предмет.');
+        }
+
+        return redirect()->route('admin.items')->with('success', 'Предмет «'.$name.'» удалён.');
     }
 
     public function addStat(Request $request, ShareItem $item): RedirectResponse
@@ -303,6 +332,7 @@ class ItemController extends Controller
         $data = $request->validate([
             'effect_id' => ['required', 'integer', 'exists:effects,id'],
             'duration_seconds' => ['required', 'integer', 'min:1', 'max:604800'],
+            'reapply_policy' => ['required', 'string', 'in:'.implode(',', array_column(ItemBuffReapplyPolicy::cases(), 'value'))],
         ]);
 
         $effect = Effect::query()->whereKey($data['effect_id'])->where('type', 'buff')->first();
@@ -312,7 +342,10 @@ class ItemController extends Controller
 
         ShareItemBuff::query()->updateOrCreate(
             ['share_item_id' => $item->id, 'effect_id' => $effect->id],
-            ['duration_seconds' => $data['duration_seconds']],
+            [
+                'duration_seconds' => $data['duration_seconds'],
+                'reapply_policy' => $data['reapply_policy'],
+            ],
         );
 
         return redirect()->back()->with('success', 'Бафф добавлен.');
@@ -324,6 +357,47 @@ class ItemController extends Controller
         $buff->delete();
 
         return redirect()->back()->with('success', 'Бафф удалён.');
+    }
+
+    public function updateUseLimit(Request $request, ShareItem $item): RedirectResponse
+    {
+        $data = $request->validate([
+            'enabled' => ['required', 'boolean'],
+            'max_uses' => ['required_if:enabled,1', 'nullable', 'integer', 'min:1', 'max:65535'],
+            'period_value' => ['required_if:enabled,1', 'nullable', 'integer', 'min:1', 'max:525600'],
+            'period_unit' => ['required_if:enabled,1', 'nullable', 'string', 'in:minutes,hours,days'],
+        ]);
+
+        if (! $request->boolean('enabled')) {
+            $item->useLimit()->delete();
+
+            return redirect()->back()->with('success', 'Ограничение использования отключено.');
+        }
+
+        $multiplier = match ($data['period_unit']) {
+            'minutes' => 60,
+            'hours' => 3600,
+            'days' => 86400,
+        };
+        $periodSeconds = (int) $data['period_value'] * $multiplier;
+        if ($periodSeconds > 31536000) {
+            return redirect()->back()->withErrors(['period_value' => 'Период не может превышать 365 дней.'])->withInput();
+        }
+
+        DB::transaction(function () use ($item, $data, $periodSeconds): void {
+            $limit = ShareItemUseLimit::query()->updateOrCreate(
+                ['share_item_id' => $item->id],
+                [
+                    'max_uses' => (int) $data['max_uses'],
+                    'period_seconds' => $periodSeconds,
+                ],
+            );
+
+            // После изменения правила старые окна больше не соответствуют настройке.
+            $limit->playerStates()->delete();
+        });
+
+        return redirect()->back()->with('success', 'Ограничение использования сохранено. Текущие периоды игроков сброшены.');
     }
 
     public function addDebuff(Request $request, ShareItem $item): RedirectResponse
@@ -391,10 +465,6 @@ class ItemController extends Controller
             'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
             'count' => ['required', 'integer', 'min:1', 'max:999999'],
         ]);
-
-        if ((int) $data['share_item_id'] === (int) $item->id) {
-            return redirect()->back()->with('error', 'Исходный предмет нельзя добавить в собственные материалы.');
-        }
 
         $item->rarityUpgradeMaterials()->syncWithoutDetaching([
             (int) $data['share_item_id'] => ['count' => (int) $data['count']],
@@ -545,6 +615,7 @@ class ItemController extends Controller
         $item->is_sell = (bool) $request->input('is_sell', true);
         $item->is_auction_sellable = (bool) $request->input('is_auction_sellable', false);
         $item->is_give = (bool) $request->input('is_give', true);
+        $item->is_clan_warehouse_allowed = (bool) $request->input('is_clan_warehouse_allowed', true);
         $item->is_droppable = (bool) $request->input('is_droppable', true);
         $item->is_stackable = $type->isEquipment()
             ? false
@@ -592,6 +663,18 @@ class ItemController extends Controller
             $pool = $request->input('rune_stat_pool', []);
             $item->rune_stat_pool = count($pool) > 0 ? $pool : null;
         }
+
+        // Встроенная пассивка (оружие/щит)
+        if (in_array($type, [ShareItemType::WEAPON, ShareItemType::SHIELD], true)) {
+            $raw = $request->input('innate_passive_type');
+            $item->innate_passive_type = $raw ? RunePassiveType::from($raw) : null;
+            $item->innate_passive_value = $item->innate_passive_type !== null && $request->filled('innate_passive_value')
+                ? (int) $request->input('innate_passive_value')
+                : null;
+        } else {
+            $item->innate_passive_type = null;
+            $item->innate_passive_value = null;
+        }
     }
 
     /** Возвращает текст ошибки, если заклинание уже привязано к другой книге, иначе null. */
@@ -634,7 +717,7 @@ class ItemController extends Controller
 
     private function storeItemImage(UploadedFile $file): string
     {
-        return $file->store('items', 'public');
+        return $this->imageStorage->storeOnPublicDisk($file, 'items');
     }
 
     public function addRequirement(Request $request, ShareItem $item): RedirectResponse

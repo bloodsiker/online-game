@@ -8,10 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\Request;
 
 class EffectController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(Request $request)
     {
         $filters = [
@@ -94,7 +102,7 @@ class EffectController extends Controller
         if ($request->hasFile('image')) {
             $request->validate(['image' => ['image', 'max:4096']]);
             $oldImage = $effect->getRawOriginal('image');
-            $effect->image = $request->file('image')->store('effects', 'public');
+            $effect->image = $this->imageStorage->storeOnPublicDisk($request->file('image'), 'effects');
             $this->deleteStorageImage($oldImage);
         } elseif ($request->boolean('delete_image')) {
             $this->deleteStorageImage($effect->getRawOriginal('image'));

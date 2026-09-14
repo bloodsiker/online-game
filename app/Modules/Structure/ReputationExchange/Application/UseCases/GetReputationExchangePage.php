@@ -45,6 +45,7 @@ class GetReputationExchangePage
 
         $items = $exchangeItems->map(
             static fn (ReputationExchange $item): ReputationExchangeViewItemDTO => new ReputationExchangeViewItemDTO(
+                id: (int) $item->id,
                 shareItemId: (int) $item->shareItem->id,
                 name: (string) $item->shareItem->name,
                 image: (string) $item->shareItem->image,

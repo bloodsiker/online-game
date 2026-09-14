@@ -106,9 +106,44 @@ final class MonsterStatFormulas
         return (int) round(ExperienceCurve::referenceMonsterExp($level) * $difficultyMultiplier);
     }
 
-    /** @return array{0: int, 1: int} [min, max] денег с монстра, как доля от опыта */
-    public static function moneyRange(int $exp): array
+    /**
+     * Затухание доли денег с монстра, СБРАСЫВАЕТСЯ на 100% в начале каждого тира
+     * (см. docs/economy-pricing-tier1-tier2.md, docs/economy-pricing-tier3.md):
+     * ExperienceCurve::killsPerLevel() намеренно взрывается внутри каждого тира
+     * (21→100→экспоненциально до 9000 килов к 100 lvl) — без затухания суммарный
+     * доход на верхнем чекпоинте тира оказывается в сотни раз больше дохода на
+     * нижнем, что при цене «150% от накопленного дохода с начала тира» даёт либо
+     * смешные, либо многомиллионные числа. Коэффициент каждого тира подобран
+     * бинарным поиском под свой целевой разрыв (Тир2: 933x→300x, Тир3: 308x→40x).
+     * Затухание СБРАСЫВАЕТСЯ на границе, а не продолжается глобально — иначе на
+     * Тир3 (50-89) множитель от Тир2-коэффициента упал бы до ~1.6% к 90 lvl.
+     * Тир1 (1-19) не затрагивается — там экономика уже откалибрована без затухания.
+     *
+     * @var array<int, float> нижняя граница тира (уровень) => коэффициент затухания за уровень
+     */
+    private const MONEY_DECAY_BY_TIER_START = [
+        20 => 0.9429,
+        50 => 0.9220,
+    ];
+
+    /** @return array{0: int, 1: int} [min, max] денег с монстра, как доля от опыта (с затуханием доли, сброс на границе тира — см. MONEY_DECAY_BY_TIER_START) */
+    public static function moneyRange(int $exp, int $level = 1): array
     {
-        return [(int) round($exp * 0.15), (int) round($exp * 0.30)];
+        $tierStart = 1;
+        $decayPerLevel = 1.0;
+
+        foreach (self::MONEY_DECAY_BY_TIER_START as $start => $decay) {
+            if ($level >= $start) {
+                $tierStart = $start;
+                $decayPerLevel = $decay;
+            }
+        }
+
+        $multiplier = $decayPerLevel ** ($level - $tierStart);
+
+        return [
+            (int) round($exp * 0.15 * $multiplier),
+            (int) round($exp * 0.30 * $multiplier),
+        ];
     }
 }

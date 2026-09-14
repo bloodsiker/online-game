@@ -43,6 +43,12 @@ class ClanWarehouseController extends Controller
             return redirect()->route('clan');
         }
 
+        if (! $membership->clan->hasPaidTax()) {
+            session()->flash('message', 'Клановое хранилище заблокировано до оплаты ежемесячного налога.');
+
+            return redirect()->route('location');
+        }
+
         if (! $membership->role->hasPermission(ClanPermission::DEPOSIT)) {
             session()->flash('message', 'У вас нет прав класть предметы в хранилище клана.');
 
@@ -72,6 +78,20 @@ class ClanWarehouseController extends Controller
                 ->whereIn('backpacks.item_id', array_keys($putItems))
                 ->where('equipped', 0)
                 ->get();
+
+            $blockedItemIds = $items
+                ->filter(static fn (Backpack $backpack): bool => ! $backpack->item->itemInfo->is_clan_warehouse_allowed)
+                ->pluck('item_id')
+                ->all();
+            $items = $items
+                ->filter(static fn (Backpack $backpack): bool => $backpack->item->itemInfo->is_clan_warehouse_allowed)
+                ->values();
+
+            if ($items->isEmpty()) {
+                session()->flash('message', 'Выбранные предметы нельзя положить в хранилище клана.');
+
+                return redirect()->back();
+            }
 
             $stackableItemIds = $items
                 ->filter(static fn (Backpack $backpack): bool => $backpack->item->itemInfo->is_stackable)
@@ -145,6 +165,10 @@ class ClanWarehouseController extends Controller
             if ($logData) {
                 ClanWarehouseLog::insert($logData);
             }
+
+            if ($blockedItemIds !== []) {
+                session()->flash('message', 'Часть выбранных предметов нельзя положить в хранилище клана.');
+            }
         }
 
         $backpackItems = Backpack::select('backpacks.*')
@@ -153,6 +177,7 @@ class ClanWarehouseController extends Controller
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('equipped', 0)
+            ->where('share_items.is_clan_warehouse_allowed', true)
             ->orderBy('share_items.type', 'desc')
             ->get();
 
@@ -179,6 +204,12 @@ class ClanWarehouseController extends Controller
             session()->flash('message', 'Вы не состоите в клане.');
 
             return redirect()->route('clan');
+        }
+
+        if (! $membership->clan->hasPaidTax()) {
+            session()->flash('message', 'Клановое хранилище заблокировано до оплаты ежемесячного налога.');
+
+            return redirect()->route('location');
         }
 
         if (! $membership->role->hasPermission(ClanPermission::WITHDRAW_ITEMS)) {
@@ -308,6 +339,12 @@ class ClanWarehouseController extends Controller
             session()->flash('message', 'Вы не состоите в клане.');
 
             return redirect()->route('clan');
+        }
+
+        if (! $membership->clan->hasPaidTax()) {
+            session()->flash('message', 'Клановое хранилище заблокировано до оплаты ежемесячного налога.');
+
+            return redirect()->route('location');
         }
 
         $clan = $membership->clan;

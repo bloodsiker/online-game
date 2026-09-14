@@ -136,7 +136,7 @@
                                style="font-size: 14px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>Главная</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style=" list-style-type: none; ">
-                            <a class="b-aside__impo-link" href="#"
+                            <a class="b-aside__impo-link" href="{{ route('library.index') }}"
                                style="font-size: 14px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>Библиотека</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style=" list-style-type: none; ">

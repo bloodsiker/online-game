@@ -9,7 +9,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
-use App\Modules\Clan\Domain\Models\ClanLog;
+use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -26,6 +26,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Application\Services\ReputationService;
+use App\Modules\Reputation\Domain\Events\ReputationMedalEarned;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
@@ -41,6 +42,7 @@ class QuestController extends Controller
         private readonly ChatService $chatService,
         private readonly ExperienceService $experienceService,
         private readonly ReputationService $reputationService,
+        private readonly ClanLogService $clanLogService,
     ) {}
 
     public function list(Request $request)
@@ -315,12 +317,12 @@ class QuestController extends Controller
                 $this->giveDeliverItems($user, $quest, $progress->current_stage_id);
             }
 
-            ClanLog::create([
-                'clan_id' => $clan->id,
-                'user_id' => $user->id,
-                'action' => ClanLogAction::QUEST_STARTED,
-                'details' => "Квест: {$quest->title}",
-            ]);
+            $this->clanLogService->write(
+                $clan,
+                $user,
+                ClanLogAction::QUEST_STARTED,
+                "Квест: {$quest->title}",
+            );
         });
 
         $this->chatService->sendQuestToUser($user, "Для вашего клана начался квест <b>«{$quest->title}»</b>. Удачи!");
@@ -402,12 +404,12 @@ class QuestController extends Controller
             $progress->objectives()->delete();
             $progress->delete();
 
-            ClanLog::create([
-                'clan_id' => $clan->id,
-                'user_id' => $user->id,
-                'action' => ClanLogAction::QUEST_CANCELLED,
-                'details' => "Квест: {$progress->quest->title}",
-            ]);
+            $this->clanLogService->write(
+                $clan,
+                $user,
+                ClanLogAction::QUEST_CANCELLED,
+                "Квест: {$progress->quest->title}",
+            );
         });
 
         $redirectRoute = $npcId ? redirect()->route('npc', ['id' => $npcId]) : redirect()->route('quests', ['tab' => 'clan']);
@@ -598,12 +600,12 @@ class QuestController extends Controller
                 'reset_at' => $resetAt,
             ]);
 
-            ClanLog::create([
-                'clan_id' => $clan->id,
-                'user_id' => $user->id,
-                'action' => ClanLogAction::QUEST_COMPLETED,
-                'details' => "Квест: {$quest->title}",
-            ]);
+            $this->clanLogService->write(
+                $clan,
+                $user,
+                ClanLogAction::QUEST_COMPLETED,
+                "Квест: {$quest->title}",
+            );
         });
 
         $this->chatService->sendSystemToUser($user, $this->buildQuestCompleteMessage($quest));
@@ -924,6 +926,12 @@ class QuestController extends Controller
         // Send personal system chat notification about quest completion
         $this->chatService->sendSystemToUser($user, $this->buildQuestCompleteMessage($quest));
 
+        // Квест-подвиг: если для него настроена отдельная feat-медаль — объявляем всем.
+        $featTier = ReputationTier::where('feat_quest_id', $quest->id)->with('reputation')->first();
+        if ($featTier && $featTier->feat_medal_name !== null) {
+            event(new ReputationMedalEarned($player, $featTier, $featTier->feat_medal_name, isFeat: true));
+        }
+
         return redirect()->route('npc', ['id' => $npcId])
             ->with('quest_success', 'Квест выполнен! Награда получена.');
     }
@@ -950,12 +958,12 @@ class QuestController extends Controller
     {
         $clan->increment('points', $amount);
         $user->clanMembership?->increment('points', $amount);
-        ClanLog::create([
-            'clan_id' => $clan->id,
-            'user_id' => $user->id,
-            'action' => ClanLogAction::BONUS_POINTS_EARNED,
-            'details' => "+{$amount} очков за клановый квест",
-        ]);
+        $this->clanLogService->write(
+            $clan,
+            $user,
+            ClanLogAction::BONUS_POINTS_EARNED,
+            "+{$amount} очков за клановый квест",
+        );
     }
 
     private function giveDeliverItems($user, Quest $quest, ?int $stageId = null): void

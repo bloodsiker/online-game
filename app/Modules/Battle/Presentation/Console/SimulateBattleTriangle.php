@@ -333,6 +333,11 @@ class SimFighter implements FightHitInterface
             + PlayerStatFormulas::critDamageBonus((float) $this->intuition, $this->level));
     }
 
+    public function getMagicCritDamage(): int
+    {
+        return PlayerStatFormulas::CRIT_DAMAGE_BASE;
+    }
+
     // Синтетические билды симулятора щит не носят — блок всегда 0
     public function getBlockChance(): int
     {

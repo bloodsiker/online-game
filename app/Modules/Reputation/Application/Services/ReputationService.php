@@ -9,6 +9,7 @@ use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
+use App\Modules\Reputation\Domain\Events\ReputationMedalEarned;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
@@ -123,12 +124,24 @@ class ReputationService
     public function addPoints(Player $player, Reputation $reputation, int $amount, bool $touchCooldown = true): PlayerReputation
     {
         $pr = $this->getOrCreate($player, $reputation);
+        $tierBefore = $this->getCurrentTier($reputation, $pr->points);
+
         $pr->increment('points', $amount);
         if ($touchCooldown) {
             $pr->update(['last_completed_at' => now()]);
         }
         $pr->refresh();
         $this->syncReputationRating($player);
+
+        $tierAfter = $this->getCurrentTier($reputation, $pr->points);
+
+        // Обычная медаль: игрок только что пересёк порог тира, у которого она есть.
+        if ($tierAfter
+            && $tierAfter->medal_name !== null
+            && $tierAfter->id !== $tierBefore?->id
+        ) {
+            event(new ReputationMedalEarned($player, $tierAfter, $tierAfter->medal_name, isFeat: false));
+        }
 
         return $pr;
     }
@@ -193,6 +206,47 @@ class ReputationService
         }
 
         return $availableAt->locale('ru')->diffForHumans(now(), true, false, 2);
+    }
+
+    /**
+     * Подношения (обмен ресурса с риском) можно сдавать раз в 2 дня —
+     * отдельный от квестового кулдауна таймер, чтобы сдача подношения
+     * не блокировала взятие репутационных квестов и наоборот.
+     */
+    public function canMakeOffering(Player $player, Reputation $reputation): bool
+    {
+        $pr = PlayerReputation::where('player_id', $player->id)
+            ->where('reputation_id', $reputation->id)
+            ->first();
+
+        if (! $pr || ! $pr->last_offering_at) {
+            return true;
+        }
+
+        return $pr->last_offering_at->addDays(2)->isPast();
+    }
+
+    public function getOfferingCooldownDiff(Player $player, Reputation $reputation): ?string
+    {
+        $pr = PlayerReputation::where('player_id', $player->id)
+            ->where('reputation_id', $reputation->id)
+            ->first();
+
+        if (! $pr || ! $pr->last_offering_at) {
+            return null;
+        }
+
+        $availableAt = $pr->last_offering_at->addDays(2);
+        if ($availableAt->isPast()) {
+            return null;
+        }
+
+        return $availableAt->locale('ru')->diffForHumans(now(), true, false, 2);
+    }
+
+    public function touchOfferingCooldown(Player $player, Reputation $reputation): void
+    {
+        $this->getOrCreate($player, $reputation)->update(['last_offering_at' => now()]);
     }
 
     /**

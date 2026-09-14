@@ -7,6 +7,7 @@ namespace App\Modules\Reputation\Application\UseCases;
 use App\Modules\Reputation\Application\DTOs\ReputationPageDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Domain\Contracts\ReputationReadRepository;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputationMedal;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetReputationPage
@@ -28,6 +29,14 @@ class GetReputationPage
         $cooldownDiff = $this->reputationService->getCooldownDiff($player, $reputation);
         $earnedMedals = $this->reputationService->getEarnedMedals($reputation, $pr->points, $player);
         $earnedFeatMedals = $this->reputationService->getEarnedFeatMedals($reputation, $pr->points, $player);
+        $earnedMedalDates = PlayerReputationMedal::query()
+            ->where('player_id', $player->id)
+            ->where('reputation_id', $reputation->id)
+            ->get(['tier_id', 'is_feat', 'earned_at'])
+            ->mapWithKeys(fn (PlayerReputationMedal $medal): array => [
+                $medal->tier_id.'_'.($medal->is_feat ? 'feat' : 'regular') => $medal->earned_at?->format('d.m.Y H:i'),
+            ])
+            ->all();
 
         $progressMap = [];
         if ($activeQuest) {
@@ -45,6 +54,7 @@ class GetReputationPage
             cooldownDiff: $cooldownDiff,
             earnedMedals: $earnedMedals,
             earnedFeatMedals: $earnedFeatMedals,
+            earnedMedalDates: $earnedMedalDates,
             progressMap: $progressMap,
             message: session('rep_error') ?? session('rep_success'),
             messageType: session()->has('rep_success') ? 'success' : 'error',

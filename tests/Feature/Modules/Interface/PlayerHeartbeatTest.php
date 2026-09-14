@@ -130,6 +130,21 @@ class PlayerHeartbeatTest extends TestCase
         $this->postJson(route('player.heartbeat'))->assertUnauthorized();
     }
 
+    public function test_authenticated_user_can_refresh_csrf_token(): void
+    {
+        $user = (new User)->forceFill([
+            'name' => 'CSRF Token Tester',
+            'email' => 'csrf-token@example.test',
+            'password' => Hash::make('secret'),
+        ]);
+        $user->save();
+
+        $this->actingAs($user)
+            ->getJson(route('player.csrf-token'))
+            ->assertOk()
+            ->assertJsonStructure(['token']);
+    }
+
     public function test_server_tick_processes_due_poison_and_broadcasts_private_player_state(): void
     {
         $now = Carbon::parse('2026-08-21 14:00:00');

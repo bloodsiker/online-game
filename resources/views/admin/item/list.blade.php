@@ -84,7 +84,7 @@
                                 <th width="120">Слот</th>
                                 <th width="100">Цена</th>
                                 <th width="110">Статус</th>
-                                <th width="190"></th>
+                                <th width="260"></th>
                             </tr>
                             </thead>
                             <tbody>
@@ -111,6 +111,15 @@
                                         <form action="{{ route('admin.item.duplicate', $item->id) }}" method="post" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-xs btn-default">Дубль</button>
+                                        </form>
+                                        <form action="{{ route('admin.item.destroy', $item->id) }}"
+                                              method="post"
+                                              class="d-inline"
+                                              data-confirm-message="Удалить предмет «{{ $item->name }}»? Все его экземпляры у игроков также будут удалены. Действие необратимо."
+                                              onsubmit="return confirm(this.dataset.confirmMessage);">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger">Удалить</button>
                                         </form>
                                     </td>
                                 </tr>

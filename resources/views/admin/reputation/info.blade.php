@@ -25,6 +25,16 @@
                                     Магазин <span class="badge badge-primary">{{ $reputation->shopItems->count() }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-exchange" href="#tab-exchange" data-bs-toggle="tab">
+                                    Обмен предметов <span class="badge badge-primary">{{ $reputation->exchangeItems->count() }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-gamble" href="#tab-gamble" data-bs-toggle="tab">
+                                    Обмен с риском <span class="badge badge-primary">{{ $reputation->gambleOptions->count() }}</span>
+                                </a>
+                            </li>
                         </ul>
 
                         <div class="tab-content">
@@ -58,12 +68,59 @@
                                                 <input type="text" class="form-control" name="icon" value="{{ $reputation->icon }}">
                                                 @if($reputation->icon)
                                                     <div class="mt-1">
-                                                        <img src="{{ $reputation->icon }}" style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" alt="">
+                                                        <img src="{{ str_starts_with($reputation->icon, 'http') || str_starts_with($reputation->icon, '/') ? $reputation->icon : asset($reputation->icon) }}" style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:4px;" alt="">
                                                     </div>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
+
+                                    <hr>
+                                    <h5>Милость богов</h5>
+                                    <p class="text-muted small">Если задано — репутация даёт игроку боевой эффект (см. <code>DivineFavorService</code>): пока активен маркер-эффект от эликсира (2ч) — временно, на % текущего тира; как только у тира есть медаль (обычная или подвиг) — % этого тира закрепляется навсегда, эликсир больше не нужен. Величины % задаются на вкладке «Уровни» у каждого тира.</p>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label>Тип эффекта</label>
+                                                <select class="form-control" name="favor_effect_type">
+                                                    <option value="">— нет —</option>
+                                                    @foreach($favorTypes as $favorType)
+                                                        <option value="{{ $favorType->value }}" @selected(old('favor_effect_type', $reputation->favor_effect_type?->value) === $favorType->value)>
+                                                            {{ match($favorType->value) { 'heal' => 'Лечение', 'poison' => 'Яд (DoT по цели)', 'attack_buff' => 'Баф атаки', default => $favorType->value } }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label>Шанс срабатывания за удар, %</label>
+                                                <input type="number" class="form-control" name="favor_proc_chance" value="{{ $reputation->favor_proc_chance }}" min="1" max="100">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label>Эликсир (за подношение)</label>
+                                                <select id="elixir-item-select" name="elixir_share_item_id" class="form-control">
+                                                    @if($reputation->elixirItem)
+                                                        <option value="{{ $reputation->elixirItem->id }}" selected>[{{ $reputation->elixirItem->id }}] {{ $reputation->elixirItem->name }}</option>
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label>Маркер-эффект (2ч окно от эликсира)</label>
+                                                <select class="form-control" name="favor_marker_effect_id">
+                                                    <option value="">— нет —</option>
+                                                    @foreach($effects as $effect)
+                                                        <option value="{{ $effect->id }}" @selected($reputation->favor_marker_effect_id === $effect->id)>[{{ $effect->id }}] {{ $effect->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="row mb-3">
                                         <div class="col-sm-12">
                                             <button class="btn btn-primary">Сохранить</button>
@@ -85,10 +142,16 @@
                                             <div class="card-header d-flex align-items-center justify-content-between py-2">
                                                 <div>
                                                     @if($tier->medal_icon)
-                                                        <img src="{{ $tier->medal_icon }}" style="width:24px;height:24px;object-fit:contain;margin-right:6px;vertical-align:middle;" alt="">
+                                                        <img src="{{ $tier->medalIconUrl() }}" style="width:24px;height:24px;object-fit:contain;margin-right:6px;vertical-align:middle;" alt="">
                                                     @endif
                                                     <strong>{{ $tier->medal_name ?: 'Без названия' }}</strong>
                                                     <span class="text-muted ms-2">{{ number_format($tier->min_points) }} – {{ $tier->max_points !== null ? number_format($tier->max_points) : '∞' }} очков</span>
+                                                    @if($tier->favor_percent !== null)
+                                                        <span class="badge badge-info ms-2" title="Милость богов на этом тире">🙏 {{ $tier->favor_percent }}% / {{ $tier->favor_duration_seconds ?? 30 }}сек{{ $tier->medal_name ? ' (навсегда)' : ' (только с эликсиром)' }}</span>
+                                                    @endif
+                                                    @if($tier->feat_favor_percent !== null)
+                                                        <span class="badge badge-warning ms-2" title="Милость богов за выполненный подвиг, навсегда">🙏 {{ $tier->feat_favor_percent }}% (подвиг)</span>
+                                                    @endif
                                                 </div>
                                                 <div>
                                                     <a class="modal-with-zoom-anim btn btn-xs btn-primary" href="#modalTierEdit{{ $tier->id }}">Изменить</a>
@@ -175,8 +238,23 @@
                                                             <input type="file" class="form-control mt-2" name="medal_image" accept="image/*">
                                                             <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
                                                             @if($tier->medal_icon)
-                                                                <img src="{{ str_starts_with($tier->medal_icon, 'http') || str_starts_with($tier->medal_icon, '/') ? $tier->medal_icon : asset($tier->medal_icon) }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
+                                                                <img src="{{ $tier->medalIconUrl() }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
                                                             @endif
+                                                        </div>
+                                                        <hr>
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-group mb-2">
+                                                                    <label>🙏 Милость богов на этом тире, % <small class="text-muted">(работает, только если у репутации задан «Тип эффекта»; навсегда — если у тира есть медаль, иначе — только с активным эликсиром)</small></label>
+                                                                    <input type="number" class="form-control" name="favor_percent" value="{{ $tier->favor_percent }}" min="1" max="100">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group mb-2">
+                                                                    <label>Длительность милости, сек <small class="text-muted">(суммарно, делится на тики; пусто = 30 по умолчанию)</small></label>
+                                                                    <input type="number" class="form-control" name="favor_duration_seconds" value="{{ $tier->favor_duration_seconds }}" min="1">
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <hr>
                                                         <div class="form-group mb-2">
@@ -201,8 +279,12 @@
                                                             <input type="file" class="form-control mt-2" name="feat_medal_image" accept="image/*">
                                                             <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
                                                             @if($tier->feat_medal_icon)
-                                                                <img src="{{ str_starts_with($tier->feat_medal_icon, 'http') || str_starts_with($tier->feat_medal_icon, '/') ? $tier->feat_medal_icon : asset($tier->feat_medal_icon) }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
+                                                                <img src="{{ $tier->featMedalIconUrl() }}" width="35" height="35" style="object-fit:contain;margin-top:6px;" alt="">
                                                             @endif
+                                                        </div>
+                                                        <div class="form-group mb-2">
+                                                            <label>🙏 Милость богов за подвиг, % <small class="text-muted">(навсегда, приоритет выше обычной медали этого тира)</small></label>
+                                                            <input type="number" class="form-control" name="feat_favor_percent" value="{{ $tier->feat_favor_percent }}" min="1" max="100">
                                                         </div>
                                                     </div>
                                                     <footer class="card-footer">
@@ -269,6 +351,110 @@
                                 </div>
                             </div>
 
+                            {{-- ОБМЕН ПРЕДМЕТОВ (линейный) --}}
+                            <div id="tab-exchange" class="tab-pane">
+                                <div class="pt-3">
+                                    @if($exchangeStructure)
+                                        <p class="text-muted small">Здание обмена: <a href="{{ route('admin.structure.info', $exchangeStructure->id) }}">[{{ $exchangeStructure->id }}] {{ $exchangeStructure->name }}</a>. Предмет → фиксированное количество очков репутации, в пределах указанного диапазона очков.</p>
+                                        <div class="mb-3">
+                                            <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalExchange">Добавить предмет</a>
+                                        </div>
+                                    @else
+                                        <p class="text-warning small">У NPC этой репутации ещё нет здания «Обмен на репутацию» — создайте Structure (type=reputation_exchange) на этого NPC, прежде чем добавлять предметы обмена.</p>
+                                    @endif
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="50">ID</th>
+                                                <th width="45"></th>
+                                                <th>Предмет</th>
+                                                <th width="90">Очков за 1 шт.</th>
+                                                <th width="110">Мин. очков</th>
+                                                <th width="110">Макс. очков</th>
+                                                <th width="80">Сортировка</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($reputation->exchangeItems as $exchangeItem)
+                                                <tr style="vertical-align: middle">
+                                                    <td>{{ $exchangeItem->id }}</td>
+                                                    <td>
+                                                        @if($exchangeItem->shareItem?->image)
+                                                            <img src="{{ $exchangeItem->shareItem->image }}" width="36" alt="">
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $exchangeItem->shareItem?->name ?? '—' }}</td>
+                                                    <td>{{ $exchangeItem->points }}</td>
+                                                    <td>{{ number_format($exchangeItem->min_reputation, 0, '', ' ') }}</td>
+                                                    <td>{{ number_format($exchangeItem->max_reputation, 0, '', ' ') }}</td>
+                                                    <td>{{ $exchangeItem->sort_order }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.reputation.exchange.delete', [$reputation->id, $exchangeItem->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="8" class="text-center text-muted">Предметов обмена нет</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ОБМЕН С РИСКОМ --}}
+                            <div id="tab-gamble" class="tab-pane">
+                                <div class="pt-3">
+                                    <p class="text-muted small">Механика «выбери ресурс → выбери риск»: игрок выбирает один из вариантов ниже для конкретного ресурса — стоимость, шанс успеха и награду в очках репутации. Ресурс тратится в любом случае, очки начисляются только при успехе. Используется структурой типа «Обмен на репутацию» с <code>exchange_type = gamble</code>.</p>
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalGamble">Добавить вариант</a>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered mb-none">
+                                            <thead>
+                                            <tr>
+                                                <th width="50">ID</th>
+                                                <th width="45"></th>
+                                                <th>Ресурс</th>
+                                                <th width="100">Стоимость</th>
+                                                <th width="100">Шанс успеха</th>
+                                                <th width="110">Награда, очков</th>
+                                                <th width="80">Сортировка</th>
+                                                <th width="70"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @forelse($reputation->gambleOptions as $option)
+                                                <tr style="vertical-align: middle">
+                                                    <td>{{ $option->id }}</td>
+                                                    <td>
+                                                        @if($option->shareItem?->image)
+                                                            <img src="{{ $option->shareItem->image }}" width="36" alt="">
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $option->shareItem?->name ?? '—' }}</td>
+                                                    <td>{{ number_format($option->resource_cost, 0, '', ' ') }}</td>
+                                                    <td>{{ $option->success_chance }}%</td>
+                                                    <td>{{ number_format($option->reward_points, 0, '', ' ') }}</td>
+                                                    <td>{{ $option->sort_order }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.reputation.gamble.delete', [$reputation->id, $option->id]) }}"
+                                                           class="btn btn-xs btn-danger"
+                                                           onclick="return confirm('Удалить?')">Удалить</a>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="8" class="text-center text-muted">Вариантов обмена нет</td></tr>
+                                            @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -308,6 +494,21 @@
                         <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
                     </div>
                     <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-2">
+                                <label>🙏 Милость богов на этом тире, % <small class="text-muted">(навсегда, если у тира есть медаль, иначе — только с активным эликсиром)</small></label>
+                                <input type="number" class="form-control" name="favor_percent" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-2">
+                                <label>Длительность милости, сек <small class="text-muted">(пусто = 30 по умолчанию)</small></label>
+                                <input type="number" class="form-control" name="favor_duration_seconds" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
                     <div class="form-group mb-2">
                         <label>⚔ Квест-подвиг <small class="text-muted">(без него медаль не выдаётся; для цепочки — финальный квест)</small></label>
                         <select class="form-control tier-feat-select" name="feat_quest_id" data-modal="#modalTier"></select>
@@ -325,6 +526,10 @@
                         <input type="text" class="form-control" name="feat_medal_icon">
                         <input type="file" class="form-control mt-2" name="feat_medal_image" accept="image/*">
                         <small class="form-text text-muted">Или загрузите файл до 4 МБ. Он заменит указанный путь.</small>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>🙏 Милость богов за подвиг, % <small class="text-muted">(навсегда, приоритет выше обычной медали)</small></label>
+                        <input type="number" class="form-control" name="feat_favor_percent" min="1" max="100">
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -365,6 +570,100 @@
                             <div class="form-group mb-2">
                                 <label>Мин. очков репутации</label>
                                 <input type="number" class="form-control" name="min_points" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Сортировка</label>
+                        <input type="number" class="form-control" name="sort_order" value="0">
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить предмет линейного обмена --}}
+    <div id="modalExchange" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.reputation.exchange.add', $reputation->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить предмет обмена</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Предмет</label>
+                        <select id="exchange-item-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label>Очков за 1 шт.</label>
+                                <input type="number" class="form-control" name="points" value="5" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label>Мин. очков репутации</label>
+                                <input type="number" class="form-control" name="min_reputation" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label>Макс. очков репутации</label>
+                                <input type="number" class="form-control" name="max_reputation" value="999999" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label>Сортировка</label>
+                                <input type="number" class="form-control" name="sort_order" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="col-md-12 text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
+    {{-- Модалка: добавить вариант обмена с риском --}}
+    <div id="modalGamble" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.reputation.gamble.add', $reputation->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить вариант обмена</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="form-group mb-2">
+                        <label>Ресурс</label>
+                        <select id="gamble-item-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Стоимость (кол-во ресурса)</label>
+                                <input type="number" class="form-control" name="resource_cost" value="0" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Шанс успеха, %</label>
+                                <input type="number" class="form-control" name="success_chance" value="100" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Награда, очков репутации</label>
+                                <input type="number" class="form-control" name="reward_points" value="0" min="0">
                             </div>
                         </div>
                     </div>
@@ -453,6 +752,71 @@
             },
             minimumInputLength: 0
         });
+    });
+
+    // Divine favor elixir item select
+    $('#elixir-item-select').select2({
+        theme: 'bootstrap',
+        placeholder: 'Выберите эликсир',
+        allowClear: true,
+        templateResult: formatItemOption,
+        templateSelection: formatItemOption,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    // Linear exchange item select
+    $('#exchange-item-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalExchange'),
+        placeholder: 'Выберите предмет',
+        allowClear: true,
+        templateResult: formatItemOption,
+        templateSelection: formatItemOption,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    // Gamble option item select
+    $('#gamble-item-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalGamble'),
+        placeholder: 'Выберите ресурс',
+        allowClear: true,
+        templateResult: formatItemOption,
+        templateSelection: formatItemOption,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
     });
 
     // Feat quest selects (in add/edit tier modals)

@@ -9,9 +9,11 @@ use App\Http\Controllers\Admin\ClanSkillController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
+use App\Http\Controllers\Admin\InjuryTypeController;
 use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
-use App\Http\Controllers\Admin\InjuryTypeController;
+use App\Http\Controllers\Admin\LibraryArticleController;
+use App\Http\Controllers\Admin\LibraryCategoryController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LocationGateController;
 use App\Http\Controllers\Admin\MagicSkillController;
@@ -29,6 +31,20 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/library/categories', [LibraryCategoryController::class, 'index'])->name('library.categories.index');
+Route::get('/library/categories/create', [LibraryCategoryController::class, 'create'])->name('library.categories.create');
+Route::post('/library/categories', [LibraryCategoryController::class, 'store'])->name('library.categories.store');
+Route::get('/library/categories/{category}/edit', [LibraryCategoryController::class, 'edit'])->name('library.categories.edit');
+Route::put('/library/categories/{category}', [LibraryCategoryController::class, 'update'])->name('library.categories.update');
+Route::delete('/library/categories/{category}', [LibraryCategoryController::class, 'destroy'])->name('library.categories.destroy');
+Route::get('/library/articles', [LibraryArticleController::class, 'index'])->name('library.articles.index');
+Route::get('/library/articles/create', [LibraryArticleController::class, 'create'])->name('library.articles.create');
+Route::post('/library/articles', [LibraryArticleController::class, 'store'])->name('library.articles.store');
+Route::post('/library/articles/upload-image', [LibraryArticleController::class, 'uploadImage'])->name('library.articles.upload-image');
+Route::get('/library/articles/{article}/edit', [LibraryArticleController::class, 'edit'])->name('library.articles.edit');
+Route::put('/library/articles/{article}', [LibraryArticleController::class, 'update'])->name('library.articles.update');
+Route::delete('/library/articles/{article}', [LibraryArticleController::class, 'destroy'])->name('library.articles.destroy');
 
 Route::get('/clan-skills', [ClanSkillController::class, 'index'])->name('clan_skills');
 Route::match(['GET', 'POST'], '/clan-skill/create', [ClanSkillController::class, 'create'])->name('clan_skill.create');
@@ -64,6 +80,8 @@ Route::match(['GET', 'POST'], '/dungeon/{dungeon}', [DungeonController::class, '
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');
 Route::get('/api/npcs', [ApiController::class, 'npcs'])->name('api.npcs');
+Route::get('/api/monsters', [ApiController::class, 'monsters'])->name('api.monsters');
+Route::get('/api/reputations', [ApiController::class, 'reputations'])->name('api.reputations');
 Route::get('/api/quests', [ApiController::class, 'quests'])->name('api.quests');
 Route::get('/api/maps', [ApiController::class, 'maps'])->name('api.maps');
 
@@ -82,6 +100,7 @@ Route::post('/item/create', [ItemController::class, 'store'])->name('item.store'
 Route::get('/item/{item}/drop', [ItemController::class, 'drop'])->name('item.drop');
 Route::get('/item/{item}/quests', [ItemController::class, 'quests'])->name('item.quests');
 Route::match(['GET', 'POST'], '/item/{item}', [ItemController::class, 'info'])->name('item.info');
+Route::delete('/item/{item}', [ItemController::class, 'destroy'])->name('item.destroy');
 Route::post('/item/{item}/duplicate', [ItemController::class, 'duplicate'])->name('item.duplicate');
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');
 Route::post('/item/recipe/{recipe}', [ItemController::class, 'addItemToRecipe'])->name('item.recipe.add_item');
@@ -92,6 +111,7 @@ Route::post('/item/{item}/effect', [ItemController::class, 'addEffect'])->name('
 Route::get('/item/{item}/effect/{effect}/delete', [ItemController::class, 'deleteEffect'])->name('item.effect.delete');
 Route::post('/item/{item}/buff', [ItemController::class, 'addBuff'])->name('item.buff.add');
 Route::get('/item/{item}/buff/{buff}/delete', [ItemController::class, 'deleteBuff'])->name('item.buff.delete');
+Route::post('/item/{item}/use-limit', [ItemController::class, 'updateUseLimit'])->name('item.use_limit.update');
 Route::post('/item/{item}/debuff', [ItemController::class, 'addDebuff'])->name('item.debuff.add');
 Route::get('/item/{item}/debuff/{debuff}/delete', [ItemController::class, 'deleteDebuff'])->name('item.debuff.delete');
 Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'])->name('item.requirement.add');
@@ -217,6 +237,10 @@ Route::post('/reputation/{reputation}/tier/{tier}/quest', [ReputationController:
 Route::get('/reputation/{reputation}/tier/{tier}/quest/{tierQuest}/delete', [ReputationController::class, 'deleteTierQuest'])->name('reputation.tier.quest.delete');
 Route::post('/reputation/{reputation}/shop', [ReputationController::class, 'addShopItem'])->name('reputation.shop.add');
 Route::get('/reputation/{reputation}/shop/{shopItem}/delete', [ReputationController::class, 'deleteShopItem'])->name('reputation.shop.delete');
+Route::post('/reputation/{reputation}/gamble', [ReputationController::class, 'addGambleOption'])->name('reputation.gamble.add');
+Route::get('/reputation/{reputation}/gamble/{gambleOption}/delete', [ReputationController::class, 'deleteGambleOption'])->name('reputation.gamble.delete');
+Route::post('/reputation/{reputation}/exchange', [ReputationController::class, 'addExchangeItem'])->name('reputation.exchange.add');
+Route::get('/reputation/{reputation}/exchange/{exchangeItem}/delete', [ReputationController::class, 'deleteExchangeItem'])->name('reputation.exchange.delete');
 
 Route::get('/users', [UserController::class, 'index'])->name('users');
 
@@ -233,5 +257,6 @@ Route::get('/bank/stock/{stock}/duplicate', [BankStockController::class, 'duplic
 
 Route::get('/players', [PlayerController::class, 'index'])->name('players');
 Route::match(['GET', 'POST'], '/player/{player}', [PlayerController::class, 'info'])->name('player.info');
+Route::post('/player/{player}/level-up', [PlayerController::class, 'levelUp'])->name('player.level_up');
 Route::post('/player/{player}/backpack/add', [PlayerController::class, 'backpackAdd'])->name('player.backpack.add');
 Route::get('/player/{player}/backpack/{backpack}/delete', [PlayerController::class, 'backpackDelete'])->name('player.backpack.delete');

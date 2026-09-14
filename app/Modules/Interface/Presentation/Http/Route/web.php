@@ -14,3 +14,7 @@ Route::get('/interface', [InterfaceController::class, 'interface'])->name('inter
 Route::post('/player/heartbeat', [InterfaceController::class, 'heartbeat'])
     ->middleware(['auth', 'throttle:12,1'])
     ->name('player.heartbeat');
+
+Route::get('/player/csrf-token', [InterfaceController::class, 'csrfToken'])
+    ->middleware(['auth', 'throttle:12,1'])
+    ->name('player.csrf-token');

@@ -126,7 +126,7 @@ readonly class HitCalculator
         return $armor * (1 - $pierce);
     }
 
-    /** Критурон с мягким потолком: 175% → асимптотически к 300% (формула общая с MagicHitCalculator, см. PlayerStatFormulas) */
+    /** Физический критурон с мягким потолком: 175% → асимптотически к 300%. */
     private function effectiveCritDamage(FightHitInterface $attacker): float
     {
         return PlayerStatFormulas::effectiveCritDamage($attacker->getCritDamage());

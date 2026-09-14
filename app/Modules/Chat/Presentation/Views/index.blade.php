@@ -420,11 +420,12 @@
                                                     }
 
                                                     var chatHasParty = @json($hasParty);
+                                                    var chatHasClan = @json($hasClan);
                                                     function refreshPartyChannelAvailability() {
                                                         fetch('{{ route('chat.party-availability') }}')
                                                             .then(function (response) { return response.json(); })
                                                             .then(function (data) {
-                                                                if (Boolean(data.has_party) !== chatHasParty) {
+                                                                if (Boolean(data.has_party) !== chatHasParty || Boolean(data.has_clan) !== chatHasClan) {
                                                                     window.location.reload();
                                                                 }
                                                             })
@@ -514,7 +515,7 @@
                                             <span class="icon"><img src="{{ asset('img/bg/chat/cht-friends-icon.png') }}" alt="Друзья"></span>
                                             <span class="title">Друзья</span>
                                         </li>
-                                        @if(auth()->user()->clanMembership)
+                                        @if($hasClan)
                                         <li class="clan" data-type="clan"
                                             title="Участники клана" onclick="chatFrameSelect('clan');">
                                             <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Клан"></span>

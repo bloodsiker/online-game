@@ -14,6 +14,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Event\Domain\Services\EventActivityProgressService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
@@ -25,6 +26,8 @@ use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Reputation\Domain\Enums\DivineFavorType;
+use App\Modules\Reputation\Domain\Services\DivineFavorService;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 
 readonly class AttackService
@@ -42,6 +45,7 @@ readonly class AttackService
         private PlayerRunePassiveService $runePassiveService,
         private PlayerStatService $statService,
         private RandomizerInterface $random,
+        private DivineFavorService $divineFavorService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -55,6 +59,7 @@ readonly class AttackService
 
         $isBoss = $locMonster->monster->isBoss();
         $runePassives = $this->runePassiveService->resolve($player);
+        $divineFavors = $this->divineFavorService->resolve($player);
         $effectiveHpMax = $this->statService->resolve($player)->getHpMax();
 
         /** @var FightHitDTO $hit */
@@ -178,9 +183,118 @@ readonly class AttackService
             }
 
             $this->applyOffensiveRunePassives($player, $locMonster, $battle, $damage, $hit->getHandSide(), $runePassives, $xpMultiplier, $effectiveHpMax, $result);
+            $this->applyDivineFavors($player, $locMonster, $battle, $divineFavors, $effectiveHpMax, $result);
         }
 
         return $result;
+    }
+
+    /**
+     * «Милость богов»: независимо от оружия/рун, по репутации с настроенной
+     * божественной милостью — шанс на лечение себя (Богиня жизни), яд на
+     * цель (Бог мёртвых) или временный баф атаки на себя (Бог войны). Все три
+     * эффекта используют одну и ту же величину % — из текущего тира
+     * репутации, либо фиксированную (feat_favor_percent), если подвиг
+     * выполнен и милость стала постоянной.
+     *
+     * @param  list<array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}>  $divineFavors
+     */
+    private function applyDivineFavors(
+        Player $player,
+        MonsterOnLocation $locMonster,
+        Battle $battle,
+        array $divineFavors,
+        int $effectiveHpMax,
+        AttackResultDTO $result,
+    ): void {
+        foreach ($divineFavors as $favor) {
+            if (! $this->random->chance($favor['chance'])) {
+                continue;
+            }
+
+            match ($favor['type']) {
+                DivineFavorType::HEAL => $this->applyDivineHeal($player, $battle, $favor, $effectiveHpMax, $result),
+                DivineFavorType::POISON => $this->applyDivinePoison($locMonster, $battle, $favor, $result),
+                DivineFavorType::ATTACK_BUFF => $this->applyDivineAttackBuff($player, $battle, $favor, $result),
+            };
+        }
+    }
+
+    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    private function applyDivineHeal(Player $player, Battle $battle, array $favor, int $effectiveHpMax, AttackResultDTO $result): void
+    {
+        $effect = Effect::where('slug', 'fiora_blessing_'.$favor['percent'])->first();
+        if ($effect === null) {
+            return;
+        }
+
+        $durationSeconds = $favor['durationSeconds'];
+        $ticks = max(1, intdiv($durationSeconds, max(1, (int) $effect->tick_interval)));
+        $totalHeal = max($ticks, (int) round($effectiveHpMax * $effect->value_per_tick / 100));
+        $tickValue = max(1, (int) round($totalHeal / $ticks));
+
+        $result->log(sprintf(
+            '<p><b class="color-buff">🙏 Милость «%s» нисходит на вас — тело начинает восстанавливаться!</b></p>',
+            $favor['reputation']->name,
+        ));
+
+        $this->effectService->applyEffectToPlayer(
+            $effect,
+            $player,
+            $battle,
+            $result,
+            $durationSeconds,
+            $tickValue,
+        );
+    }
+
+    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    private function applyDivinePoison(MonsterOnLocation $locMonster, Battle $battle, array $favor, AttackResultDTO $result): void
+    {
+        if ($locMonster->hp_now <= 0) {
+            return;
+        }
+
+        $effect = Effect::where('slug', 'kairell_wrath_'.$favor['percent'])->first();
+        if ($effect === null) {
+            return;
+        }
+
+        $durationSeconds = $favor['durationSeconds'];
+        $ticks = max(1, intdiv($durationSeconds, max(1, (int) $effect->tick_interval)));
+        $totalDamage = max($ticks, (int) round($locMonster->hp_max * $effect->value_per_tick / 100));
+        $tickValue = max(1, (int) round($totalDamage / $ticks));
+
+        $result->log(sprintf(
+            '<p><b class="color-debuff">☠️ Милость «%s» отравляет %s!</b></p>',
+            $favor['reputation']->name,
+            $locMonster->monster->name,
+        ));
+
+        $this->effectService->applyEffectToMonster(
+            $effect,
+            $locMonster,
+            $battle,
+            $result,
+            $durationSeconds,
+            $tickValue,
+        );
+    }
+
+    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    private function applyDivineAttackBuff(Player $player, Battle $battle, array $favor, AttackResultDTO $result): void
+    {
+        $effect = Effect::where('slug', 'divine_attack_buff_'.$favor['percent'])->first();
+        if ($effect === null) {
+            return;
+        }
+
+        $this->effectService->applyEffectToPlayer($effect, $player, $battle, $result, $favor['durationSeconds']);
+
+        $result->log(sprintf(
+            '<p><b class="color-buff">⚔ Милость «%s» разгорается в вас яростью боя!</b></p>',
+            $favor['reputation']->name,
+        ));
     }
 
     /**

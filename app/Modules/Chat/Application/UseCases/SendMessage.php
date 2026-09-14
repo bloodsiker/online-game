@@ -63,7 +63,18 @@ class SendMessage
         }
 
         if ($defaultChannel === ChatChannel::Clan) {
-            $data['clan_id'] = $sender->clanMembership?->clan_id;
+            $sender->loadMissing('clanMembership.clan');
+            $membership = $sender->clanMembership;
+
+            if ($membership === null) {
+                throw new RuntimeException('Вы не состоите в клане.');
+            }
+
+            if (! $membership->clan->hasPaidTax()) {
+                throw new RuntimeException('Клановый чат заблокирован до оплаты ежемесячного налога.');
+            }
+
+            $data['clan_id'] = $membership->clan_id;
         }
 
         if ($defaultChannel === ChatChannel::Party) {

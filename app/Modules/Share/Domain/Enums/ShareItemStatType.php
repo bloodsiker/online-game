@@ -22,6 +22,7 @@ enum ShareItemStatType: string
     case MAGIC_CRITICAL = 'magic_critical';
     case HP_MAX = 'hp_max';
     case CRIT_DAMAGE = 'crit_damage';
+    case MAGIC_CRIT_DAMAGE = 'magic_crit_damage';
     case ENDURANCE = 'endurance';
     case BLOCK_CHANCE = 'block_chance';
     case BLOCK_FLAT = 'block_flat';
@@ -46,6 +47,7 @@ enum ShareItemStatType: string
             self::MAGIC_CRITICAL => 'Шанс магического крита, %',
             self::HP_MAX => 'Уровень жизни',
             self::CRIT_DAMAGE => 'Сила крит. удара',
+            self::MAGIC_CRIT_DAMAGE => 'Сила магического крит. удара',
             self::ENDURANCE => 'Выносливость',
             self::BLOCK_CHANCE => 'Шанс блока щитом, %',
             self::BLOCK_FLAT => 'Блок щитом (фикс.)',

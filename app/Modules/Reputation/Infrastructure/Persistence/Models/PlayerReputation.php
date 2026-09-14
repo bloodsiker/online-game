@@ -12,11 +12,12 @@ class PlayerReputation extends Model
 {
     protected $table = 'player_reputations';
 
-    protected $fillable = ['player_id', 'reputation_id', 'points', 'last_completed_at'];
+    protected $fillable = ['player_id', 'reputation_id', 'points', 'last_completed_at', 'last_offering_at'];
 
     protected $casts = [
         'points' => 'integer',
         'last_completed_at' => 'datetime',
+        'last_offering_at' => 'datetime',
     ];
 
     public function player(): BelongsTo

@@ -130,11 +130,14 @@ class PlayerStatService
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
             'magic_attack' => 0.0,
-            // Как и блок щитом — целиком с экипировки (жезл), базы своей нет
+            // Как и блок щитом — целиком с экипировки (фолиант), базы своей нет
             'magic_critical' => 0.0,
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
             'crit_damage' => PlayerStatFormulas::CRIT_DAMAGE_BASE
                 + PlayerStatFormulas::critDamageBonus((float) $primary['intuition'], max(1, (int) $player->lvl)),
+            // Магический критурон — целиком с экипировки, без бонуса от Интуиции
+            // (чтобы «чистому магу» Интуиция не была обязательной статой).
+            'magic_crit_damage' => (float) PlayerStatFormulas::CRIT_DAMAGE_BASE,
             // Блок щитом — целиком от предметов (щит), базы своей нет
             'block_chance' => 0.0,
             'block_flat' => 0.0,
@@ -177,6 +180,7 @@ class PlayerStatService
         $sheet->magicAttack = $computed['magic_attack'];
         $sheet->magicCritical = $computed['magic_critical'];
         $sheet->critDamage = $computed['crit_damage'];
+        $sheet->magicCritDamage = $computed['magic_crit_damage'];
         $sheet->blockChance = $computed['block_chance'];
         $sheet->blockFlat = $computed['block_flat'];
         $sheet->blockPercent = $computed['block_percent'];
@@ -379,6 +383,7 @@ class PlayerStatService
             ShareItemStatType::MAGIC_RESISTANCE => 'magic_resistance',
             ShareItemStatType::MAGIC_CRITICAL => 'magic_critical',
             ShareItemStatType::CRIT_DAMAGE => 'crit_damage',
+            ShareItemStatType::MAGIC_CRIT_DAMAGE => 'magic_crit_damage',
             ShareItemStatType::ENDURANCE => 'endurance',
             ShareItemStatType::BLOCK_CHANCE => 'block_chance',
             ShareItemStatType::BLOCK_FLAT => 'block_flat',

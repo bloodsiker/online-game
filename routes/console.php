@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use Illuminate\Foundation\Inspiring;
@@ -16,6 +17,11 @@ Schedule::command('items:delete-expired-location')
 
 Schedule::call(static fn (): int => app(PruneExpiredPlayerInjuries::class)->execute())
     ->name('players:prune-expired-injuries')
+    ->everyMinute()
+    ->withoutOverlapping();
+
+Schedule::call(static fn (): int => app(ProcessExpiredClanTaxes::class)->execute(now()))
+    ->name('clans:process-expired-taxes')
     ->everyMinute()
     ->withoutOverlapping();
 

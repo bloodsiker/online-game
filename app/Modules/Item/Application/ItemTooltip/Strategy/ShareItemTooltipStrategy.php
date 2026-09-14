@@ -18,6 +18,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
         $shareItems = ItemTooltipRelationLoader::load($this->items, [
             'stats',
             'effects',
+            'useLimit',
             'requirements.skill',
         ]);
 

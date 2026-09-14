@@ -27,6 +27,7 @@ enum ClanLogAction: string
     case QUEST_CANCELLED = 'quest_cancelled';
     case TREASURY_DEPOSIT = 'treasury_deposit';
     case TREASURY_WITHDRAW = 'treasury_withdraw';
+    case TAX_PAID = 'tax_paid';
 
     public function label(): string
     {
@@ -52,6 +53,7 @@ enum ClanLogAction: string
             self::QUEST_CANCELLED => 'Клановый квест отменён',
             self::TREASURY_DEPOSIT => 'Пополнение казны',
             self::TREASURY_WITHDRAW => 'Снятие из казны',
+            self::TAX_PAID => 'Оплата налога',
         };
     }
 }

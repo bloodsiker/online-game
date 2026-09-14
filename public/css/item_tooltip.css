@@ -1,0 +1,113 @@
+#artifact_alt {
+    color: #955c4a;
+    font: 11px Tahoma, Geneva, sans-serif;
+}
+
+#artifact_alt .aa-table {
+    border-radius: 30px 30px 0 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2);
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 11px;
+}
+
+#artifact_alt .aa-table * {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 11px;
+}
+
+#artifact_alt .aa-table table {
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+}
+
+#artifact_alt .aa-tl {
+    width: 14px;
+    height: 24px;
+    background: url('/img/bg/item_info/tbl-pop_corner-top-left.gif') no-repeat;
+}
+
+#artifact_alt .aa-t {
+    height: 24px;
+    background: url('/img/bg/item_info/tbl-pop_top.gif');
+}
+
+#artifact_alt .aa-tr {
+    width: 14px;
+    height: 24px;
+    background: url('/img/bg/item_info/tbl-pop_corner-top-right.gif') no-repeat;
+}
+
+#artifact_alt .aa-l {
+    width: 14px;
+    background: url('/img/bg/item_info/tbl-pop_left.gif') repeat-y;
+}
+
+#artifact_alt .aa-r {
+    width: 14px;
+    background: url('/img/bg/item_info/tbl-pop_right.gif') repeat-y;
+}
+
+#artifact_alt .aa-bl {
+    width: 14px;
+    height: 5px;
+    background: url('/img/bg/item_info/tbl-pop_corner-bottom-left.gif') no-repeat;
+}
+
+#artifact_alt .aa-b {
+    height: 5px;
+    background: url('/img/bg/item_info/tbl-pop_bottom.gif') repeat-x;
+}
+
+#artifact_alt .aa-br {
+    width: 14px;
+    height: 5px;
+    background: url('/img/bg/item_info/tbl-pop_corner-bottom-right.gif') no-repeat;
+}
+
+#artifact_alt .list_dark {
+    background-color: #f4bb8a;
+}
+
+#artifact_alt .skill_list td {
+    padding: 0 7px;
+}
+
+#artifact_alt .skill_list td td {
+    padding: 0;
+}
+
+#artifact_alt .b {
+    font-weight: 700;
+}
+
+#artifact_alt .red,
+#artifact_alt .red * {
+    color: #d00000;
+}
+
+#artifact_alt .redd,
+#artifact_alt .redd * {
+    color: #ba0000 !important;
+}
+
+#artifact_alt .grnn,
+#artifact_alt .grnn * {
+    color: #114d01 !important;
+}
+
+#artifact_alt .dark,
+#artifact_alt .dark * {
+    color: #49382d !important;
+}
+
+#artifact_alt .violet,
+#artifact_alt .violet * {
+    color: #3615ac !important;
+}
+
+#artifact_alt .aa-table p {
+    margin: 0 0 6px;
+}

@@ -14,6 +14,7 @@ use App\Modules\Share\Domain\Enums\RecipeUnlockType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Workshop\Application\DTOs\WorkshopResultDTO;
+use App\Modules\Structure\Workshop\Domain\Services\CraftSuccessChanceConfig;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -95,13 +96,29 @@ class CraftProfessionItem
                 }
             }
 
+            $chance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel);
+
+            if (random_int(1, 100) > $chance) {
+                $failureExperience = max(1, (int) round(max(1, (int) $recipe->itemInfo->skill_exp) / 2));
+                $this->professionExperienceService->award($player, $recipe->itemInfo->skill, $failureExperience);
+
+                return new WorkshopResultDTO(false, sprintf(
+                    'Неудача при создании «%s» (шанс успеха был %d%%). Ресурсы потрачены впустую. %s: опыт +%d.',
+                    $recipe->kraftItem->name,
+                    $chance,
+                    $recipe->itemInfo->skill->name,
+                    $failureExperience,
+                ));
+            }
+
             $this->backpackService->addItemByShareItem($user, $recipe->kraftItem, 1);
             $experience = max(1, (int) $recipe->itemInfo->skill_exp);
             $this->professionExperienceService->award($player, $recipe->itemInfo->skill, $experience);
 
             return new WorkshopResultDTO(true, sprintf(
-                'Создано: «%s» ×1. %s: опыт +%d.',
+                'Создано: «%s» ×1 (шанс успеха был %d%%). %s: опыт +%d.',
                 $recipe->kraftItem->name,
+                $chance,
                 $recipe->itemInfo->skill->name,
                 $experience,
             ));

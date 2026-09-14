@@ -150,7 +150,7 @@ class OvergrownRoadMonsterSeeder extends Seeder
         foreach (self::MONSTERS as $p) {
             [$minDmg, $maxDmg] = MonsterStatFormulas::damageRange($p['lvl'], $p['dmgPercent']);
             $exp = MonsterStatFormulas::expReward($p['lvl'], $p['expMultiplier']);
-            [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp);
+            [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $p['lvl']);
 
             $monster = Monster::firstOrNew(['name' => $p['name'], 'lvl' => $p['lvl']]);
 

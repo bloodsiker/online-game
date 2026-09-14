@@ -60,6 +60,9 @@ class StatSheet implements FightHitInterface
     /** Множитель критического урона, % (150 = ×1.5) */
     public int $critDamage = 150;
 
+    /** Множитель магического критического урона, % — целиком с экипировки, не от Интуиции */
+    public int $magicCritDamage = 175;
+
     public int $level = 1;
 
     public int $freeStats = 0;
@@ -183,6 +186,11 @@ class StatSheet implements FightHitInterface
     public function getCritDamage(): int
     {
         return $this->critDamage;
+    }
+
+    public function getMagicCritDamage(): int
+    {
+        return $this->magicCritDamage;
     }
 
     public function getLevel(): int

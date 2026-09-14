@@ -55,6 +55,11 @@ final readonly class MonsterCombatant implements FightHitInterface
         return $this->monster->getCritDamage();
     }
 
+    public function getMagicCritDamage(): int
+    {
+        return $this->monster->getMagicCritDamage();
+    }
+
     public function getLevel(): int
     {
         return $this->monster->getLevel();

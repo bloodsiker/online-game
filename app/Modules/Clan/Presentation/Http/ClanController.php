@@ -83,6 +83,7 @@ class ClanController extends Controller
             'levelRank' => $page->levelRank,
             'experienceRank' => $page->experienceRank,
             'members' => $page->members,
+            'learnedSkills' => $page->learnedSkills,
             'logs' => $page->logs,
         ]);
     }

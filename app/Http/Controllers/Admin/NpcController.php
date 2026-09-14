@@ -8,10 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\Request;
 
 class NpcController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list()
     {
         $list = Npc::with('location')->orderByDesc('id')->get();
@@ -26,8 +34,7 @@ class NpcController extends Controller
                 'dialogueNodes',
                 'dialogueNodes as active_dialogue_nodes_count' => static fn ($query) => $query->where('is_active', true),
             ])
-            ->orderByDesc('dialogue_nodes_count')
-            ->orderByDesc('id')
+            ->orderBy('id')
             ->get();
 
         return view('admin.npc.dialogues', compact('list'));
@@ -167,7 +174,7 @@ class NpcController extends Controller
 
         if ($request->hasFile('image')) {
             $oldImage = $npc->getRawOriginal('image');
-            $npc->image = $request->file('image')->store('npc', 'public');
+            $npc->image = $this->imageStorage->storeOnPublicDisk($request->file('image'), 'npc');
             $this->deleteStorageImage($oldImage);
         } elseif ($request->boolean('delete_image')) {
             $this->deleteStorageImage($npc->getRawOriginal('image'));

@@ -22,6 +22,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
         $items = ItemTooltipRelationLoader::load($this->items, [
             'itemInfo.stats',
             'itemInfo.effects',
+            'itemInfo.useLimit',
             'itemInfo.requirements.skill',
             'gems.gemInfo',
             'runes.runeInfo',

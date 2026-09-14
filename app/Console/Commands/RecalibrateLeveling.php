@@ -90,7 +90,7 @@ class RecalibrateLeveling extends Command
         foreach (self::MONSTERS as $name => $p) {
             [$minDmg, $maxDmg] = MonsterStatFormulas::damageRange($p['level'], $p['dmgPercent']);
             $exp = MonsterStatFormulas::expReward($p['level'], $p['expMultiplier']);
-            [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp);
+            [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $p['level']);
 
             $monster = Monster::firstOrNew(['name' => $name]);
             $monster->lvl = $p['level'];

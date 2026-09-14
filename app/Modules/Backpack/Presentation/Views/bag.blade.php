@@ -2059,7 +2059,7 @@
         document.getElementById('item-ctx-menu').style.display = 'none';
         var base = '{{ url("/items") }}';
         switch (action) {
-            case 'info':    showArtifactInfo(id, null, null, null); break;
+            case 'info':    itemTooltipOpenInfo(id, null, null, null); break;
             case 'equip':   location.href = base + '/put-on/'     + id; break;
             case 'unequip': location.href = base + '/put-off/'    + id; break;
             case 'use':

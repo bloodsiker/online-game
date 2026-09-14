@@ -16,6 +16,7 @@ enum ClanPermission: string
     case WITHDRAW_MONEY = 'withdraw_money';
     case WITHDRAW_ITEMS = 'withdraw_items';
     case LEARN_SKILL = 'learn_skill';
+    case PAY_TAX = 'pay_tax';
 
     public function bit(): int
     {
@@ -30,6 +31,7 @@ enum ClanPermission: string
             self::CHAT => 2048,
             self::WITHDRAW_ITEMS => 8192,
             self::LEARN_SKILL => 16384,
+            self::PAY_TAX => 32768,
         };
     }
 
@@ -46,6 +48,7 @@ enum ClanPermission: string
             self::WITHDRAW_MONEY => 'Забирать деньги',
             self::WITHDRAW_ITEMS => 'Забирать вещи',
             self::LEARN_SKILL => 'Изучать навыки',
+            self::PAY_TAX => 'Платить налог',
         };
     }
 
@@ -62,6 +65,7 @@ enum ClanPermission: string
             self::WITHDRAW_MONEY => 'Забирать<br>деньги',
             self::WITHDRAW_ITEMS => 'Забирать<br>вещи',
             self::LEARN_SKILL => 'Изучать<br>навыки',
+            self::PAY_TAX => 'Платить<br>налог',
         };
     }
 

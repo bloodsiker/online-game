@@ -114,7 +114,7 @@
                                 <a href="{{ route('items.info', ['id' => $item->item->id]) }}" style="color:#666666" class="b">{{ $item->item->itemInfo->name }}</a>
                                 <br>
                                 <span title="Тип предмета">
-                                    <img src="https://fun-dwar.com/images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}
+                                    <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->item->itemInfo->getTypeName() }}
                                 </span>
                             </td>
                         </tr>

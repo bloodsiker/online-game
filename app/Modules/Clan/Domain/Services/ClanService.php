@@ -9,7 +9,6 @@ use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
-use App\Modules\Clan\Domain\Models\ClanLog;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\Clan\Domain\Repositories\ClanRepositoryInterface;
@@ -18,7 +17,10 @@ use Illuminate\Http\UploadedFile;
 
 readonly class ClanService
 {
-    public function __construct(private ClanRepositoryInterface $clanRepository) {}
+    public function __construct(
+        private ClanRepositoryInterface $clanRepository,
+        private ClanLogService $clanLogService,
+    ) {}
 
     public function create(User $user, string $name, UploadedFile $icon): Clan
     {
@@ -28,6 +30,7 @@ readonly class ClanService
             'name' => $name,
             'owner_id' => $user->id,
             'icon' => $iconPath,
+            'tax_paid_until' => now()->addMonthNoOverflow(),
         ]);
 
         $leaderRole = ClanRole::create([
@@ -431,11 +434,6 @@ readonly class ClanService
 
     private function log(int $clanId, ?int $userId, ClanLogAction $action, string $details): void
     {
-        ClanLog::create([
-            'clan_id' => $clanId,
-            'user_id' => $userId,
-            'action' => $action,
-            'details' => $details,
-        ]);
+        $this->clanLogService->write($clanId, $userId, $action, $details);
     }
 }

@@ -206,6 +206,11 @@ class Monster extends Model implements FightHitInterface
         return 150;
     }
 
+    public function getMagicCritDamage(): int
+    {
+        return 150;
+    }
+
     public function getLevel(): int
     {
         return max(1, (int) $this->lvl);

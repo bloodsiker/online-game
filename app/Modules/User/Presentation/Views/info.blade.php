@@ -653,21 +653,104 @@
 <script>
     var MedalsOnPage = 6;
     var position = 0;
-    var medals = @json($reputationMedals).map(function (medal) {
+    var medals = @json($reputationMedals);
+
+    function medalTooltipEscape(value) {
+        var element = document.createElement('div');
+        element.textContent = value == null ? '' : String(value);
+
+        return element.innerHTML;
+    }
+
+    function renderMedalTooltip(medal) {
+        var rows = '';
+        rows += '<tr class="skill_list list_dark"><td>Репутация</td><td class="b red" align="right">' + medalTooltipEscape(medal.reputation) + '</td></tr>';
+        rows += '<tr class="skill_list"><td>Получена за</td><td class="b red" align="right">' + Number(medal.minPoints).toLocaleString('ru-RU') + ' репутации</td></tr>';
+
+        if (Number(medal.rating) > 0) {
+            rows += '<tr class="skill_list list_dark"><td>Рейтинг</td><td class="b red" align="right">+' + Number(medal.rating).toLocaleString('ru-RU') + '</td></tr>';
+        }
+        if (medal.earnedAt) {
+            rows += '<tr class="skill_list"><td>Дата получения</td><td class="b red" align="right">' + medalTooltipEscape(medal.earnedAt) + '</td></tr>';
+        }
+        if (medal.description) {
+            rows += '<tr class="skill_list list_dark"><td colspan="2" style="padding-top:4px;padding-bottom:4px">' + medalTooltipEscape(medal.description) + '</td></tr>';
+        }
+
+        return '<table width="300" border="0" cellspacing="0" cellpadding="0" style="background-color:#FBD4A4" class="aa-table">'
+            + '<tr><td width="14" class="aa-tl"><img src="/img/icon/d.gif" width="14" height="24"><br></td>'
+            + '<td class="aa-t aa-table-t" align="center" style="vertical-align:middle"><b class="red">' + medalTooltipEscape(medal.name) + '</b></td>'
+            + '<td width="14" class="aa-tr"><img src="/img/icon/d.gif" width="14" height="24"><br></td></tr>'
+            + '<tr><td class="aa-l" style="padding:0"></td><td style="padding:0">'
+            + '<table width="275" style="margin:3px" border="0" cellspacing="0" cellpadding="0" class="aa-table-t"><tr>'
+            + '<td align="center" valign="middle" width="72" height="71" style="background:url(/main/images/user-reward-frame.png) center/72px 71px no-repeat">'
+            + '<img src="' + medalTooltipEscape(medal.image) + '" alt="" width="60" height="60" border="0"></td>'
+            + '<td valign="middle"><div><img src="/img/icon/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle">&nbsp;'
+            + medalTooltipEscape(medal.type) + '</div></td></tr></table>'
+            + '<table class="aa-table-t" width="100%" cellpadding="0" cellspacing="0" border="0">' + rows + '</table>'
+            + '</td><td class="aa-r" style="padding:0"></td></tr>'
+            + '<tr><td class="aa-bl"></td><td class="aa-b"></td><td class="aa-br"></td></tr></table>';
+    }
+
+    function showMedalInfo(image, event, show) {
+        var tooltip = document.getElementById('artifact_alt');
+        if (!tooltip) return;
+
+        if (!show) {
+            tooltip.style.display = 'none';
+            document.onmousemove = function () {};
+            return;
+        }
+
+        var medal = medals[Number(image.dataset.medalIndex)];
+        if (!medal) return;
+
+        if (show === 2) {
+            tooltip.innerHTML = renderMedalTooltip(medal);
+            tooltip.style.display = 'block';
+            document.onmousemove = function (moveEvent) {
+                showMedalInfo(image, moveEvent, 1);
+            };
+        }
+
+        var spacing = 10;
+        var x = event.clientX + spacing;
+        var y = event.clientY + spacing;
+        if (x + tooltip.offsetWidth > window.innerWidth - spacing) {
+            x = event.clientX - tooltip.offsetWidth - spacing;
+        }
+        if (y + tooltip.offsetHeight > window.innerHeight - spacing) {
+            y = event.clientY - tooltip.offsetHeight - spacing;
+        }
+
+        tooltip.style.left = Math.max(7, x) + 'px';
+        tooltip.style.top = Math.max(7, y) + 'px';
+    }
+
+    function createMedalImage(medal, index) {
         var image = document.createElement('img');
         image.src = medal.image;
         image.alt = medal.name;
-        image.title = medal.reputation + ': ' + medal.name;
+        image.dataset.medalIndex = index;
         image.width = 35;
         image.height = 35;
         image.border = 0;
+        image.onmouseover = function (event) { showMedalInfo(this, event, 2); };
+        image.onmouseout = function (event) { showMedalInfo(this, event, 0); };
 
-        return image.outerHTML;
-    });
+        return image;
+    }
 
     function showMedals() {
         for (var i = 0; i < MedalsOnPage; i++) {
-            document.getElementById('medal_' + i).innerHTML = medals[i + position] ? medals[i + position] : '&nbsp;';
+            var cell = document.getElementById('medal_' + i);
+            var medalIndex = i + position;
+            cell.innerHTML = '';
+            if (medals[medalIndex]) {
+                cell.appendChild(createMedalImage(medals[medalIndex], medalIndex));
+            } else {
+                cell.innerHTML = '&nbsp;';
+            }
         }
         document.getElementById('medal_l').src = position > 0
             ? '{{ asset('img/medal/medal_l_act.gif') }}'

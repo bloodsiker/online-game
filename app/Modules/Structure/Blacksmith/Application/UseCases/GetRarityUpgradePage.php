@@ -58,7 +58,7 @@ class GetRarityUpgradePage
         $items = $slots->map(function (Backpack $slot) use ($counts, $user, $tooltipItems): array {
             $source = $slot->item->itemInfo;
 
-            $steps = $this->buildUpgradeSteps($source, $counts, $user, $tooltipItems);
+            $steps = $this->buildUpgradeSteps($source, $counts, $user, $tooltipItems, $slot);
             $firstStep = $steps[0];
 
             return [
@@ -90,11 +90,12 @@ class GetRarityUpgradePage
      * @param  Collection<int, ShareItem>  $tooltipItems
      * @return list<array<string, mixed>>
      */
-    private function buildUpgradeSteps(ShareItem $source, Collection $counts, User $user, Collection $tooltipItems): array
+    private function buildUpgradeSteps(ShareItem $source, Collection $counts, User $user, Collection $tooltipItems, Backpack $slot): array
     {
         $steps = [];
         $visited = [];
         $current = $source;
+        $isFirstStep = true;
 
         while ($current !== null && ! isset($visited[$current->id])) {
             $visited[$current->id] = true;
@@ -105,13 +106,24 @@ class GetRarityUpgradePage
                 break;
             }
 
-            $materials = $current->rarityUpgradeMaterials->map(fn (ShareItem $material): array => [
-                'id' => (int) $material->id,
-                'name' => $material->name,
-                'image' => $material->transparent_image ?? $material->image,
-                'needed' => (int) $material->pivot->count,
-                'available' => (int) ($counts[$material->id] ?? 0),
-            ])->values()->all();
+            $materials = $current->rarityUpgradeMaterials->map(function (ShareItem $material) use ($counts, $isFirstStep, $current, $slot): array {
+                $available = (int) ($counts[$material->id] ?? 0);
+                if ($isFirstStep && (int) $material->id === (int) $current->id) {
+                    // Материал ссылается на сам апгрейдящийся предмет — экземпляр
+                    // из этого слота не может одновременно стать результатом
+                    // апгрейда И быть материалом (см. UpgradeItemRarity::execute()
+                    // и $excludeBackpackId), поэтому его нельзя засчитывать дважды.
+                    $available -= (int) $slot->count;
+                }
+
+                return [
+                    'id' => (int) $material->id,
+                    'name' => $material->name,
+                    'image' => $material->transparent_image ?? $material->image,
+                    'needed' => (int) $material->pivot->count,
+                    'available' => max(0, $available),
+                ];
+            })->values()->all();
 
             $steps[] = [
                 'name' => $current->name,
@@ -132,6 +144,7 @@ class GetRarityUpgradePage
             $tooltipItems->push($target);
             $tooltipItems->push(...$current->rarityUpgradeMaterials);
             $current = $target;
+            $isFirstStep = false;
         }
 
         return $steps;

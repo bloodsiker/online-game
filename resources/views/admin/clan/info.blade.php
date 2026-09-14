@@ -35,6 +35,11 @@
                                     Хранилище <span class="badge badge-primary">{{ $warehouse->count() }}</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-tax" href="#tab-tax" data-bs-toggle="tab">
+                                    Налоги <span class="badge badge-primary">{{ $taxPayments->count() }}</span>
+                                </a>
+                            </li>
                         </ul>
 
                         <div class="tab-content">
@@ -54,6 +59,16 @@
                                             <tr><th>Уровень</th><td>{{ $clan->lvl }}</td></tr>
                                             <tr><th>Очки клана</th><td>{{ number_format($clan->points, 0, '', ' ') }}</td></tr>
                                             <tr><th>Казна (монеты)</th><td>{{ number_format($clan->treasury, 0, '', ' ') }}</td></tr>
+                                            <tr>
+                                                <th>Налог оплачен до</th>
+                                                <td>
+                                                    @if($clan->hasPaidTax())
+                                                        <span class="badge badge-success">{{ $clan->tax_paid_until?->format('d.m.Y H:i') }}</span>
+                                                    @else
+                                                        <span class="badge badge-danger">Просрочен</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
                                             <tr><th>Вместимость хранилища</th><td>{{ $clan->warehouse_capacity }}</td></tr>
                                         </table>
                                     </div>
@@ -283,6 +298,46 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </div>
+
+                            {{-- ИСТОРИЯ ОПЛАТЫ НАЛОГА (ТОЛЬКО АДМИНКА) --}}
+                            <div id="tab-tax" class="tab-pane">
+                                <div class="table-responsive pt-3">
+                                    <table class="table table-hover table-bordered mb-none">
+                                        <thead>
+                                        <tr>
+                                            <th width="50">ID</th>
+                                            <th width="160">Дата оплаты</th>
+                                            <th>Оплатил</th>
+                                            <th>Здание</th>
+                                            <th width="110">Сумма</th>
+                                            <th width="130">Баланс до / после</th>
+                                            <th width="260">Оплаченный период</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @forelse($taxPayments as $payment)
+                                            <tr style="vertical-align: middle">
+                                                <td>{{ $payment->id }}</td>
+                                                <td class="small text-muted">{{ $payment->created_at?->format('d.m.Y H:i') }}</td>
+                                                <td>{{ $payment->user?->name ?? '—' }}</td>
+                                                <td>{{ $payment->structure?->name ?? '—' }}</td>
+                                                <td>{{ number_format($payment->amount, 0, '', ' ') }}</td>
+                                                <td>
+                                                    {{ number_format($payment->balance_before, 0, '', ' ') }} /
+                                                    {{ number_format($payment->balance_after, 0, '', ' ') }}
+                                                </td>
+                                                <td>
+                                                    {{ $payment->paid_from?->format('d.m.Y H:i') }} —
+                                                    {{ $payment->paid_until?->format('d.m.Y H:i') }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="7" class="text-center text-muted">Оплат ещё не было</td></tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 

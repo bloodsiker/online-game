@@ -443,9 +443,25 @@
                                             <span class="char-stat-label">Крит</span>
                                             <span class="char-stat-val">{{ $character->stats->getCritical() }}</span>
                                         </div>
+                                        <div class="char-stat-row" title="Множитель урона при физическом или магическом критическом ударе">
+                                            <span class="char-stat-label">Сила крит. удара</span>
+                                            <span class="char-stat-val">{{ $character->stats->getCritDamage() }}%</span>
+                                        </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Уворот</span>
                                             <span class="char-stat-val">{{ $character->stats->getDodge() }}</span>
+                                        </div>
+                                        <div class="char-stat-row" title="Вероятность срабатывания блока при экипированном щите">
+                                            <span class="char-stat-label">Шанс блока щитом</span>
+                                            <span class="char-stat-val">{{ $character->stats->getBlockChance() }}%</span>
+                                        </div>
+                                        <div class="char-stat-row" title="Фиксированная часть урона, которую блок поглощает и отражает атакующему">
+                                            <span class="char-stat-label">Блок щитом (фикс.)</span>
+                                            <span class="char-stat-val">{{ $character->stats->getBlockFlat() }}</span>
+                                        </div>
+                                        <div class="char-stat-row" title="Процент урона, который блок поглощает и отражает атакующему">
+                                            <span class="char-stat-label">Блок щитом</span>
+                                            <span class="char-stat-val">{{ $character->stats->getBlockPercent() }}%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -464,8 +480,16 @@
                                             <div class="char-bar-fill char-bar-mp" style="width:{{ $mpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Атака</span>
+                                            <span class="char-stat-label">Магическая атака</span>
                                             <span class="char-stat-val">{{ $character->stats->getMagicAttack() }}</span>
+                                        </div>
+                                        <div class="char-stat-row" title="Снижает получаемый магический урон">
+                                            <span class="char-stat-label">Магическое сопротивление</span>
+                                            <span class="char-stat-val">{{ $character->stats->getMagicResistance() }}</span>
+                                        </div>
+                                        <div class="char-stat-row" title="Вероятность критического срабатывания атакующего заклинания">
+                                            <span class="char-stat-label">Магический крит</span>
+                                            <span class="char-stat-val">{{ $character->stats->getMagicCriticalChance() }}%</span>
                                         </div>
                                     </div>
                                 </div>

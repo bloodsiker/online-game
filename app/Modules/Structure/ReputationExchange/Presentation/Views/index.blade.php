@@ -30,7 +30,14 @@
         .tbl-shp-sides.ls { background-position: left top; background-repeat: repeat-y; }
         .tbl-shp-sides.rs { background-position: right top; background-repeat: repeat-y; }
         .tbl-usi_bg { background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }}); background-repeat: repeat; }
-        .relic-img { width: 60px; height: 60px; object-fit: contain; background: rgba(0,0,0,.05); }
+        .relic-frame {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            padding: 5px 6px 6px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
+        }
+        .relic-img { display: block; width: 60px; height: 60px; object-fit: contain; cursor: pointer; }
         .relic-badge { font-weight: 700; padding: 1px 5px; border-radius: 3px; color: #fff; font-size: 10px; }
         .relic-badge.active { background: #489200; }
         .relic-badge.inactive { background: #999; }
@@ -158,10 +165,12 @@
                                 <tbody>
                                 <tr class="bg_l">
                                     <td width="60">
-                                        <img src="{{ asset($item->image) }}" class="relic-img" alt="{{ $item->name }}"
-                                             data-id="{{ $item->shareItemId }}"
-                                             onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
-                                             onclick="window.open('{{ route('items.info.share', ['id' => $item->shareItemId]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                        <div class="relic-frame">
+                                            <img src="{{ asset($item->image) }}" class="relic-img" alt="{{ $item->name }}"
+                                                 data-id="{{ $item->shareItemId }}"
+                                                 onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                 onclick="window.open('{{ route('items.info.share', ['id' => $item->shareItemId]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                        </div>
                                     </td>
                                     <td>
                                         <div style="margin-bottom: 3px;">
@@ -191,7 +200,7 @@
                                                         <span class="arrow right {{ $maxCount <= 1 ? 'right-disabled' : '' }}" onclick="relicCounter(this);" title="Увеличить кол-во"></span>
                                                         <input type="text" data-points="{{ $item->points }}" data-min="1" data-max="{{ $maxCount }}"
                                                                value="1" class="cart_amount_sell_input relic_count_input" autocomplete="off"
-                                                               form="relic-form-{{ $item->shareItemId }}" name="count" {{ $canExchange ? '' : 'disabled' }}>
+                                                               form="relic-form-{{ $item->id }}" name="count" {{ $canExchange ? '' : 'disabled' }}>
                                                     </span>
                                                 </span>
                                             </span>
@@ -199,7 +208,7 @@
                                         <div>= <b class="redd relic_total">{{ $item->points }}</b> реп.</div>
                                     </td>
                                     <td align="right" width="80">
-                                        <form id="relic-form-{{ $item->shareItemId }}" action="{{ route('reputation_exchange.apply', ['id' => $page->structureId]) }}" method="POST">
+                                        <form id="relic-form-{{ $item->id }}" action="{{ route('reputation_exchange.apply', ['id' => $page->structureId]) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="share_item_id" value="{{ $item->shareItemId }}">
                                             <span class="butt1 pointer relic-exchange-btn {{ $canExchange ? '' : 'disabled' }}">

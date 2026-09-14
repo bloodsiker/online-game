@@ -7,14 +7,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\NewsComment;
 use App\Models\NewsPost;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class NewsController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(): View
     {
         $news = NewsPost::query()
@@ -46,14 +53,10 @@ class NewsController extends Controller
             'file' => ['required', 'image', 'max:4096'],
         ]);
 
-        $file = $data['file'];
-        $directory = 'news/'.date('Y/m');
-        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
-
-        $file->move(public_path($directory), $filename);
+        $path = $this->imageStorage->storeInPublicDirectory($data['file'], 'news');
 
         return response()->json([
-            'url' => asset($directory.'/'.$filename),
+            'url' => asset($path),
         ]);
     }
 

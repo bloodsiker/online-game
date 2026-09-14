@@ -16,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer(['main.index', 'auth.register'], function ($view) {
+        View::composer(['main.index', 'auth.register', 'library.layout'], function ($view) {
             $tenMinutesAgo = Carbon::now()->subMinutes(10);
             $onlineCount = User::where('last_online_at', '>=', $tenMinutesAgo)->count();
             $view->with('onlineCount', $onlineCount);

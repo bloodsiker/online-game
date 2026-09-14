@@ -7,6 +7,7 @@ namespace App\Modules\Clan\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Clan\Application\UseCases\DepositClanTreasury;
 use App\Modules\Clan\Application\UseCases\GetClanTreasuryPage;
+use App\Modules\Clan\Application\UseCases\PayClanTax;
 use App\Modules\Clan\Application\UseCases\WithdrawClanTreasury;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,7 @@ class ClanTreasuryController extends Controller
         private readonly GetClanTreasuryPage $getClanTreasuryPage,
         private readonly DepositClanTreasury $depositClanTreasury,
         private readonly WithdrawClanTreasury $withdrawClanTreasury,
+        private readonly PayClanTax $payClanTax,
     ) {}
 
     public function index(Request $request, int $id): mixed
@@ -27,6 +29,7 @@ class ClanTreasuryController extends Controller
                 $message = match ($request->input('action')) {
                     'deposit' => $this->depositClanTreasury->execute(Auth::user(), $id, (int) $request->input('amount', 0)),
                     'withdraw' => $this->withdrawClanTreasury->execute(Auth::user(), $id, (int) $request->input('amount', 0)),
+                    'pay_tax' => $this->payClanTax->execute(Auth::user(), $id),
                     default => throw new RuntimeException('Неизвестное действие.'),
                 };
 
@@ -51,6 +54,10 @@ class ClanTreasuryController extends Controller
             'clan' => $page->clan,
             'membership' => $page->membership,
             'canWithdraw' => $page->canWithdraw,
+            'isLeader' => $page->isLeader,
+            'canPayTax' => $page->canPayTax,
+            'taxPaid' => $page->taxPaid,
+            'taxAmount' => $page->taxAmount,
             'logs' => $page->logs,
         ]);
     }

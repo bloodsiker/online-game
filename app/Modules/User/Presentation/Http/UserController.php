@@ -13,6 +13,7 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputationMedal;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -66,48 +67,80 @@ final class UserController
         ]);
     }
 
-    /** @return array<int, array{image: string, name: string, reputation: string}> */
+    /**
+     * @return array<int, array{
+     *     image: string,
+     *     name: string,
+     *     reputation: string,
+     *     type: string,
+     *     rating: int,
+     *     minPoints: int,
+     *     earnedAt: ?string,
+     *     description: ?string
+     * }>
+     */
     private function reputationMedals(Player $player): array
     {
+        $earnedAtByTier = PlayerReputationMedal::where('player_id', $player->id)
+            ->get(['tier_id', 'is_feat', 'earned_at'])
+            ->keyBy(fn (PlayerReputationMedal $medal): string => $medal->tier_id.'_'.($medal->is_feat ? 'feat' : 'regular'));
+
         return $player->reputations
-            ->flatMap(function (PlayerReputation $playerReputation) use ($player) {
+            ->map(function (PlayerReputation $playerReputation) use ($player, $earnedAtByTier) {
                 $reputation = $playerReputation->reputation;
                 if ($reputation === null) {
-                    return [];
+                    return null;
                 }
 
                 $regularMedals = $this->reputationService
                     ->getEarnedMedals($reputation, $playerReputation->points, $player)
                     ->map(fn ($tier) => [
-                        'image' => $this->medalImageUrl($tier->medal_icon),
+                        'image' => $tier->medalIconUrl(),
                         'name' => $tier->medal_name,
                         'reputation' => $reputation->name,
+                        'rating' => $tier->regularMedalRating(),
+                        'minPoints' => $tier->min_points,
+                        'earnedAt' => $earnedAtByTier->get($tier->id.'_regular')?->earned_at,
+                        'type' => 'Медаль репутации',
+                        'description' => null,
                     ]);
 
                 $featMedals = $this->reputationService
                     ->getEarnedFeatMedals($reputation, $playerReputation->points, $player)
                     ->map(fn ($tier) => [
-                        'image' => $this->medalImageUrl($tier->feat_medal_icon),
+                        'image' => $tier->featMedalIconUrl(),
                         'name' => $tier->feat_medal_name,
                         'reputation' => $reputation->name,
+                        'rating' => $tier->featMedalRating(),
+                        'minPoints' => $tier->min_points,
+                        'earnedAt' => $earnedAtByTier->get($tier->id.'_feat')?->earned_at,
+                        'type' => 'Медаль за подвиг',
+                        'description' => $tier->feat_description,
                     ]);
 
-                return $regularMedals->concat($featMedals);
+                // В карусели — только самая престижная медаль репутации
+                // (feat-медаль всегда весомее обычной, см. FEAT_MEDAL_RATING).
+                return $regularMedals->concat($featMedals)
+                    ->filter(fn (array $medal): bool => is_string($medal['image']) && $medal['image'] !== '')
+                    ->sortByDesc(fn (array $medal) => [$medal['rating'], $medal['minPoints']])
+                    ->first();
             })
-            ->filter(fn (array $medal): bool => $medal['image'] !== '')
+            ->filter()
+            // Недавно полученные медали — первыми в карусели. Медали без записи
+            // о времени получения (не было события, редкий случай) уходят в конец.
+            ->sortByDesc(fn (array $medal) => $medal['earnedAt']?->timestamp ?? -1)
+            ->map(fn (array $medal) => [
+                'image' => $medal['image'],
+                'name' => $medal['name'],
+                'reputation' => $medal['reputation'],
+                'type' => $medal['type'],
+                'rating' => $medal['rating'],
+                'minPoints' => $medal['minPoints'],
+                'earnedAt' => $medal['earnedAt']?->format('d.m.Y H:i'),
+                'description' => $medal['description'],
+            ])
             ->values()
             ->all();
-    }
-
-    private function medalImageUrl(?string $image): string
-    {
-        if ($image === null || $image === '') {
-            return '';
-        }
-
-        return str_starts_with($image, 'http://') || str_starts_with($image, 'https://') || str_starts_with($image, '/')
-            ? $image
-            : asset($image);
     }
 
     /**

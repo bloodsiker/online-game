@@ -218,6 +218,11 @@ final class RosterReferenceFighter implements FightHitInterface
         return (int) round(PlayerStatFormulas::CRIT_DAMAGE_BASE + PlayerStatFormulas::critDamageBonus($this->stats['intuition'], $this->level));
     }
 
+    public function getMagicCritDamage(): int
+    {
+        return PlayerStatFormulas::CRIT_DAMAGE_BASE;
+    }
+
     public function getBlockChance(): int
     {
         return 0;

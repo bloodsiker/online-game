@@ -17,6 +17,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,13 @@ use Illuminate\View\View;
 
 class MonsterController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(Request $request): View
     {
         $filters = [
@@ -406,7 +414,7 @@ class MonsterController extends Controller
 
     private function storeImage(UploadedFile $file): string
     {
-        return $file->store('monsters', 'public');
+        return $this->imageStorage->storeOnPublicDisk($file, 'monsters');
     }
 
     private function syncMechanicImage(BossMechanic $mechanic, Request $request): void
@@ -414,7 +422,7 @@ class MonsterController extends Controller
         if ($request->hasFile('image')) {
             $request->validate(['image' => ['image', 'max:4096']]);
             $oldImage = $mechanic->getRawOriginal('image');
-            $mechanic->image = $request->file('image')->store('boss-mechanics', 'public');
+            $mechanic->image = $this->imageStorage->storeOnPublicDisk($request->file('image'), 'boss-mechanics');
             $this->deleteStorageImage($oldImage);
         } elseif ($request->boolean('delete_image')) {
             $this->deleteStorageImage($mechanic->getRawOriginal('image'));

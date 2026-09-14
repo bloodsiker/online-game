@@ -281,7 +281,7 @@ In `app/Modules/Battle/Domain/Contracts/FightHitInterface.php`, right after the 
     /** Магическое сопротивление (Мудрость + экипировка) — единственная защита от магии, см. MagicHitCalculator */
     public function getMagicResistance(): int;
 
-    /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/жезл и т.п.) — интеллект считается отдельно */
+    /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/фолиант и т.п.) — интеллект считается отдельно */
     public function getMagicAttack(): int;
 ```
 

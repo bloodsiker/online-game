@@ -13,6 +13,7 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ReputationRatingTest extends TestCase
@@ -75,6 +76,22 @@ class ReputationRatingTest extends TestCase
         $this->assertSame(50, $this->tierAt(2000)->regularMedalRating());
         $this->assertSame(100, $this->tierAt(3000)->regularMedalRating());
         $this->assertSame(0, $this->tierAt(4000)->regularMedalRating());
+    }
+
+    public function test_medal_icon_urls_support_storage_and_legacy_public_paths(): void
+    {
+        $storedTier = (new ReputationTier)->forceFill([
+            'medal_icon' => 'reputations/medals/2026/09/medal.webp',
+        ]);
+        $legacyTier = (new ReputationTier)->forceFill([
+            'medal_icon' => 'img/reputation/medal.webp',
+        ]);
+
+        $this->assertSame(
+            Storage::disk('public')->url('reputations/medals/2026/09/medal.webp'),
+            $storedTier->medalIconUrl(),
+        );
+        $this->assertSame(asset('img/reputation/medal.webp'), $legacyTier->medalIconUrl());
     }
 
     public function test_rating_is_recalculated_without_duplicate_awards(): void

@@ -5,7 +5,7 @@ let showItemInfo = (obj, evnt, show) => {
     }
     var itemId = obj.dataset.id;
     if (!itemId) itemId = 'AA_' + obj.getAttribute('artifact_id');
-    var itemInfo = getTopWindow().gebi('artifact_alt');
+    var itemInfo = itemTooltipTopWindow().gebi('artifact_alt');
 
     if (!itemInfo) return;
 
@@ -31,34 +31,34 @@ let showItemInfo = (obj, evnt, show) => {
         }
 
         if (act1 || act2 || act3) {
-            _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
+            itemTooltipBackground(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
         }
     }
     if (!show) {
         if (act1 || act2 || act3) {
-            _background(obj, '/img/icon/d.gif');
+            itemTooltipBackground(obj, '/img/icon/d.gif');
         }
         itemInfo.style.display = 'none';
         document.onmousemove = function(){}
         return;
     }
 
-    var coor = getIframeShift();
+    var coor = itemTooltipIframeShift();
     var ex = evnt.clientX+coor.left;
     var ey = evnt.clientY+coor.top;
 
-    if (_top().noIframeAlt) {
-        ex = evnt.clientX + _top().document.body.scrollLeft;
-        ey = evnt.clientY + _top().document.body.scrollTop;
+    if (itemTooltipRootWindow().noIframeAlt) {
+        ex = evnt.clientX + itemTooltipRootWindow().document.body.scrollLeft;
+        ey = evnt.clientY + itemTooltipRootWindow().document.body.scrollTop;
     }
 
     if (act1 || act2 || act3) {
         obj.style.cursor = 'pointer'
-        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){showArtifactInfo(itemId, null, null, e||event)});
-        _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
+        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){itemTooltipOpenInfo(itemId, null, null, e||event)});
+        itemTooltipBackground(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
 
-        var coord = getCoords(obj);
-        var cont = gebi("item_list");
+        var coord = itemTooltipCoords(obj);
+        var cont = itemTooltipGetById("item_list");
 
         var scroll_x = window.scrollX || window.document.body.scrollLeft;
         var scroll_y = window.scrollY || window.document.body.scrollTop;
@@ -79,20 +79,20 @@ let showItemInfo = (obj, evnt, show) => {
             if (rel_x >= 40) {
                 if (rel_y < 20) {
                     if (obj.getAttribute('gift_id')) { // РґР»СЏ РїРѕРґР°СЂРєРѕРІ
-                        obj.onclick = function(e){showArtifactInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
+                        obj.onclick = function(e){itemTooltipOpenInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
                     } else if (obj.getAttribute('store')) { // РІ РјР°РіР°Р·РёРЅРµ РїСЂРё РєР»РёРєРµ РЅР° info РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РІРѕРґРёС‚СЊ С‚РѕРІР°СЂ РїРѕ Р°СЂС‚РёРєСѓР»Сѓ
-                        obj.onclick = function(e){showArtifactInfo(false, obj.getAttribute('art_id'), null, e||event)};
+                        obj.onclick = function(e){itemTooltipOpenInfo(false, obj.getAttribute('art_id'), null, e||event)};
                     } else {
-                        obj.onclick = function(e){showArtifactInfo(itemId, null, null, e||event)}
+                        obj.onclick = function(e){itemTooltipOpenInfo(itemId, null, null, e||event)}
                     }
 
-                    _background(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
                     try{obj.style.cursor = 'hand'} catch(e){}
                     try{obj.style.cursor = 'pointer'} catch(e){}
                 }
                 if (act2 != 0 && rel_y >= 40) {
                     obj.onclick = function(e){try{showItemInfo(obj, act2, e||event)}catch(e){ console.trace(e); }}
-                    _background(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
                     try{obj.style.cursor = 'hand'} catch(e){}
                     try{obj.style.cursor = 'pointer'} catch(e){}
                 }
@@ -100,7 +100,7 @@ let showItemInfo = (obj, evnt, show) => {
             if (act3 > 0 && rel_x < 20) {
                 if (rel_y < 20) {
                     obj.onclick = function(e){try{showItemInfo(obj, act3, e||event)}catch(e){ console.trace(e); }};
-                    _background(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
                     try {obj.style.cursor = 'hand'} catch(e){}
                     try {obj.style.cursor = 'pointer'} catch(e){}
                 }
@@ -108,8 +108,8 @@ let showItemInfo = (obj, evnt, show) => {
         }
     }
 
-    var x = ex + itemInfo.offsetWidth > _top().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
-    var y = ey + itemInfo.offsetHeight - _top().document.body.scrollTop > _top().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
+    var x = ex + itemInfo.offsetWidth > itemTooltipRootWindow().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
+    var y = ey + itemInfo.offsetHeight - itemTooltipRootWindow().document.body.scrollTop > itemTooltipRootWindow().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
 
     if (x < 0 ) {
         x = ex - itemInfo.offsetWidth / 2;
@@ -117,8 +117,8 @@ let showItemInfo = (obj, evnt, show) => {
     if (x < 7 ) {
         x = 7;
     }
-    if (x > _top().document.body.clientWidth - itemInfo.offsetWidth - 20) {
-        x = _top().document.body.clientWidth - itemInfo.offsetWidth - 20;
+    if (x > itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20) {
+        x = itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20;
     }
 
     itemInfo.style.left = x + 'px';
@@ -133,7 +133,7 @@ let showItemInfoOld = (obj, evnt, show) => {
     }
     var itemId = obj.dataset.id;
     if (!itemId) itemId = 'AA_' + obj.getAttribute('artifact_id');
-    var itemInfo = getTopWindow().gebi('artifact_alt');
+    var itemInfo = itemTooltipTopWindow().gebi('artifact_alt');
 
     if (!itemInfo) return;
 
@@ -159,34 +159,34 @@ let showItemInfoOld = (obj, evnt, show) => {
         }
 
         if (act1 || act2 || act3) {
-            _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
+            itemTooltipBackground(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 +".gif"));
         }
     }
     if (!show) {
         if (act1 || act2 || act3) {
-            _background(obj, '/img/icon/d.gif');
+            itemTooltipBackground(obj, '/img/icon/d.gif');
         }
         itemInfo.style.display = 'none';
         document.onmousemove = function(){}
         return;
     }
 
-    var coor = getIframeShift();
+    var coor = itemTooltipIframeShift();
     var ex = evnt.clientX+coor.left;
     var ey = evnt.clientY+coor.top;
 
-    if (_top().noIframeAlt) {
-        ex = evnt.clientX + _top().document.body.scrollLeft;
-        ey = evnt.clientY + _top().document.body.scrollTop;
+    if (itemTooltipRootWindow().noIframeAlt) {
+        ex = evnt.clientX + itemTooltipRootWindow().document.body.scrollLeft;
+        ey = evnt.clientY + itemTooltipRootWindow().document.body.scrollTop;
     }
 
     if (act1 || act2 || act3) {
         obj.style.cursor = 'pointer'
-        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){showArtifactInfo(itemId, null, null, e||event)});
-        _background(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
+        obj.onclick = (act1 != 0 ? function(e){try{showItemInfo(obj, act1, e||event)}catch(e){ console.trace(e); }} : function(e){itemTooltipOpenInfo(itemId, null, null, e||event)});
+        itemTooltipBackground(obj, ("/img/bg/backpack/itemact-"+ act1) + act2 + (act3 + ".gif"));
 
-        var coord = getCoords(obj);
-        var cont = gebi("item_list");
+        var coord = itemTooltipCoords(obj);
+        var cont = itemTooltipGetById("item_list");
 
         var scroll_x = window.scrollX || window.document.body.scrollLeft;
         var scroll_y = window.scrollY || window.document.body.scrollTop;
@@ -207,20 +207,20 @@ let showItemInfoOld = (obj, evnt, show) => {
             if (rel_x >= 40) {
                 if (rel_y < 20) {
                     if (obj.getAttribute('gift_id')) { // РґР»СЏ РїРѕРґР°СЂРєРѕРІ
-                        obj.onclick = function(e){showArtifactInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
+                        obj.onclick = function(e){itemTooltipOpenInfo(false, false, null, e||event, obj.getAttribute('gift_id'))};
                     } else if (obj.getAttribute('store')) { // РІ РјР°РіР°Р·РёРЅРµ РїСЂРё РєР»РёРєРµ РЅР° info РЅРµРѕР±С…РѕРґРёРјРѕ РІС‹РІРѕРґРёС‚СЊ С‚РѕРІР°СЂ РїРѕ Р°СЂС‚РёРєСѓР»Сѓ
-                        obj.onclick = function(e){showArtifactInfo(false, obj.getAttribute('art_id'), null, e||event)};
+                        obj.onclick = function(e){itemTooltipOpenInfo(false, obj.getAttribute('art_id'), null, e||event)};
                     } else {
-                        obj.onclick = function(e){showArtifactInfo(itemId, null, null, e||event)}
+                        obj.onclick = function(e){itemTooltipOpenInfo(itemId, null, null, e||event)}
                     }
 
-                    _background(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_info' + act2 + (act3 + '.gif'));
                     try{obj.style.cursor = 'hand'} catch(e){}
                     try{obj.style.cursor = 'pointer'} catch(e){}
                 }
                 if (act2 != 0 && rel_y >= 40) {
                     obj.onclick = function(e){try{showItemInfo(obj, act2, e||event)}catch(e){ console.trace(e); }}
-                    _background(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_drop' + act2 + (act3 + '.gif'));
                     try{obj.style.cursor = 'hand'} catch(e){}
                     try{obj.style.cursor = 'pointer'} catch(e){}
                 }
@@ -228,7 +228,7 @@ let showItemInfoOld = (obj, evnt, show) => {
             if (act3 > 0 && rel_x < 20) {
                 if (rel_y < 20) {
                     obj.onclick = function(e){try{showItemInfo(obj, act3, e||event)}catch(e){ console.trace(e); }};
-                    _background(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
+                    itemTooltipBackground(obj, '/img/bg/backpack/itemact_use' + act2 + (act3 + '.gif'));
                     try {obj.style.cursor = 'hand'} catch(e){}
                     try {obj.style.cursor = 'pointer'} catch(e){}
                 }
@@ -236,8 +236,8 @@ let showItemInfoOld = (obj, evnt, show) => {
         }
     }
 
-    var x = ex + itemInfo.offsetWidth > _top().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
-    var y = ey + itemInfo.offsetHeight - _top().document.body.scrollTop > _top().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
+    var x = ex + itemInfo.offsetWidth > itemTooltipRootWindow().document.body.clientWidth - 20 ? ex - itemInfo.offsetWidth - 10 : ex + 10;
+    var y = ey + itemInfo.offsetHeight - itemTooltipRootWindow().document.body.scrollTop > itemTooltipRootWindow().document.body.clientHeight - 20 ? ey - itemInfo.offsetHeight - 10 : ey + 10;
 
     if (x < 0 ) {
         x = ex - itemInfo.offsetWidth / 2;
@@ -245,8 +245,8 @@ let showItemInfoOld = (obj, evnt, show) => {
     if (x < 7 ) {
         x = 7;
     }
-    if (x > _top().document.body.clientWidth - itemInfo.offsetWidth - 20) {
-        x = _top().document.body.clientWidth - itemInfo.offsetWidth - 20;
+    if (x > itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20) {
+        x = itemTooltipRootWindow().document.body.clientWidth - itemInfo.offsetWidth - 20;
     }
 
     itemInfo.style.left = x + 'px';
@@ -335,7 +335,7 @@ let renderItemInfo = (id) => {
         bg = !bg;
         for (i in a.requirements) {
             var req = a.requirements[i];
-            var met = _checkRequirement(req);
+            var met = itemTooltipCheckRequirement(req);
             var reqColor = met ? '#8b4a00' : '#ff0000';
             content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td style="color:' + reqColor + ';">' + req.title + '</td><td align="right" style="color:' + reqColor + ';font-weight:bold;">' + req.min_value + '</td></tr>';
             bg = !bg;
@@ -488,7 +488,7 @@ let renderItemInfo = (id) => {
     return content;
 }
 
-function showArtifactInfo(artifact_id, artikul_id, set_id, evnt, user_store) {
+function itemTooltipOpenInfo(artifact_id, artikul_id, set_id, evnt, user_store) {
     if (typeof(iam_sorting_now) !== 'undefined' && iam_sorting_now)
         return false;
     if (evnt && evnt.shiftKey && artifact_id) {
@@ -505,7 +505,7 @@ function showArtifactInfo(artifact_id, artikul_id, set_id, evnt, user_store) {
     window.open(url, "", "width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no");
 }
 
-let _background = (obj, name) => {
+let itemTooltipBackground = (obj, name) => {
     if (obj.tagName == 'IMAGE') {
         obj.src = name;
     } else {
@@ -513,8 +513,8 @@ let _background = (obj, name) => {
     }
 }
 
-function getCoords(obj){
-    var o=typeof(obj) == 'string' ? gebi(obj) : obj
+function itemTooltipCoords(obj){
+    var o=typeof(obj) == 'string' ? itemTooltipGetById(obj) : obj
     var ret={'l':o.offsetLeft,'t':o.offsetTop,'w':o.offsetWidth,'h':o.offsetHeight}
     while(o=o.offsetParent){
         ret.l+=o.offsetLeft
@@ -523,7 +523,7 @@ function getCoords(obj){
     return ret
 }
 
-let _top = () => {
+let itemTooltipRootWindow = () => {
     return window.top;
 
     if (window.last_top) return window.last_top;
@@ -541,7 +541,7 @@ let _top = () => {
     return p;
 }
 
-let getTopWindow = () => {
+let itemTooltipTopWindow = () => {
     let w = window;
 
     while (w.parent && w.parent !== w) {
@@ -556,11 +556,11 @@ let getTopWindow = () => {
     return w;
 }
 
-let gebi = (id) => {
+let itemTooltipGetById = (id) => {
     return document.getElementById(id)
 }
 
-let _checkRequirement = (req) => {
+let itemTooltipCheckRequirement = (req) => {
     var ps = window.playerStats;
     if (!ps) return true;
     var type = req.type;
@@ -571,7 +571,7 @@ let _checkRequirement = (req) => {
     return true;
 };
 
-let getIframeShift = () => {
+let itemTooltipIframeShift = () => {
     var currentWindow = window,
         currentFrame = null,
 

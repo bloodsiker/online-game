@@ -711,7 +711,7 @@ class GenerateSeed extends Command
     ): Monster {
         [$minDmg, $maxDmg] = MonsterStatFormulas::damageRange($level, $dmgPercentOfPlayerHp);
         $exp = MonsterStatFormulas::expReward($level, $expMultiplier);
-        [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp);
+        [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $level);
 
         $monster = new Monster;
         $monster->name = $name;

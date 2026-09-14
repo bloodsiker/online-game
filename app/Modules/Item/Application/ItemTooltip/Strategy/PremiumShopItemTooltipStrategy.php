@@ -16,6 +16,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
         $shopItems = ItemTooltipRelationLoader::load($this->items, [
             'item.stats',
             'item.effects',
+            'item.useLimit',
             'item.requirements.skill',
         ]);
 

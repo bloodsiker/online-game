@@ -2,10 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Modules\Player\Domain\Events\PlayerLeveledUp;
+use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class SetPlayerLevel extends Command
 {
@@ -28,7 +27,7 @@ class SetPlayerLevel extends Command
     /**
      * Выполнение команды.
      */
-    public function handle()
+    public function handle(PlayerLevelUpService $levelUpService)
     {
         $playerId = $this->argument('id');
         $targetLevel = (int) $this->argument('level');
@@ -51,7 +50,7 @@ class SetPlayerLevel extends Command
             return Command::FAILURE;
         }
 
-        $maxLevel = DB::table('experiences')->max('lvl');
+        $maxLevel = $levelUpService->maxLevel();
         if ($targetLevel > $maxLevel) {
             $this->error("Максимальный уровень в игре: {$maxLevel}");
 
@@ -64,12 +63,7 @@ class SetPlayerLevel extends Command
         // 3. Последовательно повышаем каждый уровень
         $bar = $this->output->createProgressBar($targetLevel - $currentLevel);
         $bar->start();
-
-        for ($level = $currentLevel + 1; $level <= $targetLevel; $level++) {
-            $this->levelUp($player, $level);
-            $bar->advance();
-        }
-
+        $player = $levelUpService->raiseToLevel($player, $targetLevel, fn () => $bar->advance());
         $bar->finish();
         $this->newLine();
 
@@ -77,41 +71,9 @@ class SetPlayerLevel extends Command
         $this->info('Текущие характеристики:');
         $this->info("  HP: {$player->hp_now}/{$player->hp_max}");
         $this->info("  MP: {$player->mp_now}/{$player->mp_max}");
-        $this->info("  STR: {$player->str}, AGIL: {$player->agil}, INT: {$player->int}");
+        $this->info("  STR: {$player->strength}, AGIL: {$player->agility}, INT: {$player->intelligence}");
         $this->info("  Опыт: {$player->exp}/{$player->exp_up}");
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * Повышение на один уровень
-     */
-    private function levelUp(Player $player, int $newLevel)
-    {
-        $levelConfig = DB::table('experiences')->where('lvl', $newLevel)->first();
-
-        if (! $levelConfig) {
-            throw new \Exception("Конфигурация для уровня {$newLevel} не найдена");
-        }
-
-        $nextLevelConfig = DB::table('experiences')->where('lvl', $newLevel + 1)->first();
-
-        // Устанавливаем опыт и пороги
-        $player->lvl = $newLevel;
-        $player->exp = $levelConfig->exp;
-
-        if ($nextLevelConfig) {
-            $player->exp_up = $nextLevelConfig->exp;
-            $player->exp_diff = $nextLevelConfig->exp_diff;
-        } else {
-            $player->exp_up = $levelConfig->exp;
-            $player->exp_diff = 0;
-        }
-
-        // Сохраняем изменения
-        $player->save();
-
-        // Вызываем событие повышения уровня
-        event(new PlayerLeveledUp($player));
     }
 }

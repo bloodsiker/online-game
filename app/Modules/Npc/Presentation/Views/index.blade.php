@@ -191,6 +191,22 @@
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
                                     <table class="coll w100 p6h p2v brd2-all">
                                         <tbody>
+                                        @if($dialogueStartNode)
+                                            <tr class="bg_l"
+                                                onclick="location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}'"
+                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                <td class="brd2-top brd2-bt" width="1%">
+                                                    <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
+                                                </td>
+                                                <td class="brd2-top brd2-bt">{{ $dialogueStartNode->title }}</td>
+                                                <td class="brd2-top brd2-bt" align="right">
+                                                    <b class="butt2 pointer"><b>
+                                                        <input value="Поговорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}';" style="width:90px">
+                                                    </b></b>
+                                                </td>
+                                            </tr>
+                                        @endif
+
                                         @if($npc->structures->count())
                                             @foreach($npc->structures as $structure)
                                                 @if($structure->isShop())
@@ -274,22 +290,6 @@
                                                     </tr>
                                                 @endif
                                             @endforeach
-                                        @endif
-
-                                        @if($dialogueStartNode)
-                                            <tr class="bg_l"
-                                                onclick="location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}'"
-                                                onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
-                                                <td class="brd2-top brd2-bt" width="1%">
-                                                    <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
-                                                </td>
-                                                <td class="brd2-top brd2-bt">{{ $dialogueStartNode->title }}</td>
-                                                <td class="brd2-top brd2-bt" align="right">
-                                                    <b class="butt2 pointer"><b>
-                                                        <input value="Поговорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}';" style="width:90px">
-                                                    </b></b>
-                                                </td>
-                                            </tr>
                                         @endif
 
                                         @if($isClanRegistrar ?? false)

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -94,6 +96,59 @@ class ApiController extends Controller
             'results' => $results->map(fn (Npc $npc) => [
                 'id' => $npc->id,
                 'text' => "[{$npc->id}] {$npc->name}",
+                'image' => $npc->image,
+            ]),
+            'pagination' => ['more' => ($page * $perPage) < $total],
+        ]);
+    }
+
+    public function monsters(Request $request): JsonResponse
+    {
+        $search = $request->input('q', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 20;
+
+        $query = Monster::query()
+            ->when($search, function ($query) use ($search): void {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            })
+            ->orderBy('name');
+
+        $total = $query->count();
+        $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
+
+        return response()->json([
+            'results' => $results->map(fn (Monster $monster) => [
+                'id' => $monster->id,
+                'text' => "[{$monster->id}] {$monster->name} ({$monster->lvl} ур.)",
+                'image' => $monster->image,
+            ]),
+            'pagination' => ['more' => ($page * $perPage) < $total],
+        ]);
+    }
+
+    public function reputations(Request $request): JsonResponse
+    {
+        $search = $request->input('q', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 20;
+
+        $query = Reputation::query()
+            ->when($search, function ($query) use ($search): void {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            })
+            ->orderBy('name');
+
+        $total = $query->count();
+        $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
+
+        return response()->json([
+            'results' => $results->map(fn (Reputation $reputation) => [
+                'id' => $reputation->id,
+                'text' => "[{$reputation->id}] {$reputation->name}",
+                'image' => resolve_storage_image_url($reputation->icon),
             ]),
             'pagination' => ['more' => ($page * $perPage) < $total],
         ]);

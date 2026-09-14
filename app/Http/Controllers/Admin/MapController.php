@@ -10,6 +10,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -20,6 +21,13 @@ use Illuminate\View\View;
 
 class MapController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(Request $request): View
     {
         $filters = [
@@ -235,6 +243,6 @@ class MapController extends Controller
 
     private function storeGatheringFieldImage(UploadedFile $file): string
     {
-        return $file->store('maps/gathering-fields', 'public');
+        return $this->imageStorage->storeOnPublicDisk($file, 'maps/gathering-fields');
     }
 }

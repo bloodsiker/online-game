@@ -81,8 +81,9 @@ final class PlayerStatFormulas
     /**
      * Итоговый множитель крита с мягким потолком: до CRIT_DAMAGE_BASE растёт
      * линейно, дальше — асимптотически к CRIT_DAMAGE_CAP. Общая формула для
-     * физической (HitCalculator) и магической (MagicHitCalculator) боёвки —
-     * «насколько сильно бьёт крит» одно и то же понятие независимо от типа урона.
+     * физического (HitCalculator, «сырое» значение растёт от Интуиции) и
+     * магического (MagicHitCalculator, «сырое» значение — целиком с
+     * экипировки, см. ShareItemStatType::MAGIC_CRIT_DAMAGE) крита.
      */
     public static function effectiveCritDamage(int $rawCritDamage): float
     {

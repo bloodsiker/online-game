@@ -205,6 +205,20 @@
                             <span>Новости</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.library.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-library" aria-hidden="true"></i>
+                            <span>Библиотека</span>
+                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.library.articles.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.library.articles.index') }}">Статьи</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.library.categories.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.library.categories.index') }}">Категории</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="{{ request()->routeIs('admin.post.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.post.send') }}">
                             <i class="bx bx-envelope" aria-hidden="true"></i>

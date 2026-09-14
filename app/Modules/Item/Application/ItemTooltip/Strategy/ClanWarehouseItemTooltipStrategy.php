@@ -16,6 +16,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
         $warehouseItems = ItemTooltipRelationLoader::load($this->items, [
             'item.itemInfo.stats',
             'item.itemInfo.effects',
+            'item.itemInfo.useLimit',
         ]);
 
         foreach ($warehouseItems as $warehouseItem) {

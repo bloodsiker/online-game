@@ -5,18 +5,26 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
-use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
+use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class MagicSkillController extends Controller
 {
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
     public function list(Request $request)
     {
         $filters = [
@@ -180,7 +188,7 @@ class MagicSkillController extends Controller
         if ($request->hasFile('image')) {
             $request->validate(['image' => ['image', 'max:4096']]);
             $oldImage = $magicSkill->getRawOriginal('image');
-            $magicSkill->image = $request->file('image')->store('magic-skills', 'public');
+            $magicSkill->image = $this->imageStorage->storeOnPublicDisk($request->file('image'), 'magic-skills');
             $this->deleteStorageImage($oldImage);
         } elseif ($request->boolean('delete_image')) {
             $this->deleteStorageImage($magicSkill->getRawOriginal('image'));

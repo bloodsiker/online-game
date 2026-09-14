@@ -18,10 +18,10 @@ interface FightHitInterface
     /** Магическое сопротивление (Мудрость + экипировка) — единственная защита от магии, см. MagicHitCalculator */
     public function getMagicResistance(): int;
 
-    /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/жезл и т.п.) — интеллект считается отдельно */
+    /** Флэт-бонус к силе заклинаний ИСКЛЮЧИТЕЛЬНО с экипировки (посох/фолиант и т.п.) — интеллект считается отдельно */
     public function getMagicAttack(): int;
 
-    /** Шанс крита заклинания, % — база 0, даёт только экипировка (жезл); множитель — общий getCritDamage() */
+    /** Шанс крита заклинания, % — база 0, даёт только экипировка (фолиант). */
     public function getMagicCriticalChance(): int;
 
     public function getArmor(): int;
@@ -36,8 +36,15 @@ interface FightHitInterface
      */
     public function getClassShare(CombatClass $class): float;
 
-    /** Множитель критического урона в процентах (150 = ×1.5) */
+    /** Множитель физического критического урона в процентах (175 = ×1.75) */
     public function getCritDamage(): int;
+
+    /**
+     * Множитель магического критического урона в процентах — база 175,
+     * растёт исключительно с экипировки (см. ShareItemStatType::MAGIC_CRIT_DAMAGE),
+     * не зависит от Интуиции.
+     */
+    public function getMagicCritDamage(): int;
 
     /**
      * Уровень бойца — масштабирует константы боя (K шансов, знаменатель брони),

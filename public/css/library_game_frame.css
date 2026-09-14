@@ -1,0 +1,149 @@
+.library-article-content table.library-game-frame,
+.note-editable table.library-game-frame,
+table.library-game-frame {
+    max-width: 100%;
+    margin: 10px auto;
+    border: 0;
+    border-spacing: 0;
+    border-collapse: separate;
+}
+
+.library-game-frame > tbody > tr > td {
+    padding: 0;
+    border: 0;
+}
+
+.library-game-frame .tbl-shp-sml {
+    font-size: 0;
+    background: url('/img/bg/tbl-shp-sml.png') no-repeat;
+}
+
+.library-game-frame .tbl-shp-sml.lt {
+    height: 22px;
+    background-position: 0 0;
+}
+
+.library-game-frame .tbl-shp-sml.rt {
+    height: 22px;
+    background-position: 0 -25px;
+}
+
+.library-game-frame .tbl-shp-sml.tt {
+    height: 22px;
+    background-position: center -50px;
+    background-repeat: repeat-x;
+}
+
+.library-game-frame .tbl-shp-sml.lb {
+    background-position: 0 -75px;
+}
+
+.library-game-frame .tbl-shp-sml.rb {
+    background-position: 0 -100px;
+}
+
+.library-game-frame .tbl-shp-sml.bb {
+    height: 18px;
+    background-position: center -125px;
+    background-repeat: repeat-x;
+}
+
+.library-game-frame .tbl-shp-sides {
+    font-size: 0;
+    background: url('/img/bg/tbl-shp-sides.png') no-repeat;
+}
+
+.library-game-frame .tbl-shp-sides.ls {
+    background-position: left top;
+    background-repeat: repeat-y;
+}
+
+.library-game-frame .tbl-shp-sides.rs {
+    background-position: right top;
+    background-repeat: repeat-y;
+}
+
+.library-game-frame .tbl-usi_bg {
+    background: url('/img/bg/tbl-usi_bg.gif') repeat;
+}
+
+.library-game-frame table.library-game-frame__title {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    border-spacing: 0;
+    border-collapse: separate;
+}
+
+.library-game-frame table.library-game-frame__title td {
+    height: 22px;
+    padding: 0;
+    border: 0;
+}
+
+.library-game-frame table.library-game-frame__title img {
+    display: block;
+    width: 27px;
+    max-width: none;
+    height: 22px;
+}
+
+.library-game-frame table.library-game-frame__title .tbl-usi_label-center {
+    height: 19px;
+    padding: 0 10px 3px;
+    color: #fcf5b7;
+    font-family: Tahoma, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: normal;
+    white-space: nowrap;
+    background: url('/img/bg/info/tbl-usi_label-center.gif') repeat-x;
+}
+
+.library-game-frame span.butt1,
+.library-game-frame span.butt1.disabled {
+    display: inline-block;
+    height: 38px;
+    font-size: 26px;
+    cursor: pointer;
+    background: url('/img/bg/btn/tbl-btn2_c-left.png') left 4px no-repeat;
+}
+
+.library-game-frame span.butt1 > span,
+.library-game-frame span.butt1.disabled > span {
+    display: inline-block;
+    height: 38px;
+    font-size: 26px;
+    cursor: pointer;
+    background: url('/img/bg/btn/tbl-btn2_c-right.png') right 4px no-repeat;
+}
+
+.library-game-frame span.butt1 input,
+.library-game-frame span.butt1 button.butt1,
+.library-game-frame span.butt1.disabled input,
+.library-game-frame span.butt1.disabled button {
+    height: 38px;
+    margin: 0 33px;
+    padding-bottom: 4px;
+    color: #f8dea4 !important;
+    font-family: Tahoma, sans-serif;
+    font-size: 11px !important;
+    font-weight: 700;
+    text-decoration: none;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    background: transparent url('/img/bg/btn/tbl-btn2_center.png') center top repeat-x;
+}
+
+.library-game-frame span.butt1.disabled {
+    opacity: .5;
+}
+
+.library-game-frame span.butt1.disabled,
+.library-game-frame span.butt1.disabled > span,
+.library-game-frame span.butt1.disabled input,
+.library-game-frame span.butt1.disabled button {
+    cursor: default;
+}

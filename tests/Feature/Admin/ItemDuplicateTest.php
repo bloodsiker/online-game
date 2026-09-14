@@ -12,6 +12,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemDebuff;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemUseLimit;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
@@ -46,6 +47,7 @@ class ItemDuplicateTest extends TestCase
             $table->boolean('is_sell')->default(true);
             $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
+            $table->boolean('is_clan_warehouse_allowed')->default(true);
             $table->boolean('is_droppable')->default(true);
             $table->boolean('is_stackable')->default(false);
             $table->boolean('is_weight')->default(true);
@@ -89,6 +91,14 @@ class ItemDuplicateTest extends TestCase
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('effect_id');
             $table->unsignedInteger('duration_seconds');
+            $table->string('reapply_policy')->default('refresh');
+            $table->timestamps();
+        });
+        Schema::create('share_item_use_limits', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedSmallInteger('max_uses');
+            $table->unsignedInteger('period_seconds');
             $table->timestamps();
         });
         Schema::create('share_item_debuffs', function (Blueprint $table): void {
@@ -157,9 +167,10 @@ class ItemDuplicateTest extends TestCase
         ShareItemStat::create(['share_item_id' => $item->id, 'stat_type' => 'attack_min', 'value' => 3, 'value_type' => 'flat']);
         ShareItemEffect::create(['share_item_id' => $item->id, 'effect_type' => 'heal_hp', 'value' => 7, 'value_type' => 'percent', 'duration_seconds' => 5]);
         DB::table('effects')->insert(['id' => 1, 'name' => 'Сила медведя', 'slug' => 'bear_strength', 'type' => 'buff']);
-        ShareItemBuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 60]);
+        ShareItemBuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 60, 'reapply_policy' => 'block']);
         ShareItemDebuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 30]);
         ShareItemRequirement::create(['share_item_id' => $item->id, 'type' => 'level', 'min_value' => 10]);
+        ShareItemUseLimit::create(['share_item_id' => $item->id, 'max_uses' => 2, 'period_seconds' => 86400]);
 
         $recipe = new ShareRecipe;
         $recipe->share_item_id = $item->id;
@@ -173,7 +184,7 @@ class ItemDuplicateTest extends TestCase
         (new ItemController)->duplicate($item);
 
         $copy = ShareItem::where('name', 'Сундук мастера (копия)')->firstOrFail();
-        $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems']);
+        $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems', 'useLimit']);
 
         $this->assertNotSame($item->id, $copy->id);
         $this->assertSame($item->description, $copy->description);
@@ -183,6 +194,9 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame(7, $copy->effects->sole()->value);
         $this->assertSame(60, $copy->buffs->sole()->duration_seconds);
         $this->assertSame(1, $copy->buffs->sole()->effect_id);
+        $this->assertSame('block', $copy->buffs->sole()->reapply_policy->value);
+        $this->assertSame(2, $copy->useLimit->max_uses);
+        $this->assertSame(86400, $copy->useLimit->period_seconds);
         $this->assertSame(30, $copy->debuffs->sole()->duration_seconds);
         $this->assertSame(10, $copy->requirements->sole()->min_value);
         $this->assertNotNull($copy->recipe);

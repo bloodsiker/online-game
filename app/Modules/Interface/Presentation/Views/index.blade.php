@@ -1310,6 +1310,10 @@
     const playerStateChannelName = 'player.' + playerId;
     const playerStateFallbackInterval = 30000;
     const playerPresenceInterval = 120000;
+    const playerHeartbeatUrl = @json(route('player.heartbeat', [], false));
+    const playerCsrfTokenUrl = @json(route('player.csrf-token', [], false));
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    let playerCsrfToken = csrfMeta?.content || '';
     let playerHeartbeatInFlight = false;
     let playerStateFallbackTimer = null;
     let playerPresenceTimer = null;
@@ -1344,22 +1348,47 @@
         }
     }
 
+    async function requestPlayerHeartbeat() {
+        return fetch(playerHeartbeatUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': playerCsrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+    }
+
+    async function refreshPlayerCsrfToken() {
+        const response = await fetch(playerCsrfTokenUrl, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        });
+        if (!response.ok) return false;
+
+        const payload = await response.json();
+        if (!payload.token) return false;
+
+        playerCsrfToken = payload.token;
+        if (csrfMeta) csrfMeta.content = playerCsrfToken;
+
+        return true;
+    }
+
     async function syncPlayerState() {
         if (playerHeartbeatInFlight) return;
 
         playerHeartbeatInFlight = true;
 
         try {
-            const response = await fetch('{{ route('player.heartbeat') }}', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
-            });
-
+            let response = await requestPlayerHeartbeat();
+            if (response.status === 419 && await refreshPlayerCsrfToken()) {
+                response = await requestPlayerHeartbeat();
+            }
             if (!response.ok) return;
 
             applyPlayerState(await response.json());

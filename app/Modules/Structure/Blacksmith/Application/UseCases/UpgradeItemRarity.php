@@ -63,16 +63,15 @@ class UpgradeItemRarity
             }
 
             foreach ($source->rarityUpgradeMaterials as $material) {
-                if ($material->id === $source->id) {
-                    return new BlacksmithActionResultDTO(false, 'Исходный предмет нельзя использовать как материал для самого себя.');
-                }
-                if ($this->availableMaterialCount($user, $material->id) < (int) $material->pivot->count) {
+                $excludeBackpackId = $material->id === $source->id ? $slot->id : null;
+                if ($this->availableMaterialCount($user, $material->id, $excludeBackpackId) < (int) $material->pivot->count) {
                     return new BlacksmithActionResultDTO(false, sprintf('Не хватает материала «%s».', $material->name));
                 }
             }
 
             foreach ($source->rarityUpgradeMaterials as $material) {
-                $this->consumeMaterial($user, $material->id, (int) $material->pivot->count);
+                $excludeBackpackId = $material->id === $source->id ? $slot->id : null;
+                $this->consumeMaterial($user, $material->id, (int) $material->pivot->count, $excludeBackpackId);
             }
 
             if ($source->upgrade_gold_cost > 0) {
@@ -87,11 +86,12 @@ class UpgradeItemRarity
         });
     }
 
-    private function availableMaterialCount(User $user, int $shareItemId): int
+    private function availableMaterialCount(User $user, int $shareItemId, ?int $excludeBackpackId = null): int
     {
         return (int) Backpack::query()
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', false)
+            ->when($excludeBackpackId !== null, fn ($query) => $query->whereKeyNot($excludeBackpackId))
             ->whereHas('item', fn ($query) => $query->where('share_item_id', $shareItemId))
             ->lockForUpdate()
             ->sum('count');
@@ -102,12 +102,13 @@ class UpgradeItemRarity
         return array_search($rarity, ItemRarity::cases(), true);
     }
 
-    private function consumeMaterial(User $user, int $shareItemId, int $quantity): bool
+    private function consumeMaterial(User $user, int $shareItemId, int $quantity, ?int $excludeBackpackId = null): bool
     {
         $slots = Backpack::query()
             ->with('item')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', false)
+            ->when($excludeBackpackId !== null, fn ($query) => $query->whereKeyNot($excludeBackpackId))
             ->whereHas('item', fn ($query) => $query->where('share_item_id', $shareItemId))
             ->lockForUpdate()
             ->get();

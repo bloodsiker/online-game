@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
@@ -9,10 +10,14 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Carbon;
 
 class DropService
 {
+    public function __construct(private readonly BackpackService $backpackService) {}
+
     public function dropMoney(User $user, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
         if ($locationMonster->is_drop_money) {
@@ -52,6 +57,10 @@ class DropService
                             continue;
                         }
 
+                        if ($item->required_active_effect_id !== null && ! $this->hasActiveEffect($dropRecipient, $item->required_active_effect_id)) {
+                            continue;
+                        }
+
                         // 100 000 равновероятных значений: одно значение = 0.001%.
                         // Диапазон начинается с 1, чтобы шанс 0% никогда не срабатывал.
                         $randomChance = random_int(1, 100000) / 1000;
@@ -66,6 +75,12 @@ class DropService
             }
 
             foreach ($droppedItems as $dropItem) {
+                if ($dropItem['item']->drop_direct_to_backpack) {
+                    $this->backpackService->addItemByShareItem($dropRecipient, $dropItem['item'], $dropItem['count']);
+
+                    continue;
+                }
+
                 $item = new Item;
                 $item->share_item_id = $dropItem['item']->id;
                 $item->count_use = $dropItem['item']->count_use;
@@ -82,5 +97,14 @@ class DropService
                 $location->itemsOnLocation()->attach($item->id, $pivotData);
             }
         }
+    }
+
+    private function hasActiveEffect(User $user, int $effectId): bool
+    {
+        return PlayerActiveEffect::query()
+            ->where('player_id', $user->player->id)
+            ->where('effect_id', $effectId)
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', Carbon::now()))
+            ->exists();
     }
 }

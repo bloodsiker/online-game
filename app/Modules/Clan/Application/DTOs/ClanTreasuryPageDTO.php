@@ -16,6 +16,10 @@ final readonly class ClanTreasuryPageDTO
         public Clan $clan,
         public ClanMember $membership,
         public bool $canWithdraw,
+        public bool $isLeader,
+        public bool $canPayTax,
+        public bool $taxPaid,
+        public int $taxAmount,
         public LengthAwarePaginator $logs,
     ) {}
 }

@@ -20,6 +20,7 @@
         request()->routeIs('admin.bank.stocks', 'admin.bank.stock.*') => ['label' => 'Акции банка', 'route' => 'admin.bank.stocks'],
         request()->routeIs('admin.action', 'admin.action.*') => ['label' => 'Действия на локации', 'route' => 'admin.action'],
         request()->routeIs('admin.news', 'admin.news.*') => ['label' => 'Новости', 'route' => 'admin.news'],
+        request()->routeIs('admin.library.*') => ['label' => 'Библиотека', 'route' => 'admin.library.articles.index'],
         request()->routeIs('admin.event.activities', 'admin.event.activity.*') => ['label' => 'Активности событий', 'route' => 'admin.event.activities'],
         request()->routeIs('admin.referral.stages', 'admin.referral.stage.*') => ['label' => 'Этапы наград', 'route' => 'admin.referral.stages'],
         request()->routeIs('admin.referral.stats') => ['label' => 'Статистика рефералов', 'route' => 'admin.referral.stats'],
