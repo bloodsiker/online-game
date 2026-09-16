@@ -172,7 +172,7 @@
         .library-header-select .dropdown_list,
         .library-header-select .dropdown_list_inner { display: block; }
         .library-header-select .dropdown_list_inner {
-            max-height: 180px;
+            max-height: 320px;
             overflow-x: hidden;
             overflow-y: auto;
         }
@@ -388,7 +388,7 @@
                             <div class="b-common-block__cont library-forum-nav-panel">
                                 <div class="b-common-block__bgr clearfix">
                                     @forelse($categories as $category)
-                                        @include('library.partials.sidebar-category', ['item' => $category, 'depth' => 0])
+                                        @include('library::partials.sidebar-category', ['item' => $category, 'depth' => 0])
                                     @empty
                                         <div class="library-empty">Разделы пока не добавлены.</div>
                                     @endforelse

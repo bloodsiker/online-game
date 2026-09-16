@@ -67,19 +67,28 @@
         .gp-frame-bg { background: url('/img/bg/common-bg.png'); padding: 10px; }
         .upgrade-icon { display: inline-block; width: 60px; height: 60px; padding: 5px 6px 6px; background: url('/main/images/user-reward-frame.png') no-repeat; cursor: pointer; }
         .upgrade-icon img { width: 60px; height: 60px; object-fit: contain; }
-        .upgrade-chance-bar { height: 10px; background: #ddd; border: 1px solid #b08060; margin: 3px 0; }
-        .upgrade-chance-fill { height: 100%; background: #55aa33; }
-        .upgrade-chance-fill.medium { background: #ddaa00; }
-        .upgrade-chance-fill.low { background: #cc3300; }
+        .rep-progress-bar { position: relative; width: 100%; height: 31px; margin: 4px 0 6px; overflow: hidden; }
+        .rep-progress-bar__bg { height: 27px; margin: 2px 5px 0; overflow: hidden; border-radius: 5px; background: url('{{ asset('img/progressbar/progress-bar-1-bg.png') }}') 0 -54px repeat-x; }
+        .rep-progress-bar__fill { height: 27px; background: url('{{ asset('img/progressbar/progress-bar-1-bg.png') }}') 0 -27px repeat-x; }
+        .rep-progress-bar__border { position: absolute; top: 0; left: 0; width: 100%; height: 31px; }
+        .rep-progress-bar__border-left,
+        .rep-progress-bar__border-right,
+        .rep-progress-bar__border-center { height: 31px; background: url('{{ asset('img/progressbar/progress-bar-1-border.png') }}') no-repeat; }
+        .rep-progress-bar__border-left,
+        .rep-progress-bar__border-right { position: absolute; top: 0; width: 20px; }
+        .rep-progress-bar__border-left { left: 0; }
+        .rep-progress-bar__border-right { right: 0; background-position: 0 -31px; }
+        .rep-progress-bar__border-center { margin: 0 20px; background-position: 0 -62px; background-repeat: repeat-x; }
+        .rep-progress-bar__text { position: absolute; top: 0; left: 0; width: 100%; color: #fff; font-size: 11px; font-weight: bold; line-height: 31px; text-align: center; text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444; }
 
         /* Result flash */
         .flash-success { background: #d4f0c0; border: 1px solid #60a840; color: #2a6010; padding: 6px 10px; margin-bottom: 8px; }
         .flash-fail    { background: #f8dcd0; border: 1px solid #c05030; color: #7a2010; padding: 6px 10px; margin-bottom: 8px; }
         .flash-destroy { background: #300000; border: 1px solid #c00000; color: #ff6060; padding: 6px 10px; margin-bottom: 8px; font-weight: bold; }
 
-        /* Progress bar */
-        .upgrade-progress-wrap { width: 100%; height: 12px; background: #ddd; border: 1px solid #b08060; margin: 8px 0 4px; display: none; }
-        .upgrade-progress-fill { height: 100%; width: 0; background: linear-gradient(to right, #c47a20, #f0a840); transition: width 1s linear; }
+        /* Progress bar shown while the blacksmith performs the upgrade. */
+        .upgrade-progress-wrap { display: none; margin-top: 8px; }
+        .upgrade-progress-fill { width: 0; margin-right: auto; margin-left: 0; transform-origin: left center; }
     </style>
 </head>
 <body class="regcolor" leftmargin="0" rightmargin="0">
@@ -367,6 +376,8 @@
     let selectedBaseScrollId  = null;
     let selectedBonusScrollId = null;
     let luckyActive           = false;
+    let upgradeAnimationFrameId = null;
+    let upgradeSubmissionTimeoutId = null;
 
     document.querySelectorAll('.item-row').forEach(function (row) {
         row.addEventListener('click', function () {
@@ -414,12 +425,12 @@
     }
 
     function renderUpgradePanel(itemId) {
+        cancelUpgrade();
+
         const d = upgradeData[itemId];
         if (!d) return;
 
         const chance = luckyActive ? d.successChanceLucky : d.successChance;
-        const chanceClass = chance >= 70 ? '' : (chance >= 40 ? 'medium' : 'low');
-
         const itemHtml = `
             <span class="upgrade-icon"
                   data-id="${itemId}"
@@ -449,18 +460,39 @@
                 ${itemHtml}
                 <span>Уровень: <b class="lvl-badge">+${d.level}</b> &rarr; <b class="lvl-badge">+${d.level + 1}</b></span><br><br>
                 <span>Шанс успеха: <b>${chance.toFixed(0)}%</b></span><br>
-                <div class="upgrade-chance-bar"><div class="upgrade-chance-fill ${chanceClass}" style="width:${Math.min(chance,100)}%"></div></div>
+                <div class="rep-progress-bar" title="Шанс успеха: ${chance.toFixed(0)}%">
+                    <div class="rep-progress-bar__bg">
+                        <div class="rep-progress-bar__fill" style="width:${Math.min(chance, 100)}%;"></div>
+                    </div>
+                    <div class="rep-progress-bar__border">
+                        <div class="rep-progress-bar__border-left"></div>
+                        <div class="rep-progress-bar__border-right"></div>
+                        <div class="rep-progress-bar__border-center"></div>
+                    </div>
+                    <div class="rep-progress-bar__text">${chance.toFixed(0)}%</div>
+                </div>
                 ${d.destroyChance > 0 ? `<span style="color:#c00;">Шанс уничтожения: <b>${d.destroyChance}%</b></span><br>` : ''}
                 ${d.failStreak >= 10 ? `<span style="color:#489200;">⚡ Гарантированный успех!</span><br>` : (d.pity > 0 ? `<span style="color:#888;">Pity: +${d.pity * 2}%</span><br>` : '')}
                 <br>
                 <span>Стоимость: <img src="{{ asset('img/icon/m_game.gif') }}" width="10" height="10"> <b>${d.cost.toLocaleString()}</b></span><br>
                 <div style="margin:6px 0 2px; font-size:11px; color:#666;">Свиток: ${scrollHtml}</div>
                 <div style="margin:0 0 4px; font-size:11px; color:#666;">Доп. свиток: ${bonusHtml}</div>
-                <div class="upgrade-progress-wrap" id="upgrade-progress-wrap">
-                    <div class="upgrade-progress-fill" id="upgrade-progress-fill"></div>
+                <div class="rep-progress-bar upgrade-progress-wrap" id="upgrade-progress-wrap" title="Выполняется заточка">
+                    <div class="rep-progress-bar__bg">
+                        <div class="rep-progress-bar__fill upgrade-progress-fill" id="upgrade-progress-fill"></div>
+                    </div>
+                    <div class="rep-progress-bar__border">
+                        <div class="rep-progress-bar__border-left"></div>
+                        <div class="rep-progress-bar__border-right"></div>
+                        <div class="rep-progress-bar__border-center"></div>
+                    </div>
+                    <div class="rep-progress-bar__text" id="upgrade-progress-text">0%</div>
                 </div>
-                <span class="butt1 pointer">
+                <span class="butt1 pointer" id="upgrade-start-action">
                     <span><input value="Заточить" type="button" onclick="startUpgrade()" class="grnn"></span>
+                </span>
+                <span class="butt1 pointer" id="upgrade-cancel-action" style="display:none;">
+                    <span><input value="Отмена" type="button" onclick="cancelUpgrade()" class="grnn"></span>
                 </span>
             `;
         }
@@ -469,7 +501,7 @@
     }
 
     function startUpgrade() {
-        if (!selectedItemId) return;
+        if (!selectedItemId || upgradeSubmissionTimeoutId !== null) return;
 
         if (!selectedBaseScrollId) {
             window.parent.systemInfo('Для заточки необходимо выбрать свиток заточки.', 'Внимание');
@@ -478,18 +510,56 @@
 
         const wrap = document.getElementById('upgrade-progress-wrap');
         const fill = document.getElementById('upgrade-progress-fill');
-        if (!wrap || !fill) return;
-
-        const btn = document.querySelector('#upgrade-panel-content input[type=button]');
-        if (btn) btn.disabled = true;
+        const text = document.getElementById('upgrade-progress-text');
+        const startAction = document.getElementById('upgrade-start-action');
+        const cancelAction = document.getElementById('upgrade-cancel-action');
+        if (!wrap || !fill || !text || !startAction || !cancelAction) return;
 
         wrap.style.display = 'block';
-        fill.getBoundingClientRect();
-        fill.style.width = '100%';
+        startAction.style.display = 'none';
+        cancelAction.style.display = 'inline-block';
+        const startedAt = performance.now();
+        const duration = 2500;
+        const animateProgress = function (now) {
+            const percent = Math.min(100, Math.round((now - startedAt) / duration * 100));
+            fill.style.width = percent + '%';
+            text.textContent = percent + '%';
 
-        setTimeout(function () {
+            if (percent < 100) {
+                upgradeAnimationFrameId = requestAnimationFrame(animateProgress);
+            } else {
+                upgradeAnimationFrameId = null;
+            }
+        };
+        upgradeAnimationFrameId = requestAnimationFrame(animateProgress);
+
+        upgradeSubmissionTimeoutId = window.setTimeout(function () {
+            upgradeSubmissionTimeoutId = null;
             document.getElementById('upgrade-form').submit();
-        }, 1050);
+        }, duration + 50);
+    }
+
+    function cancelUpgrade() {
+        if (upgradeAnimationFrameId !== null) {
+            cancelAnimationFrame(upgradeAnimationFrameId);
+            upgradeAnimationFrameId = null;
+        }
+        if (upgradeSubmissionTimeoutId !== null) {
+            clearTimeout(upgradeSubmissionTimeoutId);
+            upgradeSubmissionTimeoutId = null;
+        }
+
+        const wrap = document.getElementById('upgrade-progress-wrap');
+        const fill = document.getElementById('upgrade-progress-fill');
+        const text = document.getElementById('upgrade-progress-text');
+        const startAction = document.getElementById('upgrade-start-action');
+        const cancelAction = document.getElementById('upgrade-cancel-action');
+
+        if (wrap) wrap.style.display = 'none';
+        if (fill) fill.style.width = '0';
+        if (text) text.textContent = '0%';
+        if (startAction) startAction.style.display = 'inline-block';
+        if (cancelAction) cancelAction.style.display = 'none';
     }
 
     function sendDataToGame(url) {

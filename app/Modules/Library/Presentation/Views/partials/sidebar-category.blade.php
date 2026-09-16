@@ -12,7 +12,7 @@
                 <div class="clearfix" style="display:block">
                     <ul class="b-common-block__bgr library-nav-sub">
                         @foreach($item->children as $child)
-                            @include('library.partials.sidebar-category', ['item' => $child, 'depth' => 1])
+                            @include('library::partials.sidebar-category', ['item' => $child, 'depth' => 1])
                         @endforeach
                     </ul>
                 </div>
@@ -27,7 +27,7 @@
         @if($item->children->isNotEmpty())
             <ul class="library-nav-sub">
                 @foreach($item->children as $child)
-                    @include('library.partials.sidebar-category', ['item' => $child, 'depth' => $depth + 1])
+                    @include('library::partials.sidebar-category', ['item' => $child, 'depth' => $depth + 1])
                 @endforeach
             </ul>
         @endif

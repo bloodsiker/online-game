@@ -8,6 +8,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Item\Infrastructure\Persistence\Models\LockpickingAttempt;
 use App\Modules\Location\Application\DTOs\GatheringActionResultDTO;
 use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
 use App\Modules\Location\Domain\Events\GatheringMapUpdated;
@@ -482,6 +483,13 @@ class GatheringService
 
         if ($this->hasActiveBattle((int) $user->id, (int) $location->id)) {
             return 'Во время боя добыча ресурсов недоступна.';
+        }
+
+        if (LockpickingAttempt::query()
+            ->where('player_id', $user->player->id)
+            ->where('expires_at', '>', now())
+            ->exists()) {
+            return 'Сначала завершите взлом сундука.';
         }
 
         return null;

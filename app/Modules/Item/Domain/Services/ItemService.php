@@ -151,9 +151,34 @@ class ItemService
         return null;
     }
 
-    public function openChest(Item $item): void
+    public function openChest(User $user, int $itemId): ?int
     {
-        if ($item->itemInfo->type !== ShareItemType::CHEST) {
+        return DB::transaction(function () use ($user, $itemId): ?int {
+            $item = Item::query()
+                ->with('itemInfo.lockConfig')
+                ->whereKey($itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($item === null || $this->accessibleChest($user, $itemId, $item) === null) {
+                return null;
+            }
+
+            if (($item->itemInfo->lockConfig?->lock_required_skill ?? 0) > 0 && ! $item->is_open) {
+                return null;
+            }
+
+            if (! $item->is_open) {
+                $this->populateChest($item);
+            }
+
+            return $item->id;
+        });
+    }
+
+    private function populateChest(Item $item): void
+    {
+        if ($item->itemInfo->type !== ShareItemType::CHEST || $item->is_open) {
             return;
         }
 
@@ -170,29 +195,120 @@ class ItemService
         $item->save();
     }
 
-    public function pickUpFromChest(User $user, Item $chest, int $itemId): string
+    public function pickUpFromChest(User $user, int $chestId, int $itemId): string
     {
-        if (! $chest->itemsInChest()->count()) {
-            return '';
+        return DB::transaction(function () use ($user, $chestId, $itemId): string {
+            $chest = Item::query()->whereKey($chestId)->lockForUpdate()->first();
+            if ($chest === null || $this->accessibleChest($user, $chestId, $chest) === null || ! $chest->is_open) {
+                return 'Сундук больше недоступен.';
+            }
+
+            $slot = ItemInChest::query()
+                ->where('chest_id', $chestId)
+                ->where('item_id', $itemId)
+                ->with('item.itemInfo')
+                ->lockForUpdate()
+                ->first();
+            $item = $slot?->item;
+
+            if ($slot === null || $item === null) {
+                return 'Кто-то уже поднял этот предмет...';
+            }
+
+            $count = $slot->count;
+            $slot->delete();
+
+            $this->addPickedItemToBackpack($user, $item, $count);
+
+            if (! ItemInChest::query()->where('chest_id', $chestId)->exists()) {
+                $chest->delete();
+            }
+
+            return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+        });
+    }
+
+    /**
+     * Генерирует и атомарно переносит всё содержимое сундука в рюкзак.
+     * Вызывающий код должен удерживать FOR UPDATE на сундуке.
+     *
+     * @return list<array{share_item_id: int, name: string, image: string, count: int}>
+     */
+    public function claimAllChestContents(User $user, Item $chest): array
+    {
+        if (! $chest->is_open) {
+            $this->populateChest($chest);
         }
 
-        $slot = ItemInChest::where('item_id', $itemId)->first();
-        $item = Item::find($itemId);
+        $loot = [];
+        $slots = ItemInChest::query()
+            ->where('chest_id', $chest->id)
+            ->with('item.itemInfo')
+            ->lockForUpdate()
+            ->get();
 
-        if (! $slot || ! $item) {
-            return sprintf('Кто-то уже поднял предмет <b>"%s"</b>...', $item?->itemInfo->name ?? 'предмет');
+        foreach ($slots as $slot) {
+            $item = $slot->item;
+            if ($item === null) {
+                $slot->delete();
+
+                continue;
+            }
+
+            $count = max(1, (int) $slot->count);
+            $loot[] = [
+                'share_item_id' => (int) $item->share_item_id,
+                'name' => $item->itemInfo->name,
+                'image' => $item->itemInfo->image,
+                'count' => $count,
+            ];
+            $slot->delete();
+            $this->addPickedItemToBackpack($user, $item, $count);
         }
 
-        $count = $slot->count;
-        $slot->delete();
+        $chest->delete();
 
-        $this->addPickedItemToBackpack($user, $item, $count);
+        return $loot;
+    }
 
-        if (! $chest->itemsInChest()->count()) {
-            $chest->delete();
+    /** @return array{0: Item, 1: 'world'|'inventory'}|null */
+    public function accessibleChest(User $user, int $itemId, ?Item $knownItem = null): ?array
+    {
+        $item = $knownItem ?? Item::query()->with('itemInfo')->find($itemId);
+        if ($item === null || $item->itemInfo->type !== ShareItemType::CHEST) {
+            return null;
         }
 
-        return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+        if (Backpack::query()
+            ->where('user_id', $user->id)
+            ->where('item_id', $itemId)
+            ->where('equipped', 0)
+            ->exists()) {
+            return [$item, 'inventory'];
+        }
+
+        $user->loadMissing('currentLocation');
+        if ($user->currentLocation === null) {
+            return null;
+        }
+
+        $query = ItemOnLocation::query()
+            ->visible()
+            ->where('item_id', $itemId)
+            ->where('location_id', $user->location_id);
+
+        if ($user->currentLocation->dungeon_id !== null) {
+            $sessionId = DungeonSession::query()
+                ->where('user_id', $user->id)
+                ->first()?->monsterSessionId();
+            $sessionId !== null
+                ? $query->where('dungeon_session_id', $sessionId)
+                : $query->whereNull('dungeon_session_id');
+        } else {
+            $query->whereNull('dungeon_session_id');
+        }
+
+        return $query->exists() ? [$item, 'world'] : null;
     }
 
     public function equip(User $user, int $itemId): ?string

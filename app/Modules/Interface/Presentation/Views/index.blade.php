@@ -1849,6 +1849,33 @@
     </div>
 </div>
 
+{{-- Отдельное модальное окно взлома сундука --}}
+<div id="lockpicking-overlay" class="error_div" style="display:none;z-index:1012;"></div>
+<div id="lockpicking-modal" style="display:none;position:fixed;z-index:1013;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:500px;max-width:calc(100vw - 24px);">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title">Открытие сундука</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeLockpickingModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:8px 12px 3px;">
+                    <iframe id="lockpicking-modal-frame" src="about:blank" title="Открытие сундука" style="display:block;width:100%;height:280px;border:0;"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let _ptsData = {};
     let _ptsModalMode = 'points';
@@ -1901,6 +1928,50 @@
 
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display   = 'none';
+    }
+
+    let _lockpickingContentHeight = 280;
+
+    function lockpickingModalHeight(contentHeight) {
+        const availableHeight = Math.max(180, window.innerHeight - 90);
+        const minHeight = Math.min(280, availableHeight);
+        const maxHeight = Math.min(650, availableHeight);
+
+        return Math.max(minHeight, Math.min(Math.ceil(Number(contentHeight) || minHeight) + 2, maxHeight));
+    }
+
+    function openLockpickingModal(url) {
+        const frame = document.getElementById('lockpicking-modal-frame');
+        _lockpickingContentHeight = 280;
+        frame.style.height = lockpickingModalHeight(_lockpickingContentHeight) + 'px';
+        frame.src = url;
+        document.getElementById('lockpicking-overlay').style.display = 'block';
+        document.getElementById('lockpicking-modal').style.display = 'block';
+    }
+
+    function closeLockpickingModal() {
+        document.getElementById('lockpicking-overlay').style.display = 'none';
+        document.getElementById('lockpicking-modal').style.display = 'none';
+        document.getElementById('lockpicking-modal-frame').src = 'about:blank';
+    }
+
+    function resizeLockpickingModal(contentHeight) {
+        _lockpickingContentHeight = Math.max(0, Number(contentHeight) || 0);
+        document.getElementById('lockpicking-modal-frame').style.height = lockpickingModalHeight(_lockpickingContentHeight) + 'px';
+    }
+
+    window.addEventListener('resize', function () {
+        const modal = document.getElementById('lockpicking-modal');
+        if (modal?.style.display === 'block') {
+            resizeLockpickingModal(_lockpickingContentHeight);
+        }
+    });
+
+    function refreshGameFrameAfterLockpicking() {
+        const gameFrame = document.getElementById('game-frame');
+        if (gameFrame?.contentWindow) {
+            gameFrame.contentWindow.location.reload();
+        }
     }
 
     function openMapMonstersModal(data) {

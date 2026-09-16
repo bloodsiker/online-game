@@ -9,6 +9,7 @@ use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
+use App\Modules\Item\Application\Services\LockpickingService;
 use App\Modules\Item\Application\UseCases\DropItem;
 use App\Modules\Item\Application\UseCases\EquipItem;
 use App\Modules\Item\Application\UseCases\GetChestPage;
@@ -51,6 +52,7 @@ class ItemController extends Controller
         private readonly LocationReadRepository $locationReadRepository,
         private readonly PlayerRevivalService $revivalService,
         private readonly ItemUsagePolicyService $itemUsagePolicyService,
+        private readonly LockpickingService $lockpickingService,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -131,7 +133,13 @@ class ItemController extends Controller
 
     public function openChest(int $id): RedirectResponse
     {
-        $itemId = $this->openChest->execute($id);
+        if ($redirect = $this->lockedChestRedirect($id)) {
+            return $redirect;
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+        $itemId = $this->openChest->execute($user, $id);
         abort_if($itemId === null, 404);
 
         return redirect()->route('items.view_chest', ['id' => $itemId]);
@@ -139,13 +147,24 @@ class ItemController extends Controller
 
     public function viewChest(int $id): mixed
     {
+        if ($redirect = $this->lockedChestRedirect($id)) {
+            return $redirect;
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+
         return view('item::chest_items', [
-            'page' => $this->getChestPage->execute($id),
+            'page' => $this->getChestPage->execute($user, $id),
         ]);
     }
 
     public function pickUpInChest(int $chest, int $id): mixed
     {
+        if ($redirect = $this->lockedChestRedirect($chest)) {
+            return $redirect;
+        }
+
         /** @var User $user */
         $user = Auth::user();
 
@@ -172,6 +191,15 @@ class ItemController extends Controller
         return view('item::info', [
             'page' => $this->getItemInfoPage->executeByShareItemId($id, $user->player),
         ]);
+    }
+
+    private function lockedChestRedirect(int $chestId): ?RedirectResponse
+    {
+        if (! $this->lockpickingService->isLockedChest($chestId)) {
+            return null;
+        }
+
+        return redirect()->route('items.lockpick.show', ['id' => $chestId]);
     }
 
     public function useItem(Request $request, int $id): JsonResponse

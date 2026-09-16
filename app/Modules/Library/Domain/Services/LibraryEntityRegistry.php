@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Library;
+namespace App\Modules\Library\Domain\Services;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;

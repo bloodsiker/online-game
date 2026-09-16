@@ -359,11 +359,13 @@
                                         onmouseout="showItemInfo(this,event,0)"
                                     @endif>
                                     <img src="{{ $item->image }}" alt="{{ $item->name }}">
-                                    <span class="loot-quantity">×{{ $item->count }}</span>
+                                    @if((int) $item->count > 1)
+                                        <span class="loot-quantity">×{{ $item->count }}</span>
+                                    @endif
                                 </div>
                                 <div class="loot-card-content">
                                     <div>
-                                        <div class="loot-item-name">
+                                        <div class="loot-item-name" @if(!empty($item->rarityColor)) style="color: {{ $item->rarityColor }}" @endif>
                                             @if(isset($item->infoUrl, $item->shareItemId))
                                                 <a data-id="{{ $item->shareItemId }}"
                                                    href="{{ $item->infoUrl }}"
@@ -384,9 +386,21 @@
                                         </div>
                                     </div>
                                     <div class="loot-card-action">
-                                        <b class="butt2 pointer"><b>
-                                            <input value="{{ $item->actionLabel }}" type="button" onclick="window.location.href = @js($item->actionUrl)">
-                                        </b></b>
+                                        @if($item->lockpickingUrl !== null)
+                                            <b class="butt2 pointer"><b>
+                                                <input value="{{ $item->actionLabel }}" type="button"
+                                                       onclick="window.parent.openLockpickingModal(@js($item->lockpickingUrl))">
+                                            </b></b>
+                                        @elseif($item->actionLabel === 'Открыть')
+                                            <form method="post" action="{{ $item->actionUrl }}">
+                                                @csrf
+                                                <b class="butt2 pointer"><b><input value="{{ $item->actionLabel }}" type="submit"></b></b>
+                                            </form>
+                                        @else
+                                            <b class="butt2 pointer"><b>
+                                                <input value="{{ $item->actionLabel }}" type="button" onclick="window.location.href = @js($item->actionUrl)">
+                                            </b></b>
+                                        @endif
                                     </div>
                                 </div>
                             </article>

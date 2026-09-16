@@ -14,5 +14,7 @@ final readonly class TakeLocationItemDTO
         public string $infoUrl,
         public string $actionLabel,
         public string $actionUrl,
+        public ?string $lockpickingUrl = null,
+        public ?string $rarityColor = null,
     ) {}
 }

@@ -12,5 +12,7 @@ final readonly class ItemLocationEntryDTO
         public int $count,
         public string $actionLabel,
         public string $actionUrl,
+        public ?string $lockpickingUrl = null,
+        public ?string $rarityColor = null,
     ) {}
 }

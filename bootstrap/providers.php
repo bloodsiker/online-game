@@ -10,6 +10,7 @@ use App\Modules\Event\EventServiceProvider;
 use App\Modules\Friend\FriendServiceProvider;
 use App\Modules\Interface\InterfaceServiceProvider;
 use App\Modules\Item\ItemServiceProvider;
+use App\Modules\Library\LibraryServiceProvider;
 use App\Modules\Location\LocationServiceProvider;
 use App\Modules\MagicSkill\MagicSkillServiceProvider;
 use App\Modules\Monster\MonsterServiceProvider;
@@ -36,6 +37,7 @@ return [
     FriendServiceProvider::class,
     InterfaceServiceProvider::class,
     ItemServiceProvider::class,
+    LibraryServiceProvider::class,
     LocationServiceProvider::class,
     MagicSkillServiceProvider::class,
     MonsterServiceProvider::class,

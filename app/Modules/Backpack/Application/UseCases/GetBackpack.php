@@ -9,6 +9,7 @@ use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Domain\Contracts\ItemReadRepository;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class GetBackpack
@@ -61,6 +62,18 @@ class GetBackpack
             ->map(static fn (mixed $id): int => (int) $id)
             ->values()
             ->all();
+        $lockedChestItemIds = $data->getBackpack()
+            ->filter(static function ($backpack): bool {
+                $shareItem = $backpack->item->itemInfo;
+
+                return $shareItem->type === ShareItemType::CHEST
+                    && ! $backpack->item->is_open
+                    && ($shareItem->lockConfig?->lock_required_skill ?? 0) > 0;
+            })
+            ->pluck('item_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
         $debuffTargets = $this->itemReadRepository->getOnlineUsersOnLocation($user)
             ->filter(fn (User $target): bool => $target->player !== null)
             ->map(fn (User $target): array => ['id' => $target->player->id, 'name' => $target->name])
@@ -70,6 +83,6 @@ class GetBackpack
         $this->collector->collectFrom(new BackpackItemTooltipStrategy($data->getBackpack()));
         $itemTooltipScript = $this->collector->renderScript();
 
-        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'learnableRecipeItemIds');
+        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'learnableRecipeItemIds', 'lockedChestItemIds');
     }
 }

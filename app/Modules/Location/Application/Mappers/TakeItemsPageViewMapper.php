@@ -18,6 +18,9 @@ class TakeItemsPageViewMapper
             items: $items->map(
                 static function ($item): TakeLocationItemDTO {
                     $isChest = $item->item->itemInfo->type === ShareItemType::CHEST;
+                    $requiresLockpicking = $isChest
+                        && ! $item->item->is_open
+                        && ($item->item->itemInfo->lockConfig?->lock_required_skill ?? 0) > 0;
 
                     return new TakeLocationItemDTO(
                         shareItemId: (int) $item->item->share_item_id,
@@ -33,6 +36,10 @@ class TakeItemsPageViewMapper
                                 ? route('items.view_chest', ['id' => $item->item->id])
                                 : route('items.open_chest', ['id' => $item->item->id]))
                             : route('items.pick_up', ['id' => $item->item->id]),
+                        lockpickingUrl: $requiresLockpicking
+                            ? route('items.lockpick.show', ['id' => $item->item->id, 'modal' => 1])
+                            : null,
+                        rarityColor: $item->item->itemInfo->rarity?->color(),
                     );
                 }
             )->all(),

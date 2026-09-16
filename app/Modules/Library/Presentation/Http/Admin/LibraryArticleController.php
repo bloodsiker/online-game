@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Modules\Library\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\LibraryArticle;
-use App\Models\LibraryCategory;
-use App\Services\Library\LibraryEntityRegistry;
+use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

@@ -18,6 +18,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
             'item.effects',
             'item.useLimit',
             'item.requirements.skill',
+            'item.lockpickConfig',
         ]);
 
         foreach ($shopItems as $shopItem) {

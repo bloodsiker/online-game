@@ -20,6 +20,19 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-rarity-upgrade" href="#tab-rarity-upgrade" data-bs-toggle="tab">Апгрейд редкости</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-requirements" href="#tab-requirements" data-bs-toggle="tab">Требования</a>
+                            </li>
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-target="#tab-recipe" href="#tab-recipe" data-bs-toggle="tab">Рецепт</a>
+                                </li>
+                            @endif
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-target="#tab-lock" href="#tab-lock" data-bs-toggle="tab">Замок и ловушка</a>
+                                </li>
+                            @endif
                             @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::GEM)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-gem" href="#tab-gem" data-bs-toggle="tab">Камень</a>
@@ -217,6 +230,7 @@
                                                 <input type="number" min="0" max="100" class="form-control" name="gathering_double_chance_percent" value="{{ $item->gathering_double_chance_percent }}">
                                                 <small class="form-text text-muted">Шанс получить ×2 ресурса за одну добычу с этим инструментом в руке. 0 — без шанса.</small>
                                             </div>
+
                                         </div>
 
                                         <div class="col-lg-2">
@@ -291,9 +305,82 @@
                                                 </select>
                                                 <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Является отмычкой</label>
+                                                <select class="form-control" name="is_lockpick">
+                                                    <option value="0" @selected(!$item->is_lockpick)>Нет</option>
+                                                    <option value="1" @selected($item->is_lockpick)>Да</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Тир отмычки</label>
+                                                <input type="number" min="1" max="6" class="form-control" name="lockpick_tier" value="{{ old('lockpick_tier', $item->lockpickConfig?->tier ?? 1) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Ускорение взлома, %</label>
+                                                <input type="number" min="0" max="90" class="form-control" name="lockpick_speed_bonus_percent" value="{{ old('lockpick_speed_bonus_percent', $item->lockpickConfig?->speed_bonus_percent ?? 0) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Шанс сохранить при неудаче, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="lockpick_failure_preserve_chance_percent" value="{{ old('lockpick_failure_preserve_chance_percent', $item->lockpickConfig?->failure_preserve_chance_percent ?? 0) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Шанс обезвредить ловушку, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="lockpick_trap_avoid_chance_percent" value="{{ old('lockpick_trap_avoid_chance_percent', $item->lockpickConfig?->trap_avoid_chance_percent ?? 0) }}">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+                                    <div id="tab-lock" class="tab-pane">
+                                        <div class="row pt-3 pb-3">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Сложность замка</label>
+                                                    <input type="number" min="0" max="300" class="form-control" name="lock_required_skill" value="{{ old('lock_required_skill', $item->lockConfig?->lock_required_skill ?? 0) }}" form="item-info-form">
+                                                    <small class="form-text text-muted">0 — сундук открывается без взлома.</small>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Базовое время взлома, сек.</label>
+                                                    <input type="number" min="2" max="3600" class="form-control" name="lock_duration_seconds" value="{{ old('lock_duration_seconds', $item->lockConfig?->lock_duration_seconds ?? 12) }}" form="item-info-form">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Опыт Взломщика за успех</label>
+                                                    <input type="number" min="1" max="65535" class="form-control" name="lockpicking_experience_reward" value="{{ old('lockpicking_experience_reward', $item->lockConfig?->experience_reward) }}" placeholder="Автоматически" form="item-info-form">
+                                                    <small class="form-text text-muted">Пусто — сложность замка / 10, минимум 1.</small>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Снижение шанса взлома, %</label>
+                                                    <input type="number" min="0" max="95" class="form-control" name="trap_chance_penalty_percent" value="{{ old('trap_chance_penalty_percent', $item->lockConfig?->trap_chance_penalty_percent ?? 0) }}" form="item-info-form">
+                                                    <small class="form-text text-muted">Вычитается из базового шанса. Итоговый шанс не опускается ниже 5%.</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Дебафф при неудаче</label>
+                                                    <select class="form-control" name="trap_effect_id" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }' form="item-info-form">
+                                                        <option value=""></option>
+                                                        @foreach($debuffEffects as $effect)
+                                                            <option value="{{ $effect->id }}" @selected((int) old('trap_effect_id', $item->lockConfig?->trap_effect_id) === $effect->id)>{{ $effect->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Длительность дебаффа, сек.</label>
+                                                    <input type="number" min="1" max="86400" class="form-control" name="trap_effect_duration_seconds" value="{{ old('trap_effect_duration_seconds', $item->lockConfig?->trap_effect_duration_seconds ?? 60) }}" form="item-info-form">
+                                                    <small class="form-text text-muted">Повторное наложение обновляет длительность, но не усиливает эффект.</small>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Мгновенный урон от макс. HP, %</label>
+                                                    <input type="number" min="0" max="100" class="form-control" name="trap_damage_percent" value="{{ old('trap_damage_percent', $item->lockConfig?->trap_damage_percent ?? 0) }}" form="item-info-form">
+                                                </div>
+                                                <div class="alert alert-info py-2">Ловушка срабатывает только после неудачного завершения взлома. При успехе или отмене дебафф и урон не применяются.</div>
+                                            </div>
+                                        </div>
+                                        @include('admin.item.partials.chest-contents')
+                                    </div>
+                                @endif
 
                                 <div id="tab-rarity-upgrade" class="tab-pane">
                                     <div class="row pt-3 pb-3">
@@ -317,6 +404,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @include('admin.item.partials.rarity-upgrade-materials')
                                 </div>
 
                                 {{-- КАМЕНЬ --}}
@@ -478,6 +566,84 @@
                                     </div>
                                 @endif
 
+                                {{-- ТРЕБОВАНИЯ ДЛЯ НАДЕВАНИЯ / ИСПОЛЬЗОВАНИЯ --}}
+                                <div id="tab-requirements" class="tab-pane">
+                                    @include('admin.item.partials.requirements')
+                                </div>
+
+                                <div id="tab-recipe" class="tab-pane">
+                                    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
+                                        <div class="row pt-3 pb-3">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Крафт предмета</label>
+                                                    <select id="sel-kraft-item" name="kraft_item_id" form="recipe-update-form" class="form-control">
+                                                        @if($item->recipe->kraft_item_id && $item->recipe->kraftItem)
+                                                            <option value="{{ $item->recipe->kraftItem->id }}" selected>
+                                                                [{{ $item->recipe->kraftItem->id }}] {{ $item->recipe->kraftItem->name }}
+                                                            </option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Процент успеха (%)</label>
+                                                    <input type="number" class="form-control" name="percent" form="recipe-update-form" value="{{ $item->recipe->percent }}" min="0" max="100">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-form-label">Использование рецепта</label>
+                                                    <select name="unlock_type" form="recipe-update-form" class="form-control">
+                                                        @foreach(\App\Modules\Share\Domain\Enums\RecipeUnlockType::cases() as $unlockType)
+                                                            <option value="{{ $unlockType->value }}"
+                                                                    @selected(old('unlock_type', $item->recipe->unlock_type?->value ?? \App\Modules\Share\Domain\Enums\RecipeUnlockType::SINGLE_USE->value) === $unlockType->value)>
+                                                                {{ $unlockType->label() }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <small class="form-text text-muted">Изучаемый рецепт расходуется при изучении и затем навсегда доступен в мастерской. Одноразовый расходуется при крафте в кузнице.</small>
+                                                </div>
+                                                <button class="btn btn-primary btn-sm" form="recipe-update-form">Сохранить рецепт</button>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="mb-3">
+                                                    <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddResource">Добавить ресурс</a>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-bordered mb-none">
+                                                        <thead>
+                                                        <tr>
+                                                            <th width="45"></th>
+                                                            <th>Название</th>
+                                                            <th width="100">Кол-во</th>
+                                                            <th width="70"></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        @forelse($item->recipe->items as $needItem)
+                                                            <tr style="vertical-align: middle">
+                                                                <td>
+                                                                    @if($needItem->image)
+                                                                        <img src="{{ $needItem->image }}" width="36" alt="">
+                                                                    @endif
+                                                                </td>
+                                                                <td><a href="{{ route('admin.item.info', $needItem->id) }}">{{ $needItem->name }}</a></td>
+                                                                <td>{{ $needItem->pivot->count }}</td>
+                                                                <td>
+                                                                    <a href="{{ route('admin.item.recipe.delete_item', ['recipe' => $item->recipe->id, 'item' => $needItem->id]) }}"
+                                                                       class="btn btn-xs btn-danger"
+                                                                       onclick="return confirm('Удалить?')">Удалить</a>
+                                                                </td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr><td colspan="4" class="text-center text-muted">Нет ресурсов</td></tr>
+                                                        @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
                             </div>
 
                             <div class="row mb-3 mt-2">
@@ -490,6 +656,41 @@
                     </div>
                 </div>
             </section>
+
+                    <form id="recipe-update-form" action="{{ $item->recipe ? route('admin.item.recipe.update', $item->recipe->id) : '#' }}" method="post">
+                        {{ csrf_field() }}
+                    </form>
+
+                    {{-- Модалка: добавить ресурс (поза головною формою) --}}
+                    <div id="modalAddResource" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+                        <section class="card">
+                            <form action="{{ $item->recipe ? route('admin.item.recipe.add_item', $item->recipe->id) : '#' }}" method="post">
+                                <header class="card-header"><h2 class="card-title">Добавить ресурс</h2></header>
+                                <div class="card-body">
+                                    {{ csrf_field() }}
+                                    <div class="form-group mb-2">
+                                        <label>Предмет</label>
+                                        <select id="sel-recipe-item" name="share_item_id" class="form-control"></select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>Количество</label>
+                                        <input type="number" class="form-control" name="count" value="1" min="1">
+                                    </div>
+                                </div>
+                                <footer class="card-footer">
+                                    <div class="col-md-12 text-end">
+                                        <button class="btn btn-primary">Добавить</button>
+                                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                                    </div>
+                                </footer>
+                            </form>
+                        </section>
+                    </div>
+
+
+
+
+
         </div>
     </div>
 
@@ -811,162 +1012,44 @@
         </div>
     </div>
 
-    {{-- ТРЕБОВАНИЯ --}}
-    <div class="row">
-        <div class="col-md-12">
-            <section class="card">
-                <header class="card-header">
-                    <h2 class="card-title">Требования для надевания / использования</h2>
-                    <p class="card-subtitle text-muted">Минимальные характеристики персонажа для экипировки или использования предмета</p>
-                </header>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <form action="{{ route('admin.item.requirement.add', $item->id) }}" method="post" id="req-form">
-                                {{ csrf_field() }}
-                                <div class="form-group mb-2">
-                                    <label class="col-form-label">Тип требования</label>
-                                    <select name="type" class="form-control" id="req-type" onchange="updateReqFields()">
-                                        @foreach($requirementTypes as $rType)
-                                            <option value="{{ $rType->value }}">{{ $rType->label() }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2" id="req-stat-field" style="display:none">
-                                    <label class="col-form-label">Характеристика</label>
-                                    <select name="stat_key" class="form-control">
-                                        @foreach($playerStatKeys as $key)
-                                            <option value="{{ $key->value }}">{{ $key->label() }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2" id="req-skill-field" style="display:none">
-                                    <label class="col-form-label">Навык</label>
-                                    <select name="skill_id" class="form-control" data-plugin-selectTwo>
-                                        @foreach($skills as $skill)
-                                            <option value="{{ $skill->id }}">{{ $skill->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="col-form-label">Минимальное значение</label>
-                                    <input type="number" class="form-control" name="min_value" value="1" min="1">
-                                </div>
-                                <button class="btn btn-primary btn-sm">Добавить требование</button>
-                            </form>
-                            <script>
-                                function updateReqFields() {
-                                    var type = document.getElementById('req-type').value;
-                                    document.getElementById('req-stat-field').style.display  = type === 'stat'  ? '' : 'none';
-                                    document.getElementById('req-skill-field').style.display = type === 'skill' ? '' : 'none';
-                                }
-                                updateReqFields();
-                            </script>
-                        </div>
-                        <div class="col-md-8">
-                            <table class="table table-hover table-bordered mb-none">
-                                <thead>
-                                <tr>
-                                    <th>Тип</th>
-                                    <th>Условие</th>
-                                    <th width="100">Мин. значение</th>
-                                    <th width="70"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @forelse($item->requirements as $req)
-                                    <tr style="vertical-align: middle">
-                                        <td>{{ $req->type->label() }}</td>
-                                        <td>{{ $req->label() }}</td>
-                                        <td>{{ $req->min_value }}</td>
-                                        <td>
-                                            <a href="{{ route('admin.item.requirement.delete', ['item' => $item->id, 'requirement' => $req->id]) }}"
-                                               class="btn btn-xs btn-danger"
-                                               onclick="return confirm('Удалить?')">Удалить</a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4" class="text-center text-muted">Нет требований</td></tr>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
+    {{-- Формы вынесены из основной формы предмета; элементы внутри таба ссылаются на них через form="...". --}}
+    <form id="req-form" action="{{ route('admin.item.requirement.add', $item->id) }}" method="post" class="d-none">
+        @csrf
+    </form>
+    <form id="rarity-upgrade-material-add-form" action="{{ route('admin.item.rarity_upgrade.material.add', $item->id) }}" method="post" class="d-none">
+        @csrf
+    </form>
+    @foreach($item->rarityUpgradeMaterials as $material)
+        <form id="rarity-upgrade-material-delete-form-{{ $material->id }}"
+              action="{{ route('admin.item.rarity_upgrade.material.delete', ['item' => $item->id, 'material' => $material->id]) }}"
+              method="post" class="d-none">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
 
-    {{-- МАТЕРИАЛЫ АПГРЕЙДА РЕДКОСТИ --}}
-    <div class="row">
-        <div class="col-md-12">
-            <section class="card">
-                <header class="card-header">
-                    <h2 class="card-title">Материалы для апгрейда редкости</h2>
-                    <p class="card-subtitle text-muted">Списываются вместе с монетами при превращении предмета в настроенный результат.</p>
-                </header>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <form action="{{ route('admin.item.rarity_upgrade.material.add', $item->id) }}" method="post">
-                                @csrf
-                                <div class="form-group mb-2">
-                                    <label class="col-form-label">Материал</label>
-                                    <select name="share_item_id" class="form-control" data-plugin-selectTwo required>
-                                        @foreach($upgradeTargets as $target)
-                                            <option value="{{ $target->id }}">[{{ $target->id }}] {{ $target->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="col-form-label">Количество</label>
-                                    <input type="number" min="1" name="count" value="1" class="form-control" required>
-                                </div>
-                                <button class="btn btn-primary btn-sm">Добавить материал</button>
-                            </form>
-                        </div>
-                        <div class="col-md-8">
-                            <table class="table table-hover table-bordered mb-none">
-                                <thead><tr><th width="45"></th><th>Материал</th><th width="110">Количество</th><th width="70"></th></tr></thead>
-                                <tbody>
-                                @forelse($item->rarityUpgradeMaterials as $material)
-                                    <tr style="vertical-align: middle">
-                                        <td><img src="{{ $material->image }}" width="36" alt=""></td>
-                                        <td><a href="{{ route('admin.item.info', $material->id) }}">{{ $material->name }}</a></td>
-                                        <td>{{ $material->pivot->count }}</td>
-                                        <td>
-                                            <form action="{{ route('admin.item.rarity_upgrade.material.delete', ['item' => $item->id, 'material' => $material->id]) }}" method="post">
-                                                @csrf @method('DELETE')
-                                                <button class="btn btn-xs btn-danger" onclick="return confirm('Удалить?')">Удалить</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4" class="text-center text-muted">Материалы не требуются</td></tr>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+        <form id="chest-content-add-form" action="{{ route('admin.item.chest_content.add', $item->id) }}" method="post" class="d-none">@csrf</form>
+        @foreach($item->itemHasItems as $containedItem)
+            <form id="chest-content-update-{{ $containedItem->id }}" action="{{ route('admin.item.chest_content.update', ['item' => $item->id, 'containedItem' => $containedItem->id]) }}" method="post" class="d-none">
+                @csrf
+                @method('PATCH')
+            </form>
+            <form id="chest-content-delete-{{ $containedItem->id }}" action="{{ route('admin.item.chest_content.delete', ['item' => $item->id, 'containedItem' => $containedItem->id]) }}" method="post" class="d-none">
+                @csrf
+                @method('DELETE')
+            </form>
+        @endforeach
+    @endif
 
-    {{-- СОДЕРЖИМОЕ / ПОБОЧНЫЙ ДРОП --}}
-    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST || $item->type->isGatheringResource())
+    {{-- ДОПОЛНИТЕЛЬНЫЕ РЕСУРСЫ ПРИ ДОБЫЧЕ --}}
+    @if($item->type->isGatheringResource())
         <div class="row">
             <div class="col-md-12">
                 <section class="card">
                     <header class="card-header">
-                        <h2 class="card-title">Содержимое / побочный дроп</h2>
-                        <p class="card-subtitle text-muted">
-                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
-                                При открытии сундука каждый предмет разыгрывается независимо с указанным шансом.
-                            @else
-                                При добыче этого ресурса каждый предмет ниже может дополнительно выпасть независимо, с указанным шансом (например, смола вместе с бревном).
-                            @endif
-                        </p>
+                        <h2 class="card-title">Дополнительные ресурсы</h2>
+                        <p class="card-subtitle text-muted">При добыче этого ресурса каждый предмет ниже может дополнительно выпасть независимо, с указанным шансом.</p>
                     </header>
                     <div class="card-body">
                         <div class="row">
@@ -1051,120 +1134,17 @@
         </div>
     @endif
 
-    {{-- РЕЦЕПТ (только для типа RECIPE) --}}
-    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
-        <div class="row">
-            <div class="col-md-12">
-                <section class="card">
-                    <header class="card-header"><h2 class="card-title">Рецепт</h2></header>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <form action="{{ route('admin.item.recipe.update', $item->recipe->id) }}" method="post">
-                                    {{ csrf_field() }}
-                                    <div class="form-group">
-                                        <label class="col-form-label">Крафт предмета</label>
-                                        <select id="sel-kraft-item" name="kraft_item_id" class="form-control">
-                                            @if($item->recipe->kraft_item_id && $item->recipe->kraftItem)
-                                                <option value="{{ $item->recipe->kraftItem->id }}" selected>
-                                                    [{{ $item->recipe->kraftItem->id }}] {{ $item->recipe->kraftItem->name }}
-                                                </option>
-                                            @endif
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-form-label">Процент успеха (%)</label>
-                                        <input type="number" class="form-control" name="percent" value="{{ $item->recipe->percent }}" min="0" max="100">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-form-label">Использование рецепта</label>
-                                        <select name="unlock_type" class="form-control">
-                                            @foreach(\App\Modules\Share\Domain\Enums\RecipeUnlockType::cases() as $unlockType)
-                                                <option value="{{ $unlockType->value }}"
-                                                        @selected(old('unlock_type', $item->recipe->unlock_type?->value ?? \App\Modules\Share\Domain\Enums\RecipeUnlockType::SINGLE_USE->value) === $unlockType->value)>
-                                                    {{ $unlockType->label() }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Изучаемый рецепт расходуется при изучении и затем навсегда доступен в мастерской. Одноразовый расходуется при крафте в кузнице.</small>
-                                    </div>
-                                    <button class="btn btn-primary btn-sm">Сохранить рецепт</button>
-                                </form>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddResource">Добавить ресурс</a>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-bordered mb-none">
-                                        <thead>
-                                        <tr>
-                                            <th width="45"></th>
-                                            <th>Название</th>
-                                            <th width="100">Кол-во</th>
-                                            <th width="70"></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @forelse($item->recipe->items as $needItem)
-                                            <tr style="vertical-align: middle">
-                                                <td>
-                                                    @if($needItem->image)
-                                                        <img src="{{ $needItem->image }}" width="36" alt="">
-                                                    @endif
-                                                </td>
-                                                <td><a href="{{ route('admin.item.info', $needItem->id) }}">{{ $needItem->name }}</a></td>
-                                                <td>{{ $needItem->pivot->count }}</td>
-                                                <td>
-                                                    <a href="{{ route('admin.item.recipe.delete_item', ['recipe' => $item->recipe->id, 'item' => $needItem->id]) }}"
-                                                       class="btn btn-xs btn-danger"
-                                                       onclick="return confirm('Удалить?')">Удалить</a>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr><td colspan="4" class="text-center text-muted">Нет ресурсов</td></tr>
-                                        @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        {{-- Модалка: добавить ресурс --}}
-        <div id="modalAddResource" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
-            <section class="card">
-                <form action="{{ route('admin.item.recipe.add_item', $item->recipe->id) }}" method="post">
-                    <header class="card-header"><h2 class="card-title">Добавить ресурс</h2></header>
-                    <div class="card-body">
-                        {{ csrf_field() }}
-                        <div class="form-group mb-2">
-                            <label>Предмет</label>
-                            <select id="sel-recipe-item" name="share_item_id" class="form-control"></select>
-                        </div>
-                        <div class="form-group mb-2">
-                            <label>Количество</label>
-                            <input type="number" class="form-control" name="count" value="1" min="1">
-                        </div>
-                    </div>
-                    <footer class="card-footer">
-                        <div class="col-md-12 text-end">
-                            <button class="btn btn-primary">Добавить</button>
-                            <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
-                        </div>
-                    </footer>
-                </form>
-            </section>
-        </div>
-    @endif
-
 @include('admin.layout.summernote', ['selector' => 'textarea[name=description]'])
 
 @push('footer_scripts')
 <script>
+    if (window.location.hash === '#tab-requirements') {
+        const requirementsTab = document.querySelector('[data-bs-target="#tab-requirements"]');
+        if (requirementsTab && window.bootstrap) {
+            bootstrap.Tab.getOrCreateInstance(requirementsTab).show();
+        }
+    }
+
     document.getElementById('image').addEventListener('change', function () {
         const file = this.files[0];
         if (file) {

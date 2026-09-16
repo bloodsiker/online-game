@@ -17,6 +17,7 @@ class ClanWarehouseItemTooltipStrategy implements ItemTooltipStrategyInterface
             'item.itemInfo.stats',
             'item.itemInfo.effects',
             'item.itemInfo.useLimit',
+            'item.itemInfo.lockpickConfig',
         ]);
 
         foreach ($warehouseItems as $warehouseItem) {

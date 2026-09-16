@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockConfig;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockpickConfig;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -62,6 +64,9 @@ use Illuminate\Support\Carbon;
  * @property int|null $skill_exp
  * @property int|null $gathering_time_seconds
  * @property int|null $gathering_respawn_seconds
+ * @property bool $is_lockpick
+ * @property-read ShareItemLockConfig|null $lockConfig
+ * @property-read ShareItemLockpickConfig|null $lockpickConfig
  * @property string|null $tool_family
  * @property int $gathering_speed_bonus_percent
  * @property int $gathering_double_chance_percent
@@ -139,6 +144,7 @@ class ShareItem extends Model
         'gathering_double_chance_percent' => 'integer',
         'upgrade_gold_cost' => 'integer',
         'drop_direct_to_backpack' => 'boolean',
+        'is_lockpick' => 'boolean',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];
@@ -152,6 +158,16 @@ class ShareItem extends Model
     public function requiredActiveEffect(): BelongsTo
     {
         return $this->belongsTo(Effect::class, 'required_active_effect_id');
+    }
+
+    public function lockConfig(): HasOne
+    {
+        return $this->hasOne(ShareItemLockConfig::class);
+    }
+
+    public function lockpickConfig(): HasOne
+    {
+        return $this->hasOne(ShareItemLockpickConfig::class);
     }
 
     public function magicSkillBook(): HasOne

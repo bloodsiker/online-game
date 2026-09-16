@@ -6,7 +6,6 @@ use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HotbarController;
-use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\SlotController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -54,9 +53,6 @@ Route::get('/login/{id}', [HomeController::class, 'login'])->name('login.as');
 // })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
 
 Route::get('/error', [ErrorController::class, 'index'])->name('error');
-
-Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
-Route::get('/library/{slug}', [LibraryController::class, 'show'])->name('library.show');
 
 // Легаси-адрес прода: старые ссылки и закэшированный JS ведут на artifact_info.php
 Route::get('/artifact_info.php', function (): mixed {

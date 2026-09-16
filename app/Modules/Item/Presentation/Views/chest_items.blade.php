@@ -27,7 +27,12 @@
             <tr class="l0">
                 <td class="itm"><img src="{{ $item->image }}" class="itm">{{ $item->name }}</td>
                 <td width="30" align="center">x{{ $item->count }}</td>
-                <td><a href="{{ $item->pickupUrl }}">поднять</a>&nbsp;»</td>
+                <td>
+                    <form method="post" action="{{ $item->pickupUrl }}" style="display:inline">
+                        @csrf
+                        <button type="submit" style="border:0;background:none;padding:0;color:#000;text-decoration:underline;cursor:pointer;font:inherit">поднять</button>&nbsp;»
+                    </form>
+                </td>
             </tr>
         @endforeach
         <tr class="t0"><td colspan="3"><b>Bceгo: {{ $page->count }}</b></td></tr>

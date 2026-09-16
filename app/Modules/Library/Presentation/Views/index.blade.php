@@ -1,4 +1,4 @@
-@extends('library.layout')
+@extends('library::layout')
 
 @section('title', $selectedCategory?->name ?? 'Все статьи')
 @section('panel-title', $selectedCategory?->name ?? 'Библиотека')
@@ -51,6 +51,6 @@
             @endforelse
             </tbody>
         </table>
-        <div class="library-pagination">{{ $articles->links('library.pagination') }}</div>
+        <div class="library-pagination">{{ $articles->links('library::pagination') }}</div>
     @endif
 @endsection

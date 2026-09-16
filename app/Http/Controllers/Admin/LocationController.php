@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -12,6 +15,7 @@ use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class LocationController extends Controller
@@ -53,9 +57,14 @@ class LocationController extends Controller
         }
 
         $location->load(['map', 'northSide', 'southSide', 'eastSide', 'westSide', 'upSide', 'downSide', 'monsters']);
-        $monsters = Monster::orderBy('name')->get();
+        $locationItems = ItemOnLocation::query()
+            ->with('item.itemInfo')
+            ->where('location_id', $location->id)
+            ->whereNull('dungeon_session_id')
+            ->orderByDesc('id')
+            ->get();
 
-        return view('admin.location.info', compact('location', 'monsters'));
+        return view('admin.location.info', compact('location', 'locationItems'));
     }
 
     public function addMonster(Request $request, Location $location): RedirectResponse
@@ -89,6 +98,47 @@ class LocationController extends Controller
         MapMonstersCache::flush();
 
         return redirect()->back()->with('success', 'Моб удалён.');
+    }
+
+    public function addItem(Request $request, Location $location): RedirectResponse
+    {
+        $data = $request->validate([
+            'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
+            'count' => ['required', 'integer', 'min:1', 'max:10000'],
+        ]);
+
+        DB::transaction(function () use ($data, $location): void {
+            $item = Item::query()->create(['share_item_id' => $data['share_item_id']]);
+
+            $slot = new ItemOnLocation;
+            $slot->item_id = $item->id;
+            $slot->location_id = $location->id;
+            $slot->dungeon_session_id = null;
+            $slot->count = $data['count'];
+            $slot->expires_at = null;
+            $slot->save();
+        });
+
+        return redirect()->back()->with('success', 'Предмет добавлен на локацию.');
+    }
+
+    public function deleteItem(Location $location, int $locationItem): RedirectResponse
+    {
+        $slot = ItemOnLocation::query()
+            ->where('id', $locationItem)
+            ->where('location_id', $location->id)
+            ->firstOrFail();
+
+        $itemId = $slot->item_id;
+        $slot->delete();
+
+        $stillUsed = Backpack::query()->where('item_id', $itemId)->exists()
+            || ItemOnLocation::query()->where('item_id', $itemId)->exists();
+        if (! $stillUsed) {
+            Item::query()->whereKey($itemId)->delete();
+        }
+
+        return redirect()->back()->with('success', 'Предмет убран с локации.');
     }
 
     private function fillLocation(Location $location, Request $request): void

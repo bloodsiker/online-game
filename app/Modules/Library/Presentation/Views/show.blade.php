@@ -1,4 +1,4 @@
-@extends('library.layout')
+@extends('library::layout')
 
 @section('title', $article->title)
 @section('panel-title', $article->title)

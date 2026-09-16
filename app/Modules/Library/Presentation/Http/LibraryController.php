@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Modules\Library\Presentation\Http;
 
-use App\Models\LibraryArticle;
-use App\Models\LibraryCategory;
-use App\Services\Library\LibraryEntityRegistry;
-use App\Services\Library\LibraryShortcodeRenderer;
+use App\Http\Controllers\Controller;
+use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
+use App\Modules\Library\Domain\Services\LibraryShortcodeRenderer;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,7 +57,7 @@ class LibraryController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('library.index', compact('categories', 'articles', 'selectedCategory'));
+        return view('library::index', compact('categories', 'articles', 'selectedCategory'));
     }
 
     public function show(
@@ -102,7 +103,7 @@ class LibraryController extends Controller
             'label' => $link->custom_label ?: ($entities->label($link->entity_type, (int) $link->entity_id) ?? '#'.$link->entity_id),
         ]);
 
-        return view('library.show', [
+        return view('library::show', [
             'article' => $article,
             'selectedCategory' => $navigationCategory,
             'linkedEntities' => $linkedEntities,

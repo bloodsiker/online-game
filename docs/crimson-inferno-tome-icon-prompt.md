@@ -1,0 +1,7 @@
+# Промпт для иконки «Фолиант Багрового Инферно» (премиум, heroic)
+
+Переименован из «Жезл Багрового Пламени» (id981) в фолиант — `skill_id` уже был 11 («Владение фолиантом»), статы не менялись. Премиум/героическая редкость — в отличие от промптов «Архимаг»/«Астрал» (без украшений), здесь украшения намеренно разрешены, чтобы предмет визуально выделялся как топовый.
+
+```
+Extremely ornate premium grimoire, "Crimson Inferno" heroic-rarity fantasy game weapon icon — the most visually spectacular item in its tier, clearly a top-rank premium artifact. Charred crimson leather cover with elaborate gold filigree scrollwork bordering the edges, a large faceted ruby embedded in the center that glows from within like a burning coal, the book's pages glowing white-hot at the edges as if barely containing molten fire, wisps of ember and smoke curling from between the pages, a heavy gold chain-and-clasp binding, dramatic and imposing silhouette. Isolated on a fully transparent background, PNG format, item only, no background elements, no drop shadow. A thin bright white outline hugging the item's silhouette, with a soft white glow radiating outward from that outline that gradually fades into the transparent background, separating it clearly from any background it gets placed over. Square composition, item centered and filling most of the frame, --ar 1:1. Bold clear silhouette, rich but readable detail, strong value contrast — must read clearly as a small icon while still looking premium.
+```

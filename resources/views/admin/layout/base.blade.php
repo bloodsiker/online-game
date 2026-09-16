@@ -115,7 +115,8 @@
             .find(function (button) {
                 const label = button.tagName === 'INPUT' ? button.value : button.textContent;
 
-                return button.type !== 'button'
+                return (!designatedForm || button.form === designatedForm)
+                    && button.type !== 'button'
                     && !button.disabled
                     && /^(сохранить|создать)(?:\s|$)/i.test(label.trim());
             });

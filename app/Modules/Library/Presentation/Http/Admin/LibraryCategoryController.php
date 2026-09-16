@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Modules\Library\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\LibraryCategory;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;

@@ -76,7 +76,7 @@ class EloquentLocationReadRepository implements LocationReadRepository
     public function getItemsOnLocation(User $user, int $locationId): Collection
     {
         return $this->visibleItemsOnLocationQuery($user, $locationId)
-            ->with(['item', 'item.itemInfo'])
+            ->with(['item', 'item.itemInfo.lockConfig'])
             ->get();
     }
 

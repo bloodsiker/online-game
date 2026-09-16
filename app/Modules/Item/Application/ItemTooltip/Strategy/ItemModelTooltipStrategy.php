@@ -24,6 +24,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
             'itemInfo.effects',
             'itemInfo.useLimit',
             'itemInfo.requirements.skill',
+            'itemInfo.lockpickConfig',
             'gems.gemInfo',
             'runes.runeInfo',
         ]);

@@ -16,6 +16,9 @@
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-lock" href="#tab-lock" data-bs-toggle="tab">Замок и ловушка</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-gem" href="#tab-gem" data-bs-toggle="tab">Камень</a>
                             </li>
                             <li class="nav-item">
@@ -29,7 +32,7 @@
                             </li>
                         </ul>
 
-                        <form action="{{ route('admin.item.store') }}" method="post" enctype="multipart/form-data">
+                        <form id="item-create-form" action="{{ route('admin.item.store') }}" method="post" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="tab-content">
 
@@ -51,6 +54,22 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Тир отмычки</label>
+                                                <input type="number" min="1" max="6" class="form-control" name="lockpick_tier" value="{{ old('lockpick_tier', 1) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Ускорение взлома, %</label>
+                                                <input type="number" min="0" max="90" class="form-control" name="lockpick_speed_bonus_percent" value="{{ old('lockpick_speed_bonus_percent', 0) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Шанс сохранить при неудаче, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="lockpick_failure_preserve_chance_percent" value="{{ old('lockpick_failure_preserve_chance_percent', 0) }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Шанс обезвредить ловушку, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" name="lockpick_trap_avoid_chance_percent" value="{{ old('lockpick_trap_avoid_chance_percent', 0) }}">
                                             </div>
 
                                             <div class="form-group">
@@ -256,6 +275,61 @@
                                                 </select>
                                                 <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="is_lockpick">Является отмычкой</label>
+                                                <select class="form-control" name="is_lockpick" id="is_lockpick">
+                                                    <option value="0" @selected(old('is_lockpick', '0') === '0')>Нет</option>
+                                                    <option value="1" @selected(old('is_lockpick') === '1')>Да</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="tab-lock" class="tab-pane">
+                                    <div class="row pt-3 pb-3">
+                                        <div class="col-lg-6">
+                                            <div class="alert alert-info py-2">Настройки применяются только к предметам типа «Сундук». Для обычного сундука оставьте сложность замка равной 0.</div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="lock_required_skill">Сложность замка</label>
+                                                <input type="number" min="0" max="300" class="form-control" id="lock_required_skill" name="lock_required_skill" value="{{ old('lock_required_skill', 0) }}" form="item-create-form">
+                                                <small class="form-text text-muted">0 — сундук открывается без взлома.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="lock_duration_seconds">Базовое время взлома, сек.</label>
+                                                <input type="number" min="2" max="3600" class="form-control" id="lock_duration_seconds" name="lock_duration_seconds" value="{{ old('lock_duration_seconds', 12) }}" form="item-create-form">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="lockpicking_experience_reward">Опыт Взломщика за успех</label>
+                                                <input type="number" min="1" max="65535" class="form-control" id="lockpicking_experience_reward" name="lockpicking_experience_reward" value="{{ old('lockpicking_experience_reward') }}" placeholder="Автоматически" form="item-create-form">
+                                                <small class="form-text text-muted">Пусто — сложность замка / 10, минимум 1.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="trap_chance_penalty_percent">Снижение шанса взлома, %</label>
+                                                <input type="number" min="0" max="95" class="form-control" id="trap_chance_penalty_percent" name="trap_chance_penalty_percent" value="{{ old('trap_chance_penalty_percent', 0) }}" form="item-create-form">
+                                                <small class="form-text text-muted">Вычитается из базового шанса. Итоговый шанс не опускается ниже 5%.</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="trap_effect_id">Дебафф при неудаче</label>
+                                                <select class="form-control" id="trap_effect_id" name="trap_effect_id" data-plugin-selectTwo data-plugin-options='{ "placeholder": "Не выбран", "allowClear": true }' form="item-create-form">
+                                                    <option value=""></option>
+                                                    @foreach($debuffEffects as $effect)
+                                                        <option value="{{ $effect->id }}" @selected((int) old('trap_effect_id') === $effect->id)>{{ $effect->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="trap_effect_duration_seconds">Длительность дебаффа, сек.</label>
+                                                <input type="number" min="1" max="86400" class="form-control" id="trap_effect_duration_seconds" name="trap_effect_duration_seconds" value="{{ old('trap_effect_duration_seconds', 60) }}" form="item-create-form">
+                                                <small class="form-text text-muted">Повторное наложение обновляет длительность, но не усиливает эффект.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="trap_damage_percent">Мгновенный урон от макс. HP, %</label>
+                                                <input type="number" min="0" max="100" class="form-control" id="trap_damage_percent" name="trap_damage_percent" value="{{ old('trap_damage_percent', 0) }}" form="item-create-form">
+                                            </div>
+                                            <div class="alert alert-info py-2">Ловушка срабатывает только после неудачного завершения взлома.</div>
                                         </div>
                                     </div>
                                 </div>

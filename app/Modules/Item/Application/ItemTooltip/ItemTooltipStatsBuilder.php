@@ -37,6 +37,18 @@ final class ItemTooltipStatsBuilder
             ];
         }
 
+        if ($item->is_lockpick && $item->lockpickConfig !== null) {
+            $config = $item->lockpickConfig;
+            $requiredSkill = $config->tier === 1 ? 1 : ($config->tier - 1) * 50;
+            array_push($stats,
+                ['title' => 'Тир отмычки', 'value' => (string) $config->tier],
+                ['title' => 'Требуется Взломщик', 'value' => (string) $requiredSkill],
+                ['title' => 'Ускорение взлома', 'value' => '+'.$config->speed_bonus_percent.'%'],
+                ['title' => 'Сохранение при неудаче', 'value' => $config->failure_preserve_chance_percent.'%'],
+                ['title' => 'Обход ловушки', 'value' => $config->trap_avoid_chance_percent.'%'],
+            );
+        }
+
         return $stats;
     }
 

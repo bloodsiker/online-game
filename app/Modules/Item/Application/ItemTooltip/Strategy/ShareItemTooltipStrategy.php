@@ -20,6 +20,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
             'effects',
             'useLimit',
             'requirements.skill',
+            'lockpickConfig',
         ]);
 
         foreach ($shareItems as $shareItem) {

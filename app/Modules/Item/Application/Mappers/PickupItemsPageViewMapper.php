@@ -18,6 +18,9 @@ class PickupItemsPageViewMapper
             items: $items->map(
                 static function ($item): ItemLocationEntryDTO {
                     $isChest = $item->item->itemInfo->type === ShareItemType::CHEST;
+                    $requiresLockpicking = $isChest
+                        && ! $item->item->is_open
+                        && ($item->item->itemInfo->lockConfig?->lock_required_skill ?? 0) > 0;
 
                     return new ItemLocationEntryDTO(
                         image: (string) $item->item->itemInfo->image,
@@ -31,6 +34,10 @@ class PickupItemsPageViewMapper
                                 ? route('items.view_chest', ['id' => $item->item->id])
                                 : route('items.open_chest', ['id' => $item->item->id]))
                             : route('items.pick_up', ['id' => $item->item->id]),
+                        lockpickingUrl: $requiresLockpicking
+                            ? route('items.lockpick.show', ['id' => $item->item->id, 'modal' => 1])
+                            : null,
+                        rarityColor: $item->item->itemInfo->rarity?->color(),
                     );
                 }
             )->all(),

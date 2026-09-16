@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockConfig;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockpickConfig;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
@@ -87,8 +89,9 @@ class ItemController extends Controller
         $toolFamilies = GatheringToolFamily::cases();
         $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
         $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
+        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name')->get();
 
-        return view('admin.item.create', compact('skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds'));
+        return view('admin.item.create', compact('skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'debuffEffects'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -96,6 +99,8 @@ class ItemController extends Controller
         $item = new ShareItem;
         $this->fillItem($item, $request);
         $item->save();
+        $this->syncLockConfig($item, $request);
+        $this->syncLockpickConfig($item, $request);
 
         if ($item->type === ShareItemType::RECIPE) {
             ShareRecipe::firstOrCreate(['share_item_id' => $item->id], [
@@ -120,6 +125,8 @@ class ItemController extends Controller
         if ($request->isMethod('POST')) {
             $this->fillItem($item, $request);
             $item->save();
+            $this->syncLockConfig($item, $request);
+            $this->syncLockpickConfig($item, $request);
 
             $bookError = $this->syncMagicSkillBook($item, $request);
             if ($bookError !== null) {
@@ -137,12 +144,15 @@ class ItemController extends Controller
             'effects',
             'buffs.effect',
             'useLimit',
+            'lockConfig',
+            'lockpickConfig',
             'debuffs.effect',
             'requirements.skill',
             'magicSkillBook',
             'rarityUpgradeTarget',
             'rarityUpgradeMaterials',
             'itemHasItems' => fn ($query) => $query->orderBy('share_items.name'),
+            'lockConfig.trapEffect',
         ]);
 
         $skills = Skill::orderBy('name')->get();
@@ -238,6 +248,10 @@ class ItemController extends Controller
 
             if ($item->useLimit !== null) {
                 $copy->useLimit()->save($item->useLimit->replicate());
+            }
+
+            if ($item->lockConfig !== null) {
+                $copy->lockConfig()->save($item->lockConfig->replicate());
             }
 
             foreach ($item->debuffs as $debuff) {
@@ -565,6 +579,17 @@ class ItemController extends Controller
             'gathering_double_chance_percent' => ['nullable', 'integer', 'between:0,100'],
             'upgrade_to_share_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
             'upgrade_gold_cost' => ['nullable', 'integer', 'min:0', 'max:2147483647'],
+            'lock_required_skill' => ['nullable', 'integer', 'between:0,300'],
+            'lock_duration_seconds' => ['nullable', 'integer', 'between:2,3600'],
+            'lockpicking_experience_reward' => ['nullable', 'integer', 'between:1,65535'],
+            'trap_chance_penalty_percent' => ['nullable', 'integer', 'between:0,95'],
+            'trap_effect_id' => ['nullable', 'integer', 'exists:effects,id'],
+            'trap_effect_duration_seconds' => ['nullable', 'integer', 'between:1,86400'],
+            'trap_damage_percent' => ['nullable', 'integer', 'between:0,100'],
+            'lockpick_tier' => ['nullable', 'integer', 'between:1,6'],
+            'lockpick_speed_bonus_percent' => ['nullable', 'integer', 'between:0,90'],
+            'lockpick_failure_preserve_chance_percent' => ['nullable', 'integer', 'between:0,100'],
+            'lockpick_trap_avoid_chance_percent' => ['nullable', 'integer', 'between:0,100'],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -617,12 +642,13 @@ class ItemController extends Controller
         $item->is_give = (bool) $request->input('is_give', true);
         $item->is_clan_warehouse_allowed = (bool) $request->input('is_clan_warehouse_allowed', true);
         $item->is_droppable = (bool) $request->input('is_droppable', true);
-        $item->is_stackable = $type->isEquipment()
+        $item->is_stackable = $type->isEquipment() || $type === ShareItemType::CHEST
             ? false
             : (bool) $request->input('is_stackable', false);
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->is_use = (bool) $request->input('is_use', false);
+        $item->is_lockpick = (bool) $request->input('is_lockpick', false);
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
         $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
         $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
@@ -675,6 +701,49 @@ class ItemController extends Controller
             $item->innate_passive_type = null;
             $item->innate_passive_value = null;
         }
+    }
+
+    private function syncLockConfig(ShareItem $item, Request $request): void
+    {
+        if ($item->type !== ShareItemType::CHEST) {
+            $item->lockConfig()->delete();
+
+            return;
+        }
+
+        ShareItemLockConfig::query()->updateOrCreate(
+            ['share_item_id' => $item->id],
+            [
+                'lock_required_skill' => (int) $request->input('lock_required_skill', 0),
+                'lock_duration_seconds' => (int) $request->input('lock_duration_seconds', 12),
+                'experience_reward' => $request->filled('lockpicking_experience_reward')
+                    ? (int) $request->input('lockpicking_experience_reward')
+                    : null,
+                'trap_chance_penalty_percent' => (int) $request->input('trap_chance_penalty_percent', 0),
+                'trap_effect_id' => $request->filled('trap_effect_id') ? $request->integer('trap_effect_id') : null,
+                'trap_effect_duration_seconds' => (int) $request->input('trap_effect_duration_seconds', 60),
+                'trap_damage_percent' => (int) $request->input('trap_damage_percent', 0),
+            ],
+        );
+    }
+
+    private function syncLockpickConfig(ShareItem $item, Request $request): void
+    {
+        if (! $item->is_lockpick) {
+            $item->lockpickConfig()->delete();
+
+            return;
+        }
+
+        ShareItemLockpickConfig::query()->updateOrCreate(
+            ['share_item_id' => $item->id],
+            [
+                'tier' => (int) $request->input('lockpick_tier', 1),
+                'speed_bonus_percent' => (int) $request->input('lockpick_speed_bonus_percent', 0),
+                'failure_preserve_chance_percent' => (int) $request->input('lockpick_failure_preserve_chance_percent', 0),
+                'trap_avoid_chance_percent' => (int) $request->input('lockpick_trap_avoid_chance_percent', 0),
+            ],
+        );
     }
 
     /** Возвращает текст ошибки, если заклинание уже привязано к другой книге, иначе null. */
@@ -734,13 +803,17 @@ class ItemController extends Controller
             'min_value' => (int) $request->input('min_value', 1),
         ]);
 
-        return redirect()->back()->with('success', 'Требование добавлено.');
+        return redirect()
+            ->to(route('admin.item.info', $item->id).'#tab-requirements')
+            ->with('success', 'Требование добавлено.');
     }
 
     public function deleteRequirement(ShareItem $item, ShareItemRequirement $requirement): RedirectResponse
     {
         $requirement->delete();
 
-        return redirect()->back()->with('success', 'Требование удалено.');
+        return redirect()
+            ->to(route('admin.item.info', $item->id).'#tab-requirements')
+            ->with('success', 'Требование удалено.');
     }
 }

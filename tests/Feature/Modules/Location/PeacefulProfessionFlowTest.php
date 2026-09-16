@@ -138,6 +138,26 @@ class PeacefulProfessionFlowTest extends TestCase
         ]);
     }
 
+    public function test_gathering_cannot_start_while_lockpicking_is_active(): void
+    {
+        Carbon::setTestNow('2026-08-29 12:00:00');
+        $this->seedGatheringResource();
+        $service = new GatheringService(Mockery::mock(BackpackService::class));
+        $user = User::query()->findOrFail(1);
+        $nodeId = $service->state($user)['nodes'][0]['id'];
+
+        DB::table('lockpicking_attempts')->insert([
+            'player_id' => 1,
+            'expires_at' => now()->addMinute(),
+        ]);
+
+        $result = $service->start($user, $nodeId);
+
+        $this->assertFalse($result->ok);
+        $this->assertSame('Сначала завершите взлом сундука.', $result->message);
+        $this->assertDatabaseMissing('gathering_attempts', ['player_id' => 1]);
+    }
+
     public function test_guaranteed_double_chance_awards_two_resources(): void
     {
         Carbon::setTestNow('2026-08-29 12:00:00');
@@ -612,6 +632,12 @@ class PeacefulProfessionFlowTest extends TestCase
             $table->unsignedBigInteger('gathering_node_id');
             $table->unsignedBigInteger('location_id');
             $table->timestamp('completes_at');
+            $table->timestamp('expires_at');
+            $table->timestamps();
+        });
+        Schema::create('lockpicking_attempts', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id')->unique();
             $table->timestamp('expires_at');
             $table->timestamps();
         });

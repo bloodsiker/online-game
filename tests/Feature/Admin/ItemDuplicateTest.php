@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Http\Controllers\Admin\ItemController;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockConfig;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemBuff;
@@ -53,6 +54,7 @@ class ItemDuplicateTest extends TestCase
             $table->boolean('is_weight')->default(true);
             $table->boolean('is_slot_usable')->default(false);
             $table->boolean('is_use')->default(false);
+            $table->boolean('is_lockpick')->default(false);
             $table->unsignedBigInteger('skill_id')->nullable();
             $table->integer('skill_lvl')->nullable();
             $table->integer('skill_exp')->nullable();
@@ -99,6 +101,18 @@ class ItemDuplicateTest extends TestCase
             $table->unsignedBigInteger('share_item_id')->unique();
             $table->unsignedSmallInteger('max_uses');
             $table->unsignedInteger('period_seconds');
+            $table->timestamps();
+        });
+        Schema::create('share_item_lock_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedSmallInteger('lock_required_skill')->default(0);
+            $table->unsignedSmallInteger('lock_duration_seconds')->default(12);
+            $table->unsignedSmallInteger('experience_reward')->nullable();
+            $table->unsignedTinyInteger('trap_chance_penalty_percent')->default(0);
+            $table->unsignedBigInteger('trap_effect_id')->nullable();
+            $table->unsignedSmallInteger('trap_effect_duration_seconds')->default(60);
+            $table->unsignedTinyInteger('trap_damage_percent')->default(0);
             $table->timestamps();
         });
         Schema::create('share_item_debuffs', function (Blueprint $table): void {
@@ -171,6 +185,14 @@ class ItemDuplicateTest extends TestCase
         ShareItemDebuff::create(['share_item_id' => $item->id, 'effect_id' => 1, 'duration_seconds' => 30]);
         ShareItemRequirement::create(['share_item_id' => $item->id, 'type' => 'level', 'min_value' => 10]);
         ShareItemUseLimit::create(['share_item_id' => $item->id, 'max_uses' => 2, 'period_seconds' => 86400]);
+        ShareItemLockConfig::create([
+            'share_item_id' => $item->id,
+            'lock_required_skill' => 75,
+            'lock_duration_seconds' => 18,
+            'experience_reward' => 9,
+            'trap_chance_penalty_percent' => 12,
+            'trap_damage_percent' => 15,
+        ]);
 
         $recipe = new ShareRecipe;
         $recipe->share_item_id = $item->id;
@@ -184,7 +206,7 @@ class ItemDuplicateTest extends TestCase
         (new ItemController)->duplicate($item);
 
         $copy = ShareItem::where('name', 'Сундук мастера (копия)')->firstOrFail();
-        $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems', 'useLimit']);
+        $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems', 'useLimit', 'lockConfig']);
 
         $this->assertNotSame($item->id, $copy->id);
         $this->assertSame($item->description, $copy->description);
@@ -197,6 +219,10 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame('block', $copy->buffs->sole()->reapply_policy->value);
         $this->assertSame(2, $copy->useLimit->max_uses);
         $this->assertSame(86400, $copy->useLimit->period_seconds);
+        $this->assertSame(75, $copy->lockConfig->lock_required_skill);
+        $this->assertSame(9, $copy->lockConfig->experience_reward);
+        $this->assertSame(12, $copy->lockConfig->trap_chance_penalty_percent);
+        $this->assertSame(15, $copy->lockConfig->trap_damage_percent);
         $this->assertSame(30, $copy->debuffs->sole()->duration_seconds);
         $this->assertSame(10, $copy->requirements->sole()->min_value);
         $this->assertNotNull($copy->recipe);
@@ -209,6 +235,44 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame(2, $copy->itemHasItems->sole()->pivot->min_count);
         $this->assertSame(5, $copy->itemHasItems->sole()->pivot->max_count);
         $this->assertSame(35, $copy->itemHasItems->sole()->pivot->drop_chance);
+    }
+
+    public function test_admin_lock_fields_are_saved_to_the_chest_config(): void
+    {
+        DB::table('effects')->insert([
+            'id' => 7,
+            'name' => 'Ловушка сундука',
+            'slug' => 'chest-trap',
+            'type' => 'debuff',
+        ]);
+
+        $item = ShareItem::create([
+            'name' => 'Запертый сундук',
+            'type' => ShareItemType::CHEST,
+        ]);
+        $request = Request::create('/admin/item/'.$item->id, 'POST', [
+            'lock_required_skill' => 85,
+            'lock_duration_seconds' => 24,
+            'lockpicking_experience_reward' => 13,
+            'trap_chance_penalty_percent' => 17,
+            'trap_effect_id' => 7,
+            'trap_effect_duration_seconds' => 150,
+            'trap_damage_percent' => 11,
+        ]);
+
+        $method = new \ReflectionMethod(ItemController::class, 'syncLockConfig');
+        $method->invoke(new ItemController, $item, $request);
+
+        $this->assertDatabaseHas('share_item_lock_configs', [
+            'share_item_id' => $item->id,
+            'lock_required_skill' => 85,
+            'lock_duration_seconds' => 24,
+            'experience_reward' => 13,
+            'trap_chance_penalty_percent' => 17,
+            'trap_effect_id' => 7,
+            'trap_effect_duration_seconds' => 150,
+            'trap_damage_percent' => 11,
+        ]);
     }
 
     public function test_chest_content_can_be_added_updated_and_deleted(): void

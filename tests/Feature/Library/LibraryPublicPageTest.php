@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Library;
 
 use App\Http\Middleware\AdminMiddleware;
-use App\Models\LibraryArticle;
-use App\Models\LibraryCategory;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;

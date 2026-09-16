@@ -2000,6 +2000,7 @@
     var _droppableItemIds = @json($droppableItemIds ?? []);
     var _debuffTargetItemIds = @json($debuffTargetItemIds ?? []);
     var _learnableRecipeItemIds = @json($learnableRecipeItemIds ?? []);
+    var _lockedChestItemIds = @json($lockedChestItemIds ?? []);
     var _debuffTargets = @json($debuffTargets ?? []);
     var _debuffItemId = null;
 
@@ -2064,7 +2065,15 @@
             case 'unequip': location.href = base + '/put-off/'    + id; break;
             case 'use':
                 if (_ctxItemType === 'chest') {
-                    location.href = base + '/open-chest/' + id;
+                    if (_lockedChestItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                        try {
+                            window.top.openLockpickingModal(base + '/lockpick/' + id + '?modal=1');
+                        } catch (error) {
+                            window.location.href = base + '/lockpick/' + id;
+                        }
+                    } else {
+                        submitItemPost(base + '/open-chest/' + id);
+                    }
                 } else if (_debuffTargetItemIds.indexOf(parseInt(id, 10)) !== -1) {
                     openDebuffTargetDialog(id);
                 } else {
@@ -2087,6 +2096,21 @@
                 } catch(e) {}
                 break;
         }
+    }
+
+    function submitItemPost(url) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+
+        var csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
+
+        document.body.appendChild(form);
+        form.submit();
     }
 
     function openDebuffTargetDialog(itemId) {

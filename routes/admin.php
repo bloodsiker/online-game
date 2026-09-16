@@ -12,8 +12,6 @@ use App\Http\Controllers\Admin\DungeonController;
 use App\Http\Controllers\Admin\InjuryTypeController;
 use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
-use App\Http\Controllers\Admin\LibraryArticleController;
-use App\Http\Controllers\Admin\LibraryCategoryController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LocationGateController;
 use App\Http\Controllers\Admin\MagicSkillController;
@@ -31,20 +29,6 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-Route::get('/library/categories', [LibraryCategoryController::class, 'index'])->name('library.categories.index');
-Route::get('/library/categories/create', [LibraryCategoryController::class, 'create'])->name('library.categories.create');
-Route::post('/library/categories', [LibraryCategoryController::class, 'store'])->name('library.categories.store');
-Route::get('/library/categories/{category}/edit', [LibraryCategoryController::class, 'edit'])->name('library.categories.edit');
-Route::put('/library/categories/{category}', [LibraryCategoryController::class, 'update'])->name('library.categories.update');
-Route::delete('/library/categories/{category}', [LibraryCategoryController::class, 'destroy'])->name('library.categories.destroy');
-Route::get('/library/articles', [LibraryArticleController::class, 'index'])->name('library.articles.index');
-Route::get('/library/articles/create', [LibraryArticleController::class, 'create'])->name('library.articles.create');
-Route::post('/library/articles', [LibraryArticleController::class, 'store'])->name('library.articles.store');
-Route::post('/library/articles/upload-image', [LibraryArticleController::class, 'uploadImage'])->name('library.articles.upload-image');
-Route::get('/library/articles/{article}/edit', [LibraryArticleController::class, 'edit'])->name('library.articles.edit');
-Route::put('/library/articles/{article}', [LibraryArticleController::class, 'update'])->name('library.articles.update');
-Route::delete('/library/articles/{article}', [LibraryArticleController::class, 'destroy'])->name('library.articles.destroy');
 
 Route::get('/clan-skills', [ClanSkillController::class, 'index'])->name('clan_skills');
 Route::match(['GET', 'POST'], '/clan-skill/create', [ClanSkillController::class, 'create'])->name('clan_skill.create');
@@ -172,6 +156,8 @@ Route::get('/locations', [LocationController::class, 'list'])->name('locations')
 Route::post('/location/{location}/monster', [LocationController::class, 'addMonster'])->name('location.monster.add');
 Route::post('/location/{location}/monster/{monster}/aggression', [LocationController::class, 'updateMonsterAggression'])->name('location.monster.aggression');
 Route::get('/location/{location}/monster/{monster}/delete', [LocationController::class, 'deleteMonster'])->name('location.monster.delete');
+Route::post('/location/{location}/item', [LocationController::class, 'addItem'])->name('location.item.add');
+Route::get('/location/{location}/item/{locationItem}/delete', [LocationController::class, 'deleteItem'])->name('location.item.delete');
 
 Route::get('/location-gates', [LocationGateController::class, 'list'])->name('location-gates');
 Route::match(['GET', 'POST'], '/location-gate/create', [LocationGateController::class, 'create'])->name('location-gate.create');

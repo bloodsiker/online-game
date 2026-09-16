@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\LibraryArticle;
-use App\Models\LibraryCategory;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
