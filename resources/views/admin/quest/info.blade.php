@@ -16,6 +16,11 @@
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-stages" href="#tab-stages" data-bs-toggle="tab">
+                                    Этапы <span class="badge badge-primary">{{ $quest->stages->count() }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-objectives" href="#tab-objectives" data-bs-toggle="tab">
                                     Задания <span class="badge badge-primary">{{ $quest->objectives->count() }}</span>
                                 </a>
@@ -83,7 +88,7 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Предыдущий квест</label>
+                                                <label class="col-form-label">Родительский квест <small class="text-muted">(группировка)</small></label>
                                                 <select id="sel-parent-quest" name="parent_quest_id" class="form-control">
                                                     @if($quest->parentQuest)
                                                         <option value="{{ $quest->parentQuest->id }}" selected>[{{ $quest->parentQuest->id }}] {{ $quest->parentQuest->title }}</option>
@@ -91,12 +96,22 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Следующий квест</label>
+                                                <label class="col-form-label">Предыдущий обязательный квест</label>
                                                 <select id="sel-after-quest" name="after_quest_id" class="form-control">
                                                     @if($quest->afterQuest)
                                                         <option value="{{ $quest->afterQuest->id }}" selected>[{{ $quest->afterQuest->id }}] {{ $quest->afterQuest->title }}</option>
                                                     @endif
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Следующие квесты</label>
+                                                <div class="form-control" style="height:auto;min-height:38px;background:#f5f5f5;">
+                                                    @forelse($quest->nextQuests as $nextQuest)
+                                                        <a href="{{ route('admin.quest.info', $nextQuest->id) }}">[{{ $nextQuest->id }}] {{ $nextQuest->title }}</a>{{ !$loop->last ? ', ' : '' }}
+                                                    @empty
+                                                        <span class="text-muted">Нет. Список определяется автоматически по полю «Предыдущий обязательный квест» у других квестов.</span>
+                                                    @endforelse
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -130,9 +145,78 @@
                                 </form>
                             </div>
 
+                            {{-- ЭТАПЫ --}}
+                            <div id="tab-stages" class="tab-pane">
+                                <div class="pt-3">
+                                    <div class="alert alert-info py-2">
+                                        Для этапа ожидания время хранится только на сервере и игроку не показывается.
+                                        В поле реплики укажите нейтральный ответ без даты и остатка времени.
+                                    </div>
+                                    <div class="mb-3">
+                                        <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalStage">Добавить этап</a>
+                                    </div>
+                                    @foreach($quest->stages as $stage)
+                                        <form action="{{ route('admin.quest.stage.update', [$quest->id, $stage->id]) }}" method="post" class="mb-3 p-2" style="border:1px solid #e5e5e5;border-radius:4px;">
+                                            {{ csrf_field() }}
+                                            <div class="row">
+                                                <div class="col-md-1">
+                                                    <label class="col-form-label">Порядок</label>
+                                                    <input type="number" min="1" class="form-control" name="order" value="{{ $stage->order }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Тип</label>
+                                                    <select name="stage_type" class="form-control">
+                                                        <option value="action" @selected($stage->stage_type === 'action')>Обычный</option>
+                                                        <option value="wait" @selected($stage->stage_type === 'wait')>Скрытое ожидание</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Название</label>
+                                                    <input type="text" class="form-control" name="title" value="{{ $stage->title }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">NPC завершения (ID)</label>
+                                                    <input type="number" class="form-control" name="complete_npc_id" value="{{ $stage->complete_npc_id }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Ожидание, сек.</label>
+                                                    <input type="number" min="1" class="form-control" name="wait_duration_seconds" value="{{ $stage->wait_duration_seconds }}">
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end" style="gap:6px;">
+                                                    <button class="btn btn-primary btn-sm">Сохранить</button>
+                                                    <a href="{{ route('admin.quest.stage.delete', [$quest->id, $stage->id]) }}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить этап? Цели этапа будут отвязаны.')">Удалить</a>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Описание этапа</label>
+                                                    <textarea class="form-control" name="description" rows="2">{{ $stage->description }}</textarea>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Реплика, если ещё рано</label>
+                                                    <textarea class="form-control" name="waiting_text" rows="2">{{ $stage->waiting_text }}</textarea>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Реплика после ожидания</label>
+                                                    <textarea class="form-control" name="ready_text" rows="2">{{ $stage->ready_text }}</textarea>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endforeach
+                                    @if($quest->stages->isEmpty())
+                                        <p class="text-muted">Этапов пока нет. Без этапов квест работает по старой схеме.</p>
+                                    @endif
+                                </div>
+                            </div>
+
                             {{-- ЗАДАНИЯ --}}
                             <div id="tab-objectives" class="tab-pane">
                                 <div class="pt-3">
+                                    <div class="alert alert-info py-2">
+                                        Для <b>use_item</b>: выберите предмет; <b>item</b> разрешает использование в любом месте,
+                                        <b>location</b> требует указанную локацию, <b>npc</b> — присутствие NPC в текущей локации,
+                                        <b>monster</b> — присутствие активного монстра. Поле карты дополнительно ограничивает цель картой.
+                                    </div>
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalObjective">Добавить задание</a>
                                     </div>
@@ -151,6 +235,7 @@
                                                         <option value="collect" @selected($obj->type === 'collect')>collect — собрать предмет</option>
                                                         <option value="talk" @selected($obj->type === 'talk')>talk — поговорить с NPC</option>
                                                         <option value="deliver" @selected($obj->type === 'deliver')>deliver — сдать предмет</option>
+                                                        <option value="use_item" @selected($obj->type === 'use_item')>use_item — использовать предмет</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
@@ -159,6 +244,7 @@
                                                         <option value="monster" @selected($obj->target_type === 'monster')>monster</option>
                                                         <option value="npc" @selected($obj->target_type === 'npc')>npc</option>
                                                         <option value="item" @selected($obj->target_type === 'item')>item</option>
+                                                        <option value="location" @selected($obj->target_type === 'location')>location</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-2">
@@ -170,8 +256,8 @@
                                                     <input type="text" class="form-control" name="target_ids" value="{{ !empty($obj->target_ids) ? implode(',', $obj->target_ids) : '' }}" placeholder="85,93">
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="col-form-label">Предмет для сбора (ID)</label>
-                                                    <input type="number" class="form-control" name="share_item_id" value="{{ $obj->share_item_id }}">
+                                                    <label class="col-form-label">Предмет (ShareItem ID)</label>
+                                                    <input type="number" class="form-control" name="share_item_id" value="{{ $obj->share_item_id ?: ($obj->type === 'deliver' ? $obj->target_id : '') }}">
                                                     @if($obj->collectItem)
                                                         <small class="text-muted d-block">
                                                             <img src="{{ $obj->collectItem->image }}" style="width:16px;vertical-align:middle;" alt="">
@@ -182,6 +268,15 @@
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-md-2">
+                                                    <label class="col-form-label">Этап</label>
+                                                    <select class="form-control" name="stage_id">
+                                                        <option value="">Без этапа</option>
+                                                        @foreach($quest->stages as $stage)
+                                                            <option value="{{ $stage->id }}" @selected((int)$obj->stage_id === (int)$stage->id)>{{ $stage->order }}. {{ $stage->title ?: 'Без названия' }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
                                                     <label class="col-form-label">Кол-во</label>
                                                     <input type="number" min="1" class="form-control" name="required_amount" value="{{ $obj->required_amount }}">
                                                 </div>
@@ -189,7 +284,18 @@
                                                     <label class="col-form-label">Шанс дропа (%)</label>
                                                     <input type="number" step="0.01" class="form-control" name="drop_chance" value="{{ $obj->drop_chance }}" placeholder="только для collect">
                                                 </div>
-                                                <div class="col-md-5">
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Карта (ID, необязательно)</label>
+                                                    <input type="number" class="form-control" name="map_id" value="{{ $obj->map_id }}">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Расходовать предмет</label>
+                                                    <select class="form-control" name="consume_item">
+                                                        <option value="1" @selected($obj->consume_item)>Да</option>
+                                                        <option value="0" @selected(!$obj->consume_item)>Нет</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
                                                     <label class="col-form-label">Описание для игрока</label>
                                                     <input type="text" class="form-control" name="description" value="{{ $obj->description }}">
                                                 </div>
@@ -348,6 +454,64 @@
         </section>
     </div>
 
+    {{-- Модалка: добавить этап --}}
+    <div id="modalStage" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+        <section class="card">
+            <form action="{{ route('admin.quest.stage.add', $quest->id) }}" method="post">
+                <header class="card-header"><h2 class="card-title">Добавить этап</h2></header>
+                <div class="card-body">
+                    {{ csrf_field() }}
+                    <div class="row">
+                        <div class="col-md-3 form-group mb-2">
+                            <label>Порядок</label>
+                            <input type="number" min="1" class="form-control" name="order" value="{{ ($quest->stages->max('order') ?? 0) + 1 }}">
+                        </div>
+                        <div class="col-md-4 form-group mb-2">
+                            <label>Тип этапа</label>
+                            <select class="form-control" name="stage_type" id="stage-type">
+                                <option value="action">Обычный</option>
+                                <option value="wait">Скрытое ожидание</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 form-group mb-2">
+                            <label>NPC завершения (ID)</label>
+                            <input type="number" class="form-control" name="complete_npc_id">
+                        </div>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Название</label>
+                        <input type="text" class="form-control" name="title">
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Описание</label>
+                        <textarea class="form-control" name="description" rows="2"></textarea>
+                    </div>
+                    <div id="stage-wait-fields" style="display:none;">
+                        <div class="form-group mb-2">
+                            <label>Продолжительность ожидания, секунд</label>
+                            <input type="number" min="1" class="form-control" name="wait_duration_seconds" value="3600">
+                            <small class="text-muted">Значение сохраняется на сервере и игроку не показывается.</small>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label>Реплика, если игрок пришёл слишком рано</label>
+                            <textarea class="form-control" name="waiting_text" rows="2">Ты пришёл слишком рано. Возвращайся позже.</textarea>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label>Реплика после завершения ожидания</label>
+                            <textarea class="form-control" name="ready_text" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <div class="text-end">
+                        <button class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                    </div>
+                </footer>
+            </form>
+        </section>
+    </div>
+
     {{-- Модалка: добавить задание --}}
     <div id="modalObjective" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
         <section class="card">
@@ -364,6 +528,7 @@
                                     <option value="collect">collect — собрать предмет</option>
                                     <option value="talk">talk — поговорить с NPC</option>
                                     <option value="deliver">deliver — сдать предмет</option>
+                                    <option value="use_item">use_item — использовать предмет</option>
                                 </select>
                             </div>
                         </div>
@@ -374,6 +539,7 @@
                                     <option value="monster">monster</option>
                                     <option value="npc">npc</option>
                                     <option value="item">item</option>
+                                    <option value="location">location</option>
                                 </select>
                             </div>
                         </div>
@@ -387,8 +553,17 @@
                         <input type="text" class="form-control" name="target_ids" placeholder="85,93">
                     </div>
                     <div class="form-group mb-2" id="obj-item-row">
-                        <label>Предмет для сбора (collect)</label>
+                        <label>Предмет <small class="text-muted">(collect / deliver / use_item)</small></label>
                         <select id="obj-item-select" name="share_item_id" class="form-control"></select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Этап</label>
+                        <select name="stage_id" class="form-control">
+                            <option value="">Без этапа</option>
+                            @foreach($quest->stages as $stage)
+                                <option value="{{ $stage->id }}">{{ $stage->order }}. {{ $stage->title ?: 'Без названия' }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
@@ -403,6 +578,19 @@
                                 <input type="number" step="0.01" class="form-control" name="drop_chance" placeholder="только для collect">
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Карта (ID, необязательно)</label>
+                                <input type="number" class="form-control" name="map_id">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-2" id="obj-consume-row" style="display:none;">
+                        <label>Расходовать предмет после успешного использования</label>
+                        <select name="consume_item" class="form-control">
+                            <option value="1">Да</option>
+                            <option value="0">Нет</option>
+                        </select>
                     </div>
                     <div class="form-group mb-2">
                         <label>Описание для игрока</label>
@@ -493,6 +681,10 @@
     makeAjaxSelect2('#sel-parent-quest', '{{ route('admin.api.quests') }}', 'Выберите квест');
     makeAjaxSelect2('#sel-after-quest',  '{{ route('admin.api.quests') }}', 'Выберите квест');
 
+    $('#stage-type').on('change', function () {
+        $('#stage-wait-fields').toggle($(this).val() === 'wait');
+    }).trigger('change');
+
     function formatItemOption(item) {
         if (!item.id) return item.text;
         var img = item.image
@@ -562,9 +754,11 @@
         minimumInputLength: 0
     });
 
-    // Показывать/скрывать строку предмета в зависимости от типа задания
+    // Показывать/скрывать поля предметной цели в зависимости от типа задания
     $('#obj-type').on('change', function () {
-        $('#obj-item-row').toggle($(this).val() === 'collect');
+        var type = $(this).val();
+        $('#obj-item-row').toggle(['collect', 'deliver', 'use_item'].indexOf(type) !== -1);
+        $('#obj-consume-row').toggle(type === 'use_item');
     }).trigger('change');
 
     // Показывать/скрывать поля в зависимости от типа награды

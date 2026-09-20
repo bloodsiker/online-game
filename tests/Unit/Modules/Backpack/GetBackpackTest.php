@@ -35,6 +35,20 @@ class GetBackpackTest extends TestCase
         $this->assertSame([$tool], $data->getTool()->all());
     }
 
+    public function test_chest_has_its_own_section_in_main_backpack_group(): void
+    {
+        $chest = $this->backpackItem(itemId: 103, shareItemId: 401);
+        $data = new BackpackDTO(
+            backpack: new Collection([$chest]),
+            items: new Collection(['chest' => new Collection([$chest])]),
+            countItems: 1,
+            group: 'main',
+        );
+
+        $this->assertTrue($data->hasChest());
+        $this->assertSame([$chest], $data->getChest()->all());
+    }
+
     public function test_it_marks_only_keys_with_a_teleport_gate_from_current_location_as_usable(): void
     {
         $availableKey = $this->backpackItem(itemId: 100, shareItemId: 324);

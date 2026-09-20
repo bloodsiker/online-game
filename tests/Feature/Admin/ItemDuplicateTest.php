@@ -108,11 +108,18 @@ class ItemDuplicateTest extends TestCase
             $table->unsignedBigInteger('share_item_id')->unique();
             $table->unsignedSmallInteger('lock_required_skill')->default(0);
             $table->unsignedSmallInteger('lock_duration_seconds')->default(12);
+            $table->unsignedTinyInteger('minimum_success_chance_percent')->default(5);
             $table->unsignedSmallInteger('experience_reward')->nullable();
             $table->unsignedTinyInteger('trap_chance_penalty_percent')->default(0);
             $table->unsignedBigInteger('trap_effect_id')->nullable();
             $table->unsignedSmallInteger('trap_effect_duration_seconds')->default(60);
             $table->unsignedTinyInteger('trap_damage_percent')->default(0);
+            $table->timestamps();
+        });
+        Schema::create('share_item_instant_rewards', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->string('reward_type');
             $table->timestamps();
         });
         Schema::create('share_item_debuffs', function (Blueprint $table): void {
@@ -190,6 +197,7 @@ class ItemDuplicateTest extends TestCase
             'lock_required_skill' => 75,
             'lock_duration_seconds' => 18,
             'experience_reward' => 9,
+            'minimum_success_chance_percent' => 11,
             'trap_chance_penalty_percent' => 12,
             'trap_damage_percent' => 15,
         ]);
@@ -221,6 +229,7 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame(86400, $copy->useLimit->period_seconds);
         $this->assertSame(75, $copy->lockConfig->lock_required_skill);
         $this->assertSame(9, $copy->lockConfig->experience_reward);
+        $this->assertSame(11, $copy->lockConfig->minimum_success_chance_percent);
         $this->assertSame(12, $copy->lockConfig->trap_chance_penalty_percent);
         $this->assertSame(15, $copy->lockConfig->trap_damage_percent);
         $this->assertSame(30, $copy->debuffs->sole()->duration_seconds);
@@ -254,6 +263,7 @@ class ItemDuplicateTest extends TestCase
             'lock_required_skill' => 85,
             'lock_duration_seconds' => 24,
             'lockpicking_experience_reward' => 13,
+            'minimum_success_chance_percent' => 9,
             'trap_chance_penalty_percent' => 17,
             'trap_effect_id' => 7,
             'trap_effect_duration_seconds' => 150,
@@ -268,6 +278,7 @@ class ItemDuplicateTest extends TestCase
             'lock_required_skill' => 85,
             'lock_duration_seconds' => 24,
             'experience_reward' => 13,
+            'minimum_success_chance_percent' => 9,
             'trap_chance_penalty_percent' => 17,
             'trap_effect_id' => 7,
             'trap_effect_duration_seconds' => 150,

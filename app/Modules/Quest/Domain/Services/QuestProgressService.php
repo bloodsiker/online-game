@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Domain\Services;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\DTOs\QuestItemGateState;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Events\QuestItemDropped;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 
 class QuestProgressService
@@ -20,6 +25,38 @@ class QuestProgressService
     public function __construct(
         private readonly BackpackService $backpackService,
     ) {}
+
+    public function resolveItemGate(User $user, Quest $quest): QuestItemGateState
+    {
+        $objectives = $quest->objectives
+            ->where('type', 'collect')
+            ->where('target_type', 'item')
+            ->filter(fn (QuestObjective $objective) => (bool) $objective->share_item_id);
+
+        if ($objectives->isEmpty()) {
+            return new QuestItemGateState(
+                backpackCounts: [],
+                missingItemNames: [],
+            );
+        }
+
+        $objectives->loadMissing('collectItem');
+        $counts = $this->backpackService->countByShareItemIds(
+            $user,
+            $objectives->pluck('share_item_id')->map(fn ($id) => (int) $id)->unique()->values()->all(),
+        );
+
+        $missing = $objectives
+            ->filter(fn (QuestObjective $objective) => ($counts[(int) $objective->share_item_id] ?? 0) < (int) $objective->required_amount)
+            ->map(fn (QuestObjective $objective) => $objective->collectItem?->name ?? 'предмет')
+            ->values()
+            ->all();
+
+        return new QuestItemGateState(
+            backpackCounts: $counts,
+            missingItemNames: $missing,
+        );
+    }
 
     /**
      * @return list<string> One-time messages for the caller to display.
@@ -107,6 +144,252 @@ class QuestProgressService
         }
 
         return $this->progressClanKillAndCollect($player, $locationMonster, $locationMapId, $messages);
+    }
+
+    /**
+     * Прогрессирует цели type=talk при посещении страницы НПС — у kill/collect триггер
+     * бой, у talk триггера не было вообще: amount никогда не рос, required_amount(1)
+     * был недостижим, квест с такой целью нельзя было завершить ни при каких условиях
+     * (см. QuestPlayer::isAllObjectivesComplete/isCurrentStageComplete — 'talk' не входит
+     * в список типов, освобождённых от проверки amount, в отличие от 'deliver').
+     *
+     * @return list<string> Одноразовые сообщения для отображения на странице НПС.
+     */
+    public function progressTalk(Player $player, int $npcId): array
+    {
+        $messages = [];
+
+        [$questPlayers, $progressByQuestPlayer, $objectivesMap] = $this->loadPersonalProgress($player);
+
+        foreach ($questPlayers as $questPlayer) {
+            foreach ($progressByQuestPlayer[$questPlayer->id] ?? [] as $playerObj) {
+                /** @var QuestObjective|null $qo */
+                $qo = $objectivesMap[$questPlayer->quest_id][$playerObj->quest_objective_id] ?? null;
+
+                if ($qo?->type !== 'talk' || $qo->target_type !== 'npc') {
+                    continue;
+                }
+
+                if ($questPlayer->current_stage_id !== null && $qo->stage_id !== $questPlayer->current_stage_id) {
+                    continue;
+                }
+
+                if (! $qo->matchesMonster($npcId)) {
+                    continue;
+                }
+
+                if ($playerObj->amount >= $qo->required_amount) {
+                    continue;
+                }
+
+                // Тот же race-safe условный инкремент, что и у kill/collect.
+                $updated = (bool) $playerObj->newQuery()
+                    ->whereKey($playerObj->getKey())
+                    ->where('amount', '<', $qo->required_amount)
+                    ->increment('amount');
+
+                if (! $updated) {
+                    continue;
+                }
+
+                $playerObj->amount++;
+
+                $remaining = $qo->required_amount - $playerObj->amount;
+                $messages[] = $remaining > 0
+                    ? sprintf("<p style='margin:2px 0;'><span style='background:#e2e3ff; border-left:3px solid #4b3fae; padding:2px 6px; display:inline-block;'>💬 Разговор состоялся. Осталось поговорить ещё с: <b>%s</b></span></p>", $remaining)
+                    : "<p style='margin:2px 0;'><span style='background:#d6d8ff; border-left:3px solid #4b3fae; padding:2px 6px; display:inline-block;'>✅ Все нужные разговоры состоялись!</span></p>";
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Засчитывает успешное использование предмета в активных целях use_item.
+     * Контекст цели вычисляется на сервере по текущей локации игрока, поэтому
+     * клиент не может подменить NPC, монстра, карту или локацию.
+     *
+     * @return array{matched: bool, consume: bool, messages: list<string>}
+     */
+    public function progressItemUse(Player $player, int $shareItemId): array
+    {
+        return $this->progressPreparedItemUse($this->prepareItemUse($player, $shareItemId));
+    }
+
+    /**
+     * Один раз на запрос находит все подходящие незавершённые цели. Подготовленный
+     * список можно сначала использовать для проверки доступности предмета, а затем
+     * передать в progressPreparedItemUse() без повторного обхода и запросов.
+     *
+     * @return list<array{progress: QuestPlayerObjective|QuestClanObjective, objective: QuestObjective}>
+     */
+    public function prepareItemUse(Player $player, int $shareItemId): array
+    {
+        $matches = [];
+        $definitions = QuestDefinitionsCache::objectivesByQuest();
+        $targetTypes = $this->itemUseTargetTypes($definitions, $shareItemId);
+        if ($targetTypes === []) {
+            return $matches;
+        }
+
+        [$questPlayers, $progressByQuestPlayer, $objectivesMap] = $this->loadPersonalProgress($player);
+        $context = $this->itemUseContext($player, $targetTypes);
+
+        foreach ($questPlayers as $questPlayer) {
+            foreach ($progressByQuestPlayer[$questPlayer->id] ?? [] as $progress) {
+                $objective = $objectivesMap[$questPlayer->quest_id][$progress->quest_objective_id] ?? null;
+                if ($this->isPendingItemUseMatch($progress, $objective, $questPlayer->current_stage_id, $shareItemId, $context)) {
+                    $matches[] = compact('progress', 'objective');
+                }
+            }
+        }
+
+        $membership = $player->user->clanMembership;
+        if (! $membership) {
+            return $matches;
+        }
+
+        $clanProgress = QuestClanProgress::query()
+            ->setEagerLoads([])
+            ->where('clan_id', $membership->clan_id)
+            ->where('user_id', $player->user_id)
+            ->where('status', QuestPlayerStatus::IN_PROGRESS)
+            ->first();
+
+        if (! $clanProgress) {
+            return $matches;
+        }
+
+        foreach (QuestClanObjective::query()->where('quest_clan_progress_id', $clanProgress->id)->get() as $progress) {
+            $objective = $objectivesMap[$clanProgress->quest_id][$progress->quest_objective_id] ?? null;
+            if ($this->isPendingItemUseMatch($progress, $objective, $clanProgress->current_stage_id, $shareItemId, $context)) {
+                $matches[] = compact('progress', 'objective');
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
+     * @param  list<array{progress: QuestPlayerObjective|QuestClanObjective, objective: QuestObjective}>  $matches
+     * @return array{matched: bool, consume: bool, messages: list<string>}
+     */
+    public function progressPreparedItemUse(array $matches): array
+    {
+        $result = ['matched' => false, 'consume' => false, 'messages' => []];
+
+        foreach ($matches as $match) {
+            $this->incrementItemUseObjective($match['progress'], $match['objective'], $result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  list<string>  $targetTypes
+     * @return array{location_id: int, map_id: ?int, npc_ids: list<int>, monster_ids: list<int>}
+     */
+    private function itemUseContext(Player $player, array $targetTypes): array
+    {
+        $locationId = (int) $player->user->location_id;
+
+        return [
+            'location_id' => $locationId,
+            'map_id' => Location::query()->whereKey($locationId)->value('map_id'),
+            'npc_ids' => in_array('npc', $targetTypes, true)
+                ? Npc::query()->where('location_id', $locationId)->where('is_active', true)
+                    ->pluck('id')->map(fn ($id) => (int) $id)->all()
+                : [],
+            'monster_ids' => in_array('monster', $targetTypes, true)
+                ? MonsterOnLocation::query()->where('location_id', $locationId)->where('active', true)
+                    ->pluck('monster_id')->map(fn ($id) => (int) $id)->unique()->values()->all()
+                : [],
+        ];
+    }
+
+    /**
+     * @param  array<int, Collection<int, QuestObjective>>  $objectivesMap
+     * @return list<string>
+     */
+    private function itemUseTargetTypes(array $objectivesMap, int $shareItemId): array
+    {
+        return collect($objectivesMap)
+            ->flatten(1)
+            ->filter(fn (QuestObjective $objective) => $objective->type === 'use_item'
+                && (int) $objective->share_item_id === $shareItemId)
+            ->pluck('target_type')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /** @param array{location_id: int, map_id: ?int, npc_ids: list<int>, monster_ids: list<int>} $context */
+    private function matchesItemUse(
+        ?QuestObjective $objective,
+        ?int $currentStageId,
+        int $shareItemId,
+        array $context,
+    ): bool {
+        if ($objective?->type !== 'use_item' || (int) $objective->share_item_id !== $shareItemId) {
+            return false;
+        }
+
+        if ($currentStageId !== null && (int) $objective->stage_id !== $currentStageId) {
+            return false;
+        }
+
+        if ($objective->map_id && (int) $objective->map_id !== (int) $context['map_id']) {
+            return false;
+        }
+
+        return match ($objective->target_type) {
+            'location' => (int) $objective->target_id === $context['location_id'],
+            'npc' => in_array((int) $objective->target_id, $context['npc_ids'], true),
+            'monster' => in_array((int) $objective->target_id, $context['monster_ids'], true),
+            'item' => ! $objective->target_id || (int) $objective->target_id === $shareItemId,
+            default => false,
+        };
+    }
+
+    /**
+     * @param  QuestPlayerObjective|QuestClanObjective  $progress
+     * @param  array{location_id: int, map_id: ?int, npc_ids: list<int>, monster_ids: list<int>}  $context
+     */
+    private function isPendingItemUseMatch(
+        $progress,
+        ?QuestObjective $objective,
+        ?int $currentStageId,
+        int $shareItemId,
+        array $context,
+    ): bool {
+        return $this->matchesItemUse($objective, $currentStageId, $shareItemId, $context)
+            && (int) $progress->amount < max(1, (int) $objective->required_amount);
+    }
+
+    /**
+     * @param  QuestPlayerObjective|QuestClanObjective  $progress
+     * @param  array{matched: bool, consume: bool, messages: list<string>}  $result
+     */
+    private function incrementItemUseObjective($progress, QuestObjective $objective, array &$result): void
+    {
+        $required = max(1, (int) $objective->required_amount);
+        if ((int) $progress->amount >= $required) {
+            return;
+        }
+
+        $updated = (bool) $progress->newQuery()
+            ->whereKey($progress->getKey())
+            ->where('amount', '<', $required)
+            ->increment('amount');
+
+        if (! $updated) {
+            return;
+        }
+
+        $progress->amount++;
+        $result['matched'] = true;
+        $result['consume'] = $result['consume'] || (bool) $objective->consume_item;
+        $result['messages'][] = $objective->description ?: 'Квестовый предмет использован.';
     }
 
     private function progressClanKillAndCollect(

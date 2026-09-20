@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Library\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Database\Eloquent\Collection;
@@ -41,6 +42,7 @@ class LibraryCategoryController extends Controller
         return view('admin.library.categories.form', [
             'category' => null,
             'categories' => $this->categoryOptions(),
+            'contentTypes' => LibraryCategoryContentType::cases(),
         ]);
     }
 
@@ -58,6 +60,7 @@ class LibraryCategoryController extends Controller
         return view('admin.library.categories.form', [
             'category' => $category,
             'categories' => $this->categoryOptions($category),
+            'contentTypes' => LibraryCategoryContentType::cases(),
         ]);
     }
 
@@ -92,6 +95,7 @@ class LibraryCategoryController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('library_categories', 'slug')->ignore($category->id)],
             'description' => ['nullable', 'string'],
+            'content_type' => ['required', Rule::enum(LibraryCategoryContentType::class)],
             'image' => ['nullable', 'image', 'max:4096'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
@@ -108,6 +112,7 @@ class LibraryCategoryController extends Controller
             'name' => $data['name'],
             'slug' => $data['slug'] ?: $this->uniqueSlug($data['name'], $category),
             'description' => $data['description'] ?? null,
+            'content_type' => $data['content_type'],
             'sort_order' => (int) ($data['sort_order'] ?? 0),
             'is_active' => $request->boolean('is_active'),
         ]);

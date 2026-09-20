@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Player\Application\UseCases;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerGatheringStat;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\RecipeUnlockType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
@@ -18,7 +20,14 @@ class GetProfessionsPage
         'Повар',
         'Ремесленник',
         'Кузнец',
+        'Травник',
+        'Рыбак',
+        'Геолог',
+        'Лесоруб',
     ];
+
+    /** Профессии добычи ресурсов — у них нет рецептов, вместо этого показываем счётчик добытого (см. player_gathering_stats). */
+    private const GATHERING_PROFESSIONS = ['Травник', 'Рыбак', 'Геолог', 'Лесоруб'];
 
     /**
      * @return array{professions: list<array<string, mixed>>, activeProfessionId: ?int}
@@ -47,6 +56,15 @@ class GetProfessionsPage
             ->where('lvl', 1)
             ->get()
             ->keyBy('skill_id');
+        $gatheringSkillIds = $skills->filter(fn (Skill $skill): bool => in_array($skill->name, self::GATHERING_PROFESSIONS, true))->modelKeys();
+        $gatheredResourcesBySkill = ShareItem::query()
+            ->whereIn('skill_id', $gatheringSkillIds)
+            ->get(['id', 'name', 'image', 'transparent_image', 'skill_id'])
+            ->groupBy('skill_id');
+        $gatheringStatsByShareItem = PlayerGatheringStat::query()
+            ->where('player_id', $player->id)
+            ->get()
+            ->keyBy('share_item_id');
         $recipesBySkill = $player->recipes()
             ->where('share_recipes.unlock_type', RecipeUnlockType::LEARNABLE->value)
             ->whereNotNull('share_recipes.kraft_item_id')
@@ -55,7 +73,7 @@ class GetProfessionsPage
             ->get()
             ->groupBy(fn (ShareRecipe $recipe): int => (int) $recipe->itemInfo->skill_id);
 
-        $professions = $skills->map(function (Skill $skill) use ($progressBySkill, $firstRequirements, $recipesBySkill): array {
+        $professions = $skills->map(function (Skill $skill) use ($progressBySkill, $firstRequirements, $recipesBySkill, $gatheredResourcesBySkill, $gatheringStatsByShareItem): array {
             $progress = $progressBySkill->get($skill->id);
             $firstRequirement = $firstRequirements->get($skill->id);
             $level = (int) ($progress?->lvl ?? 1);
@@ -81,6 +99,26 @@ class GetProfessionsPage
                 ->values()
                 ->all();
 
+            $isGathering = in_array($skill->name, self::GATHERING_PROFESSIONS, true);
+
+            $gatheredResources = [];
+            if ($isGathering) {
+                $gatheredResources = $gatheredResourcesBySkill->get($skill->id, collect())
+                    ->map(function (ShareItem $resource) use ($gatheringStatsByShareItem): array {
+                        return [
+                            'shareItemId' => (int) $resource->id,
+                            'name' => (string) $resource->name,
+                            'image' => (string) ($resource->transparent_image ?? $resource->image),
+                            'totalGathered' => (int) ($gatheringStatsByShareItem->get($resource->id)?->total_gathered ?? 0),
+                        ];
+                    })
+                    ->filter(fn (array $resource): bool => $resource['totalGathered'] > 0)
+                    ->sortByDesc('totalGathered')
+                    ->values()
+                    ->all();
+            }
+            $totalGathered = array_sum(array_column($gatheredResources, 'totalGathered'));
+
             return [
                 'id' => (int) $skill->id,
                 'name' => $skill->name === 'Ремесленник' ? 'Ремесник' : (string) $skill->name,
@@ -91,6 +129,9 @@ class GetProfessionsPage
                 'levelExperienceRequired' => $experienceToLevel,
                 'recipes' => $recipes,
                 'recipesCount' => count($recipes),
+                'isGathering' => $isGathering,
+                'gatheredResources' => $gatheredResources,
+                'totalGathered' => $totalGathered,
             ];
         })->all();
 

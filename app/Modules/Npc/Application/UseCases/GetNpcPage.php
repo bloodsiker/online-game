@@ -8,6 +8,7 @@ use App\Modules\Npc\Application\DTOs\NpcPageDTO;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -17,12 +18,17 @@ class GetNpcPage
     public function __construct(
         private readonly NpcReadRepository $readRepository,
         private readonly ReputationService $reputationService,
+        private readonly QuestProgressService $questProgressService,
     ) {}
 
     public function execute(User $user, int $npcId): NpcPageDTO
     {
         $player = $user->player;
         $npc = $this->readRepository->findNpcByIdOrFail($npcId);
+
+        // Визит на страницу НПС — единственный доступный триггер для целей type=talk
+        // (в отличие от kill/collect, у которых триггер — бой). См. QuestProgressService::progressTalk.
+        $this->questProgressService->progressTalk($player, $npc->id);
 
         $questStates = $this->readRepository->getPlayerQuestStateGroups($player->id);
         $completedQuestIds = $questStates['completed'];

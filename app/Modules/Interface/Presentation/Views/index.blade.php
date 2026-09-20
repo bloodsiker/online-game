@@ -1485,6 +1485,8 @@
             clan_id: user.clan_id ? Number(user.clan_id) : null,
             clan_name: user.clan_name || null,
             clan_icon: user.clan_icon || null,
+            chat_mute_title: user.chat_mute_title || null,
+            chat_mute_expires_at: user.chat_mute_expires_at || null,
             info_url: user.info_url || ('{{ url('/info/u') }}/' + Number(user.id)),
         };
     }
@@ -1548,6 +1550,15 @@
                 onlinePresenceUsers.delete(Number(user.id));
                 sendOnlinePresenceSnapshot();
                 syncPublicOnlineCount();
+            })
+            .listen('.communication.mute.changed', function (event) {
+                const onlineUser = onlinePresenceUsers.get(Number(event.user_id));
+                if (!onlineUser) return;
+
+                onlineUser.chat_mute_title = event.chat_mute_title || null;
+                onlineUser.chat_mute_expires_at = event.chat_mute_expires_at || null;
+                onlinePresenceUsers.set(Number(event.user_id), onlineUser);
+                sendOnlinePresenceSnapshot();
             });
     }
 

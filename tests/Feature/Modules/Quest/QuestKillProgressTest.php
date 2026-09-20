@@ -209,6 +209,46 @@ class QuestKillProgressTest extends TestCase
         Event::assertNotDispatched(QuestItemDropped::class);
     }
 
+    public function test_use_item_objective_progresses_only_in_configured_location(): void
+    {
+        DB::table('locations')->insert(['id' => 1, 'name' => 'Алтарь', 'map_id' => 3]);
+        $user = User::query()->create(['name' => 'ritualist', 'location_id' => 1]);
+        DB::table('players')->insert(['id' => $user->id, 'user_id' => $user->id, 'lvl' => 1]);
+
+        $quest = Quest::query()->create(['title' => 'Ритуал', 'type' => 'main']);
+        $objective = QuestObjective::query()->create([
+            'quest_id' => $quest->id,
+            'type' => 'use_item',
+            'target_type' => 'location',
+            'target_id' => 1,
+            'share_item_id' => 42,
+            'consume_item' => false,
+            'required_amount' => 2,
+        ]);
+
+        DB::table('quest_players')->insert([
+            'id' => 1,
+            'player_id' => $user->id,
+            'quest_id' => $quest->id,
+            'status' => 'in_progress',
+        ]);
+        DB::table('quest_player_objectives')->insert([
+            'quest_player_id' => 1,
+            'quest_objective_id' => $objective->id,
+            'amount' => 0,
+        ]);
+        QuestDefinitionsCache::flush();
+
+        $result = app(QuestProgressService::class)->progressItemUse(
+            Player::query()->findOrFail($user->id),
+            42,
+        );
+
+        $this->assertTrue($result['matched']);
+        $this->assertFalse($result['consume']);
+        $this->assertSame(1, (int) DB::table('quest_player_objectives')->value('amount'));
+    }
+
     private function playerOf(User $user): Player
     {
         $player = new Player;
@@ -244,10 +284,19 @@ class QuestKillProgressTest extends TestCase
         Schema::dropIfExists('quest_clan_objectives');
         Schema::dropIfExists('monster_on_locations');
         Schema::dropIfExists('share_items');
+        Schema::dropIfExists('npcs');
 
         Schema::create('locations', function (Blueprint $t): void {
             $t->increments('id');
             $t->string('name')->nullable();
+            $t->unsignedInteger('map_id')->nullable();
+        });
+        Schema::create('npcs', function (Blueprint $t): void {
+            $t->increments('id');
+            $t->string('name')->nullable();
+            $t->unsignedInteger('location_id')->nullable();
+            $t->boolean('is_active')->default(true);
+            $t->timestamps();
         });
         Schema::create('monsters', function (Blueprint $t): void {
             $t->increments('id');
@@ -306,10 +355,12 @@ class QuestKillProgressTest extends TestCase
             $t->increments('id');
             $t->unsignedInteger('quest_id');
             $t->string('type');
+            $t->string('target_type')->default('monster');
             $t->unsignedInteger('target_id')->nullable();
             $t->unsignedInteger('stage_id')->nullable();
             $t->unsignedInteger('required_amount');
             $t->unsignedInteger('share_item_id')->nullable();
+            $t->boolean('consume_item')->default(true);
             $t->unsignedInteger('map_id')->nullable();
             $t->unsignedTinyInteger('drop_chance')->nullable();
             $t->text('description')->nullable();

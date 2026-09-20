@@ -56,6 +56,16 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label" for="instant_reward_type">Мгновенная награда</label>
+                                                <select class="form-control" name="instant_reward_type" id="instant_reward_type">
+                                                    <option value="">Нет</option>
+                                                    @foreach(\App\Modules\Item\Domain\Enums\InstantRewardType::cases() as $rewardType)
+                                                        <option value="{{ $rewardType->value }}" @selected(old('instant_reward_type') === $rewardType->value)>{{ $rewardType->label() }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Количество в содержимом сундука или тайника будет размером награды. В рюкзак предмет не попадёт.</small>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Тир отмычки</label>
                                                 <input type="number" min="1" max="6" class="form-control" name="lockpick_tier" value="{{ old('lockpick_tier', 1) }}">
                                             </div>
@@ -305,9 +315,14 @@
                                                 <small class="form-text text-muted">Пусто — сложность замка / 10, минимум 1.</small>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label" for="minimum_success_chance_percent">Минимальный шанс взлома, %</label>
+                                                <input type="number" min="0" max="95" class="form-control" id="minimum_success_chance_percent" name="minimum_success_chance_percent" value="{{ old('minimum_success_chance_percent', 5) }}" form="item-create-form">
+                                                <small class="form-text text-muted">Ни навык, ни ловушка, ни низкий тир отмычки не опустят итоговый шанс ниже этого значения.</small>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="trap_chance_penalty_percent">Снижение шанса взлома, %</label>
                                                 <input type="number" min="0" max="95" class="form-control" id="trap_chance_penalty_percent" name="trap_chance_penalty_percent" value="{{ old('trap_chance_penalty_percent', 0) }}" form="item-create-form">
-                                                <small class="form-text text-muted">Вычитается из базового шанса. Итоговый шанс не опускается ниже 5%.</small>
+                                                <small class="form-text text-muted">Вычитается из базового шанса с учётом настроенного минимального порога.</small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">

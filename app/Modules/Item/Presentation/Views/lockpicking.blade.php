@@ -301,10 +301,12 @@
                 image.alt = item.name;
                 icon.appendChild(image);
 
-                if (item.count > 1) {
+                if (item.count > 1 || item.reward_type === 'money') {
                     const count = document.createElement('span');
                     count.className = 'lock-loot-count';
-                    count.textContent = '×' + item.count;
+                    count.textContent = item.reward_type === 'money'
+                        ? '+' + Number(item.count).toLocaleString('ru-RU')
+                        : '×' + item.count;
                     icon.appendChild(count);
                 }
                 grid.appendChild(icon);
@@ -435,6 +437,13 @@
             if (data.status === 'success') {
                 renderSuccess(data);
                 setCompleted();
+                if (data.money !== undefined) {
+                    try {
+                        window.top.sendToFrame('character-frame', { money: data.money }, window.location.origin);
+                    } catch (error) {
+                        console.error('Не удалось обновить баланс в character-frame:', error);
+                    }
+                }
             }
             if (data.status !== 'failure' && data.status !== 'success') {
                 message(data.message);

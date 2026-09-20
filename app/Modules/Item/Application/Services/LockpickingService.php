@@ -58,6 +58,7 @@ class LockpickingService
             $skillLevel,
             $config->lock_required_skill,
             $config->trap_chance_penalty_percent,
+            $config->minimum_success_chance_percent,
         );
         $lockpicks = $this->availableLockpicks($user, $config, $skillLevel);
         $selected = $attempt?->lockpick_share_item_id
@@ -147,7 +148,13 @@ class LockpickingService
             $lockpickConfig = $lockpickInfo->lockpickConfig;
             $speedBonus = (int) ($lockpickConfig?->speed_bonus_percent ?? 0);
             $duration = $this->lockpickDurationSeconds($config->lock_duration_seconds, $skillLevel, $config->lock_required_skill, $lockpickTier, $speedBonus);
-            $chance = $this->lockpickSuccessChance($skillLevel, $config->lock_required_skill, $config->trap_chance_penalty_percent, $lockpickTier);
+            $chance = $this->lockpickSuccessChance(
+                $skillLevel,
+                $config->lock_required_skill,
+                $config->trap_chance_penalty_percent,
+                $lockpickTier,
+                $config->minimum_success_chance_percent,
+            );
             $startedAt = now();
             $attempt = LockpickingAttempt::query()->create([
                 'player_id' => $user->player_id,
@@ -290,7 +297,11 @@ class LockpickingService
 
             return new LockpickingActionResultDTO(true, $loot === []
                 ? 'Сундук открыт, но он оказался пуст.'
-                : 'Сундук успешно открыт.', 200, ['status' => 'success', 'loot' => $loot]);
+                : 'Сундук успешно открыт.', 200, [
+                    'status' => 'success',
+                    'loot' => $loot,
+                    'money' => (int) $lockedUser->money,
+                ]);
         });
     }
 
@@ -314,15 +325,20 @@ class LockpickingService
         });
     }
 
-    public function successChance(int $skillLevel, int $requiredSkill, int $trapChancePenaltyPercent): float
-    {
+    public function successChance(
+        int $skillLevel,
+        int $requiredSkill,
+        int $trapChancePenaltyPercent,
+        int $minimumSuccessChancePercent,
+    ): float {
         $difference = $skillLevel - max(1, $requiredSkill);
         $chance = $difference >= 0
             ? 80 + $difference * 0.15
             : 80 + $difference * 1.5;
         $chance -= min(95, max(0, $trapChancePenaltyPercent));
+        $minimumChance = min(95, max(0, $minimumSuccessChancePercent));
 
-        return round(min(95, max(5, $chance)), 2);
+        return round(min(95, max($minimumChance, $chance)), 2);
     }
 
     public function durationSeconds(int $baseSeconds, int $skillLevel, int $requiredSkill): int
@@ -332,11 +348,20 @@ class LockpickingService
         return max(2, (int) ceil(max(2, $baseSeconds) * (1 - $bonus / 100)));
     }
 
-    public function lockpickSuccessChance(int $skillLevel, int $requiredSkill, int $trapPenalty, int $lockpickTier): float
-    {
+    public function lockpickSuccessChance(
+        int $skillLevel,
+        int $requiredSkill,
+        int $trapPenalty,
+        int $lockpickTier,
+        int $minimumSuccessChancePercent,
+    ): float {
         $tierGap = max(0, $this->lockTier($requiredSkill) - max(1, min(6, $lockpickTier)));
+        $minimumChance = min(95, max(0, $minimumSuccessChancePercent));
 
-        return round(max(5, $this->successChance($skillLevel, $requiredSkill, $trapPenalty) - $tierGap * 10), 2);
+        return round(max(
+            $minimumChance,
+            $this->successChance($skillLevel, $requiredSkill, $trapPenalty, $minimumChance) - $tierGap * 10,
+        ), 2);
     }
 
     public function lockpickDurationSeconds(int $baseSeconds, int $skillLevel, int $requiredSkill, int $lockpickTier, int $speedBonus): int
@@ -407,7 +432,13 @@ class LockpickingService
                 $config = $info->lockpickConfig;
                 $tier = max(1, (int) ($config?->tier ?? 1));
                 $requiredSkill = $this->lockpickRequiredSkill($tier);
-                $chance = $this->lockpickSuccessChance($skillLevel, $chestConfig->lock_required_skill, $chestConfig->trap_chance_penalty_percent, $tier);
+                $chance = $this->lockpickSuccessChance(
+                    $skillLevel,
+                    $chestConfig->lock_required_skill,
+                    $chestConfig->trap_chance_penalty_percent,
+                    $tier,
+                    $chestConfig->minimum_success_chance_percent,
+                );
                 $duration = $this->lockpickDurationSeconds($chestConfig->lock_duration_seconds, $skillLevel, $chestConfig->lock_required_skill, $tier, (int) ($config?->speed_bonus_percent ?? 0));
 
                 return [

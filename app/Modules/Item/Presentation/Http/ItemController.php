@@ -26,6 +26,7 @@ use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Player\Domain\Services\PlayerRevivalService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -53,6 +54,7 @@ class ItemController extends Controller
         private readonly PlayerRevivalService $revivalService,
         private readonly ItemUsagePolicyService $itemUsagePolicyService,
         private readonly LockpickingService $lockpickingService,
+        private readonly QuestProgressService $questProgressService,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -247,7 +249,13 @@ class ItemController extends Controller
         );
 
         if ($gate !== null) {
+            $questUsePlan = $this->questProgressService->prepareItemUse(
+                $player,
+                (int) $backpack->item->share_item_id,
+            );
             $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
+
+            $questUse = $this->questProgressService->progressPreparedItemUse($questUsePlan);
 
             $user->prev_location_id = $user->location_id;
             $user->location_id = $gate->to_location_id;
@@ -264,6 +272,8 @@ class ItemController extends Controller
                 'removed' => $removed,
                 'count' => $newCount,
                 'teleport_url' => route('location'),
+                'message' => $questUse['messages'][0] ?? null,
+                'quest_messages' => $questUse['messages'],
             ]);
         }
 
@@ -272,8 +282,13 @@ class ItemController extends Controller
         );
         $itemBuffs = $backpack->item->itemInfo->buffs;
         $itemDebuffs = $backpack->item->itemInfo->debuffs;
+        $hasRegularEffect = $instantEffects->isNotEmpty() || $itemBuffs->isNotEmpty() || $itemDebuffs->isNotEmpty();
+        $questUsePlan = $this->questProgressService->prepareItemUse(
+            $player,
+            (int) $backpack->item->share_item_id,
+        );
 
-        if ($instantEffects->isEmpty() && $itemBuffs->isEmpty() && $itemDebuffs->isEmpty()) {
+        if (! $hasRegularEffect && $questUsePlan === []) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Этот предмет нельзя использовать здесь.',
@@ -320,6 +335,8 @@ class ItemController extends Controller
 
         $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
 
+        $questUse = $this->questProgressService->progressPreparedItemUse($questUsePlan);
+
         $stats = $this->statService->resolve($player);
         $expBefore = (int) $player->exp;
 
@@ -350,7 +367,12 @@ class ItemController extends Controller
             );
         }
 
-        ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
+        if ($hasRegularEffect || $questUse['consume']) {
+            ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
+        } else {
+            $removed = false;
+            $newCount = (int) $backpack->count;
+        }
 
         $player->refresh();
         $stats = $this->statService->resolve($player);
@@ -369,7 +391,8 @@ class ItemController extends Controller
             'exp_restored' => $expRestored,
             'message' => $expRestored > 0
                 ? sprintf('Возвращено потерянного опыта: %s.', number_format($expRestored, 0, '.', ' '))
-                : null,
+                : ($questUse['messages'][0] ?? null),
+            'quest_messages' => $questUse['messages'],
             'blessings' => array_map(
                 static fn ($effect): array => $effect->toArray(),
                 $effectResult->getPlayerEffects(),

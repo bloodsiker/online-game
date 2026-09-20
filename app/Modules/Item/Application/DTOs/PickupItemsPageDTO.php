@@ -13,6 +13,7 @@ final readonly class PickupItemsPageDTO
         public int $count,
         public array $items,
         public string $message,
+        public int $money,
         public string $locationUrl,
         public string $backpackUrl,
     ) {}

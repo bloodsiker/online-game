@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Application\UseCases;
 
 use App\Modules\Chat\Application\DTOs\ChatMessageDTO;
+use App\Modules\Chat\Domain\ChatMessageLifetime;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
@@ -49,6 +50,7 @@ class GetMessages
             ChatMessageType::PartyNotice,
             ChatMessageType::Quest,
             ChatMessageType::QuestItem,
+            ChatMessageType::Loot,
         ]);
         $content = $this->renderer->render($msg->message, $trusted);
         $isOwn = $msg->user_id === $user->id;
@@ -81,9 +83,9 @@ class GetMessages
     private function expirationTime(ChatMessage $message, ChatChannel $viewChannel): ?string
     {
         $expiresAt = match (true) {
-            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(30),
-            $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(10),
-            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(10),
+            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
+            $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
+            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             default => null,
         };
 

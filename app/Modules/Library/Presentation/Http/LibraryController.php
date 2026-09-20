@@ -5,25 +5,77 @@ declare(strict_types=1);
 namespace App\Modules\Library\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Library\Application\Services\BestiaryCatalogService;
+use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
 use App\Modules\Library\Domain\Services\LibraryShortcodeRenderer;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Location\Application\UseCases\GetMapsPage;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class LibraryController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
-    {
+    public function index(
+        Request $request,
+        BestiaryCatalogService $bestiary,
+        GetMapsPage $mapsPage,
+    ): View|RedirectResponse {
         $selectedCategory = null;
         if ($request->filled('category')) {
             $selectedCategory = LibraryCategory::query()->where('is_active', true)->where('slug', $request->input('category'))->firstOrFail();
         }
 
         $categories = $this->navigationCategories();
+
+        if ($selectedCategory?->content_type === LibraryCategoryContentType::MONSTERS) {
+            $filters = $request->validate([
+                'q' => ['nullable', 'string', 'max:100'],
+                'level_from' => ['nullable', 'integer', 'min:1', 'max:10000'],
+                'level_to' => ['nullable', 'integer', 'min:1', 'max:10000', 'gte:level_from'],
+                'map_id' => ['nullable', 'integer', 'exists:maps,id'],
+                'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+                'boss' => ['nullable', Rule::in(['all', '0', '1'])],
+            ]);
+
+            return view('library::bestiary', [
+                'categories' => $categories,
+                'selectedCategory' => $selectedCategory,
+                'filters' => $filters,
+                ...$bestiary->get($filters),
+            ]);
+        }
+
+        if ($selectedCategory?->content_type === LibraryCategoryContentType::MAPS) {
+            $filters = $request->validate([
+                'location_id' => ['nullable', 'integer', 'min:1'],
+            ]);
+            $user = $request->user();
+            $currentMapId = $user?->loadMissing('currentLocation')->currentLocation?->map_id;
+            $locationSearchId = $request->filled('location_id')
+                ? (int) $filters['location_id']
+                : null;
+            $searchedLocation = $locationSearchId !== null
+                ? Location::query()->with('map')->find($locationSearchId)
+                : null;
+
+            return view('library::maps', [
+                'categories' => $categories,
+                'selectedCategory' => $selectedCategory,
+                'page' => $mapsPage->execute($currentMapId !== null ? (int) $currentMapId : null),
+                'locationSearchId' => $locationSearchId,
+                'searchedLocation' => $searchedLocation,
+                'bestiaryCategory' => LibraryCategory::query()
+                    ->where('is_active', true)
+                    ->where('content_type', LibraryCategoryContentType::MONSTERS->value)
+                    ->first(),
+            ]);
+        }
 
         $categoryIds = $selectedCategory
             ? $this->activeCategoryIds($selectedCategory)

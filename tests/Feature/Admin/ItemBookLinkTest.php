@@ -37,27 +37,43 @@ class ItemBookLinkTest extends TestCase
             $table->string('type')->default('resource');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
+            $table->string('transparent_image')->nullable();
             $table->string('rarity')->default('common');
             $table->string('slot')->nullable();
             $table->integer('price')->default(0);
             $table->integer('break_crystal')->default(0);
             $table->integer('count_use')->default(0);
+            $table->unsignedTinyInteger('max_drop_level_difference')->nullable();
             $table->integer('expire')->nullable();
             $table->boolean('is_two_hand')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);
             $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
+            $table->boolean('is_clan_warehouse_allowed')->default(true);
             $table->boolean('is_droppable')->default(true);
+            $table->boolean('is_stackable')->default(false);
             $table->boolean('is_weight')->default(true);
             $table->boolean('is_slot_usable')->default(false);
+            $table->boolean('is_use')->default(false);
+            $table->boolean('is_lockpick')->default(false);
             $table->unsignedBigInteger('skill_id')->nullable();
             $table->integer('skill_lvl')->nullable();
             $table->integer('skill_exp')->nullable();
+            $table->integer('gathering_time_seconds')->nullable();
+            $table->integer('gathering_respawn_seconds')->nullable();
+            $table->string('gathering_tool_family')->nullable();
+            $table->string('tool_family')->nullable();
+            $table->unsignedTinyInteger('gathering_speed_bonus_percent')->default(0);
+            $table->unsignedTinyInteger('gathering_double_chance_percent')->default(0);
+            $table->unsignedBigInteger('upgrade_to_share_item_id')->nullable();
+            $table->unsignedInteger('upgrade_gold_cost')->default(0);
             $table->string('upgrade_scroll_type')->nullable();
             $table->json('gem_stats')->nullable();
             $table->string('rune_rarity')->nullable();
             $table->json('rune_stat_pool')->nullable();
+            $table->string('innate_passive_type')->nullable();
+            $table->integer('innate_passive_value')->nullable();
             $table->timestamps();
         });
         Schema::create('magic_skills', function (Blueprint $table): void {
@@ -73,6 +89,34 @@ class ItemBookLinkTest extends TestCase
             $table->id();
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('magic_skill_id')->unique();
+            $table->timestamps();
+        });
+        Schema::create('share_item_instant_rewards', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->string('reward_type');
+            $table->timestamps();
+        });
+        Schema::create('share_item_lock_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedSmallInteger('lock_required_skill')->default(0);
+            $table->unsignedTinyInteger('minimum_success_chance_percent')->default(5);
+            $table->unsignedSmallInteger('lock_duration_seconds')->default(12);
+            $table->unsignedSmallInteger('experience_reward')->nullable();
+            $table->unsignedTinyInteger('trap_chance_penalty_percent')->default(0);
+            $table->unsignedBigInteger('trap_effect_id')->nullable();
+            $table->unsignedSmallInteger('trap_effect_duration_seconds')->default(60);
+            $table->unsignedTinyInteger('trap_damage_percent')->default(0);
+            $table->timestamps();
+        });
+        Schema::create('share_item_lockpick_configs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->unsignedTinyInteger('tier')->default(1);
+            $table->unsignedTinyInteger('speed_bonus_percent')->default(0);
+            $table->unsignedTinyInteger('failure_preserve_chance_percent')->default(0);
+            $table->unsignedTinyInteger('trap_avoid_chance_percent')->default(0);
             $table->timestamps();
         });
 

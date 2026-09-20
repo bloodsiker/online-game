@@ -268,6 +268,8 @@ class LocationPageViewMapper
                     'clan_id' => $clan?->id,
                     'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
                     'clan_name' => $clan?->name,
+                    'chat_mute_title' => $user->activeChatMute?->tooltip(),
+                    'chat_mute_expires_at' => $user->activeChatMute?->expires_at?->toIso8601String(),
                     'id' => $user->id,
                     'info_url' => route('info.user', ['id' => $user->id]),
                     'is_online' => ($user->last_online_at?->timestamp ?? 0) > $tenMinutesAgo->timestamp,

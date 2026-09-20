@@ -70,6 +70,7 @@ class ApiController extends Controller
                 'id' => $item->id,
                 'text' => "[{$item->id}] {$item->name}",
                 'image' => $item->image,
+                'type' => $item->type->value,
             ]),
             'pagination' => [
                 'more' => ($page * $perPage) < $total,

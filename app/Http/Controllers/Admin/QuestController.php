@@ -12,9 +12,11 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestDialogue;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class QuestController extends Controller
 {
@@ -83,7 +85,11 @@ class QuestController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $quest->load(['objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo', 'rewards.location', 'rewards.reputation', 'dialogues', 'startNpc', 'completeNpc', 'parentQuest', 'afterQuest']);
+        $quest->load([
+            'objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo',
+            'rewards.location', 'rewards.reputation', 'dialogues', 'stages.completeNpc',
+            'startNpc', 'completeNpc', 'parentQuest', 'afterQuest', 'nextQuests',
+        ]);
         $questTypes = QuestType::cases();
         $rewardTypes = QuestRewardType::cases();
         $reputations = Reputation::orderBy('name')->get();
@@ -98,13 +104,25 @@ class QuestController extends Controller
             ->filter()
             ->values();
 
+        $type = (string) $request->input('type');
+        $shareItemId = $request->input('share_item_id') ?: null;
+        $targetId = $request->input('target_id') ?: $targetIds->first();
+        if ($type === 'deliver' && $shareItemId) {
+            $targetId = $shareItemId;
+        } elseif ($type === 'use_item' && $request->input('target_type') === 'item' && ! $targetId) {
+            $targetId = $shareItemId;
+        }
+
         QuestObjective::create([
             'quest_id' => $quest->id,
-            'type' => $request->input('type'),
+            'stage_id' => $request->input('stage_id') ?: null,
+            'type' => $type,
             'target_type' => $request->input('target_type'),
-            'target_id' => $request->input('target_id') ?: $targetIds->first(),
+            'target_id' => $targetId,
             'target_ids' => $targetIds->count() > 1 ? $targetIds->all() : null,
-            'share_item_id' => $request->input('share_item_id') ?: null,
+            'share_item_id' => $shareItemId,
+            'consume_item' => $request->boolean('consume_item', true),
+            'map_id' => $request->input('map_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
             'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
             'description' => $request->input('description'),
@@ -115,17 +133,30 @@ class QuestController extends Controller
 
     public function updateObjective(Request $request, Quest $quest, QuestObjective $objective): RedirectResponse
     {
+        abort_unless((int) $objective->quest_id === (int) $quest->id, 404);
         $targetIds = collect(explode(',', (string) $request->input('target_ids')))
             ->map(fn ($id) => (int) trim($id))
             ->filter()
             ->values();
 
+        $type = (string) $request->input('type');
+        $shareItemId = $request->input('share_item_id') ?: null;
+        $targetId = $request->input('target_id') ?: $targetIds->first();
+        if ($type === 'deliver' && $shareItemId) {
+            $targetId = $shareItemId;
+        } elseif ($type === 'use_item' && $request->input('target_type') === 'item' && ! $targetId) {
+            $targetId = $shareItemId;
+        }
+
         $objective->update([
-            'type' => $request->input('type'),
+            'stage_id' => $request->input('stage_id') ?: null,
+            'type' => $type,
             'target_type' => $request->input('target_type'),
-            'target_id' => $request->input('target_id') ?: $targetIds->first(),
+            'target_id' => $targetId,
             'target_ids' => $targetIds->count() > 1 ? $targetIds->all() : null,
-            'share_item_id' => $request->input('share_item_id') ?: null,
+            'share_item_id' => $shareItemId,
+            'consume_item' => $request->boolean('consume_item', true),
+            'map_id' => $request->input('map_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
             'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
             'description' => $request->input('description'),
@@ -136,9 +167,34 @@ class QuestController extends Controller
 
     public function deleteObjective(Quest $quest, QuestObjective $objective): RedirectResponse
     {
+        abort_unless((int) $objective->quest_id === (int) $quest->id, 404);
         $objective->delete();
 
         return redirect()->back()->with('success', 'Задание удалено.');
+    }
+
+    public function addStage(Request $request, Quest $quest): RedirectResponse
+    {
+        $data = $this->stageData($request, $quest);
+        $quest->stages()->create($data);
+
+        return redirect()->back()->with('success', 'Этап добавлен.');
+    }
+
+    public function updateStage(Request $request, Quest $quest, QuestStage $stage): RedirectResponse
+    {
+        abort_unless((int) $stage->quest_id === (int) $quest->id, 404);
+        $stage->update($this->stageData($request, $quest, $stage));
+
+        return redirect()->back()->with('success', 'Этап сохранён.');
+    }
+
+    public function deleteStage(Quest $quest, QuestStage $stage): RedirectResponse
+    {
+        abort_unless((int) $stage->quest_id === (int) $quest->id, 404);
+        $stage->delete();
+
+        return redirect()->back()->with('success', 'Этап удалён. Цели этапа отвязаны.');
     }
 
     public function addReward(Request $request, Quest $quest): RedirectResponse
@@ -209,15 +265,69 @@ class QuestController extends Controller
 
     private function fillQuest(Quest $quest, Request $request): void
     {
+        $parentQuestId = $request->input('parent_quest_id') ?: null;
+        $previousQuestId = $request->input('after_quest_id') ?: null;
+
+        if ($quest->exists && ((int) $parentQuestId === (int) $quest->id || (int) $previousQuestId === (int) $quest->id)) {
+            throw ValidationException::withMessages([
+                'after_quest_id' => 'Квест не может ссылаться сам на себя.',
+            ]);
+        }
+
+        if ($quest->exists && $this->dependencyChainContains((int) $previousQuestId, (int) $quest->id)) {
+            throw ValidationException::withMessages([
+                'after_quest_id' => 'Такая связь создаёт циклическую цепочку квестов.',
+            ]);
+        }
+
         $quest->title = $request->input('title');
         $quest->description = $request->input('description');
         $quest->type = $request->input('type');
         $quest->start_npc_id = $request->input('start_npc_id') ?: null;
         $quest->complete_npc_id = $request->input('complete_npc_id') ?: null;
-        $quest->parent_quest_id = $request->input('parent_quest_id') ?: null;
-        $quest->after_quest_id = $request->input('after_quest_id') ?: null;
+        $quest->parent_quest_id = $parentQuestId;
+        $quest->after_quest_id = $previousQuestId;
         $quest->reset_period = $request->filled('reset_period') ? (int) $request->input('reset_period') : null;
         $quest->is_active = (bool) $request->input('is_active', true);
         $quest->is_finish = (bool) $request->input('is_finish', false);
+    }
+
+    private function dependencyChainContains(int $questId, int $searchedQuestId): bool
+    {
+        $visited = [];
+
+        while ($questId > 0 && ! isset($visited[$questId])) {
+            if ($questId === $searchedQuestId) {
+                return true;
+            }
+
+            $visited[$questId] = true;
+            $questId = (int) Quest::query()->whereKey($questId)->value('after_quest_id');
+        }
+
+        return false;
+    }
+
+    /** @return array<string, mixed> */
+    private function stageData(Request $request, Quest $quest, ?QuestStage $stage = null): array
+    {
+        $stageType = in_array($request->input('stage_type'), ['action', 'wait'], true)
+            ? $request->input('stage_type')
+            : 'action';
+
+        return [
+            'complete_npc_id' => $request->input('complete_npc_id') ?: null,
+            'order' => max(1, (int) $request->input('order', $stage?->order ?? (($quest->stages()->max('order') ?? 0) + 1))),
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'stage_type' => $stageType,
+            'wait_duration_seconds' => $stageType === 'wait'
+                ? max(1, (int) $request->input('wait_duration_seconds', 60))
+                : null,
+            'waiting_text' => $stageType === 'wait'
+                ? ($request->input('waiting_text') ?: 'Ты пришёл слишком рано. Возвращайся позже.')
+                : null,
+            'ready_text' => $stageType === 'wait' ? $request->input('ready_text') : null,
+        ];
     }
 }

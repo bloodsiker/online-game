@@ -18,6 +18,7 @@
                         <th width="60">ID</th>
                         <th>Название</th>
                         <th>Родитель</th>
+                        <th width="145">Содержимое</th>
                         <th width="100">Порядок</th>
                         <th width="100">Статей</th>
                         <th width="100">Активна</th>
@@ -34,6 +35,7 @@
                                 <small class="text-muted d-block">/{{ $category->slug }}</small>
                             </td>
                             <td>{{ $category->parent?->name ?? '—' }}</td>
+                            <td>{{ $category->content_type->label() }}</td>
                             <td>{{ $category->sort_order }}</td>
                             <td>{{ $category->articles_count }}</td>
                             <td><span class="badge badge-{{ $category->is_active ? 'success' : 'default' }}">{{ $category->is_active ? 'Да' : 'Нет' }}</span></td>
@@ -47,7 +49,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="text-center text-muted">Категории ещё не созданы</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted">Категории ещё не созданы</td></tr>
                     @endforelse
                     </tbody>
                 </table>

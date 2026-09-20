@@ -242,6 +242,13 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                            @if(!empty($stageMessage))
+                                                <tr class="fs-12">
+                                                    <td colspan="3" style="padding: 4px 6px 10px; color: #7b1a1a; font-weight: bold;">
+                                                        {!! $stageMessage !!}
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         @endif
                                         @if($showObjectives ?? true)
                                             @foreach($visibleObjectives as $objective)
@@ -308,7 +315,7 @@
                                                     $rewardText = match($reward->type->value) {
                                                         'exp'               => '+' . $reward->amount . ' опыта',
                                                         'money'             => '+' . $reward->amount . ' монет',
-                                                        'item'              => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        'item'              => $reward->itemInfo ? '' : 'предмет',
                                                         'location_access'   => 'доступ к «' . ($reward->location?->name ?? 'локации') . '»',
                                                         'clan_points'       => '+' . $reward->amount . ' клановых очков',
                                                         'reputation_points' => '+' . $reward->amount . ' репутации «' . ($reward->reputation?->name ?? 'репутация') . '»',
@@ -321,7 +328,17 @@
                                                     </td>
                                                     <td class="b" colspan="2">
                                                         <span class="brown">Награда:</span>
-                                                        <span class="greenn">{{ $rewardText }}</span>
+                                                        @if($reward->type->value === 'item' && $reward->itemInfo)
+                                                            <span class="greenn">{{ $reward->amount > 1 ? $reward->amount . 'x ' : '' }}</span>
+                                                            <a href="{{ route('items.info.share', ['id' => $reward->itemInfo->id]) }}"
+                                                               class="b"
+                                                               style="color: {{ $reward->itemInfo->rarity?->color() ?? '#666666' }};"
+                                                               onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                                                {{ $reward->itemInfo->name }}
+                                                            </a>
+                                                        @else
+                                                            <span class="greenn">{{ $rewardText }}</span>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach

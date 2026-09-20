@@ -7,6 +7,8 @@ namespace App\Modules\User\Infrastructure\Persistence\Models;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Moderation\Domain\Enums\CommunicationScope;
+use App\Modules\Moderation\Domain\Models\UserCommunicationMute;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -41,6 +44,8 @@ use Illuminate\Notifications\Notifiable;
  * @property-read Location $prevLocation
  * @property-read Player $player
  * @property-read ClanMember|null $clanMembership
+ * @property-read Collection|UserCommunicationMute[] $communicationMutes
+ * @property-read UserCommunicationMute|null $activeChatMute
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -111,6 +116,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function clanMembership(): HasOne
     {
         return $this->hasOne(ClanMember::class);
+    }
+
+    public function communicationMutes(): HasMany
+    {
+        return $this->hasMany(UserCommunicationMute::class);
+    }
+
+    public function activeChatMute(): HasOne
+    {
+        return $this->hasOne(UserCommunicationMute::class)
+            ->where('scope', CommunicationScope::Chat)
+            ->active()
+            ->latest('expires_at');
     }
 
     public function getBagCount(): int

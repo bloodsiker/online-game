@@ -8,6 +8,8 @@ use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\Moderation\Application\Services\CommunicationMuteService;
+use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\Party\Infrastructure\Persistence\Models\Party;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -22,6 +24,7 @@ class PartyChatChannelTest extends TestCase
     {
         $chatRepository = $this->createMock(ChatMessageRepositoryInterface::class);
         $partyRepository = $this->createMock(PartyRepositoryInterface::class);
+        $muteService = $this->createMock(CommunicationMuteService::class);
         $user = $this->user(7);
         $party = new Party;
         $party->id = 42;
@@ -36,8 +39,11 @@ class PartyChatChannelTest extends TestCase
                 && $data['party_id'] === 42
                 && $data['message'] === 'Собираемся у ворот'))
             ->willReturn(new ChatMessage);
+        $muteService->expects($this->once())
+            ->method('throwIfMuted')
+            ->with($user, CommunicationScope::Chat);
 
-        (new SendMessage($chatRepository, $partyRepository))
+        (new SendMessage($chatRepository, $partyRepository, $muteService))
             ->execute($user, 'Собираемся у ворот', ChatChannel::Party);
     }
 
@@ -46,6 +52,7 @@ class PartyChatChannelTest extends TestCase
     {
         $chatRepository = $this->createMock(ChatMessageRepositoryInterface::class);
         $partyRepository = $this->createMock(PartyRepositoryInterface::class);
+        $muteService = $this->createMock(CommunicationMuteService::class);
         $user = $this->user(7);
 
         $partyRepository->expects($this->once())
@@ -53,11 +60,14 @@ class PartyChatChannelTest extends TestCase
             ->with(7)
             ->willReturn(null);
         $chatRepository->expects($this->never())->method('create');
+        $muteService->expects($this->once())
+            ->method('throwIfMuted')
+            ->with($user, CommunicationScope::Chat);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Канал группы доступен только её участникам.');
 
-        (new SendMessage($chatRepository, $partyRepository))
+        (new SendMessage($chatRepository, $partyRepository, $muteService))
             ->execute($user, 'Меня здесь быть не должно', ChatChannel::Party);
     }
 

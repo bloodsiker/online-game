@@ -1,0 +1,25 @@
+.library-equipment-set {
+    margin-top: 14px;
+}
+
+.library-equipment-set__description {
+    margin: 0 0 8px;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.library-equipment-set__items {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.library-equipment-set__items .news-shortcode-item {
+    flex: 0 0 auto;
+}
+
+.library-equipment-set__empty {
+    color: #8e6c55;
+    font-style: italic;
+}

@@ -7,7 +7,9 @@ namespace App\Modules\Item\Domain\Services;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Item\Domain\DTOs\InstantRewardResult;
 use App\Modules\Item\Domain\Enums\ItemActionType;
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemInChest;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
@@ -30,6 +32,7 @@ class ItemService
         private readonly ItemRequirementService $requirementService,
         private readonly QuestProgressService $questProgressService,
         private readonly ItemActionLogger $itemActionLogger,
+        private readonly InstantItemRewardService $instantRewardService,
     ) {}
 
     public function pickUpFromLocation(User $user, int $itemId): string
@@ -59,10 +62,23 @@ class ItemService
             }
 
             $item = $slot->item;
+
+            if ($item->itemInfo->type === ShareItemType::CHEST
+                && $slot->interaction_type !== LocationItemInteractionType::PICKUP) {
+                return 'Этот сундук нужно открыть прямо на локации.';
+            }
+
             $count = $slot->count;
             $slot->delete();
 
-            $this->addPickedItemToBackpack($user, $item, $count);
+            $instantReward = $this->deliverPickedItem($user, $item, $count);
+
+            if ($instantReward !== null) {
+                return sprintf(
+                    'Вы получили <b>%s</b> монет.',
+                    number_format($instantReward->amount, 0, '', ' '),
+                );
+            }
 
             return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
         });
@@ -108,10 +124,15 @@ class ItemService
             return null;
         }
 
-        $user->currentLocation->itemsOnLocation()->attach($itemId, [
+        $locationData = [
             'count' => $qty,
             'expires_at' => $item->itemInfo->groundExpiresAt(),
-        ]);
+        ];
+        if ($item->itemInfo->type === ShareItemType::CHEST) {
+            $locationData['interaction_type'] = LocationItemInteractionType::PICKUP->value;
+        }
+
+        $user->currentLocation->itemsOnLocation()->attach($itemId, $locationData);
 
         return null;
     }
@@ -218,10 +239,17 @@ class ItemService
             $count = $slot->count;
             $slot->delete();
 
-            $this->addPickedItemToBackpack($user, $item, $count);
+            $instantReward = $this->deliverPickedItem($user, $item, $count);
 
             if (! ItemInChest::query()->where('chest_id', $chestId)->exists()) {
                 $chest->delete();
+            }
+
+            if ($instantReward !== null) {
+                return sprintf(
+                    'Вы получили <b>%s</b> монет.',
+                    number_format($instantReward->amount, 0, '', ' '),
+                );
             }
 
             return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
@@ -232,7 +260,7 @@ class ItemService
      * Генерирует и атомарно переносит всё содержимое сундука в рюкзак.
      * Вызывающий код должен удерживать FOR UPDATE на сундуке.
      *
-     * @return list<array{share_item_id: int, name: string, image: string, count: int}>
+     * @return list<array{share_item_id: int, name: string, image: string, count: int, reward_type?: string}>
      */
     public function claimAllChestContents(User $user, Item $chest): array
     {
@@ -256,14 +284,14 @@ class ItemService
             }
 
             $count = max(1, (int) $slot->count);
-            $loot[] = [
+            $slot->delete();
+            $instantReward = $this->deliverPickedItem($user, $item, $count);
+            $loot[] = $instantReward?->toLootArray() ?? [
                 'share_item_id' => (int) $item->share_item_id,
                 'name' => $item->itemInfo->name,
                 'image' => $item->itemInfo->image,
                 'count' => $count,
             ];
-            $slot->delete();
-            $this->addPickedItemToBackpack($user, $item, $count);
         }
 
         $chest->delete();
@@ -295,7 +323,8 @@ class ItemService
         $query = ItemOnLocation::query()
             ->visible()
             ->where('item_id', $itemId)
-            ->where('location_id', $user->location_id);
+            ->where('location_id', $user->location_id)
+            ->where('interaction_type', LocationItemInteractionType::OPEN_HERE->value);
 
         if ($user->currentLocation->dungeon_id !== null) {
             $sessionId = DungeonSession::query()
@@ -558,8 +587,20 @@ class ItemService
         }
     }
 
-    private function addPickedItemToBackpack(User $user, Item $item, int $count): void
+    /**
+     * Единая точка доставки добычи. Мгновенные награды выдаются сервисом,
+     * обычные предметы попадают в рюкзак. Будущие тайники могут вызывать
+     * InstantItemRewardService напрямую, не создавая Item.
+     */
+    private function deliverPickedItem(User $user, Item $item, int $count): ?InstantRewardResult
     {
+        $instantReward = $this->instantRewardService->grant($user, $item->itemInfo, $count);
+        if ($instantReward !== null) {
+            $item->delete();
+
+            return $instantReward;
+        }
+
         if ($item->itemInfo->is_stackable) {
             $existing = $this->backpackService->getItem($user, $item->itemInfo);
             if ($existing) {
@@ -568,7 +609,7 @@ class ItemService
                     $item->delete();
                 }
 
-                return;
+                return null;
             }
         }
 
@@ -577,5 +618,7 @@ class ItemService
             'item_id' => $item->id,
             'count' => $count,
         ]);
+
+        return null;
     }
 }

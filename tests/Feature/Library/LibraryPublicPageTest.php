@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Library;
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
+use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -15,12 +17,181 @@ use App\Modules\Player\Infrastructure\Persistence\Models\InjuryType;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
+use Database\Seeders\LibraryEquipmentSeeder;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class LibraryPublicPageTest extends TestCase
 {
     use DatabaseTransactions;
+
+    public function test_equipment_seeder_creates_tier_articles_with_item_cards(): void
+    {
+        $this->seed(LibraryEquipmentSeeder::class);
+
+        $category = LibraryCategory::query()->where('slug', 'snariazhenie')->firstOrFail();
+
+        $this->assertSame('Снаряжение', $category->name);
+        $this->assertSame(3, $category->articles()->count());
+
+        $response = $this->get(route('library.show', [
+            'slug' => 'snariazhenie-tir-2',
+            'category' => $category->slug,
+        ]))
+            ->assertOk()
+            ->assertSee('Комплект «Мамонт»')
+            ->assertSee('Сумеречный комплект')
+            ->assertSee('Комплект «Палач»')
+            ->assertSee('Комплект «Иней»')
+            ->assertSee('Комплект «Всполох»')
+            ->assertSee('library-equipment-set__items', false)
+            ->assertSee('css/library_equipment.css', false)
+            ->assertSee('onmouseover="showItemInfo(this,event,2)"', false)
+            ->assertDontSee('[[item:', false);
+
+        $this->assertGreaterThanOrEqual(
+            5,
+            substr_count($response->getContent(), 'library-game-frame library-equipment-set'),
+        );
+    }
+
+    public function test_admin_can_choose_dynamic_monster_catalog_for_category(): void
+    {
+        $this->withoutMiddleware(AdminMiddleware::class);
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
+        $this->post(route('admin.library.categories.store'), [
+            'name' => 'Автоматический бестиарий',
+            'slug' => 'admin-dynamic-bestiary-test',
+            'description' => 'Монстры из игровой базы.',
+            'content_type' => LibraryCategoryContentType::MONSTERS->value,
+            'sort_order' => 10,
+            'is_active' => '1',
+        ])->assertRedirect(route('admin.library.categories.index'));
+
+        $this->assertDatabaseHas('library_categories', [
+            'slug' => 'admin-dynamic-bestiary-test',
+            'content_type' => LibraryCategoryContentType::MONSTERS->value,
+        ]);
+    }
+
+    public function test_monster_category_renders_dynamic_bestiary_without_articles(): void
+    {
+        $category = LibraryCategory::query()->create([
+            'name' => 'Бестиарий',
+            'slug' => 'dynamic-bestiary-test',
+            'content_type' => LibraryCategoryContentType::MONSTERS,
+            'is_active' => true,
+        ]);
+        $location = Location::query()->with('map')->firstOrFail();
+        $regular = Monster::query()->create([
+            'name' => 'Библиотечный волк',
+            'lvl' => 12,
+            'hp' => 350,
+            'armor' => 15,
+            'dodge' => 7,
+            'critical' => 4,
+            'min_dmg' => 20,
+            'max_dmg' => 28,
+            'aggression' => 0,
+            'is_boss' => false,
+        ]);
+        $boss = Monster::query()->create([
+            'name' => 'Библиотечный вожак',
+            'lvl' => 18,
+            'hp' => 1200,
+            'armor' => 35,
+            'dodge' => 8,
+            'critical' => 9,
+            'min_dmg' => 45,
+            'max_dmg' => 60,
+            'aggression' => 0,
+            'is_boss' => true,
+        ]);
+        $regular->locations()->attach($location->id);
+        $boss->locations()->attach($location->id);
+
+        $this->get(route('library.index', [
+            'category' => $category->slug,
+            'q' => 'Библиотечный',
+            'location_id' => $location->id,
+        ]))
+            ->assertOk()
+            ->assertSee('library-bestiary-grid', false)
+            ->assertSee('library_bestiary.css', false)
+            ->assertSee('Библиотечный волк')
+            ->assertSee('Библиотечный вожак')
+            ->assertSee($location->name)
+            ->assertSee('Номер локации')
+            ->assertSee('name="location_id"', false)
+            ->assertDontSee('Все локации')
+            ->assertSee('data-library-info-popup', false)
+            ->assertSee(route('info.monster.catalog', ['id' => $boss->id]), false);
+
+        $this->get(route('library.index', [
+            'category' => $category->slug,
+            'q' => 'Библиотечный',
+            'boss' => '1',
+        ]))
+            ->assertOk()
+            ->assertSee('Библиотечный вожак')
+            ->assertDontSee('Библиотечный волк');
+    }
+
+    public function test_map_category_renders_current_game_map_tree(): void
+    {
+        $category = LibraryCategory::query()->create([
+            'name' => 'Карта мира',
+            'slug' => 'dynamic-map-tree-test',
+            'content_type' => LibraryCategoryContentType::MAPS,
+            'is_active' => true,
+        ]);
+        $map = Map::query()->whereNotNull('slug')->whereHas('locations')->firstOrFail();
+        $location = Location::query()->where('map_id', $map->id)->firstOrFail();
+
+        $this->get(route('library.index', ['category' => $category->slug]))
+            ->assertOk()
+            ->assertSee('library-map-tree', false)
+            ->assertSee('library_maps.css', false)
+            ->assertSee('Карты мира')
+            ->assertSee($map->name)
+            ->assertSee(route('map.public', ['slug' => $map->slug]), false)
+            ->assertSee('map_id='.$map->id, false)
+            ->assertSee('Монстры карты')
+            ->assertSee('name="location_id"', false);
+
+        $this->get(route('library.index', [
+            'category' => $category->slug,
+            'location_id' => $location->id,
+        ]))
+            ->assertOk()
+            ->assertSee('['.$location->id.'] '.$location->name)
+            ->assertSee('Карта: '.$map->name)
+            ->assertSee(route('map.public', [
+                'slug' => $map->slug,
+                'highlight_location' => $location->id,
+            ]), false)
+            ->assertSee('Показать на карте');
+
+        $this->get(route('map.public', [
+            'slug' => $map->slug,
+            'highlight_location' => $location->id,
+        ]))
+            ->assertOk()
+            ->assertSee('map-search-highlight', false)
+            ->assertSee("get('highlight_location')", false);
+
+        $missingLocationId = (int) Location::query()->max('id') + 1000;
+
+        $this->get(route('library.index', [
+            'category' => $category->slug,
+            'location_id' => $missingLocationId,
+        ]))
+            ->assertOk()
+            ->assertSee('Локация с номером '.$missingLocationId.' не найдена.');
+    }
 
     public function test_library_index_shows_only_published_articles(): void
     {
@@ -154,7 +325,10 @@ class LibraryPublicPageTest extends TestCase
             ->assertSee('data-library-info-popup', false)
             ->assertSee(route('info.monster.catalog', ['id' => $monster->id]), false)
             ->assertSee(route('map.public', ['slug' => $map->slug]), false)
-            ->assertSee(route('map.public', ['slug' => $map->slug]).'#'.$location->id, false)
+            ->assertSee(route('map.public', [
+                'slug' => $map->slug,
+                'highlight_location' => $location->id,
+            ]), false)
             ->assertSee('Стражи старого города')
             ->assertDontSee("[[map:{$map->id}; display:inline]]", false)
             ->assertDontSee("[[reputation:{$reputation->id}]]", false);
@@ -308,12 +482,22 @@ class LibraryPublicPageTest extends TestCase
             ->where('type', ShareItemType::ARTIFACT->value)
             ->where('is_active', true)
             ->get();
+        $premiumArtifactIds = ShopItem::query()
+            ->where('structure_id', 10)
+            ->whereIn('share_item_id', $artifacts->modelKeys())
+            ->pluck('share_item_id');
 
         $this->assertNotEmpty($artifacts);
+        $this->assertNotEmpty($premiumArtifactIds);
+        $this->assertGreaterThan($premiumArtifactIds->count(), $artifacts->count());
 
         $response = $this->get(route('library.show', 'artifact-catalog-shortcode-test'))
             ->assertOk()
             ->assertSee('library-artifact-catalog', false)
+            ->assertSee('library-artifact-catalog-group--game', false)
+            ->assertSee('library-artifact-catalog-group--premium', false)
+            ->assertSee('Игровые артефакты')
+            ->assertSee('Премиум-артефакты')
             ->assertSee('css/library_artifact_catalog.css', false)
             ->assertSee(asset('main/images/user-reward-frame.png'), false)
             ->assertSee('onmouseover="showItemInfo(this,event,2)"', false)
@@ -326,9 +510,62 @@ class LibraryPublicPageTest extends TestCase
                 ->assertSee('data-id="'.$artifact->id.'"', false);
         }
 
+        preg_match('/library-artifact-catalog-group--game.*?<\/section>/s', $response->getContent(), $gameGroup);
+        preg_match('/library-artifact-catalog-group--premium.*?<\/section>/s', $response->getContent(), $premiumGroup);
+
+        $this->assertSame(
+            $artifacts->count() - $premiumArtifactIds->count(),
+            substr_count($gameGroup[0] ?? '', 'class="library-artifact-catalog__entry"'),
+        );
+        $this->assertSame(
+            $premiumArtifactIds->count(),
+            substr_count($premiumGroup[0] ?? '', 'class="library-artifact-catalog__entry"'),
+        );
+
         $this->assertSame(
             $artifacts->count(),
             substr_count($response->getContent(), 'class="library-artifact-catalog__entry"'),
+        );
+    }
+
+    public function test_article_renders_current_clan_skill_catalog(): void
+    {
+        $category = LibraryCategory::query()->create([
+            'name' => 'Кланы',
+            'slug' => 'clan-skills-shortcode-test',
+            'is_active' => true,
+        ]);
+        LibraryArticle::query()->create([
+            'category_id' => $category->id,
+            'title' => 'Клановые навыки',
+            'slug' => 'clan-skills-catalog-shortcode-test',
+            'content' => '[[clan_skill_catalog]]',
+            'status' => LibraryArticle::STATUS_PUBLISHED,
+            'published_at' => now(),
+        ]);
+        $skills = ClanSkillDefinition::query()->with('levels.magicSkill')->get();
+
+        $this->assertNotEmpty($skills);
+
+        $response = $this->get(route('library.show', 'clan-skills-catalog-shortcode-test'))
+            ->assertOk()
+            ->assertSee('library-clan-skills', false)
+            ->assertSee('css/library_clan_skill_catalog.css', false)
+            ->assertSee('Ур. 1')
+            ->assertDontSee('[[clan_skill_catalog]]', false);
+
+        foreach ($skills as $skill) {
+            $response->assertSee($skill->name);
+
+            $firstLevelIcon = $skill->levels->firstWhere('level', 1)?->magicSkill?->image;
+            if ($firstLevelIcon) {
+                $response->assertSee($firstLevelIcon, false);
+            }
+        }
+
+        $this->assertSame(
+            $skills->count(),
+            substr_count($response->getContent(), 'class="library-clan-skills__icon"'),
         );
     }
 }

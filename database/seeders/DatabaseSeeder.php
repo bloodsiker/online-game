@@ -37,5 +37,6 @@ class DatabaseSeeder extends Seeder
         $this->call(OvergrownRoadLocationSeeder::class);
         $this->call(WatchHillsSeeder::class);
         $this->call(GranitePassSeeder::class);
+        $this->call(LibraryEquipmentSeeder::class);
     }
 }

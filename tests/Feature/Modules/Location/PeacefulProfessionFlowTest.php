@@ -7,6 +7,8 @@ namespace Tests\Feature\Modules\Location;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
+use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Item\Domain\Services\InstantItemRewardService;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Item\Domain\Services\ItemService;
@@ -54,8 +56,14 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->seedGatheringResource();
 
         $backpack = Mockery::mock(BackpackService::class);
-        $backpack->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
-        $service = new GatheringService($backpack);
+        $backpackItem = new Backpack;
+        $backpackItem->count = 5;
+        $backpack->shouldReceive('addItemByShareItem')->once()->andReturn($backpackItem);
+        $chat = Mockery::mock(ChatService::class);
+        $chat->shouldReceive('sendLootToUser')
+            ->once()
+            ->with(Mockery::type(User::class), 'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 5 шт.)');
+        $service = new GatheringService($backpack, $chat);
         $user = User::query()->findOrFail(1);
 
         $state = $service->state($user);
@@ -89,7 +97,7 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $backpack = Mockery::mock(BackpackService::class);
         $backpack->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
         $user = User::query()->findOrFail(1);
         $nodeId = $service->state($user)['nodes'][0]['id'];
 
@@ -124,7 +132,7 @@ class PeacefulProfessionFlowTest extends TestCase
         DB::table('share_items')->where('id', 20)->update(['gathering_speed_bonus_percent' => 50]);
 
         $backpack = Mockery::mock(BackpackService::class);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
         $user = User::query()->findOrFail(1);
 
         $state = $service->state($user);
@@ -142,7 +150,7 @@ class PeacefulProfessionFlowTest extends TestCase
     {
         Carbon::setTestNow('2026-08-29 12:00:00');
         $this->seedGatheringResource();
-        $service = new GatheringService(Mockery::mock(BackpackService::class));
+        $service = $this->gatheringService(Mockery::mock(BackpackService::class));
         $user = User::query()->findOrFail(1);
         $nodeId = $service->state($user)['nodes'][0]['id'];
 
@@ -166,7 +174,7 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $backpack = Mockery::mock(BackpackService::class);
         $backpack->shouldReceive('addItemByShareItem')->once()->with(Mockery::any(), Mockery::any(), 2)->andReturn(new Backpack);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
         $user = User::query()->findOrFail(1);
         $nodeId = $service->state($user)['nodes'][0]['id'];
 
@@ -194,16 +202,27 @@ class PeacefulProfessionFlowTest extends TestCase
         ]);
 
         $backpack = Mockery::mock(BackpackService::class);
+        $primaryBackpackItem = new Backpack;
+        $primaryBackpackItem->count = 4;
         $backpack->shouldReceive('addItemByShareItem')
             ->once()
             ->with(Mockery::any(), Mockery::on(fn ($item): bool => (int) $item->id === 10), 1)
-            ->andReturn(new Backpack);
+            ->andReturn($primaryBackpackItem);
+        $bonusBackpackItem = new Backpack;
+        $bonusBackpackItem->count = 7;
         $backpack->shouldReceive('addItemByShareItem')
             ->once()
             ->with(Mockery::any(), Mockery::on(fn ($item): bool => (int) $item->id === 11), 2)
-            ->andReturn(new Backpack);
+            ->andReturn($bonusBackpackItem);
 
-        $service = new GatheringService($backpack);
+        $chat = Mockery::mock(ChatService::class);
+        $chat->shouldReceive('sendLootToUser')
+            ->once()
+            ->with(
+                Mockery::type(User::class),
+                'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 4 шт.) Дополнительно: <b>Смола</b> 2 шт. (в рюкзаке 7 шт.)',
+            );
+        $service = new GatheringService($backpack, $chat);
         $user = User::query()->findOrFail(1);
         $nodeId = $service->state($user)['nodes'][0]['id'];
         $this->assertTrue($service->start($user, $nodeId)->ok);
@@ -217,6 +236,7 @@ class PeacefulProfessionFlowTest extends TestCase
             'name' => 'Смола',
             'image' => '/resin.png',
             'count' => 2,
+            'backpackCount' => 7,
         ]], $completed->data['bonusRewards']);
         $this->assertStringContainsString('Также найдено: Смола ×2', $completed->message);
     }
@@ -226,7 +246,7 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->seedGatheringResource();
 
         $backpack = Mockery::mock(BackpackService::class);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
 
         $rightHandState = $service->state(User::query()->findOrFail(1));
         $this->assertTrue($rightHandState['nodes'][0]['canGather']);
@@ -248,7 +268,7 @@ class PeacefulProfessionFlowTest extends TestCase
 
         $backpack = Mockery::mock(BackpackService::class);
         $backpack->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
         $firstPlayer = User::query()->findOrFail(1);
         $secondPlayer = User::query()->findOrFail(2);
         $nodeId = $service->state($firstPlayer)['nodes'][0]['id'];
@@ -295,6 +315,7 @@ class PeacefulProfessionFlowTest extends TestCase
             $requirements,
             Mockery::mock(QuestProgressService::class),
             Mockery::mock(ItemActionLogger::class),
+            new InstantItemRewardService,
         );
 
         $error = $service->equip(User::query()->findOrFail(1), 201);
@@ -351,6 +372,7 @@ class PeacefulProfessionFlowTest extends TestCase
             $requirements,
             Mockery::mock(QuestProgressService::class),
             Mockery::mock(ItemActionLogger::class),
+            new InstantItemRewardService,
         );
 
         $error = $service->equip(User::query()->findOrFail(1), 201);
@@ -375,7 +397,7 @@ class PeacefulProfessionFlowTest extends TestCase
         ]);
 
         $backpack = Mockery::mock(BackpackService::class);
-        $service = new GatheringService($backpack);
+        $service = $this->gatheringService($backpack);
 
         $stateOutsideBattleLocation = $service->state(User::query()->findOrFail(1));
         $this->assertTrue($stateOutsideBattleLocation['enabled']);
@@ -418,6 +440,14 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertSame('Этот рецепт является одноразовым и не может быть изучен.', $result->message);
         $this->assertDatabaseMissing('player_recipes', ['player_id' => 1, 'share_recipe_id' => 1]);
         $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 301, 'count' => 1]);
+    }
+
+    private function gatheringService(BackpackService $backpackService): GatheringService
+    {
+        $chatService = Mockery::mock(ChatService::class);
+        $chatService->shouldReceive('sendLootToUser')->zeroOrMoreTimes();
+
+        return new GatheringService($backpackService, $chatService);
     }
 
     private function seedPlayerAndProfession(): void

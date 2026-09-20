@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Interface\Domain\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
-final class OnlineCountUpdated implements ShouldBroadcastNow
+final class OnlineCountUpdated implements ShouldBroadcast
 {
     use Dispatchable;
 

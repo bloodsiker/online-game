@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Item;
 
+use App\Modules\Quest\Domain\Services\QuestDefinitionsCache;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -23,6 +24,7 @@ class UseItemTest extends TestCase
         DB::purge('sqlite');
 
         $this->createTables();
+        QuestDefinitionsCache::flush();
 
         DB::table('races')->insert(['id' => 1, 'name' => 'Человек']);
         DB::table('locations')->insert(['id' => 10]);
@@ -96,6 +98,46 @@ class UseItemTest extends TestCase
             ]);
         $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 101, 'count' => 1]);
         $this->assertDatabaseHas('users', ['id' => 1, 'location_id' => 11, 'prev_location_id' => 10]);
+    }
+
+    public function test_teleport_use_returns_and_records_quest_message(): void
+    {
+        $this->giveKey(403, 110);
+        $this->createGate(403, 'teleport_use', false, 10, 11);
+        DB::table('quests')->insert(['id' => 1, 'title' => 'Путь через портал']);
+        DB::table('quest_objectives')->insert([
+            'id' => 1,
+            'quest_id' => 1,
+            'type' => 'use_item',
+            'target_type' => 'item',
+            'share_item_id' => 403,
+            'consume_item' => false,
+            'required_amount' => 1,
+            'description' => 'Печать портала активирована.',
+        ]);
+        DB::table('quest_players')->insert([
+            'id' => 1,
+            'player_id' => 1,
+            'quest_id' => 1,
+            'status' => 'in_progress',
+        ]);
+        DB::table('quest_player_objectives')->insert([
+            'quest_player_id' => 1,
+            'quest_objective_id' => 1,
+            'amount' => 0,
+        ]);
+        QuestDefinitionsCache::flush();
+
+        $response = $this->postJson(route('items.use', 110));
+
+        $response->assertOk()
+            ->assertJsonPath('message', 'Печать портала активирована.')
+            ->assertJsonPath('quest_messages.0', 'Печать портала активирована.');
+        $this->assertDatabaseHas('quest_player_objectives', [
+            'quest_player_id' => 1,
+            'quest_objective_id' => 1,
+            'amount' => 1,
+        ]);
     }
 
     public function test_consumable_multi_use_key_loses_one_use_after_teleport(): void
@@ -459,6 +501,54 @@ class UseItemTest extends TestCase
         Schema::create('locations', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('dungeon_id')->nullable();
+            $table->unsignedBigInteger('map_id')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('quests', function (Blueprint $table): void {
+            $table->id();
+            $table->string('title');
+            $table->timestamps();
+        });
+
+        Schema::create('quest_objectives', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('quest_id');
+            $table->unsignedBigInteger('stage_id')->nullable();
+            $table->string('type');
+            $table->string('target_type');
+            $table->unsignedBigInteger('target_id')->nullable();
+            $table->json('target_ids')->nullable();
+            $table->unsignedBigInteger('share_item_id')->nullable();
+            $table->boolean('consume_item')->default(true);
+            $table->unsignedBigInteger('map_id')->nullable();
+            $table->unsignedInteger('required_amount')->default(1);
+            $table->float('drop_chance')->nullable();
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('quest_players', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('quest_id');
+            $table->string('status');
+            $table->unsignedBigInteger('current_stage_id')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('quest_player_objectives', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('quest_player_id');
+            $table->unsignedBigInteger('quest_objective_id');
+            $table->unsignedInteger('amount')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('clan_members', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('clan_id');
             $table->timestamps();
         });
 

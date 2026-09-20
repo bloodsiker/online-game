@@ -14,6 +14,7 @@
         .gathering-page { margin: 0 auto; }
         .gathering-layout { display: grid; grid-template-columns: minmax(0, 1fr) 275px; gap: 10px; align-items: start; }
         .gathering-frame { border: 2px ridge #9c815b; background: #c8b792; box-shadow: inset 0 0 0 2px #e8ddc4, 0 2px 8px rgba(0, 0, 0, .35); }
+        .gathering-frame--map { position: relative; overflow: hidden; }
         .gathering-frame-head, .gathering-frame-foot { padding: 6px 9px; border: 1px solid #826c4f; background: linear-gradient(#efe5cf, #cdbb98); }
         .gathering-frame-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .gathering-frame-title { color: #6e160f; font-weight: bold; }
@@ -40,17 +41,9 @@
         .gathering-selection-name { color: #6e160f; font-weight: bold; }
         .gathering-selection-meta { margin-top: 3px; color: #5d5040; font-size: 10px; }
         .gathering-selection.empty { color: #7c6e59; font-style: italic; }
-        .gathering-work { display: none; margin-top: 8px; padding-top: 8px; color: #312519; border-top: 1px solid #b29e79; }
-        .gathering-work.is-visible { display: block; }
-        .gathering-work-row, .gathering-skill-row, .gathering-tooltip-row { display: flex; justify-content: space-between; gap: 8px; }
-        .gathering-work-row { margin-bottom: 5px; font-size: 11px; }
-        .gathering-progress-track, .gathering-xp-track { overflow: hidden; border: 1px solid #9d8b68; background: #332c22; box-shadow: inset 0 1px 3px rgba(0,0,0,.75); }
-        .gathering-progress-track { height: 15px; border-color: #c9b98d; background: #1d1a16; }
-        .gathering-progress-fill, .gathering-xp-fill { height: 100%; }
-        .gathering-progress-fill { width: 0; background: repeating-linear-gradient(135deg, #789331 0 8px, #96b641 8px 16px); }
-        .gathering-cancel { width: 100%; margin-top: 7px; padding: 4px 8px; color: #5f190d; background: linear-gradient(#ffe2ba, #f0b47b); border: 1px solid #a54c2b; box-shadow: inset 0 1px rgba(255,255,255,.45); font: 11px Tahoma, Arial, sans-serif; cursor: pointer; }
-        .gathering-cancel:hover { background: linear-gradient(#ffedc9, #f6c18e); }
-        .gathering-cancel:disabled { opacity: .55; cursor: wait; }
+        .gathering-skill-row, .gathering-tooltip-row { display: flex; justify-content: space-between; gap: 8px; }
+        .gathering-xp-track { overflow: hidden; border: 1px solid #9d8b68; background: #332c22; box-shadow: inset 0 1px 3px rgba(0,0,0,.75); }
+        .gathering-xp-fill { height: 100%; }
         .gathering-xp-track { height: 11px; margin: 5px 0; }
         .gathering-xp-fill { background: linear-gradient(#a5c94d, #708f2b); }
         .gathering-sidebar { display: grid; gap: 10px; }
@@ -76,6 +69,23 @@
         .gathering-notice { position: absolute; top: 39px; left: 50%; z-index: 4; display: none; width: max-content; max-width: calc(100% - 20px); padding: 5px 9px; color: #5f190d; background: linear-gradient(#ffe2ba, #f4b67f); border: 1px solid #a54c2b; box-shadow: 0 3px 10px rgba(54,25,9,.45); font-size: 11px; line-height: 1.35; text-align: center; transform: translateX(-50%); }
         .gathering-notice.is-error { color: #7c170e; background: linear-gradient(#ffe0cf, #f0a98e); border-color: #a33d2f; }
         .gathering-notice.is-warn { color: #654212; background: linear-gradient(#fff0be, #efc26f); border-color: #a97824; }
+        .gathering-modal-overlay { position: absolute; inset: 0; z-index: 20; display: none; background: rgba(24, 18, 12, .58); }
+        .gathering-modal { position: absolute; top: 50%; left: 50%; z-index: 21; display: none; width: 460px; max-width: calc(100% - 24px); transform: translate(-50%, -50%); }
+        .gathering-modal .popup_global_container { width: 100%; }
+        .gathering-modal__content { padding: 12px 18px 8px; color: #5c351d; text-align: center; }
+        .gathering-modal__bar { position: relative; width: 100%; height: 31px; margin: 4px 0 8px; overflow: hidden; }
+        .gathering-modal__bar-bg { height: 27px; margin: 2px 5px 0; overflow: hidden; border-radius: 5px; background: url('{{ asset('img/progressbar/progress-bar-1-bg.png') }}') 0 -54px repeat-x; }
+        .gathering-modal__bar-fill { width: 0; height: 27px; margin-right: auto; margin-left: 0; background: url('{{ asset('img/progressbar/progress-bar-1-bg.png') }}') 0 -27px repeat-x; transform-origin: left center; }
+        .gathering-modal__bar-border { position: absolute; inset: 0 0 auto; width: 100%; height: 31px; }
+        .gathering-modal__bar-left, .gathering-modal__bar-right, .gathering-modal__bar-center { height: 31px; background: url('{{ asset('img/progressbar/progress-bar-1-border.png') }}') no-repeat; }
+        .gathering-modal__bar-left, .gathering-modal__bar-right { position: absolute; top: 0; width: 20px; }
+        .gathering-modal__bar-left { left: 0; }
+        .gathering-modal__bar-right { right: 0; background-position: 0 -31px; }
+        .gathering-modal__bar-center { margin: 0 20px; background-position: 0 -62px; background-repeat: repeat-x; }
+        .gathering-modal__percent { position: absolute; inset: 0; color: #fff; font-size: 11px; font-weight: bold; line-height: 31px; text-align: center; text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444; }
+        .gathering-modal__error { display: none; margin-top: 9px; padding: 7px 9px; color: #7c170e; border: 1px solid #a33d2f; background: linear-gradient(#ffe0cf, #f0a98e); font-size: 11px; font-weight: bold; line-height: 1.4; text-align: center; }
+        .gathering-modal__actions { margin-top: 10px; text-align: center; }
+        .gathering-modal__actions .butt1 input { min-width: 150px; }
         @keyframes gathering-pulse { 50% { transform: scale(1.04); } }
         @keyframes gathering-active-pulse { 50% { transform: scale(1.09); box-shadow: 0 0 0 2px rgba(255,240,164,.7), 0 0 13px rgba(255,220,111,.75), inset 0 0 5px rgba(0,0,0,.8); } }
         @keyframes gathering-busy-pulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 2px rgba(220,69,51,.66), 0 0 13px rgba(210,50,36,.76), inset 0 0 5px rgba(0,0,0,.8); } }
@@ -85,7 +95,7 @@
 <body>
 <main class="gathering-page">
     <div class="gathering-layout">
-        <section class="gathering-frame">
+        <section class="gathering-frame gathering-frame--map">
             <div class="gathering-field-wrap">
                 <div class="gathering-help">Тяните карту или используйте прокрутку · двойной клик — начать добычу</div>
                 <div class="gathering-notice" id="gathering-notice" role="status" aria-live="polite"></div>
@@ -96,9 +106,48 @@
                     </div>
                 </div>
             </div>
+            <div class="gathering-modal-overlay" id="gathering-modal-overlay"></div>
+            <div class="gathering-modal" id="gathering-modal" role="dialog" aria-modal="true" aria-labelledby="gathering-modal-title">
+                <div class="popup_global_container">
+                    <div class="popup-top-left">
+                        <div class="popup-top-right">
+                            <div class="popup-top-center">
+                                <div class="popup_global_title" id="gathering-modal-title">Добыча ресурса</div>
+                            </div>
+                        </div>
+                        <div class="popup_global_close_btn" id="gathering-modal-close" role="button" tabindex="0" aria-label="Отменить добычу"></div>
+                    </div>
+                    <div class="popup-left-center">
+                        <div class="popup-right-center">
+                            <div class="popup_global_content" style="padding:8px 12px 3px;">
+                                <div class="gathering-modal__content">
+                                    <div class="gathering-modal__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gathering-modal-progress">
+                                        <div class="gathering-modal__bar-bg"><div class="gathering-modal__bar-fill" id="gathering-modal-fill"></div></div>
+                                        <div class="gathering-modal__bar-border">
+                                            <div class="gathering-modal__bar-left"></div>
+                                            <div class="gathering-modal__bar-right"></div>
+                                            <div class="gathering-modal__bar-center"></div>
+                                        </div>
+                                        <div class="gathering-modal__percent" id="gathering-modal-percent">0%</div>
+                                    </div>
+                                    <div class="gathering-modal__error" id="gathering-modal-error" role="alert" aria-live="assertive"></div>
+                                    <div class="gathering-modal__actions">
+                                        <span class="butt1 pointer"><span><input value="Отменить" id="gathering-modal-cancel" type="button" class="grnn"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="popup-left-bottom">
+                        <div class="popup-right-bottom">
+                            <div class="popup-bottom-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
         <aside class="gathering-sidebar">
-            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Выбранный ресурс</span></header><div class="gathering-frame-foot"><div class="gathering-selection empty" id="gathering-selection">Нажмите на ресурс на карте.</div><div class="gathering-work" id="gathering-work"><div class="gathering-work-row"><strong id="gathering-work-name">Добыча</strong><span id="gathering-work-time">0%</span></div><div class="gathering-progress-track" id="gathering-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="gathering-progress-fill" id="gathering-progress-fill"></div></div><button class="gathering-cancel" id="gathering-cancel" type="button">Отменить добычу</button></div></div></section>
+            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Выбранный ресурс</span></header><div class="gathering-frame-foot"><div class="gathering-selection empty" id="gathering-selection">Нажмите на ресурс на карте.</div></div></section>
             <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Мирные профессии</span></header><div class="gathering-frame-foot" id="gathering-professions"></div></section>
             <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Добыто за этот заход</span></header><div class="gathering-frame-foot"><ul class="gathering-bag" id="gathering-bag"><li class="empty">пока ничего</li></ul></div></section>
             <section class="gathering-frame"><div class="gathering-frame-foot gathering-note">Предмет выдаётся даже при переполненном рюкзаке. Пока рюкзак перегружен, персонаж не сможет перейти на другую локацию.</div></section>
@@ -125,7 +174,7 @@
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const initial = @json($initialGatheringState);
     const state = { nodes: new Map(), professions: [], attempt: null, selectedNodeId: null, lastResult: null, noticeTimer: null, serverOffset: 0, inventory: {}, completing: false, refreshing: null, viewportPositioned: false, pan: null };
-    const el = { field: document.getElementById('gathering-field'), nodes: document.getElementById('gathering-nodes'), empty: document.getElementById('gathering-empty'), selection: document.getElementById('gathering-selection'), work: document.getElementById('gathering-work'), workName: document.getElementById('gathering-work-name'), workTime: document.getElementById('gathering-work-time'), progress: document.getElementById('gathering-progress-fill'), progressTrack: document.getElementById('gathering-progress-track'), cancel: document.getElementById('gathering-cancel'), professions: document.getElementById('gathering-professions'), bag: document.getElementById('gathering-bag'), tooltip: document.getElementById('gathering-tooltip'), notice: document.getElementById('gathering-notice') };
+    const el = { field: document.getElementById('gathering-field'), nodes: document.getElementById('gathering-nodes'), empty: document.getElementById('gathering-empty'), selection: document.getElementById('gathering-selection'), professions: document.getElementById('gathering-professions'), bag: document.getElementById('gathering-bag'), tooltip: document.getElementById('gathering-tooltip'), notice: document.getElementById('gathering-notice'), modal: document.getElementById('gathering-modal'), modalOverlay: document.getElementById('gathering-modal-overlay'), modalProgress: document.getElementById('gathering-modal-progress'), modalFill: document.getElementById('gathering-modal-fill'), modalPercent: document.getElementById('gathering-modal-percent'), modalError: document.getElementById('gathering-modal-error'), modalCancel: document.getElementById('gathering-modal-cancel'), modalClose: document.getElementById('gathering-modal-close') };
 
     function request(url, method) {
         return fetch(url, { method: method || 'GET', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' }).then(async function (response) { const data = await response.json(); if (!response.ok) throw data; return data; });
@@ -133,6 +182,19 @@
     function showNotice(message, type) { clearTimeout(state.noticeTimer); el.notice.textContent = message; el.notice.className = 'gathering-notice ' + (type || ''); el.notice.style.display = 'block'; state.noticeTimer = window.setTimeout(function () { el.notice.style.display = 'none'; }, 4200); }
     function setLog(message, type) { if (type) showNotice(message, type); }
     function escapeHtml(value) { const div = document.createElement('div'); div.textContent = value == null ? '' : String(value); return div.innerHTML; }
+    function openProgressModal(node) {
+        const nodeId = node?.id || state.attempt?.nodeId || null;
+        const sameAttempt = el.modal.style.display === 'block' && String(el.modal.dataset.nodeId || '') === String(nodeId || '');
+        el.modal.dataset.nodeId = nodeId || '';
+        if (!sameAttempt) { clearProgressModalError(); setProgressModalBusy(false); updateProgressModal(0); }
+        el.modalOverlay.style.display = 'block'; el.modal.style.display = 'block';
+    }
+    function updateProgressModal(percent) { const normalized = Math.max(0, Math.min(100, Number(percent) || 0)); el.modalFill.style.width = normalized.toFixed(2) + '%'; el.modalPercent.textContent = Math.round(normalized) + '%'; el.modalProgress.setAttribute('aria-valuenow', String(Math.round(normalized))); }
+    function setProgressModalBusy(busy) { el.modalCancel.disabled = !!busy; }
+    function clearProgressModalError() { el.modalError.textContent = ''; el.modalError.style.display = 'none'; el.modalCancel.value = 'Отменить'; }
+    function showProgressModalError(message) { el.modalError.textContent = message || 'Не удалось выполнить добычу.'; el.modalError.style.display = 'block'; el.modalCancel.value = state.attempt ? 'Отменить' : 'Закрыть'; setProgressModalBusy(false); el.modalOverlay.style.display = 'block'; el.modal.style.display = 'block'; }
+    function closeProgressModal() { el.modal.dataset.nodeId = ''; el.modalOverlay.style.display = 'none'; el.modal.style.display = 'none'; clearProgressModalError(); updateProgressModal(0); setProgressModalBusy(false); }
+    function handleProgressModalAction() { if (state.attempt) { cancelGathering(); return; } closeProgressModal(); }
     function positionViewportOnce() { if (state.viewportPositioned) return; state.viewportPositioned = true; window.requestAnimationFrame(function () { el.field.scrollLeft = Math.max(0, (el.field.scrollWidth - el.field.clientWidth) / 2); el.field.scrollTop = Math.max(0, (el.field.scrollHeight - el.field.clientHeight) / 2); }); }
     function startPan(event) { if (event.button !== 0 || event.target.closest('.gathering-node')) return; state.pan = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, left: el.field.scrollLeft, top: el.field.scrollTop }; el.field.classList.add('is-dragging'); el.field.setPointerCapture(event.pointerId); }
     function movePan(event) { if (!state.pan || state.pan.pointerId !== event.pointerId) return; el.field.scrollLeft = state.pan.left - (event.clientX - state.pan.x); el.field.scrollTop = state.pan.top - (event.clientY - state.pan.y); }
@@ -183,25 +245,25 @@
     function positionTooltip(event) { const bounds = el.tooltip.getBoundingClientRect(); let left = event.clientX + 12, top = event.clientY + 12; if (left + bounds.width > innerWidth - 8) left = event.clientX - bounds.width - 12; if (top + bounds.height > innerHeight - 8) top = event.clientY - bounds.height - 12; el.tooltip.style.left = left + 'px'; el.tooltip.style.top = top + 'px'; }
     function startGathering(nodeId) {
         const node = state.nodes.get(nodeId); if (!node || state.attempt) { setLog('Сначала завершите текущую добычу.', 'is-warn'); return; }
-        state.lastResult = null; state.selectedNodeId = nodeId; request(urls.start.replace('__NODE__', String(nodeId)), 'POST').then(function (data) { state.attempt = data.attempt; setLog(data.message); renderNodes(); renderSelection(); renderProgress(); }).catch(function (error) { setLog(error.message || 'Не удалось начать добычу.', 'is-error'); refreshState(); });
+        state.lastResult = null; state.selectedNodeId = nodeId; openProgressModal(node); clearProgressModalError(); setProgressModalBusy(true); request(urls.start.replace('__NODE__', String(nodeId)), 'POST').then(function (data) { state.attempt = data.attempt; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderSelection(); renderProgress(); }).catch(function (error) { const message = error.message || 'Не удалось начать добычу.'; state.lastResult = message; showProgressModalError(message); setLog(message, 'is-error'); refreshState(); });
     }
-    function renderProgress() { if (!state.attempt) { el.work.classList.remove('is-visible'); el.progress.style.width = '0%'; return; } const node = state.nodes.get(Number(state.attempt.nodeId)); el.work.classList.add('is-visible'); el.workName.textContent = 'Добыча: ' + (node ? node.name : 'ресурс'); window.requestAnimationFrame(updateProgress); }
+    function renderProgress() { if (!state.attempt) { if (el.modalError.style.display !== 'block') closeProgressModal(); else el.modalCancel.value = 'Закрыть'; return; } const node = state.nodes.get(Number(state.attempt.nodeId)); openProgressModal(node); el.modalCancel.value = 'Отменить'; window.requestAnimationFrame(updateProgress); }
     function updateProgress() {
         if (!state.attempt) return; const now = Date.now() + state.serverOffset, start = Date.parse(state.attempt.startedAt), end = Date.parse(state.attempt.completesAt); const progress = Math.max(0, Math.min(1, (now - start) / Math.max(1, end - start))), percent = Math.round(progress * 100);
-        el.progress.style.width = (progress * 100).toFixed(2) + '%'; el.progressTrack.setAttribute('aria-valuenow', percent); el.workTime.textContent = percent + '%'; if (progress < 1) { window.requestAnimationFrame(updateProgress); return; } if (!state.completing) completeGathering();
+        updateProgressModal(progress * 100); if (progress < 1) { window.requestAnimationFrame(updateProgress); return; } if (!state.completing) completeGathering();
     }
     function completeGathering() {
-        state.completing = true; request(urls.complete, 'POST').then(function (data) { state.attempt = null; state.completing = false; state.lastResult = data.ok ? null : data.message; if (data.reward) addRewardToInventory(data.reward); (data.bonusRewards || []).forEach(addRewardToInventory); setLog(data.message); renderSelection(); renderBag(); return refreshState(); }).catch(function (error) { state.completing = false; state.lastResult = error.message || 'Не удалось завершить добычу.'; renderSelection(); setLog(state.lastResult, 'is-error'); refreshState(); });
+        state.completing = true; request(urls.complete, 'POST').then(function (data) { state.attempt = null; state.completing = false; state.lastResult = data.ok ? null : data.message; if (!data.ok) { showProgressModalError(data.message); renderSelection(); setLog(data.message, 'is-error'); return refreshState(); } closeProgressModal(); if (data.reward) addRewardToInventory(data.reward); (data.bonusRewards || []).forEach(addRewardToInventory); setLog(data.message); renderSelection(); renderBag(); return refreshState(); }).catch(function (error) { state.completing = false; state.lastResult = error.message || 'Не удалось завершить добычу.'; showProgressModalError(state.lastResult); renderSelection(); setLog(state.lastResult, 'is-error'); refreshState(); });
     }
     function cancelGathering() {
         if (!state.attempt || state.completing) return;
-        state.completing = true; el.cancel.disabled = true; request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; el.cancel.disabled = false; setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { state.completing = false; el.cancel.disabled = false; setLog(error.message || 'Не удалось отменить добычу.', 'is-error'); });
+        state.completing = true; setProgressModalBusy(true); request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { const message = error.message || 'Не удалось отменить добычу.'; state.completing = false; showProgressModalError(message); setLog(message, 'is-error'); });
     }
     function addRewardToInventory(item) { state.inventory[item.shareItemId] = { ...item, count: (state.inventory[item.shareItemId]?.count || 0) + item.count }; }
     function renderBag() { const items = Object.values(state.inventory); el.bag.innerHTML = items.length ? items.map(function (item) { return '<li><img src="' + escapeHtml(item.image) + '" alt=""><span>' + escapeHtml(item.name) + '</span><span class="gathering-bag-count">×' + item.count + '</span></li>'; }).join('') : '<li class="empty">пока ничего</li>'; }
     function refreshState() {
         if (state.refreshing) return state.refreshing;
-        state.refreshing = request(urls.state).then(applyState).catch(function () { setLog('Не удалось обновить общее поле карты.', 'is-error'); }).finally(function () { state.refreshing = null; });
+        state.refreshing = request(urls.state).then(applyState).catch(function (error) { const message = error.message || 'Не удалось обновить общее поле карты.'; if (el.modal.style.display === 'block') showProgressModalError(message); setLog(message, 'is-error'); }).finally(function () { state.refreshing = null; });
         return state.refreshing;
     }
     function subscribeToGatheringMap() {
@@ -214,8 +276,8 @@
         }
     }
     el.field.addEventListener('pointerdown', startPan); el.field.addEventListener('pointermove', movePan); el.field.addEventListener('pointerup', stopPan); el.field.addEventListener('pointercancel', stopPan);
-    el.cancel.addEventListener('click', cancelGathering);
-    window.addEventListener('pagehide', function () { try { window.parent.setMapHiddenForGathering(false); } catch (e) {} if (window.Echo) window.Echo.leave('gathering.map.' + mapId); if (!state.attempt) return; const form = new FormData(); form.append('_token', csrf); navigator.sendBeacon(urls.cancel, form); });
+    el.modalCancel.addEventListener('click', handleProgressModalAction); el.modalClose.addEventListener('click', handleProgressModalAction); el.modalClose.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleProgressModalAction(); } });
+    window.addEventListener('pagehide', function () { try { window.parent.setMapHiddenForGathering(false); } catch (e) {} closeProgressModal(); if (window.Echo) window.Echo.leave('gathering.map.' + mapId); if (!state.attempt) return; const form = new FormData(); form.append('_token', csrf); navigator.sendBeacon(urls.cancel, form); });
     applyState(initial); positionViewportOnce(); setLog(initial.message || 'Ресурсы доступны. Перемещайте карту и дважды нажмите на кружок, чтобы начать добычу.');
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', subscribeToGatheringMap, { once: true }); else subscribeToGatheringMap();
 })();

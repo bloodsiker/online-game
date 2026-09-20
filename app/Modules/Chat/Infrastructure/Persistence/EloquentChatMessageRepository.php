@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Infrastructure\Persistence;
 
 use App\Modules\Chat\Application\Jobs\BroadcastChatMessageExpiration;
+use App\Modules\Chat\Domain\ChatMessageLifetime;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Events\ChatMessageCreated;
@@ -35,9 +36,9 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
     private function scheduleExpirationBroadcast(ChatMessage $message): void
     {
         $expiresAt = match (true) {
-            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(30),
-            $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(10),
-            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(10),
+            $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
+            $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
+            $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             default => null,
         };
 
@@ -96,8 +97,8 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
     private function applyChannelFilter(Builder $query, User $user, ChatChannel $channel): void
     {
         $ignoredIds = $this->getIgnoredUserIds($user);
-        $tenMinutesAgo = Carbon::now()->subMinutes(10);
-        $thirtyMinutesAgo = Carbon::now()->subMinutes(30);
+        $tenMinutesAgo = Carbon::now()->subMinutes(ChatMessageLifetime::PERSONAL_MINUTES);
+        $thirtyMinutesAgo = Carbon::now()->subMinutes(ChatMessageLifetime::SYSTEM_MINUTES);
 
         $privateClause = function ($q) use ($user, $ignoredIds, $tenMinutesAgo) {
             $q->where('channel', ChatChannel::Private->value)
@@ -136,8 +137,9 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                         ChatMessageType::PartyNotice->value,
                         ChatMessageType::Quest->value,
                         ChatMessageType::QuestItem->value,
+                        ChatMessageType::Loot->value,
                     ])
-                    ->where('created_at', '>=', Carbon::now()->subMinutes(10))
+                    ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::PERSONAL_MINUTES))
                 )
                 ->orWhere($privateClause)
                 ->orWhere($systemClause)

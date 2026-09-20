@@ -10,7 +10,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 
 class ChestPageViewMapper
 {
-    public function map(?Item $chest, string $message = ''): ChestPageDTO
+    public function map(?Item $chest, string $message, int $money): ChestPageDTO
     {
         $items = $chest?->itemsInChest ?? collect();
         $chestId = $chest?->id;
@@ -23,11 +23,13 @@ class ChestPageViewMapper
                     name: (string) $item->getName(),
                     count: (int) $item->pivot->count,
                     pickupUrl: route('items.pickup_chest', ['chest' => $chestId, 'id' => $item->id]),
+                    rewardType: $item->itemInfo->instantReward?->reward_type->value,
                 )
             )->all(),
             message: $message,
             backpackUrl: route('backpack'),
             locationUrl: route('location'),
+            money: $money,
         );
     }
 }

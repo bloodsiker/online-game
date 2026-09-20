@@ -1,0 +1,190 @@
+.library-bestiary-description {
+    margin: 0 0 10px;
+    line-height: 1.45;
+}
+
+.library-bestiary-filters {
+    padding: 8px;
+    border: 1px solid #c79568;
+    background: rgba(244, 215, 171, .48) url('../img/bg/info/bg_l.gif') repeat;
+}
+
+.library-bestiary-filters__row {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.7fr) minmax(85px, .65fr) minmax(85px, .65fr);
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.library-bestiary-filters__row:last-of-type {
+    grid-template-columns: minmax(150px, 1fr) minmax(210px, 1.45fr) minmax(120px, .8fr);
+}
+
+.library-bestiary-filters label,
+.library-bestiary-filters label > span {
+    display: block;
+}
+
+.library-bestiary-filters label > span {
+    margin-bottom: 3px;
+    color: #60351f;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.library-bestiary-filters select.library-search-field {
+    appearance: auto;
+}
+
+.library-bestiary-summary {
+    margin: 10px 2px 7px;
+    color: #89664f;
+    font-size: 11px;
+}
+
+.library-bestiary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.library-bestiary-card {
+    display: flex;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 132px;
+    padding: 6px;
+    color: #5e3d29;
+    border: 1px solid #a96f47;
+    background: rgba(240, 207, 160, .58) url('../img/bg/info/bg_l.gif') repeat;
+    box-shadow: inset 0 0 0 2px rgba(255, 244, 210, .52);
+}
+
+.library-bestiary-card:hover {
+    color: #5e3d29;
+    text-decoration: none;
+    border-color: #71351e;
+    background-color: rgba(235, 188, 126, .78);
+}
+
+.library-bestiary-card--boss {
+    border-color: #8d2c21;
+    box-shadow: inset 0 0 0 2px rgba(255, 230, 185, .65), 0 0 5px rgba(125, 27, 14, .2);
+}
+
+.library-bestiary-card__portrait {
+    position: relative;
+    display: flex;
+    flex: 0 0 112px;
+    width: 112px;
+    height: 118px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid #9e6743;
+    background: rgba(62, 31, 17, .16);
+}
+
+.library-bestiary-card__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.library-bestiary-card__empty {
+    color: #9c704f;
+    font: bold 35px Georgia, serif;
+}
+
+.library-bestiary-card__level {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    padding: 1px 4px;
+    color: #f8dea4;
+    font-size: 9px;
+    font-weight: bold;
+    background: rgba(55, 18, 8, .84);
+}
+
+.library-bestiary-card__body {
+    display: flex;
+    min-width: 0;
+    padding-left: 8px;
+    flex: 1;
+    flex-direction: column;
+}
+
+.library-bestiary-card__heading {
+    display: flex;
+    min-width: 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(151, 96, 58, .45);
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.library-bestiary-card__heading strong {
+    overflow: hidden;
+    color: #7e1d0a;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.library-bestiary-card__heading em {
+    flex: 0 0 auto;
+    padding: 1px 4px;
+    color: #f8dea4;
+    font-size: 8px;
+    font-style: normal;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: #8d2c21;
+}
+
+.library-bestiary-card__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 7px;
+    margin-top: 5px;
+    font-size: 9px;
+    line-height: 13px;
+}
+
+.library-bestiary-card__stats span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.library-bestiary-card__habitat {
+    display: block;
+    margin-top: auto;
+    padding-top: 5px;
+    color: #684733;
+    font-size: 9px;
+    line-height: 12px;
+}
+
+.library-bestiary-card__maps {
+    display: block;
+    overflow: hidden;
+    margin-top: 2px;
+    color: #98745b;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.library-bestiary-empty {
+    grid-column: 1 / -1;
+    border: 1px solid #d5a173;
+}
+
+@media (max-width: 1050px) {
+    .library-bestiary-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -15,5 +15,7 @@ final readonly class WhoUserDTO
         public ?string $clanName,
         public ?string $clanIcon,
         public ?int $clanId,
+        public ?string $chatMuteTitle,
+        public ?string $chatMuteExpiresAt,
     ) {}
 }

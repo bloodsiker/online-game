@@ -13,7 +13,7 @@ Broadcast::channel('player.{playerId}', function ($user, $playerId) {
 });
 
 Broadcast::channel('online', function ($user) {
-    $user->loadMissing(['player', 'clanMembership.clan']);
+    $user->loadMissing(['player', 'clanMembership.clan', 'activeChatMute']);
     $clan = $user->clanMembership?->clan;
 
     return [
@@ -26,6 +26,8 @@ Broadcast::channel('online', function ($user) {
         'clan_id' => $clan?->id,
         'clan_name' => $clan?->name,
         'clan_icon' => $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
+        'chat_mute_title' => $user->activeChatMute?->tooltip(),
+        'chat_mute_expires_at' => $user->activeChatMute?->expires_at?->toIso8601String(),
         'info_url' => url('/info/u/'.$user->id),
     ];
 });

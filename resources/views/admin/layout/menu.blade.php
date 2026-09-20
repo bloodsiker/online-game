@@ -20,6 +20,18 @@
                             <span>Дашборд</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.scheduled_tasks.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.scheduled_tasks.index') }}">
+                            <i class="bx bx-time-five" aria-hidden="true"></i>
+                            <span>Планировщик</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.chat.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.chat.index') }}">
+                            <i class="bx bx-message-rounded-dots" aria-hidden="true"></i>
+                            <span>Чат</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.race', 'admin.race.info') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.race') }}">
                             <i class="bx bx-cube" aria-hidden="true"></i>
@@ -216,6 +228,17 @@
                             </li>
                             <li class="{{ request()->routeIs('admin.library.categories.*') ? 'nav-active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.library.categories.index') }}">Категории</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.forum.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
+                            <i class="bx bx-message-square-dots" aria-hidden="true"></i>
+                            <span>Форум</span>
+                        </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.forum.sections.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.forum.sections.index') }}">Категории</a>
                             </li>
                         </ul>
                     </li>

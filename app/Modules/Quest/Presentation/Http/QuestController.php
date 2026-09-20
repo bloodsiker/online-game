@@ -17,6 +17,8 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Quest\Domain\Services\QuestStageRuntimeService;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
@@ -43,6 +45,8 @@ class QuestController extends Controller
         private readonly ExperienceService $experienceService,
         private readonly ReputationService $reputationService,
         private readonly ClanLogService $clanLogService,
+        private readonly QuestStageRuntimeService $questStageRuntimeService,
+        private readonly QuestProgressService $questProgressService,
     ) {}
 
     public function list(Request $request)
@@ -148,13 +152,14 @@ class QuestController extends Controller
             $canAccept = $clanMembership && ! $inProgress && ! QuestClanProgress::where('user_id', $user->id)
                 ->where('status', QuestPlayerStatus::IN_PROGRESS)
                 ->exists();
+            $stageMessage = $this->questStageRuntimeService->messageFor($clanProgress);
 
             [$dialoguePage, $dialogueNextUrl, $showObjectives] = $this->resolveDialoguePage($quest, $inProgress, $request, $npc?->id);
 
             return view('quest::quest', compact(
                 'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
                 'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
-                'dialoguePage', 'dialogueNextUrl', 'showObjectives'
+                'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage'
             ));
         }
 
@@ -196,13 +201,14 @@ class QuestController extends Controller
         $clanProgress = null;
         $isAcceptor = false;
         $canAccept = true;
+        $stageMessage = $this->questStageRuntimeService->messageFor($questPlayer);
 
         [$dialoguePage, $dialogueNextUrl, $showObjectives] = $this->resolveDialoguePage($quest, $inProgress, $request, $npc?->id);
 
         return view('quest::quest', compact(
             'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
             'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
-            'dialoguePage', 'dialogueNextUrl', 'showObjectives'
+            'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage'
         ));
     }
 
@@ -290,7 +296,7 @@ class QuestController extends Controller
                 $existing->update([
                     'user_id' => $user->id,
                     'status' => QuestPlayerStatus::IN_PROGRESS,
-                    'current_stage_id' => $firstStage?->id,
+                    ...$this->questStageRuntimeService->stateFor($firstStage),
                     'completed_at' => null,
                     'reset_at' => null,
                 ]);
@@ -306,7 +312,7 @@ class QuestController extends Controller
                     'quest_id' => $quest->id,
                     'clan_id' => $clan->id,
                     'user_id' => $user->id,
-                    'current_stage_id' => $firstStage?->id,
+                    ...$this->questStageRuntimeService->stateFor($firstStage),
                 ]);
                 foreach ($quest->objectives as $objective) {
                     QuestClanObjective::create([
@@ -453,8 +459,11 @@ class QuestController extends Controller
         // --- STAGED ---
         if ($clanProgress->current_stage_id !== null) {
             if (! $clanProgress->isCurrentStageComplete()) {
+                $message = $this->questStageRuntimeService->messageFor($clanProgress)
+                    ?: 'Не все задания текущего этапа выполнены.';
+
                 return redirect()->route('npc', ['id' => $npcId])
-                    ->with('quest_error', 'Не все задания текущего этапа выполнены.');
+                    ->with('quest_error', $message);
             }
 
             $currentStage = $clanProgress->currentStage;
@@ -502,7 +511,7 @@ class QuestController extends Controller
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
                     }
-                    $clanProgress->update(['current_stage_id' => $nextStage->id]);
+                    $clanProgress->update($this->questStageRuntimeService->stateFor($nextStage));
                     foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
                         $shareItem = $objective->shareItem;
                         if ($shareItem) {
@@ -530,7 +539,7 @@ class QuestController extends Controller
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
                 }
-                $clanProgress->update(['current_stage_id' => null]);
+                $clanProgress->update($this->questStageRuntimeService->stateFor(null));
             });
 
             $clanProgress->refresh();
@@ -660,12 +669,13 @@ class QuestController extends Controller
             }
 
             // Reset for another run
-            DB::transaction(function () use ($existingQuestPlayer, $quest) {
+            $itemGate = $this->questProgressService->resolveItemGate($existingQuestPlayer->player->user, $quest);
+            DB::transaction(function () use ($existingQuestPlayer, $quest, $itemGate) {
                 $firstStage = $quest->firstStage();
                 $existingQuestPlayer->objectives()->delete();
                 $existingQuestPlayer->update([
                     'status' => QuestPlayerStatus::IN_PROGRESS,
-                    'current_stage_id' => $firstStage?->id,
+                    ...$this->questStageRuntimeService->stateFor($firstStage),
                     'completed_at' => null,
                     'reset_at' => null,
                 ]);
@@ -673,6 +683,7 @@ class QuestController extends Controller
                     QuestPlayerObjective::create([
                         'quest_player_id' => $existingQuestPlayer->id,
                         'quest_objective_id' => $objective->id,
+                        'amount' => $itemGate->initialAmountFor($objective),
                     ]);
                 }
                 // Give deliver items for new run (first stage only if staged)
@@ -702,17 +713,31 @@ class QuestController extends Controller
             }
         }
 
-        DB::transaction(function () use ($player, $user, $quest, &$existingQuestPlayer) {
+        // Item-gate objectives (type=collect, target_type=item)
+        // не имеют живого триггера прогресса после взятия квеста: их amount замораживается
+        // в момент take() и никогда не пересчитывается заново. Если пустить игрока без всех
+        // предметов на руках, квест станет НАВСЕГДА невыполнимым, даже когда предметы появятся
+        // позже — поэтому просто не даём взять квест, пока не собрано всё нужное.
+        $itemGate = $this->questProgressService->resolveItemGate($user, $quest);
+        $missingItemGate = $itemGate->missingDescription();
+        if ($missingItemGate !== null) {
+            return redirect()->route('npc', ['id' => $npcId])
+                ->with('quest_error', "Для взятия этого квеста нужно уже иметь при себе: {$missingItemGate}.");
+        }
+
+        DB::transaction(function () use ($player, $user, $quest, $itemGate, &$existingQuestPlayer) {
+            $firstStage = $quest->firstStage();
             $questPlayer = QuestPlayer::create([
                 'player_id' => $player->id,
                 'quest_id' => $quest->id,
-                'current_stage_id' => $quest->firstStage()?->id,
+                ...$this->questStageRuntimeService->stateFor($firstStage),
             ]);
 
             foreach ($quest->objectives as $objective) {
                 QuestPlayerObjective::create([
                     'quest_player_id' => $questPlayer->id,
                     'quest_objective_id' => $objective->id,
+                    'amount' => $itemGate->initialAmountFor($objective),
                 ]);
             }
 
@@ -755,8 +780,11 @@ class QuestController extends Controller
         // --- STAGED QUEST: player is on an active stage ---
         if ($questPlayer->current_stage_id !== null) {
             if (! $questPlayer->isCurrentStageComplete()) {
+                $message = $this->questStageRuntimeService->messageFor($questPlayer)
+                    ?: 'Не все задания текущего этапа выполнены.';
+
                 return redirect()->route('npc', ['id' => $npcId])
-                    ->with('quest_error', 'Не все задания текущего этапа выполнены.');
+                    ->with('quest_error', $message);
             }
 
             $currentStage = $questPlayer->currentStage;
@@ -765,19 +793,20 @@ class QuestController extends Controller
             // Проверка наличия предметов одним агрегатным запросом
             $stageShareItemIds = $currentStage->objectives
                 ->whereIn('type', ['deliver', 'collect'])
-                ->filter(fn ($objective) => (bool) $objective->share_item_id)
-                ->map(fn ($objective) => (int) $objective->share_item_id)
+                ->map(fn ($objective) => $objective->requiredShareItemId())
+                ->filter()
                 ->unique()
                 ->values()
                 ->all();
             $backpackCounts = $this->backpackService->countByShareItemIds($user, $stageShareItemIds);
 
             foreach ($currentStage->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
-                if (! $objective->share_item_id) {
+                $requiredShareItemId = $objective->requiredShareItemId();
+                if (! $requiredShareItemId) {
                     continue;
                 }
                 $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
-                if ($shareItem && ($backpackCounts[(int) $objective->share_item_id] ?? 0) < $objective->required_amount) {
+                if ($shareItem && ($backpackCounts[$requiredShareItemId] ?? 0) < $objective->required_amount) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
                 }
@@ -810,7 +839,7 @@ class QuestController extends Controller
                         }
                     }
 
-                    $questPlayer->update(['current_stage_id' => $nextStage->id]);
+                    $questPlayer->update($this->questStageRuntimeService->stateFor($nextStage));
 
                     // Give deliver items for the new stage
                     foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
@@ -842,7 +871,7 @@ class QuestController extends Controller
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
                 }
-                $questPlayer->update(['current_stage_id' => null]);
+                $questPlayer->update($this->questStageRuntimeService->stateFor(null));
             });
 
             $questPlayer->refresh();
@@ -859,19 +888,20 @@ class QuestController extends Controller
             // Проверка наличия предметов одним агрегатным запросом
             $finalShareItemIds = $quest->objectives
                 ->whereIn('type', ['deliver', 'collect'])
-                ->filter(fn ($objective) => (bool) $objective->share_item_id)
-                ->map(fn ($objective) => (int) $objective->share_item_id)
+                ->map(fn ($objective) => $objective->requiredShareItemId())
+                ->filter()
                 ->unique()
                 ->values()
                 ->all();
             $backpackCounts = $this->backpackService->countByShareItemIds($user, $finalShareItemIds);
 
             foreach ($quest->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
-                if (! $objective->share_item_id) {
+                $requiredShareItemId = $objective->requiredShareItemId();
+                if (! $requiredShareItemId) {
                     continue;
                 }
                 $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
-                if ($shareItem && ($backpackCounts[(int) $objective->share_item_id] ?? 0) < $objective->required_amount) {
+                if ($shareItem && ($backpackCounts[$requiredShareItemId] ?? 0) < $objective->required_amount) {
                     return redirect()->route('npc', ['id' => $npcId])
                         ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
                 }
@@ -944,7 +974,11 @@ class QuestController extends Controller
             $parts[] = match ($reward->type) {
                 QuestRewardType::EXP => "+{$reward->amount} опыта",
                 QuestRewardType::MONEY => "+{$reward->amount} монет",
-                QuestRewardType::ITEM => ($reward->amount > 1 ? "{$reward->amount}x " : '').($reward->itemInfo?->name ?? 'предмет'),
+                QuestRewardType::ITEM => ($reward->amount > 1 ? "{$reward->amount}x " : '').(
+                    $reward->share_item_id && $reward->itemInfo
+                        ? "[[share_item_{$reward->share_item_id}]]"
+                        : 'предмет'
+                ),
                 QuestRewardType::LOCATION_ACCESS => 'открыт доступ к «'.($reward->location?->name ?? 'локации').'»',
                 QuestRewardType::CLAN_POINTS => "+{$reward->amount} клановых очков",
                 QuestRewardType::REPUTATION_POINTS => "+{$reward->amount} очков репутации",

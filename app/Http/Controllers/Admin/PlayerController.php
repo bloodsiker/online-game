@@ -7,12 +7,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Moderation\Application\Services\CommunicationMuteService;
+use App\Modules\Moderation\Domain\Enums\CommunicationScope;
+use App\Modules\Moderation\Domain\Models\UserCommunicationMute;
 use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PlayerController extends Controller
 {
@@ -79,7 +83,26 @@ class PlayerController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('admin.player.info', compact('player', 'backpack', 'playerReputations', 'maxPlayerLevel'));
+        $communicationMutes = UserCommunicationMute::query()
+            ->where('user_id', $player->user_id)
+            ->with(['imposedBy', 'revokedBy'])
+            ->latest()
+            ->limit(50)
+            ->get();
+        $activeCommunicationMutes = UserCommunicationMute::query()
+            ->where('user_id', $player->user_id)
+            ->active()
+            ->get()
+            ->keyBy(fn (UserCommunicationMute $mute): string => $mute->scope->value);
+
+        return view('admin.player.info', compact(
+            'player',
+            'backpack',
+            'playerReputations',
+            'maxPlayerLevel',
+            'communicationMutes',
+            'activeCommunicationMutes',
+        ));
     }
 
     public function levelUp(Request $request, Player $player, PlayerLevelUpService $levelUpService): RedirectResponse
@@ -118,5 +141,44 @@ class PlayerController extends Controller
         $backpack->delete();
 
         return redirect()->back()->with('success', 'Предмет удалён из рюкзака.');
+    }
+
+    public function mute(
+        Request $request,
+        Player $player,
+        CommunicationMuteService $communicationMuteService,
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'scope' => ['required', Rule::enum(CommunicationScope::class)],
+            'duration_minutes' => ['required', 'integer', 'min:1', 'max:525600'],
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $scope = CommunicationScope::from($validated['scope']);
+        $mute = $communicationMuteService->mute(
+            $player->user,
+            $request->user(),
+            $scope,
+            (int) $validated['duration_minutes'],
+            $validated['reason'] ?? null,
+        );
+
+        return redirect()->back()->with(
+            'success',
+            sprintf('%s заблокирован до %s.', $scope->label(), $mute->expires_at->format('d.m.Y H:i')),
+        );
+    }
+
+    public function revokeMute(
+        Request $request,
+        Player $player,
+        UserCommunicationMute $mute,
+        CommunicationMuteService $communicationMuteService,
+    ): RedirectResponse {
+        abort_unless((int) $mute->user_id === (int) $player->user_id, 404);
+
+        $communicationMuteService->revoke($mute, $request->user());
+
+        return redirect()->back()->with('success', 'Молчание снято досрочно.');
     }
 }

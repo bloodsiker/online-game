@@ -57,6 +57,8 @@
         .msg-quest_item            { border-left: 2px solid #009900; padding-left: 3px; color: #009900; font-weight: bold; }
         .msg-quest_item small      { color: #009900; }
         .msg-quest_item-icon       { font-weight: bold; }
+        .msg-loot                  { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
+        .msg-loot small            { color: #000; }
         .prv-name         { color: #ff0000; font-weight: bold; }
         .msg-time-reply   { cursor: pointer; text-decoration: underline dotted #999; color: #ff0000; }
         .msg-time-reply:hover { opacity: 0.75; }
@@ -142,6 +144,9 @@
 
                         @elseif ($msg->type === 'quest_item')
                             <span class="msg-quest_item-icon">✦</span> {!! $msg->content !!}
+
+                        @elseif ($msg->type === 'loot')
+                            {!! $msg->content !!}
 
                         @elseif ($msg->type === 'private')
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
@@ -265,6 +270,8 @@
             html += msg.content;
         } else if (msg.type === 'quest_item') {
             html += '<span class="msg-quest_item-icon">✦</span> ' + msg.content;
+        } else if (msg.type === 'loot') {
+            html += msg.content;
         } else if (msg.type === 'private') {
             html += clanIconHtml(msg)
                   + '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'

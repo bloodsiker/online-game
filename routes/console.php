@@ -1,33 +1,24 @@
 <?php
 
-use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
-use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
-use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
+use App\Modules\Scheduler\Application\Services\ScheduledTaskManager;
+use App\Modules\Scheduler\Application\Services\ScheduledTaskRunner;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
+Artisan::command('inspire', function (): void {
     $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote')->hourly();
+})->purpose('Display an inspiring quote');
 
-Schedule::command('items:delete-expired-location')
-    ->everyMinute()
-    ->withoutOverlapping();
+$taskManager = app(ScheduledTaskManager::class);
 
-Schedule::call(static fn (): int => app(PruneExpiredPlayerInjuries::class)->execute())
-    ->name('players:prune-expired-injuries')
-    ->everyMinute()
-    ->withoutOverlapping();
+foreach ($taskManager->definitions() as $definition) {
+    $event = Schedule::call(
+        static fn (): string => app(ScheduledTaskRunner::class)->run($definition->key),
+    );
 
-Schedule::call(static fn (): int => app(ProcessExpiredClanTaxes::class)->execute(now()))
-    ->name('clans:process-expired-taxes')
-    ->everyMinute()
-    ->withoutOverlapping();
-
-Schedule::call(static fn (): int => app(ProcessDuePlayerStates::class)->execute(now()))
-    ->name('players:process-state')
-    // Реген налаштований раз на REGEN_INTERVAL=5с (див. Player::REGEN_INTERVAL),
-    // щосекундний тік лише сканує таблиці без користі.
-    ->everyFiveSeconds()
-    ->withoutOverlapping(1);
+    $taskManager->applySchedule($event, $definition)
+        ->name('scheduled-task:'.$definition->key)
+        ->when(static fn (): bool => app(ScheduledTaskManager::class)->isEnabled($definition->key))
+        ->withoutOverlapping(max(1, (int) ceil($definition->lockSeconds / 60)));
+}

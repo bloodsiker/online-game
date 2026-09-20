@@ -46,6 +46,8 @@ class WhoPageViewMapper
             clanName: $clan?->name,
             clanIcon: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
             clanId: $clan?->id,
+            chatMuteTitle: $user->activeChatMute?->tooltip(),
+            chatMuteExpiresAt: $user->activeChatMute?->expires_at?->toIso8601String(),
         );
     }
 }

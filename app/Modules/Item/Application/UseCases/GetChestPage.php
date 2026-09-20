@@ -27,6 +27,7 @@ class GetChestPage
         return $this->mapper->map(
             $this->readRepository->findChestWithItems($chestId),
             $message,
+            (int) $user->money,
         );
     }
 }

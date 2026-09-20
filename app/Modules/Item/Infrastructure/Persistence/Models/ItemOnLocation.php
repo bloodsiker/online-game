@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Infrastructure\Persistence\Models;
 
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property int $item_id
  * @property int $location_id
  * @property int $count
+ * @property LocationItemInteractionType $interaction_type
  * @property Carbon|null $expires_at
  */
 class ItemOnLocation extends Model
@@ -28,9 +30,11 @@ class ItemOnLocation extends Model
 
     protected $attributes = [
         'count' => 1,
+        'interaction_type' => LocationItemInteractionType::PICKUP->value,
     ];
 
     protected $casts = [
+        'interaction_type' => LocationItemInteractionType::class,
         'expires_at' => 'datetime',
     ];
 

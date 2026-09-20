@@ -6,19 +6,23 @@ namespace App\Modules\Item\Application\Mappers;
 
 use App\Modules\Item\Application\DTOs\ItemLocationEntryDTO;
 use App\Modules\Item\Application\DTOs\PickupItemsPageDTO;
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use Illuminate\Support\Collection;
 
 class PickupItemsPageViewMapper
 {
-    public function map(Collection $items, string $message): PickupItemsPageDTO
+    public function map(Collection $items, string $message, int $money): PickupItemsPageDTO
     {
         return new PickupItemsPageDTO(
             count: $items->count(),
             items: $items->map(
                 static function ($item): ItemLocationEntryDTO {
                     $isChest = $item->item->itemInfo->type === ShareItemType::CHEST;
+                    $mustBePickedUp = $isChest
+                        && $item->interaction_type === LocationItemInteractionType::PICKUP;
                     $requiresLockpicking = $isChest
+                        && ! $mustBePickedUp
                         && ! $item->item->is_open
                         && ($item->item->itemInfo->lockConfig?->lock_required_skill ?? 0) > 0;
 
@@ -26,10 +30,10 @@ class PickupItemsPageViewMapper
                         image: (string) $item->item->itemInfo->image,
                         name: (string) $item->item->getName(),
                         count: (int) $item->count,
-                        actionLabel: $isChest
+                        actionLabel: $isChest && ! $mustBePickedUp
                             ? ($item->item->is_open ? 'Заглянуть' : 'Открыть')
                             : 'Поднять',
-                        actionUrl: $isChest
+                        actionUrl: $isChest && ! $mustBePickedUp
                             ? ($item->item->is_open
                                 ? route('items.view_chest', ['id' => $item->item->id])
                                 : route('items.open_chest', ['id' => $item->item->id]))
@@ -42,6 +46,7 @@ class PickupItemsPageViewMapper
                 }
             )->all(),
             message: $message,
+            money: $money,
             locationUrl: route('location'),
             backpackUrl: route('backpack'),
         );

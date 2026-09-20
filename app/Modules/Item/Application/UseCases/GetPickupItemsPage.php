@@ -25,6 +25,7 @@ class GetPickupItemsPage
         return $this->mapper->map(
             $this->readRepository->getLocationItems($user),
             $message,
+            (int) $user->money,
         );
     }
 }

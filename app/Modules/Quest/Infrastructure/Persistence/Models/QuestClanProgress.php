@@ -6,6 +6,7 @@ namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Concerns\HasCurrentQuestStage;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,15 +14,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuestClanProgress extends Model
 {
+    use HasCurrentQuestStage;
+
     protected $table = 'quest_clan_progress';
 
     protected $casts = [
         'status' => QuestPlayerStatus::class,
         'reset_at' => 'datetime',
         'completed_at' => 'datetime',
+        'current_stage_started_at' => 'datetime',
+        'current_stage_ready_at' => 'datetime',
     ];
 
-    protected $fillable = ['quest_id', 'clan_id', 'user_id', 'status', 'current_stage_id', 'completed_at', 'reset_at'];
+    protected $fillable = [
+        'quest_id', 'clan_id', 'user_id', 'status', 'current_stage_id',
+        'current_stage_started_at', 'current_stage_ready_at', 'completed_at', 'reset_at',
+    ];
 
     protected $attributes = ['status' => QuestPlayerStatus::IN_PROGRESS];
 
@@ -60,21 +68,6 @@ class QuestClanProgress extends Model
 
         return $this->objectives->filter(
             fn ($obj) => $obj->questObjective->stage_id === $this->current_stage_id
-        );
-    }
-
-    public function isCurrentStageComplete(): bool
-    {
-        $objectives = $this->current_stage_id !== null
-            ? $this->objectives->filter(fn ($o) => $o->questObjective->stage_id === $this->current_stage_id)
-            : $this->objectives;
-
-        if ($objectives->isEmpty()) {
-            return false;
-        }
-
-        return $objectives->every(fn ($o) => $o->questObjective->type === 'deliver' ||
-            $o->amount >= $o->questObjective->required_amount
         );
     }
 

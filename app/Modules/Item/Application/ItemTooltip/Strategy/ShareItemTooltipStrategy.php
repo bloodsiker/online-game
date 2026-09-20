@@ -6,6 +6,7 @@ namespace App\Modules\Item\Application\ItemTooltip\Strategy;
 
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 
@@ -33,7 +34,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 // Тот же формат базовых данных, что у предмета из рюкзака.
                 // Это шаблон предмета, поэтому у него нет только свойств
                 // конкретного экземпляра: заточки, камней и рун.
-                price: sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $shareItem->price),
+                price: ItemTooltipPriceFormatter::money((int) $shareItem->price),
                 diamond: '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],

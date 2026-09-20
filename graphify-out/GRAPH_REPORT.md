@@ -1,16 +1,16 @@
-# Graph Report - online-game  (2026-09-16)
+# Graph Report - online-game  (2026-09-17)
 
 ## Corpus Check
-- 2066 files · ~10,839,194 words
+- 2385 files · ~11,145,638 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 13521 nodes · 28690 edges · 1340 communities (1123 shown, 217 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 1675 edges (avg confidence: 0.68)
+- 13930 nodes · 28935 edges · 1630 communities (1404 shown, 226 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 1678 edges (avg confidence: 0.68)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `05dc6321`
+- Built from commit: `f7ae00bd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -57,6 +57,7 @@
 - [[_COMMUNITY_ModulesBattle|Modules/Battle]]
 - [[_COMMUNITY_ModulesBackpack|Modules/Backpack]]
 - [[_COMMUNITY_ModulesPlayer|Modules/Player]]
+- [[_COMMUNITY_ModulesReputation|Modules/Reputation]]
 - [[_COMMUNITY_ModulesClan|Modules/Clan]]
 - [[_COMMUNITY_ModulesClan|Modules/Clan]]
 - [[_COMMUNITY_ModulesLocation|Modules/Location]]
@@ -238,6 +239,7 @@
 - [[_COMMUNITY_ModulesClan|Modules/Clan]]
 - [[_COMMUNITY_ModulesDungeon|Modules/Dungeon]]
 - [[_COMMUNITY_ModulesDungeon|Modules/Dungeon]]
+- [[_COMMUNITY_ModulesInterface|Modules/Interface]]
 - [[_COMMUNITY_ModulesLocation|Modules/Location]]
 - [[_COMMUNITY_ModulesMagicSkill|Modules/MagicSkill]]
 - [[_COMMUNITY_ModulesMagicSkill|Modules/MagicSkill]]
@@ -503,37 +505,28 @@
 - [[_COMMUNITY_computeAutoPlacement|computeAutoPlacement]]
 - [[_COMMUNITY_QuestKillProgressTest|QuestKillProgressTest]]
 - [[_COMMUNITY_player_menu.js|player_menu.js]]
-- [[_COMMUNITY_EnsureBankAccount|EnsureBankAccount]]
 - [[_COMMUNITY_ReputationExchangeStrategyResolver|ReputationExchangeStrategyResolver]]
 - [[_COMMUNITY_getOffsetParent|getOffsetParent]]
-- [[_COMMUNITY_ReputationShopItemRequirement.php|ReputationShopItemRequirement.php]]
 - [[_COMMUNITY_md5|md5]]
-- [[_COMMUNITY_ReputationShopItemRequirement.php|ReputationShopItemRequirement.php]]
 - [[_COMMUNITY_tProcessMenu|tProcessMenu]]
-- [[_COMMUNITY_LibraryArticleLink.php|LibraryArticleLink.php]]
-- [[_COMMUNITY_ItemTooltipBatchLoadingTest|ItemTooltipBatchLoadingTest]]
 - [[_COMMUNITY_SaveInjuryType|SaveInjuryType]]
 - [[_COMMUNITY_AuctionHistory|AuctionHistory]]
 - [[_COMMUNITY_Deposit|Deposit]]
-- [[_COMMUNITY_PlayerStatServiceDebuffClampTest|PlayerStatServiceDebuffClampTest]]
+- [[_COMMUNITY_Experience|Experience]]
 - [[_COMMUNITY_http_game_load_test.php|http_game_load_test.php]]
-- [[_COMMUNITY_LibraryCommissionShopSeeder|LibraryCommissionShopSeeder]]
+- [[_COMMUNITY_ReferralFrameController.php|ReferralFrameController.php]]
 - [[_COMMUNITY_theme.js|theme.js]]
 - [[_COMMUNITY_UpgradeResult|UpgradeResult]]
 - [[_COMMUNITY_boxicons.js|boxicons.js]]
-- [[_COMMUNITY_BankStockContribution.php|BankStockContribution.php]]
+- [[_COMMUNITY_MonsterInfoTest|MonsterInfoTest]]
 - [[_COMMUNITY_ge|ge]]
 - [[_COMMUNITY_get_art_alt|get_art_alt]]
 - [[_COMMUNITY_MonsterInfoTest|MonsterInfoTest]]
-- [[_COMMUNITY_ChatIgnore.php|ChatIgnore.php]]
 - [[_COMMUNITY_PlayerRecipe.php|PlayerRecipe.php]]
 - [[_COMMUNITY_MailboxUnreadBroadcastTest.php|MailboxUnreadBroadcastTest.php]]
-- [[_COMMUNITY_RemoveRune|RemoveRune]]
-- [[_COMMUNITY_parseMeta|parseMeta]]
-- [[_COMMUNITY_17a19fcab2772e58ddf3beb503ad0cd0.php|17a19fcab2772e58ddf3beb503ad0cd0.php]]
 - [[_COMMUNITY_AddFriend|AddFriend]]
-- [[_COMMUNITY_ReferralRewardStage.php|ReferralRewardStage.php]]
-- [[_COMMUNITY_InjuryTypeManagementTest|InjuryTypeManagementTest]]
+- [[_COMMUNITY_ItemDuplicateTest|ItemDuplicateTest]]
+- [[_COMMUNITY_BattleRoundHit.php|BattleRoundHit.php]]
 - [[_COMMUNITY_2782bf37c1a4cab54df7805fbfdc3cf1.php|2782bf37c1a4cab54df7805fbfdc3cf1.php]]
 - [[_COMMUNITY_GatheringAttempt|GatheringAttempt]]
 - [[_COMMUNITY_PlayerInjuryServiceTest|PlayerInjuryServiceTest]]
@@ -701,18 +694,16 @@
 - [[_COMMUNITY_Q переводи на вебсокет|Q: переводи на вебсокет]]
 - [[_COMMUNITY_Q что-то реген хп не обновляет прогрес бары|Q: что-то реген хп не обновляет прогрес бары]]
 - [[_COMMUNITY_Q сейчас в меню начинает пульсировать конверт если новое письмо, но если перезайти в игру или обновить страницу то непрочитанные письма есть но конверт уже не пульсирует|Q: сейчас в меню начинает пульсировать конверт если новое письмо, но если перезайти в игру или обновить страницу то непрочитанные письма есть но конверт уже не пульсирует]]
-- [[_COMMUNITY_regular.js|regular.js]]
+- [[_COMMUNITY_GetSellableItems|GetSellableItems]]
 - [[_COMMUNITY_Dropdown|Dropdown]]
 - [[_COMMUNITY_z|z]]
 - [[_COMMUNITY_o|o]]
 - [[_COMMUNITY_common.js|common.js]]
 - [[_COMMUNITY_cookie.js|cookie.js]]
 - [[_COMMUNITY_monster_ability_tooltip.js|monster_ability_tooltip.js]]
-- [[_COMMUNITY_.log|.log]]
 - [[_COMMUNITY_backpack_diff|backpack_diff]]
 - [[_COMMUNITY_getChatFrame|getChatFrame]]
 - [[_COMMUNITY_simple_alt.js|simple_alt.js]]
-- [[_COMMUNITY_LibraryInjuriesSeeder|LibraryInjuriesSeeder]]
 - [[_COMMUNITY_Q в админке httplocalhost85adminmagic-skills httplocalhost85admineffects сделай одним разделом но с выпадающим списком как раздел Документация и поставь иконку для раздела|Q: в админке http://localhost:85/admin/magic-skills http://localhost:85/admin/effects сделай одним разделом но с выпадающим списком как раздел Документация и поставь иконку для раздела]]
 - [[_COMMUNITY_Q поставь иконку для раздела Магия в админском меню|Q: поставь иконку для раздела Магия в админском меню]]
 - [[_COMMUNITY_Q дополни раздел документация информацией о магической атаке|Q: дополни раздел документация информацией о магической атаке]]
@@ -754,53 +745,54 @@
 - [[_COMMUNITY_Q Как универсальные горячие клавиши поддерживают русскую и украинскую раскладки|Q: Как универсальные горячие клавиши поддерживают русскую и украинскую раскладки?]]
 - [[_COMMUNITY_Q Как обеспечена работа горячих клавиш, когда фокус находится не в game-frame|Q: Как обеспечена работа горячих клавиш, когда фокус находится не в game-frame?]]
 - [[_COMMUNITY_Q Где после рефакторинга находятся обработчики игровых горячих клавиш|Q: Где после рефакторинга находятся обработчики игровых горячих клавиш?]]
-- [[_COMMUNITY_LibraryRacesSeeder|LibraryRacesSeeder]]
 - [[_COMMUNITY_MaximumSelectionLength|MaximumSelectionLength]]
 - [[_COMMUNITY_me|me]]
-- [[_COMMUNITY_lt|lt]]
 - [[_COMMUNITY_eo|eo]]
 - [[_COMMUNITY_game-shortcuts.js|game-shortcuts.js]]
 - [[_COMMUNITY_gui_styled|gui_styled]]
 - [[_COMMUNITY_ClanIndexPageDTO|ClanIndexPageDTO]]
-- [[_COMMUNITY_UpgradeServiceTest|UpgradeServiceTest]]
 - [[_COMMUNITY_535040f933b72db7c52371328feb07df.php|535040f933b72db7c52371328feb07df.php]]
 - [[_COMMUNITY_5a92667b5a91220b6a13e2ed60d1f228.php|5a92667b5a91220b6a13e2ed60d1f228.php]]
 - [[_COMMUNITY_html_page_list|html_page_list]]
 - [[_COMMUNITY_GatheringActionResultDTO|GatheringActionResultDTO]]
 - [[_COMMUNITY_crimson-inferno-tome-icon-prompt|crimson-inferno-tome-icon-prompt.md]]
 - [[_COMMUNITY_jquery.magnific-popup.js|jquery.magnific-popup.js]]
-- [[_COMMUNITY_LibraryArticleLink.php|LibraryArticleLink.php]]
-- [[_COMMUNITY_BankStockContribution.php|BankStockContribution.php]]
-- [[_COMMUNITY_PlayerStatServiceDebuffClampTest|PlayerStatServiceDebuffClampTest]]
-- [[_COMMUNITY_ClanIndexPageDTO|ClanIndexPageDTO]]
-- [[_COMMUNITY_AcceptFriend|AcceptFriend]]
+- [[_COMMUNITY_section.blade.php|section.blade.php]]
+- [[_COMMUNITY_topic.blade.php|topic.blade.php]]
 - [[_COMMUNITY_DeclineFriend|DeclineFriend]]
-- [[_COMMUNITY_2026_08_26_141000_migrate_pending_party_invitation_chat_links_to_uuid.php|2026_08_26_141000_migrate_pending_party_invitation_chat_links_to_uuid.php]]
 - [[_COMMUNITY_Баланс сундуков Взломщика|Баланс сундуков Взломщика]]
 - [[_COMMUNITY_00e5b1ce181a20d34d262ca7985f92e3.php|00e5b1ce181a20d34d262ca7985f92e3.php]]
-- [[_COMMUNITY_37fa63c750ac7fd05de86917bf01ed88.php|37fa63c750ac7fd05de86917bf01ed88.php]]
-- [[_COMMUNITY_3bdfc3ed9082f737745434d4e975aaa6.php|3bdfc3ed9082f737745434d4e975aaa6.php]]
-- [[_COMMUNITY_52232adc792c2fd9b5aa501a20f778ac.php|52232adc792c2fd9b5aa501a20f778ac.php]]
-- [[_COMMUNITY_56a60139b0da17c808c3cfbf71cbe559.php|56a60139b0da17c808c3cfbf71cbe559.php]]
 - [[_COMMUNITY_7012c082c43cb0108719df8d0cc66e7c.php|7012c082c43cb0108719df8d0cc66e7c.php]]
 - [[_COMMUNITY_d2fcff1749235a9a007fdb1eb476d727.php|d2fcff1749235a9a007fdb1eb476d727.php]]
 - [[_COMMUNITY_f507e7b1080cbf49df349c9f19ef0f83.php|f507e7b1080cbf49df349c9f19ef0f83.php]]
+- [[_COMMUNITY_LibraryCraftsmanLockpicksSeeder|LibraryCraftsmanLockpicksSeeder]]
+- [[_COMMUNITY_RatingPageViewMapper.php|RatingPageViewMapper.php]]
+- [[_COMMUNITY_GranitePassSeeder|GranitePassSeeder]]
+- [[_COMMUNITY_LibraryCommissionShopSeeder|LibraryCommissionShopSeeder]]
+- [[_COMMUNITY_InjuryTypeManagementTest|InjuryTypeManagementTest]]
+- [[_COMMUNITY_AcceptFriend|AcceptFriend]]
+- [[_COMMUNITY_RemoveEnemy|RemoveEnemy]]
+- [[_COMMUNITY_GatheringNode|GatheringNode]]
+- [[_COMMUNITY_BossDefeatLog.php|BossDefeatLog.php]]
+- [[_COMMUNITY_RuneSeeder|RuneSeeder]]
+- [[_COMMUNITY_Ut|Ut]]
+- [[_COMMUNITY_MagicResistanceDerivationTest|MagicResistanceDerivationTest]]
+- [[_COMMUNITY_.run|.run]]
+- [[_COMMUNITY_.run|.run]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `User` - 682 edges
+1. `User` - 693 edges
 2. `Player` - 399 edges
 3. `ShareItem` - 201 edges
-4. `TestCase` - 188 edges
+4. `TestCase` - 192 edges
 5. `Structure` - 179 edges
 6. `Backpack` - 155 edges
-7. `Controller` - 139 edges
+7. `Controller` - 141 edges
 8. `Battle` - 134 edges
 9. `Monster` - 126 edges
 10. `PlayerStatService` - 115 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `set()` --references--> `Map`  [EXTRACTED]
-  public/admin/vendor/bootstrap/js/bootstrap.esm.min.js → app/Modules/Location/Infrastructure/Persistence/Models/Map.php
 - `set()` --references--> `Map`  [EXTRACTED]
   public/admin/vendor/bootstrap/js/bootstrap.min.js → app/Modules/Location/Infrastructure/Persistence/Models/Map.php
 - `get()` --references--> `Map`  [EXTRACTED]
@@ -809,11 +801,13 @@
   public/admin/vendor/bootstrap/js/bootstrap.bundle.min.js → app/Modules/Location/Infrastructure/Persistence/Models/Map.php
 - `It()` --references--> `Map`  [EXTRACTED]
   public/admin/vendor/bootstrap/js/bootstrap.bundle.min.js → app/Modules/Location/Infrastructure/Persistence/Models/Map.php
+- `le()` --references--> `Map`  [EXTRACTED]
+  public/admin/vendor/bootstrap/js/bootstrap.bundle.min.js → app/Modules/Location/Infrastructure/Persistence/Models/Map.php
 
 ## Import Cycles
 - None detected.
 
-## Communities (1340 total, 217 thin omitted)
+## Communities (1630 total, 226 thin omitted)
 
 ### Community 1 - "Modules/Battle"
 Cohesion: 0.04
@@ -821,127 +815,143 @@ Nodes (21): BossFightContext, canTrigger(), execute(), AoeAttackMechanic, BaseBo
 
 ### Community 2 - "Modules/Structure"
 Cohesion: 0.04
-Nodes (49): create(), filterValidIds(), getForChannel(), getIgnoredUserIds(), ChatChannel, MagicSkillPageDTO, Collection, ApplyReferralCode (+41 more)
+Nodes (43): create(), filterValidIds(), getForChannel(), getIgnoredUserIds(), ChatChannel, MagicSkillPageDTO, Collection, ApplyReferralCode (+35 more)
 
 ### Community 3 - "app/Http"
-Cohesion: 0.13
-Nodes (7): PruneExpiredPlayerInjuries, RandomizerInterface, PlayerInjuryService, Carbon, Request, UserController, Response
+Cohesion: 0.16
+Nodes (7): Request, ClanWarehouse, BelongsTo, ClanWarehouseLog, BelongsTo, ClanWarehouseController, Request
 
 ### Community 4 - "Modules/Quest"
-Cohesion: 0.10
-Nodes (8): RedirectResponse, Request, QuestController, BelongsTo, HasMany, Quest, BelongsTo, QuestDialogue
+Cohesion: 0.05
+Nodes (16): RedirectResponse, Request, QuestController, BelongsTo, HasMany, Quest, BelongsTo, QuestClanProgress (+8 more)
 
 ### Community 5 - "Modules/Friend"
 Cohesion: 0.21
 Nodes (5): FriendActionResultDTO, AddIgnore, FriendRelationshipRepository, FriendRelationshipRepository, RemoveIgnore
 
 ### Community 6 - "app/Http"
-Cohesion: 0.10
-Nodes (9): ItemActionResultDTO, DropItem, EquipItem, ItemReadRepository, OpenChest, ItemReadRepository, UnequipItem, ItemService (+1 more)
+Cohesion: 0.05
+Nodes (21): ChestEntryDTO, ChestPageDTO, ItemActionResultDTO, ChestPageViewMapper, DropItem, EquipItem, ItemReadRepository, GetChestPage (+13 more)
 
 ### Community 7 - "Modules/Battle"
-Cohesion: 0.12
-Nodes (6): Collection, ReputationPageDTO, BelongsTo, HasMany, ReputationTier, ReputationRatingTest
+Cohesion: 0.05
+Nodes (22): ForumService, Collection, LengthAwarePaginator, ForumWriter, ForumHtmlSanitizer, ForumPost, BelongsTo, ForumSection (+14 more)
 
 ### Community 8 - "database"
-Cohesion: 0.05
-Nodes (19): AttackResultDTO, self, AttackService, RandomizerInterface, BattleEffectService, ActiveEffectType, CarbonInterface, MonsterAttackService (+11 more)
+Cohesion: 0.07
+Nodes (9): BelongsTo, QuestClanObjective, HasMany, BelongsTo, HasMany, QuestPlayer, BelongsTo, QuestPlayerObjective (+1 more)
 
 ### Community 9 - "Modules/Interface"
 Cohesion: 0.06
-Nodes (28): BroadcastChatMessageExpiration, SendLevelUpSystemMessage, SendMedalEarnedSystemMessage, SendPlayerInjuryMessage, SendQuestItemDropMessage, ChatMessagesInvalidated, PrivateChannel, PrivateChannel (+20 more)
+Nodes (29): BroadcastChatMessageExpiration, ChatMessageExpired, ChatChannel, ChatMessagesInvalidated, PrivateChannel, DateTimeInterface, UpdatePlayerOnlinePresence, PrivateChannel (+21 more)
 
 ### Community 10 - "Modules/Player"
-Cohesion: 0.04
-Nodes (22): PlayerMagicSkillService, findAllyTarget(), findOwnedSkill(), getPlayerPageData(), consumeMana(), CarbonInterface, savePlayers(), syncEquippedSkills() (+14 more)
+Cohesion: 0.03
+Nodes (33): RedirectResponse, Request, PlayerController, PlayerMagicSkillService, findAllyTarget(), findOwnedSkill(), getPlayerPageData(), consumeMana() (+25 more)
 
 ### Community 11 - "app/Http"
-Cohesion: 0.05
-Nodes (17): RedirectResponse, Request, StructureController, BreakPageDTO, KraftPageDTO, RarityUpgradePageDTO, UpgradeTransferPageDTO, Collection (+9 more)
+Cohesion: 0.06
+Nodes (19): AuctionResultDTO, BuyLot, CancelLot, CancelOrder, CreateOrder, GetAuctionLots, Collection, GetClaims (+11 more)
+
+### Community 12 - "Modules/Quest"
+Cohesion: 0.13
+Nodes (3): Dt(), remove(), wt
 
 ### Community 13 - "Modules/Structure"
-Cohesion: 0.18
-Nodes (4): ItemController, JsonResponse, RedirectResponse, Request
+Cohesion: 0.06
+Nodes (15): ItemController, RedirectResponse, Request, UploadedFile, View, GiveStarterBonus, DeleteShareItem, BelongsTo (+7 more)
 
 ### Community 14 - "Modules/Battle"
-Cohesion: 0.06
-Nodes (16): PlayerDeathFinalizer, TimedEffectDeathService, PlayerHeartbeatDTO, HeartbeatPlayer, InterfaceReadRepository, BuffAttackStrategy, BuffDefenseStrategy, PlayerEffectTickResult (+8 more)
+Cohesion: 0.04
+Nodes (27): HealthController, JsonResponse, RedirectResponse, Request, View, PlayerDeathFinalizer, BuffAttackStrategy, BuffDefenseStrategy (+19 more)
 
 ### Community 15 - "Modules/Clan"
-Cohesion: 0.13
-Nodes (4): Collection, BelongsTo, PostLetter, MailboxUnreadBroadcastTest
+Cohesion: 0.06
+Nodes (20): PostActionResultDTO, BroadcastMailboxUnreadState, BulkLetters, DeleteLetter, GetMailbox, Collection, ReadLetter, SendLetter (+12 more)
 
 ### Community 16 - "Modules/Clan"
-Cohesion: 0.09
-Nodes (11): MonsterController, JsonResponse, RedirectResponse, Request, UploadedFile, View, BossMechanic, BelongsTo (+3 more)
+Cohesion: 0.15
+Nodes (5): MapMonstersCache, EloquentMonsterReadRepository, MonsterObserver, MonsterServiceProvider, MonsterReadRepository
 
 ### Community 17 - "Modules/Item"
 Cohesion: 0.09
-Nodes (13): BattleOrchestrator, MonsterSelector, BattleDetail, BelongsTo, FightController, View, ExpireDungeonSession, PlayerEffectNotificationDTO (+5 more)
+Nodes (11): CreateClan, UploadedFile, KickClanMember, LeaveClan, Carbon, TransactionManager, ProcessExpiredClanTaxes, ClanSkillService (+3 more)
 
 ### Community 18 - "Modules/Structure"
+Cohesion: 0.17
+Nodes (5): DungeonCoordinator, DungeonCooldownRepository, DungeonSessionRepository, TransactionManager, AdvanceSurvivalWave
+
+### Community 19 - "Modules/Reputation"
 Cohesion: 0.07
-Nodes (6): BelongsTo, HasMany, QuestPlayer, BelongsTo, QuestPlayerObjective, OrdenHuntersReworkSeeder
+Nodes (7): BattleEffectService, ActiveEffectType, CarbonInterface, BelongsTo, PlayerActiveEffect, PlayerHeartbeatTest, PlayerTimedEffectServiceTest
 
 ### Community 20 - "Modules/Npc"
-Cohesion: 0.05
-Nodes (21): BattleServiceProvider, ChatServiceProvider, EffectServiceProvider, EventServiceProvider, FriendServiceProvider, LibraryServiceProvider, MagicSkillServiceProvider, NpcServiceProvider (+13 more)
+Cohesion: 0.04
+Nodes (24): BackpackServiceProvider, EloquentBackpackRepository, BattleServiceProvider, ChatServiceProvider, EffectServiceProvider, EventServiceProvider, ForumServiceProvider, ItemServiceProvider (+16 more)
 
 ### Community 21 - "Modules/Structure"
 Cohesion: 0.13
 Nodes (10): UpgradePageDTO, Collection, UpgradePageViewMapper, GetUpgradePage, BlacksmithReadRepository, BlacksmithInventoryRepository, TransactionManager, UpgradeItem (+2 more)
 
 ### Community 22 - "Modules/Reputation"
-Cohesion: 0.11
-Nodes (11): create(), delete(), findByUserId(), incrementWave(), markCompleted(), CarbonInterface, EloquentDungeonSessionRepository, CarbonInterface (+3 more)
+Cohesion: 0.10
+Nodes (12): create(), delete(), findByUserId(), incrementWave(), markCompleted(), CarbonInterface, DungeonServiceProvider, EloquentDungeonSessionRepository (+4 more)
 
 ### Community 23 - "Modules/Clan"
-Cohesion: 0.03
-Nodes (14): BackpackService, Collection, ItemRequirementService, BelongsTo, PlayerArtifact, BelongsTo, PlayerRecipe, GambleExchangeOptionDTO (+6 more)
+Cohesion: 0.11
+Nodes (5): BackpackService, Collection, ItemRequirementService, BuyReputationShopItem, ReputationReadRepository
 
 ### Community 24 - "Modules/Player"
+Cohesion: 0.07
+Nodes (17): findChestWithItems(), findItem(), findUser(), getLocationItems(), getOnlineUsersOnLocation(), Collection, EloquentItemReadRepository, Collection (+9 more)
+
+### Community 25 - "Modules/Structure"
 Cohesion: 0.12
-Nodes (6): Item, BelongsTo, BelongsToMany, HasMany, BelongsTo, PlayerEquipment
+Nodes (10): Collection, ReputationListPageDTO, GetReputationListPage, ReputationReadRepository, BelongsTo, PlayerReputationMedal, Carbon, Request (+2 more)
 
 ### Community 26 - "Modules/Location"
-Cohesion: 0.08
-Nodes (10): GatheringActionResultDTO, GatheringPageDTO, GetGatheringPage, GatheringService, GatheringAttempt, BelongsTo, GatheringNode, BelongsTo (+2 more)
+Cohesion: 0.11
+Nodes (7): GatheringActionResultDTO, GatheringService, GatheringAttempt, BelongsTo, GatheringNode, BelongsTo, HasMany
 
 ### Community 27 - "Modules/Structure"
-Cohesion: 0.12
-Nodes (16): _arrayWithoutHoles(), _classCallCheck(), _createClass(), _defineProperties(), ensureCss(), findIconDefinition(), iconFromMapping(), insertCss() (+8 more)
+Cohesion: 0.05
+Nodes (89): apiObject(), _arrayWithHoles(), _arrayWithoutHoles(), asFoundIcon(), asIcon(), asSymbol(), asyncCall(), asyncFlush() (+81 more)
 
 ### Community 28 - "Modules/Player"
-Cohesion: 0.05
-Nodes (19): DashboardController, DocsController, View, UserController, LoginController, Request, Request, RegisterController (+11 more)
+Cohesion: 0.03
+Nodes (30): ActionController, Request, View, ClanController, DashboardController, DocsController, View, Request (+22 more)
 
 ### Community 29 - "Modules/Reputation"
-Cohesion: 0.18
-Nodes (6): GetClanSkillsPage, LearnClanSkill, ClanSkillController, ClanSkillHallController, RedirectResponse, View
+Cohesion: 0.06
+Nodes (16): MonsterController, JsonResponse, RedirectResponse, Request, UploadedFile, View, findById(), findByLocationMonsterId() (+8 more)
 
 ### Community 30 - "Modules/Chat"
-Cohesion: 0.05
-Nodes (26): ChatMessageDTO, ChatService, ChatChannel, Collection, GetMessages, ChatChannel, ChatMessageRepositoryInterface, ChatChannel (+18 more)
+Cohesion: 0.06
+Nodes (15): SendLevelUpSystemMessage, SendMedalEarnedSystemMessage, SendPlayerInjuryMessage, SendQuestItemDropMessage, ChatService, ChatChannel, Collection, ChatMessageRepositoryInterface (+7 more)
 
 ### Community 31 - "Modules/Location"
-Cohesion: 0.04
-Nodes (24): BattleService, AdvanceSurvivalWave, GetActiveDungeonSession, DungeonSessionRepository, LocationDungeonSessionDTO, LocationMonsterDTO, LocationMoveDirectionDTO, LocationNpcDTO (+16 more)
+Cohesion: 0.07
+Nodes (16): GetActiveDungeonSession, DungeonSessionRepository, LocationDungeonSessionDTO, LocationMonsterDTO, LocationMoveDirectionDTO, LocationNpcDTO, LocationPageDTO, LocationPlayerFrameDTO (+8 more)
 
 ### Community 32 - "Modules/Structure"
-Cohesion: 0.08
-Nodes (14): ActivityPeriod, ActivityCardDTO, ActivityCardViewMapper, Collection, EventActivityProgressService, EventActivity, BelongsTo, EventActivityProgress (+6 more)
+Cohesion: 0.07
+Nodes (16): ActivityPeriod, ActivityCardDTO, ActivityCardViewMapper, GetActivityCards, Collection, EventActivityProgressService, EventActivity, BelongsTo (+8 more)
 
 ### Community 33 - "Modules/Battle"
 Cohesion: 0.05
 Nodes (89): apiObject(), _arrayWithHoles(), _arrayWithoutHoles(), asFoundIcon(), asIcon(), asSymbol(), asyncCall(), asyncFlush() (+81 more)
 
 ### Community 34 - "Modules/Item"
-Cohesion: 0.21
-Nodes (3): BelongsTo, QuestReward, ReputationSeeder
+Cohesion: 0.22
+Nodes (6): NpcController, Request, NpcDialogueNode, BelongsTo, NpcDialogueOption, BelongsTo
 
 ### Community 35 - "Modules/Item"
-Cohesion: 0.23
-Nodes (5): BarterShopController, PurchaseCart, RedirectResponse, Request, ShopController
+Cohesion: 0.16
+Nodes (7): ShopBuyPageDTO, Collection, ShopCartDTO, Collection, ShopBuyPageViewMapper, GetBuyPage, ShopReadRepository
+
+### Community 36 - "Modules/Reputation"
+Cohesion: 0.16
+Nodes (9): GetBackpack, ItemReadRepository, LocationReadRepository, BackpackRepositoryInterface, UpdateOrder, BackpackController, JsonResponse, Request (+1 more)
 
 ### Community 37 - "Modules/Item"
 Cohesion: 0.06
@@ -959,17 +969,21 @@ Nodes (68): applyStyle(), applyStyleOnLoad(), arrow(), attachToScrollParents(), 
 Cohesion: 0.06
 Nodes (84): addHandler(), applyStyles(), areValidElements(), arrow(), bootstrapDelegationHandler(), bootstrapHandler(), computeAutoPlacement(), computeOffsets() (+76 more)
 
+### Community 42 - "Modules/Reputation"
+Cohesion: 0.20
+Nodes (3): AuctionController, RedirectResponse, Request
+
 ### Community 43 - "Modules/Clan"
-Cohesion: 0.04
-Nodes (38): ClanFramePageDTO, CarbonInterface, Collection, ClanInformationPageDTO, ClanLogsPageDTO, LengthAwarePaginator, ClanQuestsPageDTO, Collection (+30 more)
+Cohesion: 0.08
+Nodes (21): ClanInformationPageDTO, ClanLogsPageDTO, LengthAwarePaginator, ClanMemberPageDTO, Collection, ClanQuestsPageDTO, Collection, ClanRolePageDTO (+13 more)
 
 ### Community 44 - "Modules/Clan"
-Cohesion: 0.27
-Nodes (5): LibraryArticleController, JsonResponse, RedirectResponse, Request, View
+Cohesion: 0.18
+Nodes (6): LibraryEntityRegistry, LibraryArticleController, JsonResponse, RedirectResponse, Request, View
 
 ### Community 45 - "Modules/Location"
-Cohesion: 0.21
-Nodes (6): TakeItemsPageDTO, TakeLocationItemDTO, Collection, TakeItemsPageViewMapper, GetTakeItemsPage, LocationReadRepository
+Cohesion: 0.07
+Nodes (9): GatheringPageDTO, MapsPageDTO, MapTreeNodeDTO, GetGatheringPage, GetMapsPage, Collection, LocationController, JsonResponse (+1 more)
 
 ### Community 46 - "Modules/Structure"
 Cohesion: 0.13
@@ -977,158 +991,166 @@ Nodes (11): BankStockController, RedirectResponse, Request, BankStock, HasMany, 
 
 ### Community 47 - "Modules/Player"
 Cohesion: 0.05
-Nodes (13): FistAttackStrategy, FightHitInterface, HeroEffectDTO, HeroPageDTO, HeroPageViewMapper, CarbonInterface, Collection, GetHeroPage (+5 more)
+Nodes (11): HeroEffectDTO, HeroPageDTO, HeroPageViewMapper, CarbonInterface, Collection, GetHeroPage, InterfaceReadRepository, CharacterDTO (+3 more)
 
 ### Community 48 - "Modules/Referral"
-Cohesion: 0.20
-Nodes (3): AuctionController, RedirectResponse, Request
+Cohesion: 0.04
+Nodes (25): GetProfessionsPage, PeacefulProfessionExperienceService, BelongsTo, PlayerRecipe, RatingEntryDTO, RatingMenuItemDTO, BelongsTo, BelongsToMany (+17 more)
 
 ### Community 49 - "Modules/Structure"
-Cohesion: 0.07
-Nodes (18): AuctionResultDTO, BuyLot, CancelLot, CancelOrder, CreateLot, CreateOrder, FulfillOrder, GetAuctionLots (+10 more)
+Cohesion: 0.24
+Nodes (7): RunePageViewMapper, GetRunesPage, BlacksmithReadRepository, RedirectResponse, Request, View, RuneController
 
 ### Community 50 - "app/Console"
-Cohesion: 0.04
-Nodes (34): ClanContextDTO, ClanMemberPageDTO, Collection, AddClanRole, CancelClanRequest, DeleteClanRole, GetClanCharacteristicsPage, GetClanIndexPage (+26 more)
+Cohesion: 0.06
+Nodes (17): AddClanRole, CancelClanRequest, DeleteClanRole, InviteToClan, SaveClanDescription, SaveClanMemberRoles, SaveClanNews, SaveClanRoles (+9 more)
 
 ### Community 51 - "app/Http"
 Cohesion: 0.14
 Nodes (12): NewsController, JsonResponse, RedirectResponse, Request, View, MainController, RedirectResponse, Request (+4 more)
 
 ### Community 52 - "app/Http"
-Cohesion: 0.14
-Nodes (9): InitialExperienceDTO, PlayerRepositoryInterface, RegisterPlayerProfile, PlayerFactory, getInitialExperienceForLevel(), register(), save(), EloquentPlayerRepository (+1 more)
+Cohesion: 0.08
+Nodes (22): createRelationship(), delete(), existsRelationship(), findRelationship(), findRelationshipById(), findTargetPlayerByName(), firstOrCreateRelationship(), getAcceptedFriends() (+14 more)
 
 ### Community 53 - "Modules/Backpack"
-Cohesion: 0.19
-Nodes (7): GetShopItems, Collection, PurchaseCart, RedirectResponse, Request, View, PremiumShopController
-
-### Community 54 - "Modules/Battle"
-Cohesion: 0.18
-Nodes (6): ChestEntryDTO, ChestPageDTO, ChestPageViewMapper, GetChestPage, ItemReadRepository, PickUpInChest
+Cohesion: 0.15
+Nodes (7): EloquentPartyRepository, Collection, PartyStatus, PartyMember, BelongsTo, PartyServiceProvider, PartyRepositoryInterface
 
 ### Community 55 - "Modules/Battle"
 Cohesion: 0.39
 Nodes (4): HitCalculator, CombatClass, FightHitInterface, RandomizerInterface
 
+### Community 56 - "Modules/Battle"
+Cohesion: 0.10
+Nodes (3): CombatClass, SimFighter, SimulateBattleTriangle
+
 ### Community 57 - "Modules/Structure"
-Cohesion: 0.04
-Nodes (29): Backpack, BelongsTo, ItemGem, BelongsTo, EloquentBlacksmithInventoryRepository, Collection, EloquentBlacksmithReadRepository, Collection (+21 more)
+Cohesion: 0.03
+Nodes (35): Backpack, BelongsTo, Collection, ShareItemType, findOwnedSlot(), findOwnedSlotByShareItemId(), findOwnedSlotByShareItemIdForUpdate(), findOwnedSlotByTypes() (+27 more)
 
 ### Community 58 - "Modules/Chat"
-Cohesion: 0.15
-Nodes (10): ManageIgnore, Collection, FriendRelationshipRepository, ChatController, ChatChannel, FriendRelationshipRepository, JsonResponse, PartyRepositoryInterface (+2 more)
+Cohesion: 0.12
+Nodes (14): ManageIgnore, Collection, FriendRelationshipRepository, ChatChannel, ChatMessageRepositoryInterface, PartyRepositoryInterface, SendMessage, ChatController (+6 more)
 
 ### Community 59 - "Modules/Dungeon"
-Cohesion: 0.17
-Nodes (4): DungeonCoordinator, DungeonCooldownRepository, DungeonSessionRepository, TransactionManager
+Cohesion: 0.09
+Nodes (10): findActiveByIdOrFail(), findByIdOrFail(), getActive(), Collection, EloquentDungeonReadRepository, Collection, Dungeon, BelongsTo (+2 more)
 
 ### Community 60 - "Modules/Dungeon"
-Cohesion: 0.04
-Nodes (31): Experience, ClanPermission, ItemInChest, BelongsTo, LockpickingLog, BelongsTo, ShareItemLockpickConfig, LocationHasMonster (+23 more)
+Cohesion: 0.11
+Nodes (13): findReputationForIndexOrFail(), findReputationForShopOrFail(), findShopItemOrFail(), getAllReputations(), getShopItemsByCategory(), Collection, EloquentReputationReadRepository, Collection (+5 more)
 
 ### Community 61 - "Modules/Rating"
 Cohesion: 0.12
 Nodes (11): RatingPageDTO, RatingSearchResultDTO, LengthAwarePaginator, RatingPageViewMapper, GetRatingPage, RatingReadRepository, RatingReadRepository, SearchRating (+3 more)
 
 ### Community 62 - "Modules/Event"
-Cohesion: 0.20
-Nodes (6): BlacksmithActionResultDTO, self, RuneActionDTO, BlacksmithInventoryRepository, TransactionManager, RerollRune
+Cohesion: 0.19
+Nodes (5): GetPublicClanPage, ClanController, RedirectResponse, Request, View
 
 ### Community 63 - "app/Http"
-Cohesion: 0.13
+Cohesion: 0.15
 Nodes (10): ClanSkillController, RedirectResponse, Request, ClanSkillDefinition, HasMany, ClanSkillLevel, BelongsTo, HasMany (+2 more)
 
 ### Community 64 - "Modules/Battle"
 Cohesion: 0.04
-Nodes (45): adoptValue(), ajaxConvert(), ajaxHandleResponses(), Animation(), boxModelAdjustment(), buildFragment(), buildParams(), camelCase() (+37 more)
+Nodes (57): addCombinator(), adoptValue(), ajaxConvert(), ajaxHandleResponses(), Animation(), boxModelAdjustment(), buildFragment(), buildParams() (+49 more)
 
 ### Community 65 - "app/Http"
-Cohesion: 0.16
-Nodes (5): PurchaseCart, ShopCartService, PurchaseCart, BelongsTo, ShopCart
+Cohesion: 0.18
+Nodes (8): RedirectResponse, Request, SkillController, BelongsTo, PlayerSkill, Skill, BelongsTo, SkillLevelRequirement
 
 ### Community 66 - "Modules/Share"
-Cohesion: 0.13
-Nodes (5): LockpickingActionResultDTO, LockpickingService, LockpickingAttempt, BelongsTo, PeacefulProfessionExperienceService
+Cohesion: 0.14
+Nodes (4): LockpickingActionResultDTO, LockpickingService, LockpickingAttempt, BelongsTo
 
 ### Community 67 - "app/Http"
 Cohesion: 0.07
 Nodes (65): applyStyle(), applyStyleOnLoad(), arrow(), attachToScrollParents(), clockwise(), computeAutoPlacement(), computeStyle(), destroy() (+57 more)
 
 ### Community 68 - "Modules/User"
-Cohesion: 0.05
-Nodes (16): AggressionChecker, Collection, BattleCreator, Collection, BattleFinder, BossRespawnService, MonsterSpawner, Collection (+8 more)
+Cohesion: 0.14
+Nodes (8): AggressionChecker, Collection, BossRespawnService, MonsterSpawner, Collection, MonsterOnLocationRepository, Builder, Collection
+
+### Community 69 - "Modules/Effect"
+Cohesion: 0.06
+Nodes (15): ReputationExchangePageDTO, ReputationExchangeResultDTO, ApplyReputationExchange, GetReputationExchangePage, getPageData(), perform(), GambleExchangeService, LinearExchangeService (+7 more)
 
 ### Community 70 - "Modules/Battle"
-Cohesion: 0.13
-Nodes (3): CombatClass, RosterReferenceFighter, SimulatePveRoster
+Cohesion: 0.09
+Nodes (4): CombatClass, RosterReferenceFighter, SimulatePveRoster, PlayerStatFormulas
 
 ### Community 71 - "Modules/Friend"
-Cohesion: 0.11
-Nodes (13): findReputationForIndexOrFail(), findReputationForShopOrFail(), findShopItemOrFail(), getAllReputations(), getShopItemsByCategory(), Collection, EloquentReputationReadRepository, Collection (+5 more)
+Cohesion: 0.34
+Nodes (3): MagicSkillController, RedirectResponse, Request
 
 ### Community 72 - "Modules/Structure"
-Cohesion: 0.08
-Nodes (20): ItemUseBlockedException, CarbonInterface, ExchangePageDTO, ExchangeResultDTO, ExchangeViewItemDTO, ExchangePageViewMapper, Collection, ApplyExchange (+12 more)
+Cohesion: 0.09
+Nodes (16): ExchangeActionDTO, ExchangePageDTO, ExchangeResultDTO, ExchangeViewItemDTO, ExchangePageViewMapper, Collection, ApplyExchange, ExchangeReadRepository (+8 more)
 
 ### Community 73 - "Modules/Item"
 Cohesion: 0.22
 Nodes (4): ItemInfoPageDTO, ItemInfoPageViewMapper, GetItemInfoPage, ItemReadRepository
 
 ### Community 74 - "database"
-Cohesion: 0.06
-Nodes (23): EquipmentStatFormulas, BelongsTo, ShareItemLockConfig, BelongsTo, ShareItemRequirement, BelongsTo, ShareItemStat, BelongsTo (+15 more)
+Cohesion: 0.17
+Nodes (10): BelongsTo, ShareItemRequirement, BelongsTo, ShareItemStat, ItemRarity, PlayerStatKey, ShareItemSlot, ShareItemStatType (+2 more)
+
+### Community 75 - "Modules/Structure"
+Cohesion: 0.22
+Nodes (6): EquipmentStatFormulas, HighTierEquipmentSeeder, PlayerStatKey, ShareItemSlot, ShareItemStatType, ShareItemType
 
 ### Community 76 - "Modules/Battle"
 Cohesion: 0.13
 Nodes (10): FightListFilterDTO, Request, self, FightListItemDTO, FightListPageDTO, LengthAwarePaginator, GetFightList, FightListController (+2 more)
 
 ### Community 77 - "Modules/Battle"
-Cohesion: 0.06
-Nodes (20): DepositClanTreasury, TransactionManager, GetClanTreasuryPage, PayClanTax, TransactionManager, TransactionManager, WithdrawClanTreasury, allBits() (+12 more)
+Cohesion: 0.17
+Nodes (12): DepositClanTreasury, TransactionManager, GetClanTreasuryPage, PayClanTax, TransactionManager, TransactionManager, WithdrawClanTreasury, ClanTaxPayment (+4 more)
 
 ### Community 78 - "Modules/Chat"
-Cohesion: 0.18
-Nodes (4): InterfaceController, FriendRelationshipRepository, JsonResponse, Request
+Cohesion: 0.08
+Nodes (15): OnMapPageDTO, Carbon, WhoPageDTO, WhoUserDTO, Carbon, Collection, WhoPageViewMapper, GetOnMapPage (+7 more)
 
 ### Community 79 - "Modules/Dungeon"
-Cohesion: 0.11
-Nodes (11): findGlobal(), findPersonal(), Carbon, setGlobal(), setPersonal(), DungeonServiceProvider, EloquentDungeonCooldownRepository, Carbon (+3 more)
+Cohesion: 0.13
+Nodes (10): findGlobal(), findPersonal(), Carbon, setGlobal(), setPersonal(), EloquentDungeonCooldownRepository, Carbon, DungeonCooldown (+2 more)
 
 ### Community 80 - "Modules/Structure"
-Cohesion: 0.15
-Nodes (5): BelongsTo, HasMany, QuestClanProgress, Request, QuestController
+Cohesion: 0.11
+Nodes (10): ClanContextDTO, GetClanIndexPage, NpcReadRepository, GetClanInformationPage, GetClanLogsPage, GetClanMemberPage, GetClanQuestsPage, GetClanRolePage (+2 more)
 
 ### Community 81 - "Modules/Clan"
 Cohesion: 0.18
-Nodes (7): ClanLevelController, RedirectResponse, Request, View, ClanCharacteristicsPageDTO, ClanLevel, ClanLevelService
+Nodes (8): ClanLevelController, RedirectResponse, Request, View, ClanCharacteristicsPageDTO, GetClanCharacteristicsPage, ClanLevel, ClanLevelService
 
 ### Community 82 - "app/Http"
-Cohesion: 0.09
-Nodes (17): WarehouseItemDTO, WarehousePageDTO, WarehouseResultDTO, Collection, WarehousePageViewMapper, GetPutPage, WarehouseInventoryRepository, GetTakePage (+9 more)
+Cohesion: 0.10
+Nodes (16): WarehousePageDTO, WarehouseResultDTO, Collection, WarehousePageViewMapper, GetPutPage, WarehouseInventoryRepository, GetTakePage, WarehouseInventoryRepository (+8 more)
 
 ### Community 83 - "app/Http"
-Cohesion: 0.10
-Nodes (13): NpcController, Request, NpcPageDTO, Collection, Npc, BelongsTo, HasMany, NpcDialogueNode (+5 more)
+Cohesion: 0.17
+Nodes (8): HandOverCandidateDTO, HandOverPageDTO, HandOverPageViewMapper, Collection, GetHandOverPage, ItemReadRepository, HandOverToUser, ItemReadRepository
 
 ### Community 84 - "Modules/MagicSkill"
-Cohesion: 0.07
-Nodes (13): MagicSkillController, RedirectResponse, Request, MagicSkill, BelongsTo, BelongsToMany, HasMany, MagicBookStarterSeeder (+5 more)
+Cohesion: 0.09
+Nodes (9): MagicSkill, BelongsTo, BelongsToMany, HasMany, MagicBookStarterSeeder, MagicAttackStrategyTest, SeededDotSpellTicksTest, SeededBuffSpellScalesMagicTest (+1 more)
 
 ### Community 85 - "Modules/Structure"
-Cohesion: 0.08
-Nodes (12): ClanServiceProvider, EloquentClanRepository, LaravelTransactionManager, LaravelTransactionManager, LaravelTransactionManager, LaravelTransactionManager, LaravelTransactionManager, LaravelTransactionManager (+4 more)
+Cohesion: 0.07
+Nodes (14): ClanServiceProvider, EloquentClanRepository, LaravelTransactionManager, LaravelTransactionManager, LaravelTransactionManager, ReferralServiceProvider, LaravelTransactionManager, LaravelTransactionManager (+6 more)
 
 ### Community 86 - "Modules/Dungeon"
-Cohesion: 0.18
-Nodes (18): asIcon(), asSymbol(), attributesParser(), defineIcons(), _defineProperty(), deGroup(), fillBlack(), joinStyles() (+10 more)
+Cohesion: 0.14
+Nodes (7): CreateLot, FulfillOrder, AuctionClaim, BelongsTo, AuctionHistory, BelongsTo, AuctionFeeCalculator
 
 ### Community 87 - "Modules/Friend"
 Cohesion: 0.14
 Nodes (9): FriendEntryDTO, FriendsFrameDTO, FriendsPageDTO, FriendsViewMapper, Collection, GetFriendsFrame, FriendRelationshipRepository, GetFriendsPage (+1 more)
 
 ### Community 88 - "Modules/Structure"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (13): close(), create(), findOpenForUser(), getClosedByUser(), getOpenByUser(), Collection, DateTimeInterface, BankDeposit (+5 more)
 
 ### Community 89 - "Modules/Clan"
@@ -1137,31 +1159,27 @@ Nodes (6): botAttack(), getUrl(), getXmlHttp(), huntAttack(), moveMedals(), show
 
 ### Community 90 - "Modules/Npc"
 Cohesion: 0.10
-Nodes (49): ae(), At(), be(), Bt(), ce(), ct(), d(), dt() (+41 more)
+Nodes (48): ae(), At(), be(), Bt(), ce(), ct(), d(), dt() (+40 more)
 
 ### Community 91 - "Modules/Battle"
-Cohesion: 0.29
-Nodes (4): Collection, ReputationShopCartDTO, Collection, ReputationShopPageDTO
+Cohesion: 0.10
+Nodes (11): ProcessPlayerStates, TimedEffectDeathService, PlayerHeartbeatDTO, HeartbeatPlayer, InterfaceReadRepository, CarbonInterface, Collection, ProcessDuePlayerStates (+3 more)
 
 ### Community 92 - "Modules/Dungeon"
 Cohesion: 0.09
 Nodes (15): deleteWarehouseItem(), findBackpackStack(), findWarehouseStack(), getBackpackItems(), getBackpackItemsForTransfer(), getWarehouseItems(), getWarehouseItemsForTransfer(), Collection (+7 more)
 
-### Community 93 - "Modules/Friend"
-Cohesion: 0.09
-Nodes (21): createRelationship(), delete(), existsRelationship(), findRelationship(), findRelationshipById(), findTargetPlayerByName(), firstOrCreateRelationship(), getAcceptedFriends() (+13 more)
-
 ### Community 94 - "Modules/Share"
-Cohesion: 0.21
-Nodes (25): Al(), H(), qc(), U(), xc(), Zc(), a(), C() (+17 more)
+Cohesion: 0.30
+Nodes (17): a(), C(), d(), E(), f(), g(), i(), l() (+9 more)
 
 ### Community 95 - "Modules/Post"
-Cohesion: 0.14
-Nodes (6): BroadcastMailboxUnreadState, BulkLetters, DeleteLetter, GetMailbox, ReadLetter, SendLetter
+Cohesion: 0.19
+Nodes (4): EnterDungeon, DungeonReadRepository, PartyService, PartyRepositoryInterface
 
 ### Community 96 - "Modules/Dungeon"
-Cohesion: 0.17
-Nodes (7): ExchangeFilterDTO, GetExchangeOrders, Collection, GetMyOrders, Collection, AuctionOrder, BelongsTo
+Cohesion: 0.14
+Nodes (3): AdminImageStorage, UploadedFile, AdminImageStorageTest
 
 ### Community 97 - "Modules/Clan"
 Cohesion: 0.04
@@ -1185,27 +1203,27 @@ Nodes (5): PartyController, JsonResponse, RedirectResponse, Request, View
 
 ### Community 102 - "Modules/Battle"
 Cohesion: 0.02
-Nodes (29): StatModifier, isInstant(), isTimed(), BaseTestCase, FightHitInterface, AdminBreadcrumbTest, MagicSeedersAreRegisteredTest, ExampleTest (+21 more)
+Nodes (31): BaseTestCase, LocationReadRepository, AdminBreadcrumbTest, MagicSeedersAreRegisteredTest, ExampleTest, BossRespawnBatchQueryTest, TimedPlayerControlEffectTest, SimulateClanExperienceTest (+23 more)
 
 ### Community 103 - "database"
 Cohesion: 0.17
-Nodes (5): EloquentMagicSkillRepository, CarbonInterface, Collection, MagicSkillReadRepository, MagicSkillWriteRepository
+Nodes (6): GetClanSkillsPage, LearnClanSkill, ClanSkillController, ClanSkillHallController, RedirectResponse, View
 
 ### Community 104 - "Modules/Share"
 Cohesion: 0.26
 Nodes (5): FriendController, JsonResponse, RedirectResponse, Request, View
 
 ### Community 105 - "Modules/MagicSkill"
-Cohesion: 0.08
-Nodes (13): LearnMagicSkillResultDTO, MagicSkillActionResultDTO, MagicSkillRequirementService, GetMagicSkillPage, MagicSkillReadRepository, LearnMagicSkillFromBook, MagicSkillWriteRepository, UpdateEquippedMagicSkills (+5 more)
+Cohesion: 0.12
+Nodes (10): MagicSkillActionResultDTO, GetMagicSkillPage, MagicSkillReadRepository, MagicSkillWriteRepository, UpdateEquippedMagicSkills, MagicSkillWriteRepository, UpdateMagicSkillOrder, MagicSkillController (+2 more)
 
 ### Community 106 - "Modules/Party"
-Cohesion: 0.04
-Nodes (28): EnterDungeon, DungeonReadRepository, PartyService, PartyRepositoryInterface, createOrRefreshPendingInvite(), createParty(), disband(), findActiveByUser() (+20 more)
+Cohesion: 0.11
+Nodes (13): createOrRefreshPendingInvite(), createParty(), disband(), findActiveByUser(), findOpenById(), findPendingInviteByUuid(), getMemberUsers(), Collection (+5 more)
 
 ### Community 107 - "Modules/Structure"
-Cohesion: 0.19
-Nodes (11): GemActionDTO, InsertGem, BlacksmithInventoryRepository, TransactionManager, OpenSocket, BlacksmithInventoryRepository, TransactionManager, BlacksmithInventoryRepository (+3 more)
+Cohesion: 0.18
+Nodes (12): BlacksmithActionResultDTO, GemActionDTO, InsertGem, BlacksmithInventoryRepository, TransactionManager, OpenSocket, BlacksmithInventoryRepository, TransactionManager (+4 more)
 
 ### Community 108 - "Modules/Monster"
 Cohesion: 0.10
@@ -1220,72 +1238,76 @@ Cohesion: 0.22
 Nodes (3): MageFighter, PveOutcome, SimulatePveEncounter
 
 ### Community 111 - "Modules/Item"
-Cohesion: 0.04
-Nodes (51): addHandler(), AttachmentMap, bootstrapDelegationHandler(), bootstrapHandler(), BSCLS_PREFIX_REGEX, BSCLS_PREFIX_REGEX$1, customEvents, Default (+43 more)
+Cohesion: 0.05
+Nodes (50): addHandler(), AttachmentMap, bootstrapDelegationHandler(), bootstrapHandler(), BSCLS_PREFIX_REGEX, BSCLS_PREFIX_REGEX$1, customEvents, Default (+42 more)
 
 ### Community 112 - "Modules/Location"
 Cohesion: 0.10
-Nodes (43): a(), Ac(), bc(), bl(), c(), cl(), dc(), ec() (+35 more)
+Nodes (51): a(), Ac(), Al(), bc(), bl(), c(), cl(), dc() (+43 more)
 
 ### Community 113 - "Modules/Party"
-Cohesion: 0.11
-Nodes (8): ClanController, Request, ClanWarehouse, BelongsTo, ClanWarehouseLog, BelongsTo, ClanWarehouseController, Request
+Cohesion: 0.20
+Nodes (7): ItemRune, BelongsTo, OpenRuneSlot, BlacksmithInventoryRepository, TransactionManager, RuneRarity, RuneService
 
 ### Community 114 - "Modules/Referral"
 Cohesion: 0.15
 Nodes (8): ReferralFrameDTO, ReferralFrameEntryDTO, Collection, ReferralFrameViewMapper, GetReferralFrame, ReferralRepository, View, ReferralFrameController
 
 ### Community 115 - "Modules/Structure"
-Cohesion: 0.16
-Nodes (7): EloquentReferralRepository, Collection, BelongsTo, HasMany, Referral, ReferralRewardStage, ReferralRepository
+Cohesion: 0.06
+Nodes (21): findInviterForUser(), findReferralByReferredUserId(), findUserByName(), getActiveStages(), getReferralsByReferrerUserId(), getUnlockedStages(), Collection, EloquentReferralRepository (+13 more)
 
 ### Community 116 - "app/Http"
-Cohesion: 0.07
-Nodes (18): ReputationActionResultDTO, ReputationShopCartService, AddReputationCartItem, ReputationReadRepository, DeclineReputationQuest, ReputationReadRepository, GetReputationShopPage, ReputationReadRepository (+10 more)
+Cohesion: 0.16
+Nodes (3): PartyInvite, BelongsTo, PartyInviteTest
+
+### Community 117 - "Modules/Backpack"
+Cohesion: 0.17
+Nodes (7): ExchangeFilterDTO, GetExchangeOrders, Collection, GetMyOrders, Collection, AuctionOrder, BelongsTo
 
 ### Community 118 - "Modules/Clan"
-Cohesion: 0.09
-Nodes (13): ActiveDungeonSessionDTO, DungeonIndexPageDTO, DungeonShowPageDTO, DungeonViewDTO, DungeonViewMapper, Collection, ExitDungeon, GetDungeonIndexPage (+5 more)
+Cohesion: 0.14
+Nodes (10): ActiveDungeonSessionDTO, DungeonIndexPageDTO, DungeonShowPageDTO, DungeonViewDTO, DungeonViewMapper, Collection, GetDungeonIndexPage, DungeonReadRepository (+2 more)
 
 ### Community 119 - "Modules/Item"
-Cohesion: 0.17
-Nodes (6): PostActionResultDTO, SendSystemLetter, RedirectResponse, Request, View, PostAdminController
+Cohesion: 0.13
+Nodes (6): MoveResultDTO, self, PlayerMovementService, PlayerEquipmentLoader, BelongsTo, PlayerLocationAccess
 
 ### Community 120 - "Modules/MagicSkill"
-Cohesion: 0.13
-Nodes (26): Q(), a(), D(), e(), f(), Ft(), G(), ge() (+18 more)
+Cohesion: 0.12
+Nodes (29): Q(), a(), D(), e(), f(), Ft(), G(), ge() (+21 more)
 
 ### Community 122 - "Modules/Npc"
 Cohesion: 0.21
-Nodes (6): ItemLocationEntryDTO, PickupItemsPageDTO, Collection, PickupItemsPageViewMapper, GetPickupItemsPage, ItemReadRepository
+Nodes (6): TakeItemsPageDTO, TakeLocationItemDTO, Collection, TakeItemsPageViewMapper, GetTakeItemsPage, LocationReadRepository
 
 ### Community 123 - "Modules/Player"
-Cohesion: 0.12
-Nodes (7): DungeonGate, BelongsTo, MoveResultDTO, self, PlayerMovementService, PlayerEquipmentLoader, DungeonSeeder
+Cohesion: 0.30
+Nodes (6): EloquentChatMessageRepository, Builder, ChatChannel, FriendRelationshipRepository, PartyRepositoryInterface, ChatMessageRepositoryInterface
 
 ### Community 124 - "Modules/Structure"
 Cohesion: 0.09
 Nodes (3): FightHitDTO, Collection, self
 
-### Community 125 - "Modules/Structure"
-Cohesion: 0.23
-Nodes (4): Builder, HasMany, InjuryBodyPart, PlayerInjuryNotificationTest
-
 ### Community 126 - "Modules/Interface"
-Cohesion: 0.09
-Nodes (18): CraftItemDTO, BreakPageViewMapper, KraftPageViewMapper, CraftItem, BlacksmithInventoryRepository, BlacksmithReadRepository, TransactionManager, GetBreakPage (+10 more)
+Cohesion: 0.15
+Nodes (11): BreakPageViewMapper, CraftItem, BlacksmithInventoryRepository, BlacksmithReadRepository, TransactionManager, GetBreakPage, BlacksmithReadRepository, BlacksmithController (+3 more)
 
 ### Community 127 - "Modules/Interface"
 Cohesion: 0.06
-Nodes (31): an(), bt(), dt(), er(), Fn(), ft(), gt(), ht() (+23 more)
+Nodes (32): K(), an(), bt(), dt(), er(), Fn(), ft(), gt() (+24 more)
+
+### Community 128 - "Modules/Location"
+Cohesion: 0.23
+Nodes (11): findNpcByIdOrFail(), findNpcByNameOrFail(), findNpcByUuidOrFail(), getAvailableQuests(), getClanInProgressForUser(), getClanProgressAtNpc(), getInProgressQuestPlayers(), getNpcReputations() (+3 more)
 
 ### Community 129 - "Modules/Referral"
-Cohesion: 0.16
-Nodes (7): ReferralInviteDTO, ReferralPageDTO, ReferralStageDTO, Collection, ReferralPageViewMapper, GetReferralPage, ReferralRepository
+Cohesion: 0.12
+Nodes (10): ReferralInviteDTO, ReferralPageDTO, ReferralStageDTO, Collection, ReferralPageViewMapper, GetReferralPage, ReferralRepository, ReferralRepository (+2 more)
 
 ### Community 130 - "Modules/Structure"
-Cohesion: 0.08
-Nodes (5): Button, findShadowRoot(), Popover, remove(), Tooltip
+Cohesion: 0.10
+Nodes (4): findShadowRoot(), Popover, remove(), Tooltip
 
 ### Community 131 - "app/Http"
 Cohesion: 0.09
@@ -1297,18 +1319,26 @@ Nodes (4): Popover, remove(), sanitizeHtml(), Tooltip
 
 ### Community 133 - "Modules/Interface"
 Cohesion: 0.10
-Nodes (42): attachToScrollParents(), computeAutoPlacement(), find(), findCommonOffsetParent(), findIndex(), getArea(), getBordersSize(), getBoundaries() (+34 more)
+Nodes (31): attachToScrollParents(), computeAutoPlacement(), find(), findCommonOffsetParent(), findIndex(), getArea(), getBoundaries(), getFixedPositionOffsetParent() (+23 more)
 
 ### Community 134 - "Modules/Interface"
-Cohesion: 0.16
-Nodes (4): EffectController, Request, AdminImageStorage, UploadedFile
+Cohesion: 0.19
+Nodes (7): GetShopItems, Collection, PurchaseCart, RedirectResponse, Request, View, PremiumShopController
+
+### Community 135 - "Modules/Location"
+Cohesion: 0.14
+Nodes (9): InitialExperienceDTO, PlayerRepositoryInterface, RegisterPlayerProfile, PlayerFactory, getInitialExperienceForLevel(), register(), save(), EloquentPlayerRepository (+1 more)
 
 ### Community 136 - "Modules/Post"
 Cohesion: 0.10
-Nodes (31): attachToScrollParents(), computeAutoPlacement(), find(), findCommonOffsetParent(), findIndex(), getArea(), getBoundaries(), getFixedPositionOffsetParent() (+23 more)
+Nodes (42): attachToScrollParents(), computeAutoPlacement(), find(), findCommonOffsetParent(), findIndex(), getArea(), getBordersSize(), getBoundaries() (+34 more)
+
+### Community 137 - "Modules/Structure"
+Cohesion: 0.13
+Nodes (10): ShopSellPageDTO, Collection, ShopSellPageViewMapper, GetSellPage, ShopReadRepository, BarterShopController, PurchaseCart, RedirectResponse (+2 more)
 
 ### Community 138 - "Modules/Structure"
-Cohesion: 0.33
+Cohesion: 0.26
 Nodes (5): GrantReferralReward, GrantReferralRewards, ReferralRepository, ReferralRewardIssuer, TransactionManager
 
 ### Community 139 - "app/Repositories"
@@ -1316,31 +1346,31 @@ Cohesion: 0.07
 Nodes (13): AbstractRepository, Builder, Collection, Model, LocationRepository, Builder, MonsterRepository, Builder (+5 more)
 
 ### Community 140 - "app/Http"
-Cohesion: 0.23
-Nodes (6): LocationGateController, RedirectResponse, Request, View, LocationGate, BelongsTo
+Cohesion: 0.13
+Nodes (14): LocationGateController, RedirectResponse, Request, View, countItemsOnLocation(), findDungeonSessionByUserId(), findLocationOrFail(), findTeleportUseGate() (+6 more)
 
 ### Community 142 - "Modules/Clan"
 Cohesion: 0.11
 Nodes (39): At(), bt(), ce(), Ct(), D(), dt(), ft(), gt() (+31 more)
 
 ### Community 143 - "Modules/Monster"
-Cohesion: 0.05
-Nodes (13): MonsterInfoPageDTO, GetMonsterInfoPage, MonsterReadRepository, findById(), findByLocationMonsterId(), EloquentMonsterReadRepository, Monster, BelongsToMany (+5 more)
+Cohesion: 0.24
+Nodes (4): MonsterInfoPageDTO, GetMonsterInfoPage, MonsterReadRepository, MonsterController
 
 ### Community 144 - "Modules/Structure"
-Cohesion: 0.20
-Nodes (8): Carbon, WhoPageDTO, WhoUserDTO, Carbon, Collection, WhoPageViewMapper, GetWhoPage, InterfaceReadRepository
+Cohesion: 0.18
+Nodes (6): GetNpcInfoPage, NpcReadRepository, GetNpcPage, NpcReadRepository, NpcController, Request
 
 ### Community 145 - "Modules/Structure"
 Cohesion: 0.18
 Nodes (9): findExchangeItem(), findStructureOrFail(), getExchangeItems(), Collection, EloquentExchangeReadRepository, Collection, Exchange, BelongsTo (+1 more)
 
 ### Community 146 - "app/Console"
-Cohesion: 0.04
-Nodes (25): BackpackItemTooltipStrategy, ItemTooltipCollector, ItemTooltipStrategyInterface, static, ItemTooltipDto, ItemTooltipRelationLoader, ItemTooltipRenderer, ItemTooltipStatsBuilder (+17 more)
+Cohesion: 0.07
+Nodes (11): ItemTooltipCollector, ItemTooltipStrategyInterface, static, ItemTooltipDto, ItemTooltipRenderer, collect(), GetReputationShopPage, ReputationReadRepository (+3 more)
 
 ### Community 147 - "Modules/Clan"
-Cohesion: 0.20
+Cohesion: 0.18
 Nodes (4): RegisterRequest, CreateClanRequest, FormRequest, Validator
 
 ### Community 148 - "Modules/Battle"
@@ -1360,116 +1390,108 @@ Cohesion: 0.04
 Nodes (44): _args, author, email, name, url, bugs, url, contributors (+36 more)
 
 ### Community 152 - "Modules/Party"
-Cohesion: 0.09
-Nodes (10): findActiveByIdOrFail(), findByIdOrFail(), getActive(), Collection, EloquentDungeonReadRepository, Collection, Dungeon, BelongsTo (+2 more)
+Cohesion: 0.25
+Nodes (6): GetGemsPage, BlacksmithReadRepository, GemController, RedirectResponse, Request, View
 
 ### Community 153 - "Modules/Party"
-Cohesion: 0.16
-Nodes (4): CanCraftRecipe, CraftService, CanCraftRecipeTest, CraftServiceTest
+Cohesion: 0.18
+Nodes (4): BossMechanic, Attribute, BelongsTo, BossMechanicInterface
 
 ### Community 154 - "Modules/Rating"
 Cohesion: 0.18
 Nodes (9): getSkills(), paginateDeathsRating(), paginateLevelRating(), paginateReputationRating(), paginateSkillRating(), paginateVictoriesRating(), paginateWealthRating(), Collection (+1 more)
 
 ### Community 155 - "Modules/Structure"
-Cohesion: 0.19
-Nodes (14): bootstrap(), classArray(), disableObservation(), domready(), enableObservation(), getMutator(), isWatched(), observe() (+6 more)
+Cohesion: 0.09
+Nodes (7): GambleExchangeOptionDTO, GambleExchangeResourceDTO, BelongsTo, ReputationExchange, BelongsTo, ReputationGambleOption, ReputationExchangeTest
 
 ### Community 157 - "Modules/Structure"
 Cohesion: 0.10
 Nodes (3): Fe, Qe, remove()
 
 ### Community 158 - "Modules/Structure"
-Cohesion: 0.23
-Nodes (5): RedirectResponse, Request, PlayerController, Closure, PlayerLevelUpService
+Cohesion: 0.19
+Nodes (7): DualWieldStrategy, FightHitInterface, FistAttackStrategy, FightHitInterface, OneHandWeaponStrategy, FightHitInterface, AttackStrategyInterface
 
 ### Community 161 - "Modules/Chat"
-Cohesion: 0.23
-Nodes (3): format_money(), LibraryShortcodeRenderer, Model
+Cohesion: 0.11
+Nodes (9): LocationController, RedirectResponse, Request, UploadedFile, View, Location, BelongsTo, BelongsToMany (+1 more)
 
 ### Community 162 - "Modules/Event"
 Cohesion: 0.27
 Nodes (4): AddEnemy, FriendRelationshipRepository, AddFriend, FriendRelationshipRepository
 
 ### Community 163 - "Modules/Location"
-Cohesion: 0.12
-Nodes (13): GetRarityUpgradePage, Collection, ShareItemType, RedirectResponse, Request, View, ToolWorkshopController, CraftProfessionItem (+5 more)
+Cohesion: 0.45
+Nodes (11): itemTooltipBackground(), itemTooltipCheckRequirement(), itemTooltipCoords(), itemTooltipGetById(), itemTooltipIframeShift(), itemTooltipOpenInfo(), itemTooltipRootWindow(), itemTooltipTopWindow() (+3 more)
 
 ### Community 164 - "Modules/MagicSkill"
-Cohesion: 0.11
-Nodes (15): TransferUpgradeDTO, UpgradeTransferPageViewMapper, GetUpgradeTransferPage, BlacksmithReadRepository, BlacksmithInventoryRepository, TransactionManager, TransferUpgrade, CanTransferUpgrade (+7 more)
+Cohesion: 0.13
+Nodes (11): TransferUpgradeDTO, UpgradeTransferPageViewMapper, GetUpgradeTransferPage, BlacksmithReadRepository, BlacksmithInventoryRepository, TransactionManager, TransferUpgrade, CanTransferUpgrade (+3 more)
 
 ### Community 166 - "Modules/Structure"
-Cohesion: 0.24
+Cohesion: 0.26
 Nodes (4): LibraryCategoryController, RedirectResponse, Request, View
 
 ### Community 167 - "app/Http"
-Cohesion: 0.09
-Nodes (17): MapController, RedirectResponse, Request, UploadedFile, View, findMapBySlug(), getOnlineUsers(), getPlayerActiveEffects() (+9 more)
+Cohesion: 0.10
+Nodes (16): MapController, RedirectResponse, Request, UploadedFile, View, JsonResponse, findMapBySlug(), getOnlineUsers() (+8 more)
 
 ### Community 168 - "Modules/Player"
 Cohesion: 0.14
-Nodes (10): AllocateStatsResultDTO, AllocateStats, PlayerRepositoryInterface, GetCharacter, GetProfessionsPage, CharacterController, JsonResponse, RedirectResponse (+2 more)
+Nodes (9): AllocateStatsResultDTO, AllocateStats, PlayerRepositoryInterface, GetCharacter, CharacterController, JsonResponse, RedirectResponse, Request (+1 more)
 
 ### Community 170 - "Modules/Reputation"
 Cohesion: 0.18
 Nodes (5): GemPageDTO, GemPageViewMapper, Collection, MountRarityConfig, ItemRarity
 
 ### Community 171 - "Modules/Structure"
-Cohesion: 0.12
-Nodes (5): EloquentNpcReadRepository, Collection, Collection, QuestDefinitionsCache, QuestDefinitionObserver
+Cohesion: 0.13
+Nodes (4): EloquentNpcReadRepository, Collection, QuestDefinitionsCache, QuestDefinitionObserver
 
 ### Community 172 - "Modules/Structure"
-Cohesion: 0.16
-Nodes (4): CraftResult, self, self, UpgradeResult
+Cohesion: 0.14
+Nodes (5): self, CraftResult, self, self, UpgradeResult
 
 ### Community 174 - "Modules/Structure"
 Cohesion: 0.10
-Nodes (20): be(), C(), ce(), ge(), ht(), I(), je(), ke() (+12 more)
+Nodes (29): j(), t(), be(), C(), ce(), d(), e(), Ee() (+21 more)
 
 ### Community 175 - "app/Repositories"
 Cohesion: 0.21
 Nodes (9): create(), getAll(), getByIds(), getOneById(), getQuery(), Builder, Collection, Model (+1 more)
 
 ### Community 177 - "app/Http"
-Cohesion: 0.21
-Nodes (13): b(), be(), Ee(), he(), le(), Oe(), qe(), se() (+5 more)
+Cohesion: 0.26
+Nodes (5): ChatMessageDTO, GetMessages, ChatChannel, ChatMessageRepositoryInterface, MessageRenderer
 
 ### Community 178 - "Modules/Item"
 Cohesion: 0.10
 Nodes (3): AllowClear(), InputData(), MaximumSelectionLength()
 
-### Community 179 - "Modules/Npc"
-Cohesion: 0.17
-Nodes (8): HandOverCandidateDTO, HandOverPageDTO, HandOverPageViewMapper, Collection, GetHandOverPage, ItemReadRepository, HandOverToUser, ItemReadRepository
-
 ### Community 181 - "Modules/Structure"
-Cohesion: 0.14
-Nodes (9): BreakItem, BlacksmithInventoryRepository, BlacksmithReadRepository, TransactionManager, CanBreakItem, self, SalvageResult, BreakService (+1 more)
+Cohesion: 0.18
+Nodes (8): BreakItem, BlacksmithInventoryRepository, BlacksmithReadRepository, TransactionManager, CanBreakItem, self, SalvageResult, BreakService
 
 ### Community 182 - "Modules/Structure"
-Cohesion: 0.15
-Nodes (7): HotbarController, JsonResponse, Request, EffectHandler, HotbarService, BelongsTo, PlayerSlot
+Cohesion: 0.08
+Nodes (13): HotbarController, JsonResponse, Request, Request, SlotController, EffectHandler, ItemEffectStrategyFactory, ItemEffectStrategyInterface (+5 more)
 
 ### Community 183 - "Modules/Battle"
-Cohesion: 0.09
-Nodes (10): ActionController, Request, View, Request, View, RaceController, MagicSkillRequirement, BelongsTo (+2 more)
+Cohesion: 0.06
+Nodes (18): ReputationActionResultDTO, Collection, ReputationShopCartDTO, ReputationShopCartService, AddReputationCartItem, ReputationReadRepository, DeclineReputationQuest, ReputationReadRepository (+10 more)
 
 ### Community 185 - "Modules/Npc"
-Cohesion: 0.17
-Nodes (6): NpcInfoPageDTO, GetNpcInfoPage, NpcReadRepository, GetNpcPage, NpcReadRepository, NpcController
-
-### Community 186 - "Modules/Party"
-Cohesion: 0.11
-Nodes (4): Dt(), jt, remove(), Ht()
+Cohesion: 0.29
+Nodes (4): MagicSkillBook, BelongsTo, ItemBookLinkTest, Request
 
 ### Community 187 - "Modules/Player"
 Cohesion: 0.10
 Nodes (23): addEvent(), allStylesLoaded(), attach(), cached(), Font(), FontFamily(), generateFromVML(), getFont() (+15 more)
 
 ### Community 188 - "Modules/Referral"
-Cohesion: 0.11
-Nodes (10): ItemUsagePolicyService, CarbonInterface, BelongsTo, PlayerItemUseLimitState, BelongsTo, ShareItemBuff, BelongsTo, HasMany (+2 more)
+Cohesion: 0.02
+Nodes (29): BelongsTo, ShareItemLockConfig, BelongsTo, ShareItemLockpickConfig, MapGatheringResource, BelongsTo, HasMany, MagicSkillRequirement (+21 more)
 
 ### Community 189 - "Modules/Share"
 Cohesion: 0.60
@@ -1484,28 +1506,28 @@ Cohesion: 0.10
 Nodes (23): addHandler(), bootstrapDelegationHandler(), bootstrapHandler(), Button, findHandler(), get(), getDataAttribute(), getDataAttributes() (+15 more)
 
 ### Community 192 - "Modules/Structure"
-Cohesion: 0.25
-Nodes (4): Collection, SummonMinionsMechanic, MonsterSummonPool, BelongsTo
+Cohesion: 0.17
+Nodes (6): InjuryTypeController, RedirectResponse, Request, View, SaveInjuryTypeRequest, DeleteInjuryType
 
 ### Community 193 - "Modules/Location"
-Cohesion: 0.12
-Nodes (3): InfiniteScroll(), MultipleSelection(), SingleSelection()
+Cohesion: 0.11
+Nodes (3): MultipleSelection(), Results(), SingleSelection()
 
 ### Community 194 - "Modules/Interface"
-Cohesion: 0.15
-Nodes (7): InjuryTypeController, RedirectResponse, Request, View, SaveInjuryTypeRequest, DeleteInjuryType, InjuryType
+Cohesion: 0.16
+Nodes (6): ClanIndexPageDTO, Collection, NpcInfoPageDTO, Npc, BelongsTo, HasMany
 
 ### Community 195 - "Modules/Location"
-Cohesion: 0.07
-Nodes (13): RedirectResponse, Request, SkillController, BelongsTo, PlayerSkill, Collection, Skill, BelongsTo (+5 more)
+Cohesion: 0.35
+Nodes (5): LibraryController, Collection, RedirectResponse, Request, View
 
 ### Community 197 - "Modules/Post"
-Cohesion: 0.08
-Nodes (21): bo(), Bt(), ce(), co(), go(), gt(), jt(), k() (+13 more)
+Cohesion: 0.09
+Nodes (18): bo(), Bt(), ce(), co(), go(), jt(), k(), Ke() (+10 more)
 
 ### Community 198 - "Modules/Referral"
-Cohesion: 0.16
-Nodes (8): Collection, ReputationListPageDTO, GetReputationListPage, ReputationReadRepository, GetReputationPage, ReputationReadRepository, BelongsTo, PlayerReputationMedal
+Cohesion: 0.51
+Nodes (4): ItemRarity, ShareItemSlot, ShareItemType, TransferUpgradeTest
 
 ### Community 199 - "Modules/Referral"
 Cohesion: 0.26
@@ -1513,11 +1535,11 @@ Nodes (6): ItemActionLogController, Request, View, ItemActionLog, BelongsTo, Ite
 
 ### Community 200 - "Modules/Structure"
 Cohesion: 0.23
-Nodes (11): findNpcByIdOrFail(), findNpcByNameOrFail(), findNpcByUuidOrFail(), getAvailableQuests(), getClanInProgressForUser(), getClanProgressAtNpc(), getInProgressQuestPlayers(), getNpcReputations() (+3 more)
+Nodes (3): LearnMagicSkillResultDTO, MagicSkillRequirementService, LearnMagicSkillFromBook
 
 ### Community 201 - "Modules/Structure"
-Cohesion: 0.20
-Nodes (7): ItemRune, BelongsTo, OpenRuneSlot, BlacksmithInventoryRepository, TransactionManager, RuneRarity, RuneService
+Cohesion: 0.26
+Nodes (5): KraftPageDTO, KraftPageViewMapper, Collection, GetKraftPage, BlacksmithReadRepository
 
 ### Community 202 - "Modules/Structure"
 Cohesion: 0.14
@@ -1528,52 +1550,48 @@ Cohesion: 0.07
 Nodes (14): bm(), bn(), bZ(), cb(), cc(), cs(), ct(), cv() (+6 more)
 
 ### Community 204 - "Modules/Structure"
-Cohesion: 0.09
-Nodes (22): A(), at(), ce(), e(), fe(), ge(), ht(), It() (+14 more)
+Cohesion: 0.08
+Nodes (35): A(), at(), b(), be(), ce(), e(), Ee(), fe() (+27 more)
 
 ### Community 205 - "Modules/Interface"
 Cohesion: 0.11
 Nodes (24): A(), b(), c(), D(), e(), i(), l(), n() (+16 more)
 
-### Community 206 - "app/Http"
-Cohesion: 0.20
-Nodes (12): addCombinator(), condense(), createPositionalPseudo(), elementMatcher(), markFunction(), matcherFromGroupMatchers(), matcherFromTokens(), multipleContexts() (+4 more)
-
 ### Community 207 - "Modules/Clan"
-Cohesion: 0.20
-Nodes (4): ShopBuyPageDTO, Collection, ShopCartDTO, Collection
+Cohesion: 0.24
+Nodes (4): RuneActionDTO, ImbueRune, BlacksmithInventoryRepository, TransactionManager
+
+### Community 209 - "Modules/Structure"
+Cohesion: 0.22
+Nodes (3): LibraryShortcodeRenderer, Model, InjuryType
 
 ### Community 210 - "Modules/Structure"
-Cohesion: 0.26
-Nodes (7): HealthController, JsonResponse, RedirectResponse, Request, View, RecoveryStrategyInterface, RecoveryStrategyFactory
+Cohesion: 0.25
+Nodes (4): ItemUsagePolicyService, CarbonInterface, BelongsTo, PlayerItemUseLimitState
 
 ### Community 211 - "Modules/Structure"
 Cohesion: 0.13
 Nodes (6): Collapse, getElementFromSelector(), getSelector(), getSelectorFromElement(), reflow(), Tab
 
 ### Community 212 - "Modules/Structure"
-Cohesion: 0.12
-Nodes (24): j(), n(), t(), A(), C(), d(), F(), G() (+16 more)
+Cohesion: 0.16
+Nodes (18): A(), C(), d(), F(), G(), h(), j(), k() (+10 more)
 
 ### Community 213 - "Modules/Structure"
-Cohesion: 0.12
-Nodes (19): F, getDataAttributes(), H(), j(), K(), M(), off(), on() (+11 more)
+Cohesion: 0.11
+Nodes (20): F, getDataAttributes(), H(), j(), K(), M(), off(), on() (+12 more)
 
 ### Community 214 - "Modules/Structure"
 Cohesion: 0.24
 Nodes (24): a(), b(), c(), d(), e(), f(), g(), h() (+16 more)
-
-### Community 215 - "app/Http"
-Cohesion: 0.11
-Nodes (3): ee(), nt, q
 
 ### Community 216 - "app/Http"
 Cohesion: 0.09
 Nodes (14): callDep(), ContainerCSS(), countResults(), DropdownCSS(), handler(), hasProp(), makeNormalize(), makeRelParts() (+6 more)
 
 ### Community 217 - "app/Http"
-Cohesion: 0.09
-Nodes (65): a(), binl2rstr(), binlMD5(), bitRotateLeft(), c(), d(), e(), f() (+57 more)
+Cohesion: 0.08
+Nodes (70): a(), binl2rstr(), binlMD5(), bitRotateLeft(), c(), d(), e(), f() (+62 more)
 
 ### Community 219 - "Modules/Battle"
 Cohesion: 0.07
@@ -1584,64 +1602,56 @@ Cohesion: 0.25
 Nodes (26): A(), b(), c(), d(), e(), f(), g(), h() (+18 more)
 
 ### Community 222 - "Modules/Dungeon"
-Cohesion: 0.16
-Nodes (7): LibraryArticle, BelongsTo, Builder, HasMany, LibraryCategory, SoftDeletes, LibraryPublicPageTest
+Cohesion: 0.12
+Nodes (9): LibraryArticle, BelongsTo, Builder, HasMany, LibraryCategory, BelongsTo, HasMany, SoftDeletes (+1 more)
 
 ### Community 223 - "Modules/Dungeon"
-Cohesion: 0.20
-Nodes (6): LibraryEntityRegistry, LibraryController, Collection, RedirectResponse, Request, View
+Cohesion: 0.13
+Nodes (6): PremiumShopResultDTO, PurchaseCart, ShopCartService, BelongsTo, ShopCart, PurchaseCartBatchQueryTest
+
+### Community 224 - "Modules/Interface"
+Cohesion: 0.25
+Nodes (4): Collection, SummonMinionsMechanic, MonsterSummonPool, BelongsTo
 
 ### Community 227 - "Modules/MagicSkill"
 Cohesion: 0.12
 Nodes (4): ArrayAdapter(), BaseAdapter(), SelectAdapter(), Tags()
 
 ### Community 228 - "Modules/Monster"
-Cohesion: 0.21
-Nodes (4): EloquentItemReadRepository, Collection, ItemServiceProvider, ItemReadRepository
+Cohesion: 0.08
+Nodes (10): AttackResultDTO, self, AttackService, RandomizerInterface, MonsterAttackService, RandomizerInterface, DropService, ClanExperienceService (+2 more)
 
 ### Community 229 - "Modules/Quest"
 Cohesion: 0.21
-Nodes (12): apiObject(), blankMeta(), byLigature(), byUnicode(), classParser(), css(), htmlEscape(), joinAttributes() (+4 more)
+Nodes (6): ItemLocationEntryDTO, PickupItemsPageDTO, Collection, PickupItemsPageViewMapper, GetPickupItemsPage, ItemReadRepository
 
 ### Community 230 - "Modules/Structure"
 Cohesion: 0.48
 Nodes (26): P(), a(), b(), c(), d(), ee(), f(), g() (+18 more)
-
-### Community 233 - "app/Http"
-Cohesion: 0.08
-Nodes (12): DeleteExpiredLocationItems, Closure, Collection, RecalculatePlayersHp, SetPlayerLevel, MtRandomizer, ItemOnLocation, BelongsTo (+4 more)
 
 ### Community 234 - "Modules/Backpack"
 Cohesion: 0.11
 Nodes (4): Dropdown, getNextActiveElement(), isDisabled(), isVisible()
 
 ### Community 235 - "Modules/Interface"
-Cohesion: 0.16
-Nodes (5): EloquentLocationReadRepository, Builder, Collection, LocationServiceProvider, LocationReadRepository
-
-### Community 236 - "Modules/Item"
-Cohesion: 0.17
-Nodes (3): et, M(), Y()
+Cohesion: 0.23
+Nodes (3): EloquentLocationReadRepository, Builder, Collection
 
 ### Community 237 - "Modules/MagicSkill"
 Cohesion: 0.17
 Nodes (22): addStyleSheet(), b(), contains(), createDocumentFragment(), createElement(), d(), e(), g() (+14 more)
 
 ### Community 239 - "Modules/Player"
-Cohesion: 0.21
-Nodes (5): GambleExchangePageDTO, ReputationExchangeStrategyResolver, RedirectResponse, Request, ReputationExchangeController
+Cohesion: 0.24
+Nodes (4): ClanTreasuryPageDTO, LengthAwarePaginator, ClanTreasuryLog, BelongsTo
 
 ### Community 240 - "Modules/Referral"
 Cohesion: 0.11
 Nodes (3): distanceAndSkiddingToXY(), Dropdown, offset()
 
-### Community 241 - "Modules/Structure"
-Cohesion: 0.13
-Nodes (3): getDataAttributes(), z(), z
-
 ### Community 242 - "Modules/Structure"
-Cohesion: 0.47
-Nodes (3): ApiController, JsonResponse, Request
+Cohesion: 0.22
+Nodes (3): ExitDungeon, DungeonController, RedirectResponse
 
 ### Community 244 - "Modules/Structure"
 Cohesion: 0.13
@@ -1660,32 +1670,28 @@ Cohesion: 0.15
 Nodes (5): Collapse, contains(), effect$1(), find(), Tab
 
 ### Community 250 - "Modules/Dungeon"
-Cohesion: 0.13
+Cohesion: 0.12
 Nodes (4): Dropdown, getNextActiveElement(), isDisabled(), noop()
 
 ### Community 252 - "Modules/Item"
 Cohesion: 0.13
 Nodes (3): AttachContainer(), InfiniteScroll(), MultipleSelection()
 
-### Community 253 - "Modules/MagicSkill"
-Cohesion: 0.30
-Nodes (6): ItemActionLogger, ShopResultDTO, ShopInventoryRepository, ShopReadRepository, TransactionManager, SellItems
-
 ### Community 254 - "Modules/Quest"
-Cohesion: 0.12
-Nodes (6): HidePlaceholder(), MinimumInputLength(), Options(), Placeholder(), Tags(), Tokenizer()
+Cohesion: 0.11
+Nodes (7): HidePlaceholder(), MaximumInputLength(), MinimumInputLength(), Options(), Placeholder(), Tags(), Tokenizer()
 
 ### Community 255 - "Modules/Reputation"
-Cohesion: 0.36
-Nodes (4): RedirectResponse, Request, View, PostController
+Cohesion: 0.33
+Nodes (11): getBordersSize(), getBoundingClientRect(), getClientRect(), getOffsetRect(), getOffsetRectRelativeToArbitraryNode(), getScroll(), getSize(), getViewportOffsetRectRelativeToArtbitraryNode() (+3 more)
 
 ### Community 257 - "database"
 Cohesion: 0.48
 Nodes (5): addSkillGate(), attachToShields(), ensureSkill(), seedLevelRequirements(), up()
 
 ### Community 258 - "database"
-Cohesion: 0.26
-Nodes (5): ShopSellPageDTO, Collection, ShopSellPageViewMapper, GetSellPage, ShopReadRepository
+Cohesion: 0.29
+Nodes (3): PruneExpiredPlayerInjuries, RandomizerInterface, PlayerInjuryService
 
 ### Community 259 - "Modules/Battle"
 Cohesion: 0.40
@@ -1695,25 +1701,17 @@ Nodes (3): beatenBy(), beats(), self
 Cohesion: 0.12
 Nodes (10): allowedAttribute(), getElement(), getUID(), isElement(), isVisible(), onDOMContentLoaded(), sanitizeHtml(), toType() (+2 more)
 
-### Community 261 - "Modules/Clan"
-Cohesion: 0.21
-Nodes (7): findInviterForUser(), findReferralByReferredUserId(), findUserByName(), getActiveStages(), getReferralsByReferrerUserId(), getUnlockedStages(), Collection
-
 ### Community 262 - "Modules/Clan"
 Cohesion: 0.07
-Nodes (15): AjaxAdapter(), callDep(), countResults(), DecoratedClass(), Defaults(), Dropdown(), hasProp(), makeNormalize() (+7 more)
+Nodes (15): AjaxAdapter(), callDep(), countResults(), DecoratedClass(), Defaults(), Dropdown(), EventRelay(), hasProp() (+7 more)
 
 ### Community 263 - "Modules/Clan"
 Cohesion: 0.11
 Nodes (8): HidePlaceholder(), InitSelection(), MaximumInputLength(), MinimumInputLength(), Options(), Placeholder(), Query(), Tokenizer()
 
-### Community 265 - "GetMessages"
-Cohesion: 0.29
-Nodes (4): MagicSkillBook, BelongsTo, ItemBookLinkTest, Request
-
 ### Community 266 - "Modules/Location"
-Cohesion: 0.45
-Nodes (11): itemTooltipBackground(), itemTooltipCheckRequirement(), itemTooltipCoords(), itemTooltipGetById(), itemTooltipIframeShift(), itemTooltipOpenInfo(), itemTooltipRootWindow(), itemTooltipTopWindow() (+3 more)
+Cohesion: 0.39
+Nodes (3): BankController, JsonResponse, Request
 
 ### Community 267 - "Modules/Location"
 Cohesion: 0.10
@@ -1744,16 +1742,12 @@ Cohesion: 0.11
 Nodes (17): Global Constraints, Magic Combat System Implementation Plan, Self-Review Notes, Task 10: DoT — tick value fixed once at cast time, Task 11: Heal formula upgrade, Task 12: Starter content — 7 books, Task 13: Admin UI — book/skill configuration, Task 14: Extend `battle:simulate-pve` for magic builds + final checklist pass (+9 more)
 
 ### Community 281 - "Modules/Item"
-Cohesion: 0.22
-Nodes (3): AttachBody(), CloseOnSelect(), EventRelay()
+Cohesion: 0.21
+Nodes (3): AttachBody(), CloseOnSelect(), SelectOnClose()
 
 ### Community 282 - "Modules/Location"
 Cohesion: 0.16
 Nodes (18): closeHeavensGift(), confirm_front(), confirmCenterDivClose(), entry_point_request(), front_conf(), front_fight_start(), front_locations(), getSWF() (+10 more)
-
-### Community 287 - "InjuryBodyPart"
-Cohesion: 0.33
-Nodes (4): ProcessPlayerStates, CarbonInterface, Collection, ProcessDuePlayerStates
 
 ### Community 288 - "Modules/Structure"
 Cohesion: 0.60
@@ -1784,8 +1778,8 @@ Cohesion: 0.50
 Nodes (3): admin.layout.breadcrumbs, admin.layout.header, admin.layout.menu
 
 ### Community 296 - "replaceForPosition"
-Cohesion: 0.22
-Nodes (4): GiveStarterBonus, BackpackServiceProvider, EloquentBackpackRepository, BackpackRepositoryInterface
+Cohesion: 0.08
+Nodes (10): BackpackItemTooltipStrategy, ItemTooltipRelationLoader, ItemTooltipStatsBuilder, ClanWarehouseItemTooltipStrategy, ItemModelTooltipStrategy, PremiumShopItemTooltipStrategy, ShareItemTooltipStrategy, WarehouseLogItemTooltipStrategy (+2 more)
 
 ### Community 297 - "Modules/Battle"
 Cohesion: 0.16
@@ -1799,21 +1793,13 @@ Nodes (3): battle::partials.action_panel, battle::partials.fight_styles, battle:
 Cohesion: 0.50
 Nodes (3): battle::partials.action_panel, battle::partials.fight_styles, battle::partials.side_panel
 
-### Community 300 - "Modules/Monster"
-Cohesion: 0.09
-Nodes (4): BelongsTo, PlayerActiveEffect, PlayerHeartbeatTest, PlayerTimedEffectServiceTest
-
 ### Community 301 - "Modules/Monster"
-Cohesion: 0.33
-Nodes (11): getBordersSize(), getBoundingClientRect(), getClientRect(), getOffsetRect(), getOffsetRectRelativeToArbitraryNode(), getScroll(), getSize(), getViewportOffsetRectRelativeToArtbitraryNode() (+3 more)
-
-### Community 303 - "Modules/Structure"
-Cohesion: 0.10
-Nodes (9): ReputationExchangePageDTO, ReputationExchangeResultDTO, ApplyReputationExchange, GetReputationExchangePage, getPageData(), perform(), LinearExchangeService, ReputationExchangeService (+1 more)
+Cohesion: 0.30
+Nodes (6): ItemActionLogger, ShopResultDTO, ShopInventoryRepository, ShopReadRepository, TransactionManager, SellItems
 
 ### Community 305 - "Modules/Structure"
-Cohesion: 0.23
-Nodes (16): Z(), at(), ct(), E(), et(), it(), J(), kt() (+8 more)
+Cohesion: 0.21
+Nodes (17): Z(), at(), ct(), E(), et(), it(), J(), kt() (+9 more)
 
 ### Community 306 - "database"
 Cohesion: 0.83
@@ -1831,33 +1817,25 @@ Nodes (3): changeEnum(), down(), up()
 Cohesion: 0.83
 Nodes (3): changeEnum(), down(), up()
 
-### Community 314 - "database"
-Cohesion: 0.04
-Nodes (22): ItemController, RedirectResponse, Request, UploadedFile, View, DeleteShareItem, BelongsTo, BelongsToMany (+14 more)
-
 ### Community 315 - "GemController.php"
-Cohesion: 0.27
-Nodes (6): GetGemsPage, BlacksmithReadRepository, GemController, RedirectResponse, Request, View
+Cohesion: 0.32
+Nodes (3): LockpickingController, JsonResponse, Request
 
 ### Community 318 - "Modules/Clan"
 Cohesion: 0.22
 Nodes (11): c(), d(), e(), f(), g(), h(), i(), j() (+3 more)
 
-### Community 320 - "Modules/Effect"
-Cohesion: 0.27
-Nodes (8): countItemsOnLocation(), findDungeonSessionByUserId(), findLocationOrFail(), findTeleportUseGate(), getItemsOnLocation(), getLocationUsers(), getMonstersOnLocation(), Collection
-
 ### Community 322 - "HealthController.php"
-Cohesion: 0.22
-Nodes (7): ImbueRune, BlacksmithInventoryRepository, TransactionManager, RedirectResponse, Request, View, RuneController
+Cohesion: 0.39
+Nodes (3): EnsureBankAccount, BankUserRepository, BankAccountGenerator
 
 ### Community 323 - "NpcReadRepository.php"
-Cohesion: 0.07
-Nodes (10): MonsterOnHitEffectService, RandomizerInterface, Effect, ActiveEffectType, BelongsToMany, EffectDamageScalingType, HasMany, BossDebuffDurationTest (+2 more)
+Cohesion: 0.09
+Nodes (8): Effect, ActiveEffectType, BelongsToMany, EffectDamageScalingType, HasMany, BossDebuffDurationTest, DotTickFixedAtCastTimeTest, HotTickBudgetTest
 
 ### Community 325 - "Modules/Location"
-Cohesion: 0.08
-Nodes (12): ItemEffectStrategyFactory, ItemEffectStrategyInterface, ItemEffectType, HealHpStrategy, HealMpStrategy, apply(), RestoreLostExpStrategy, ItemEffectValue (+4 more)
+Cohesion: 0.43
+Nodes (3): ItemRarity, ShareItemType, UpgradeItemRarity
 
 ### Community 326 - "Modules/Location"
 Cohesion: 0.13
@@ -1868,44 +1846,36 @@ Cohesion: 0.18
 Nodes (12): Identity(), resolve(), Identity(), resolve(), Thrower(), Thrower(), args(), clearPlaceholder() (+4 more)
 
 ### Community 328 - "Modules/Npc"
-Cohesion: 0.16
-Nodes (9): GetBackpack, ItemReadRepository, LocationReadRepository, BackpackRepositoryInterface, UpdateOrder, BackpackController, JsonResponse, Request (+1 more)
-
-### Community 334 - "RunePageViewMapper"
-Cohesion: 0.26
-Nodes (5): RunePageDTO, Collection, RunePageViewMapper, GetRunesPage, BlacksmithReadRepository
+Cohesion: 0.19
+Nodes (5): Attribute, Builder, HasMany, InjuryBodyPart, PlayerInjuryNotificationTest
 
 ### Community 336 - "Modules/Referral"
 Cohesion: 0.14
 Nodes (13): DoT / баф / дебаф / лечение, Админка и интерфейс, Данные и миграции, Изучение по книгам, Область, оставленная вне этой спеки, Общий механизм каста (мана + кулдаун), Полноценная боевая магическая система, Правила (зафиксировано, не обсуждается заново) (+5 more)
 
 ### Community 338 - "Modules/Structure"
-Cohesion: 0.11
-Nodes (10): resolve_storage_image_url(), Attribute, Attribute, Attribute, Attribute, Attribute, Attribute, Attribute (+2 more)
-
-### Community 339 - "Modules/Structure"
-Cohesion: 0.31
-Nodes (3): QuestProgressService, BelongsTo, QuestClanObjective
+Cohesion: 0.10
+Nodes (12): format_money(), resolve_storage_image_url(), ApiController, JsonResponse, Request, Attribute, Attribute, Attribute (+4 more)
 
 ### Community 348 - "Modules/Structure"
 Cohesion: 0.15
 Nodes (12): Docker, MySQL, Автоматические и браузерные проверки, Воспроизведение, Выводы и приоритеты, Изоляция данных, Итог, Отчёт нагрузочного тестирования — 2026-08-11 (+4 more)
 
 ### Community 349 - "Modules/Structure"
-Cohesion: 0.31
-Nodes (4): GetClaims, Collection, AuctionClaim, BelongsTo
+Cohesion: 0.08
+Nodes (13): DeleteExpiredLocationItems, Closure, Collection, RecalculatePlayersHp, SetPlayerLevel, MtRandomizer, ItemOnLocation, BelongsTo (+5 more)
 
 ### Community 350 - "Modules/Structure"
-Cohesion: 0.31
-Nodes (3): OnMapPageDTO, GetOnMapPage, InterfaceReadRepository
+Cohesion: 0.03
+Nodes (30): Experience, ChatIgnore, BelongsTo, allBits(), bit(), ClanLog, BelongsTo, ClanLogAction (+22 more)
 
 ### Community 486 - "resources"
 Cohesion: 0.33
 Nodes (5): admin.item.partials.chest-contents, admin.item.partials.rarity-upgrade-materials, admin.item.partials.requirements, admin.item.navigation, admin.layout.summernote
 
 ### Community 491 - "RuneController.php"
-Cohesion: 0.36
-Nodes (4): RedirectResponse, Request, View, ReferralController
+Cohesion: 0.05
+Nodes (10): AdminMiddleware, Closure, Request, DatabaseTransactions, BarterShopConfigurationTest, ClanIconRenderingTest, MapGatheringResourceConfigurationTest, MonsterEffectAssignmentTest (+2 more)
 
 ### Community 496 - "Modules/Clan"
 Cohesion: 0.29
@@ -1920,8 +1890,8 @@ Cohesion: 0.17
 Nodes (11): 10. Плащ «Астрал» (кольчуга/плащ, торс), 1. Посох «Астрал» (оружие), 2. Фолиант «Астрал» (оружие), 3. Сфера «Астрал» (оружие), 4. Мантия «Астрал» (броня, грудь), 5. Сапоги «Астрал» (обувь), 6. Наручи «Астрал» (предплечья), 7. Капюшон «Астрал» (шлем) (+3 more)
 
 ### Community 569 - "resources"
-Cohesion: 0.27
-Nodes (10): _arrayWithHoles(), asFoundIcon(), findIcon(), generateLayersText(), generateMutation(), generateSvgReplacementMutation(), _iterableToArrayLimit(), _nonIterableRest() (+2 more)
+Cohesion: 0.39
+Nodes (7): findResourceBackpackItem(), findStructureOrFail(), getBackpackShareItemCounts(), getSelectedSellableItems(), getSellableItems(), getShopItems(), Collection
 
 ### Community 580 - "self"
 Cohesion: 0.17
@@ -1940,28 +1910,20 @@ Cohesion: 0.17
 Nodes (11): devDependencies, axios, laravel-echo, laravel-vite-plugin, pusher-js, vite, private, scripts (+3 more)
 
 ### Community 587 - "searchPseudoElements"
-Cohesion: 0.33
-Nodes (5): OpenDeposit, BankDepositRepository, BankUserRepository, TransactionManager, DepositTerms
+Cohesion: 0.73
+Nodes (4): OpenDeposit, BankDepositRepository, BankUserRepository, TransactionManager
 
-### Community 588 - "Closure"
-Cohesion: 0.44
-Nodes (9): j(), t(), d(), e(), Ee(), l(), Te(), we() (+1 more)
-
-### Community 590 - "Response"
-Cohesion: 0.14
-Nodes (6): Collection, ReputationService, BuyReputationShopItem, ReputationReadRepository, BelongsTo, PlayerReputation
+### Community 589 - "Request"
+Cohesion: 0.64
+Nodes (3): ChatMessageExpirationTest, ChatChannel, ChatMessageType
 
 ### Community 593 - "BelongsTo"
 Cohesion: 0.36
 Nodes (5): Backdrop, execute(), executeAfterTransition(), getTransitionDurationFromElement(), triggerTransitionEnd()
 
 ### Community 594 - "HasMany"
-Cohesion: 0.36
+Cohesion: 0.32
 Nodes (5): Backdrop, execute(), executeAfterTransition(), getTransitionDurationFromElement(), triggerTransitionEnd()
-
-### Community 622 - "DungeonCooldownRepository"
-Cohesion: 0.29
-Nodes (10): asyncCall(), asyncFlush(), fulfill(), handleThenable(), invokeCallback(), publish(), publishFulfillment(), publishRejection() (+2 more)
 
 ### Community 623 - "DungeonSessionRepository"
 Cohesion: 0.22
@@ -1975,53 +1937,49 @@ Nodes (9): Вывод, Дополнительный аудит N+1, Основн
 Cohesion: 0.20
 Nodes (9): MySQL ENUM, Архетипы оружия, Контекст, Магическое оружие (посох/фолиант/сфера), Механика магического крита, Навыки владения, Область, оставленная вне этой спеки, Правки к правилу 1 из 2026-08-22 (+1 more)
 
+### Community 650 - "BelongsToMany"
+Cohesion: 0.36
+Nodes (4): ClanFramePageDTO, CarbonInterface, Collection, GetClanMembersFrame
+
 ### Community 651 - "HasMany"
 Cohesion: 0.27
 Nodes (3): changePopup(), closePopup(), openPopup()
 
 ### Community 657 - "GetMapsPage.php"
-Cohesion: 0.04
-Nodes (20): FightDTO, self, PlayerAttackInitiator, BattleFinishService, BossMechanicsService, BossPhaseService, BossShieldService, FightOrchestrator (+12 more)
+Cohesion: 0.03
+Nodes (36): FightDTO, self, BattleCreator, Collection, BattleFinder, BattleOrchestrator, BattleService, MonsterSelector (+28 more)
 
 ### Community 659 - "MagicSkillBook"
-Cohesion: 0.31
-Nodes (4): DepositsPageDTO, Collection, GetDepositsPage, BankDepositRepository
+Cohesion: 0.20
+Nodes (5): DepositsPageDTO, Collection, GetDepositsPage, BankDepositRepository, DepositTerms
 
 ### Community 668 - "SendSystemLetter"
-Cohesion: 0.29
-Nodes (4): DungeonController, RedirectResponse, Request, View
+Cohesion: 0.15
+Nodes (6): opts_from_el(), UTCDate(), UTCToday(), defineIcons(), _defineProperty(), _objectSpread()
 
 ### Community 687 - "TransactionManager"
 Cohesion: 0.22
 Nodes (8): Алое Братство, Бог Войны (Кариндор), Бог Мёртвых (Кайрелл), Богиня Жизни (Фиора), Городская стража, Искатели реликтов, Орден Охотников, Промпты для иконок медалей репутации
 
-### Community 697 - "ReputationExchange"
-Cohesion: 0.39
-Nodes (4): GetActivityCards, EventController, Request, View
+### Community 688 - "ShopInventoryRepository"
+Cohesion: 0.03
+Nodes (27): DungeonGate, BelongsTo, Collection, BelongsTo, QuestObjective, BelongsTo, HasMany, QuestStage (+19 more)
 
 ### Community 699 - "TransferUpgradeTest.php"
-Cohesion: 0.15
-Nodes (13): AttackStrategyResolver, AttackStrategyInterface, MagicHitCalculator, FightHitInterface, MagicAttackStrategy, FightHitInterface, MagicBuffStrategy, MagicCastGuard (+5 more)
-
-### Community 700 - "ShopCart"
-Cohesion: 0.22
-Nodes (9): byOldName(), getCanonicalIcon(), getIconName(), isReserved(), maskParser(), parseMeta(), styleParser(), symbolParser() (+1 more)
+Cohesion: 0.13
+Nodes (13): AttackStrategyResolver, AttackStrategyInterface, MagicHitCalculator, FightHitInterface, MagicAttackStrategy, FightHitInterface, MagicBuffStrategy, PlayerEffectNotificationDTO (+5 more)
 
 ### Community 704 - "resources"
 Cohesion: 0.42
 Nodes (8): AC_AddExtension(), AC_FL_RunContent(), AC_Generateobj(), AC_GetArgs(), AC_SW_RunContent(), ControlVersion(), DetectFlashVer(), GetSwfVer()
 
 ### Community 784 - "resources"
-Cohesion: 0.15
-Nodes (6): opts_from_el(), UTCDate(), UTCToday(), defineIcons(), _defineProperty(), _objectSpread()
-
-### Community 785 - "ApiController"
-Cohesion: 0.21
-Nodes (5): ChatMessageCreated, ChatChannel, ShouldBroadcast, ChatMessageCreatedTest, ChatChannel
+Cohesion: 0.60
+Nodes (3): defineIcons(), _defineProperty(), _objectSpread()
 
 ### Community 786 - "resources"
-Cohesion: 0.09
-Nodes (11): RedirectResponse, Request, ReputationController, DivineFavorService, BelongsTo, BelongsToMany, HasMany, Reputation (+3 more)
+Cohesion: 0.05
+Nodes (22): RedirectResponse, Request, ReputationController, Collection, ReputationPageDTO, Collection, ReputationShopPageDTO, Collection (+14 more)
 
 ### Community 798 - "email-decode.min.js"
 Cohesion: 0.61
@@ -2031,29 +1989,25 @@ Nodes (8): a(), c(), e(), i(), n(), o(), r(), t()
 Cohesion: 0.22
 Nodes (9): checkbox_set(), clientExchangeGet(), clientExchangePut(), countSymbols(), doPost(), findClosest(), getCaretPosition(), indexOf() (+1 more)
 
-### Community 802 - "onTree"
-Cohesion: 0.38
-Nodes (6): findChestWithItems(), findItem(), findUser(), getLocationItems(), getOnlineUsersOnLocation(), Collection
-
-### Community 803 - "BankController.php"
-Cohesion: 0.31
-Nodes (4): GetSaleProceeds, Collection, AuctionSaleProceeds, BelongsTo
-
 ### Community 805 - "bootstrap-datepicker.min.js"
 Cohesion: 0.36
 Nodes (4): c(), d(), h(), i()
 
+### Community 809 - "bootstrap-datepicker.js"
+Cohesion: 0.80
+Nodes (3): BlacksmithInventoryRepository, TransactionManager, RemoveRune
+
 ### Community 810 - "computeAutoPlacement"
-Cohesion: 0.15
-Nodes (7): LocationController, RedirectResponse, Request, UploadedFile, View, MapMonstersCache, MonsterObserver
+Cohesion: 0.80
+Nodes (3): BlacksmithInventoryRepository, TransactionManager, RerollRune
+
+### Community 811 - "QuestKillProgressTest"
+Cohesion: 0.60
+Nodes (3): defineIcons(), _defineProperty(), _objectSpread()
 
 ### Community 812 - "player_menu.js"
 Cohesion: 0.50
 Nodes (7): addFriend(), closeCtxMenu(), copyNick(), openUserInfo(), showCtxMenu(), showInfo(), toggleIgnore()
-
-### Community 813 - "EnsureBankAccount"
-Cohesion: 0.60
-Nodes (3): ShopBuyPageViewMapper, GetBuyPage, ShopReadRepository
 
 ### Community 814 - "ReputationExchangeStrategyResolver"
 Cohesion: 0.31
@@ -2067,16 +2021,8 @@ Nodes (4): BankLogRepository, BankUserRepository, TransactionManager, Transfer
 Cohesion: 0.29
 Nodes (7): fightRedirect(), openPremium(), openPremiumStore(), resurrect(), return_link(), tProcessMenu(), userAttack()
 
-### Community 820 - "LibraryArticleLink.php"
-Cohesion: 0.05
-Nodes (11): AdminMiddleware, Closure, Request, DatabaseTransactions, BarterShopConfigurationTest, ClanIconRenderingTest, ItemDeleteTest, MapGatheringResourceConfigurationTest (+3 more)
-
-### Community 822 - "SaveInjuryType"
-Cohesion: 0.20
-Nodes (6): EnsureBankAccount, BankUserRepository, BankAccountGenerator, BankController, JsonResponse, Request
-
 ### Community 823 - "AuctionHistory"
-Cohesion: 0.47
+Cohesion: 0.50
 Nodes (3): MonsterOnHitEffectServiceTest, ActiveEffectType, EffectDamageScalingType
 
 ### Community 826 - "http_game_load_test.php"
@@ -2099,33 +2045,21 @@ Nodes (6): be(), ge(), Oe(), Ve(), ye(), ze()
 Cohesion: 0.33
 Nodes (6): art_alt_cap(), artifact_get_color(), get_art_alt(), loadArtifactArtikulsData(), renderArtifactAlt(), set_art_alt()
 
-### Community 835 - "ChatIgnore.php"
-Cohesion: 0.24
-Nodes (3): BelongsTo, ReputationExchange, ReputationExchangeTest
-
-### Community 837 - "PlayerRecipe.php"
-Cohesion: 0.39
-Nodes (7): findResourceBackpackItem(), findStructureOrFail(), getBackpackShareItemCounts(), getSelectedSellableItems(), getSellableItems(), getShopItems(), Collection
-
 ### Community 838 - "MailboxUnreadBroadcastTest.php"
 Cohesion: 0.25
 Nodes (7): 1. Грубая отмычка (тир 1), 2. Усиленная отмычка (тир 2), 3. Стальная отмычка (тир 3), 4. Точная отмычка (тир 4), 5. Мастерская отмычка (тир 5), 6. Рунная отмычка (тир 6, высший), Промпты для иконок отмычек (профессия «Взломщик», 6 тиров)
 
-### Community 839 - "RemoveRune"
-Cohesion: 0.80
-Nodes (3): BlacksmithInventoryRepository, TransactionManager, RemoveRune
+### Community 841 - "ItemDuplicateTest"
+Cohesion: 0.33
+Nodes (4): DungeonController, RedirectResponse, Request, View
 
-### Community 842 - "AddFriend"
-Cohesion: 0.60
-Nodes (3): defineIcons(), _defineProperty(), _objectSpread()
+### Community 843 - "BattleRoundHit.php"
+Cohesion: 0.32
+Nodes (3): EloquentInterfaceReadRepository, Carbon, Collection
 
 ### Community 845 - "2782bf37c1a4cab54df7805fbfdc3cf1.php"
 Cohesion: 0.39
 Nodes (4): Deposit, BankLogRepository, BankUserRepository, TransactionManager
-
-### Community 846 - "GatheringAttempt"
-Cohesion: 0.04
-Nodes (20): BuffSkillSeeder, ClanMentorNpcSeeder, ClanQuestSeeder, ClanSkillHallSeeder, ClanSkillReagentSeeder, ClanSkillSeeder, DatabaseSeeder, GemSeeder (+12 more)
 
 ### Community 847 - "PlayerInjuryServiceTest"
 Cohesion: 0.73
@@ -2787,10 +2721,6 @@ Nodes (4): Answer, Outcome, Q: что-то реген хп не обновляе
 Cohesion: 0.40
 Nodes (4): Answer, Outcome, Q: сейчас в меню начинает пульсировать конверт если новое письмо, но если перезайти в игру или обновить страницу то непрочитанные письма есть но конверт уже не пульсирует, Source Nodes
 
-### Community 1012 - "regular.js"
-Cohesion: 0.15
-Nodes (5): RecalculatePlayerModification, RecalculatePlayerStats, PlayerChangeStat, PlayerServiceProvider, PlayerLevelUpServiceTest
-
 ### Community 1014 - "z"
 Cohesion: 0.50
 Nodes (5): F(), H(), L(), ut(), z()
@@ -2991,10 +2921,6 @@ Nodes (3): Answer, Outcome, Q: Где после рефакторинга нах
 Cohesion: 0.50
 Nodes (4): de(), me(), pe(), Te()
 
-### Community 1070 - "lt"
-Cohesion: 0.15
-Nodes (8): ChannelManager, MessageReceived, UpdatePlayerPresenceFromSocket, EloquentInterfaceReadRepository, Carbon, Collection, InterfaceServiceProvider, InterfaceReadRepository
-
 ### Community 1071 - "eo"
 Cohesion: 0.50
 Nodes (4): eo(), oo(), to(), xo()
@@ -3011,26 +2937,34 @@ Nodes (4): addClass(), gui_styled(), hasClass(), removeClass()
 Cohesion: 0.08
 Nodes (25): 10. Сундук тайной стражи (сложность 160, без ловушки), 11. Рунический сейф (сложность 180, ослабляющая ловушка), 12. Проклятый ковчег (сложность 195, усиленная ловушка), 13. Сундук древних (сложность 210, без ловушки), 14. Сокровищница магистра (сложность 230, ослабляющая ловушка), 15. Запретный ковчег (сложность 245, усиленная ловушка), 16. Рунный ковчег (сложность 260, без ловушки), 17. Сундук владыки (сложность 280, ослабляющая ловушка) (+17 more)
 
+### Community 1076 - "535040f933b72db7c52371328feb07df.php"
+Cohesion: 0.05
+Nodes (16): RedirectResponse, Request, StructureController, BreakPageDTO, RarityUpgradePageDTO, RunePageDTO, UpgradeTransferPageDTO, Collection (+8 more)
+
 ### Community 1088 - "GatheringActionResultDTO"
 Cohesion: 0.50
 Nodes (4): dt(), G(), lt(), _()
 
-### Community 1315 - "37fa63c750ac7fd05de86917bf01ed88.php"
-Cohesion: 0.60
-Nodes (3): defineIcons(), _defineProperty(), _objectSpread()
-
-### Community 1317 - "52232adc792c2fd9b5aa501a20f778ac.php"
-Cohesion: 0.15
-Nodes (4): BelongsTo, HasMany, LibraryArtifactsSeeder, LibraryInjuriesSeeder
-
 ### Community 1320 - "7012c082c43cb0108719df8d0cc66e7c.php"
-Cohesion: 0.17
-Nodes (7): BroadcastOnlineCountFromSocket, ChannelManager, MessageReceived, OnlineCountUpdated, Channel, ChannelRemoved, OnlineCountBroadcastTest
+Cohesion: 0.08
+Nodes (14): ChatMessageCreated, ChatChannel, BroadcastOnlineCountFromSocket, ChannelManager, MessageReceived, OnlineCountUpdated, InterfaceServiceProvider, Channel (+6 more)
+
+### Community 1618 - "InjuryTypeManagementTest"
+Cohesion: 0.53
+Nodes (3): ChannelManager, MessageReceived, UpdatePlayerPresenceFromSocket
+
+### Community 1624 - "BossDefeatLog.php"
+Cohesion: 0.05
+Nodes (9): MonsterCombatantFactory, BossDefeatLog, BelongsTo, MonsterActiveEffect, BelongsTo, MonsterOnLocation, BelongsTo, QueryException (+1 more)
+
+### Community 1626 - "Ut"
+Cohesion: 0.67
+Nodes (3): gt(), mt(), vt()
 
 ## Knowledge Gaps
-- **1043 isolated node(s):** `backpack::partials.injury_slot`, `battle::partials.fight_styles`, `battle::partials.action_panel`, `battle::partials.side_panel`, `battle::partials.fight_styles` (+1038 more)
+- **1046 isolated node(s):** `backpack::partials.injury_slot`, `battle::partials.fight_styles`, `battle::partials.action_panel`, `battle::partials.side_panel`, `battle::partials.fight_styles` (+1041 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **217 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **226 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Work-memory lessons
 
@@ -3049,12 +2983,12 @@ Nodes (7): BroadcastOnlineCountFromSocket, ChannelManager, MessageReceived, Onli
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Map` connect `app/Http` to `Modules/Structure`, `Modules/Structure`, `Modules/Structure`, `app/Http`, `Modules/Clan`, `Modules/Battle`, `Modules/Player`, `Modules/Structure`, `Modules/Location`, `Modules/Battle`, `Modules/Player`, `lt`, `Modules/Party`, `Modules/Dungeon`, `Modules/Structure`, `Modules/Structure`, `Modules/Structure`, `Modules/Clan`, `Modules/Structure`, `Modules/Item`, `Modules/Item`, `Modules/Structure`?**
-  _High betweenness centrality (0.201) - this node is a cross-community bridge._
-- **Why does `User` connect `Modules/Structure` to `app/Http`, `Modules/Friend`, `app/Http`, `database`, `Modules/Interface`, `app/Http`, `Modules/Structure`, `Modules/Battle`, `Modules/Clan`, `Modules/Item`, `Modules/Structure`, `Modules/Npc`, `Modules/Structure`, `Modules/Clan`, `Modules/Location`, `Modules/Player`, `Modules/Reputation`, `Modules/Chat`, `Modules/Location`, `Modules/Clan`, `Modules/Location`, `lt`, `Modules/Player`, `Modules/Structure`, `app/Console`, `app/Http`, `Modules/Battle`, `Modules/Structure`, `Modules/Chat`, `Modules/Dungeon`, `Modules/Dungeon`, `Modules/Rating`, `Modules/Event`, `app/Http`, `app/Http`, `Modules/Share`, `Modules/User`, `Modules/Effect`, `Modules/Structure`, `searchPseudoElements`, `Modules/Battle`, `Response`, `Modules/Clan`, `app/Http`, `Modules/MagicSkill`, `Modules/Friend`, `Modules/Post`, `Modules/Chat`, `Modules/Battle`, `Modules/MagicSkill`, `Modules/Party`, `Modules/Structure`, `DungeonSessionRepository`, `Modules/Referral`, `Modules/Structure`, `app/Http`, `Modules/Clan`, `Modules/Item`, `Modules/Npc`, `Modules/Player`, `Modules/Interface`, `Modules/Referral`, `Modules/Location`, `app/Http`, `Modules/Structure`, `GetMapsPage.php`, `app/Console`, `MagicSkillBook`, `Modules/Party`, `Modules/Event`, `Modules/Location`, `Modules/MagicSkill`, `Modules/Reputation`, `Modules/Npc`, `Modules/Npc`, `TransferUpgradeTest.php`, `Modules/Structure`, `Modules/Location`, `Modules/Referral`, `Modules/Referral`, `Modules/Structure`, `Modules/Clan`, `Modules/Monster`, `Modules/Interface`, `Modules/MagicSkill`, `database`, `Modules/Clan`, `resources`, `ClanIndexPageDTO`, `AcceptFriend`, `DeclineFriend`, `2026_08_26_141000_migrate_pending_party_invitation_chat_links_to_uuid.php`, `Modules/Monster`, `00e5b1ce181a20d34d262ca7985f92e3.php`, `Modules/Structure`, `onTree`, `ClanFramePageDTO`, `EnsureBankAccount`, `ReputationExchangeStrategyResolver`, `getOffsetParent`, `Modules/Structure`, `md5`, `SaveInjuryType`, `GemController.php`, `Modules/Effect`, `HealthController.php`, `Modules/Npc`, `ReferralRewardStage.php`, `2782bf37c1a4cab54df7805fbfdc3cf1.php`, `RunePageViewMapper`, `PlayerInjuryServiceTest`, `GatheringAttempt`, `Modules/Structure`?**
-  _High betweenness centrality (0.123) - this node is a cross-community bridge._
-- **Why does `MapMonstersCache` connect `computeAutoPlacement` to `Modules/Clan`, `resources`, `app/Http`?**
-  _High betweenness centrality (0.089) - this node is a cross-community bridge._
+- **Why does `Map` connect `app/Http` to `Modules/Structure`, `Modules/Structure`, `Modules/Structure`, `Modules/Quest`, `Modules/Clan`, `Modules/Battle`, `Modules/Player`, `Modules/Battle`, `Modules/Player`, `Modules/Location`, `Modules/Structure`, `ShopInventoryRepository`, `Modules/Referral`, `Modules/Structure`, `BattleRoundHit.php`, `Modules/Structure`, `Modules/Structure`, `BossDefeatLog.php`, `Modules/Clan`, `Modules/Structure`, `Modules/Structure`, `Modules/Item`, `Modules/Structure`?**
+  _High betweenness centrality (0.191) - this node is a cross-community bridge._
+- **Why does `MapMonstersCache` connect `Modules/Clan` to `Modules/Chat`, `SendSystemLetter`, `Modules/Reputation`, `app/Http`?**
+  _High betweenness centrality (0.118) - this node is a cross-community bridge._
+- **Why does `User` connect `Modules/Structure` to `Modules/Quest`, `Modules/Friend`, `app/Http`, `Modules/Battle`, `database`, `Modules/Interface`, `app/Http`, `Modules/Clan`, `Modules/Item`, `Modules/Structure`, `Modules/Npc`, `Modules/Structure`, `Modules/Clan`, `Modules/Player`, `Modules/Structure`, `Modules/Location`, `Modules/Player`, `Modules/Chat`, `Modules/Location`, `Modules/Item`, `Modules/Reputation`, `Modules/Clan`, `Modules/Location`, `Modules/Player`, `Modules/Referral`, `Modules/Structure`, `app/Console`, `535040f933b72db7c52371328feb07df.php`, `Modules/Backpack`, `Modules/Battle`, `Modules/Structure`, `Modules/Chat`, `Modules/Dungeon`, `Modules/Rating`, `Modules/Event`, `Modules/Share`, `Modules/Effect`, `Modules/Structure`, `RatingPageViewMapper.php`, `searchPseudoElements`, `Modules/Battle`, `Modules/Chat`, `Modules/Structure`, `Modules/Clan`, `app/Http`, `app/Http`, `AcceptFriend`, `RemoveEnemy`, `Modules/Friend`, `BossDefeatLog.php`, `Modules/Dungeon`, `Modules/Battle`, `Modules/Post`, `Modules/Chat`, `Modules/Battle`, `database`, `Modules/MagicSkill`, `Modules/Structure`, `DungeonSessionRepository`, `Modules/Party`, `Modules/Referral`, `Modules/Structure`, `app/Http`, `Modules/Item`, `Modules/Npc`, `Modules/Player`, `Modules/Interface`, `Modules/Referral`, `Modules/Location`, `Modules/Structure`, `BelongsToMany`, `app/Http`, `app/Http`, `Modules/Structure`, `GetMapsPage.php`, `app/Console`, `Modules/Clan`, `MagicSkillBook`, `Modules/Party`, `Modules/Structure`, `Modules/Event`, `Modules/MagicSkill`, `Modules/Reputation`, `ShopInventoryRepository`, `app/Http`, `Modules/Npc`, `Modules/Battle`, `TransferUpgradeTest.php`, `Modules/Referral`, `Modules/Structure`, `Modules/Interface`, `Modules/Referral`, `Modules/Structure`, `Modules/Structure`, `Modules/Clan`, `Modules/Dungeon`, `Modules/Monster`, `Modules/Quest`, `Modules/Interface`, `Modules/Player`, `Modules/Structure`, `Modules/Clan`, `resources`, `DeclineFriend`, `Modules/Monster`, `00e5b1ce181a20d34d262ca7985f92e3.php`, `Modules/Structure`, `MagicHitCalculatorTest`, `Modules/Monster`, `ReputationExchangeStrategyResolver`, `getOffsetParent`, `md5`, `HealthController.php`, `Modules/Location`, `BattleRoundHit.php`, `2782bf37c1a4cab54df7805fbfdc3cf1.php`, `PlayerInjuryServiceTest`, `Modules/Structure`?**
+  _High betweenness centrality (0.114) - this node is a cross-community bridge._
 - **Are the 42 inferred relationships involving `User` (e.g. with `.index()` and `.register()`) actually correct?**
   _`User` has 42 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 37 inferred relationships involving `Player` (e.g. with `.handle()` and `.resyncPlayers()`) actually correct?**
@@ -3062,4 +2996,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 51 inferred relationships involving `ShareItem` (e.g. with `.createBoxItems()` and `.createRecipeItems()`) actually correct?**
   _`ShareItem` has 51 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `backpack::partials.injury_slot`, `battle::partials.fight_styles`, `battle::partials.action_panel` to the rest of the system?**
-  _1076 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1079 weakly-connected nodes found - possible documentation gaps or missing edges._

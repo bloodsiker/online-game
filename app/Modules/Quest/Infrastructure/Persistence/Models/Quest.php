@@ -54,6 +54,11 @@ class Quest extends Model
         return $this->belongsTo(self::class, 'after_quest_id');
     }
 
+    public function nextQuests(): HasMany
+    {
+        return $this->hasMany(self::class, 'after_quest_id');
+    }
+
     public function stages(): HasMany
     {
         return $this->hasMany(QuestStage::class, 'quest_id')->orderBy('order');

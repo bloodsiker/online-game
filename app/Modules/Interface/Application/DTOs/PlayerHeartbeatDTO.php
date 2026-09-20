@@ -28,15 +28,10 @@ final readonly class PlayerHeartbeatDTO
             'mp' => $this->mp,
             'dead' => $this->dead,
             'death_message' => $this->deathMessage,
-            'effects' => array_map(static fn (HeroEffectDTO $effect): array => [
-                'id' => $effect->id,
-                'name' => $effect->name,
-                'duration' => $effect->duration,
-                'total_duration' => $effect->totalDuration,
-                'is_curse' => $effect->isCurse,
-                'image' => $effect->image,
-                'description' => $effect->description,
-            ], $this->effects),
+            'effects' => array_map(
+                static fn (HeroEffectDTO $effect): array => $effect->toArray(),
+                $this->effects,
+            ),
         ];
     }
 }

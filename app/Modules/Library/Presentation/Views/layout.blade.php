@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') — Библиотека</title>
+    <title>@yield('title') — @yield('site-section', 'Библиотека')</title>
     <script src="{{ asset('main/js/common.js') }}"></script>
     <script src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('main/css/main_register.css') }}">
@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="{{ asset('css/library_game_frame.css') }}?v={{ filemtime(public_path('css/library_game_frame.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/library_injury_catalog.css') }}?v={{ filemtime(public_path('css/library_injury_catalog.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/library_artifact_catalog.css') }}?v={{ filemtime(public_path('css/library_artifact_catalog.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/library_clan_skill_catalog.css') }}?v={{ filemtime(public_path('css/library_clan_skill_catalog.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/library_equipment.css') }}?v={{ filemtime(public_path('css/library_equipment.css')) }}">
+    @stack('styles')
     <style>
         html, body { min-height: 100%; }
         body {
@@ -23,6 +26,26 @@
             background-image: url('{{ asset('main/images/theme_old/bg.gif') }}');
         }
         .library-main { top: 100px; padding-bottom: 100px; }
+        .library-header-menu-link {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            box-sizing: border-box;
+            width: 100%;
+            height: 45px;
+            margin: 0;
+            padding: 0 4px;
+            color: #d49b2c;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            text-align: center;
+            text-decoration: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .library-header-menu-link:hover { color: #f0bc47; text-decoration: none; }
+        .b-nav-lvl-1__menu-list { padding-left: 0; }
         .library-columns { position: relative; top: -40px; display: flex; min-height: calc(100vh - 60px); align-items: stretch; }
         .library-column-left { display: flex; float: none; width: 290px; align-self: flex-start; }
         .library-column-right { display: flex; float: none; width: 730px; margin-left: 0; }
@@ -235,7 +258,7 @@
         .library-home-tile { position: relative; display: block; height: 150px; overflow: hidden; border: 1px solid #9f6039; background: #2f1c12 url('{{ asset('main/images/frames/main-bg.jpg') }}'); box-shadow: inset 0 0 0 3px rgba(228,171,101,.28); }
         .library-home-tile img { width: 100%; height: 100%; object-fit: cover; opacity: .84; transition: .2s; }
         .library-home-tile:hover img { opacity: 1; transform: scale(1.025); }
-        .library-home-tile span { position: absolute; right: 0; bottom: 0; left: 0; padding: 8px; color: #f7d79a; font-weight: bold; font-size: 14px; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 2px #000; background: linear-gradient(transparent, rgba(30,10,4,.92)); }
+        .library-home-tile span { position: absolute; right: 0; bottom: 2px; left: 0; padding: 8px; color: #f7d79a; font-weight: bold; font-size: 14px; text-align: center; text-transform: uppercase; text-shadow: 1px 1px 2px #000; background: linear-gradient(transparent, rgba(30,10,4,.92)); }
         .library-home-tile--empty { display: flex; align-items: center; justify-content: center; }
         .library-home-tile--empty span { position: static; background: none; }
         .library-article-content { font-size: 12px; line-height: 1.55; overflow-wrap: anywhere; }
@@ -320,7 +343,7 @@
         }
     </style>
 </head>
-<body>
+<body class="@yield('body-class')">
 <div id="artifact_alt" style="left:0;top:0;width:300px;display:none;position:fixed;z-index:10000001;pointer-events:none"></div>
 <script>var art_alt = [];</script>
 @yield('tooltip-script')
@@ -362,16 +385,19 @@
                 <div class="b-nav-lvl-1__menu">
                     <ul class="b-nav-lvl-1__menu-list">
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
-                            <a class="b-aside__impo-link" href="{{ route('index') }}" style="font-size:14px;font-weight:bold;position:relative;color:#d49b2c;left:23px;top:8px"><span>Главная</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('index') }}"><span>Главная</span></a>
                         </li>
-                        <li class="b-nav-lvl-1__menu-item is-active" style="list-style-type:none">
-                            <a class="b-aside__impo-link" href="{{ route('library.index') }}" style="font-size:14px;font-weight:bold;position:relative;color:#d49b2c;left:23px;top:8px"><span>Библиотека</span></a>
+                        <li class="b-nav-lvl-1__menu-item {{ request()->routeIs('library.*') ? 'is-active' : '' }}" style="list-style-type:none">
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('library.index') }}"><span>Библиотека</span></a>
+                        </li>
+                        <li class="b-nav-lvl-1__menu-item {{ request()->routeIs('forum.*') ? 'is-active' : '' }}" style="list-style-type:none">
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('forum.index') }}"><span>Форум</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
-                            <a class="b-aside__impo-link" href="#" style="font-size:14px;font-weight:bold;position:relative;color:#d49b2c;left:31px;top:8px"><span>Телеграм</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="#"><span>Телеграм</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
-                            <a class="b-aside__impo-link" href="#" style="font-size:14px;font-weight:bold;position:relative;color:#d49b2c;left:24px;top:8px"><span>Контакты</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="#"><span>Контакты</span></a>
                         </li>
                     </ul>
                 </div>
@@ -387,11 +413,17 @@
                         <div class="b-common-block__bgl library-forum-nav-shell">
                             <div class="b-common-block__cont library-forum-nav-panel">
                                 <div class="b-common-block__bgr clearfix">
-                                    @forelse($categories as $category)
-                                        @include('library::partials.sidebar-category', ['item' => $category, 'depth' => 0])
-                                    @empty
-                                        <div class="library-empty">Разделы пока не добавлены.</div>
-                                    @endforelse
+                                    <div class="b-common-block__bgl forum-nav-group"></div>
+                                    @hasSection('sidebar')
+                                        @yield('sidebar')
+                                    @else
+                                        @forelse($categories ?? [] as $category)
+                                            @include('library::partials.sidebar-category', ['item' => $category, 'depth' => 0])
+                                        @empty
+                                            <div class="library-empty">Разделы пока не добавлены.</div>
+                                        @endforelse
+                                    @endif
+                                    <div class="b-common-block__bgl forum-nav-group"></div>
                                 </div>
                             </div>
                         </div>

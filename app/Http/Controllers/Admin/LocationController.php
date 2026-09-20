@@ -6,11 +6,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -105,16 +108,22 @@ class LocationController extends Controller
         $data = $request->validate([
             'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
             'count' => ['required', 'integer', 'min:1', 'max:10000'],
+            'interaction_type' => ['nullable', 'in:pickup,open_here'],
         ]);
 
         DB::transaction(function () use ($data, $location): void {
-            $item = Item::query()->create(['share_item_id' => $data['share_item_id']]);
+            $shareItem = ShareItem::query()->findOrFail($data['share_item_id']);
+            $item = Item::query()->create(['share_item_id' => $shareItem->id]);
 
             $slot = new ItemOnLocation;
             $slot->item_id = $item->id;
             $slot->location_id = $location->id;
             $slot->dungeon_session_id = null;
             $slot->count = $data['count'];
+            $slot->interaction_type = $shareItem->type === ShareItemType::CHEST
+                ? LocationItemInteractionType::tryFrom($data['interaction_type'] ?? '')
+                    ?? LocationItemInteractionType::OPEN_HERE
+                : LocationItemInteractionType::PICKUP;
             $slot->expires_at = null;
             $slot->save();
         });

@@ -20,7 +20,7 @@ class EloquentItemReadRepository implements ItemReadRepository
 
     public function findChestWithItems(int $id): ?Item
     {
-        return Item::with('itemsInChest')->find($id);
+        return Item::with('itemsInChest.itemInfo.instantReward')->find($id);
     }
 
     public function getLocationItems(User $user): Collection

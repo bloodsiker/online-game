@@ -6,6 +6,7 @@ namespace App\Modules\Backpack\Domain\Services\ItemTooltip;
 
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemTooltipStrategyInterface;
@@ -39,7 +40,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),
-                price: sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), $itemInfo->price),
+                price: ItemTooltipPriceFormatter::money((int) $itemInfo->price),
                 diamond: '',
                 lev: ['title' => ' Уровень ', 'value' => '1'],
                 skills: [],

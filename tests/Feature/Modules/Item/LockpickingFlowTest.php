@@ -328,6 +328,7 @@ class LockpickingFlowTest extends TestCase
             $table->unsignedSmallInteger('lock_required_skill');
             $table->unsignedSmallInteger('lock_duration_seconds');
             $table->unsignedSmallInteger('experience_reward')->nullable();
+            $table->unsignedTinyInteger('minimum_success_chance_percent')->default(5);
             $table->unsignedTinyInteger('trap_chance_penalty_percent')->default(0);
             $table->unsignedBigInteger('trap_effect_id')->nullable();
             $table->unsignedSmallInteger('trap_effect_duration_seconds')->default(60);

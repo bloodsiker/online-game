@@ -17,11 +17,12 @@ class QuestObjective extends Model
     protected $casts = [
         'drop_chance' => 'float',
         'target_ids' => 'array',
+        'consume_item' => 'boolean',
     ];
 
     protected $fillable = [
         'quest_id', 'stage_id', 'type', 'target_type', 'target_id', 'target_ids',
-        'share_item_id', 'map_id', 'required_amount', 'drop_chance', 'description',
+        'share_item_id', 'consume_item', 'map_id', 'required_amount', 'drop_chance', 'description',
     ];
 
     /**
@@ -61,5 +62,12 @@ class QuestObjective extends Model
     public function collectItem(): BelongsTo
     {
         return $this->belongsTo(ShareItem::class, 'share_item_id');
+    }
+
+    public function requiredShareItemId(): ?int
+    {
+        $id = $this->type === 'deliver' ? $this->target_id : $this->share_item_id;
+
+        return $id ? (int) $id : null;
     }
 }

@@ -26,7 +26,13 @@
         @foreach($page->items as $item)
             <tr class="l0">
                 <td class="itm"><img src="{{ $item->image }}" class="itm">{{ $item->name }}</td>
-                <td width="30" align="center">x{{ $item->count }}</td>
+                <td width="70" align="center">
+                    @if($item->rewardType === 'money')
+                        {{ format_money($item->count) }} монет
+                    @else
+                        x{{ $item->count }}
+                    @endif
+                </td>
                 <td>
                     <form method="post" action="{{ $item->pickupUrl }}" style="display:inline">
                         @csrf
@@ -42,6 +48,11 @@
 <p><a href="{{ $page->backpackUrl }}">Список ваших вещей</a> »</p>
 <p>« <a href="{{ $page->locationUrl }}" target="game">Описание местности</a></p>
 <script>
+    try {
+        window.top.sendToFrame('character-frame', { money: @json($page->money) }, window.location.origin);
+    } catch (error) {
+        console.error('Не удалось обновить баланс в character-frame:', error);
+    }
 </script>
 </body>
 </html>

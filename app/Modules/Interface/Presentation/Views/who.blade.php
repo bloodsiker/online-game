@@ -85,6 +85,12 @@
         .info-icon-link {
             margin-left: 3px;
         }
+        .chat-mute-icon {
+            width: 10px;
+            height: 10px;
+            margin-left: 3px;
+            vertical-align: middle;
+        }
         .prv-btn {
             cursor: pointer;
             vertical-align: middle;
@@ -122,6 +128,9 @@
                            data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                            title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                         <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                        @if($user->chatMuteTitle)
+                            <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="Молчание" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                        @endif
                     </span>
                 </div>
             @endforeach
@@ -148,6 +157,9 @@
                        class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
                        title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
                     <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                    @if($user->chatMuteTitle)
+                        <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="Молчание" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                    @endif
                     </div>
                 @endforeach
             </div>
@@ -181,6 +193,9 @@
     var prvArrowSrc = '{{ asset('img/icon/users-arrow.gif') }}';
     var infoUrlBase = '{{ url('/info/user') }}/';
     var playerInfoIconSrc = '{{ asset('main/images/player_info.gif') }}';
+    var chatMuteIconSrc = '{{ asset('main/images/gag.gif') }}';
+    var lastLocationUsers = [];
+    var lastOnlineUsers = [];
 
     // Иконка информации о персонаже возле ника — открывает карточку игрока в отдельном окне
     function whoOpenUserInfo(userId) {
@@ -200,6 +215,27 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    function chatMuteIcon(user) {
+        var expiresAt = Date.parse(user.chat_mute_expires_at || '');
+        var remainingMs = expiresAt - Date.now();
+
+        if (!Number.isFinite(expiresAt) || remainingMs <= 0) return '';
+
+        var minutes = Math.max(1, Math.ceil(remainingMs / 60000));
+        var days = Math.floor(minutes / 1440);
+        var hours = Math.floor((minutes % 1440) / 60);
+        var restMinutes = minutes % 60;
+        var parts = [];
+
+        if (days > 0) parts.push(days + ' д.');
+        if (hours > 0) parts.push(hours + ' ч.');
+        if (restMinutes > 0 && days === 0) parts.push(restMinutes + ' мин.');
+
+        var title = 'Проклятие молчания. Осталось: ' + parts.slice(0, 2).join(' ');
+
+        return '<img class="chat-mute-icon" src="' + chatMuteIconSrc + '" title="' + escapeHtml(title) + '" alt="Молчание" data-mute-expires-at="' + escapeHtml(user.chat_mute_expires_at) + '">';
     }
 
     function buildUsersHtml(users) {
@@ -230,6 +266,7 @@
                 +     clan
                 +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="Информация о персонаже"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
                 +     '<a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
+                +     chatMuteIcon(u)
                 +   '</span>'
                 + '</div>';
         });
@@ -242,6 +279,7 @@
         var countEl   = document.getElementById('location-count');
         if (!container) return;
 
+        lastLocationUsers = users;
         var online = users.filter(function (u) { return u.is_online; });
         if (countEl) countEl.textContent = online.length;
 
@@ -252,6 +290,7 @@
         var container = document.getElementById('online-users');
         var globalCount = document.getElementById('global-online-count');
         var bottomCount = document.getElementById('chat_user_count');
+        lastOnlineUsers = users;
         if (container) container.innerHTML = buildUsersHtml(users);
         if (globalCount) globalCount.textContent = count;
         if (bottomCount) bottomCount.textContent = count;
@@ -269,6 +308,18 @@
     });
 
     window.top.postMessage({ type: 'requestOnlinePresence' }, window.location.origin);
+
+    setInterval(function () {
+        var locationContainer = document.getElementById('location-users');
+        var onlineContainer = document.getElementById('online-users');
+
+        if (locationContainer && lastLocationUsers.length) {
+            locationContainer.innerHTML = buildUsersHtml(lastLocationUsers);
+        }
+        if (onlineContainer && lastOnlineUsers.length) {
+            onlineContainer.innerHTML = buildUsersHtml(lastOnlineUsers);
+        }
+    }, 30000);
 
     // ── Контекстное меню персонажа (как на проде: ПКМ по нику) ──────────────
     initPlayerMenu({

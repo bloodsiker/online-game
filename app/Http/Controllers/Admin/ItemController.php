@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Item\Domain\Enums\InstantRewardType;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemInstantReward;
 use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockConfig;
 use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockpickConfig;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -101,6 +103,7 @@ class ItemController extends Controller
         $item->save();
         $this->syncLockConfig($item, $request);
         $this->syncLockpickConfig($item, $request);
+        $this->syncInstantReward($item, $request);
 
         if ($item->type === ShareItemType::RECIPE) {
             ShareRecipe::firstOrCreate(['share_item_id' => $item->id], [
@@ -127,6 +130,7 @@ class ItemController extends Controller
             $item->save();
             $this->syncLockConfig($item, $request);
             $this->syncLockpickConfig($item, $request);
+            $this->syncInstantReward($item, $request);
 
             $bookError = $this->syncMagicSkillBook($item, $request);
             if ($bookError !== null) {
@@ -146,6 +150,7 @@ class ItemController extends Controller
             'useLimit',
             'lockConfig',
             'lockpickConfig',
+            'instantReward',
             'debuffs.effect',
             'requirements.skill',
             'magicSkillBook',
@@ -227,6 +232,7 @@ class ItemController extends Controller
             'recipe.items',
             'itemHasItems',
             'magicSkillBook',
+            'instantReward',
         ]);
 
         $copy = DB::transaction(function () use ($item): ShareItem {
@@ -252,6 +258,10 @@ class ItemController extends Controller
 
             if ($item->lockConfig !== null) {
                 $copy->lockConfig()->save($item->lockConfig->replicate());
+            }
+
+            if ($item->instantReward !== null) {
+                $copy->instantReward()->save($item->instantReward->replicate());
             }
 
             foreach ($item->debuffs as $debuff) {
@@ -582,6 +592,7 @@ class ItemController extends Controller
             'lock_required_skill' => ['nullable', 'integer', 'between:0,300'],
             'lock_duration_seconds' => ['nullable', 'integer', 'between:2,3600'],
             'lockpicking_experience_reward' => ['nullable', 'integer', 'between:1,65535'],
+            'minimum_success_chance_percent' => ['nullable', 'integer', 'between:0,95'],
             'trap_chance_penalty_percent' => ['nullable', 'integer', 'between:0,95'],
             'trap_effect_id' => ['nullable', 'integer', 'exists:effects,id'],
             'trap_effect_duration_seconds' => ['nullable', 'integer', 'between:1,86400'],
@@ -590,6 +601,7 @@ class ItemController extends Controller
             'lockpick_speed_bonus_percent' => ['nullable', 'integer', 'between:0,90'],
             'lockpick_failure_preserve_chance_percent' => ['nullable', 'integer', 'between:0,100'],
             'lockpick_trap_avoid_chance_percent' => ['nullable', 'integer', 'between:0,100'],
+            'instant_reward_type' => ['nullable', 'string', 'in:'.implode(',', array_column(InstantRewardType::cases(), 'value'))],
         ]);
 
         $type = ShareItemType::from($request->input('type'));
@@ -649,6 +661,18 @@ class ItemController extends Controller
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->is_use = (bool) $request->input('is_use', false);
         $item->is_lockpick = (bool) $request->input('is_lockpick', false);
+        if ($request->filled('instant_reward_type')) {
+            // Мгновенная награда существует только как шаблон для добычи.
+            $item->is_sell = false;
+            $item->is_auction_sellable = false;
+            $item->is_give = false;
+            $item->is_clan_warehouse_allowed = false;
+            $item->is_droppable = false;
+            $item->is_stackable = false;
+            $item->is_slot_usable = false;
+            $item->is_use = false;
+            $item->is_weight = false;
+        }
         $item->skill_id = $request->filled('skill_id') ? (int) $request->input('skill_id') : null;
         $item->skill_lvl = $request->filled('skill_lvl') ? (int) $request->input('skill_lvl') : null;
         $item->skill_exp = $request->filled('skill_exp') ? (int) $request->input('skill_exp') : null;
@@ -719,11 +743,26 @@ class ItemController extends Controller
                 'experience_reward' => $request->filled('lockpicking_experience_reward')
                     ? (int) $request->input('lockpicking_experience_reward')
                     : null,
+                'minimum_success_chance_percent' => (int) $request->input('minimum_success_chance_percent', 5),
                 'trap_chance_penalty_percent' => (int) $request->input('trap_chance_penalty_percent', 0),
                 'trap_effect_id' => $request->filled('trap_effect_id') ? $request->integer('trap_effect_id') : null,
                 'trap_effect_duration_seconds' => (int) $request->input('trap_effect_duration_seconds', 60),
                 'trap_damage_percent' => (int) $request->input('trap_damage_percent', 0),
             ],
+        );
+    }
+
+    private function syncInstantReward(ShareItem $item, Request $request): void
+    {
+        if (! $request->filled('instant_reward_type')) {
+            $item->instantReward()->delete();
+
+            return;
+        }
+
+        ShareItemInstantReward::query()->updateOrCreate(
+            ['share_item_id' => $item->id],
+            ['reward_type' => InstantRewardType::from($request->string('instant_reward_type')->toString())],
         );
     }
 

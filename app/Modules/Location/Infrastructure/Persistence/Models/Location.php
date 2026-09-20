@@ -67,7 +67,7 @@ class Location extends Model
     {
         return $this->belongsToMany(Item::class, 'item_on_locations', 'location_id', 'item_id')
             ->with('itemInfo')
-            ->withPivot(['count', 'dungeon_session_id', 'expires_at']);
+            ->withPivot(['count', 'interaction_type', 'dungeon_session_id', 'expires_at']);
     }
 
     public function map(): BelongsTo

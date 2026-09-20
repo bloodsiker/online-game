@@ -6,9 +6,15 @@ namespace Tests\Feature\Modules\Item;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
+use App\Modules\Item\Application\Mappers\PickupItemsPageViewMapper;
+use App\Modules\Item\Domain\Services\InstantItemRewardService;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Domain\Services\ItemRequirementService;
 use App\Modules\Item\Domain\Services\ItemService;
+use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
+use App\Modules\Location\Application\Mappers\TakeItemsPageViewMapper;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
@@ -78,6 +84,147 @@ class ChestSecurityTest extends TestCase
         $this->assertNull($this->service()->openChest($this->user(1), 100));
     }
 
+    public function test_instant_money_reward_is_credited_without_entering_backpack(): void
+    {
+        $this->seedChest(100, 10, true, true);
+        DB::table('users')->insert(['id' => 1, 'money' => 100]);
+        DB::table('share_items')->insert([
+            'id' => 20,
+            'name' => 'Горстка монет',
+            'type' => 'misc',
+            'image' => '/img/bank_stock/new_coins.gif',
+            'is_stackable' => false,
+        ]);
+        DB::table('share_item_instant_rewards')->insert([
+            'share_item_id' => 20,
+            'reward_type' => 'money',
+        ]);
+        DB::table('items')->insert(['id' => 200, 'share_item_id' => 20, 'is_open' => false]);
+        DB::table('item_in_chest')->insert(['chest_id' => 100, 'item_id' => 200, 'count' => 275]);
+
+        $message = $this->service()->pickUpFromChest(User::query()->findOrFail(1), 100, 200);
+
+        $this->assertSame('Вы получили <b>275</b> монет.', $message);
+        $this->assertSame(375, (int) DB::table('users')->where('id', 1)->value('money'));
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 200]);
+        $this->assertDatabaseMissing('items', ['id' => 200]);
+        $this->assertDatabaseMissing('item_in_chest', ['chest_id' => 100, 'item_id' => 200]);
+    }
+
+    public function test_claiming_all_after_lockpicking_returns_money_loot_and_credits_balance(): void
+    {
+        $this->seedChest(100, 10, true, true);
+        DB::table('users')->insert(['id' => 1, 'money' => 0]);
+        DB::table('share_items')->insert([
+            'id' => 20,
+            'name' => 'Горстка монет',
+            'type' => 'misc',
+            'image' => '/img/bank_stock/new_coins.gif',
+            'is_stackable' => false,
+        ]);
+        DB::table('share_item_instant_rewards')->insert([
+            'share_item_id' => 20,
+            'reward_type' => 'money',
+        ]);
+        DB::table('items')->insert(['id' => 200, 'share_item_id' => 20, 'is_open' => false]);
+        DB::table('item_in_chest')->insert(['chest_id' => 100, 'item_id' => 200, 'count' => 1_250]);
+
+        $loot = $this->service()->claimAllChestContents(
+            User::query()->findOrFail(1),
+            Item::query()->findOrFail(100),
+        );
+
+        $this->assertSame('money', $loot[0]['reward_type']);
+        $this->assertSame(1_250, $loot[0]['count']);
+        $this->assertSame(1_250, (int) DB::table('users')->where('id', 1)->value('money'));
+        $this->assertDatabaseMissing('items', ['id' => 200]);
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 200]);
+    }
+
+    public function test_monster_drop_chest_must_be_picked_up_before_it_can_be_opened(): void
+    {
+        DB::table('share_items')->insert([
+            'id' => 10,
+            'name' => 'Трофейная шкатулка',
+            'type' => 'chest',
+            'is_stackable' => false,
+        ]);
+        DB::table('items')->insert(['id' => 100, 'share_item_id' => 10, 'is_open' => false]);
+        DB::table('item_on_locations')->insert([
+            'item_id' => 100,
+            'location_id' => 6,
+            'interaction_type' => 'pickup',
+        ]);
+        $user = $this->userOnLocation(1, 6);
+
+        $this->assertNull($this->service()->openChest($user, 100));
+
+        $message = $this->service()->pickUpFromLocation($user, 100);
+
+        $this->assertSame('Вы подняли предмет <b>"Трофейная шкатулка"</b>...', $message);
+        $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 100]);
+        $this->assertDatabaseMissing('item_on_locations', ['item_id' => 100]);
+    }
+
+    public function test_location_chest_can_be_opened_but_cannot_be_picked_up(): void
+    {
+        DB::table('share_items')->insert([
+            'id' => 10,
+            'name' => 'Сундук на локации',
+            'type' => 'chest',
+            'is_stackable' => false,
+        ]);
+        DB::table('items')->insert(['id' => 100, 'share_item_id' => 10, 'is_open' => false]);
+        DB::table('item_on_locations')->insert([
+            'item_id' => 100,
+            'location_id' => 6,
+            'interaction_type' => 'open_here',
+        ]);
+        $user = $this->userOnLocation(1, 6);
+
+        $message = $this->service()->pickUpFromLocation($user, 100);
+
+        $this->assertSame('Этот сундук нужно открыть прямо на локации.', $message);
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 100]);
+        $this->assertDatabaseHas('item_on_locations', ['item_id' => 100]);
+        $this->assertSame(100, $this->service()->openChest($user, 100));
+        $this->assertTrue((bool) Item::query()->findOrFail(100)->is_open);
+    }
+
+    public function test_location_list_shows_pickup_only_for_portable_chest(): void
+    {
+        DB::table('share_items')->insert([
+            'id' => 10,
+            'name' => 'Трофейная шкатулка',
+            'type' => 'chest',
+            'is_stackable' => false,
+        ]);
+        DB::table('items')->insert(['id' => 100, 'share_item_id' => 10, 'is_open' => false]);
+        DB::table('item_on_locations')->insert([
+            'item_id' => 100,
+            'location_id' => 6,
+            'interaction_type' => 'pickup',
+        ]);
+
+        $page = app(PickupItemsPageViewMapper::class)->map(
+            ItemOnLocation::query()->with(['item', 'item.itemInfo.lockConfig'])->get(),
+            '',
+            0,
+        );
+
+        $this->assertSame('Поднять', $page->items[0]->actionLabel);
+        $this->assertSame(route('items.pick_up', ['id' => 100]), $page->items[0]->actionUrl);
+        $this->assertNull($page->items[0]->lockpickingUrl);
+
+        $takeItemsPage = app(TakeItemsPageViewMapper::class)->map(
+            ItemOnLocation::query()->with(['item', 'item.itemInfo.lockConfig'])->get(),
+        );
+
+        $this->assertSame('Поднять', $takeItemsPage->items[0]->actionLabel);
+        $this->assertSame(route('items.pick_up', ['id' => 100]), $takeItemsPage->items[0]->actionUrl);
+        $this->assertNull($takeItemsPage->items[0]->lockpickingUrl);
+    }
+
     private function seedChest(int $itemId, int $shareItemId, bool $owned, bool $opened = false): void
     {
         if (! DB::table('share_items')->where('id', $shareItemId)->exists()) {
@@ -99,6 +246,18 @@ class ChestSecurityTest extends TestCase
         return $user;
     }
 
+    private function userOnLocation(int $id, int $locationId): User
+    {
+        $user = $this->user($id);
+        $user->location_id = $locationId;
+        $location = new Location;
+        $location->id = $locationId;
+        $location->dungeon_id = null;
+        $user->setRelation('currentLocation', $location);
+
+        return $user;
+    }
+
     private function service(): ItemService
     {
         return new ItemService(
@@ -108,6 +267,7 @@ class ChestSecurityTest extends TestCase
             $this->createMock(ItemRequirementService::class),
             $this->createMock(QuestProgressService::class),
             $this->createMock(ItemActionLogger::class),
+            new InstantItemRewardService,
         );
     }
 
@@ -117,13 +277,26 @@ class ChestSecurityTest extends TestCase
             $table->id();
             $table->string('name');
             $table->string('type');
+            $table->string('image')->nullable();
             $table->boolean('is_stackable')->default(false);
+            $table->timestamps();
+        });
+        Schema::create('share_item_instant_rewards', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id')->unique();
+            $table->string('reward_type');
+            $table->timestamps();
+        });
+        Schema::create('users', function (Blueprint $table): void {
+            $table->id();
+            $table->integer('money')->default(0);
             $table->timestamps();
         });
         Schema::create('share_item_lock_configs', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id')->unique();
             $table->unsignedSmallInteger('lock_required_skill')->default(0);
+            $table->unsignedTinyInteger('minimum_success_chance_percent')->default(5);
             $table->timestamps();
         });
         Schema::create('share_item_has_items', function (Blueprint $table): void {
@@ -174,6 +347,16 @@ class ChestSecurityTest extends TestCase
             $table->unsignedBigInteger('chest_id');
             $table->unsignedBigInteger('item_id');
             $table->integer('count')->default(1);
+            $table->timestamps();
+        });
+        Schema::create('item_on_locations', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('item_id');
+            $table->unsignedBigInteger('location_id');
+            $table->integer('count')->default(1);
+            $table->string('interaction_type')->default('pickup');
+            $table->unsignedBigInteger('dungeon_session_id')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

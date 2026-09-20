@@ -4,6 +4,7 @@ namespace App\Modules\Item\Application\ItemTooltip\Strategy;
 
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 
@@ -30,9 +31,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                 color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
                 kind: $itemInfo->getTypeName(),
-                price: $itemInfo->price
-                    ? sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_game.gif'), format_money($itemInfo->price))
-                    : '',
+                price: ItemTooltipPriceFormatter::money((int) $itemInfo->price),
                 diamond: $shopItem->diamond
                     ? sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_dmd.gif'), $shopItem->diamond)
                     : '',

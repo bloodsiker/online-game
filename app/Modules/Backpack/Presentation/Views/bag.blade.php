@@ -1474,6 +1474,44 @@
                                                             <br>
                                                         @endif
 
+                                                        @if($data->hasChest())
+                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
+                                                                <div align="center">
+                                                                    <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                                                        <tbody>
+                                                                        <tr height="22">
+                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">Шкатулки</td>
+                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                                                                        </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+
+                                                                <br>
+                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable">
+                                                                    @foreach($data->getChest() as $item)
+                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
+                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="0" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                        &nbsp;
+                                                                                        @if($item->count > 1)
+                                                                                            <div class="bpdig">{{ $item->count }}</div>
+                                                                                        @endif
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                            <br>
+                                                        @endif
+
                                                         @if($data->hasGems())
                                                             <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
                                                                 <div align="center">
@@ -2026,7 +2064,7 @@
             || wearable;
         // is_use — фолбэк для предметов с инстант-эффектом, чей тип не входит
         // в этот список (например misc): см. share_items.is_use.
-        var usable     = (['potion','eat','scroll','artifact','chest','gift'].indexOf(type) !== -1
+        var usable     = (['potion','eat','scroll','artifact','chest','gift','quest'].indexOf(type) !== -1
             || el.getAttribute('data-is-use') === '1')
             && !wearable;
         var isBook     = type === 'book';
@@ -2181,6 +2219,10 @@
                 }
             }
 
+            if (data.message) {
+                try { window.top.openGameMessageModal({ title: 'Предмет использован', message: data.message }); } catch(e) {}
+            }
+
             if (data.teleport_url) {
                 try { window.top.toLocation(data.teleport_url); } catch(e) { window.top.location.href = data.teleport_url; }
                 return;
@@ -2199,9 +2241,6 @@
             }
             if (data.removed_effects && data.removed_effects.length) {
                 try { window.top.sendToFrame('character-frame', { removedEffects: data.removed_effects }); } catch(e) {}
-            }
-            if (data.message) {
-                try { window.top.openGameMessageModal({ title: 'Предмет использован', message: data.message }); } catch(e) {}
             }
             try { window.top.refreshHotbar(); } catch(e) {}
         })

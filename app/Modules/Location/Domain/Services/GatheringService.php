@@ -8,6 +8,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\LockpickingAttempt;
 use App\Modules\Location\Application\DTOs\GatheringActionResultDTO;
 use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
@@ -18,6 +19,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerGatheringStat;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -33,6 +35,7 @@ class GatheringService
 
     public function __construct(
         private readonly BackpackService $backpackService,
+        private readonly ChatService $chatService,
     ) {}
 
     public function state(User $user): array
@@ -274,9 +277,28 @@ class GatheringService
             $isDouble = $doubleChance > 0 && random_int(1, 100) <= $doubleChance;
             $count = $isDouble ? 2 : 1;
 
-            $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
+            $backpackItem = $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
             $bonusRewards = $this->rollBonusResources($lockedUser, $resource);
+            $lootMessage = sprintf(
+                'Вы получили вещь <b>%s</b> %d шт. (в рюкзаке %d шт.)',
+                e((string) $resource->name),
+                $count,
+                (int) $backpackItem->count,
+            );
+            if ($bonusRewards !== []) {
+                $lootMessage .= ' Дополнительно: '.implode('; ', array_map(
+                    fn (array $bonus): string => sprintf(
+                        '<b>%s</b> %d шт. (в рюкзаке %d шт.)',
+                        e($bonus['name']),
+                        $bonus['count'],
+                        $bonus['backpackCount'],
+                    ),
+                    $bonusRewards,
+                ));
+            }
+            $this->chatService->sendLootToUser($lockedUser, $lootMessage);
             $profession = $this->awardExperience($player, $resource->skill, max(1, (int) $resource->skill_exp));
+            $this->incrementGatheringStat($player, (int) $resource->id, $count);
 
             [$x, $y] = $this->randomPosition($node->mapResource, (float) $node->x_percent, (float) $node->y_percent);
             $node->x_percent = $x;
@@ -413,7 +435,7 @@ class GatheringService
      * (например, смола вместе с бревном) — использует тот же `itemHasItems`,
      * что и содержимое сундуков.
      *
-     * @return list<array{shareItemId: int, name: string, image: string, count: int}>
+     * @return list<array{shareItemId: int, name: string, image: string, count: int, backpackCount: int}>
      */
     private function rollBonusResources(User $user, ShareItem $resource): array
     {
@@ -426,13 +448,14 @@ class GatheringService
             }
 
             $count = random_int((int) $bonusItem->pivot->min_count, (int) $bonusItem->pivot->max_count);
-            $this->backpackService->addItemByShareItem($user, $bonusItem, $count);
+            $backpackItem = $this->backpackService->addItemByShareItem($user, $bonusItem, $count);
 
             $bonuses[] = [
                 'shareItemId' => (int) $bonusItem->id,
                 'name' => (string) $bonusItem->name,
                 'image' => $this->gatheringImage($bonusItem),
                 'count' => $count,
+                'backpackCount' => (int) $backpackItem->count,
             ];
         }
 
@@ -594,6 +617,25 @@ class GatheringService
         $playerSkill->save();
 
         return $this->professionState($playerSkill);
+    }
+
+    /**
+     * Копится по каждому ресурсу отдельно (не агрегированно по профессии) для отображения на
+     * /character/professions — не сбрасывается и не связано с уровнем/опытом навыка.
+     */
+    private function incrementGatheringStat(Player $player, int $shareItemId, int $count): void
+    {
+        DB::table('player_gathering_stats')->upsert(
+            [[
+                'player_id' => $player->id,
+                'share_item_id' => $shareItemId,
+                'total_gathered' => $count,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]],
+            ['player_id', 'share_item_id'],
+            ['total_gathered' => DB::raw('total_gathered + '.$count), 'updated_at' => now()],
+        );
     }
 
     private function professionStates(Player $player): array

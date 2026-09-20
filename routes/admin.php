@@ -23,12 +23,17 @@ use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\RaceController;
 use App\Http\Controllers\Admin\ReputationController;
+use App\Http\Controllers\Admin\ScheduledTaskController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/scheduled-tasks', [ScheduledTaskController::class, 'index'])->name('scheduled_tasks.index');
+Route::post('/scheduled-tasks/{task}', [ScheduledTaskController::class, 'update'])->name('scheduled_tasks.update');
+Route::post('/scheduled-tasks/{task}/run', [ScheduledTaskController::class, 'run'])->name('scheduled_tasks.run');
 
 Route::get('/clan-skills', [ClanSkillController::class, 'index'])->name('clan_skills');
 Route::match(['GET', 'POST'], '/clan-skill/create', [ClanSkillController::class, 'create'])->name('clan_skill.create');
@@ -203,6 +208,9 @@ Route::match(['GET', 'POST'], '/quest/{quest}', [QuestController::class, 'info']
 Route::post('/quest/{quest}/objective', [QuestController::class, 'addObjective'])->name('quest.objective.add');
 Route::post('/quest/{quest}/objective/{objective}', [QuestController::class, 'updateObjective'])->name('quest.objective.update');
 Route::get('/quest/{quest}/objective/{objective}/delete', [QuestController::class, 'deleteObjective'])->name('quest.objective.delete');
+Route::post('/quest/{quest}/stage', [QuestController::class, 'addStage'])->name('quest.stage.add');
+Route::post('/quest/{quest}/stage/{stage}', [QuestController::class, 'updateStage'])->name('quest.stage.update');
+Route::get('/quest/{quest}/stage/{stage}/delete', [QuestController::class, 'deleteStage'])->name('quest.stage.delete');
 Route::post('/quest/{quest}/reward', [QuestController::class, 'addReward'])->name('quest.reward.add');
 Route::post('/quest/{quest}/reward/{reward}', [QuestController::class, 'updateReward'])->name('quest.reward.update');
 Route::get('/quest/{quest}/reward/{reward}/delete', [QuestController::class, 'deleteReward'])->name('quest.reward.delete');
@@ -246,3 +254,5 @@ Route::match(['GET', 'POST'], '/player/{player}', [PlayerController::class, 'inf
 Route::post('/player/{player}/level-up', [PlayerController::class, 'levelUp'])->name('player.level_up');
 Route::post('/player/{player}/backpack/add', [PlayerController::class, 'backpackAdd'])->name('player.backpack.add');
 Route::get('/player/{player}/backpack/{backpack}/delete', [PlayerController::class, 'backpackDelete'])->name('player.backpack.delete');
+Route::post('/player/{player}/mute', [PlayerController::class, 'mute'])->name('player.mute');
+Route::post('/player/{player}/mute/{mute}/revoke', [PlayerController::class, 'revokeMute'])->name('player.mute.revoke');

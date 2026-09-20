@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int|null $experience_reward
+ * @property int $minimum_success_chance_percent
  */
 class ShareItemLockConfig extends Model
 {
     protected $fillable = [
-        'share_item_id', 'lock_required_skill', 'lock_duration_seconds', 'experience_reward', 'trap_chance_penalty_percent',
+        'share_item_id', 'lock_required_skill', 'lock_duration_seconds', 'experience_reward', 'minimum_success_chance_percent', 'trap_chance_penalty_percent',
         'trap_effect_id', 'trap_effect_duration_seconds', 'trap_damage_percent',
     ];
 
@@ -23,6 +24,7 @@ class ShareItemLockConfig extends Model
         'lock_required_skill' => 'integer',
         'lock_duration_seconds' => 'integer',
         'experience_reward' => 'integer',
+        'minimum_success_chance_percent' => 'integer',
         'trap_chance_penalty_percent' => 'integer',
         'trap_effect_duration_seconds' => 'integer',
         'trap_damage_percent' => 'integer',

@@ -26,5 +26,12 @@
         :backpack-url="$page->backpackUrl"
         empty-message="На земле больше ничего нет."
     />
+    <script>
+        try {
+            window.top.sendToFrame('character-frame', { money: @json($page->money) }, window.location.origin);
+        } catch (error) {
+            console.error('Не удалось обновить баланс в character-frame:', error);
+        }
+    </script>
 </body>
 </html>

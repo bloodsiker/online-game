@@ -268,6 +268,7 @@
                                 <th width="45"></th>
                                 <th>Предмет</th>
                                 <th width="90">Кол-во</th>
+                                <th width="150">Поведение</th>
                                 <th width="160">Исчезнет</th>
                                 <th width="70"></th>
                             </tr>
@@ -289,11 +290,20 @@
                                         @endif
                                     </td>
                                     <td class="text-center">{{ $slot->count }}</td>
+                                    <td class="text-center">
+                                        @if($slot->item?->itemInfo?->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)
+                                            <span class="badge {{ $slot->interaction_type === \App\Modules\Item\Domain\Enums\LocationItemInteractionType::PICKUP ? 'badge-info' : 'badge-success' }}">
+                                                {{ $slot->interaction_type === \App\Modules\Item\Domain\Enums\LocationItemInteractionType::PICKUP ? 'Сначала подобрать' : 'Открывать здесь' }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">Поднять</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">{{ $slot->expires_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                     <td><a href="{{ route('admin.location.item.delete', ['location' => $location->id, 'locationItem' => $slot->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center text-muted">На локации нет предметов</td></tr>
+                                <tr><td colspan="7" class="text-center text-muted">На локации нет предметов</td></tr>
                             @endforelse
                             </tbody>
                         </table>
@@ -318,6 +328,16 @@
                     <div class="form-group mb-2">
                         <label class="control-label">Количество (1–10000)</label>
                         <input type="number" name="count" min="1" max="10000" value="1" class="form-control">
+                    </div>
+                    <div id="location_chest_behavior" class="form-group mb-2" style="display:none;">
+                        <label class="control-label">Поведение сундука</label>
+                        <select id="location_interaction_type" name="interaction_type" class="form-control">
+                            <option value="open_here">Открывать или взламывать на локации</option>
+                            <option value="pickup">Сначала подобрать в рюкзак</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            Если выключено, сундук открывается или взламывается прямо на локации.
+                        </small>
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -430,6 +450,13 @@
             cache: true
         },
         minimumInputLength: 0
+    }).on('select2:select', function (event) {
+        var isChest = event.params.data.type === 'chest';
+        $('#location_chest_behavior').toggle(isChest);
+        if (!isChest) $('#location_interaction_type').val('open_here');
+    }).on('select2:clear', function () {
+        $('#location_chest_behavior').hide();
+        $('#location_interaction_type').val('open_here');
     });
 </script>
 @endpush

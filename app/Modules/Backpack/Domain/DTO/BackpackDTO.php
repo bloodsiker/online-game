@@ -145,6 +145,16 @@ final class BackpackDTO
         return $this->items->get('recipe');
     }
 
+    public function hasChest(): bool
+    {
+        return $this->items->has('chest');
+    }
+
+    public function getChest(): Collection
+    {
+        return $this->items->get('chest');
+    }
+
     /** Камни (самоцветы) и оправы показываются одним разделом «Камни» */
     public function hasGems(): bool
     {

@@ -61,6 +61,14 @@
         .recipe-result img { width: 28px; height: 28px; object-fit: contain; }
         .recipe-result a { color: #5f3f2e; font-weight: bold; text-decoration: none; }
         .empty-recipes { padding: 24px; border: 1px dashed #b9a187; color: #77675b; background: rgba(255,248,234,.6); text-align: center; }
+        .gathering-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+        .gathering-card { display: flex; align-items: center; gap: 10px; min-height: 60px; border: 1px solid #b99c72; border-radius: 3px; overflow: hidden; background: #f7eedb; box-shadow: 0 1px 2px rgba(66,45,30,.1); }
+        .gathering-icon { flex: 0 0 58px; display: flex; align-items: center; justify-content: center; align-self: stretch; background: linear-gradient(135deg, #dfccaa, #f3e6cd); border-right: 1px solid #c7aa82; }
+        .gathering-icon img { width: 42px; height: 42px; object-fit: contain; }
+        .gathering-card-body { flex: 1; min-width: 0; padding: 6px 8px; }
+        .gathering-card-name { color: #5c2813; font-weight: bold; }
+        .gathering-card-count { color: #766357; }
+        .gathering-card-count b { color: #5a2a0a; }
         .empty-page { padding: 35px; text-align: center; color: #75644d; }
         @media (max-width: 700px) { .profession-tabs { grid-template-columns: repeat(2, minmax(120px, 1fr)); } }
         @media (max-width: 380px) { .profession-tabs { grid-template-columns: 1fr; } }
@@ -91,8 +99,8 @@
                                             role="tab"
                                             aria-selected="{{ $profession['id'] === $page['activeProfessionId'] ? 'true' : 'false' }}">
                                         <span class="profession-tab-name">{{ $profession['name'] }}</span>
-                                        <span class="profession-tab-caption">изученные рецепты</span>
-                                        <span class="profession-count">{{ $profession['recipesCount'] }}</span>
+                                        <span class="profession-tab-caption">{{ $profession['isGathering'] ? 'добыто ресурсов' : 'изученные рецепты' }}</span>
+                                        <span class="profession-count">{{ $profession['isGathering'] ? $profession['totalGathered'] : $profession['recipesCount'] }}</span>
                                     </button>
                                 @endforeach
                             </nav>
@@ -114,6 +122,24 @@
                                         </div>
                                     </header>
 
+                                    @if($profession['isGathering'])
+                                        <div class="recipes-heading">Добыто ресурсов <span class="profession-count">{{ number_format($profession['totalGathered'], 0, '.', ' ') }}</span></div>
+                                        @if($profession['gatheredResources'] === [])
+                                            <div class="empty-recipes">Этим персонажем ещё не добыто ни одного ресурса.</div>
+                                        @else
+                                            <div class="gathering-grid">
+                                                @foreach($profession['gatheredResources'] as $resource)
+                                                    <article class="gathering-card">
+                                                        <div class="gathering-icon"><img src="{{ asset($resource['image']) }}" alt="{{ $resource['name'] }}"></div>
+                                                        <div class="gathering-card-body">
+                                                            <a class="gathering-card-name" href="{{ route('items.info.share', ['id' => $resource['shareItemId']]) }}" target="_blank" style="text-decoration:none;">{{ $resource['name'] }}</a>
+                                                            <div class="gathering-card-count">добыто: <b>{{ number_format($resource['totalGathered'], 0, '.', ' ') }}</b></div>
+                                                        </div>
+                                                    </article>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @else
                                     <div class="recipes-heading">Изученные рецепты <span class="profession-count">{{ $profession['recipesCount'] }}</span></div>
                                     @if($profession['recipes'] === [])
                                         <div class="empty-recipes">У этой профессии пока нет изученных рецептов.</div>
@@ -139,6 +165,7 @@
                                                 </article>
                                             @endforeach
                                         </div>
+                                    @endif
                                     @endif
                                 </section>
                             @endforeach

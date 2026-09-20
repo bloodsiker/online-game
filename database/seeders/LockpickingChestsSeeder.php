@@ -8,6 +8,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class LockpickingChestsSeeder extends Seeder
@@ -138,7 +139,14 @@ class LockpickingChestsSeeder extends Seeder
             throw new RuntimeException("Не найдены предметы для содержимого сундука «{$chest->name}».");
         }
 
-        DB::table('share_item_has_items')->where('parent_item_id', $chest->id)->delete();
+        $existingLoot = DB::table('share_item_has_items')->where('parent_item_id', $chest->id);
+        if (Schema::hasTable('share_item_instant_rewards')) {
+            $existingLoot->whereNotIn(
+                'share_item_id',
+                DB::table('share_item_instant_rewards')->select('share_item_id'),
+            );
+        }
+        $existingLoot->delete();
         $materialCount = match ($variant) {
             0 => [1, 1],
             1 => [1, 2],
@@ -186,6 +194,7 @@ class LockpickingChestsSeeder extends Seeder
             'item_id' => $item->id,
             'location_id' => self::LOCATION_ID,
             'count' => 1,
+            'interaction_type' => 'open_here',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

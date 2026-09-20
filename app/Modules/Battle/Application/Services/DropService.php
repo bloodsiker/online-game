@@ -6,11 +6,13 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Carbon;
 
@@ -75,7 +77,9 @@ class DropService
             }
 
             foreach ($droppedItems as $dropItem) {
-                if ($dropItem['item']->drop_direct_to_backpack) {
+                $isChest = $dropItem['item']->type === ShareItemType::CHEST;
+
+                if ($dropItem['item']->drop_direct_to_backpack && ! $isChest) {
                     $this->backpackService->addItemByShareItem($dropRecipient, $dropItem['item'], $dropItem['count']);
 
                     continue;
@@ -88,6 +92,7 @@ class DropService
 
                 $pivotData = [
                     'count' => $dropItem['count'],
+                    'interaction_type' => LocationItemInteractionType::PICKUP->value,
                     'expires_at' => $dropItem['item']->groundExpiresAt(),
                 ];
                 if ($dungeonSessionId !== null) {

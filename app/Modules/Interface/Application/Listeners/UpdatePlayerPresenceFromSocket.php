@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Interface\Application\Listeners;
 
-use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Modules\Interface\Application\Jobs\UpdatePlayerOnlinePresence;
 use Laravel\Reverb\Events\MessageReceived;
 use Laravel\Reverb\Protocols\Pusher\Contracts\ChannelManager;
 
@@ -33,8 +33,6 @@ final class UpdatePlayerPresenceFromSocket
             return;
         }
 
-        User::query()
-            ->where('player_id', (int) $matches[1])
-            ->update(['last_online_at' => now()]);
+        UpdatePlayerOnlinePresence::dispatch((int) $matches[1], now());
     }
 }

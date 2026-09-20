@@ -30,6 +30,15 @@ class LibraryLockpickingSeeder extends Seeder
         'Рунный ковчег', 'Сундук владыки', 'Хранилище Бездны',
     ];
 
+    private const CASKETS = [
+        'Потрёпанная шкатулка' => '1–14',
+        'Медная шкатулка' => '15–29',
+        'Стальная шкатулка' => '30–44',
+        'Руническая шкатулка' => '45–59',
+        'Древняя шкатулка' => '60–69',
+        'Шкатулка Бездны' => '70+',
+    ];
+
     public function run(): void
     {
         DB::transaction(function (): void {
@@ -44,6 +53,11 @@ class LibraryLockpickingSeeder extends Seeder
                 ->with('lockConfig.trapEffect')
                 ->get()
                 ->keyBy('name');
+            $caskets = ShareItem::query()
+                ->whereIn('name', array_keys(self::CASKETS))
+                ->with('lockConfig.trapEffect')
+                ->get()
+                ->keyBy('name');
 
             LibraryArticle::withTrashed()->updateOrCreate(
                 ['slug' => 'vzломshchik'],
@@ -52,7 +66,7 @@ class LibraryLockpickingSeeder extends Seeder
                     'author_id' => null,
                     'title' => 'Взломщик',
                     'excerpt' => 'Вскрытие замков на сундуках и шкатулках: шанс успеха, тиры отмычек, ловушки и развитие профессии.',
-                    'content' => $this->content($lockpicks, $chests),
+                    'content' => $this->content($lockpicks, $chests, $caskets),
                     'status' => LibraryArticle::STATUS_PUBLISHED,
                     'published_at' => now(),
                     'sort_order' => 70,
@@ -62,7 +76,7 @@ class LibraryLockpickingSeeder extends Seeder
         });
     }
 
-    private function content($lockpicks, $chests): string
+    private function content($lockpicks, $chests, $caskets): string
     {
         return <<<'HTML'
 <p><b>Взломщик</b> — мирная профессия для открытия запертых сундуков и шкатулок. Навык влияет на вероятность успешного взлома и его длительность, а подходящая отмычка помогает работать быстрее и безопаснее.</p>
@@ -117,6 +131,28 @@ HTML
             .$this->chestFrame($chests)
             .<<<'HTML'
 
+<h2>Шкатулки с монстров</h2>
+<p>Шкатулки — переносная разновидность запертого сундука. Они выпадают с монстров и сразу попадают в рюкзак, поэтому их не нужно открывать на месте и за них нельзя конкурировать с другими игроками.</p>
+HTML
+            .$this->frame('Как получить и открыть шкатулку', <<<'HTML'
+<ol>
+<li>Победите монстра подходящего уровня и получите шкатулку в рюкзак.</li>
+<li>Откройте рюкзак и нажмите <b>«Открыть»</b> на найденной шкатулке.</li>
+<li>Выберите отмычку и завершите взлом по обычным правилам профессии.</li>
+<li>При успехе шкатулка исчезнет, а найденные предметы попадут в рюкзак. Монеты из «Горстки монет» сразу зачислятся на баланс.</li>
+</ol>
+HTML)
+            .<<<'HTML'
+
+<div class="library-info-block library-info-block--tip"><strong>Шанс выпадения:</strong> <b>2%</b> с обычного монстра и <b>5%</b> с босса. Награда выпадает только с подходящих по уровню противников: монстр не должен быть ниже игрока более чем на 10 уровней.</div>
+HTML
+            .$this->casketFrame($caskets)
+            .<<<'HTML'
+
+<p>Чем выше уровень монстра, тем сложнее замок и опаснее ловушка на шкатулке, но тем ценнее её содержимое. Внутри можно найти основной ресурс тира, зелье, отмычку и монеты.</p>
+
+<div class="library-info-block library-info-block--warning"><strong>Важно:</strong> неудачная попытка не уничтожает шкатулку. Её можно попробовать открыть повторно, однако отмычка может сломаться, а ловушка — нанести урон и наложить отрицательный эффект.</div>
+
 <h2>Неудача и ловушки</h2>
 HTML
             .$this->frame('Последствия провала', <<<'HTML'
@@ -162,6 +198,42 @@ HTML;
         return $this->frame('Тиры отмычек', <<<HTML
 <table>
 <thead><tr><th>Отмычка</th><th>Замки</th><th>Навык</th><th>Бонусы</th><th>Запас</th></tr></thead>
+<tbody>{$rows}</tbody>
+</table>
+HTML);
+    }
+
+    private function casketFrame($caskets): string
+    {
+        $rows = '';
+        foreach (self::CASKETS as $name => $monsterLevels) {
+            $casket = $caskets->get($name);
+            if ($casket === null || $casket->lockConfig === null) {
+                continue;
+            }
+
+            $config = $casket->lockConfig;
+            $trap = $config->trap_effect_id === null && $config->trap_damage_percent === 0
+                ? 'Нет'
+                : sprintf(
+                    '%s<br>Урон %d%% HP',
+                    $config->trapEffect?->name ?? 'Ловушка',
+                    $config->trap_damage_percent,
+                );
+            $rows .= sprintf(
+                '<tr><td>[[item:%d]]</td><td>%s</td><td>%d</td><td>%d сек.</td><td>%d</td><td>%s</td></tr>',
+                $casket->id,
+                $monsterLevels,
+                $config->lock_required_skill,
+                $config->lock_duration_seconds,
+                $config->experience_reward,
+                $trap,
+            );
+        }
+
+        return $this->frame('Линейка шкатулок', <<<HTML
+<table>
+<thead><tr><th>Шкатулка</th><th>Уровень монстров</th><th>Сложность</th><th>Время</th><th>Опыт</th><th>Ловушка</th></tr></thead>
 <tbody>{$rows}</tbody>
 </table>
 HTML);

@@ -6,6 +6,8 @@ namespace Tests\Unit\Modules\Interface;
 
 use App\Modules\Interface\Application\Listeners\BroadcastOnlineCountFromSocket;
 use App\Modules\Interface\Domain\Events\OnlineCountUpdated;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Support\Facades\Event;
 use Laravel\Reverb\Application;
 use Laravel\Reverb\Connection;
@@ -19,6 +21,14 @@ use Tests\TestCase;
 
 class OnlineCountBroadcastTest extends TestCase
 {
+    public function test_online_count_broadcast_is_queued_instead_of_blocking_reverb(): void
+    {
+        $event = new OnlineCountUpdated(3);
+
+        $this->assertInstanceOf(ShouldBroadcast::class, $event);
+        $this->assertNotInstanceOf(ShouldBroadcastNow::class, $event);
+    }
+
     public function test_subscribed_client_can_request_current_presence_count(): void
     {
         Event::fake([OnlineCountUpdated::class]);

@@ -9,6 +9,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Interface\Application\Jobs\UpdatePlayerOnlinePresence;
 use App\Modules\Interface\Application\Listeners\UpdatePlayerPresenceFromSocket;
 use App\Modules\Interface\Domain\Events\PlayerStateUpdated;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -21,6 +22,7 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Reverb\Application;
 use Laravel\Reverb\Connection;
@@ -368,6 +370,7 @@ class PlayerHeartbeatTest extends TestCase
 
     public function test_authenticated_socket_presence_updates_online_timestamp(): void
     {
+        Queue::fake([UpdatePlayerOnlinePresence::class]);
         $now = Carbon::parse('2026-08-21 14:30:00');
         Carbon::setTestNow($now);
         $user = (new User)->forceFill([
@@ -412,6 +415,13 @@ class PlayerHeartbeatTest extends TestCase
 
         (new UpdatePlayerPresenceFromSocket($channels))->handle($event);
 
+        Queue::assertPushed(
+            UpdatePlayerOnlinePresence::class,
+            fn (UpdatePlayerOnlinePresence $job): bool => $job->playerId === 91
+                && $job->seenAt->getTimestamp() === $now->getTimestamp(),
+        );
+
+        (new UpdatePlayerOnlinePresence(91, $now))->handle();
         $this->assertTrue($user->fresh()->last_online_at->equalTo($now));
 
         Carbon::setTestNow($now->copy()->addMinute());
@@ -423,6 +433,7 @@ class PlayerHeartbeatTest extends TestCase
 
         (new UpdatePlayerPresenceFromSocket($unauthorizedChannels))->handle($event);
 
+        Queue::assertPushed(UpdatePlayerOnlinePresence::class, 1);
         $this->assertTrue($user->fresh()->last_online_at->equalTo($now));
     }
 

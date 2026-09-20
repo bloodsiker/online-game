@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Library\Infrastructure\Persistence\Models;
 
+use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,6 +16,7 @@ class LibraryCategory extends Model
         'name',
         'slug',
         'description',
+        'content_type',
         'image',
         'sort_order',
         'is_active',
@@ -23,6 +25,7 @@ class LibraryCategory extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'content_type' => LibraryCategoryContentType::class,
     ];
 
     public function parent(): BelongsTo

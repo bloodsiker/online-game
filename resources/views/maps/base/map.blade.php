@@ -540,5 +540,6 @@
     </tr>
     </tbody>
 </table>
+@include('maps.partials.location-highlight')
 </body>
 </html>

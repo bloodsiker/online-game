@@ -19,20 +19,21 @@ class LockpickingServiceTest extends TestCase
         int $skill,
         int $required,
         int $trapPenalty,
+        int $minimumChance,
         float $expected,
     ): void {
-        $this->assertSame($expected, $this->service()->successChance($skill, $required, $trapPenalty));
+        $this->assertSame($expected, $this->service()->successChance($skill, $required, $trapPenalty, $minimumChance));
     }
 
     public static function chanceCases(): array
     {
         return [
-            'equal level' => [100, 100, 0, 80.0],
-            'higher lock is still possible' => [90, 100, 0, 65.0],
-            'far higher lock has floor' => [1, 100, 0, 5.0],
-            'trap reduces chance' => [100, 100, 20, 60.0],
-            'chance has global ceiling' => [300, 1, 0, 95.0],
-            'trap penalty is clamped' => [100, 100, 99, 5.0],
+            'equal level' => [100, 100, 0, 5, 80.0],
+            'higher lock is still possible' => [90, 100, 0, 5, 65.0],
+            'far higher lock has configured floor' => [1, 100, 0, 12, 12.0],
+            'trap reduces chance' => [100, 100, 20, 5, 60.0],
+            'chance has global ceiling' => [300, 1, 0, 5, 95.0],
+            'trap penalty respects configured floor' => [100, 100, 99, 8, 8.0],
         ];
     }
 
@@ -61,7 +62,8 @@ class LockpickingServiceTest extends TestCase
     {
         $service = $this->service();
 
-        $this->assertSame(60.0, $service->lockpickSuccessChance(100, 100, 0, 1));
+        $this->assertSame(60.0, $service->lockpickSuccessChance(100, 100, 0, 1, 5));
+        $this->assertSame(18.0, $service->lockpickSuccessChance(1, 300, 95, 1, 18));
         $this->assertSame(26, $service->lockpickDurationSeconds(20, 100, 100, 1, 0));
         $this->assertSame(22, $service->lockpickDurationSeconds(20, 100, 100, 2, 5));
     }

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Library\Domain\Services;
 
+use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
+use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
+use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -16,12 +19,16 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Services\News\NewsShortcodeRenderer;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 final class LibraryShortcodeRenderer
 {
+    private const PREMIUM_SHOP_STRUCTURE_ID = 10;
+
     /** @var array<string, array<int, Model>> */
     private array $entities = [];
 
@@ -42,6 +49,12 @@ final class LibraryShortcodeRenderer
         $html = preg_replace_callback(
             '/\[\[artifact_catalog\]\]/i',
             fn (): string => $this->renderArtifactCatalog(),
+            $html,
+        ) ?? $html;
+
+        $html = preg_replace_callback(
+            '/\[\[clan_skill_catalog\]\]/i',
+            fn (): string => $this->renderClanSkillCatalog(),
             $html,
         ) ?? $html;
 
@@ -137,7 +150,10 @@ final class LibraryShortcodeRenderer
                 $entity->image,
                 $entity->map?->name ? 'Карта: '.$entity->map->name : Str::limit(strip_tags((string) $entity->description), 90),
                 $entity->map?->slug
-                    ? route('map.public', ['slug' => $entity->map->slug]).'#'.$entity->id
+                    ? route('map.public', [
+                        'slug' => $entity->map->slug,
+                        'highlight_location' => $entity->id,
+                    ])
                     : route('map'),
             ],
         };
@@ -257,11 +273,137 @@ final class LibraryShortcodeRenderer
             return '<div class="library-info-block library-info-block--warning">Активные артефакты пока не настроены.</div>';
         }
 
+        $premiumArtifactIds = ShopItem::query()
+            ->where('structure_id', self::PREMIUM_SHOP_STRUCTURE_ID)
+            ->whereIn('share_item_id', $artifacts->modelKeys())
+            ->pluck('share_item_id')
+            ->flip();
+
+        $gameArtifacts = $artifacts
+            ->reject(fn (ShareItem $artifact): bool => $premiumArtifactIds->has($artifact->id));
+        $premiumArtifacts = $artifacts
+            ->filter(fn (ShareItem $artifact): bool => $premiumArtifactIds->has($artifact->id));
+
+        return '<div class="library-artifact-catalog-groups">'
+            .$this->renderArtifactGroup(
+                'game',
+                'Игровые артефакты',
+                'Эти артефакты можно получить игровым способом.',
+                $gameArtifacts,
+            )
+            .$this->renderArtifactGroup(
+                'premium',
+                'Премиум-артефакты',
+                'Эти артефакты приобретаются в премиальном магазине за алмазы.',
+                $premiumArtifacts,
+            )
+            .'</div>';
+    }
+
+    private function renderClanSkillCatalog(): string
+    {
+        $skills = ClanSkillDefinition::query()
+            ->with('levels.magicSkill')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        if ($skills->isEmpty()) {
+            return '<div class="library-info-block library-info-block--warning">Клановые навыки пока не настроены.</div>';
+        }
+
+        $maxLevel = max(1, (int) $skills->max('max_level'));
+        $levelHeaders = collect(range(1, $maxLevel))
+            ->map(fn (int $level): string => '<th>Ур. '.$level.'</th>')
+            ->implode('');
+        $rows = $skills
+            ->map(fn (ClanSkillDefinition $skill): string => $this->renderClanSkillRow($skill, $maxLevel))
+            ->implode('');
+
+        return '<div class="library-clan-skills-wrap">'
+            .'<table class="library-clan-skills">'
+            .'<thead><tr><th>Навык</th>'.$levelHeaders.'</tr></thead>'
+            .'<tbody>'.$rows.'</tbody>'
+            .'</table></div>';
+    }
+
+    private function renderClanSkillRow(ClanSkillDefinition $skill, int $maxLevel): string
+    {
+        $levels = $skill->levels->keyBy('level');
+        /** @var ClanSkillLevel|null $firstLevel */
+        $firstLevel = $levels->get(1);
+        $icon = $firstLevel?->magicSkill?->image;
+        $iconHtml = $icon
+            ? '<img class="library-clan-skills__icon" src="'.e($icon).'" alt="'.e($skill->name).'">'
+            : '<span class="library-clan-skills__icon library-clan-skills__icon--empty" aria-hidden="true">✦</span>';
+        $cells = '';
+
+        foreach (range(1, $maxLevel) as $levelNumber) {
+            /** @var ClanSkillLevel|null $level */
+            $level = $levels->get($levelNumber);
+            if ($level === null) {
+                $cells .= '<td class="library-clan-skills__empty">—</td>';
+
+                continue;
+            }
+
+            $effects = collect($level->magicSkill?->effects ?? [])
+                ->filter(fn (mixed $effect): bool => is_array($effect))
+                ->map(fn (array $effect): string => $this->clanSkillEffectLabel($effect))
+                ->filter()
+                ->implode('<br>');
+            $requirements = 'Клан '.$level->required_clan_level.' ур.';
+            if ((int) $level->required_bonus_points > 0) {
+                $requirements .= ' · '.format_money((int) $level->required_bonus_points).' очк.';
+            }
+
+            $cells .= '<td>'
+                .'<strong class="library-clan-skills__bonus">'.($effects !== '' ? $effects : '—').'</strong>'
+                .'<small>'.$requirements.'</small>'
+                .'</td>';
+        }
+
+        return '<tr>'
+            .'<th class="library-clan-skills__name"><span class="library-clan-skills__skill">'
+            .$iconHtml
+            .'<span class="library-clan-skills__data"><strong>'.e($skill->name).'</strong>'
+            .'<span>'.e((string) $skill->description).'</span></span>'
+            .'</span></th>'
+            .$cells
+            .'</tr>';
+    }
+
+    /** @param array<string, mixed> $effect */
+    private function clanSkillEffectLabel(array $effect): string
+    {
+        $type = ClanSkillEffectType::tryFrom((string) ($effect['type'] ?? ''));
+        $value = (float) ($effect['value'] ?? 0);
+        $formatted = rtrim(rtrim(number_format(abs($value), 2, '.', ''), '0'), '.');
+
+        return ($value >= 0 ? '+' : '−')
+            .e($formatted)
+            .(! empty($effect['is_percent']) ? '%' : '')
+            .' '.e($type?->label() ?? (string) ($effect['type'] ?? 'Бонус'));
+    }
+
+    /** @param Collection<int, ShareItem> $artifacts */
+    private function renderArtifactGroup(string $type, string $title, string $description, Collection $artifacts): string
+    {
         $cards = $artifacts
             ->map(fn (ShareItem $artifact): string => $this->renderArtifact($artifact))
             ->implode('');
 
-        return '<div class="library-artifact-catalog">'.$cards.'</div>';
+        $content = $cards !== ''
+            ? '<div class="library-artifact-catalog">'.$cards.'</div>'
+            : '<div class="library-artifact-catalog-group__empty">Артефакты этой группы пока не добавлены.</div>';
+
+        return '<section class="library-artifact-catalog-group library-artifact-catalog-group--'.e($type).'">'
+            .'<header class="library-artifact-catalog-group__header">'
+            .'<strong>'.e($title).'</strong>'
+            .'<span>'.e($description).'</span>'
+            .'</header>'
+            .$content
+            .'</section>';
     }
 
     private function renderArtifact(ShareItem $artifact): string

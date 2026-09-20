@@ -73,9 +73,18 @@ class ChatService
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::QuestItem);
     }
 
-    public function sendSystem(string $message, ?int $mapId = null, ?int $clanId = null): ChatMessage
+    public function sendLootToUser(User $user, string $message): ChatMessage
     {
-        return $this->sendSystemMessage->toChannel($message, $mapId, $clanId);
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Loot);
+    }
+
+    public function sendSystem(
+        string $message,
+        ?int $mapId = null,
+        ?int $clanId = null,
+        ChatMessageType $type = ChatMessageType::System,
+    ): ChatMessage {
+        return $this->sendSystemMessage->toChannel($message, $mapId, $clanId, $type);
     }
 
     public function sendSystemToParty(int $partyId, string $message): ChatMessage

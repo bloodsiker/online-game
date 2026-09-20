@@ -6,12 +6,12 @@ namespace App\Modules\Location\Domain\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-final class GatheringMapUpdated implements ShouldBroadcastNow, ShouldDispatchAfterCommit
+final class GatheringMapUpdated implements ShouldBroadcast, ShouldDispatchAfterCommit
 {
     use Dispatchable;
     use InteractsWithSockets;

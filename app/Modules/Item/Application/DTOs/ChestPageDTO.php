@@ -15,5 +15,6 @@ final readonly class ChestPageDTO
         public string $message,
         public string $backpackUrl,
         public string $locationUrl,
+        public int $money,
     ) {}
 }

@@ -11,7 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuestStage extends Model
 {
-    protected $fillable = ['quest_id', 'complete_npc_id', 'order', 'title', 'description'];
+    protected $fillable = [
+        'quest_id', 'complete_npc_id', 'order', 'title', 'description',
+        'stage_type', 'wait_duration_seconds', 'waiting_text', 'ready_text',
+    ];
+
+    protected $casts = [
+        'wait_duration_seconds' => 'integer',
+    ];
 
     public function quest(): BelongsTo
     {
@@ -26,5 +33,10 @@ class QuestStage extends Model
     public function objectives(): HasMany
     {
         return $this->hasMany(QuestObjective::class, 'stage_id');
+    }
+
+    public function isWaiting(): bool
+    {
+        return $this->stage_type === 'wait';
     }
 }

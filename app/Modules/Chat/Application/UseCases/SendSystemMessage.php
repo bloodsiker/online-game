@@ -16,15 +16,19 @@ class SendSystemMessage
         private readonly ChatMessageRepositoryInterface $repository,
     ) {}
 
-    public function toChannel(string $message, ?int $mapId = null, ?int $clanId = null): ChatMessage
-    {
+    public function toChannel(
+        string $message,
+        ?int $mapId = null,
+        ?int $clanId = null,
+        ChatMessageType $type = ChatMessageType::System,
+    ): ChatMessage {
         return $this->repository->create([
             'user_id' => null,
             'channel' => ChatChannel::System->value,
             'map_id' => $mapId,
             'clan_id' => $clanId,
             'message' => $message,
-            'type' => ChatMessageType::System->value,
+            'type' => $type->value,
         ]);
     }
 

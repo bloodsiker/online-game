@@ -40,7 +40,7 @@ class EloquentLocationReadRepository implements LocationReadRepository
         return Cache::remember(
             'who:users_on_location:'.$locationId,
             now()->addSeconds(60),
-            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+            fn (): Collection => User::with(['player', 'clanMembership.clan', 'activeChatMute'])
                 ->where('location_id', $locationId)
                 ->orderByDesc('last_online_at')
                 ->get(),

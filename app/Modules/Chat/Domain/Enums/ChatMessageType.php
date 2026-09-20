@@ -15,4 +15,5 @@ enum ChatMessageType: string
     case PartyNotice = 'party_notice';
     case Quest = 'quest';
     case QuestItem = 'quest_item';
+    case Loot = 'loot';
 }

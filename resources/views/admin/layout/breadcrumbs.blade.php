@@ -27,6 +27,8 @@
         request()->routeIs('admin.post.send', 'admin.post.send.store') => ['label' => 'Почта', 'route' => 'admin.post.send'],
         request()->routeIs('admin.users') => ['label' => 'Пользователи', 'route' => 'admin.users'],
         request()->routeIs('admin.dashboard') => ['label' => 'Дашборд', 'route' => 'admin.dashboard'],
+        request()->routeIs('admin.scheduled_tasks.*') => ['label' => 'Планировщик', 'route' => 'admin.scheduled_tasks.index'],
+        request()->routeIs('admin.chat.*') => ['label' => 'Чат', 'route' => 'admin.chat.index'],
         request()->routeIs('admin.docs.*') => ['label' => 'Документация', 'route' => null],
         default => null,
     };

@@ -6,6 +6,7 @@ namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
+use App\Modules\Quest\Infrastructure\Persistence\Models\Concerns\HasCurrentQuestStage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,15 +14,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuestPlayer extends Model
 {
-    use HasFactory;
+    use HasCurrentQuestStage, HasFactory;
 
     protected $casts = [
         'status' => QuestPlayerStatus::class,
         'reset_at' => 'datetime',
         'completed_at' => 'datetime',
+        'current_stage_started_at' => 'datetime',
+        'current_stage_ready_at' => 'datetime',
     ];
 
-    protected $fillable = ['player_id', 'quest_id', 'status', 'current_stage_id', 'completed_at', 'reset_at'];
+    protected $fillable = [
+        'player_id', 'quest_id', 'status', 'current_stage_id',
+        'current_stage_started_at', 'current_stage_ready_at', 'completed_at', 'reset_at',
+    ];
 
     protected $attributes = ['status' => QuestPlayerStatus::IN_PROGRESS];
 
@@ -55,21 +61,6 @@ class QuestPlayer extends Model
 
         return $this->objectives->filter(
             fn ($obj) => $obj->questObjective->stage_id === $this->current_stage_id
-        );
-    }
-
-    public function isCurrentStageComplete(): bool
-    {
-        $objectives = $this->current_stage_id !== null
-            ? $this->objectives->filter(fn ($o) => $o->questObjective->stage_id === $this->current_stage_id)
-            : $this->objectives;
-
-        if ($objectives->isEmpty()) {
-            return false;
-        }
-
-        return $objectives->every(fn ($o) => $o->questObjective->type === 'deliver' ||
-            $o->amount >= $o->questObjective->required_amount
         );
     }
 

@@ -27,6 +27,17 @@
                             <label class="col-form-label">Описание</label>
                             <textarea class="form-control" name="description" rows="5">{{ old('description', $category?->description) }}</textarea>
                         </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Тип содержимого</label>
+                            <select class="form-control" name="content_type" required>
+                                @foreach($contentTypes as $contentType)
+                                    <option value="{{ $contentType->value }}" @selected(old('content_type', $category?->content_type?->value ?? 'articles') === $contentType->value)>
+                                        {{ $contentType->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Каталог монстров формируется автоматически из игровых данных и не требует статей.</small>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">

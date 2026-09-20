@@ -8,6 +8,8 @@ use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
+use App\Modules\Moderation\Application\Services\CommunicationMuteService;
+use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use RuntimeException;
@@ -17,6 +19,7 @@ class SendMessage
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
         private readonly PartyRepositoryInterface $partyRepository,
+        private readonly CommunicationMuteService $communicationMuteService,
     ) {}
 
     /**
@@ -30,6 +33,8 @@ class SendMessage
      */
     public function execute(User $sender, string $raw, ChatChannel $defaultChannel): ChatMessage
     {
+        $this->communicationMuteService->throwIfMuted($sender, CommunicationScope::Chat);
+
         $raw = trim($raw);
 
         // Private message: prv[NAME] - text  OR  prv[NAME] text

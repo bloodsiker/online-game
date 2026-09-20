@@ -15,6 +15,7 @@ class ShareItemTypeTest extends TestCase
         $this->assertSame('Инструмент', ShareItemType::TOOL->label());
         $this->assertTrue(ShareItemType::TOOL->isEquipment());
         $this->assertContains(ShareItemType::TOOL, ShareItemType::group('main'));
+        $this->assertContains(ShareItemType::CHEST, ShareItemType::group('main'));
         $this->assertSame('Рыба', ShareItemType::FISH->label());
         $this->assertSame('Драгоценные камни', ShareItemType::PRECIOUS_GEM->label());
         $this->assertTrue(ShareItemType::PLANT->isGatheringResource());

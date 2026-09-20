@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemInstantReward;
 use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockConfig;
 use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockpickConfig;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
@@ -67,6 +68,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_lockpick
  * @property-read ShareItemLockConfig|null $lockConfig
  * @property-read ShareItemLockpickConfig|null $lockpickConfig
+ * @property-read ShareItemInstantReward|null $instantReward
  * @property string|null $tool_family
  * @property int $gathering_speed_bonus_percent
  * @property int $gathering_double_chance_percent
@@ -168,6 +170,11 @@ class ShareItem extends Model
     public function lockpickConfig(): HasOne
     {
         return $this->hasOne(ShareItemLockpickConfig::class);
+    }
+
+    public function instantReward(): HasOne
+    {
+        return $this->hasOne(ShareItemInstantReward::class);
     }
 
     public function magicSkillBook(): HasOne

@@ -11,5 +11,6 @@ final readonly class ChestEntryDTO
         public string $name,
         public int $count,
         public string $pickupUrl,
+        public ?string $rewardType = null,
     ) {}
 }

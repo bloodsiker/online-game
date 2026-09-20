@@ -32,7 +32,7 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
         return Cache::remember(
             'who:users_on_location:'.$locationId,
             now()->addSeconds(60),
-            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+            fn (): Collection => User::with(['player', 'clanMembership.clan', 'activeChatMute'])
                 ->where('location_id', $locationId)
                 ->orderByDesc('last_online_at')
                 ->get(),
@@ -46,7 +46,7 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
         return Cache::remember(
             'who:online_users:'.$bucket,
             now()->addSeconds(75),
-            fn (): Collection => User::with(['player', 'clanMembership.clan'])
+            fn (): Collection => User::with(['player', 'clanMembership.clan', 'activeChatMute'])
                 ->where('last_online_at', '>=', $threshold)
                 ->orderByDesc('last_online_at')
                 ->get(),

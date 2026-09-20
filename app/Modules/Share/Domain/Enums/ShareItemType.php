@@ -117,6 +117,7 @@ enum ShareItemType: string
                 self::WOOD,
                 self::RECIPE,
                 self::BOOK,
+                self::CHEST,
                 self::SCROLL,
                 self::GEM,
                 self::MOUNT,

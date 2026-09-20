@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\Mappers;
 
+use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Location\Application\DTOs\TakeItemsPageDTO;
 use App\Modules\Location\Application\DTOs\TakeLocationItemDTO;
 use App\Modules\Share\Domain\Enums\ShareItemType;
@@ -18,7 +19,10 @@ class TakeItemsPageViewMapper
             items: $items->map(
                 static function ($item): TakeLocationItemDTO {
                     $isChest = $item->item->itemInfo->type === ShareItemType::CHEST;
+                    $mustBePickedUp = $isChest
+                        && $item->interaction_type === LocationItemInteractionType::PICKUP;
                     $requiresLockpicking = $isChest
+                        && ! $mustBePickedUp
                         && ! $item->item->is_open
                         && ($item->item->itemInfo->lockConfig?->lock_required_skill ?? 0) > 0;
 
@@ -28,10 +32,10 @@ class TakeItemsPageViewMapper
                         name: (string) $item->item->getName(),
                         count: (int) $item->count,
                         infoUrl: route('items.info.share', ['id' => $item->item->share_item_id]),
-                        actionLabel: $isChest
+                        actionLabel: $isChest && ! $mustBePickedUp
                             ? ($item->item->is_open ? 'Заглянуть' : 'Открыть')
                             : 'Поднять',
-                        actionUrl: $isChest
+                        actionUrl: $isChest && ! $mustBePickedUp
                             ? ($item->item->is_open
                                 ? route('items.view_chest', ['id' => $item->item->id])
                                 : route('items.open_chest', ['id' => $item->item->id]))

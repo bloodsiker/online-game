@@ -24,6 +24,7 @@ class PickUpInChest
         return $this->mapper->map(
             $context === null ? null : $context[0]->load('itemsInChest'),
             $message,
+            (int) $user->money,
         );
     }
 }
