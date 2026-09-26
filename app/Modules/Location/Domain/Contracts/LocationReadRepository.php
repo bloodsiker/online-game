@@ -19,12 +19,12 @@ interface LocationReadRepository
     /**
      * @return Collection<int, MonsterOnLocation>
      */
-    public function getMonstersOnLocation(int $locationId): Collection;
+    public function getMonstersOnLocation(int $locationId, ?User $user = null): Collection;
 
     /**
      * @return Collection<int, User>
      */
-    public function getLocationUsers(int $locationId): Collection;
+    public function getLocationUsers(int $locationId, ?User $user = null): Collection;
 
     public function findDungeonSessionByUserId(int $userId): ?DungeonSession;
 

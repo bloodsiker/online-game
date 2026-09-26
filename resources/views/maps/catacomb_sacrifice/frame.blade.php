@@ -443,7 +443,7 @@
                 <div id="u511">
                     <div id="l511" class="s2box br bl bt">
                         <s id="z511">0</s>
-                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => 'Gh865Vpo'], request()->except(['s']))) }}#245">
+                        <a class="alvl" href="{{ map_transition_url('Gh865Vpo', 245) }}">
                             <img src="{{ asset('img/icon/up.gif') }}" hspace="0" vspace="2" border="0" width="26" height="7">
                         </a>
                         <br>

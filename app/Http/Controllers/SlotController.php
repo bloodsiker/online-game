@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ class SlotController extends Controller
     public function __construct(
         private PlayerStatService $statService,
         private HotbarService $hotbarService,
+        private ItemTooltipCollector $itemTooltipCollector,
     ) {}
 
     public function index(Request $request)
@@ -34,7 +37,20 @@ class SlotController extends Controller
             ->filter(fn ($b) => $b->item?->itemInfo?->is_slot_usable)
             ->values();
 
-        return view('slots.index', compact('user', 'player', 'group', 'passiveSkills', 'activeSkills', 'hotbarData', 'usableItems'));
+        $itemTooltipScript = $this->itemTooltipCollector
+            ->collectFrom(new BackpackItemTooltipStrategy($usableItems))
+            ->renderScript();
+
+        return view('slots.index', compact(
+            'user',
+            'player',
+            'group',
+            'passiveSkills',
+            'activeSkills',
+            'hotbarData',
+            'usableItems',
+            'itemTooltipScript',
+        ));
     }
 
     public function updateSlot(Request $request)

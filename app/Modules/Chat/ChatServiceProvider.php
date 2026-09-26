@@ -6,11 +6,17 @@ namespace App\Modules\Chat;
 
 use App\Modules\Chat\Application\Listeners\SendChatMuteSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendLevelUpSystemMessage;
+use App\Modules\Chat\Application\Listeners\SendMapInfluenceAwardedMessage;
 use App\Modules\Chat\Application\Listeners\SendMedalEarnedSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendPlayerInjuryMessage;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
+use App\Modules\Chat\Application\Listeners\SendWorldEventFinishedMessage;
+use App\Modules\Chat\Application\Listeners\SendWorldEventStartedMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
+use App\Modules\Event\Domain\Events\WorldEventFinished;
+use App\Modules\Event\Domain\Events\WorldEventStarted;
+use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
 use App\Modules\Moderation\Domain\Events\ChatMuteImposed;
 use App\Modules\Player\Domain\Events\PlayerInjured;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
@@ -37,6 +43,9 @@ class ChatServiceProvider extends ServiceProvider
         Event::listen(PlayerInjured::class, SendPlayerInjuryMessage::class);
         Event::listen(QuestItemDropped::class, SendQuestItemDropMessage::class);
         Event::listen(ReputationMedalEarned::class, SendMedalEarnedSystemMessage::class);
+        Event::listen(MapInfluenceAwarded::class, SendMapInfluenceAwardedMessage::class);
+        Event::listen(WorldEventStarted::class, SendWorldEventStartedMessage::class);
+        Event::listen(WorldEventFinished::class, SendWorldEventFinishedMessage::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'chat');
 

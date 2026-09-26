@@ -21,7 +21,7 @@
             <div class="fight-body">
 
                 <div class="fight-act">
-                    <b class="butt1 pointer"><b><button type="button" class="butt1" id="weapon-attack" title="Атаковать оружием (Q)" onclick="actionAttack(0); return false;">&#9876; Атаковать оружием</button></b></b>
+                    <b class="butt1 pointer"><b><button type="button" class="butt1" id="weapon-attack" data-q-repeat="true" title="Атаковать оружием (Q)" onclick="actionAttack(0); return false;">&#9876; Атаковать оружием</button></b></b>
                 </div>
 
                 @if($player->hasEquippedMagicSkill())
@@ -67,6 +67,10 @@
 </table>
 
 <script>
+    // Отложенное перемещение из главного фрейма не должно сработать после
+    // перехода игрока на страницу активного боя.
+    window.availableMoves = [];
+
     // Родитель перечитывает цель отсюда в момент запуска отложенной атаки:
     // к этому времени раунд уже другой, и id из onclick устарели.
     window.battleTarget = {

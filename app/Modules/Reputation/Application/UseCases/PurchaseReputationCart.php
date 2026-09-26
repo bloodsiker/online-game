@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Reputation\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
 use App\Modules\Reputation\Application\DTOs\ReputationActionResultDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Application\Services\ReputationShopCartService;
@@ -20,6 +22,7 @@ class PurchaseReputationCart
         private readonly ReputationService $reputationService,
         private readonly ReputationShopCartService $cartService,
         private readonly BackpackService $backpackService,
+        private readonly PurchaseLogger $purchaseLogger,
     ) {}
 
     public function execute(User $user, int $reputationId): ReputationActionResultDTO
@@ -79,6 +82,25 @@ class PurchaseReputationCart
                     $this->backpackService->addItemByShareItem($user, $shopItem->item, 1);
                 }
             }
+
+            $this->purchaseLogger->record(
+                user: $user,
+                sourceType: PurchaseSourceType::ReputationShop,
+                lines: $cart->getItems()->map(static fn ($cartItem): array => [
+                    'item' => $cartItem->shopItem->item,
+                    'quantity' => (int) $cartItem->quantity,
+                    'unit_price' => (int) $cartItem->shopItem->price,
+                    'unit_diamond' => (int) $cartItem->shopItem->diamond,
+                    'requirements' => $cartItem->shopItem->requirements->map(static fn ($requirement): array => [
+                        'share_item_id' => (int) $requirement->share_item_id,
+                        'item_name' => $requirement->item?->name,
+                        'quantity' => (int) $requirement->quantity * (int) $cartItem->quantity,
+                    ])->values()->all(),
+                    'metadata' => ['minimum_reputation_points' => (int) $cartItem->shopItem->min_points],
+                ]),
+                sourceId: $reputation->id,
+                metadata: ['reputation_name' => $reputation->name],
+            );
 
             $this->cartService->clearCart($user, $reputation->id);
         });

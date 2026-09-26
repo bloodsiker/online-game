@@ -4,11 +4,12 @@ namespace App\Modules\MagicSkill\Application\Services;
 
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
 use Illuminate\Support\Facades\Cache;
 
 class PlayerMagicSkillService
 {
-    public function getActiveSkillForBattle(Player $player, int $skillId): MagicSkill
+    public function getActiveSkillForBattle(Player $player, int $skillId): ?MagicSkill
     {
         if ($skillId <= 0) {
             throw new \DomainException('Неверный ID заклинание');
@@ -17,6 +18,25 @@ class PlayerMagicSkillService
         /** @var MagicSkill|null $playerSkill */
         $playerSkill = $player->activeMagicSkills()
             ->where('magic_skill_id', $skillId)
+            ->first();
+
+        if ($playerSkill instanceof MagicSkill) {
+            return $playerSkill;
+        }
+
+        $isOnHotbar = PlayerSlot::query()
+            ->where('player_id', $player->id)
+            ->where('entity_type', 'skill')
+            ->where('entity_id', $skillId)
+            ->exists();
+
+        if (! $isOnHotbar) {
+            return null;
+        }
+
+        $playerSkill = $player->magicSkills()
+            ->where('magic_skill_id', $skillId)
+            ->where('is_passive', false)
             ->first();
 
         //        if ($this->isSkillOnCooldown($player, $playerSkill)) {

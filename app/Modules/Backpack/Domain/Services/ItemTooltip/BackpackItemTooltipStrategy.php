@@ -54,7 +54,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 gems: ItemTooltipStatsBuilder::buildGems($item),
                 runes: ItemTooltipStatsBuilder::buildRunes($item),
                 remainingUses: $item->remainingUses(),
-                specialInfo: ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo),
+                specialInfo: array_merge(ItemTooltipStatsBuilder::buildSpecialInfo($itemInfo), $item->expiryTooltipInfo()),
             ));
         }
     }

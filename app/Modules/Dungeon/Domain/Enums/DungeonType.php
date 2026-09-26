@@ -9,6 +9,7 @@ enum DungeonType: string
     case LINEAR = 'linear';
     case SURVIVAL = 'survival';
     case BOSS_RUSH = 'boss_rush';
+    case TOWER = 'tower';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum DungeonType: string
             self::LINEAR => 'Линейное',
             self::SURVIVAL => 'Выживание',
             self::BOSS_RUSH => 'Натиск боссов',
+            self::TOWER => 'Башня',
         };
     }
 }

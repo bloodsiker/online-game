@@ -9,6 +9,7 @@ use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Domain\Contracts\ItemReadRepository;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
@@ -52,6 +53,24 @@ class GetBackpack
             ->map(static fn (mixed $id): int => (int) $id)
             ->values()
             ->all();
+        $renameItemIds = $data->getBackpack()
+            ->filter(fn ($backpack): bool => $backpack->item->itemInfo->relationLoaded('effects')
+                && $backpack->item->itemInfo->effects->contains(
+                    fn ($e) => $e->effect_type === ItemEffectType::RENAME_NAME
+                ))
+            ->pluck('item_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
+        $changeRaceItemIds = $data->getBackpack()
+            ->filter(fn ($backpack): bool => $backpack->item->itemInfo->relationLoaded('effects')
+                && $backpack->item->itemInfo->effects->contains(
+                    fn ($e) => $e->effect_type === ItemEffectType::CHANGE_RACE
+                ))
+            ->pluck('item_id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
         $learnableRecipeItemIds = $data->getBackpack()
             ->filter(static function ($backpack): bool {
                 $shareItem = $backpack->item->itemInfo;
@@ -83,6 +102,6 @@ class GetBackpack
         $this->collector->collectFrom(new BackpackItemTooltipStrategy($data->getBackpack()));
         $itemTooltipScript = $this->collector->renderScript();
 
-        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'learnableRecipeItemIds', 'lockedChestItemIds');
+        return compact('data', 'user', 'playerEquip', 'itemTooltipScript', 'teleportUseKeyItemIds', 'droppableItemIds', 'debuffTargetItemIds', 'debuffTargets', 'renameItemIds', 'changeRaceItemIds', 'learnableRecipeItemIds', 'lockedChestItemIds');
     }
 }

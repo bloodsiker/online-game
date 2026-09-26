@@ -141,15 +141,16 @@ readonly class GambleExchangeService implements ReputationExchangeStrategy
         });
 
         $elixirNote = $elixir !== null ? sprintf(' Получен «%s» ×1.', $elixir->name) : '';
+        $elixirChatNote = $elixir !== null ? sprintf(' Получен [[share_item_%d]] ×1.', $elixir->id) : '';
 
         if ($succeeded) {
             $this->chatService->sendQuestToUser($user, sprintf(
-                'Вы поднесли %d×«%s» и получили <b>+%d</b> репутации «%s».%s',
+                'Вы поднесли %d×«%s» и получили <b>+%d</b> репутации <b>«%s»</b>.%s',
                 $option->resource_cost,
                 $option->shareItem->name,
                 $option->reward_points,
                 $option->reputation->name,
-                $elixirNote,
+                $elixirChatNote,
             ));
 
             return new ReputationExchangeResultDTO(true, sprintf(

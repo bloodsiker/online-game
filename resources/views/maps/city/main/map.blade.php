@@ -381,7 +381,7 @@
                                                                                                       onmouseout="mark_l(6,0)"><span
                                                                                                         class="listloc">6</span> <span
                                                                                                         style="font-size:18px;">→</span> <a
-                                                                                                        href="{{ route('on_map', array_merge(['s' => 'Hj7Kl0tEr2A'], request()->except(['s']))) }}#819">Канализация</a> <span
+                                                                                                        href="{{ map_transition_url('Hj7Kl0tEr2A', 819) }}">Канализация</a> <span
                                                                                                         class="listloc">819</span></span>
                                                                                             </td>
                                                                                         </tr>
@@ -392,7 +392,7 @@
                                                                                                       onmouseout="mark_l(101,0)"><span
                                                                                                         class="listloc">101</span> <span
                                                                                                         style="font-size:18px;">→</span> <a
-                                                                                                        href="{{ route('on_map', array_merge(['s' => 'Gh865Vpo'], request()->except(['s']))) }}#102">Шепчущий Лес</a> <span
+                                                                                                        href="{{ map_transition_url('Gh865Vpo', 102) }}">Шепчущий Лес</a> <span
                                                                                                         class="listloc">102</span></span>
                                                                                             </td>
                                                                                         </tr>
@@ -453,7 +453,7 @@
                                                                                                       onmouseover="area_show(1,1)"
                                                                                                       onmouseout="area_show(1,0)"><span
                                                                                                         class="a1 listloc"
-                                                                                                        style="">&nbsp;</span> - Город</span>
+                                                                                                        style="">&nbsp;</span> - Нейрин</span>
                                                                                             </td>
                                                                                         </tr>
                                                                                         @auth

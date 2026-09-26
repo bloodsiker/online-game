@@ -106,6 +106,51 @@ class MapGatheringResourceConfigurationTest extends TestCase
         ])->assertSessionHasErrors('resp_location_id');
     }
 
+    public function test_admin_can_choose_respawn_location_when_creating_map(): void
+    {
+        DB::table('locations')->insert([
+            [
+                'id' => 40,
+                'map_id' => 2,
+                'name' => 'Городская площадь',
+            ],
+            [
+                'id' => 41,
+                'map_id' => 2,
+                'name' => '',
+            ],
+        ]);
+
+        $this->get(route('admin.map.create'))
+            ->assertOk()
+            ->assertSee('name="resp_location_id"', escape: false)
+            ->assertSee(route('admin.api.locations'), escape: false)
+            ->assertDontSee('[40] Городская площадь');
+
+        $this->getJson(route('admin.api.locations', ['q' => 'Городская', 'page' => 1]))
+            ->assertOk()
+            ->assertJsonPath('results.0.id', 40)
+            ->assertJsonPath('results.0.text', '[40] Городская площадь (Шепчущий Лес)')
+            ->assertJsonPath('pagination.more', false);
+
+        $this->getJson(route('admin.api.locations', ['page' => 1]))
+            ->assertOk()
+            ->assertJsonPath('results.0.id', 40)
+            ->assertJsonPath('results.1.text', '[41] Локация №41 (Шепчущий Лес)');
+
+        $this->post(route('admin.map.create'), [
+            'name' => 'Новая территория',
+            'slug' => 'new-territory',
+            'folder' => 'new-territory',
+            'resp_location_id' => 40,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('maps', [
+            'name' => 'Новая территория',
+            'resp_location_id' => 40,
+        ]);
+    }
+
     private function seedConfiguration(): void
     {
         DB::table('maps')->insert(['id' => 2, 'name' => 'Шепчущий Лес']);

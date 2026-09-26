@@ -14,7 +14,7 @@ class EloquentDungeonSessionRepository implements DungeonSessionRepository
     public function findByUserId(int $userId): ?DungeonSession
     {
         return DungeonSession::query()
-            ->with(['dungeon', 'user.currentLocation'])
+            ->with(['dungeon', 'run.currentStage.locations', 'user.currentLocation'])
             ->where('user_id', $userId)
             ->first();
     }
@@ -26,10 +26,11 @@ class EloquentDungeonSessionRepository implements DungeonSessionRepository
             ->exists();
     }
 
-    public function create(Dungeon $dungeon, int $userId, ?CarbonInterface $expiresAt = null, ?int $primarySessionId = null): DungeonSession
+    public function create(Dungeon $dungeon, int $userId, ?CarbonInterface $expiresAt = null, ?int $primarySessionId = null, ?int $runId = null): DungeonSession
     {
         return DungeonSession::query()->create([
             'dungeon_id' => $dungeon->id,
+            'dungeon_run_id' => $runId,
             'user_id' => $userId,
             'primary_session_id' => $primarySessionId,
             'expires_at' => $expiresAt,

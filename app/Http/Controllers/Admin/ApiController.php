@@ -34,16 +34,23 @@ class ApiController extends Controller
                         ->orWhere('id', is_numeric($search) ? (int) $search : 0);
                 });
             })
-            ->orderBy('name');
+            ->orderByRaw("CASE WHEN name IS NULL OR TRIM(name) = '' THEN 1 ELSE 0 END")
+            ->orderBy('name')
+            ->orderBy('id');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
 
         return response()->json([
-            'results' => $results->map(fn (Location $loc) => [
-                'id' => $loc->id,
-                'text' => "[{$loc->id}] {$loc->name}".($loc->map ? " ({$loc->map->name})" : ''),
-            ]),
+            'results' => $results->map(function (Location $loc): array {
+                $locationName = trim((string) $loc->name);
+                $locationName = $locationName !== '' ? $locationName : "Локация №{$loc->id}";
+
+                return [
+                    'id' => $loc->id,
+                    'text' => "[{$loc->id}] {$locationName}".($loc->map ? " ({$loc->map->name})" : ''),
+                ];
+            }),
             'pagination' => [
                 'more' => ($page * $perPage) < $total,
             ],

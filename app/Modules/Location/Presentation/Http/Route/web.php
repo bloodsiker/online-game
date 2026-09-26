@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Location\Presentation\Http\LocationController;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
@@ -15,9 +16,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/gathering', [LocationController::class, 'gathering'])->name('gathering');
     Route::get('/gathering/availability', [LocationController::class, 'gatheringAvailability'])->name('gathering.availability');
     Route::get('/gathering/state', [LocationController::class, 'gatheringState'])->name('gathering.state');
-    Route::post('/gathering/node/{node}/start', [LocationController::class, 'startGathering'])->name('gathering.start');
-    Route::post('/gathering/complete', [LocationController::class, 'completeGathering'])->name('gathering.complete');
-    Route::post('/gathering/cancel', [LocationController::class, 'cancelGathering'])->name('gathering.cancel');
+    Route::post('/gathering/node/{node}/start', [LocationController::class, 'startGathering'])
+        ->withoutMiddleware(ValidateCsrfToken::class)
+        ->name('gathering.start');
+    Route::post('/gathering/complete', [LocationController::class, 'completeGathering'])
+        ->withoutMiddleware(ValidateCsrfToken::class)
+        ->name('gathering.complete');
+    Route::post('/gathering/cancel', [LocationController::class, 'cancelGathering'])
+        ->withoutMiddleware(ValidateCsrfToken::class)
+        ->name('gathering.cancel');
 });
 
 Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');

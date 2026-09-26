@@ -13,9 +13,9 @@ class BattleCreator
         private BattleRepository $battleRepository,
     ) {}
 
-    public function createWithMonsters(Location $location, Collection $monsters): Battle
+    public function createWithMonsters(Location $location, Collection $monsters, ?int $dungeonRunId = null): Battle
     {
-        $battle = $this->battleRepository->createBattle($location);
+        $battle = $this->battleRepository->createBattle($location, $dungeonRunId);
         $user = auth()->user();
 
         $this->battleRepository->createBattleDetails($battle, $user);

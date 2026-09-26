@@ -7,6 +7,7 @@ use App\Modules\Item\Application\ItemEffect\Strategies\BuffDefenseStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealHpStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealMpStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\ItemEffectStrategyInterface;
+use App\Modules\Item\Application\ItemEffect\Strategies\RespecStatsStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\RestoreLostExpStrategy;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 
@@ -19,6 +20,7 @@ class ItemEffectStrategyFactory
         ItemEffectType::BUFF_ATTACK->value => BuffAttackStrategy::class,
         ItemEffectType::BUFF_DEFENSE->value => BuffDefenseStrategy::class,
         ItemEffectType::RESTORE_LOST_EXP->value => RestoreLostExpStrategy::class,
+        ItemEffectType::RESPEC_STATS->value => RespecStatsStrategy::class,
     ];
 
     public static function make(ItemEffectType $type): ItemEffectStrategyInterface

@@ -26,7 +26,7 @@ class Battle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['location_id', 'status', 'rounds', 'boss_metadata'];
+    protected $fillable = ['location_id', 'dungeon_run_id', 'status', 'rounds', 'boss_metadata'];
 
     protected $casts = [
         'boss_metadata' => 'array',

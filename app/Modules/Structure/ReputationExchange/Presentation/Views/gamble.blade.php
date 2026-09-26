@@ -42,21 +42,81 @@
         .gamble-resource-row { cursor: pointer; }
         .gamble-options { display: none; }
         .gamble-options.open { display: table-row; }
+
         .gamble-option {
+            position: relative;
             display: inline-block;
-            border: 1px solid #db9f73;
-            border-radius: 4px;
-            padding: 6px 10px;
-            margin: 3px;
-            background: #fff7ea;
-            text-align: center;
+            width: 150px;
+            margin: 8px 10px 4px 0;
             vertical-align: top;
+            border: 1px solid #b99a7c;
+            box-shadow: 0 1px 0 #fff inset, 0 1px 3px rgba(67, 37, 17, .25);
+            background: #ead8ba url({{ asset('img/bg/common-bg.png') }}) repeat;
+            overflow: hidden;
+            text-align: center;
         }
-        .gamble-option.disabled { opacity: .45; }
-        .gamble-option .chance { font-size: 16px; font-weight: 700; }
+        .gamble-option.disabled { opacity: .5; }
+        .gamble-option__head {
+            position: relative;
+            z-index: 2;
+            display: table;
+            width: fit-content;
+            max-width: calc(100% - 52px);
+            height: 22px;
+            margin: 8px auto 0;
+            padding: 0 24px;
+            box-sizing: border-box;
+            background: url({{ asset('img/bg/info/tbl-usi_label-center.gif') }}) repeat-x;
+            color: #ffe9ba;
+            font-weight: bold;
+            font-size: 11px;
+            line-height: 20px;
+            text-align: center;
+            text-shadow: 0 1px 1px #4b160c;
+        }
+        .gamble-option__head::before,
+        .gamble-option__head::after {
+            position: absolute;
+            top: 0;
+            width: 27px;
+            height: 22px;
+            content: '';
+        }
+        .gamble-option__head::before { left: -23px; background: url({{ asset('img/bg/info/tbl-usi_label-left.gif') }}) no-repeat; }
+        .gamble-option__head::after { right: -23px; background: url({{ asset('img/bg/info/tbl-usi_label-right.gif') }}) no-repeat; }
+        .gamble-option__body { padding: 10px 10px 12px; }
+        .gamble-option .chance { margin: 2px 0 6px; font-size: 22px; font-weight: 700; text-shadow: 0 1px 0 #fff4d6; }
         .gamble-option .chance.high { color: #2a7a2a; }
         .gamble-option .chance.mid { color: #a06a00; }
         .gamble-option .chance.low { color: #ba0000; }
+        .gamble-option__divider {
+            position: relative;
+            width: 88%;
+            height: 11px;
+            margin: 4px auto 8px;
+        }
+        .gamble-option__divider::before {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            left: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #9a704f 18%, #9a704f 82%, transparent);
+            content: '';
+        }
+        .gamble-option__divider::after {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            border: 1px solid #895936;
+            background: #d4aa70;
+            content: '';
+            transform: translateX(-50%) rotate(45deg);
+        }
+        .gamble-option__row { padding: 1px 4px; color: #5c4433; }
+        .gamble-option__footer { margin-top: 8px; }
     </style>
     {!! $itemTooltipScript !!}
     <script>
@@ -169,12 +229,18 @@
                                     @csrf
                                     <input type="hidden" name="option_id" value="{{ $option->id }}">
                                     <div class="gamble-option {{ $optionDisabled ? 'disabled' : '' }}">
-                                        <div>Отдать: <b>{{ $option->resourceCost }}</b> шт.</div>
-                                        <div class="chance {{ $chanceClass }}">{{ $option->successChance }}%</div>
-                                        <div>Награда: <b class="redd">+{{ $option->rewardPoints }}</b> реп.</div>
-                                        <button type="submit" class="butt1 pointer" style="margin-top:4px;" {{ $optionDisabled ? 'disabled' : '' }}>
-                                            <span>Обменять</span>
-                                        </button>
+                                        <div class="gamble-option__head">Обмен</div>
+                                        <div class="gamble-option__body">
+                                            <div class="chance {{ $chanceClass }}">{{ $option->successChance }}%</div>
+                                            <div class="gamble-option__divider"></div>
+                                            <div class="gamble-option__row">Отдать: <b>{{ $option->resourceCost }}</b> шт.</div>
+                                            <div class="gamble-option__row">Награда: <b class="redd">+{{ $option->rewardPoints }}</b> реп.</div>
+                                            <div class="gamble-option__footer">
+                                                <b class="butt1 pointer"><b>
+                                                    <button type="submit" class="butt1" {{ $optionDisabled ? 'disabled' : '' }}>Обменять</button>
+                                                </b></b>
+                                            </div>
+                                        </div>
                                     </div>
                                 </form>
                             @endforeach

@@ -459,6 +459,29 @@
                                                             </tbody>
                                                         </table>
 
+                                                        <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+                                                        <table class="coll w100 p10h p2v brd2-all">
+                                                            <tbody>
+                                                            <tr class="bg_l">
+                                                                <td class="brd2-top brd2-bt b">Магическая атака</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getMagicAttack() }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="brd2-top brd2-bt b">Магическое сопротивление</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getMagicResistance() }}</td>
+                                                            </tr>
+                                                            <tr class="bg_l">
+                                                                <td class="brd2-top brd2-bt b">Маг. критический удар</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getMagicCriticalChance() }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="brd2-top brd2-bt b">Маг. критический урон</td>
+                                                                <td class="brd2-top brd2-bt b redd" align="right">{{ $stats->getMagicCritDamage() }}</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+
                                                         @if($user->clanMembership)
                                                             <div style="height:10px;font-size:1px;">&nbsp;</div>
                                                             <table class="coll w100 p10h p2v brd2-all">
@@ -664,8 +687,9 @@
 
     function renderMedalTooltip(medal) {
         var rows = '';
-        rows += '<tr class="skill_list list_dark"><td>Репутация</td><td class="b red" align="right">' + medalTooltipEscape(medal.reputation) + '</td></tr>';
-        rows += '<tr class="skill_list"><td>Получена за</td><td class="b red" align="right">' + Number(medal.minPoints).toLocaleString('ru-RU') + ' репутации</td></tr>';
+        var influenceMedal = medal.type === 'Медаль влияния';
+        rows += '<tr class="skill_list list_dark"><td>' + (influenceMedal ? 'Территория' : 'Репутация') + '</td><td class="b red" align="right">' + medalTooltipEscape(medal.reputation) + '</td></tr>';
+        rows += '<tr class="skill_list"><td>Получена за</td><td class="b red" align="right">' + Number(medal.minPoints).toLocaleString('ru-RU') + (influenceMedal ? ' влияния' : ' репутации') + '</td></tr>';
 
         if (Number(medal.rating) > 0) {
             rows += '<tr class="skill_list list_dark"><td>Рейтинг</td><td class="b red" align="right">+' + Number(medal.rating).toLocaleString('ru-RU') + '</td></tr>';
@@ -675,6 +699,9 @@
         }
         if (medal.description) {
             rows += '<tr class="skill_list list_dark"><td colspan="2" style="padding-top:4px;padding-bottom:4px">' + medalTooltipEscape(medal.description) + '</td></tr>';
+        }
+        if (Array.isArray(medal.stats) && medal.stats.length) {
+            rows += '<tr class="skill_list"><td colspan="2"><b>Характеристики:</b><br>' + medal.stats.map(medalTooltipEscape).join('<br>') + '</td></tr>';
         }
 
         return '<table width="300" border="0" cellspacing="0" cellpadding="0" style="background-color:#FBD4A4" class="aa-table">'

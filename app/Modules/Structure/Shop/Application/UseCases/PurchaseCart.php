@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Shop\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
@@ -16,6 +18,7 @@ class PurchaseCart
 {
     public function __construct(
         private readonly ShopCartService $shopCartService,
+        private readonly PurchaseLogger $purchaseLogger,
     ) {}
 
     public function execute(User $user, int $shopId, ?string $expectedType = null): ShopResultDTO
@@ -139,6 +142,35 @@ class PurchaseCart
             $lockedUser->money -= $cart->getTotalPrice();
             $lockedUser->diamond -= $cart->getTotalDiamond();
             $lockedUser->save();
+
+            $structure = Structure::query()->findOrFail($shopId);
+            $sourceType = $structure->type === Structure::TYPE_BARTER_SHOP
+                ? PurchaseSourceType::BarterShop
+                : PurchaseSourceType::Shop;
+
+            $this->purchaseLogger->record(
+                user: $lockedUser,
+                sourceType: $sourceType,
+                lines: $cart->getItems()->map(static function ($cartItem): array {
+                    $requirements = $cartItem->shopItem->relationLoaded('requirements')
+                        ? $cartItem->shopItem->requirements->map(static fn ($requirement): array => [
+                            'share_item_id' => (int) $requirement->share_item_id,
+                            'item_name' => $requirement->item?->name,
+                            'quantity' => (int) $requirement->quantity * (int) $cartItem->quantity,
+                        ])->values()->all()
+                        : [];
+
+                    return [
+                        'item' => $cartItem->shopItem->item,
+                        'quantity' => (int) $cartItem->quantity,
+                        'unit_price' => (int) $cartItem->shopItem->price,
+                        'unit_diamond' => (int) $cartItem->shopItem->diamond,
+                        'requirements' => $requirements,
+                    ];
+                }),
+                structure: $structure,
+                sourceId: $structure->id,
+            );
 
             $this->shopCartService->clearCart($lockedUser, $shopId);
 

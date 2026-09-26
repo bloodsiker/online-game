@@ -2,6 +2,7 @@
 
 namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
+use App\Modules\Influence\Infrastructure\Persistence\Models\MapInfluenceLevel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ class Map extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['parent_id', 'name', 'folder', 'slug', 'has_gathering_field', 'gathering_field_image'];
+    protected $fillable = ['parent_id', 'name', 'folder', 'slug', 'resp_location_id', 'has_gathering_field', 'gathering_field_image'];
 
     protected function casts(): array
     {
@@ -44,5 +45,10 @@ class Map extends Model
     public function gatheringResources(): HasMany
     {
         return $this->hasMany(MapGatheringResource::class);
+    }
+
+    public function influenceLevels(): HasMany
+    {
+        return $this->hasMany(MapInfluenceLevel::class)->orderBy('required_influence');
     }
 }

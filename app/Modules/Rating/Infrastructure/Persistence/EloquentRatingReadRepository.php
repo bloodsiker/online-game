@@ -9,7 +9,9 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Rating\Domain\Contracts\RatingReadRepository;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class EloquentRatingReadRepository implements RatingReadRepository
 {
@@ -58,6 +60,13 @@ class EloquentRatingReadRepository implements RatingReadRepository
         return Player::with(['user.clanMembership.clan'])
             ->orderByDesc('reputation_rating')
             ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function paginateInfluenceRating(int $perPage): LengthAwarePaginator
+    {
+        return $this->influenceRatingQuery()
             ->paginate($perPage)
             ->withQueryString();
     }
@@ -115,6 +124,11 @@ class EloquentRatingReadRepository implements RatingReadRepository
         );
     }
 
+    public function findInfluenceRatingPosition(string $nick): ?int
+    {
+        return $this->findPlayerPosition($this->influenceRatingQuery(), $nick);
+    }
+
     public function findSkillRatingPosition(int $skillId, string $nick): ?int
     {
         $position = null;
@@ -155,5 +169,20 @@ class EloquentRatingReadRepository implements RatingReadRepository
         });
 
         return $position;
+    }
+
+    private function influenceRatingQuery(): Builder
+    {
+        $totals = DB::table('map_influences')
+            ->selectRaw('user_id, SUM(influence) AS influence_total')
+            ->groupBy('user_id');
+
+        return Player::query()
+            ->with(['user.clanMembership.clan'])
+            ->joinSub($totals, 'influence_totals', 'players.user_id', '=', 'influence_totals.user_id')
+            ->select('players.*')
+            ->selectRaw('influence_totals.influence_total AS influence_total')
+            ->orderByDesc('influence_total')
+            ->orderBy('players.id');
     }
 }

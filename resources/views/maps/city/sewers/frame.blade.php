@@ -249,7 +249,7 @@
                 <div id="u819">
                     <div id="l819" class="s2box br bl bt">
                         <s id="z819">0</s>
-                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#6">
+                        <a class="alvl" href="{{ map_transition_url('1p0OH76', 6) }}">
                             <img src="{{ asset('img/icon/up.gif') }}" hspace="0" vspace="2" border="0" width="26" height="7">
                         </a>
                         <br>

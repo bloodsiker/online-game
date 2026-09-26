@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $location_id
  * @property int $monster_id
  * @property int|null $dungeon_session_id
+ * @property int|null $world_event_run_id
  * @property int $hp_max
  * @property int $hp_now
  * @property int $active
@@ -34,7 +35,7 @@ class MonsterOnLocation extends Model
     protected $table = 'monster_on_locations';
 
     protected $fillable = [
-        'location_id', 'dungeon_session_id',
+        'location_id', 'dungeon_session_id', 'world_event_run_id',
         'monster_id', 'hp_max', 'hp_now',
         'active', 'is_drop_money', 'current_phase', 'aggression',
     ];

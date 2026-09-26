@@ -13,6 +13,10 @@
                class="btn btn-sm {{ request()->routeIs('admin.item.quests') ? 'btn-primary' : 'btn-default' }}">
                 Участие в квестах
             </a>
+            <a href="{{ route('admin.event.world-events.index', ['share_item_id' => $item->id]) }}"
+               class="btn btn-sm btn-default">
+                Участвует в событиях
+            </a>
         </div>
     </div>
 </div>

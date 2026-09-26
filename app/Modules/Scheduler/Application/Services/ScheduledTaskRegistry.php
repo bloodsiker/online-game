@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Scheduler\Application\Services;
 
 use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
+use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
+use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use App\Modules\Scheduler\Domain\DTOs\ScheduledTaskDefinition;
@@ -24,11 +26,20 @@ class ScheduledTaskRegistry
 
     public const PROCESS_PLAYER_STATES = 'players.process_state';
 
+    public const PROCESS_WORLD_EVENTS = 'events.process_world_events';
+
+    public const PROCESS_DUNGEON_RUNS = 'dungeons.process_expired_runs';
+
+    public const DATABASE_BACKUP = 'system.database_backup';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
         private readonly ProcessExpiredClanTaxes $processExpiredClanTaxes,
         private readonly ProcessDuePlayerStates $processDuePlayerStates,
+        private readonly WorldEventLifecycleService $worldEventLifecycleService,
+        private readonly ProcessExpiredDungeonRuns $processExpiredDungeonRuns,
+        private readonly DatabaseBackupService $databaseBackupService,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
@@ -79,6 +90,34 @@ class ScheduledTaskRegistry
                 settingsMutable: false,
                 lockSeconds: 60,
             ),
+            self::PROCESS_WORLD_EVENTS => new ScheduledTaskDefinition(
+                key: self::PROCESS_WORLD_EVENTS,
+                name: 'Мировые события',
+                description: 'Запускает и завершает события, создаёт событийные предметы и удаляет просроченные предметы из рюкзаков.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+                settingsMutable: false,
+                lockSeconds: 60,
+            ),
+            self::PROCESS_DUNGEON_RUNS => new ScheduledTaskDefinition(
+                key: self::PROCESS_DUNGEON_RUNS,
+                name: 'Таймеры этажей данжей',
+                description: 'Завершает просроченные этажи и выводит участников из данжа.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_FIVE_SECONDS,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_FIVE_SECONDS],
+                settingsMutable: false,
+                lockSeconds: 60,
+            ),
+            self::DATABASE_BACKUP => new ScheduledTaskDefinition(
+                key: self::DATABASE_BACKUP,
+                name: 'Резервная копия базы данных',
+                description: 'Каждый час сохраняет сжатый дамп в storage/app/backups/database. За текущий день хранит все копии, за вчера — только последнюю; более старые удаляет.',
+                defaultFrequency: ScheduledTaskFrequency::HOURLY,
+                allowedFrequencies: [ScheduledTaskFrequency::HOURLY],
+                settingsMutable: false,
+                lockSeconds: 3600,
+                successHistoryIntervalSeconds: 3600,
+            ),
         ];
     }
 
@@ -103,6 +142,12 @@ class ScheduledTaskRegistry
                 'Обработано игроков: %d.',
                 $this->processDuePlayerStates->execute(now()),
             ),
+            self::PROCESS_WORLD_EVENTS => $this->processWorldEvents(),
+            self::PROCESS_DUNGEON_RUNS => sprintf(
+                'Завершено просроченных прохождений: %d.',
+                $this->processExpiredDungeonRuns->execute(now()),
+            ),
+            self::DATABASE_BACKUP => $this->createDatabaseBackup(),
             default => throw new InvalidArgumentException('Неизвестная задача планировщика.'),
         };
     }
@@ -117,5 +162,54 @@ class ScheduledTaskRegistry
         }
 
         return trim($output->fetch()) ?: 'Очистка завершена.';
+    }
+
+    private function processWorldEvents(): string
+    {
+        $now = now();
+        $stats = $this->worldEventLifecycleService->tick($now);
+        $expiredItems = $this->worldEventLifecycleService->deleteExpiredInventoryItems($now);
+
+        return sprintf(
+            'Запущено: %d; завершено: %d; создано целей: %d; удалено просроченных предметов: %d.',
+            $stats['started'],
+            $stats['finished'],
+            $stats['spawned'],
+            $expiredItems,
+        );
+    }
+
+    private function createDatabaseBackup(): string
+    {
+        $result = $this->databaseBackupService->execute();
+
+        return sprintf(
+            'Создана копия %s (%s); удалено старых файлов: %d.',
+            $this->relativeBackupPath($result['path']),
+            $this->formatBytes($result['size']),
+            $result['deleted'],
+        );
+    }
+
+    private function relativeBackupPath(string $path): string
+    {
+        $storagePath = rtrim(storage_path(), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+
+        return str_starts_with($path, $storagePath)
+            ? 'storage/'.str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen($storagePath)))
+            : $path;
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes < 1024) {
+            return $bytes.' Б';
+        }
+
+        if ($bytes < 1024 * 1024) {
+            return number_format($bytes / 1024, 1, ',', ' ').' КБ';
+        }
+
+        return number_format($bytes / (1024 * 1024), 1, ',', ' ').' МБ';
     }
 }

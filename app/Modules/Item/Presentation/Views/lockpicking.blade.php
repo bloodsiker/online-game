@@ -313,6 +313,14 @@
             });
             block.appendChild(grid);
         }
+        if (data.event_progress) {
+            const progress = document.createElement('div');
+            progress.className = 'lock-effect-card';
+            progress.textContent = 'Событие: +' + data.event_progress.influence_awarded
+                + ' влияния. Ваш прогресс: ' + data.event_progress.player
+                + '/' + data.event_progress.limit + '.';
+            block.appendChild(progress);
+        }
         el.result.classList.add('visible');
         notifyModalSize();
     }

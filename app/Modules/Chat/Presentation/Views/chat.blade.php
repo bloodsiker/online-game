@@ -47,6 +47,9 @@
         .msg-information       { border-left: 2px solid #df5d03; padding-left: 3px; color: #df5d03; font-weight: bold; }
         .msg-information small { color: #df5d03; }
         .msg-information-icon  { font-weight: bold; }
+        .msg-world_event       { border-left: 2px solid #000; padding-left: 3px; color: #000; font-weight: bold; }
+        .msg-world_event small { color: #000; }
+        .msg-world_event em    { font-style: italic; }
         .msg-party_invite      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
         .msg-party_invite small { color: #000; }
         .msg-party_invite .party-invite-action { font-weight: bold; }
@@ -73,6 +76,80 @@
         .chat-clan-icon   { vertical-align: middle; margin-right: 3px; }
         .chat-level       { color: #666; font-weight: normal; }
 
+        .world-event-widget {
+            position: fixed;
+            z-index: 100;
+            top: 6px;
+            right: 20px;
+            width: 270px;
+            max-height: calc(100vh - 20px);
+            box-sizing: border-box;
+            overflow-y: auto;
+            padding: 7px 9px;
+            border: 1px solid rgba(255, 255, 255, .28);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, .76);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+            color: #fff;
+            scrollbar-width: none;
+        }
+        .world-event-widget[hidden] { display: none; }
+        .world-event-widget::-webkit-scrollbar { display: none; }
+        .world-event-widget__heading {
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, .3);
+            text-align: center;
+        }
+        .world-event-widget__event {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 5px;
+        }
+        .world-event-widget__event + .world-event-widget__event {
+            margin-top: 5px;
+            border-top: 1px solid rgba(255, 255, 255, .2);
+        }
+        .world-event-widget__details {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .world-event-widget__title {
+            display: block;
+            overflow: hidden;
+            color: #ffd88a;
+            font-style: italic;
+            text-align: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .world-event-widget__progress {
+            margin-top: 3px;
+            color: #fff;
+            font-size: 11px;
+            text-align: left;
+        }
+        .world-event-widget__timer {
+            flex: 0 0 66px;
+            box-sizing: border-box;
+            padding: 4px 3px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .09);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .world-event-widget__timer-label,
+        .world-event-widget__timer-value { display: block; }
+        .world-event-widget__timer-label {
+            color: #ccc;
+            font-size: 10px;
+            font-weight: normal;
+        }
+        .world-event-widget__timer-value { margin-top: 2px; }
+
         /* Clan channel */
         .msg-ch-clan small         { color: #007a03; }
         .msg-ch-clan .player-link  { color: #007a03; }
@@ -97,6 +174,7 @@
     </style>
 </head>
 <body>
+<aside id="world-event-widget" class="world-event-widget" aria-live="polite" hidden></aside>
 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
     <tbody>
     <tr>
@@ -135,6 +213,9 @@
 
                         @elseif ($msg->type === 'information')
                             <span class="msg-information-icon">✔</span> {!! $msg->content !!}
+
+                        @elseif ($msg->type === 'world_event')
+                            {!! $msg->content !!}
 
                         @elseif (in_array($msg->type, ['party_invite', 'party_notice'], true))
                             {!! $msg->content !!}
@@ -183,6 +264,9 @@
 <script>
     var channel   = '{{ $channel->value }}';
     var pollUrl   = '{{ route('chat.messages') }}';
+    var worldEventsUrl = '{{ route('chat.world-events') }}';
+    var worldEventsPageUrl = @json(route('events', ['mode' => 'events']));
+    var activeWorldEvents = @json($activeWorldEvents ?? []);
     var ignoreUrl = '{{ route('chat.ignore.add') }}';
     var csrfToken = '{{ csrf_token() }}';
     var lastMessageId = getLastMessageId();
@@ -197,6 +281,134 @@
     var realtimeFallbackTimer = null;
     var realtimeReconnectRequired = false;
     var messageExpirationTimer = null;
+    var worldEventSyncTimer = null;
+    var worldEventCountdownTimer = null;
+
+    function openWorldEvent(runId) {
+        var url = worldEventsPageUrl + '#event-run-' + parseInt(runId, 10);
+        try {
+            window.top.toggleMap(false);
+            window.top.toLocation(url, true);
+        } catch (e) {
+            window.location.href = url;
+        }
+
+        return false;
+    }
+
+    function renderWorldEventWidget(events) {
+        var widget = document.getElementById('world-event-widget');
+        widget.innerHTML = '';
+
+        if (!Array.isArray(events) || events.length === 0) {
+            widget.hidden = true;
+            return;
+        }
+
+        var heading = document.createElement('div');
+        heading.className = 'world-event-widget__heading';
+        heading.textContent = 'Активные события';
+        widget.appendChild(heading);
+
+        events.forEach(function (event) {
+            var item = document.createElement('div');
+            item.className = 'world-event-widget__event';
+
+            var details = document.createElement('div');
+            details.className = 'world-event-widget__details';
+
+            var title = document.createElement('a');
+            title.className = 'world-event-widget__title';
+            title.href = worldEventsPageUrl + '#event-run-' + parseInt(event.run_id, 10);
+            title.textContent = '«' + event.title + '»';
+            title.onclick = function () { return openWorldEvent(event.run_id); };
+
+            var progress = document.createElement('div');
+            progress.className = 'world-event-widget__progress';
+            progress.textContent = 'Этап ' + parseInt(event.stage_position, 10) + ': '
+                + event.stage_title + '. ' + event.progress_label + ': '
+                + parseInt(event.collected_count, 10) + ' / '
+                + parseInt(event.global_limit, 10);
+
+            var timer = document.createElement('div');
+            timer.className = 'world-event-widget__timer';
+            timer.dataset.deadline = String(Date.now() + Math.max(0, parseInt(event.remaining_seconds, 10)) * 1000);
+
+            var timerLabel = document.createElement('span');
+            timerLabel.className = 'world-event-widget__timer-label';
+            timerLabel.textContent = 'Осталось:';
+
+            var timerValue = document.createElement('span');
+            timerValue.className = 'world-event-widget__timer-value';
+
+            details.appendChild(title);
+            details.appendChild(progress);
+            timer.appendChild(timerLabel);
+            timer.appendChild(timerValue);
+            item.appendChild(details);
+            item.appendChild(timer);
+            widget.appendChild(item);
+        });
+
+        widget.hidden = false;
+        updateWorldEventTimers();
+    }
+
+    function formatWorldEventRemaining(totalSeconds) {
+        var days = Math.floor(totalSeconds / 86400);
+        var hours = Math.floor((totalSeconds % 86400) / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+        var parts = [];
+
+        if (days > 0) parts.push(days + 'д');
+        if (days > 0 || hours > 0) parts.push(hours + 'ч');
+        parts.push(minutes + 'м');
+        parts.push(seconds + 'с');
+
+        return parts.join(' ');
+    }
+
+    function updateWorldEventTimers() {
+        document.querySelectorAll('.world-event-widget__timer').forEach(function (timer) {
+            var remaining = Math.max(0, Math.ceil((parseInt(timer.dataset.deadline, 10) - Date.now()) / 1000));
+            var value = timer.querySelector('.world-event-widget__timer-value');
+            if (value) value.textContent = formatWorldEventRemaining(remaining);
+
+            if (remaining === 0 && timer.dataset.syncRequested !== '1') {
+                timer.dataset.syncRequested = '1';
+                scheduleWorldEventSync();
+            }
+        });
+    }
+
+    function syncActiveWorldEvents() {
+        fetch(worldEventsUrl, {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Не удалось обновить события.');
+                return response.json();
+            })
+            .then(function (events) {
+                activeWorldEvents = events;
+                renderWorldEventWidget(events);
+            })
+            .catch(function () {});
+    }
+
+    function scheduleWorldEventSync() {
+        if (worldEventSyncTimer) window.clearTimeout(worldEventSyncTimer);
+        worldEventSyncTimer = window.setTimeout(function () {
+            worldEventSyncTimer = null;
+            syncActiveWorldEvents();
+        }, 50);
+    }
+
+    function handleWorldEventStateChanged() {
+        scheduleWorldEventSync();
+    }
 
     function scrollToBottom() {
         window.scrollTo(0, document.body.scrollHeight);
@@ -204,6 +416,7 @@
 
     // Scroll to bottom on load
     window.addEventListener('load', scrollToBottom);
+    renderWorldEventWidget(activeWorldEvents);
 
     function escapeHtml(str) {
         return String(str)
@@ -264,6 +477,8 @@
             html += '<span class="msg-system-icon">★</span> ' + msg.content;
         } else if (msg.type === 'information') {
             html += '<span class="msg-information-icon">✔</span> ' + msg.content;
+        } else if (msg.type === 'world_event') {
+            html += msg.content;
         } else if (msg.type === 'party_invite' || msg.type === 'party_notice') {
             html += msg.content;
         } else if (msg.type === 'quest') {
@@ -524,6 +739,7 @@
         if (realtimeFallbackTimer) return;
         realtimeFallbackTimer = window.setInterval(function () {
             fetchMessages(null, true);
+            syncActiveWorldEvents();
         }, 5000);
     }
 
@@ -562,7 +778,8 @@
             .listen('.chat.messages.invalidated', handleRealtimeInvalidation);
         realtimeSystemChannel = echo.private('chat.system')
             .listen('.chat.message.created', handleRealtimeMessage)
-            .listen('.chat.message.expired', handleRealtimeExpiration);
+            .listen('.chat.message.expired', handleRealtimeExpiration)
+            .listen('.world-event.state.changed', handleWorldEventStateChanged);
         subscribeCurrentRealtimeChannel();
 
         var connection = echo.connector && echo.connector.pusher
@@ -577,6 +794,7 @@
         connection.bind('connected', function () {
             stopFallbackPolling();
             scheduleRealtimeSync(realtimeReconnectRequired);
+            scheduleWorldEventSync();
             realtimeReconnectRequired = false;
         });
         ['disconnected', 'unavailable', 'failed'].forEach(function (state) {
@@ -589,6 +807,7 @@
         if (connection.state === 'connected') {
             stopFallbackPolling();
             scheduleRealtimeSync(false);
+            scheduleWorldEventSync();
         } else {
             window.setTimeout(function () {
                 if (connection.state !== 'connected') startFallbackPolling();
@@ -599,6 +818,7 @@
     initializeRealtime();
     removeExpiredMessages();
     messageExpirationTimer = window.setInterval(removeExpiredMessages, 1000);
+    worldEventCountdownTimer = window.setInterval(updateWorldEventTimers, 1000);
 
     // Switch channel without reloading the iframe
     window.addEventListener('message', function (event) {
@@ -618,7 +838,9 @@
         var echo = realtimeEcho();
         stopFallbackPolling();
         if (realtimeSyncTimer) window.clearTimeout(realtimeSyncTimer);
+        if (worldEventSyncTimer) window.clearTimeout(worldEventSyncTimer);
         if (messageExpirationTimer) window.clearInterval(messageExpirationTimer);
+        if (worldEventCountdownTimer) window.clearInterval(worldEventCountdownTimer);
 
         if (realtimePersonalChannel) {
             realtimePersonalChannel.stopListening('.chat.message.created', handleRealtimeMessage);
@@ -628,6 +850,7 @@
         if (realtimeSystemChannel) {
             realtimeSystemChannel.stopListening('.chat.message.created', handleRealtimeMessage);
             realtimeSystemChannel.stopListening('.chat.message.expired', handleRealtimeExpiration);
+            realtimeSystemChannel.stopListening('.world-event.state.changed', handleWorldEventStateChanged);
             if (echo) echo.leave('chat.system');
         }
         if (realtimeCurrentChannel) {

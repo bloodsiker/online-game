@@ -358,6 +358,11 @@ class PlayerHeartbeatTest extends TestCase
             ->assertDontSee('post/unread-count', false);
     }
 
+    public function test_game_page_redirects_guest_instead_of_rendering_player_frame(): void
+    {
+        $this->get(route('game'))->assertRedirect(route('index'));
+    }
+
     public function test_menu_keeps_blink_state_until_canvas_menu_is_ready(): void
     {
         $response = $this->get(route('menu'));

@@ -3,8 +3,10 @@
 namespace App\Modules\Location\Domain\Services;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Location\Application\DTOs\MoveResultDTO;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -22,11 +24,17 @@ final readonly class PlayerMovementService
     public function __construct(
         private BackpackService $backpackService,
         private PlayerEquipmentLoader $equipmentLoader,
+        private BattleRepository $battleRepository,
+        private ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
     public function move(User $user, string $direction): MoveResultDTO
     {
         $location = $user->currentLocation;
+
+        if ($this->battleRepository->hasLivingPlayerInActiveBattle($user->id, $location->id)) {
+            return MoveResultDTO::blocked('Нельзя покинуть локацию во время боя.');
+        }
 
         if (! $location->$direction) {
             return MoveResultDTO::blocked('Нельзя идти в этом направлении');
@@ -135,6 +143,10 @@ final readonly class PlayerMovementService
 
     private function checkLocationGate(LocationGate $gate, User $user): ?string
     {
+        if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {
+            return 'Проход закрыт. Недостаточно влияния на территории.';
+        }
+
         if ($gate->mode === 'teleport_use') {
             return 'Проход закрыт. Нужно использовать ключ из инвентаря.';
         }
@@ -173,6 +185,11 @@ final readonly class PlayerMovementService
         // Інвалідуємо список "хто на локації" для обох локацій.
         Cache::forget('who:users_on_location:'.$oldLocationId);
         Cache::forget('who:users_on_location:'.$newLocationId);
+        $dungeonRunId = DungeonSession::query()->where('user_id', $user->id)->value('dungeon_run_id');
+        if ($dungeonRunId !== null) {
+            Cache::forget('who:users_on_location:'.$oldLocationId.':run:'.$dungeonRunId);
+            Cache::forget('who:users_on_location:'.$newLocationId.':run:'.$dungeonRunId);
+        }
     }
 
     private function getSpeedModifier(int $used, int $capacity): float

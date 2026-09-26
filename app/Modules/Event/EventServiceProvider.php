@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Event;
 
+use App\Modules\Event\Infrastructure\Persistence\Models\WorldEventRun;
+use App\Modules\Event\Infrastructure\Persistence\Observers\WorldEventRunObserver;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,6 +13,8 @@ class EventServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        WorldEventRun::observe(WorldEventRunObserver::class);
+
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'event');
 
         Route::middleware(['web'])

@@ -27,10 +27,10 @@
         .gathering-canvas::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgba(21,16,10,.03), rgba(21,16,10,.3)); }
         .gathering-help { position: absolute; top: 8px; left: 50%; z-index: 4; transform: translateX(-50%); width: max-content; max-width: calc(100% - 20px); padding: 4px 9px; color: #f7eacb; background: rgba(31,27,22,.82); border: 1px solid rgba(236,214,167,.5); font-size: 10px; text-align: center; }
         .gathering-empty { position: absolute; top: 50%; left: 50%; z-index: 4; transform: translate(-50%, -50%); width: 80%; padding: 12px; color: #f7eacb; background: rgba(31,27,22,.82); border: 1px solid #c5a86d; text-align: center; }
-        .gathering-node { position: absolute; z-index: 3; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; transform: translate(-50%, -50%); background: transparent; cursor: pointer; font: inherit; user-select: none; }
+        .gathering-node { position: absolute; z-index: 3; width: 25px; height: 25px; padding: 0; border: 0; border-radius: 50%; transform: translate(-50%, -50%); background: transparent; cursor: pointer; font: inherit; user-select: none; }
         .gathering-node-ring { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border: 2px solid var(--rarity, #d9ba69); border-radius: 50%; background: rgba(13,18,13,.72); box-shadow: 0 0 0 1px rgba(63,43,18,.9), 0 0 7px rgba(255,220,111,.38), inset 0 0 4px rgba(0,0,0,.85); animation: gathering-pulse 2.1s ease-in-out infinite; transition: transform .12s ease; }
         .gathering-node:hover .gathering-node-ring { transform: scale(1.07); filter: brightness(1.15); }
-        .gathering-node-icon { width: 21px; height: 21px; object-fit: contain; filter: drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
+        .gathering-node-icon { width: 16px; height: 16px; object-fit: contain; filter: drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
         .gathering-node-gatherers { position: absolute; top: -7px; right: -7px; z-index: 2; display: none; min-width: 15px; height: 15px; padding: 0 3px; color: #fff7e3; background: #b52e24; border: 1px solid #f0b18a; border-radius: 50%; box-shadow: 0 1px 3px rgba(58,19,12,.55); font-size: 9px; font-weight: 700; line-height: 13px; text-align: center; pointer-events: none; }
         .gathering-node-gatherers:not(:empty) { display: block; }
         .gathering-node.is-active .gathering-node-ring { border-color: #fff0a4; animation: gathering-active-pulse 1.35s ease-in-out infinite; }

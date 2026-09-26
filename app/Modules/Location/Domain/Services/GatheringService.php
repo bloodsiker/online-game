@@ -9,6 +9,7 @@ use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Influence\Domain\Services\MapInfluenceBonusService;
 use App\Modules\Item\Infrastructure\Persistence\Models\LockpickingAttempt;
 use App\Modules\Location\Application\DTOs\GatheringActionResultDTO;
 use App\Modules\Location\Application\Jobs\BroadcastGatheringMapUpdate;
@@ -19,7 +20,6 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerGatheringStat;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -36,6 +36,7 @@ class GatheringService
     public function __construct(
         private readonly BackpackService $backpackService,
         private readonly ChatService $chatService,
+        private readonly ?MapInfluenceBonusService $influenceBonusService = null,
     ) {}
 
     public function state(User $user): array
@@ -162,7 +163,8 @@ class GatheringService
                     return $this->failure($resourceBlock, 422);
                 }
 
-                $bonusPercent = $this->equippedToolBonusPercent($lockedPlayer, (string) $resource->gathering_tool_family) ?? 0;
+                $bonusPercent = ($this->equippedToolBonusPercent($lockedPlayer, (string) $resource->gathering_tool_family) ?? 0)
+                    + ($this->influenceBonusService?->for($lockedUser->id, (int) $location->map_id)->gatheringSpeedPercent ?? 0);
                 $seconds = $this->effectiveGatheringSeconds($resource, $bonusPercent);
                 $completesAt = now()->addSeconds($seconds);
                 $attempt = GatheringAttempt::create([
@@ -278,7 +280,7 @@ class GatheringService
             $count = $isDouble ? 2 : 1;
 
             $backpackItem = $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
-            $bonusRewards = $this->rollBonusResources($lockedUser, $resource);
+            $bonusRewards = $this->rollBonusResources($lockedUser, $resource, $mapId);
             $lootMessage = sprintf(
                 'Вы получили вещь <b>%s</b> %d шт. (в рюкзаке %d шт.)',
                 e((string) $resource->name),
@@ -402,6 +404,9 @@ class GatheringService
         $bonusPercent = $resource->gathering_tool_family !== null
             ? ($this->equippedToolBonusPercent($user->player, $resource->gathering_tool_family) ?? 0)
             : 0;
+        $bonusPercent += ($this->influenceBonusService
+            ?->for($user->id, (int) $node->mapResource->map_id)
+            ->gatheringSpeedPercent ?? 0);
 
         return [
             'id' => (int) $node->id,
@@ -437,13 +442,14 @@ class GatheringService
      *
      * @return list<array{shareItemId: int, name: string, image: string, count: int, backpackCount: int}>
      */
-    private function rollBonusResources(User $user, ShareItem $resource): array
+    private function rollBonusResources(User $user, ShareItem $resource, int $mapId): array
     {
         $bonuses = [];
+        $influenceChance = $this->influenceBonusService?->for($user->id, $mapId)->bonusResourceChancePercent ?? 0;
 
         foreach ($resource->itemHasItems as $bonusItem) {
-            $chance = min(100, max(0, (int) $bonusItem->pivot->drop_chance));
-            if (random_int(1, 100) > $chance) {
+            $chance = min(100, max(0, (float) $bonusItem->pivot->drop_chance + $influenceChance));
+            if (random_int(1, 100000) / 1000 > $chance) {
                 continue;
             }
 
@@ -548,7 +554,7 @@ class GatheringService
         return $chances->isEmpty() ? null : $chances->max();
     }
 
-    private function effectiveGatheringSeconds(ShareItem $resource, int $bonusPercent): int
+    private function effectiveGatheringSeconds(ShareItem $resource, float $bonusPercent): int
     {
         $base = max(1, (int) $resource->gathering_time_seconds);
         $multiplier = 1 - min(100, max(0, $bonusPercent)) / 100;

@@ -153,16 +153,22 @@ final class ItemTooltipStatsBuilder
                 $value = floor($value * $upgradeMultiplier);
             }
 
+            // Нулевая характеристика игроку ничего не даёт — не показываем строку.
+            if ((float) $value === 0.0) {
+                continue;
+            }
+
             $valueStr = $stat->isPercent() ? $value.'%' : (string) $value;
             $stats[] = ['title' => $stat->stat_type->label(), 'value' => '+'.$valueStr];
         }
 
-        if ($attackMin !== null || $attackMax !== null) {
-            if ($upgradeLvl > 0 && $isWeaponSlot) {
-                $attackMin = $attackMin !== null ? floor($attackMin * $upgradeMultiplier) : null;
-                $attackMax = $attackMax !== null ? floor($attackMax * $upgradeMultiplier) : null;
-            }
+        if ($upgradeLvl > 0 && $isWeaponSlot) {
+            $attackMin = $attackMin !== null ? floor($attackMin * $upgradeMultiplier) : null;
+            $attackMax = $attackMax !== null ? floor($attackMax * $upgradeMultiplier) : null;
+        }
 
+        // Нулевой диапазон атаки (0 .. 0) не несёт информации — пропускаем строку.
+        if (((float) ($attackMin ?? 0)) !== 0.0 || ((float) ($attackMax ?? 0)) !== 0.0) {
             $stats[] = [
                 'title' => 'Атака',
                 'value' => '+'.($attackMin ?? 0).' .. +'.($attackMax ?? 0),
@@ -171,6 +177,13 @@ final class ItemTooltipStatsBuilder
 
         // Активные эффекты из share_item_effects (зелья, баффы)
         foreach ($item->effects as $effect) {
+            // Нулевое значение эффекта — либо ничего не даёт, либо техническая
+            // заглушка (сумма считается динамически в самой стратегии эффекта,
+            // см. RestoreLostExpStrategy/RespecStatsStrategy) — строку не показываем.
+            if ((float) $effect->value === 0.0) {
+                continue;
+            }
+
             $valueStr = $effect->value_type === ItemEffectValueType::PERCENT
                 ? $effect->value.'%'
                 : (string) $effect->value;
@@ -274,6 +287,11 @@ final class ItemTooltipStatsBuilder
             $key = $entry['type'] ?? $entry['stat'] ?? null;
 
             if (! $key) {
+                continue;
+            }
+
+            // Нулевая характеристика игроку ничего не даёт — не показываем строку.
+            if ((float) ($entry['value'] ?? 0) === 0.0) {
                 continue;
             }
 

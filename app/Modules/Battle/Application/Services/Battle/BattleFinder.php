@@ -14,10 +14,10 @@ readonly class BattleFinder
         private BattleRepository $battleRepository,
     ) {}
 
-    public function findActiveForPlayer(Location $location): ?Battle
+    public function findActiveForPlayer(Location $location, ?int $dungeonRunId = null): ?Battle
     {
         $user = auth()->user();
-        $battle = $this->battleRepository->findActiveBattleOnLocation($location);
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $dungeonRunId);
 
         if (! $battle) {
             return null;

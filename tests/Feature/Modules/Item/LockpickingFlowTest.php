@@ -7,6 +7,7 @@ namespace Tests\Feature\Modules\Item;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Event\Application\DTOs\WorldEventCollectionResult;
 use App\Modules\Item\Application\Services\LockpickingService;
 use App\Modules\Item\Domain\Services\ItemService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
@@ -149,6 +150,54 @@ class LockpickingFlowTest extends TestCase
         $this->assertSame('failure', $result->data['status']);
         $this->assertTrue($result->data['has_lockpick']);
         $this->assertDatabaseHas('backpacks', ['item_id' => 200, 'count' => 1]);
+        $this->assertDatabaseMissing('lockpicking_attempts', ['player_id' => 1]);
+    }
+
+    public function test_successful_world_event_chest_counts_progress_before_loot_is_claimed(): void
+    {
+        Carbon::setTestNow('2026-09-15 12:00:00');
+        $this->seedLockedChestAndLockpick();
+        DB::table('backpacks')->where('item_id', 100)->delete();
+        DB::table('lockpicking_attempts')->insert([
+            'player_id' => 1,
+            'item_id' => 100,
+            'share_item_id' => 10,
+            'lockpick_share_item_id' => 20,
+            'location_id' => 1,
+            'is_inventory' => false,
+            'skill_snapshot' => 1,
+            'chance_snapshot' => 100,
+            'started_at' => now()->subSeconds(12),
+            'completes_at' => now(),
+            'expires_at' => now()->addSeconds(30),
+        ]);
+        [$service, $itemService] = $this->serviceWithItemServiceMock();
+        $itemService->method('accessibleChest')->willReturnCallback(
+            static fn (User $user, int $itemId, ?Item $item = null): array => [$item ?? Item::query()->findOrFail($itemId), 'world'],
+        );
+        $itemService->expects($this->once())
+            ->method('recordWorldEventChestOpened')
+            ->willReturn(new WorldEventCollectionResult(
+                allowed: true,
+                playerProgress: 1,
+                playerLimit: 5,
+                influenceAwarded: 3,
+                mapInfluence: 18,
+            ));
+        $itemService->expects($this->once())
+            ->method('claimAllChestContents')
+            ->willReturn([]);
+
+        $result = $service->complete(User::query()->findOrFail(1), 100);
+
+        $this->assertTrue($result->ok);
+        $this->assertSame('success', $result->data['status']);
+        $this->assertSame([
+            'player' => 1,
+            'limit' => 5,
+            'influence_awarded' => 3,
+            'map_influence' => 18,
+        ], $result->data['event_progress']);
         $this->assertDatabaseMissing('lockpicking_attempts', ['player_id' => 1]);
     }
 

@@ -17,6 +17,8 @@ final class SystemMessageCatalogTest extends TestCase
         self::assertSame('30 минут', $entries->get('Глобальное системное')['lifetime']);
         self::assertSame('#cc00ff', $entries->get('Глобальное системное')['color']);
         self::assertSame('10 минут', $entries->get('Информационное')['lifetime']);
+        self::assertSame('30 минут', $entries->get('Событие')['lifetime']);
+        self::assertSame('#000000', $entries->get('Событие')['color']);
         self::assertSame('#009900', $entries->get('Квестовый предмет')['color']);
     }
 
@@ -31,5 +33,6 @@ final class SystemMessageCatalogTest extends TestCase
         self::assertContains(ChatMessageType::Loot->value, $types);
         self::assertNotContains(ChatMessageType::PartyInvite->value, $types);
         self::assertNotContains(ChatMessageType::PartyNotice->value, $types);
+        self::assertNotContains(ChatMessageType::WorldEvent->value, $types);
     }
 }

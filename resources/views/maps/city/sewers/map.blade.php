@@ -381,7 +381,7 @@
                                                                                           onmouseout="mark_l(819,0)"><span
                                                                                             class="listloc">819</span> <span
                                                                                             style="font-size:18px;">→</span> <a
-                                                                                            href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#6">Город</a> <span
+                                                                                            href="{{ map_transition_url('1p0OH76', 6) }}">Город</a> <span
                                                                                             class="listloc">6</span></span>
                                                                                             </td>
                                                                                         </tr>

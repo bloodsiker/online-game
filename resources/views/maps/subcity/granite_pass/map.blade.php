@@ -1,6 +1,7 @@
 @include('maps.base.map', [
     'mapTitle' => 'Гранитный Перевал',
     'mapFrameView' => 'maps.subcity.granite_pass.frame',
+    'mapDataFile' => 'granite_pass.php',
     'mapAreaId' => 1279,
     'mapAreaLabel' => 'Гранитный Перевал',
     'mapPassageFromId' => 1279,

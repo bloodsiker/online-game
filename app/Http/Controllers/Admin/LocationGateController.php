@@ -59,7 +59,7 @@ class LocationGateController extends Controller
     {
         $gate->from_location_id = (int) $request->input('from_location_id');
         $gate->to_location_id = (int) $request->input('to_location_id');
-        $gate->share_item_id = (int) $request->input('share_item_id');
+        $gate->share_item_id = $request->filled('share_item_id') ? $request->integer('share_item_id') : null;
         $gate->mode = $request->input('mode', 'presence_pass');
         $gate->consume_item = (bool) $request->input('consume_item', false);
         $gate->button_label = $request->input('button_label') ?: null;

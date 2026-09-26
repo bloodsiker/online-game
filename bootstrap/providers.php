@@ -9,6 +9,7 @@ use App\Modules\Effect\EffectServiceProvider;
 use App\Modules\Event\EventServiceProvider;
 use App\Modules\Forum\ForumServiceProvider;
 use App\Modules\Friend\FriendServiceProvider;
+use App\Modules\Influence\InfluenceServiceProvider;
 use App\Modules\Interface\InterfaceServiceProvider;
 use App\Modules\Item\ItemServiceProvider;
 use App\Modules\Library\LibraryServiceProvider;
@@ -38,6 +39,7 @@ return [
     FriendServiceProvider::class,
     ForumServiceProvider::class,
     InterfaceServiceProvider::class,
+    InfluenceServiceProvider::class,
     ItemServiceProvider::class,
     LibraryServiceProvider::class,
     LocationServiceProvider::class,

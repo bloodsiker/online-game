@@ -19,7 +19,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
         private FightHitInterface $player,     // StatSheet с полными рассчитанными статами
         private Player $playerModel, // Player model для чтения/записи mp_now
         private FightHitInterface $monster,
-        private MagicSkill $magicSkill,
+        private ?MagicSkill $magicSkill,
     ) {}
 
     public function getHits(): array

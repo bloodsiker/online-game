@@ -265,7 +265,7 @@
                         <s id="z102">0</s>
                         <em>102</em>
                         <cite>Городские ворота</cite>
-                        <a href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#101" class="anorth">↑</a>
+                        <a href="{{ map_transition_url('1p0OH76', 101) }}" class="anorth">↑</a>
                     </div>
                 </div>
             </div>
@@ -779,7 +779,7 @@
                     <div id="l418" class="s2box bt bb br">
                         <s id="z418">0</s>418
                         <br>
-                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => 'Kj9u18NJl3'], request()->except(['s']))) }}#883">
+                        <a class="alvl" href="{{ map_transition_url('Kj9u18NJl3', 883) }}">
                             <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
                         </a>
                     </div>
@@ -882,7 +882,7 @@
                     <div id="l245" class="s2box bl bb br">
                         <s id="z245">0</s>245
                         <br>
-                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => '9uF1sO7v'], request()->except(['s']))) }}#511">
+                        <a class="alvl" href="{{ map_transition_url('9uF1sO7v', 511) }}">
                             <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
                         </a>
                     </div>
@@ -2559,7 +2559,7 @@
                 <div id="u510">
                     <div id="l510" class="s2box bl bb">
                         <s id="z510">0</s>510
-                        <a href="{{ route('on_map', array_merge(['s' => 'Vr8Qm2Lp5Z'], request()->except(['s']))) }}#992" class="aeast">→</a>
+                        <a href="{{ map_transition_url('Vr8Qm2Lp5Z', 992) }}" class="aeast">→</a>
                     </div>
                 </div>
             </div>

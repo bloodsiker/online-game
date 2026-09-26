@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Player\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Event\Application\UseCases\GetPlayerMapInfluences;
+use App\Modules\Influence\Application\UseCases\GetMapInfluenceDetails;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Player\Application\UseCases\AllocateStats;
 use App\Modules\Player\Application\UseCases\GetCharacter;
 use App\Modules\Player\Application\UseCases\GetProfessionsPage;
@@ -20,6 +23,8 @@ class CharacterController extends Controller
         private readonly GetCharacter $getCharacter,
         private readonly AllocateStats $allocateStats,
         private readonly GetProfessionsPage $getProfessionsPage,
+        private readonly GetPlayerMapInfluences $getPlayerMapInfluences,
+        private readonly GetMapInfluenceDetails $getMapInfluenceDetails,
     ) {}
 
     public function index(Request $request): View
@@ -47,6 +52,20 @@ class CharacterController extends Controller
         );
 
         return view('player::professions', compact('page'));
+    }
+
+    public function influence(Request $request): View
+    {
+        return view('player::influence', [
+            'mapInfluences' => $this->getPlayerMapInfluences->execute($request->user()->id),
+        ]);
+    }
+
+    public function influenceDetails(Request $request, Map $map): View
+    {
+        return view('player::influence-details', [
+            'page' => $this->getMapInfluenceDetails->execute($request->user()->id, $map),
+        ]);
     }
 
     public function pointSave(Request $request): RedirectResponse|JsonResponse

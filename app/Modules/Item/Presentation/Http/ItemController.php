@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
+use App\Modules\Item\Application\ItemEffect\Strategies\RespecStatsStrategy;
 use App\Modules\Item\Application\Services\LockpickingService;
 use App\Modules\Item\Application\UseCases\DropItem;
 use App\Modules\Item\Application\UseCases\EquipItem;
@@ -23,10 +25,12 @@ use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Item\Domain\Exceptions\ItemUseBlockedException;
 use App\Modules\Item\Domain\Services\ItemUsagePolicyService;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
+use App\Modules\Player\Domain\Events\PlayerChangeStat;
 use App\Modules\Player\Domain\Services\PlayerRevivalService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -34,6 +38,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ItemController extends Controller
 {
@@ -55,6 +60,7 @@ class ItemController extends Controller
         private readonly ItemUsagePolicyService $itemUsagePolicyService,
         private readonly LockpickingService $lockpickingService,
         private readonly QuestProgressService $questProgressService,
+        private readonly ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
     public function pickUp(int $id): mixed
@@ -249,6 +255,13 @@ class ItemController extends Controller
         );
 
         if ($gate !== null) {
+            if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Недостаточно влияния для прохода.',
+                ], 422);
+            }
+
             $questUsePlan = $this->questProgressService->prepareItemUse(
                 $player,
                 (int) $backpack->item->share_item_id,
@@ -282,7 +295,13 @@ class ItemController extends Controller
         );
         $itemBuffs = $backpack->item->itemInfo->buffs;
         $itemDebuffs = $backpack->item->itemInfo->debuffs;
-        $hasRegularEffect = $instantEffects->isNotEmpty() || $itemBuffs->isNotEmpty() || $itemDebuffs->isNotEmpty();
+        $isRenameCert = $backpack->item->itemInfo->effects->contains(
+            fn ($e) => $e->effect_type === ItemEffectType::RENAME_NAME
+        );
+        $isChangeRaceCert = $backpack->item->itemInfo->effects->contains(
+            fn ($e) => $e->effect_type === ItemEffectType::CHANGE_RACE
+        );
+        $hasRegularEffect = $instantEffects->isNotEmpty() || $itemBuffs->isNotEmpty() || $itemDebuffs->isNotEmpty() || $isRenameCert || $isChangeRaceCert;
         $questUsePlan = $this->questProgressService->prepareItemUse(
             $player,
             (int) $backpack->item->share_item_id,
@@ -333,12 +352,59 @@ class ItemController extends Controller
             }
         }
 
+        $newName = null;
+        if ($isRenameCert) {
+            $validator = Validator::make(
+                ['name' => trim((string) $request->input('new_name'))],
+                ['name' => ['required', 'string', 'min:3', 'max:50', 'unique:users,name,'.$user->id]],
+                [
+                    'name.required' => 'Введите новое имя.',
+                    'name.min' => 'Имя должно быть не менее :min символов.',
+                    'name.max' => 'Имя должно быть не более :max символов.',
+                    'name.unique' => 'Такое имя уже занято.',
+                ],
+            );
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors()->first('name'),
+                ], 422);
+            }
+
+            $newName = $validator->validated()['name'];
+        }
+
+        $newRace = null;
+        if ($isChangeRaceCert) {
+            $newRaceId = $request->integer('new_race_id');
+            $newRace = Race::query()->find($newRaceId);
+
+            if ($newRace === null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Выберите расу.',
+                ], 422);
+            }
+
+            if ((int) $newRace->id === (int) $player->race_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Это уже ваша текущая раса.',
+                ], 422);
+            }
+        }
+
         $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
 
         $questUse = $this->questProgressService->progressPreparedItemUse($questUsePlan);
 
         $stats = $this->statService->resolve($player);
         $expBefore = (int) $player->exp;
+        $freeStatsBefore = (int) $player->free_stats;
+        $respecsStats = $instantEffects->contains(
+            fn ($e) => $e->effect_type === ItemEffectType::RESPEC_STATS
+        );
 
         foreach ($instantEffects as $effectModel) {
             $effect = $effectModel->toValueObject();
@@ -367,6 +433,36 @@ class ItemController extends Controller
             );
         }
 
+        if ($newName !== null) {
+            $user->name = $newName;
+            $user->save();
+        }
+
+        $raceChangeRefund = 0;
+        if ($newRace !== null) {
+            // Та же формула, что и RespecStatsStrategy: старый расовый прирост
+            // вычитается из текущих статов, остаток (вложенное игроком) уходит
+            // в свободные очки, после чего статы стартуют с базы новой расы.
+            $oldRace = $player->race;
+            $levelsGained = max(0, $player->lvl - 1);
+
+            foreach (RespecStatsStrategy::STATS as $stat) {
+                $oldRaceGrowth = (float) ($oldRace?->{$stat} ?? 0) * $levelsGained;
+                $oldBaseline = RespecStatsStrategy::STARTING_VALUE + $oldRaceGrowth;
+                $allocated = max(0.0, (float) $player->{$stat} - $oldBaseline);
+                $raceChangeRefund += (int) round($allocated);
+
+                $newRaceGrowth = (float) $newRace->{$stat} * $levelsGained;
+                $player->{$stat} = RespecStatsStrategy::STARTING_VALUE + $newRaceGrowth;
+            }
+
+            $player->race_id = $newRace->id;
+            $player->free_stats += $raceChangeRefund;
+            $player->save();
+
+            event(new PlayerChangeStat($player));
+        }
+
         if ($hasRegularEffect || $questUse['consume']) {
             ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
         } else {
@@ -377,6 +473,7 @@ class ItemController extends Controller
         $player->refresh();
         $stats = $this->statService->resolve($player);
         $expRestored = $restoresLostExp ? max(0, (int) $player->exp - $expBefore) : 0;
+        $freeStatsRefunded = $respecsStats ? max(0, (int) $player->free_stats - $freeStatsBefore) : 0;
 
         return response()->json([
             'status' => 'success',
@@ -389,9 +486,23 @@ class ItemController extends Controller
             'lvl' => $player->lvl,
             'experience' => $player->getPercentExp(),
             'exp_restored' => $expRestored,
-            'message' => $expRestored > 0
-                ? sprintf('Возвращено потерянного опыта: %s.', number_format($expRestored, 0, '.', ' '))
-                : ($questUse['messages'][0] ?? null),
+            'free_stats_refunded' => $freeStatsRefunded,
+            'new_name' => $newName,
+            'new_race' => $newRace?->name,
+            'message' => match (true) {
+                $newName !== null => sprintf('Имя изменено на «%s».', $newName),
+                $newRace !== null => sprintf(
+                    'Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.',
+                    $newRace->name,
+                    $raceChangeRefund,
+                ),
+                $expRestored > 0 => sprintf('Возвращено потерянного опыта: %s.', number_format($expRestored, 0, '.', ' ')),
+                $freeStatsRefunded > 0 => sprintf(
+                    'Характеристики сброшены! Возвращено свободных очков для распределения: %d. Расовый прирост не затронут.',
+                    $freeStatsRefunded,
+                ),
+                default => $questUse['messages'][0] ?? null,
+            },
             'quest_messages' => $questUse['messages'],
             'blessings' => array_map(
                 static fn ($effect): array => $effect->toArray(),

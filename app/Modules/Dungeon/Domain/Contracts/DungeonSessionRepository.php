@@ -14,7 +14,7 @@ interface DungeonSessionRepository
 
     public function existsForUser(int $userId): bool;
 
-    public function create(Dungeon $dungeon, int $userId, ?CarbonInterface $expiresAt = null, ?int $primarySessionId = null): DungeonSession;
+    public function create(Dungeon $dungeon, int $userId, ?CarbonInterface $expiresAt = null, ?int $primarySessionId = null, ?int $runId = null): DungeonSession;
 
     public function delete(DungeonSession $session): void;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Presentation\Http;
 
+use App\Modules\Influence\Infrastructure\Persistence\Models\PlayerInfluenceMedal;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
@@ -63,8 +64,39 @@ final class UserController
             'isOnline' => $isOnline,
             'locationPath' => $this->buildLocationPath($user),
             'itemTooltipScript' => $this->tooltipCollector->renderScript(),
-            'reputationMedals' => $this->reputationMedals($user->player),
+            'reputationMedals' => collect([
+                ...$this->reputationMedals($user->player),
+                ...$this->influenceMedals($user),
+            ])->sortByDesc('earnedTimestamp')->values()->all(),
         ]);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function influenceMedals(User $user): array
+    {
+        return PlayerInfluenceMedal::query()
+            ->with(['medal.map', 'medal.levels', 'medal.stats'])
+            ->where('user_id', $user->id)
+            ->get()
+            ->filter(fn (PlayerInfluenceMedal $entry): bool => $entry->medal !== null && $entry->medal->iconUrl() !== null)
+            ->map(fn (PlayerInfluenceMedal $entry): array => [
+                'image' => $entry->medal->iconUrl(),
+                'name' => $entry->medal->name,
+                'reputation' => $entry->medal->map?->name ?? 'Территория',
+                'type' => 'Медаль влияния',
+                'rating' => (int) $entry->medal->rating_points,
+                'minPoints' => (int) $entry->medal->levels->max('required_influence'),
+                'earnedAt' => $entry->earned_at?->format('d.m.Y H:i'),
+                'earnedTimestamp' => $entry->earned_at?->timestamp ?? -1,
+                'description' => $entry->medal->description,
+                'stats' => $entry->medal->stats->map(fn ($stat): string => sprintf(
+                    '%s: %s%s',
+                    $stat->stat_type->label(),
+                    $stat->value,
+                    $stat->is_percent ? '%' : '',
+                ))->values()->all(),
+            ])
+            ->all();
     }
 
     /**
@@ -138,6 +170,8 @@ final class UserController
                 'minPoints' => $medal['minPoints'],
                 'earnedAt' => $medal['earnedAt']?->format('d.m.Y H:i'),
                 'description' => $medal['description'],
+                'earnedTimestamp' => $medal['earnedAt']?->timestamp ?? -1,
+                'stats' => [],
             ])
             ->values()
             ->all();

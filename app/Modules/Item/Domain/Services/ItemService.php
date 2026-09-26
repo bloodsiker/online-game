@@ -7,6 +7,8 @@ namespace App\Modules\Item\Domain\Services;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
+use App\Modules\Event\Application\DTOs\WorldEventCollectionResult;
+use App\Modules\Event\Domain\Services\WorldEventCollectionService;
 use App\Modules\Item\Domain\DTOs\InstantRewardResult;
 use App\Modules\Item\Domain\Enums\ItemActionType;
 use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
@@ -33,6 +35,7 @@ class ItemService
         private readonly QuestProgressService $questProgressService,
         private readonly ItemActionLogger $itemActionLogger,
         private readonly InstantItemRewardService $instantRewardService,
+        private readonly ?WorldEventCollectionService $worldEventCollectionService = null,
     ) {}
 
     public function pickUpFromLocation(User $user, int $itemId): string
@@ -68,6 +71,11 @@ class ItemService
                 return 'Этот сундук нужно открыть прямо на локации.';
             }
 
+            $eventCollection = ($this->worldEventCollectionService ?? app(WorldEventCollectionService::class))->collect($user, $slot);
+            if ($eventCollection !== null && ! $eventCollection->allowed) {
+                return $eventCollection->error ?? 'Этот предмет события больше нельзя собрать.';
+            }
+
             $count = $slot->count;
             $slot->delete();
 
@@ -80,7 +88,24 @@ class ItemService
                 );
             }
 
-            return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+            $message = sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+            if ($eventCollection !== null) {
+                $message .= sprintf(
+                    ' Влияние: <b>+%d</b>. Ваш прогресс: <b>%d/%d</b>. Текущее влияние на карте: <b>%d</b>.',
+                    $eventCollection->influenceAwarded,
+                    $eventCollection->playerProgress,
+                    $eventCollection->playerLimit,
+                    $eventCollection->mapInfluence,
+                );
+                if ($eventCollection->stageAdvanced) {
+                    $message .= sprintf(
+                        ' Начался следующий этап: <b>«%s»</b>.',
+                        e($eventCollection->nextStageTitle ?? ''),
+                    );
+                }
+            }
+
+            return $message;
         });
     }
 
@@ -181,7 +206,8 @@ class ItemService
                 ->lockForUpdate()
                 ->first();
 
-            if ($item === null || $this->accessibleChest($user, $itemId, $item) === null) {
+            $accessible = $item === null ? null : $this->accessibleChest($user, $itemId, $item);
+            if ($item === null || $accessible === null) {
                 return null;
             }
 
@@ -190,6 +216,13 @@ class ItemService
             }
 
             if (! $item->is_open) {
+                if ($accessible[1] === 'world') {
+                    $eventCollection = $this->recordWorldEventChestOpened($user, $item);
+                    if ($eventCollection !== null && ! $eventCollection->allowed) {
+                        return null;
+                    }
+                }
+
                 $this->populateChest($item);
             }
 
@@ -214,6 +247,21 @@ class ItemService
 
         $item->is_open = 1;
         $item->save();
+    }
+
+    public function recordWorldEventChestOpened(User $user, Item $chest): ?WorldEventCollectionResult
+    {
+        $slot = ItemOnLocation::query()
+            ->where('item_id', $chest->id)
+            ->where('interaction_type', LocationItemInteractionType::OPEN_HERE->value)
+            ->lockForUpdate()
+            ->first();
+
+        if ($slot === null) {
+            return null;
+        }
+
+        return ($this->worldEventCollectionService ?? app(WorldEventCollectionService::class))->collect($user, $slot);
     }
 
     public function pickUpFromChest(User $user, int $chestId, int $itemId): string
@@ -602,7 +650,18 @@ class ItemService
         }
 
         if ($item->itemInfo->is_stackable) {
-            $existing = $this->backpackService->getItem($user, $item->itemInfo);
+            $existing = Backpack::query()
+                ->where('user_id', $user->id)
+                ->where('equipped', 0)
+                ->whereHas('item', function ($query) use ($item): void {
+                    $query->where('share_item_id', $item->share_item_id)
+                        ->when(
+                            $item->expires_at === null,
+                            fn ($query) => $query->whereNull('expires_at'),
+                            fn ($query) => $query->where('expires_at', $item->expires_at),
+                        );
+                })
+                ->first();
             if ($existing) {
                 $existing->increment('count', $count);
                 if ($existing->item_id !== $item->id) {

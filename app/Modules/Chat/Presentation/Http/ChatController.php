@@ -9,6 +9,7 @@ use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\Event\Application\UseCases\GetActiveWorldEventWidget;
 use App\Modules\Friend\Domain\Contracts\FriendRelationshipRepository;
 use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -25,6 +26,7 @@ class ChatController extends Controller
         private readonly ManageIgnore $manageIgnore,
         private readonly FriendRelationshipRepository $friendRelationshipRepository,
         private readonly PartyRepositoryInterface $partyRepository,
+        private readonly GetActiveWorldEventWidget $getActiveWorldEventWidget,
     ) {}
 
     public function index(): View
@@ -46,6 +48,7 @@ class ChatController extends Controller
             'messages' => $messages,
             'channel' => $channel,
             'ignoredUserIds' => $friendRepository->getIgnoredUserIdsByPlayerId((int) $user->player_id),
+            'activeWorldEvents' => $this->getActiveWorldEventWidget->execute(),
             'realtime' => [
                 'userId' => (int) $user->id,
                 'mapId' => $user->currentLocation?->map_id === null ? null : (int) $user->currentLocation->map_id,
@@ -53,6 +56,11 @@ class ChatController extends Controller
                 'partyId' => $party?->id === null ? null : (int) $party->id,
             ],
         ]);
+    }
+
+    public function worldEvents(): JsonResponse
+    {
+        return response()->json($this->getActiveWorldEventWidget->execute());
     }
 
     public function chatLog(): View

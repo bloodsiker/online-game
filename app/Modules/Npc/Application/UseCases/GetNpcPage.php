@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Application\UseCases;
 
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Npc\Application\DTOs\NpcPageDTO;
 use App\Modules\Npc\Domain\Contracts\NpcReadRepository;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
-use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -19,12 +20,14 @@ class GetNpcPage
         private readonly NpcReadRepository $readRepository,
         private readonly ReputationService $reputationService,
         private readonly QuestProgressService $questProgressService,
+        private readonly MapInfluenceRequirementService $influenceRequirements,
     ) {}
 
     public function execute(User $user, int $npcId): NpcPageDTO
     {
         $player = $user->player;
         $npc = $this->readRepository->findNpcByIdOrFail($npcId);
+        abort_unless($this->influenceRequirements->allowsNpc($user->id, $npc->id), 403, 'Недостаточно влияния для разговора с этим персонажем.');
 
         // Визит на страницу НПС — единственный доступный триггер для целей type=talk
         // (в отличие от kill/collect, у которых триггер — бой). См. QuestProgressService::progressTalk.
@@ -87,7 +90,6 @@ class GetNpcPage
             completedQuestIds: $completedQuestIds,
             hasClanMembership: $clanMembership !== null,
         );
-
         $reputations = $this->readRepository->getNpcReputations($npc->id);
 
         foreach ($reputations as $reputation) {
@@ -135,6 +137,10 @@ class GetNpcPage
             $randomQuest->reputation_id = $reputation->id;
             $quests->push($randomQuest);
         }
+
+        $quests = $quests->filter(
+            fn ($quest): bool => $this->influenceRequirements->allowsQuest($user->id, (int) $quest->id),
+        )->values();
 
         $questsInProgress = $this->readRepository->getInProgressQuestPlayers($player->id, $inProgressQuestIds)
             ->filter(function (QuestPlayer $qp) use ($npc) {

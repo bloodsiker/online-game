@@ -131,6 +131,12 @@
                             Волна <b>{{ $page->dungeonSession->currentWave }}</b> / {{ $page->dungeonSession->waveCount }}
                         @endif
                     @endif
+                    @if($page->dungeonSession->isTower && $page->dungeonSession->currentStageNumber)
+                        &nbsp;|&nbsp; Этаж <b>{{ $page->dungeonSession->currentStageNumber }}</b>
+                        @if($page->dungeonSession->currentStageName)
+                            — {{ $page->dungeonSession->currentStageName }}
+                        @endif
+                    @endif
                     @if($page->dungeonSession->expiresAtTimestamp !== null)
                         — осталось <b id="dungeon-timer-loc"></b>
                         <script>
@@ -177,14 +183,23 @@
                                 @else
                                     <a href="{{ $monster->infoUrl }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $monster->name }}</a>
                                 @endif
-                                [<a href="{{ $monster->attackUrl }}" onclick="return parent.navigateGameAction?.(this.href) ?? true;">атаковать</a>]
+                                [<a href="{{ $monster->attackUrl }}"
+                                    @if($loop->first) id="weapon-attack" title="Атаковать первого монстра (Q)" @endif
+                                    onclick="return parent.navigateGameAction?.(this.href) ?? true;">атаковать</a>]
                             </div>
                         @endforeach
                     </div>
                 @endif
 
                 @foreach($page->npcs as $npc)
-                    <div><a href="{{ $npc->infoUrl }}" onclick="window.open(this.href,'','width=730,height=650,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $npc->name }}</a> [<a href="{{ $npc->talkUrl }}">говорить</a>]</div>
+                    <div>
+                        @if($npc->infoUrl !== null)
+                            <a href="{{ $npc->infoUrl }}" onclick="window.open(this.href,'','width=730,height=650,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $npc->name }}</a>
+                        @else
+                            <span class="color-red">{{ $npc->name }}</span>
+                        @endif
+                        [<a href="{{ $npc->talkUrl }}">говорить</a>]
+                    </div>
                 @endforeach
 
                 <div class="side-move">
@@ -333,10 +348,12 @@
 
     // Родитель читает это поле у текущего фрейма локации, когда отложенный
     // переход срывается с кулдауна: направления берутся уже с новой локации.
-    window.availableMoves = @js(array_values(array_keys(array_filter(
-        $page->moves,
-        static fn ($move): bool => $move->available,
-    ))));
+    window.availableMoves = @js($page->hasBattle
+        ? []
+        : array_values(array_keys(array_filter(
+            $page->moves,
+            static fn ($move): bool => $move->available,
+        ))));
 
     function actionGoTo(button, direction) {
         // См. комментарий в battle::index — родитель может быть старее фрейма.

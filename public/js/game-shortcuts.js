@@ -45,10 +45,6 @@
             return;
         }
 
-        if (shortcut === 'q' && event.repeat) {
-            return;
-        }
-
         const actionElementIds = {
             arrowup: 'move-north',
             arrowdown: 'move-south',
@@ -69,6 +65,12 @@
                     event.stopImmediatePropagation();
                 }
 
+                return;
+            }
+
+            // Удержание Q повторяет только удары внутри активного боя.
+            // На локации и странице добычи повторное событие клавиши игнорируем.
+            if (shortcut === 'q' && event.repeat && actionElement.dataset.qRepeat !== 'true') {
                 return;
             }
 

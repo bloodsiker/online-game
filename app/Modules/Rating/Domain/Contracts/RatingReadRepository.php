@@ -25,6 +25,8 @@ interface RatingReadRepository
 
     public function paginateReputationRating(int $perPage): LengthAwarePaginator;
 
+    public function paginateInfluenceRating(int $perPage): LengthAwarePaginator;
+
     public function paginateSkillRating(int $skillId, int $perPage): LengthAwarePaginator;
 
     public function findLevelRatingPosition(string $nick): ?int;
@@ -36,6 +38,8 @@ interface RatingReadRepository
     public function findWealthRatingPosition(string $nick): ?int;
 
     public function findReputationRatingPosition(string $nick): ?int;
+
+    public function findInfluenceRatingPosition(string $nick): ?int;
 
     public function findSkillRatingPosition(int $skillId, string $nick): ?int;
 }

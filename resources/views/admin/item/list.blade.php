@@ -29,7 +29,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Тип</label>
-                                    <select name="type" class="form-control">
+                                    <select name="type" class="form-control item-filter-select2" data-placeholder="Все типы">
                                         <option value="">Все типы</option>
                                         @foreach($types as $type)
                                             <option value="{{ $type->value }}" @selected($filters['type'] === $type->value)>
@@ -42,7 +42,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Редкость</label>
-                                    <select name="rarity" class="form-control">
+                                    <select name="rarity" class="form-control item-filter-select2" data-placeholder="Все редкости">
                                         <option value="">Все редкости</option>
                                         @foreach($rarities as $rarity)
                                             <option value="{{ $rarity->value }}" @selected($filters['rarity'] === $rarity->value)>
@@ -55,7 +55,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="col-form-label">Слот</label>
-                                    <select name="slot" class="form-control">
+                                    <select name="slot" class="form-control item-filter-select2" data-placeholder="Все слоты">
                                         <option value="">Все слоты</option>
                                         @foreach($slots as $slot)
                                             <option value="{{ $slot->value }}" @selected($filters['slot'] === $slot->value)>
@@ -138,3 +138,20 @@
     </div>
 
 @endsection
+
+@push('footer_scripts')
+<script>
+    $(function () {
+        $('.item-filter-select2').each(function () {
+            const select = $(this);
+
+            select.select2({
+                theme: 'bootstrap',
+                placeholder: select.data('placeholder'),
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    });
+</script>
+@endpush

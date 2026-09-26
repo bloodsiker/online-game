@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Infrastructure\Persistence\Models;
 
+use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceShopSection;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
@@ -94,6 +95,18 @@ class Structure extends Model
     public function shopItems(): HasMany
     {
         return $this->hasMany(ShopItem::class);
+    }
+
+    public function influenceShopSections(): HasMany
+    {
+        return $this->hasMany(InfluenceShopSection::class);
+    }
+
+    public function isInfluenceShop(): bool
+    {
+        return $this->relationLoaded('influenceShopSections')
+            ? $this->influenceShopSections->isNotEmpty()
+            : $this->influenceShopSections()->where('is_active', true)->exists();
     }
 
     public function items(): HasManyThrough

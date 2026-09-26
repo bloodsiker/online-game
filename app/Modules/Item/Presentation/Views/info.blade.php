@@ -11,7 +11,10 @@
             background-image: url({{ asset('main/images/bg2.gif') }});
         }
         .regcolor, .regcolor * { color: #955C4A; }
-        a { text-decoration: none; }
+        a, a:link, a:visited, a:active {
+            color: #BA0000;
+            text-decoration: none;
+        }
         a:hover { text-decoration: underline; }
         table.coll { border-collapse: collapse; border-spacing: 0; }
         .mrg-top { margin-top: 7px; }
@@ -56,7 +59,7 @@
             font-weight: bold;
             font-size: 11px;
             color: #FCF5B7;
-            padding: 0 10px 3px;
+            padding: 0 10px 2px;
         }
 
         /* Таблицы характеристик */

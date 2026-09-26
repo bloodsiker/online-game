@@ -35,9 +35,55 @@
             cursor: pointer;
         }
 
+        .influence-card__title {
+            position: relative;
+            display: table;
+            height: 22px;
+            margin: 5px auto 7px;
+            padding: 0 25px;
+            box-sizing: border-box;
+            background: url('{{ asset('img/bg/info/tbl-usi_label-center.gif') }}') repeat-x;
+            color: #ffe9ba;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 20px;
+            text-align: center;
+            text-shadow: 0 1px #4b160c;
+            white-space: nowrap;
+        }
+        .influence-card__title::before,
+        .influence-card__title::after {
+            position: absolute;
+            top: 0;
+            width: 27px;
+            height: 22px;
+            content: '';
+        }
+        .influence-card__title::before {
+            left: -23px;
+            background: url('{{ asset('img/bg/info/tbl-usi_label-left.gif') }}') no-repeat;
+        }
+        .influence-card__title::after {
+            right: -23px;
+            background: url('{{ asset('img/bg/info/tbl-usi_label-right.gif') }}') no-repeat;
+        }
+        .influence-card__title a {
+            position: relative;
+            z-index: 1;
+            display: block;
+            color: #ffe9ba;
+            text-decoration: none;
+        }
+
     </style>
 </head>
 <body>
+
+@if($page->player->user->is_admin)
+    <div class="influence-card__title">
+        <a href="#" onclick="parent.openAdminToolsModal?.(); return false;">Админ</a>
+    </div>
+@endif
 
 <table width="220" border="0" cellspacing="0" cellpadding="0">
     <tbody>

@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Services\ClanLogService;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -47,6 +48,7 @@ class QuestController extends Controller
         private readonly ClanLogService $clanLogService,
         private readonly QuestStageRuntimeService $questStageRuntimeService,
         private readonly QuestProgressService $questProgressService,
+        private readonly ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
     public function list(Request $request)
@@ -218,11 +220,18 @@ class QuestController extends Controller
      * та часть шаблона, где используется $nextUrl, рендерится только пока квест не принят); если реплик
      * нет — ничего не меняем, шаблон сам возьмёт $quest->description.
      *
+     * Реплика с npc_id=null видна на странице любого NPC (старые многостраничные монологи
+     * одного персонажа). Реплика с заполненным npc_id видна только на странице этого NPC —
+     * иначе, например, финальная реплика NPC, принимающего квест, "утекала" бы в пагинацию
+     * у стартового NPC ещё до принятия задания.
+     *
      * @return array{0: ?QuestDialogue, 1: ?string, 2: bool}
      */
     private function resolveDialoguePage(Quest $quest, bool $inProgress, Request $request, ?int $npcId): array
     {
-        $dialogues = $quest->dialogues;
+        $dialogues = $quest->dialogues
+            ->filter(fn (QuestDialogue $d) => $d->npc_id === null || $d->npc_id === $npcId)
+            ->values();
 
         if ($dialogues->isEmpty()) {
             return [null, null, true];
@@ -248,6 +257,11 @@ class QuestController extends Controller
         $user = Auth::user();
         $quest = Quest::findOrFail($id);
         $npcId = $request->integer('npc');
+
+        if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsQuest($user->id, $quest->id)) {
+            return redirect()->route('npc', ['id' => $npcId])
+                ->with('quest_error', 'Для этого задания недостаточно влияния на территории.');
+        }
 
         if (! $quest->isClan()) {
             return redirect()->route('npc', ['id' => $npcId]);
@@ -467,7 +481,7 @@ class QuestController extends Controller
             }
 
             $currentStage = $clanProgress->currentStage;
-            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
+            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem', 'grantItem']);
 
             foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
                 $shareItem = $objective->shareItem;
@@ -511,6 +525,10 @@ class QuestController extends Controller
                             $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                         }
                     }
+                    if ($currentStage->grantItem) {
+                        $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
+                    }
+
                     $clanProgress->update($this->questStageRuntimeService->stateFor($nextStage));
                     foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
                         $shareItem = $objective->shareItem;
@@ -539,6 +557,11 @@ class QuestController extends Controller
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
                 }
+
+                if ($currentStage->grantItem) {
+                    $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
+                }
+
                 $clanProgress->update($this->questStageRuntimeService->stateFor(null));
             });
 
@@ -629,6 +652,11 @@ class QuestController extends Controller
         $player = $user->player;
         $quest = Quest::findOrFail($id);
         $npcId = $request->integer('npc');
+
+        if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsQuest($user->id, $quest->id)) {
+            return redirect()->route('npc', ['id' => $npcId])
+                ->with('quest_error', 'Для этого задания недостаточно влияния на территории.');
+        }
 
         // Clan quests have their own take method
         if ($quest->isClan()) {
@@ -788,7 +816,7 @@ class QuestController extends Controller
             }
 
             $currentStage = $questPlayer->currentStage;
-            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
+            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem', 'grantItem']);
 
             // Проверка наличия предметов одним агрегатным запросом
             $stageShareItemIds = $currentStage->objectives
@@ -839,6 +867,11 @@ class QuestController extends Controller
                         }
                     }
 
+                    // NPC текущего (только что завершённого) этапа физически вручает предмет
+                    if ($currentStage->grantItem) {
+                        $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
+                    }
+
                     $questPlayer->update($this->questStageRuntimeService->stateFor($nextStage));
 
                     // Give deliver items for the new stage
@@ -871,6 +904,11 @@ class QuestController extends Controller
                         $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
                     }
                 }
+
+                if ($currentStage->grantItem) {
+                    $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
+                }
+
                 $questPlayer->update($this->questStageRuntimeService->stateFor(null));
             });
 

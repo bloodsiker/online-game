@@ -17,12 +17,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="col-form-label">Ключ-предмет (share_item_id)</label>
-                            <select id="gate-item-select" class="form-control" name="share_item_id" required>
+                            <label class="col-form-label">Ключ-предмет (необязательно)</label>
+                            <select id="gate-item-select" class="form-control" name="share_item_id">
+                                <option value=""></option>
                                 @if($gate?->shareItem)
                                     <option value="{{ $gate->shareItem->id }}" selected>[{{ $gate->shareItem->id }}] {{ $gate->shareItem->name }}</option>
                                 @endif
                             </select>
+                            <small class="text-muted">Можно оставить пустым и настроить проход по влиянию в разделе «Влияние».</small>
                         </div>
 
                         <div class="form-group">

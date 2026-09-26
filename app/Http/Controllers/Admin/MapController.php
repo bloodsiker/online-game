@@ -65,19 +65,35 @@ class MapController extends Controller
     public function create(Request $request): mixed
     {
         if ($request->isMethod('POST')) {
+            $data = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'slug' => ['nullable', 'string', 'max:100'],
+                'folder' => ['nullable', 'string', 'max:100'],
+                'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
+                'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
+            ]);
+
             $map = Map::create([
-                'name' => $request->input('name'),
-                'slug' => $request->input('slug'),
-                'folder' => $request->input('folder'),
-                'parent_id' => $request->input('parent_id') ?: null,
+                'name' => $data['name'],
+                'slug' => $data['slug'] ?? null,
+                'folder' => $data['folder'] ?? null,
+                'parent_id' => $data['parent_id'] ?? null,
+                'resp_location_id' => (int) $data['resp_location_id'],
             ]);
 
             return redirect()->route('admin.map.info', $map->id)->with('success', 'Карта создана.');
         }
 
         $allMaps = Map::orderBy('name')->get();
+        $selectedRespawnLocation = null;
 
-        return view('admin.map.create', compact('allMaps'));
+        if (old('resp_location_id')) {
+            $selectedRespawnLocation = Location::query()
+                ->with('map:id,name')
+                ->find((int) old('resp_location_id'));
+        }
+
+        return view('admin.map.create', compact('allMaps', 'selectedRespawnLocation'));
     }
 
     public function info(Request $request, Map $map): mixed

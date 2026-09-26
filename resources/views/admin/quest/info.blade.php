@@ -201,6 +201,21 @@
                                                     <textarea class="form-control" name="ready_text" rows="2">{{ $stage->ready_text }}</textarea>
                                                 </div>
                                             </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">NPC выдаёт предмет в рюкзак (по завершении этапа)</label>
+                                                    <select class="form-control stage-grant-item-select" name="grant_share_item_id">
+                                                        <option value="">— не выдавать —</option>
+                                                        @if($stage->grantItem)
+                                                            <option value="{{ $stage->grantItem->id }}" selected data-image="{{ $stage->grantItem->image }}">[{{ $stage->grantItem->id }}] {{ $stage->grantItem->name }}</option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">Кол-во</label>
+                                                    <input type="number" min="1" class="form-control" name="grant_amount" value="{{ $stage->grant_amount }}">
+                                                </div>
+                                            </div>
                                         </form>
                                     @endforeach
                                     @if($quest->stages->isEmpty())
@@ -297,7 +312,7 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="col-form-label">Описание для игрока</label>
-                                                    <input type="text" class="form-control" name="description" value="{{ $obj->description }}">
+                                                    <textarea class="form-control" name="description" rows="3">{{ $obj->description }}</textarea>
                                                 </div>
                                                 <div class="col-md-3 d-flex align-items-end" style="gap:6px;">
                                                     <button class="btn btn-primary btn-sm">Сохранить</button>
@@ -383,7 +398,7 @@
                             {{-- ДИАЛОГ --}}
                             <div id="tab-dialogues" class="tab-pane">
                                 <div class="pt-3">
-                                    <p class="text-muted">Реплики показываются по одной на странице квеста до его принятия (по порядку). Текст ответа — это кнопка, по клику на которую игрок переходит к следующей реплике; на последней реплике клик по ней принимает квест. Если реплик нет — показывается обычное описание квеста.</p>
+                                    <p class="text-muted">Реплики показываются по одной на странице квеста до его принятия (по порядку). Текст ответа — это кнопка, по клику на которую игрок переходит к следующей реплике; на последней реплике клик по ней принимает квест. Если реплик нет — показывается обычное описание квеста. Поле «NPC»: если не выбран — реплика видна у любого NPC квеста (обычная многостраничная речь одного персонажа); если выбран — реплика видна только на странице этого NPC (нужно, когда старт и сдача квеста происходят у разных персонажей — например, финальная реплика NPC, принимающего задание).</p>
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalDialogue">Добавить реплику</a>
                                     </div>
@@ -395,11 +410,20 @@
                                                     <label class="col-form-label">Порядок</label>
                                                     <input type="number" min="1" class="form-control" name="order" value="{{ $dialogue->order }}">
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-2">
+                                                    <label class="col-form-label">NPC</label>
+                                                    <select class="form-control dialogue-npc-select" name="npc_id">
+                                                        <option value="">— любой —</option>
+                                                        @if($dialogue->npc)
+                                                            <option value="{{ $dialogue->npc->id }}" selected>[{{ $dialogue->npc->id }}] {{ $dialogue->npc->name }}</option>
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5">
                                                     <label class="col-form-label">Текст реплики</label>
                                                     <textarea class="form-control" name="description" rows="3">{{ $dialogue->description }}</textarea>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-md-2">
                                                     <label class="col-form-label">Текст ответа (кнопка)</label>
                                                     <input type="text" class="form-control" name="reply_text" value="{{ $dialogue->reply_text }}">
                                                 </div>
@@ -434,6 +458,12 @@
                     <div class="form-group mb-2">
                         <label class="col-form-label">Порядок</label>
                         <input type="number" min="1" class="form-control" name="order" value="{{ $quest->dialogues->max('order') + 1 }}">
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="col-form-label">NPC (пусто = видна у любого NPC квеста)</label>
+                        <select id="dialogue-npc-add" class="form-control" name="npc_id">
+                            <option value="">— любой —</option>
+                        </select>
                     </div>
                     <div class="form-group mb-2">
                         <label class="col-form-label">Текст реплики</label>
@@ -499,6 +529,18 @@
                         <div class="form-group mb-2">
                             <label>Реплика после завершения ожидания</label>
                             <textarea class="form-control" name="ready_text" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 form-group mb-2">
+                            <label>NPC выдаёт предмет в рюкзак (по завершении этапа)</label>
+                            <select id="stage-grant-item-add" class="form-control" name="grant_share_item_id">
+                                <option value="">— не выдавать —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group mb-2">
+                            <label>Кол-во</label>
+                            <input type="number" min="1" class="form-control" name="grant_amount" value="1">
                         </div>
                     </div>
                 </div>
@@ -594,7 +636,7 @@
                     </div>
                     <div class="form-group mb-2">
                         <label>Описание для игрока</label>
-                        <input type="text" class="form-control" name="description">
+                        <textarea class="form-control" name="description" rows="3"></textarea>
                     </div>
                 </div>
                 <footer class="card-footer">
@@ -681,6 +723,45 @@
     makeAjaxSelect2('#sel-parent-quest', '{{ route('admin.api.quests') }}', 'Выберите квест');
     makeAjaxSelect2('#sel-after-quest',  '{{ route('admin.api.quests') }}', 'Выберите квест');
 
+    $('.dialogue-npc-select').each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            placeholder: '— любой —',
+            allowClear: true,
+            ajax: {
+                url: '{{ route('admin.api.npcs') }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (p) { return { q: p.term, page: p.page || 1 }; },
+                processResults: function (data, p) {
+                    p.page = p.page || 1;
+                    return { results: data.results, pagination: { more: data.pagination.more } };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
+    });
+
+    $('#dialogue-npc-add').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalDialogue'),
+        placeholder: '— любой —',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.npcs') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
     $('#stage-type').on('change', function () {
         $('#stage-wait-fields').toggle($(this).val() === 'wait');
     }).trigger('change');
@@ -697,6 +778,49 @@
         theme: 'bootstrap',
         dropdownParent: $('#modalObjective'),
         placeholder: 'Выберите предмет',
+        allowClear: true,
+        templateResult: formatItemOption,
+        templateSelection: formatItemOption,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    $('.stage-grant-item-select').each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            placeholder: '— не выдавать —',
+            allowClear: true,
+            templateResult: formatItemOption,
+            templateSelection: formatItemOption,
+            ajax: {
+                url: '{{ route('admin.api.items') }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (p) { return { q: p.term, page: p.page || 1 }; },
+                processResults: function (data, p) {
+                    p.page = p.page || 1;
+                    return { results: data.results, pagination: { more: data.pagination.more } };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
+    });
+
+    $('#stage-grant-item-add').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalStage'),
+        placeholder: '— не выдавать —',
         allowClear: true,
         templateResult: formatItemOption,
         templateSelection: formatItemOption,

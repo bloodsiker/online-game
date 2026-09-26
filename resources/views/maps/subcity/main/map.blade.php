@@ -382,7 +382,7 @@
                                                       onmouseout="mark_l(102,0)"><span
                                                         class="listloc">102</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ route('on_map', array_merge(['s' => '1p0OH76'], request()->except(['s']))) }}#101">Город</a> <span
+                                                        href="{{ map_transition_url('1p0OH76', 101) }}">Город</a> <span
                                                         class="listloc">101</span></span>
                                             </td>
                                         </tr>
@@ -393,7 +393,7 @@
                                                       onmouseout="mark_l(245,0)"><span
                                                         class="listloc">245</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ route('on_map', array_merge(['s' => '9uF1sO7v'], request()->except(['s']))) }}#511">Катакомбы Жертвоприношений</a> <span
+                                                        href="{{ map_transition_url('9uF1sO7v', 511) }}">Катакомбы Жертвоприношений</a> <span
                                                         class="listloc">511</span></span>
                                             </td>
                                         </tr>
@@ -404,7 +404,7 @@
                                                       onmouseout="mark_l(418,0)"><span
                                                         class="listloc">418</span> <span
                                                         style="font-size:18px;">→</span> <a
-                                                        href="{{ route('on_map', array_merge(['s' => 'Kj9u18NJl3'], request()->except(['s']))) }}#883">Забытый Курган</a> <span
+                                                        href="{{ map_transition_url('Kj9u18NJl3', 883) }}">Забытый Курган</a> <span
                                                         class="listloc">883</span></span>
                                             </td>
                                         </tr>

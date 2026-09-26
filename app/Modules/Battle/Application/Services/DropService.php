@@ -6,6 +6,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Influence\Domain\Services\MapInfluenceBonusService;
 use App\Modules\Item\Domain\Enums\LocationItemInteractionType;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -18,7 +19,10 @@ use Illuminate\Support\Carbon;
 
 class DropService
 {
-    public function __construct(private readonly BackpackService $backpackService) {}
+    public function __construct(
+        private readonly BackpackService $backpackService,
+        private readonly MapInfluenceBonusService $influenceBonusService,
+    ) {}
 
     public function dropMoney(User $user, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
     {
@@ -29,6 +33,10 @@ class DropService
         $monster = $locationMonster->monster;
         if ($monster->min_money > 0 && $monster->max_money > 0) {
             $money = mt_rand($monster->min_money, $monster->max_money);
+            $bonusPercent = $this->influenceBonusService
+                ->for($user->id, (int) $locationMonster->location->map_id)
+                ->monsterMoneyPercent;
+            $money = max(1, (int) round($money * (1 + $bonusPercent / 100)));
             $user->money += $money;
             $user->save();
             $result->log(sprintf("<p style='margin:2px 0;'><span style='background:#fde8e8; border-left:3px solid #c0392b; padding:2px 6px; display:inline-block;'>⚔️ <b style='color:#7b1a1a;'>%s</b> уничтожен. Найдено <b>%s</b> монет</span></p>", $locationMonster->monster->name, $money));

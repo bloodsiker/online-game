@@ -9,7 +9,7 @@ final readonly class LocationNpcDTO
     public function __construct(
         public int $id,
         public string $name,
-        public string $infoUrl,
+        public ?string $infoUrl,
         public string $talkUrl,
     ) {}
 }

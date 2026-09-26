@@ -92,6 +92,16 @@ class Dungeon extends Model
         return $this->hasMany(DungeonReward::class);
     }
 
+    public function stages(): HasMany
+    {
+        return $this->hasMany(DungeonStage::class)->orderBy('number');
+    }
+
+    public function runs(): HasMany
+    {
+        return $this->hasMany(DungeonRun::class);
+    }
+
     public function requiresKey(): bool
     {
         return $this->entry_share_item_id !== null;
@@ -115,5 +125,10 @@ class Dungeon extends Model
     public function isSurvival(): bool
     {
         return $this->type === DungeonType::SURVIVAL;
+    }
+
+    public function isTower(): bool
+    {
+        return $this->type === DungeonType::TOWER;
     }
 }

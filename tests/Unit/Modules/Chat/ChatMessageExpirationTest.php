@@ -26,6 +26,15 @@ class ChatMessageExpirationTest extends TestCase
         $this->assertSame('2026-08-30T12:30:00+00:00', $dto->expires_at);
     }
 
+    public function test_world_event_messages_expire_after_thirty_minutes(): void
+    {
+        $message = $this->message(ChatChannel::System, ChatMessageType::WorldEvent);
+
+        $dto = $this->getMessage($message, ChatChannel::Main);
+
+        $this->assertSame('2026-08-30T12:30:00+00:00', $dto->expires_at);
+    }
+
     public function test_private_messages_expire_in_mixed_channels_but_remain_in_private_history(): void
     {
         $message = $this->message(ChatChannel::Private, ChatMessageType::Private);

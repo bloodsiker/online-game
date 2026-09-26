@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Reputation\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
 use App\Modules\Reputation\Application\DTOs\ReputationActionResultDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Domain\Contracts\ReputationReadRepository;
@@ -18,6 +20,7 @@ class BuyReputationShopItem
         private readonly ReputationReadRepository $readRepository,
         private readonly ReputationService $reputationService,
         private readonly BackpackService $backpackService,
+        private readonly PurchaseLogger $purchaseLogger,
     ) {}
 
     public function execute(User $user, int $id, int $itemId): ReputationActionResultDTO
@@ -47,7 +50,7 @@ class BuyReputationShopItem
             }
         }
 
-        DB::transaction(function () use ($user, $shopItem) {
+        DB::transaction(function () use ($user, $shopItem, $reputation) {
             if ($shopItem->price > 0) {
                 $user->decrement('money', $shopItem->price);
             }
@@ -60,6 +63,25 @@ class BuyReputationShopItem
             }
 
             $this->backpackService->addItemByShareItem($user, $shopItem->item, 1);
+
+            $this->purchaseLogger->record(
+                user: $user,
+                sourceType: PurchaseSourceType::ReputationShop,
+                lines: [[
+                    'item' => $shopItem->item,
+                    'quantity' => 1,
+                    'unit_price' => (int) $shopItem->price,
+                    'unit_diamond' => (int) $shopItem->diamond,
+                    'requirements' => $shopItem->requirements->map(static fn ($requirement): array => [
+                        'share_item_id' => (int) $requirement->share_item_id,
+                        'item_name' => $requirement->item?->name,
+                        'quantity' => (int) $requirement->quantity,
+                    ])->values()->all(),
+                    'metadata' => ['minimum_reputation_points' => (int) $shopItem->min_points],
+                ]],
+                sourceId: $reputation->id,
+                metadata: ['reputation_name' => $reputation->name],
+            );
         });
 
         return new ReputationActionResultDTO(true, "Товар «{$shopItem->item->name}» куплен!", 'success');

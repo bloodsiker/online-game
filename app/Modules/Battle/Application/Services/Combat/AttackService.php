@@ -13,9 +13,11 @@ use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
+use App\Modules\Dungeon\Application\Services\DungeonStageService;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Event\Domain\Services\EventActivityProgressService;
+use App\Modules\Event\Domain\Services\WorldEventKillService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -28,6 +30,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Reputation\Domain\Enums\DivineFavorType;
 use App\Modules\Reputation\Domain\Services\DivineFavorService;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
 
 readonly class AttackService
@@ -36,6 +39,7 @@ readonly class AttackService
         private AttackStrategyResolver $resolver,
         private QuestProgressService $questService,
         private EventActivityProgressService $eventActivityProgressService,
+        private WorldEventKillService $worldEventKillService,
         private ExperienceService $experienceService,
         private ClanExperienceService $clanExperienceService,
         private PlayerSkillService $playerSkillService,
@@ -46,6 +50,7 @@ readonly class AttackService
         private PlayerStatService $statService,
         private RandomizerInterface $random,
         private DivineFavorService $divineFavorService,
+        private DungeonStageService $dungeonStageService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -197,7 +202,7 @@ readonly class AttackService
      * репутации, либо фиксированную (feat_favor_percent), если подвиг
      * выполнен и милость стала постоянной.
      *
-     * @param  list<array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}>  $divineFavors
+     * @param  list<array{reputation: Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}>  $divineFavors
      */
     private function applyDivineFavors(
         Player $player,
@@ -220,7 +225,7 @@ readonly class AttackService
         }
     }
 
-    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    /** @param  array{reputation: Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
     private function applyDivineHeal(Player $player, Battle $battle, array $favor, int $effectiveHpMax, AttackResultDTO $result): void
     {
         $effect = Effect::where('slug', 'fiora_blessing_'.$favor['percent'])->first();
@@ -248,7 +253,7 @@ readonly class AttackService
         );
     }
 
-    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    /** @param  array{reputation: Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
     private function applyDivinePoison(MonsterOnLocation $locMonster, Battle $battle, array $favor, AttackResultDTO $result): void
     {
         if ($locMonster->hp_now <= 0) {
@@ -281,7 +286,7 @@ readonly class AttackService
         );
     }
 
-    /** @param  array{reputation: \App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
+    /** @param  array{reputation: Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
     private function applyDivineAttackBuff(Player $player, Battle $battle, array $favor, AttackResultDTO $result): void
     {
         $effect = Effect::where('slug', 'divine_attack_buff_'.$favor['percent'])->first();
@@ -629,6 +634,24 @@ readonly class AttackService
             $result->logSide($message);
         }
         $this->eventActivityProgressService->progressKill($player, $locationMonster);
+        $eventProgress = $this->worldEventKillService->progressKill($player, $locationMonster);
+        if ($eventProgress?->allowed) {
+            $nextStageMessage = $eventProgress->stageAdvanced
+                ? sprintf(' Начался следующий этап: <b>«%s»</b>.', e($eventProgress->nextStageTitle ?? ''))
+                : '';
+            $result->logSide(sprintf(
+                '<p class="message-event"><b>Событие:</b> +%d влияния. Ваш прогресс: %d/%d.%s</p>',
+                $eventProgress->influenceAwarded,
+                $eventProgress->playerProgress,
+                $eventProgress->playerLimit,
+                $nextStageMessage,
+            ));
+        }
+
+        $stageMessage = $this->dungeonStageService->handleMonsterKilled($locationMonster);
+        if ($stageMessage !== null) {
+            $result->logSide(sprintf('<p><b>%s</b></p>', e($stageMessage)));
+        }
     }
 
     public function checkLevelUp(Player $player, AttackResultDTO $result)

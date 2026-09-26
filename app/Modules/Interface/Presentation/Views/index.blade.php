@@ -302,11 +302,12 @@
                                     : `<span class="icon"></span>`;
                                 const name = slot.name ?? 'Пустой слот';
                                 const cooldown = slot.cooldown ?? 0;
+                                const cooldownUntil = slot.cooldown_until ?? '';
                                 const countLine = (!empty && slot.entity_type === 'item' && slot.count != null)
                                     ? `<div class="tooltip-count">Количество: <span class="count-val">${slot.count}</span></div>`
                                     : '';
                                 return `
-                                    <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
+                                    <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-cooldown-until="${cooldownUntil}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
                                         ${icon}
                                         <span class="keybind">${slot.slot}</span>
                                         <div class="cooldown"></div>
@@ -318,12 +319,21 @@
                             }
 
                             function renderHotbar(data) {
+                                Object.values(hotbarCooldownTimers).forEach(clearInterval);
+                                hotbarCooldownTimers = {};
                                 hotbarData = {};
                                 hotbarSlots.innerHTML = data.slots.map(buildSlotHtml).join('');
                                 data.slots.forEach(s => {
                                     if (!s.empty) hotbarData[s.slot] = s;
                                 });
                                 bindSlotEvents();
+
+                                hotbarSlots.querySelectorAll('.slot[data-cooldown-until]').forEach(slot => {
+                                    const until = Number(slot.dataset.cooldownUntil || 0);
+                                    if (until > Date.now() / 1000) {
+                                        startHotbarCooldown(slot, until);
+                                    }
+                                });
                             }
 
                             function bindSlotEvents() {
@@ -335,6 +345,34 @@
                             }
 
                             const hotbarCsrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                            let hotbarCooldownTimers = {};
+
+                            function startHotbarCooldown(slot, untilTimestamp) {
+                                const slotNumber = slot.dataset.slot;
+                                const cooldownEl = slot.querySelector('.cooldown');
+                                clearInterval(hotbarCooldownTimers[slotNumber]);
+                                slot.classList.add('on-cooldown');
+
+                                const tick = () => {
+                                    const timeLeft = Math.ceil(untilTimestamp - Date.now() / 1000);
+                                    if (timeLeft > 0) {
+                                        cooldownEl.textContent = timeLeft;
+                                        return;
+                                    }
+
+                                    clearInterval(hotbarCooldownTimers[slotNumber]);
+                                    delete hotbarCooldownTimers[slotNumber];
+                                    slot.classList.remove('on-cooldown');
+                                    cooldownEl.textContent = '';
+                                };
+
+                                tick();
+                                hotbarCooldownTimers[slotNumber] = setInterval(tick, 1000);
+                            }
+
+                            function showHotbarMessage(message) {
+                                if (message) showErrorIframe(message);
+                            }
 
                             function useAbility(slotNumber) {
                                 const slot = hotbarSlots.querySelector(`[data-slot="${slotNumber}"]`);
@@ -342,7 +380,7 @@
                                 if (slot.classList.contains('on-cooldown')) return;
 
                                 const entityType  = slot.dataset.entityType;
-                                const cooldownSec = parseFloat(slot.dataset.cooldown) || 0;
+                                const entityId = Number(slot.dataset.entityId || 0);
 
                                 slot.classList.add('active');
                                 setTimeout(() => slot.classList.remove('active'), 300);
@@ -363,6 +401,10 @@
                                         } else if (data.status === 'success') {
                                             const countEl = slot.querySelector('.count-val');
                                             if (countEl) countEl.textContent = data.count;
+                                            const itemCooldown = Number(slot.dataset.cooldown || 0);
+                                            if (itemCooldown > 0) {
+                                                startHotbarCooldown(slot, Date.now() / 1000 + itemCooldown);
+                                            }
                                         }
                                         if (data.status === 'success') {
                                             const hpMp = {
@@ -376,26 +418,54 @@
                                             };
                                             sendToFrame('character-frame', hpMp);
                                             gameFrame.contentWindow?.postMessage(hpMp, '*');
+                                        } else {
+                                            showHotbarMessage(data.message);
                                         }
-                                    });
+                                    })
+                                    .catch(() => showHotbarMessage('Не удалось использовать предмет.'));
                                 }
 
-                                if (cooldownSec > 0) {
-                                    const cooldownEl = slot.querySelector('.cooldown');
-                                    slot.classList.add('on-cooldown');
-                                    let timeLeft = cooldownSec;
-                                    cooldownEl.textContent = timeLeft;
+                                if (entityType === 'skill') {
+                                    let battleTarget = null;
+                                    try {
+                                        battleTarget = gameFrame.contentWindow?.battleTarget ?? null;
+                                    } catch (e) {}
 
-                                    const interval = setInterval(() => {
-                                        timeLeft--;
-                                        if (timeLeft > 0) {
-                                            cooldownEl.textContent = timeLeft;
-                                        } else {
-                                            clearInterval(interval);
-                                            slot.classList.remove('on-cooldown');
-                                            cooldownEl.textContent = '';
+                                    if (battleTarget) {
+                                        queueAttack(entityId);
+                                        return;
+                                    }
+
+                                    fetch(`{{ url('/magic-skill') }}/${entityId}/use`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': hotbarCsrf,
+                                            'Accept': 'application/json',
+                                        },
+                                        body: JSON.stringify({ target_player_id: null }),
+                                    })
+                                    .then(async response => {
+                                        const data = await response.json();
+                                        if (!response.ok || data.status !== 'success') {
+                                            throw new Error(data.message || 'Не удалось применить заклинание.');
                                         }
-                                    }, 1000);
+
+                                        showHotbarMessage(data.message);
+                                        if (data.hp && data.mp) {
+                                            const state = { hp: data.hp, mp: data.mp };
+                                            sendToFrame('character-frame', state);
+                                            gameFrame.contentWindow?.postMessage(state, window.location.origin);
+                                        }
+                                        if (Array.isArray(data.blessings) && data.blessings.length) {
+                                            sendToFrame('character-frame', { appliedEffects: data.blessings });
+                                        }
+                                        if (data.cooldown_until) {
+                                            slot.dataset.cooldownUntil = data.cooldown_until;
+                                            startHotbarCooldown(slot, Number(data.cooldown_until));
+                                        }
+                                    })
+                                    .catch(error => showHotbarMessage(error.message));
                                 }
                             }
 
@@ -405,6 +475,8 @@
                                     .then(r => r.json())
                                     .then(renderHotbar);
                             }
+
+                            gameFrame.addEventListener('load', refreshHotbar);
 
                             refreshHotbar();
 
@@ -1169,7 +1241,7 @@
 <iframe width="1" height="1" frameborder="0" id="error" name="error" src="" scrolling="no" style="display: none; position: absolute; left: 0px; top: 0px; z-index: 1001;" allowtransparency="true"></iframe>
 
 <script language="javaScript" src="{{ asset('js/common.js') }}"></script>
-<script src="{{ asset('js/game-shortcuts.js') }}"></script>
+<script src="{{ asset('js/game-shortcuts.js') }}?v={{ filemtime(public_path('js/game-shortcuts.js')) }}"></script>
 
 <script>
     function showErrorIframe(message) {
@@ -1820,6 +1892,461 @@
 
     const currentLocationId = {{ auth()->user()->location_id }};
     sendToFrame('map-frame', { currentLocationId });
+</script>
+
+@if(auth()->user()->is_admin)
+    <style>
+        .admin-tools-menu {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            padding: 12px 0 10px;
+        }
+        .admin-tools-form {
+            display: grid;
+            gap: 8px;
+            color: #2a1a0e;
+            font-size: 11px;
+        }
+        .admin-tools-field label {
+            display: block;
+            margin-bottom: 3px;
+            color: #5b2d17;
+            font-weight: bold;
+        }
+        .admin-tools-field input,
+        .admin-tools-field select,
+        .admin-tools-field textarea {
+            width: 100%;
+            padding: 4px 6px;
+            box-sizing: border-box;
+            border: 1px solid #9d7a58;
+            background: #f7ead0;
+            color: #2a1a0e;
+            font: 11px Tahoma, Arial, sans-serif;
+        }
+        .admin-tools-field textarea {
+            min-height: 55px;
+            resize: vertical;
+        }
+        .admin-tools-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 4px;
+        }
+        .admin-tools-message {
+            display: none;
+            padding: 6px 8px;
+            border: 1px solid #c8a56d;
+            background: #f8e9bd;
+            color: #5a3b20;
+            text-align: center;
+        }
+        .admin-tools-message.is-error {
+            border-color: #a24a3c;
+            background: #f4d2c7;
+            color: #7d180d;
+        }
+    </style>
+
+    <div id="admin-tools-overlay" class="error_div" style="display:none;z-index:1022;" onclick="closeAdminToolsModal()"></div>
+    <div id="admin-tools-modal" style="display:none;position:fixed;z-index:1023;left:50%;top:50%;transform:translate(-50%,-50%);">
+        <div class="popup_global_container" style="width:440px;max-width:calc(100vw - 24px);">
+            <div class="popup-top-left">
+                <div class="popup-top-right">
+                    <div class="popup-top-center">
+                        <div class="popup_global_title" id="admin-tools-title">Админ</div>
+                    </div>
+                </div>
+                <div class="popup_global_close_btn" onclick="closeAdminToolsModal()"></div>
+            </div>
+            <div class="popup-left-center">
+                <div class="popup-right-center">
+                    <div class="popup_global_content" style="padding:10px 18px 5px;">
+                        <div id="admin-tools-menu" class="admin-tools-menu">
+                            <b class="butt1 pointer"><b><input value="Телепорт" type="button" onclick="showAdminToolsPanel('teleport')"></b></b>
+                            <b class="butt1 pointer"><b><input value="Наложить молчание" type="button" onclick="showAdminToolsPanel('mute')"></b></b>
+                        </div>
+
+                        <form id="admin-tools-teleport" class="admin-tools-form" style="display:none;" onsubmit="submitAdminTeleport(event)">
+                            <div class="admin-tools-field">
+                                <label for="admin-teleport-user">Игрок</label>
+                                <select id="admin-teleport-user" name="user_id" required>
+                                    @foreach($adminToolUsers as $adminToolUser)
+                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — вы@endif</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-teleport-location">Номер локации</label>
+                                <input id="admin-teleport-location" name="location_id" type="number" min="1" step="1" inputmode="numeric" required>
+                            </div>
+                            <div class="admin-tools-actions">
+                                <b class="butt1 pointer"><b><input value="Телепортировать" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="Назад" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                            </div>
+                        </form>
+
+                        <form id="admin-tools-mute" class="admin-tools-form" style="display:none;" onsubmit="submitAdminMute(event)">
+                            <div class="admin-tools-field">
+                                <label for="admin-mute-user">Игрок</label>
+                                <select id="admin-mute-user" name="user_id" required>
+                                    @foreach($adminToolUsers as $adminToolUser)
+                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — вы@endif</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-mute-scope">Где запретить общение</label>
+                                <select id="admin-mute-scope" name="scope" required>
+                                    <option value="chat">Игровой чат</option>
+                                    <option value="forum">Форум</option>
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-mute-duration">Продолжительность, минут</label>
+                                <input id="admin-mute-duration" name="duration_minutes" type="number" min="1" max="525600" value="60" required>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-mute-reason">Причина</label>
+                                <textarea id="admin-mute-reason" name="reason" maxlength="500"></textarea>
+                            </div>
+                            <div class="admin-tools-actions">
+                                <b class="butt1 pointer"><b><input value="Наложить" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="Назад" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                            </div>
+                        </form>
+
+                        <div id="admin-tools-message" class="admin-tools-message"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="popup-left-bottom">
+                <div class="popup-right-bottom">
+                    <div class="popup-bottom-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const adminToolsSelfId = {{ auth()->id() }};
+        const adminToolsCsrf = document.querySelector('meta[name="csrf-token"]').content;
+
+        function openAdminToolsModal() {
+            showAdminToolsPanel('menu');
+            document.getElementById('admin-tools-modal').style.display = 'block';
+            document.getElementById('admin-tools-overlay').style.display = 'block';
+        }
+
+        function closeAdminToolsModal() {
+            document.getElementById('admin-tools-modal').style.display = 'none';
+            document.getElementById('admin-tools-overlay').style.display = 'none';
+        }
+
+        function showAdminToolsPanel(panel) {
+            const isMenu = panel === 'menu';
+            document.getElementById('admin-tools-menu').style.display = isMenu ? 'flex' : 'none';
+            document.getElementById('admin-tools-teleport').style.display = panel === 'teleport' ? 'grid' : 'none';
+            document.getElementById('admin-tools-mute').style.display = panel === 'mute' ? 'grid' : 'none';
+            document.getElementById('admin-tools-title').textContent = panel === 'teleport'
+                ? 'Телепорт'
+                : panel === 'mute' ? 'Наложить молчание' : 'Админ';
+            const message = document.getElementById('admin-tools-message');
+            message.style.display = 'none';
+            message.classList.remove('is-error');
+        }
+
+        function showAdminToolsMessage(message, isError = false) {
+            const node = document.getElementById('admin-tools-message');
+            node.textContent = message;
+            node.classList.toggle('is-error', isError);
+            node.style.display = 'block';
+        }
+
+        async function submitAdminToolsForm(form, url) {
+            const submit = form.querySelector('input[type="submit"]');
+            submit.disabled = true;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': adminToolsCsrf,
+                    },
+                    body: JSON.stringify(Object.fromEntries(new FormData(form))),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const validationMessage = data.errors
+                        ? Object.values(data.errors).flat()[0]
+                        : data.message;
+                    throw new Error(validationMessage || 'Не удалось выполнить действие.');
+                }
+
+                showAdminToolsMessage(data.message || 'Действие выполнено.');
+                return data;
+            } catch (error) {
+                showAdminToolsMessage(error.message || 'Не удалось выполнить действие.', true);
+                return null;
+            } finally {
+                submit.disabled = false;
+            }
+        }
+
+        async function submitAdminTeleport(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const targetUserId = Number(form.elements.user_id.value);
+            const result = await submitAdminToolsForm(form, @json(route('admin.game_tools.teleport')));
+
+            if (result && targetUserId === adminToolsSelfId) {
+                setTimeout(() => toLocation(@json(route('location'))), 700);
+            }
+        }
+
+        async function submitAdminMute(event) {
+            event.preventDefault();
+            await submitAdminToolsForm(event.currentTarget, @json(route('admin.game_tools.mute')));
+        }
+    </script>
+@endif
+
+{{-- Модальное окно смены имени (сертификат «Новое имя», открывается из backpack-frame) --}}
+<style>
+    .rename-form {
+        display: grid;
+        gap: 8px;
+        color: #2a1a0e;
+        font-size: 11px;
+    }
+    .rename-field label {
+        display: block;
+        margin-bottom: 3px;
+        color: #5b2d17;
+        font-weight: bold;
+    }
+    .rename-field input {
+        width: 100%;
+        padding: 4px 6px;
+        box-sizing: border-box;
+        border: 1px solid #9d7a58;
+        background: #f7ead0;
+        color: #2a1a0e;
+        font: 11px Tahoma, Arial, sans-serif;
+    }
+    .rename-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 4px;
+    }
+    .rename-message {
+        display: none;
+        padding: 6px 8px;
+        border: 1px solid #c8a56d;
+        background: #f8e9bd;
+        color: #5a3b20;
+        text-align: center;
+    }
+    .rename-message.is-error {
+        border-color: #a24a3c;
+        background: #f4d2c7;
+        color: #7d180d;
+    }
+</style>
+<div id="rename-overlay" class="error_div" style="display:none;z-index:1024;" onclick="closeRenameModal()"></div>
+<div id="rename-modal" style="display:none;position:fixed;z-index:1025;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:340px;max-width:calc(100vw - 24px);">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title">Новое имя</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeRenameModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:10px 18px 5px;">
+                    <form id="rename-form" class="rename-form" onsubmit="submitRenameModal(event)">
+                        <div class="rename-field">
+                            <label for="rename-new-name">Введите новое имя</label>
+                            <input id="rename-new-name" name="new_name" type="text" minlength="3" maxlength="50" required>
+                        </div>
+                        <div class="rename-actions">
+                            <b class="butt1 pointer"><b><input value="Применить" type="submit"></b></b>
+                            <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeRenameModal()"></b></b>
+                        </div>
+                    </form>
+                    <div id="rename-message" class="rename-message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var _renameItemId = null;
+
+    function openRenameModal(itemId) {
+        _renameItemId = itemId;
+        document.getElementById('rename-new-name').value = '';
+        var message = document.getElementById('rename-message');
+        message.style.display = 'none';
+        message.classList.remove('is-error');
+        document.getElementById('rename-overlay').style.display = 'block';
+        document.getElementById('rename-modal').style.display = 'block';
+    }
+
+    function closeRenameModal() {
+        document.getElementById('rename-overlay').style.display = 'none';
+        document.getElementById('rename-modal').style.display = 'none';
+    }
+
+    async function submitRenameModal(event) {
+        event.preventDefault();
+        var itemId = _renameItemId;
+        var newName = document.getElementById('rename-new-name').value.trim();
+        var submit = event.currentTarget.querySelector('input[type="submit"]');
+        var message = document.getElementById('rename-message');
+        submit.disabled = true;
+
+        try {
+            var response = await fetch('/items/use/' + itemId, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ new_name: newName }),
+            });
+            var data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Не удалось выполнить действие.');
+            }
+
+            closeRenameModal();
+            openGameMessageModal({
+                title: 'Новое имя',
+                message: data.message || 'Имя изменено.',
+                actions: [{ label: 'Ок', onClick: function () { closeGameMessageModal(); location.reload(); } }],
+            });
+        } catch (error) {
+            message.textContent = error.message || 'Не удалось выполнить действие.';
+            message.classList.add('is-error');
+            message.style.display = 'block';
+        } finally {
+            submit.disabled = false;
+        }
+    }
+</script>
+
+{{-- Модальное окно смены расы (сертификат «Смена расы», открывается из backpack-frame) --}}
+<div id="race-change-overlay" class="error_div" style="display:none;z-index:1026;" onclick="closeRaceChangeModal()"></div>
+<div id="race-change-modal" style="display:none;position:fixed;z-index:1027;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:340px;max-width:calc(100vw - 24px);">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title">Новая раса</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeRaceChangeModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:10px 18px 5px;">
+                    <form id="race-change-form" class="rename-form" onsubmit="submitRaceChangeModal(event)">
+                        <div class="rename-field">
+                            <label for="race-change-select">Выберите новую расу</label>
+                            <select id="race-change-select" name="new_race_id" required>
+                                @foreach($races ?? [] as $race)
+                                    <option value="{{ $race->id }}">{{ $race->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="rename-actions">
+                            <b class="butt1 pointer"><b><input value="Применить" type="submit"></b></b>
+                            <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeRaceChangeModal()"></b></b>
+                        </div>
+                    </form>
+                    <div id="race-change-message" class="rename-message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var _raceChangeItemId = null;
+
+    function openRaceChangeModal(itemId) {
+        _raceChangeItemId = itemId;
+        var message = document.getElementById('race-change-message');
+        message.style.display = 'none';
+        message.classList.remove('is-error');
+        document.getElementById('race-change-overlay').style.display = 'block';
+        document.getElementById('race-change-modal').style.display = 'block';
+    }
+
+    function closeRaceChangeModal() {
+        document.getElementById('race-change-overlay').style.display = 'none';
+        document.getElementById('race-change-modal').style.display = 'none';
+    }
+
+    async function submitRaceChangeModal(event) {
+        event.preventDefault();
+        var itemId = _raceChangeItemId;
+        var newRaceId = document.getElementById('race-change-select').value;
+        var submit = event.currentTarget.querySelector('input[type="submit"]');
+        var message = document.getElementById('race-change-message');
+        submit.disabled = true;
+
+        try {
+            var response = await fetch('/items/use/' + itemId, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ new_race_id: newRaceId }),
+            });
+            var data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Не удалось выполнить действие.');
+            }
+
+            closeRaceChangeModal();
+            openGameMessageModal({
+                title: 'Новая раса',
+                message: data.message || 'Раса изменена.',
+                actions: [{ label: 'Ок', onClick: function () { closeGameMessageModal(); location.reload(); } }],
+            });
+        } catch (error) {
+            message.textContent = error.message || 'Не удалось выполнить действие.';
+            message.classList.add('is-error');
+            message.style.display = 'block';
+        } finally {
+            submit.disabled = false;
+        }
+    }
 </script>
 
 {{-- Модальное окно распределения очков (открывается из character-frame) --}}

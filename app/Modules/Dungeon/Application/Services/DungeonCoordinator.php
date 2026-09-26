@@ -11,12 +11,13 @@ use App\Modules\Dungeon\Domain\Contracts\DungeonSessionRepository;
 use App\Modules\Dungeon\Domain\Contracts\TransactionManager;
 use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
 use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
-use App\Modules\Dungeon\Domain\Enums\DungeonRewardType;
+use App\Modules\Dungeon\Domain\Enums\DungeonRunStatus;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonRun;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonRunParticipant;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
@@ -29,20 +30,29 @@ class DungeonCoordinator
         private readonly DungeonCooldownRepository $cooldownRepository,
         private readonly DungeonSessionRepository $sessionRepository,
         private readonly BackpackService $backpackService,
-        private readonly ExperienceService $experienceService,
+        private readonly DungeonStageService $stageService,
+        private readonly DungeonRewardService $rewardService,
         private readonly TransactionManager $transactionManager,
     ) {}
 
     public function enterSolo(Dungeon $dungeon, User $user): DungeonSession
     {
         $this->validateEntry($dungeon, $user);
-        $this->consumeEntryKey($dungeon, $user);
-        $this->applyPersonalCooldown($dungeon, $user->id);
 
         return $this->transactionManager->run(function () use ($dungeon, $user) {
-            $this->teleportUser($user, $dungeon->first_location_id);
-            $session = $this->createSession($dungeon, $user->id);
-            $this->spawnMonstersForSession($dungeon, $session->id);
+            $this->consumeEntryKey($dungeon, $user);
+            $this->applyPersonalCooldown($dungeon, $user->id);
+            $this->applyGlobalCooldown($dungeon);
+            $run = $this->createRun($dungeon, $user->id);
+            $session = $this->createSession($dungeon, $user->id, runId: $run->id);
+            $this->addParticipant($run, $session);
+
+            if ($dungeon->isTower()) {
+                $this->stageService->start($run, $session, collect([$user]));
+            } else {
+                $this->teleportUser($user, $dungeon->first_location_id);
+                $this->spawnMonstersForSession($dungeon, $session->id);
+            }
 
             return $session;
         });
@@ -97,23 +107,15 @@ class DungeonCoordinator
             $this->validateEntry($dungeon, $user);
         }
 
-        foreach ($participants as $user) {
-            $this->consumeEntryKey($dungeon, $user);
-        }
-
-        if ($dungeon->hasGlobalCooldown()) {
-            $this->cooldownRepository->setGlobal(
-                $dungeon->id,
-                now()->addSeconds($dungeon->cooldown_seconds),
-            );
-        }
-
         return $this->transactionManager->run(function () use ($dungeon, $leader, $participants) {
-            $this->teleportUser($leader, $dungeon->first_location_id);
+            foreach ($participants as $user) {
+                $this->consumeEntryKey($dungeon, $user);
+            }
+            $this->applyGlobalCooldown($dungeon);
+            $run = $this->createRun($dungeon, $leader->id);
             $this->applyPersonalCooldown($dungeon, $leader->id);
-            $leaderSession = $this->createSession($dungeon, $leader->id);
-
-            $this->spawnMonstersForSession($dungeon, $leaderSession->id);
+            $leaderSession = $this->createSession($dungeon, $leader->id, runId: $run->id);
+            $this->addParticipant($run, $leaderSession);
 
             foreach ($participants as $user) {
                 if ($user->id === $leader->id) {
@@ -121,8 +123,17 @@ class DungeonCoordinator
                 }
 
                 $this->applyPersonalCooldown($dungeon, $user->id);
-                $this->teleportUser($user, $dungeon->first_location_id);
-                $this->createSession($dungeon, $user->id, $leaderSession->id);
+                $session = $this->createSession($dungeon, $user->id, $leaderSession->id, $run->id);
+                $this->addParticipant($run, $session);
+            }
+
+            if ($dungeon->isTower()) {
+                $this->stageService->start($run, $leaderSession, $participants);
+            } else {
+                foreach ($participants as $user) {
+                    $this->teleportUser($user, $dungeon->first_location_id);
+                }
+                $this->spawnMonstersForSession($dungeon, $leaderSession->id);
             }
 
             return $leaderSession;
@@ -141,6 +152,7 @@ class DungeonCoordinator
 
         $this->transactionManager->run(function () use ($user, $session, $returnLocationId) {
             $this->teleportUser($user, $returnLocationId);
+            $this->markParticipantFinished($session, 'abandoned');
             $this->cleanupSessionMonsters($session);
             $this->sessionRepository->delete($session);
         });
@@ -150,13 +162,38 @@ class DungeonCoordinator
     {
         $session = $this->sessionRepository->findByUserId($user->id);
 
-        if ($session === null || ! $session->isExpired()) {
+        $stageExpired = $session?->run?->status === DungeonRunStatus::ACTIVE
+            && $session->run->stage_expires_at !== null
+            && now()->gt($session->run->stage_expires_at);
+
+        if ($session === null || (! $session->isExpired() && ! $stageExpired)) {
             return false;
         }
 
         $returnLocationId = $session->dungeon->return_location_id ?? 6;
 
         $this->transactionManager->run(function () use ($user, $session, $returnLocationId) {
+            if ($session->dungeon_run_id !== null) {
+                $rootSession = DungeonSession::query()
+                    ->where('dungeon_run_id', $session->dungeon_run_id)
+                    ->whereNull('primary_session_id')
+                    ->first() ?? $session;
+                $participantIds = DungeonRunParticipant::query()
+                    ->where('dungeon_run_id', $session->dungeon_run_id)
+                    ->pluck('user_id');
+
+                $this->markRunFailed($session, 'Время этапа истекло.');
+                $this->cleanupSessionMonsters($rootSession, force: true);
+                User::query()->whereIn('id', $participantIds)->update([
+                    'prev_location_id' => DB::raw('location_id'),
+                    'location_id' => $returnLocationId,
+                ]);
+                DungeonSession::query()->where('dungeon_run_id', $session->dungeon_run_id)->delete();
+                $user->location_id = $returnLocationId;
+
+                return;
+            }
+
             $this->teleportUser($user, $returnLocationId);
             $this->cleanupSessionMonsters($session);
             $this->sessionRepository->delete($session);
@@ -220,8 +257,11 @@ class DungeonCoordinator
         }
 
         if ($session->current_wave >= $dungeon->wave_count) {
-            if (! $session->isCompleted()) {
-                $this->giveCompletionRewards($dungeon, $session);
+            if ($session->dungeon_run_id !== null) {
+                $this->completeSharedRun($session);
+            } elseif (! $session->isCompleted()) {
+                $this->sessionRepository->markCompleted($session);
+                $this->rewardService->grant($dungeon, $session->user);
             }
 
             return;
@@ -287,37 +327,6 @@ class DungeonCoordinator
         }
     }
 
-    private function giveCompletionRewards(Dungeon $dungeon, DungeonSession $session): void
-    {
-        $this->sessionRepository->markCompleted($session);
-
-        $user = $session->user;
-        $player = $user->player;
-        $rewards = $dungeon->rewards()->with('shareItem')->get();
-
-        foreach ($rewards as $reward) {
-            $rolled = mt_rand(0, 100000) / 1000;
-            if ($rolled > $reward->drop_chance) {
-                continue;
-            }
-
-            $amount = $reward->randomAmount();
-
-            match ($reward->type) {
-                DungeonRewardType::GOLD => tap($user, function ($targetUser) use ($amount) {
-                    $targetUser->money += $amount;
-                    $targetUser->save();
-                }),
-                DungeonRewardType::EXPERIENCE => tap($player, function ($targetPlayer) use ($amount) {
-                    $targetPlayer->exp += $this->experienceService->calculateGain($targetPlayer, $amount);
-                    $targetPlayer->save();
-                }),
-                DungeonRewardType::ITEM => $this->backpackService->addItemByShareItem($user, $reward->shareItem, $amount),
-                default => null,
-            };
-        }
-    }
-
     private function handleDeathExit(User $user, DungeonSession $session): string
     {
         $returnLocationId = $session->dungeon->return_location_id ?? 6;
@@ -358,15 +367,15 @@ class DungeonCoordinator
         return 'Вы выброшены из данжа, но можете вернуться, пока не истекло время похода.';
     }
 
-    private function cleanupSessionMonsters(DungeonSession $session): void
+    private function cleanupSessionMonsters(DungeonSession $session, bool $force = false): void
     {
         $monsterSessionId = $session->monsterSessionId();
 
-        if ($session->primary_session_id !== null) {
+        if (! $force && $session->primary_session_id !== null) {
             return;
         }
 
-        if ($this->sessionRepository->hasFollowers($session->id)) {
+        if (! $force && $this->sessionRepository->hasFollowers($session->id)) {
             return;
         }
 
@@ -454,13 +463,106 @@ class DungeonCoordinator
         }
     }
 
-    private function createSession(Dungeon $dungeon, int $userId, ?int $primarySessionId = null): DungeonSession
+    private function applyGlobalCooldown(Dungeon $dungeon): void
+    {
+        if ($dungeon->hasGlobalCooldown()) {
+            $this->cooldownRepository->setGlobal($dungeon->id, now()->addSeconds($dungeon->cooldown_seconds));
+        }
+    }
+
+    private function createSession(Dungeon $dungeon, int $userId, ?int $primarySessionId = null, ?int $runId = null): DungeonSession
     {
         $expiresAt = $dungeon->hasDungeonTimer()
             ? Carbon::now()->addSeconds($dungeon->time_limit_seconds)
             : null;
 
-        return $this->sessionRepository->create($dungeon, $userId, $expiresAt, $primarySessionId);
+        return $this->sessionRepository->create($dungeon, $userId, $expiresAt, $primarySessionId, $runId);
+    }
+
+    private function createRun(Dungeon $dungeon, int $leaderUserId): DungeonRun
+    {
+        return DungeonRun::query()->create([
+            'dungeon_id' => $dungeon->id,
+            'leader_user_id' => $leaderUserId,
+            'status' => DungeonRunStatus::ACTIVE,
+            'started_at' => now(),
+            'expires_at' => $dungeon->hasDungeonTimer() ? now()->addSeconds($dungeon->time_limit_seconds) : null,
+        ]);
+    }
+
+    private function addParticipant(DungeonRun $run, DungeonSession $session): void
+    {
+        DungeonRunParticipant::query()->create([
+            'dungeon_run_id' => $run->id,
+            'user_id' => $session->user_id,
+            'dungeon_session_id' => $session->id,
+            'status' => 'active',
+        ]);
+    }
+
+    private function markParticipantFinished(DungeonSession $session, string $status): void
+    {
+        if ($session->dungeon_run_id === null) {
+            return;
+        }
+
+        DungeonRunParticipant::query()
+            ->where('dungeon_run_id', $session->dungeon_run_id)
+            ->where('user_id', $session->user_id)
+            ->update(['status' => $status, 'finished_at' => now()]);
+
+        $hasActive = DungeonRunParticipant::query()
+            ->where('dungeon_run_id', $session->dungeon_run_id)
+            ->where('status', 'active')
+            ->exists();
+        if (! $hasActive) {
+            DungeonRun::query()->whereKey($session->dungeon_run_id)->update([
+                'status' => DungeonRunStatus::ABANDONED->value,
+                'finished_at' => now(),
+            ]);
+        }
+    }
+
+    private function markRunFailed(DungeonSession $session, string $reason): void
+    {
+        if ($session->dungeon_run_id === null) {
+            return;
+        }
+
+        DungeonRun::query()->whereKey($session->dungeon_run_id)->update([
+            'status' => DungeonRunStatus::FAILED->value,
+            'failure_reason' => $reason,
+            'finished_at' => now(),
+        ]);
+        DungeonRunParticipant::query()->where('dungeon_run_id', $session->dungeon_run_id)->update([
+            'status' => 'failed',
+            'finished_at' => now(),
+        ]);
+    }
+
+    private function completeSharedRun(DungeonSession $session): void
+    {
+        $completed = DungeonRun::query()
+            ->whereKey($session->dungeon_run_id)
+            ->where('status', DungeonRunStatus::ACTIVE->value)
+            ->update([
+                'status' => DungeonRunStatus::COMPLETED->value,
+                'finished_at' => now(),
+                'stage_expires_at' => null,
+            ]);
+
+        if ($completed === 0) {
+            return;
+        }
+
+        $run = DungeonRun::query()->with(['dungeon', 'participants.user'])->findOrFail($session->dungeon_run_id);
+        $run->participants()->update(['status' => 'completed', 'finished_at' => now()]);
+        $run->sessions()->update(['completed_at' => now()]);
+        foreach ($run->participants as $participant) {
+            if ($participant->user !== null) {
+                $this->rewardService->grant($run->dungeon, $participant->user);
+            }
+        }
     }
 
     private function teleportUser(User $user, int $locationId): void

@@ -335,8 +335,104 @@
             bottom: 1px;
             left: 0px;
         }
+        .hotbar-picker-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .hotbar-picker-panel {
+            min-width: 0;
+            padding: 6px;
+            border: 1px solid #c69b65;
+            background: rgba(255, 244, 217, .45);
+        }
+        .hotbar-picker-title {
+            margin: 0 0 6px;
+            color: #6c2818;
+            font-weight: bold;
+            text-align: center;
+        }
+        .hotbar-picker-panel .backpack_list {
+            max-height: 190px;
+            overflow-y: auto;
+        }
+        .hotbar-picker-panel .hotbar-pickable {
+            width: 72px !important;
+            height: 71px !important;
+        }
+        .hotbar-picker-panel .hotbar-pickable > table {
+            position: absolute;
+            top: 5px;
+            left: 6px;
+            z-index: 1;
+            margin: 0 !important;
+        }
+        .hotbar-picker-panel .hotbar-pickable::after {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            width: 72px;
+            height: 71px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 / 72px 71px no-repeat;
+            content: '';
+            pointer-events: none;
+        }
+        .hotbar-spell-mana {
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            min-width: 16px;
+            padding: 1px 3px;
+            border: 1px solid #416c91;
+            background: rgba(20, 55, 91, .85);
+            color: #d9efff;
+            font-size: 9px;
+            font-weight: bold;
+            line-height: 12px;
+            text-align: center;
+        }
+        .hotbar-skill-tooltip {
+            position: fixed;
+            z-index: 10050;
+            display: none;
+            width: 260px;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            border: 1px solid #6f3b20;
+            background: #f6e8c7 url({{ asset('img/bg/bgg.gif') }}) repeat;
+            box-shadow: 2px 3px 7px rgba(38, 20, 9, .42), inset 0 0 0 2px rgba(255, 249, 219, .65);
+            color: #4d3424;
+            font: 11px/1.35 Tahoma, Arial, sans-serif;
+            pointer-events: none;
+        }
+        .hotbar-skill-tooltip__name {
+            margin: -3px -5px 6px;
+            padding: 3px 6px 5px;
+            color: #7e1e13;
+            border-bottom: 1px solid #bd8b55;
+            font-weight: bold;
+            text-align: center;
+        }
+        .hotbar-skill-tooltip__kind {
+            margin-bottom: 5px;
+            color: #765033;
+            font-style: italic;
+            text-align: center;
+        }
+        .hotbar-skill-tooltip__stats {
+            margin-top: 6px;
+            padding-top: 5px;
+            border-top: 1px dotted #a77b50;
+        }
+        .hotbar-skill-tooltip__stats b { color: #315e94; }
+        @media (max-width: 620px) {
+            .hotbar-picker-columns {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
+    {!! $itemTooltipScript !!}
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body>
@@ -419,7 +515,7 @@
                                                                     <div class="ff__input-wrap-inner">
                                                                         <div class="ff__input-wrap-input">
                                                                             <input type="text" id="filterField" name="filterField" value="">
-                                                                            <label for="filterField">Введите название предмета</label>
+                                                                            <label for="filterField">Введите название</label>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -449,34 +545,81 @@
                                                         });
                                                     </script>
 
+                                                    <div class="hotbar-picker-columns">
+                                                        <section class="hotbar-picker-panel">
+                                                            <div class="hotbar-picker-title">Предметы</div>
+                                                            <ul id="item_list" data-caller="0" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
+                                                                @forelse($usableItems as $backpack)
+                                                                <li data-id="{{ $backpack->item_id }}"
+                                                                    data-entity-type="item"
+                                                                    data-title="{{ $backpack->item->itemInfo->name }}"
+                                                                    data-cnt="{{ $backpack->count }}"
+                                                                    class="item hotbar-pickable"
+                                                                    style="opacity: 1; cursor: pointer;"
+                                                                    onmouseover="showItemInfo(this,event,2)"
+                                                                    onmouseout="showItemInfo(this,event,0)">
+                                                                    <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                           style="float:left; margin:1px;"
+                                                                           @if($backpack->item->itemInfo->image) background="{{ asset($backpack->item->itemInfo->image) }}" @endif>
+                                                                        <tbody><tr>
+                                                                            <td style="position:relative;" valign="bottom">
+                                                                                @if($backpack->count > 1)
+                                                                                    <div class="bpdig">{{ $backpack->count }}</div>
+                                                                                @endif
+                                                                                &nbsp;
+                                                                            </td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                </li>
+                                                                @empty
+                                                                <li style="padding:10px; color:#666; list-style:none; float:none; width:auto; height:auto;">
+                                                                    Нет подходящих предметов
+                                                                </li>
+                                                                @endforelse
+                                                            </ul>
+                                                        </section>
 
-                                                    <ul id="item_list" data-caller="0" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
-                                                        @forelse($usableItems as $backpack)
-                                                        <li data-id="{{ $backpack->item_id }}"
-                                                            data-title="{{ $backpack->item->itemInfo->name }}"
-                                                            data-cnt="{{ $backpack->count }}"
-                                                            class="item hotbar-pickable"
-                                                            style="opacity: 1; cursor: pointer;"
-                                                            title="{{ $backpack->item->itemInfo->name }}">
-                                                            <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                   style="float:left; margin:1px;"
-                                                                   @if($backpack->item->itemInfo->image) background="{{ asset($backpack->item->itemInfo->image) }}" @endif>
-                                                                <tbody><tr>
-                                                                    <td style="position:relative;" valign="bottom">
-                                                                        @if($backpack->count > 1)
-                                                                            <div class="bpdig">{{ $backpack->count }}</div>
-                                                                        @endif
-                                                                        &nbsp;
-                                                                    </td>
-                                                                </tr></tbody>
-                                                            </table>
-                                                        </li>
-                                                        @empty
-                                                        <li style="padding:10px; color:#666; list-style:none; float:none; width:auto; height:auto;">
-                                                            Нет подходящих предметов
-                                                        </li>
-                                                        @endforelse
-                                                    </ul>
+                                                        <section class="hotbar-picker-panel">
+                                                            <div class="hotbar-picker-title">Заклинания</div>
+                                                            <ul id="skill_list" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
+                                                                @forelse($activeSkills as $skill)
+                                                                    <li data-id="{{ $skill->id }}"
+                                                                        data-entity-type="skill"
+                                                                        data-title="{{ $skill->name }}"
+                                                                        data-kind="{{ match($skill->type) { 'attack' => 'Боевое заклинание', 'buff' => 'Усиление', 'heal' => 'Лечение', 'debuff' => 'Ослабление', default => 'Заклинание' } }}"
+                                                                        data-description="{{ $skill->description }}"
+                                                                        data-mana="{{ $skill->mana_cost }}"
+                                                                        data-cooldown="{{ $skill->cooldown }}"
+                                                                        data-damage="{{ $skill->min_damage || $skill->max_damage ? $skill->min_damage.'–'.$skill->max_damage : '' }}"
+                                                                        data-healing="{{ $skill->base_healing }}"
+                                                                        class="item hotbar-pickable"
+                                                                        style="opacity:1;cursor:pointer;"
+                                                                        onmouseenter="showHotbarSkillTooltip(this,event,true)"
+                                                                        onmousemove="moveHotbarSkillTooltip(event)"
+                                                                        onmouseleave="showHotbarSkillTooltip(this,event,false)">
+                                                                        <table class="item pctntr" width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                               style="float:left;margin:1px;"
+                                                                               background="{{ $skill->image ?: asset('img/bg/empty_slot.gif') }}">
+                                                                            <tbody><tr>
+                                                                                <td style="position:relative;" valign="bottom">
+                                                                                    @if($skill->mana_cost > 0)
+                                                                                        <span class="hotbar-spell-mana" title="Расход маны">{{ $skill->mana_cost }}</span>
+                                                                                    @endif
+                                                                                    &nbsp;
+                                                                                </td>
+                                                                            </tr></tbody>
+                                                                        </table>
+                                                                    </li>
+                                                                @empty
+                                                                    <li style="padding:10px;color:#666;list-style:none;float:none;width:auto;height:auto;">
+                                                                        Нет изученных активных заклинаний
+                                                                    </li>
+                                                                @endforelse
+                                                            </ul>
+                                                        </section>
+                                                    </div>
+
+                                                    <div id="hotbar-skill-tooltip" class="hotbar-skill-tooltip" role="tooltip"></div>
 
                                                 </div>
 
@@ -524,7 +667,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const input = document.getElementById('filterField');
-        const items = document.querySelectorAll('#item_list li[data-title]');
+        const items = document.querySelectorAll('.hotbar-pickable[data-title]');
         const resetBtn = document.querySelector('.b-filter__reset');
 
         if (!input || !items.length || !resetBtn) return;
@@ -565,6 +708,50 @@
     const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let activeSlotNumber = null;
 
+    function moveHotbarSkillTooltip(event) {
+        const tooltip = document.getElementById('hotbar-skill-tooltip');
+        if (!tooltip || tooltip.style.display === 'none') return;
+
+        const gap = 12;
+        let left = event.clientX + gap;
+        let top = event.clientY + gap;
+        if (left + tooltip.offsetWidth > window.innerWidth - 8) left = event.clientX - tooltip.offsetWidth - gap;
+        if (top + tooltip.offsetHeight > window.innerHeight - 8) top = event.clientY - tooltip.offsetHeight - gap;
+        tooltip.style.left = Math.max(8, left) + 'px';
+        tooltip.style.top = Math.max(8, top) + 'px';
+    }
+
+    function showHotbarSkillTooltip(element, event, show) {
+        const tooltip = document.getElementById('hotbar-skill-tooltip');
+        if (!tooltip) return;
+
+        if (!show) {
+            tooltip.style.display = 'none';
+            return;
+        }
+
+        const rows = [];
+        if (Number(element.dataset.mana) > 0) rows.push(`<div>Расход маны: <b>${element.dataset.mana}</b></div>`);
+        if (Number(element.dataset.cooldown) > 0) rows.push(`<div>Перезарядка: <b>${element.dataset.cooldown} сек.</b></div>`);
+        if (element.dataset.damage) rows.push(`<div>Урон: <b>${element.dataset.damage}</b></div>`);
+        if (Number(element.dataset.healing) > 0) rows.push(`<div>Лечение: <b>${element.dataset.healing}</b></div>`);
+
+        tooltip.innerHTML = `
+            <div class="hotbar-skill-tooltip__name">${escapeHotbarTooltipText(element.dataset.title)}</div>
+            <div class="hotbar-skill-tooltip__kind">${escapeHotbarTooltipText(element.dataset.kind)}</div>
+            <div>${escapeHotbarTooltipText(element.dataset.description || 'Описание отсутствует.')}</div>
+            ${rows.length ? `<div class="hotbar-skill-tooltip__stats">${rows.join('')}</div>` : ''}
+        `;
+        tooltip.style.display = 'block';
+        moveHotbarSkillTooltip(event);
+    }
+
+    function escapeHotbarTooltipText(value) {
+        const node = document.createElement('div');
+        node.textContent = value || '';
+        return node.innerHTML;
+    }
+
     function hideArtifacts() {
         document.querySelectorAll('.user-effects-set__add')
             .forEach(el => el.classList.remove('user-effects-set-active'));
@@ -596,13 +783,14 @@
             }
         });
 
-        // Выбор предмета из попапа
-        document.getElementById('item_list').addEventListener('click', (e) => {
+        // Выбор предмета или заклинания из попапа
+        popup.addEventListener('click', (e) => {
             const li = e.target.closest('.hotbar-pickable');
             if (!li || activeSlotNumber === null) return;
 
-            const itemId = parseInt(li.dataset.id);
-            assignToSlot(activeSlotNumber, 'item', itemId, li);
+            const entityId = parseInt(li.dataset.id);
+            const entityType = li.dataset.entityType;
+            assignToSlot(activeSlotNumber, entityType, entityId, li);
         });
     });
 

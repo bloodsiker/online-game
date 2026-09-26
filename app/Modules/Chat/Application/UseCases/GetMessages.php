@@ -51,6 +51,7 @@ class GetMessages
             ChatMessageType::Quest,
             ChatMessageType::QuestItem,
             ChatMessageType::Loot,
+            ChatMessageType::WorldEvent,
         ]);
         $content = $this->renderer->render($msg->message, $trusted);
         $isOwn = $msg->user_id === $user->id;

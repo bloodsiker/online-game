@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property int $item_id
  * @property int $location_id
  * @property int $count
+ * @property int|null $world_event_run_id
  * @property LocationItemInteractionType $interaction_type
  * @property Carbon|null $expires_at
  */

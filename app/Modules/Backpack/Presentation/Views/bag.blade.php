@@ -2037,6 +2037,8 @@
     var _teleportUseKeyItemIds = @json($teleportUseKeyItemIds ?? []);
     var _droppableItemIds = @json($droppableItemIds ?? []);
     var _debuffTargetItemIds = @json($debuffTargetItemIds ?? []);
+    var _renameItemIds = @json($renameItemIds ?? []);
+    var _changeRaceItemIds = @json($changeRaceItemIds ?? []);
     var _learnableRecipeItemIds = @json($learnableRecipeItemIds ?? []);
     var _lockedChestItemIds = @json($lockedChestItemIds ?? []);
     var _debuffTargets = @json($debuffTargets ?? []);
@@ -2114,6 +2116,10 @@
                     }
                 } else if (_debuffTargetItemIds.indexOf(parseInt(id, 10)) !== -1) {
                     openDebuffTargetDialog(id);
+                } else if (_renameItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                    try { parent.openRenameModal?.(id); } catch (e) { window.top.openRenameModal?.(id); }
+                } else if (_changeRaceItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                    try { parent.openRaceChangeModal?.(id); } catch (e) { window.top.openRaceChangeModal?.(id); }
                 } else {
                     useItemAjax(id);
                 }

@@ -10,6 +10,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Mockery;
 use Tests\TestCase;
 
@@ -85,6 +86,16 @@ class GatheringPageTest extends TestCase
         $this->assertSame('/gathering', parse_url(route('gathering'), PHP_URL_PATH));
         $this->assertSame('/gathering/state', parse_url(route('gathering.state'), PHP_URL_PATH));
         $this->assertSame('/gathering/complete', parse_url(route('gathering.complete'), PHP_URL_PATH));
+    }
+
+    public function test_gathering_write_routes_do_not_require_csrf_token(): void
+    {
+        foreach (['gathering.start', 'gathering.complete', 'gathering.cancel'] as $routeName) {
+            $route = app('router')->getRoutes()->getByName($routeName);
+
+            $this->assertNotNull($route);
+            $this->assertContains(ValidateCsrfToken::class, $route->excludedMiddleware());
+        }
     }
 
     private function makeUseCase(): GetGatheringPage

@@ -33,6 +33,7 @@ class BattleLifecycleAfterDeathTest extends TestCase
         Schema::create('battles', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('location_id');
+            $table->unsignedBigInteger('dungeon_run_id')->nullable();
             $table->unsignedInteger('rounds')->default(0);
             $table->unsignedTinyInteger('status')->default(1);
             $table->json('boss_metadata')->nullable();

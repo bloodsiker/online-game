@@ -47,6 +47,11 @@ class GetRatingPage
                 'name' => 'Репутационный рейтинг',
                 'column' => 'reputation_rating',
             ],
+            'influence' => [
+                'title' => 'По влиянию',
+                'name' => 'Общее влияние',
+                'column' => 'influence_total',
+            ],
         ];
 
         foreach ($this->ratingReadRepository->getSkills() as $skill) {
@@ -72,6 +77,7 @@ class GetRatingPage
                 'deaths' => $this->ratingReadRepository->paginateDeathsRating(40),
                 'wealth' => $this->ratingReadRepository->paginateWealthRating(40),
                 'reputation' => $this->ratingReadRepository->paginateReputationRating(40),
+                'influence' => $this->ratingReadRepository->paginateInfluenceRating(40),
                 default => $this->ratingReadRepository->paginateLevelRating(40),
             };
         }

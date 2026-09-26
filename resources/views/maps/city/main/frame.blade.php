@@ -777,7 +777,7 @@
                         <em>6</em>
                         <cite>Источник жизни</cite>
                         <br>
-                        <a class="alvl" href="{{ route('on_map', array_merge(['s' => 'Hj7Kl0tEr2A'], request()->except(['s']))) }}#819">
+                        <a class="alvl" href="{{ map_transition_url('Hj7Kl0tEr2A', 819) }}">
                             <img src="{{ asset('img/icon/down.gif') }}" hspace="0" vspace="2" border="0" alt="down" width="26" height="7">
                         </a>
                     </div>
@@ -1312,7 +1312,7 @@
                         <s id="z101">0</s>
                         <em>101</em>
                         <cite>Городские ворота</cite>
-                        <a href="{{ route('on_map', array_merge(['s' => 'Gh865Vpo'], request()->except(['s']))) }}#102" class="asouth">↓</a>
+                        <a href="{{ map_transition_url('Gh865Vpo', 102) }}" class="asouth">↓</a>
                     </div>
                 </div>
             </div>

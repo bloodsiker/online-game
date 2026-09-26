@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $upgrade_lvl
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $additional_attack
  * @property int $count_use
  * @property bool $is_open
+ * @property Carbon|null $expires_at
  * @property int $count
  * @property-read ShareItem $itemInfo
  * @property-read Collection|Item[] $itemsInChest
@@ -47,6 +49,10 @@ class Item extends Model
         'is_open' => 0,
     ];
 
+    protected $casts = [
+        'expires_at' => 'datetime',
+    ];
+
     public function getName(): string
     {
         if ($this->itemInfo->count_use) {
@@ -67,6 +73,15 @@ class Item extends Model
         return (int) $this->count_use > 0
             ? (int) $this->count_use
             : $configuredUses;
+    }
+
+    /** @return list<array{title: string, value: string}> */
+    public function expiryTooltipInfo(): array
+    {
+        return $this->expires_at === null ? [] : [[
+            'title' => 'Исчезнет',
+            'value' => $this->expires_at->format('d.m.Y H:i'),
+        ]];
     }
 
     public function itemInfo(): BelongsTo

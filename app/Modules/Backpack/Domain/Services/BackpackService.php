@@ -22,7 +22,7 @@ class BackpackService
     public function getBaseQuery(User $user)
     {
         return Backpack::select('backpacks.*')
-            ->with(['item', 'item.itemInfo.debuffs', 'item.itemInfo.recipe', 'item.itemInfo.lockConfig'])
+            ->with(['item', 'item.itemInfo.debuffs', 'item.itemInfo.effects', 'item.itemInfo.recipe', 'item.itemInfo.lockConfig'])
             ->join('items', 'backpacks.item_id', '=', 'items.id')
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)

@@ -11,10 +11,13 @@ use App\Modules\Interface\Application\UseCases\GetOnMapPage;
 use App\Modules\Interface\Application\UseCases\GetWhoPage;
 use App\Modules\Interface\Application\UseCases\HeartbeatPlayer;
 use App\Modules\Post\Application\UseCases\GetMailbox;
+use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class InterfaceController extends Controller
 {
@@ -101,13 +104,30 @@ class InterfaceController extends Controller
         ]);
     }
 
-    private function gameView()
+    private function gameView(): View|RedirectResponse
     {
         /** @var ?User $user */
         $user = Auth::user();
 
+        if (! $user instanceof User) {
+            return redirect()->route('index');
+        }
+
+        $adminToolUsers = $user->is_admin
+            ? User::query()
+                ->without('player')
+                ->select(['id', 'name'])
+                ->whereNotNull('player_id')
+                ->orderBy('name')
+                ->get()
+            : collect();
+
+        $races = Race::query()->select(['id', 'name'])->orderBy('name')->get();
+
         return view('interface::index', [
-            'hasUnreadMail' => $user instanceof User && $this->mailbox->hasUnread($user),
+            'hasUnreadMail' => $this->mailbox->hasUnread($user),
+            'adminToolUsers' => $adminToolUsers,
+            'races' => $races,
         ]);
     }
 }

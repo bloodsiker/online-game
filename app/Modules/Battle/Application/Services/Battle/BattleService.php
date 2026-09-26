@@ -35,6 +35,7 @@ class BattleService
 
         // Определяем изоляцию данжа: если локация принадлежит данжу — фильтруем по сессии
         $dungeonSessionId = null;
+        $dungeonRunId = null;
         $session = null;
         if ($location->dungeon_id !== null) {
             $session = $this->getActiveDungeonSession->execute($user->id);
@@ -42,12 +43,13 @@ class BattleService
                 return null; // игрок в данже-локации без сессии — монстров нет
             }
             $dungeonSessionId = $session->monsterSessionId();
+            $dungeonRunId = $session->dungeon_run_id;
 
             // Survival: если все монстры волны мертвы — спавним следующую волну
             $this->handleSurvivalWave($session, $location);
         }
 
-        $battle = $this->battleRepository->findActiveBattleOnLocation($location);
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $dungeonRunId);
         if ($battle instanceof Battle) {
             $battleDetails = BattleDetail::where(['user_id' => $user->id, 'battle_id' => $battle->id])->first();
             if (! $battleDetails instanceof BattleDetail) {
@@ -86,7 +88,7 @@ class BattleService
 
             if ($monsterOnLocation->count() && $checkTimeRespawnMonster) {
 
-                $battle = $this->battleRepository->createBattle($location);
+                $battle = $this->battleRepository->createBattle($location, $dungeonRunId);
 
                 $this->battleRepository->createBattleDetails($battle, $user);
 
@@ -133,7 +135,7 @@ class BattleService
                         }
 
                         if ($aggressionToUser->count()) {
-                            $battle = $this->battleRepository->createBattle($location);
+                            $battle = $this->battleRepository->createBattle($location, $dungeonRunId);
 
                             $this->battleRepository->createBattleDetails($battle, $user);
 
@@ -164,23 +166,34 @@ class BattleService
 
     public function attackMonster(Location $location, int $id): ?Battle
     {
+        $user = Auth::user();
+        $session = $location->dungeon_id !== null
+            ? $this->getActiveDungeonSession->execute($user->id)
+            : null;
+        $dungeonSessionId = $session?->monsterSessionId();
+
         $monsterAttacked = MonsterOnLocation::with(['monster'])->where(['id' => $id, 'active' => 1])->first();
+
+        if ($monsterAttacked instanceof MonsterOnLocation
+            && ((int) $monsterAttacked->location_id !== (int) $location->id
+                || ($dungeonSessionId !== null && (int) $monsterAttacked->dungeon_session_id !== $dungeonSessionId)
+                || ($dungeonSessionId === null && $monsterAttacked->dungeon_session_id !== null))) {
+            $monsterAttacked = null;
+        }
 
         if (! $monsterAttacked instanceof MonsterOnLocation) {
             return null;
         }
 
-        $user = Auth::user();
-
         // На локации бой может уже идти: моб напал первым или дерётся другой
         // игрок. Заводить второй бой нельзя — findActiveBattleOnLocation()
         // отдаёт старший, и удары уходят не в тот бой, что показан игроку.
-        $battle = $this->battleRepository->findActiveBattleOnLocation($location);
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $session?->dungeon_run_id);
 
         if ($battle instanceof Battle) {
             $this->joinExistingBattle($battle, $user);
         } else {
-            $battle = $this->battleRepository->createBattle($location);
+            $battle = $this->battleRepository->createBattle($location, $session?->dungeon_run_id);
             $this->battleRepository->createBattleDetails($battle, $user);
         }
 

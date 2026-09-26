@@ -22,6 +22,7 @@ readonly class BattleOrchestrator
     public function handleLocationEntry(Location $location): ?Battle
     {
         $dungeonSessionId = null;
+        $dungeonRunId = null;
 
         if ($location->dungeon_id !== null) {
             $user = Auth::user();
@@ -31,9 +32,10 @@ readonly class BattleOrchestrator
             }
             $this->advanceSurvivalWave->execute($session, $location);
             $dungeonSessionId = $session->monsterSessionId();
+            $dungeonRunId = $session->dungeon_run_id;
         }
 
-        $battle = $this->finder->findActiveForPlayer($location);
+        $battle = $this->finder->findActiveForPlayer($location, $dungeonRunId);
         if ($battle) {
             return $battle;
         }
@@ -41,7 +43,7 @@ readonly class BattleOrchestrator
         $aggressiveMonsters = $this->spawner->spawnAndGetAggressive($location, $dungeonSessionId);
 
         if ($aggressiveMonsters->isNotEmpty()) {
-            return $this->creator->createWithMonsters($location, $aggressiveMonsters);
+            return $this->creator->createWithMonsters($location, $aggressiveMonsters, $dungeonRunId);
         }
 
         return null;

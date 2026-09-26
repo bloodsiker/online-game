@@ -1,9 +1,19 @@
 {{-- Базовый шаблон сетки для карт. Конкретные карты передают параметры через @include. --}}
 @php
+    $mapFirstRow = $mapFirstRow ?? 0;
     $mapFirstColumn = $mapFirstColumn ?? 1;
     $mapRenderedColumns = $mapColumns - $mapFirstColumn;
+    $mapTableWidth = ($mapRenderedColumns * 48) + ($mapRenderedColumns + 1) + 2;
     $mapEntryLinks = $mapEntryLinks ?? [];
-    $mapLocations = require resource_path('data/maps/'.$mapDataFile);
+    $mapData = require resource_path('data/maps/'.$mapDataFile);
+    $mapLocations = $mapData['cells'] ?? $mapData;
+    $mapAreas = $mapData['areas'] ?? [
+        $mapAreaId => [
+            'label' => $mapAreaLabel ?? '',
+            'color' => 'rgba(210, 240, 185, 0.6)',
+        ],
+    ];
+    $mapDefaultAreaId = $mapData['default_area'] ?? array_key_first($mapAreas) ?? $mapAreaId;
 @endphp
 
 <style type="text/css">
@@ -169,12 +179,14 @@
         padding: 0;
     }
 
-    .a{{ $mapAreaId }} {
-        background-color: rgba(210, 240, 185, 0.6);
+    @foreach($mapAreas as $areaId => $area)
+    .a{{ $areaId }} {
+        background-color: {{ $area['color'] ?? 'rgba(210, 240, 185, 0.6)' }};
         border-spacing: 0;
         margin: 0;
         padding: 0;
     }
+    @endforeach
     .listloc {
         border: 1px solid black;
         width: 32px;
@@ -188,12 +200,12 @@
     }
 </style>
 
-<table width="{{ ($mapRenderedColumns + 1) * 48 }}" cellspacing="1" cellpadding="0" id="m0" class="maptable">
+<table width="{{ $mapTableWidth }}" cellspacing="1" cellpadding="0" id="m0" class="maptable">
     <tbody>
     <tr style="@if(request()->has('hide')) display: none; @endif">
         <th colspan="{{ $mapRenderedColumns }}" class="t0" align="left"></th>
     </tr>
-    @for($row = 0; $row < $mapRows; $row++)
+    @for($row = $mapFirstRow; $row < $mapRows; $row++)
         <tr>
             @for($column = $mapFirstColumn; $column < $mapColumns; $column++)
                 @php
@@ -202,15 +214,17 @@
                 <td width="48" height="48">
                     @if($cell)
                         @php
-                            [$locationId, $borderClasses] = $cell;
+                            $locationId = $cell[0];
+                            $borderClasses = $cell[1];
+                            $cellAreaId = $cell[2] ?? $mapDefaultAreaId;
                         @endphp
-                        <div class="a{{ $mapAreaId }}">
+                        <div class="a{{ $cellAreaId }}">
                             <div id="u{{ $locationId }}">
                                 <div id="l{{ $locationId }}" class="s2box {{ $borderClasses }}">
                                     <s id="z{{ $locationId }}">0</s>
                                     @foreach($mapEntryLinks as $mapEntryLink)
                                         @if($locationId === (int) $mapEntryLink['locationId'])
-                                            <a class="{{ $mapEntryLink['class'] }}" href="{{ route('on_map', array_merge(['s' => $mapEntryLink['targetSlug']], request()->except(['s']))) }}#{{ $mapEntryLink['targetLocationId'] }}">{{ $mapEntryLink['arrow'] }}</a>
+                                            <a class="{{ $mapEntryLink['class'] }}" href="{{ map_transition_url($mapEntryLink['targetSlug'], $mapEntryLink['targetLocationId']) }}">{{ $mapEntryLink['arrow'] }}</a>
                                         @endif
                                     @endforeach
                                     {{ $locationId }}

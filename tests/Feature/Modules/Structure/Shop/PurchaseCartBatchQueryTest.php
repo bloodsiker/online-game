@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Structure\Shop;
 
+use App\Modules\Commerce\Application\Services\PurchaseLogger;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Shop\Application\DTOs\ShopCartDTO;
@@ -35,6 +36,21 @@ class PurchaseCartBatchQueryTest extends TestCase
             $table->unsignedInteger('diamond')->default(0);
             $table->timestamps();
         });
+        Schema::create('locations', function (Blueprint $table): void {
+            $table->id();
+        });
+        Schema::create('structures', function (Blueprint $table): void {
+            $table->id();
+            $table->string('type');
+            $table->string('name');
+            $table->unsignedBigInteger('location_id')->nullable();
+            $table->timestamps();
+        });
+        DB::table('structures')->insert([
+            'id' => 100,
+            'type' => 'shop',
+            'name' => 'Тестовый магазин',
+        ]);
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
@@ -75,7 +91,7 @@ class PurchaseCartBatchQueryTest extends TestCase
         DB::flushQueryLog();
         DB::enableQueryLog();
 
-        $result = (new PurchaseCart($cartService))->execute($user, 100);
+        $result = (new PurchaseCart($cartService, $this->purchaseLogger()))->execute($user, 100);
 
         $backpackSelects = collect(DB::getQueryLog())
             ->pluck('query')
@@ -104,7 +120,7 @@ class PurchaseCartBatchQueryTest extends TestCase
         ));
         $cartService->shouldReceive('clearCart')->once()->andReturn(1);
 
-        $result = (new \App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart($cartService))
+        $result = (new \App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart($cartService, $this->purchaseLogger()))
             ->execute($this->user(10), 100);
 
         $this->assertTrue($result->ok);
@@ -138,7 +154,7 @@ class PurchaseCartBatchQueryTest extends TestCase
         ));
         $cartService->shouldReceive('clearCart')->once()->andReturn(1);
 
-        $result = (new PurchaseCart($cartService))->execute($this->user(10), 100);
+        $result = (new PurchaseCart($cartService, $this->purchaseLogger()))->execute($this->user(10), 100);
 
         $this->assertTrue($result->ok);
         $this->assertSame(1, (int) DB::table('backpacks')->where('item_id', 101)->value('count'));
@@ -199,5 +215,13 @@ class PurchaseCartBatchQueryTest extends TestCase
         $user->syncOriginal();
 
         return $user;
+    }
+
+    private function purchaseLogger(): PurchaseLogger
+    {
+        $logger = Mockery::mock(PurchaseLogger::class);
+        $logger->shouldReceive('record')->once()->andReturn('test-purchase-uuid');
+
+        return $logger;
     }
 }

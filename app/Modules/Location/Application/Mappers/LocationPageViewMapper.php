@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Location\Application\Mappers;
 
+use App\Modules\Dungeon\Domain\Enums\DungeonRunStatus;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Location\Application\DTOs\LocationDungeonSessionDTO;
 use App\Modules\Location\Application\DTOs\LocationMonsterDTO;
 use App\Modules\Location\Application\DTOs\LocationMoveDirectionDTO;
@@ -22,6 +24,8 @@ use Illuminate\Support\Facades\Storage;
 
 class LocationPageViewMapper
 {
+    public function __construct(private readonly MapInfluenceRequirementService $influenceRequirements) {}
+
     public function map(
         User $user,
         Location $location,
@@ -49,14 +53,18 @@ class LocationPageViewMapper
                     attackUrl: route('fight.attack.monster', ['id' => $monster->id]),
                 )
             )->all(),
-            npcs: $location->npcs->map(
-                static fn ($npc): LocationNpcDTO => new LocationNpcDTO(
-                    id: (int) $npc->id,
-                    name: (string) $npc->name,
-                    infoUrl: route('info.npc', ['uuid' => $npc->uuid]),
-                    talkUrl: route('npc', ['id' => $npc->id]),
-                )
-            )->all(),
+            npcs: $location->npcs
+                ->filter(fn ($npc): bool => $this->influenceRequirements->allowsNpc($user->id, (int) $npc->id))
+                ->map(
+                    static fn ($npc): LocationNpcDTO => new LocationNpcDTO(
+                        id: (int) $npc->id,
+                        name: (string) $npc->name,
+                        infoUrl: $npc->uuid !== null
+                            ? route('info.npc', ['uuid' => $npc->uuid])
+                            : null,
+                        talkUrl: route('npc', ['id' => $npc->id]),
+                    )
+                )->all(),
             moves: $this->mapMoves($location),
             itemsOnLocationCount: $itemsOnLocationCount,
             takeItemsUrl: route('take_items'),
@@ -64,7 +72,7 @@ class LocationPageViewMapper
                     ? route('gathering')
                     : null,
             structures: $this->mapStructures($location, $user),
-            gateActions: $this->mapGateActions($location),
+            gateActions: $this->mapGateActions($location, $user),
             locationUsersJson: $this->mapLocationUsersJson($locationUsers),
             playerFrame: new LocationPlayerFrameDTO(
                 hpCurrent: (int) $user->player->hp_now,
@@ -85,6 +93,7 @@ class LocationPageViewMapper
         }
 
         $isSurvival = $dungeonSession->dungeon->isSurvival();
+        $isTower = $dungeonSession->dungeon->isTower();
         $waveCount = $dungeonSession->dungeon->wave_count;
         $currentWave = $isSurvival ? (int) $dungeonSession->current_wave : null;
         $wavesDone = $isSurvival ? (int) $dungeonSession->current_wave - 1 : null;
@@ -92,15 +101,21 @@ class LocationPageViewMapper
         $canExit = $dungeonSession->dungeon->exit_location_id === $locationId
             || ($isSurvival
                 && $waveCount !== null
-                && (int) $dungeonSession->current_wave > $waveCount);
+                && (int) $dungeonSession->current_wave > $waveCount)
+            || ($isTower && $dungeonSession->run?->status === DungeonRunStatus::COMPLETED);
 
         return new LocationDungeonSessionDTO(
             name: (string) $dungeonSession->dungeon->name,
             isSurvival: $isSurvival,
+            isTower: $isTower,
             currentWave: $currentWave,
             waveCount: $waveCount !== null ? (int) $waveCount : null,
+            currentStageNumber: $isTower ? $dungeonSession->run?->currentStage?->number : null,
+            currentStageName: $isTower ? $dungeonSession->run?->currentStage?->name : null,
             allCleared: $allCleared,
-            expiresAtTimestamp: $dungeonSession->expires_at?->timestamp,
+            expiresAtTimestamp: $isTower
+                ? $dungeonSession->run?->stage_expires_at?->timestamp
+                : $dungeonSession->expires_at?->timestamp,
             canExit: $canExit,
             exitUrl: route('dungeon.exit'),
         );
@@ -134,7 +149,7 @@ class LocationPageViewMapper
     /**
      * @return list<LocationStructureActionDTO>
      */
-    private function mapGateActions(Location $location): array
+    private function mapGateActions(Location $location, User $user): array
     {
         $actions = [];
 
@@ -144,7 +159,7 @@ class LocationPageViewMapper
             ->get();
 
         foreach ($gates as $gate) {
-            if ($gate->shareItem === null) {
+            if (! $this->influenceRequirements->allowsLocationGate($user->id, (int) $gate->id)) {
                 continue;
             }
 
@@ -210,6 +225,7 @@ class LocationPageViewMapper
     private function resolveEntryUrl(object $structure): ?string
     {
         return match (true) {
+            $structure->isShop() && $structure->isInfluenceShop() => route('influence.shop', ['structure' => $structure->id]),
             $structure->isShop() => route('shop', ['id' => $structure->id]),
             $structure->isBarterShop() => route('barter_shop', ['id' => $structure->id]),
             $structure->isWarehouse() => route('warehouse', ['id' => $structure->id]),

@@ -12,7 +12,7 @@ final class GranitePassSeeder extends Seeder
 {
     private const FIRST_LOCATION_ID = 1279;
 
-    private const LAST_LOCATION_ID = 1525;
+    private const LAST_LOCATION_ID = 1529;
 
     private const ENTRANCE_LOCATION_ID = 1278;
 
@@ -171,8 +171,9 @@ final class GranitePassSeeder extends Seeder
      */
     private function cells(): array
     {
-        /** @var array<int, array<int, array{int, string}>> $layout */
-        $layout = require resource_path('data/maps/granite_pass.php');
+        $mapData = require resource_path('data/maps/granite_pass.php');
+        /** @var array<int, array<int, array{int, string, 2?: string}>> $layout */
+        $layout = $mapData['cells'] ?? $mapData;
         $cells = [];
         $ids = [];
 
@@ -202,7 +203,7 @@ final class GranitePassSeeder extends Seeder
         sort($actualIds);
 
         if ($actualIds !== $expectedIds) {
-            throw new LogicException('Схема Гранитного Перевала должна содержать все локации 1279–1525 без пропусков.');
+            throw new LogicException('Схема Гранитного Перевала должна содержать все локации 1279–1529 без пропусков.');
         }
 
         return $cells;

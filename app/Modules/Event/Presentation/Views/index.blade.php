@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>События</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     {!! $itemTooltipScript ?? '' !!}
@@ -121,6 +122,123 @@
             left: -1px;
             font-size: 11px;
         }
+        .world-events { width: 1020px; max-width: 100%; margin: 0 auto; }
+        .world-event-card { margin: 0 0 14px; color: #3d2b20; scroll-margin: 16px; }
+        .world-event-card--highlighted { animation: worldEventCardHighlight 4s ease-out; }
+        @keyframes worldEventCardHighlight {
+            0%, 35% { filter: brightness(1.13); box-shadow: 0 0 0 3px rgba(177, 42, 17, .72), 0 0 16px rgba(177, 42, 17, .55); }
+            100% { filter: brightness(1); box-shadow: 0 0 0 0 rgba(177, 42, 17, 0); }
+        }
+        .world-event-card__head { height: 22px; text-align: center; }
+        .world-event-card__favorite {
+            display: inline-block;
+            width: 19px;
+            height: 18px;
+            margin: 0 5px 0 0;
+            padding: 0;
+            border: 0;
+            font-size: 0;
+            line-height: 0;
+            background: url(/main/images/favorite.png) center bottom no-repeat;
+            cursor: pointer;
+            vertical-align: -4px;
+        }
+        .world-event-card__favorite:hover,
+        .world-event-card__favorite--active { background-position: center top; }
+        .world-event-card__favorite:disabled { cursor: wait; opacity: .55; }
+        .world-event-card__body { display: flex; gap: 14px; align-items: flex-start; padding: 12px 16px 16px; background: url(/img/bg/tbl-usi_bg.gif) repeat; }
+        .world-event-card__image.user-rewards__item-pic {
+            flex: 0 0 200px;
+            width: 200px;
+            height: 200px;
+            min-height: 200px;
+            padding: 10px 12px 12px;
+            border: 0;
+            background-size: 224px 222px;
+            text-align: center;
+        }
+        .world-event-card__image img { display: block; width: 200px; height: 200px; object-fit: contain; }
+        .world-event-card__content { flex: 1; min-width: 0; }
+        .world-event-card__content--future { display: flex; align-items: flex-start; gap: 14px; }
+        .world-event-card__content-main { flex: 1 1 auto; min-width: 0; }
+        .world-event-card__title {
+            margin: 0 0 9px;
+            padding: 0 0 5px;
+            border-bottom: 1px solid #c69862;
+            color: #7d2415;
+            font-size: 15px;
+            line-height: 1.25;
+            text-align: left;
+            text-shadow: 0 1px rgba(255,255,255,.75);
+        }
+        .world-event-card__content p { margin: 0 0 7px; }
+        .world-event-card__stage { color: #6f351f; }
+        .world-event-card__target-list { display:flex; flex-wrap:wrap; gap:8px; margin:5px 0 9px; }
+        .world-event-card__target { width:76px; color:#542f1c; text-align:center; text-decoration:none; cursor:pointer; }
+        .world-event-card__target .user-rewards__item-pic { display:block; }
+        .world-event-card__meta { color: #70401e; }
+        .world-event-card__influence { margin: 9px 0; padding: 7px 9px; border: 1px solid #c69862; background: rgba(255,245,213,.6); }
+        .world-event-card__locations { color: #685142; }
+        .world-event-timer { display: inline-flex; align-items: stretch; min-width: 260px; margin: 8px 0 4px; overflow: hidden; border: 1px solid #6d3b1e; border-radius: 4px; background: #f3dfb2; box-shadow: inset 0 0 0 1px #efd394, 0 1px 3px rgba(48,24,10,.45); }
+        .world-event-timer__label { padding: 7px 12px; color: #f9e8b8; font-weight: bold; background: linear-gradient(#8b3a1f, #5f2414); text-shadow: 0 1px #2c1009; }
+        .world-event-timer__value { flex: 1; min-width: 96px; padding: 6px 13px; color: #6f1d12; font-size: 14px; font-weight: bold; letter-spacing: 1px; text-align: center; text-shadow: 0 1px #fff2ce; }
+        .world-event-timer__value::before { content: '⌛'; margin-right: 6px; color: #8b5b25; font-size: 11px; }
+        .world-event-timer--start .world-event-timer__label { background: linear-gradient(#647a2d, #394d19); }
+        .world-event-timer--start .world-event-timer__value { color: #42551c; }
+        .world-event-card__future-side {
+            flex: 0 0 280px;
+            min-width: 0;
+        }
+        .world-event-card__future-summary {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #c69862;
+            border-radius: 4px;
+            background: rgba(255,245,213,.62);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+            text-align: center;
+        }
+        .world-event-card__future-summary .world-event-timer {
+            display: flex;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            margin: 0 0 9px;
+        }
+        .world-event-card__future-limits {
+            margin: 0 !important;
+            color: #5f321d;
+            line-height: 1.6;
+        }
+        .world-event-card__future-side > .world-event-card__influence {
+            margin: 9px 0 0;
+            text-align: left;
+        }
+        .event-influence-list { max-width: 650px; margin: 12px auto; color: #3d2b20; }
+        .event-influence-list__intro { margin: 0 0 10px; text-align: center; color: #68452d; }
+        .event-influence-table { width: 100%; border-collapse: collapse; background: url(/img/bg/tbl-usi_bg.gif) repeat; }
+        .event-influence-table th { padding: 7px 10px; color: #f7e5ae; background: #75402a; border: 1px solid #5b2d1d; text-shadow: 0 1px #32170f; }
+        .event-influence-table td { padding: 8px 12px; border: 1px solid #c99c69; }
+        .event-influence-table tbody tr:nth-child(even) td { background: rgba(255,244,210,.35); }
+        .event-influence-table__value { width: 170px; color: #7d2415; font-size: 13px; font-weight: bold; text-align: center; }
+        .world-event-progress { margin: 7px 0 3px; }
+        .world-event-progress__label { display: flex; justify-content: space-between; font-weight: bold; }
+        .rep-progress-bar { position: relative; width: 100%; height: 31px; overflow: hidden; }
+        .rep-progress-bar__bg { height: 27px; margin: 2px 5px 0; overflow: hidden; border-radius: 5px; background: url(/img/progressbar/progress-bar-1-bg.png) 0 -54px repeat-x; }
+        .rep-progress-bar__fill { height: 27px; background: url(/img/progressbar/progress-bar-1-bg.png) 0 -27px repeat-x; }
+        .rep-progress-bar__border { position: absolute; inset: 0; height: 31px; }
+        .rep-progress-bar__border-left,.rep-progress-bar__border-right,.rep-progress-bar__border-center { height: 31px; background: url(/img/progressbar/progress-bar-1-border.png) no-repeat; }
+        .rep-progress-bar__border-left,.rep-progress-bar__border-right { position: absolute; top: 0; width: 20px; }
+        .rep-progress-bar__border-left { left: 0; }.rep-progress-bar__border-right { right: 0; background-position: 0 -31px; }
+        .rep-progress-bar__border-center { margin: 0 20px; background-position: 0 -62px; background-repeat: repeat-x; }
+        .rep-progress-bar__text { position: absolute; inset: 0; color: #fff; font-weight: bold; line-height: 31px; text-align: center; text-shadow: 0 1px 2px #333; }
+        @media(max-width:760px){
+            .world-event-card__body{display:block}
+            .world-event-card__image.user-rewards__item-pic{width:200px;margin:0 auto 10px}
+            .world-event-card__content--future{display:block}
+            .world-event-card__future-side{width:100%;margin-top:10px}
+        }
     </style>
 </head>
 <body leftmargin="0" rightmargin="0">
@@ -132,6 +250,7 @@
         'events'        => 'Текущие события',
         'events_future' => 'Будущие события',
         'events_my'     => 'Мои события',
+        'influence'     => 'Влияние',
         'activity'      => 'Активности',
         'rewards'       => 'Подвиги',
     ];
@@ -170,6 +289,10 @@
 <div style="padding: 10px 6px;">
     @if($mode === 'activity')
         @include('event::activity')
+    @elseif(in_array($mode, ['events', 'events_future', 'events_my'], true))
+        @include('event::world-events')
+    @elseif($mode === 'influence')
+        @include('event::influence')
     @else
         <div style="text-align: center; padding: 40px 20px; color: #49382d;">
             <h2 style="font-size: 16px; margin-bottom: 12px; color: #7a3010;">{{ $tabs[$mode] }}</h2>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Npc\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Npc\Application\UseCases\GetNpcInfoPage;
 use App\Modules\Npc\Application\UseCases\GetNpcPage;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
@@ -18,6 +19,7 @@ class NpcController extends Controller
     public function __construct(
         private readonly GetNpcPage $getNpcPage,
         private readonly GetNpcInfoPage $getNpcInfoPage,
+        private readonly MapInfluenceRequirementService $influenceRequirements,
     ) {}
 
     public function index(int $id)
@@ -51,6 +53,7 @@ class NpcController extends Controller
     public function dialogue(Request $request, int $id, ?int $node = null)
     {
         $npc = Npc::findOrFail($id);
+        abort_unless($this->influenceRequirements->allowsNpc((int) $request->user()->id, $npc->id), 403, 'Недостаточно влияния для разговора с этим персонажем.');
         $dialogueNode = $node !== null
             ? NpcDialogueNode::where('npc_id', $npc->id)->where('is_active', true)->findOrFail($node)
             : NpcDialogueNode::where('npc_id', $npc->id)

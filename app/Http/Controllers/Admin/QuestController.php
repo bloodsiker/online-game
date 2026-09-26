@@ -87,7 +87,7 @@ class QuestController extends Controller
 
         $quest->load([
             'objectives.shareItem', 'objectives.collectItem', 'rewards.itemInfo',
-            'rewards.location', 'rewards.reputation', 'dialogues', 'stages.completeNpc',
+            'rewards.location', 'rewards.reputation', 'dialogues.npc', 'stages.completeNpc', 'stages.grantItem',
             'startNpc', 'completeNpc', 'parentQuest', 'afterQuest', 'nextQuests',
         ]);
         $questTypes = QuestType::cases();
@@ -235,6 +235,7 @@ class QuestController extends Controller
     {
         QuestDialogue::create([
             'quest_id' => $quest->id,
+            'npc_id' => $request->input('npc_id') ?: null,
             'order' => (int) $request->input('order', $quest->dialogues()->max('order') + 1),
             'description' => $request->input('description'),
             'reply_text' => $request->input('reply_text') ?: 'Далее',
@@ -246,6 +247,7 @@ class QuestController extends Controller
     public function updateDialogue(Request $request, Quest $quest, QuestDialogue $dialogue): RedirectResponse
     {
         $dialogue->update([
+            'npc_id' => $request->input('npc_id') ?: null,
             'order' => (int) $request->input('order', $dialogue->order),
             'description' => $request->input('description'),
             'reply_text' => $request->input('reply_text') ?: 'Далее',
@@ -328,6 +330,8 @@ class QuestController extends Controller
                 ? ($request->input('waiting_text') ?: 'Ты пришёл слишком рано. Возвращайся позже.')
                 : null,
             'ready_text' => $stageType === 'wait' ? $request->input('ready_text') : null,
+            'grant_share_item_id' => $request->input('grant_share_item_id') ?: null,
+            'grant_amount' => max(1, (int) $request->input('grant_amount', 1)),
         ];
     }
 }

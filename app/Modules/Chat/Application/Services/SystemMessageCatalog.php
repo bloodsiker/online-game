@@ -53,6 +53,18 @@ final class SystemMessageCatalog
                 'sendable' => true,
             ],
             [
+                'type' => ChatMessageType::WorldEvent->value,
+                'title' => 'Событие',
+                'color' => '#000000',
+                'appearance' => 'Чёрное, жирное',
+                'audience' => 'Все игроки во всех каналах',
+                'lifetime' => ChatMessageLifetime::SYSTEM_MINUTES.' минут',
+                'icon' => '',
+                'bold' => true,
+                'italic' => false,
+                'sendable' => false,
+            ],
+            [
                 'type' => ChatMessageType::PartyInvite->value,
                 'title' => 'Приглашение в группу',
                 'color' => '#000000',

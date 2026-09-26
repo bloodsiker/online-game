@@ -50,3 +50,20 @@ if (! function_exists('resolve_storage_image_url')) {
         return Storage::disk('public')->url($value);
     }
 }
+
+if (! function_exists('map_transition_url')) {
+    /**
+     * Формирует ссылку перехода между картами с учётом текущего режима просмотра.
+     */
+    function map_transition_url(string $slug, int $locationId): string
+    {
+        if (request()->routeIs('map.public')) {
+            return route('map.public', ['slug' => $slug]).'#'.$locationId;
+        }
+
+        return route('on_map', array_merge(
+            ['s' => $slug],
+            request()->except(['s']),
+        )).'#'.$locationId;
+    }
+}

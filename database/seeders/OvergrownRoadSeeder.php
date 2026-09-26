@@ -155,8 +155,9 @@ final class OvergrownRoadSeeder extends Seeder
      */
     private function cells(): array
     {
-        /** @var array<int, array<int, array{int, string}>> $layout */
-        $layout = require resource_path('data/maps/overgrown_road.php');
+        $mapData = require resource_path('data/maps/overgrown_road.php');
+        /** @var array<int, array<int, array{int, string, 2?: string}>> $layout */
+        $layout = $mapData['cells'] ?? $mapData;
         $cells = [];
         $ids = [];
 

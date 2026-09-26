@@ -25,25 +25,53 @@ class EloquentLocationReadRepository implements LocationReadRepository
         ])->findOrFail($locationId);
     }
 
-    public function getMonstersOnLocation(int $locationId): Collection
+    public function getMonstersOnLocation(int $locationId, ?User $user = null): Collection
     {
-        return MonsterOnLocation::with('monster')
+        $query = MonsterOnLocation::with('monster')
             ->where('location_id', $locationId)
-            ->where('active', 1)
-            ->get();
+            ->where('active', 1);
+
+        $session = $user !== null ? DungeonSession::query()->where('user_id', $user->id)->first() : null;
+        if ($session !== null) {
+            $query->where('dungeon_session_id', $session->monsterSessionId());
+        } elseif ($user?->currentLocation?->dungeon_id !== null) {
+            return collect();
+        } elseif ($user !== null) {
+            $query->whereNull('dungeon_session_id');
+        }
+
+        return $query->get();
     }
 
-    public function getLocationUsers(int $locationId): Collection
+    public function getLocationUsers(int $locationId, ?User $user = null): Collection
     {
+        $session = $user !== null ? DungeonSession::query()->where('user_id', $user->id)->first() : null;
+        $runId = $session?->dungeon_run_id;
+        $cacheKey = 'who:users_on_location:'.$locationId.($runId !== null ? ':run:'.$runId : '');
+
         // Тот же список, что и в InterfaceReadRepository::getUsersOnLocation —
         // используем общий ключ кэша, чтобы не дублировать запросы.
         return Cache::remember(
-            'who:users_on_location:'.$locationId,
+            $cacheKey,
             now()->addSeconds(60),
-            fn (): Collection => User::with(['player', 'clanMembership.clan', 'activeChatMute'])
-                ->where('location_id', $locationId)
-                ->orderByDesc('last_online_at')
-                ->get(),
+            function () use ($locationId, $user, $session, $runId): Collection {
+                $query = User::with(['player', 'clanMembership.clan', 'activeChatMute'])
+                    ->where('location_id', $locationId);
+
+                if ($runId !== null) {
+                    $query->whereIn('id', DungeonSession::query()->where('dungeon_run_id', $runId)->select('user_id'));
+                } elseif ($session !== null) {
+                    $rootId = $session->monsterSessionId();
+                    $query->whereIn('id', DungeonSession::query()
+                        ->whereKey($rootId)
+                        ->orWhere('primary_session_id', $rootId)
+                        ->select('user_id'));
+                } elseif ($user?->currentLocation?->dungeon_id !== null) {
+                    return collect();
+                }
+
+                return $query->orderByDesc('last_online_at')->get();
+            },
         );
     }
 

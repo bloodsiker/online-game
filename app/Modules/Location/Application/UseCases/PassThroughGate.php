@@ -6,7 +6,9 @@ namespace App\Modules\Location\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\Services\Battle\BattleService;
+use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
 use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
+use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Location\Application\DTOs\LocationPageDTO;
 use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
@@ -23,15 +25,26 @@ class PassThroughGate
         private readonly PlayerStatService $statService,
         private readonly GetActiveDungeonSession $getActiveDungeonSession,
         private readonly LocationPageViewMapper $mapper,
+        private readonly MapInfluenceRequirementService $influenceRequirements,
+        private readonly ExpireDungeonSession $expireDungeonSession,
     ) {}
 
     public function execute(User $user, int $gateId): LocationPageDTO
     {
+        $expired = $this->expireDungeonSession->execute($user);
+        if ($expired) {
+            session()->flash('message', 'Время этажа истекло! Вы выброшены из данжа.');
+        }
+
         $gate = LocationGate::find($gateId);
 
-        if ($gate === null || $gate->mode !== 'presence_pass' || $gate->from_location_id !== $user->location_id) {
+        if ($expired) {
+            // Игрок уже перемещён наружу сервисом завершения данжа.
+        } elseif ($gate === null || $gate->mode !== 'presence_pass' || $gate->from_location_id !== $user->location_id) {
             session()->flash('message', 'Проход недоступен.');
-        } elseif ($gate->shareItem === null || $this->backpackService->getItem($user, $gate->shareItem) === null) {
+        } elseif (! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {
+            session()->flash('message', 'Для прохода недостаточно влияния на территории.');
+        } elseif ($gate->shareItem !== null && $this->backpackService->getItem($user, $gate->shareItem) === null) {
             $itemName = $gate->shareItem?->name ?? 'специальный предмет';
             session()->flash('message', "Проход закрыт. Нужен предмет: {$itemName}.");
         } else {
@@ -48,8 +61,8 @@ class PassThroughGate
             $location,
             $this->statService->resolve($user->player),
             $battle?->id,
-            $this->readRepository->getMonstersOnLocation($location->id),
-            $this->readRepository->getLocationUsers($location->id),
+            $this->readRepository->getMonstersOnLocation($location->id, $user),
+            $this->readRepository->getLocationUsers($location->id, $user),
             $this->getActiveDungeonSession->execute($user->id),
             $this->readRepository->countItemsOnLocation($user, $location->id),
         );

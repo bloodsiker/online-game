@@ -389,16 +389,20 @@
                                         @if($item->lockpickingUrl !== null)
                                             <b class="butt2 pointer"><b>
                                                 <input value="{{ $item->actionLabel }}" type="button"
+                                                       @if($loop->first) id="weapon-attack" title="{{ $item->actionLabel }} первый предмет (Q)" @endif
                                                        onclick="window.parent.openLockpickingModal(@js($item->lockpickingUrl))">
                                             </b></b>
                                         @elseif($item->actionLabel === 'Открыть')
                                             <form method="post" action="{{ $item->actionUrl }}">
                                                 @csrf
-                                                <b class="butt2 pointer"><b><input value="{{ $item->actionLabel }}" type="submit"></b></b>
+                                                <b class="butt2 pointer"><b><input value="{{ $item->actionLabel }}" type="submit"
+                                                    @if($loop->first) id="weapon-attack" title="Открыть первый предмет (Q)" @endif></b></b>
                                             </form>
                                         @else
                                             <b class="butt2 pointer"><b>
-                                                <input value="{{ $item->actionLabel }}" type="button" onclick="window.location.href = @js($item->actionUrl)">
+                                                <input value="{{ $item->actionLabel }}" type="button"
+                                                       @if($loop->first) id="weapon-attack" title="Поднять первый предмет (Q)" @endif
+                                                       onclick="window.location.href = @js($item->actionUrl)">
                                             </b></b>
                                         @endif
                                     </div>

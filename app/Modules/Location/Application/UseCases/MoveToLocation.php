@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Location\Application\UseCases;
 
 use App\Modules\Battle\Application\Services\Battle\BattleService;
+use App\Modules\Dungeon\Application\UseCases\ExpireDungeonSession;
 use App\Modules\Dungeon\Application\UseCases\GetActiveDungeonSession;
 use App\Modules\Location\Application\DTOs\LocationPageDTO;
+use App\Modules\Location\Application\DTOs\MoveResultDTO;
 use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Location\Domain\Services\PlayerMovementService;
@@ -22,11 +24,19 @@ class MoveToLocation
         private readonly PlayerStatService $statService,
         private readonly GetActiveDungeonSession $getActiveDungeonSession,
         private readonly LocationPageViewMapper $mapper,
+        private readonly ExpireDungeonSession $expireDungeonSession,
     ) {}
 
     public function execute(User $user, string $direction): LocationPageDTO
     {
-        $result = $this->playerMovementService->move($user, $direction);
+        $expired = $this->expireDungeonSession->execute($user);
+        if ($expired) {
+            session()->flash('message', 'Время этажа истекло! Вы выброшены из данжа.');
+        }
+
+        $result = $expired
+            ? MoveResultDTO::blocked('Время этажа истекло.')
+            : $this->playerMovementService->move($user, $direction);
 
         if (! $result->success) {
             session()->flash('message', $result->message);
@@ -40,8 +50,8 @@ class MoveToLocation
             $location,
             $this->statService->resolve($user->player),
             $battle?->id,
-            $this->readRepository->getMonstersOnLocation($location->id),
-            $this->readRepository->getLocationUsers($location->id),
+            $this->readRepository->getMonstersOnLocation($location->id, $user),
+            $this->readRepository->getLocationUsers($location->id, $user),
             $this->getActiveDungeonSession->execute($user->id),
             $this->readRepository->countItemsOnLocation($user, $location->id),
         );

@@ -1,5 +1,17 @@
 {{-- Базовый шаблон страницы карты. Конкретные карты передают параметры через @include. --}}
 
+@php
+    $mapLegendData = isset($mapDataFile)
+        ? require resource_path('data/maps/'.$mapDataFile)
+        : [];
+    $mapAreas = $mapLegendData['areas'] ?? [
+        $mapAreaId => [
+            'label' => $mapAreaLabel,
+            'color' => 'rgba(210, 240, 185, 0.6)',
+        ],
+    ];
+@endphp
+
 <html>
 <head>
     <title>Map</title>
@@ -383,7 +395,7 @@
                                                                                           onmouseout="mark_l({{ $mapPassageFromId }},0)"><span
                                                                                             class="listloc">{{ $mapPassageFromId }}</span> <span
                                                                                             style="font-size:18px;">{{ $mapPassageDirection }}</span> <a
-                                                                                            href="{{ route('on_map', array_merge(['s' => $mapPassageTargetSlug], request()->except(['s']))) }}#{{ $mapPassageTargetLocationId }}">{{ $mapPassageTargetLabel }}</a> <span
+                                                                                            href="{{ map_transition_url($mapPassageTargetSlug, $mapPassageTargetLocationId) }}">{{ $mapPassageTargetLabel }}</a> <span
                                                                                             class="listloc">{{ $mapPassageTargetLocationId }}</span></span>
                                                                                             </td>
                                                                                         </tr>
@@ -436,17 +448,18 @@
                                                                                     style="padding: 6px 4px; text-align: justify;">
                                                                                     <table class="coll w100 p10h p2v brd2-all">
                                                                                         <tbody>
+                                                                                        @foreach($mapAreas as $areaId => $area)
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">
                                                                                                 <span class="line-align"
                                                                                                     style="cursor:pointer;cursor:hand;margin-top:6px;display:inline-block;"
-                                                                                                    onclick="area_click({{ $mapAreaId }})"
-                                                                                                    onmouseover="area_show({{ $mapAreaId }},1)"
-                                                                                                    onmouseout="area_show({{ $mapAreaId }},0)"><span
-                                                                                                        class="a{{ $mapAreaId }} listloc"
-                                                                                                        style="">&nbsp;</span> - {{ $mapAreaLabel }}</span>
+                                                                                                    onclick="area_click(@js((string) $areaId))"
+                                                                                                    onmouseover="area_show(@js((string) $areaId),1)"
+                                                                                                    onmouseout="area_show(@js((string) $areaId),0)"><span
+                                                                                                        class="a{{ $areaId }} listloc">&nbsp;</span> - {{ $area['label'] }}</span>
                                                                                             </td>
                                                                                         </tr>
+                                                                                        @endforeach
                                                                                         @auth
                                                                                         <tr class="bg_l">
                                                                                             <td class="brd2-top brd2-bt b">

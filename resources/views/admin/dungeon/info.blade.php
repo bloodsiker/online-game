@@ -15,6 +15,14 @@
                     <header class="card-header"><h2 class="card-title">Настройки смерти</h2></header>
                     <div class="card-body">
                         <div class="form-group">
+                            <label class="col-form-label">Тип данжа</label>
+                            <select name="type" class="form-control">
+                                @foreach(\App\Modules\Dungeon\Domain\Enums\DungeonType::cases() as $type)
+                                    <option value="{{ $type->value }}" @selected(old('type', $dungeon->type->value) === $type->value)>{{ $type->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label class="col-form-label">Поведение при смерти</label>
                             <select name="death_behavior" class="form-control">
                                 @foreach($deathBehaviors as $behavior)
@@ -140,6 +148,19 @@
         </div>
     </form>
 
+    <section class="card">
+        <header class="card-header"><h2 class="card-title">Этажи и этапы</h2></header>
+        <div class="card-body">
+            <p class="help-block">Для башни таймер задаётся отдельно на каждый этаж. После уничтожения всех монстров игроки автоматически переходят выше.</p>
+
+            @foreach($dungeon->stages as $stage)
+                @include('admin.dungeon._stage-form', ['stage' => $stage])
+            @endforeach
+
+            @include('admin.dungeon._stage-form', ['stage' => null])
+        </div>
+    </section>
+
 @push('footer_scripts')
 <script>
     $('#death-return-location').select2({
@@ -164,6 +185,43 @@
             cache: true
         },
         minimumInputLength: 0
+    });
+
+    document.querySelectorAll('[data-stage-form]').forEach(function (form) {
+        const list = form.querySelector('.stage-monster-list');
+        const template = form.querySelector('.stage-monster-template');
+        const spawnType = form.querySelector('.stage-spawn-type');
+        let nextIndex = list.querySelectorAll('.stage-monster-row').length;
+
+        function updateSpawnFields() {
+            const fixed = spawnType.value === 'fixed';
+            form.querySelector('.stage-total-monsters').style.display = fixed ? 'none' : '';
+            form.querySelectorAll('.stage-monster-quantity').forEach(el => el.style.display = fixed ? '' : 'none');
+            form.querySelectorAll('.stage-monster-weight').forEach(el => el.style.display = fixed ? 'none' : '');
+            form.querySelectorAll('.stage-monster-location').forEach(el => el.style.display = fixed ? '' : 'none');
+            form.querySelector('.stage-monster-help').textContent = fixed
+                ? ' — задайте количество и клетку для каждой группы; без клетки монстры появятся у входа.'
+                : ' — общий размер волны задаётся выше, а вес определяет долю каждого вида.';
+        }
+
+        form.querySelector('.stage-monster-add').addEventListener('click', function () {
+            list.insertAdjacentHTML('beforeend', template.innerHTML.replaceAll('__INDEX__', nextIndex++));
+            updateSpawnFields();
+        });
+
+        list.addEventListener('click', function (event) {
+            const removeButton = event.target.closest('.stage-monster-remove');
+            if (! removeButton) {
+                return;
+            }
+            if (list.querySelectorAll('.stage-monster-row').length === 1) {
+                return;
+            }
+            removeButton.closest('.stage-monster-row').remove();
+        });
+
+        spawnType.addEventListener('change', updateSpawnFields);
+        updateSpawnFields();
     });
 </script>
 @endpush

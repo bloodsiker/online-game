@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Player\Domain\Services;
 
 use App\Modules\Battle\Domain\Enums\CombatClass;
+use App\Modules\Influence\Infrastructure\Persistence\Models\PlayerInfluenceMedal;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Domain\DTO\StatModifier;
 use App\Modules\Player\Domain\DTO\StatSheet;
@@ -58,6 +59,7 @@ class PlayerStatService
         $modifiers = [
             ...$this->fromEquipment($player),
             ...$this->fromArtifacts($player),
+            ...$this->fromInfluenceMedals($player),
             ...$this->fromPassiveSkills($player),
             ...$this->fromBuffs($player),
             ...$this->fromInjuries($player),
@@ -415,6 +417,39 @@ class PlayerStatService
                     value: $stat->value,
                     isPercent: $stat->value_type === ItemEffectValueType::PERCENT,
                     source: $source,
+                );
+            }
+        }
+
+        return $modifiers;
+    }
+
+    /** Only the highest earned influence medal from each territory grants stats. */
+    private function fromInfluenceMedals(Player $player): array
+    {
+        $earned = PlayerInfluenceMedal::query()
+            ->with(['medal.stats', 'medal.levels'])
+            ->where('user_id', $player->user_id)
+            ->get()
+            ->filter(fn (PlayerInfluenceMedal $entry): bool => $entry->medal !== null)
+            ->groupBy(fn (PlayerInfluenceMedal $entry): int => (int) $entry->medal->map_id)
+            ->map(fn ($entries) => $entries->sortByDesc(
+                fn (PlayerInfluenceMedal $entry): int => (int) $entry->medal->levels->max('required_influence'),
+            )->first());
+
+        $modifiers = [];
+        foreach ($earned as $entry) {
+            foreach ($entry->medal->stats as $stat) {
+                $mappedStat = $this->mapStatType($stat->stat_type);
+                if ($mappedStat === null) {
+                    continue;
+                }
+
+                $modifiers[] = new StatModifier(
+                    stat: $mappedStat,
+                    value: (float) $stat->value,
+                    isPercent: (bool) $stat->is_percent,
+                    source: 'influence-medal:'.$entry->medal->name,
                 );
             }
         }

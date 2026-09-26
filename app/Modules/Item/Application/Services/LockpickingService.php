@@ -285,6 +285,19 @@ class LockpickingService
                 ]);
             }
 
+            $eventCollection = $context[1] === 'world'
+                ? $this->itemService->recordWorldEventChestOpened($lockedUser, $item)
+                : null;
+            if ($eventCollection !== null && ! $eventCollection->allowed) {
+                $attempt->delete();
+
+                return new LockpickingActionResultDTO(
+                    false,
+                    $eventCollection->error ?? 'Цель события больше недоступна.',
+                    409,
+                );
+            }
+
             $this->writeLog($attempt, $item, 'success', false);
             $loot = $this->itemService->claimAllChestContents($lockedUser, $item);
             $skill = $this->lockpickingSkill();
@@ -301,6 +314,12 @@ class LockpickingService
                     'status' => 'success',
                     'loot' => $loot,
                     'money' => (int) $lockedUser->money,
+                    'event_progress' => $eventCollection === null ? null : [
+                        'player' => $eventCollection->playerProgress,
+                        'limit' => $eventCollection->playerLimit,
+                        'influence_awarded' => $eventCollection->influenceAwarded,
+                        'map_influence' => $eventCollection->mapInfluence,
+                    ],
                 ]);
         });
     }

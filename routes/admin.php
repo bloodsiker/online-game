@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ClanSkillController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocsController;
 use App\Http\Controllers\Admin\DungeonController;
+use App\Http\Controllers\Admin\GameToolsController;
 use App\Http\Controllers\Admin\InjuryTypeController;
 use App\Http\Controllers\Admin\ItemActionLogController;
 use App\Http\Controllers\Admin\ItemController;
@@ -24,12 +25,16 @@ use App\Http\Controllers\Admin\QuestController;
 use App\Http\Controllers\Admin\RaceController;
 use App\Http\Controllers\Admin\ReputationController;
 use App\Http\Controllers\Admin\ScheduledTaskController;
+use App\Http\Controllers\Admin\ShopPurchaseLogController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::post('/game-tools/teleport', [GameToolsController::class, 'teleport'])->name('game_tools.teleport');
+Route::post('/game-tools/mute', [GameToolsController::class, 'mute'])->name('game_tools.mute');
 
 Route::get('/scheduled-tasks', [ScheduledTaskController::class, 'index'])->name('scheduled_tasks.index');
 Route::post('/scheduled-tasks/{task}', [ScheduledTaskController::class, 'update'])->name('scheduled_tasks.update');
@@ -65,6 +70,8 @@ Route::get('/docs/runes-gems', [DocsController::class, 'runesGems'])->name('docs
 
 Route::get('/dungeons', [DungeonController::class, 'list'])->name('dungeons');
 Route::match(['GET', 'POST'], '/dungeon/{dungeon}', [DungeonController::class, 'info'])->name('dungeon.info');
+Route::post('/dungeon/{dungeon}/stages', [DungeonController::class, 'saveStage'])->name('dungeon.stage.save');
+Route::delete('/dungeon/{dungeon}/stages/{stage}', [DungeonController::class, 'deleteStage'])->name('dungeon.stage.delete');
 
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');
@@ -75,6 +82,7 @@ Route::get('/api/quests', [ApiController::class, 'quests'])->name('api.quests');
 Route::get('/api/maps', [ApiController::class, 'maps'])->name('api.maps');
 
 Route::get('/item-logs', [ItemActionLogController::class, 'list'])->name('item_logs');
+Route::get('/purchase-logs', [ShopPurchaseLogController::class, 'index'])->name('purchase_logs.index');
 
 Route::get('/injuries', [InjuryTypeController::class, 'index'])->name('injury_types');
 Route::get('/injury/create', [InjuryTypeController::class, 'create'])->name('injury_type.create');

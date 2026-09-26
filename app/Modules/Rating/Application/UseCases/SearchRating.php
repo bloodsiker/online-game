@@ -29,6 +29,7 @@ class SearchRating
                 'deaths' => $this->ratingReadRepository->findDeathsRatingPosition($nick),
                 'wealth' => $this->ratingReadRepository->findWealthRatingPosition($nick),
                 'reputation' => $this->ratingReadRepository->findReputationRatingPosition($nick),
+                'influence' => $this->ratingReadRepository->findInfluenceRatingPosition($nick),
                 default => $this->ratingReadRepository->findLevelRatingPosition($nick),
             };
         }

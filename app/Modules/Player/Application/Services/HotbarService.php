@@ -2,12 +2,12 @@
 
 namespace App\Modules\Player\Application\Services;
 
-use App\Models\MagicSkill\MagicSkill;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use Carbon\Carbon;
 
 class HotbarService
 {
@@ -79,7 +79,9 @@ class HotbarService
             ->exists();
 
         if ($alreadyInSlot) {
-            return 'Этот предмет уже назначен на другой слот.';
+            return $entityType === 'skill'
+                ? 'Это заклинание уже назначено на другой слот.'
+                : 'Этот предмет уже назначен на другой слот.';
         }
 
         if ($entityType === 'item') {
@@ -95,9 +97,12 @@ class HotbarService
                 return 'Этот предмет нельзя добавить на панель.';
             }
         } elseif ($entityType === 'skill') {
-            $hasSkill = $player->magicSkills()->where('magic_skill_id', $entityId)->exists();
+            $hasSkill = $player->magicSkills()
+                ->where('magic_skill_id', $entityId)
+                ->where('is_passive', false)
+                ->exists();
             if (! $hasSkill) {
-                return 'Навык не найден.';
+                return 'Заклинание не найдено или является пассивным.';
             }
         } else {
             return 'Неизвестный тип.';
@@ -147,12 +152,14 @@ class HotbarService
                 'name' => null,
                 'image' => null,
                 'cooldown' => 0,
+                'cooldown_until' => null,
             ];
         }
 
         $name = null;
         $image = null;
         $cooldown = 0;
+        $cooldownUntil = null;
 
         $count = null;
 
@@ -169,11 +176,17 @@ class HotbarService
                 $count = $backpack?->count ?? 0;
             }
         } elseif ($slot->entity_type === 'skill') {
-            $skill = $player->magicSkills()->where('magic_skill_id', $slot->entity_id)->first()
-                ?? MagicSkill::find($slot->entity_id);
+            $skill = $player->magicSkills()
+                ->where('magic_skill_id', $slot->entity_id)
+                ->where('is_passive', false)
+                ->first();
             if ($skill) {
                 $name = $skill->name;
                 $image = $skill->image ?? null;
+                $cooldown = (int) $skill->cooldown;
+                $cooldownUntil = $skill->pivot?->cooldown_end_at
+                    ? Carbon::parse($skill->pivot->cooldown_end_at)->getTimestamp()
+                    : null;
             }
         }
 
@@ -185,6 +198,7 @@ class HotbarService
             'name' => $name,
             'image' => $image,
             'cooldown' => $cooldown,
+            'cooldown_until' => $cooldownUntil,
             'count' => $count,
         ];
     }

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DungeonSession extends Model
 {
     protected $fillable = [
-        'dungeon_id', 'user_id', 'primary_session_id', 'current_wave', 'entered_at', 'expires_at', 'completed_at',
+        'dungeon_id', 'dungeon_run_id', 'user_id', 'primary_session_id', 'current_wave', 'entered_at', 'expires_at', 'completed_at',
     ];
 
     protected $casts = [
@@ -28,6 +28,11 @@ class DungeonSession extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function run(): BelongsTo
+    {
+        return $this->belongsTo(DungeonRun::class, 'dungeon_run_id');
     }
 
     public function isExpired(): bool

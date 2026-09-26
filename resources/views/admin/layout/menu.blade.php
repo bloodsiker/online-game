@@ -88,11 +88,19 @@
                             <span>Предметы</span>
                         </a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.item_logs') ? 'nav-active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.item_logs') }}">
+                    <li class="{{ request()->routeIs('admin.item_logs', 'admin.purchase_logs.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
+                        <a class="nav-link" href="#">
                             <i class="bx bx-history" aria-hidden="true"></i>
-                            <span>Лог предметов</span>
+                            <span>Логи</span>
                         </a>
+                        <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.item_logs') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.item_logs') }}">Предметы</a>
+                            </li>
+                            <li class="{{ request()->routeIs('admin.purchase_logs.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.purchase_logs.index') }}">Покупки</a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="{{ request()->routeIs('admin.injury_types', 'admin.injury_type.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.injury_types') }}">
@@ -128,6 +136,12 @@
                         <a class="nav-link" href="{{ route('admin.reputations') }}">
                             <i class="bx bx-medal" aria-hidden="true"></i>
                             <span>Репутации</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.influence.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.influence.index') }}">
+                            <i class="bx bx-crown" aria-hidden="true"></i>
+                            <span>Влияние</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.quests', 'admin.quest.*') ? 'nav-active' : '' }}">
@@ -206,6 +220,9 @@
                             <span>События</span>
                         </a>
                         <ul class="nav nav-children">
+                            <li class="{{ request()->routeIs('admin.event.world-events.*') ? 'nav-active' : '' }}">
+                                <a class="nav-link" href="{{ route('admin.event.world-events.index') }}">Мировые события</a>
+                            </li>
                             <li class="{{ request()->routeIs('admin.event.activities', 'admin.event.activity.*') ? 'nav-active' : '' }}">
                                 <a class="nav-link" href="{{ route('admin.event.activities') }}">Активности</a>
                             </li>

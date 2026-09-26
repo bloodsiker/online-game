@@ -62,7 +62,7 @@ Route::get('/artifact_info.php', function (): mixed {
     return redirect()->route('items.info', ['id' => $id]);
 });
 
-Route::group([], function () {
+Route::middleware('auth')->group(function (): void {
     Route::post('/slots/update', [SlotController::class, 'updateSlot'])->name('slots.update');
     Route::get('/slots', [SlotController::class, 'index'])->name('slots');
 

@@ -12,5 +12,12 @@
             'targetSlug' => 'jKg6d4Tr0K',
             'targetLocationId' => 1278,
         ],
+        [
+            'locationId' => 1529,
+            'class' => 'awest',
+            'arrow' => '←',
+            'targetSlug' => 'j87Gtf4JU2',
+            'targetLocationId' => 1530,
+        ],
     ],
 ])
