@@ -19,6 +19,12 @@ class MessageRendererTest extends TestCase
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
+        config(['cache.default' => 'array']);
+        Schema::connection('sqlite')->create('users', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+        });
+        DB::connection('sqlite')->table('users')->insert(['id' => 17, 'name' => 'BlooDSikeR']);
 
         Schema::connection('sqlite')->create('share_items', function (Blueprint $table): void {
             $table->id();
@@ -54,5 +60,22 @@ class MessageRendererTest extends TestCase
 
         $this->assertStringContainsString('[???]', $html);
         $this->assertStringContainsString('Предмет не найден', $html);
+    }
+
+    public function test_mention_recipient_is_clickable_and_preserves_space_and_text(): void
+    {
+        $html = app(MessageRenderer::class)->render('to[BlooDSikeR] хай');
+        $this->assertStringContainsString('<span class="chat-to">» <a', $html);
+        $this->assertStringContainsString('data-name="BlooDSikeR"', $html);
+        $this->assertStringContainsString('chatPlayerClick(Number(this.dataset.uid || 0), this.dataset.name); return false;', $html);
+        $this->assertStringContainsString('class="chat-to-recipient n player-link" data-uid="17"', $html);
+        $this->assertStringContainsString('>BlooDSikeR</a></span> хай', $html);
+    }
+
+    public function test_mention_nickname_is_escaped_in_text_and_attribute(): void
+    {
+        $html = app(MessageRenderer::class)->render('to[O\'Brian"<x>] Привет');
+        $this->assertStringContainsString('data-name="O&#039;Brian&quot;&lt;x&gt;"', $html);
+        $this->assertStringNotContainsString('<x>', $html);
     }
 }

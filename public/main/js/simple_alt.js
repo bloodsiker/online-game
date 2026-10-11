@@ -1,6 +1,12 @@
 top.obj = null;
 top.noIframeAlt = 1;
 function artifactAltSimple(artifact_id, show, evnt, effect) {
+    if (!effect && show && top.gameSettings?.show_item_tooltips === false) {
+        var disabledTooltip = top.gebi('artifact_alt');
+        if (disabledTooltip) disabledTooltip.style.display = 'none';
+        document.onmousemove = null;
+        return;
+    }
     var artifact_alt = top.gebi('artifact_alt');
 	if (!effect) var div = gebi('AA_'+artifact_id);
 	if (!artifact_alt) return;

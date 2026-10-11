@@ -15,7 +15,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -104,11 +103,7 @@ class MapController extends Controller
                 'slug' => ['nullable', 'string', 'max:100'],
                 'folder' => ['nullable', 'string', 'max:100'],
                 'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
-                'resp_location_id' => [
-                    'required',
-                    'integer',
-                    Rule::exists('locations', 'id')->where('map_id', $map->id),
-                ],
+                'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
             ]);
 
             $map->name = $data['name'];

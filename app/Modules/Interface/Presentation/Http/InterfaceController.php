@@ -12,6 +12,7 @@ use App\Modules\Interface\Application\UseCases\GetWhoPage;
 use App\Modules\Interface\Application\UseCases\HeartbeatPlayer;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,6 +28,7 @@ class InterfaceController extends Controller
         private readonly GetHeroPage $getHeroPage,
         private readonly HeartbeatPlayer $heartbeatPlayer,
         private readonly GetMailbox $mailbox,
+        private readonly GameSettingsService $gameSettings,
     ) {}
 
     public function index()
@@ -128,6 +130,7 @@ class InterfaceController extends Controller
             'hasUnreadMail' => $this->mailbox->hasUnread($user),
             'adminToolUsers' => $adminToolUsers,
             'races' => $races,
+            'gameSettings' => $this->gameSettings->get($user->id),
         ]);
     }
 }

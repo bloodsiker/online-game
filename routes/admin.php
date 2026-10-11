@@ -18,7 +18,6 @@ use App\Http\Controllers\Admin\LocationGateController;
 use App\Http\Controllers\Admin\MagicSkillController;
 use App\Http\Controllers\Admin\MapController;
 use App\Http\Controllers\Admin\MonsterController;
-use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\NpcController;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Admin\QuestController;
@@ -53,15 +52,6 @@ Route::get('/clan-levels', [ClanLevelController::class, 'index'])->name('clan_le
 Route::post('/clan-level', [ClanLevelController::class, 'store'])->name('clan_level.store');
 Route::post('/clan-level/{clanLevel}', [ClanLevelController::class, 'update'])->name('clan_level.update');
 Route::post('/clan-level/{clanLevel}/delete', [ClanLevelController::class, 'delete'])->name('clan_level.delete');
-
-Route::get('/news', [NewsController::class, 'list'])->name('news');
-Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
-Route::post('/news/create', [NewsController::class, 'store'])->name('news.store');
-Route::post('/news/upload-image', [NewsController::class, 'uploadImage'])->name('news.upload-image');
-Route::match(['GET', 'POST'], '/news/{news}', [NewsController::class, 'info'])->name('news.info');
-Route::get('/news/{news}/delete', [NewsController::class, 'delete'])->name('news.delete');
-Route::get('/news/{news}/comment/{comment}/toggle', [NewsController::class, 'toggleComment'])->name('news.comment.toggle');
-Route::get('/news/{news}/comment/{comment}/delete', [NewsController::class, 'deleteComment'])->name('news.comment.delete');
 
 Route::get('/docs/dungeon', [DocsController::class, 'dungeon'])->name('docs.dungeon');
 Route::get('/docs/clan', [DocsController::class, 'clan'])->name('docs.clan');
@@ -211,6 +201,7 @@ Route::match(['GET', 'POST'], '/magic-skill/{magic_skill}', [MagicSkillControlle
 Route::get('/magic-skills', [MagicSkillController::class, 'list'])->name('magic_skills');
 
 Route::get('/quests', [QuestController::class, 'list'])->name('quests');
+Route::get('/quests/tree', [QuestController::class, 'tree'])->name('quests.tree');
 Route::match(['GET', 'POST'], '/quest/create', [QuestController::class, 'create'])->name('quest.create');
 Route::match(['GET', 'POST'], '/quest/{quest}', [QuestController::class, 'info'])->name('quest.info');
 Route::post('/quest/{quest}/objective', [QuestController::class, 'addObjective'])->name('quest.objective.add');

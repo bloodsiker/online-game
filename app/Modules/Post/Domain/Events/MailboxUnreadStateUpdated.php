@@ -20,6 +20,7 @@ final class MailboxUnreadStateUpdated implements ShouldBroadcastNow, ShouldDispa
     public function __construct(
         public readonly int $userId,
         public readonly bool $hasUnread,
+        public readonly bool $newLetter = false,
     ) {}
 
     public function broadcastOn(): PrivateChannel
@@ -32,9 +33,9 @@ final class MailboxUnreadStateUpdated implements ShouldBroadcastNow, ShouldDispa
         return 'post.unread.updated';
     }
 
-    /** @return array{has_unread: bool} */
+    /** @return array{has_unread: bool, new_letter: bool} */
     public function broadcastWith(): array
     {
-        return ['has_unread' => $this->hasUnread];
+        return ['has_unread' => $this->hasUnread, 'new_letter' => $this->newLetter];
     }
 }

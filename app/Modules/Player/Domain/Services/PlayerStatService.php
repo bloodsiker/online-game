@@ -157,8 +157,25 @@ class PlayerStatService
 
         $computed = $primary + $this->applyModifiers($derivedBase, $modifiers);
 
+        // Тот же расчёт, но без отрицательных модификаторов (дебаффов вроде
+        // Страха/Разрыва брони/Слабости) — разница с $computed даёт точную
+        // «на сколько единиц дебафф занижает характеристику» для UI
+        // (resources/views/player/index.blade.php, карточки характеристик).
+        $positiveOnlyModifiers = array_values(array_filter($modifiers, fn (StatModifier $m) => $m->value >= 0));
+        $primaryWithoutDebuffs = $this->applyModifiers($primaryBase, $positiveOnlyModifiers);
+        $computedWithoutDebuffs = $primaryWithoutDebuffs + $this->applyModifiers($derivedBase, $positiveOnlyModifiers);
+
+        $debuffReduction = [];
+        foreach ($computedWithoutDebuffs as $stat => $valueWithoutDebuffs) {
+            $reduction = $valueWithoutDebuffs - $computed[$stat];
+            if ($reduction > 0) {
+                $debuffReduction[$stat] = $reduction;
+            }
+        }
+
         $sheet = new StatSheet;
         $sheet->modifiers = $modifiers;
+        $sheet->debuffReduction = $debuffReduction;
         $sheet->freeStats = $player->free_stats;
         $sheet->strength = $computed['strength'];
         $sheet->intuition = $computed['intuition'];

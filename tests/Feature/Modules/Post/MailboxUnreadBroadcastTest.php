@@ -73,7 +73,7 @@ class MailboxUnreadBroadcastTest extends TestCase
         $this->assertTrue($result->ok);
         Event::assertDispatched(
             MailboxUnreadStateUpdated::class,
-            fn (MailboxUnreadStateUpdated $event): bool => $event->userId === $recipient->id && $event->hasUnread,
+            fn (MailboxUnreadStateUpdated $event): bool => $event->userId === $recipient->id && $event->hasUnread && $event->newLetter,
         );
 
         Event::fake([MailboxUnreadStateUpdated::class]);
@@ -82,7 +82,7 @@ class MailboxUnreadBroadcastTest extends TestCase
 
         Event::assertDispatched(
             MailboxUnreadStateUpdated::class,
-            fn (MailboxUnreadStateUpdated $event): bool => $event->userId === $recipient->id && ! $event->hasUnread,
+            fn (MailboxUnreadStateUpdated $event): bool => $event->userId === $recipient->id && ! $event->hasUnread && ! $event->newLetter,
         );
     }
 

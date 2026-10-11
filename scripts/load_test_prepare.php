@@ -10,15 +10,15 @@ declare(strict_types=1);
  *   exec -T php-www php scripts/load_test_prepare.php --users=50 --monsters-per-user=10
  */
 
-use App\Models\Experience;
-use App\Models\Map;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use App\Modules\Player\Application\UseCases\RegisterPlayerProfile;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Repositories\MonsterOnLocationRepository;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

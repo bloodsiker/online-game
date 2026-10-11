@@ -408,6 +408,17 @@
                                                         class="listloc">883</span></span>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td class="brd2-top brd2-bt b">
+                                                <span class="line-align" onclick="mark_l(395,2)"
+                                                      onmouseover="mark_l(395,1)"
+                                                      onmouseout="mark_l(395,0)"><span
+                                                        class="listloc">395</span> <span
+                                                        style="font-size:18px;">→</span> <a
+                                                        href="{{ map_transition_url('6BJcCXXPZR', 1630) }}">Пепельные Предгорья</a> <span
+                                                        class="listloc">1630</span></span>
+                                            </td>
+                                        </tr>
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </td>

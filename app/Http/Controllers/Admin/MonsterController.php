@@ -17,6 +17,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -394,6 +395,13 @@ class MonsterController extends Controller
         $monster->magic_power_coefficient = max(0, (float) $request->input('magic_power_coefficient', 0));
         $monster->magic_resistance = max(0, (int) $request->input('magic_resistance', $monster->lvl));
         $monster->aggression = (int) $request->input('aggression', 0);
+
+        $rawPassiveType = $request->input('passive_type');
+        $monster->passive_type = $rawPassiveType ? CombatPassiveType::from($rawPassiveType) : null;
+        $monster->passive_value = $monster->passive_type !== null && $request->filled('passive_value')
+            ? max(0, min(255, (int) $request->input('passive_value')))
+            : null;
+
         $monster->exp = (int) $request->input('exp', 0);
         $monster->min_money = (int) $request->input('min_money', 0);
         $monster->max_money = (int) $request->input('max_money', 0);

@@ -118,6 +118,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(ClanMember::class);
     }
 
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
     public function communicationMutes(): HasMany
     {
         return $this->hasMany(UserCommunicationMute::class);

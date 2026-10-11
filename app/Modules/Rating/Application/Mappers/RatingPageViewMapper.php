@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class RatingPageViewMapper
 {
     /**
-     * @param  array<string, array{title:string,name:string,column:string}>  $menu
+     * @param  array<string, array{title:string,name:string,column:string,skill_group?:string}>  $menu
      */
     public function map(User $user, array $menu, string $type, bool $isSkillRating, LengthAwarePaginator $players): RatingPageDTO
     {
@@ -42,6 +42,7 @@ class RatingPageViewMapper
                     name: $menuItem['name'],
                     isActive: $key === $type,
                     isSkill: str_starts_with($key, 'skill_'),
+                    skillGroup: $menuItem['skill_group'] ?? null,
                 )
             )->values()->all(),
             entries: collect($players->items())->values()->map(

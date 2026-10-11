@@ -10,11 +10,47 @@ use App\Modules\Chat\Domain\Events\ChatMessageExpired;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ChatMessageCreatedTest extends TestCase
 {
+    public function test_to_name_resolves_recipient_without_making_the_message_private(): void
+    {
+        if (DB::connection()->getDriverName() !== 'sqlite' || DB::connection()->getDatabaseName() !== ':memory:') {
+            $this->markTestSkipped('Тест разрешён только в SQLite :memory:.');
+        }
+        Schema::create('users', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+        });
+        DB::table('users')->insert(['id' => 11, 'name' => 'Admin']);
+        $message = (new ChatMessage)->forceFill([
+            'id' => 42, 'channel' => 'main', 'type' => 'mention',
+            'user_id' => 7, 'message' => 'to[Admin] Привет!',
+        ]);
+        $event = new ChatMessageCreated($message);
+        $this->assertSame(11, $event->broadcastWith()['target_user_id']);
+        $this->assertNull($message->target_user_id);
+        $this->assertSame(['private-chat.main', 'private-App.Models.User.11'], array_map(static fn ($channel): string => $channel->name, $event->broadcastOn()));
+    }
+
+    public function test_notification_metadata_does_not_include_message_content(): void
+    {
+        $event = new ChatMessageCreated((new ChatMessage)->forceFill([
+            'id' => 42, 'channel' => 'private', 'type' => 'private',
+            'user_id' => 7, 'target_user_id' => 11, 'message' => 'Private text',
+        ]));
+        $payload = $event->broadcastWith();
+        $this->assertSame(7, $payload['sender_user_id']);
+        $this->assertSame(11, $payload['target_user_id']);
+        $this->assertSame('private', $payload['type']);
+        $this->assertArrayNotHasKey('message', $payload);
+    }
+
     public function test_created_message_is_broadcast_through_the_queue(): void
     {
         $event = new ChatMessageCreated((new ChatMessage)->forceFill([
@@ -72,6 +108,11 @@ class ChatMessageCreatedTest extends TestCase
                 ChatChannel::System,
                 ['user_id' => null],
                 ['private-chat.system'],
+            ],
+            'public mention and recipient notification' => [
+                ChatChannel::Main,
+                ['type' => 'mention', 'target_user_id' => 11],
+                ['private-chat.main', 'private-App.Models.User.11'],
             ],
         ];
     }

@@ -285,13 +285,6 @@
                                                 </select>
                                                 <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="is_lockpick">Является отмычкой</label>
-                                                <select class="form-control" name="is_lockpick" id="is_lockpick">
-                                                    <option value="0" @selected(old('is_lockpick', '0') === '0')>Нет</option>
-                                                    <option value="1" @selected(old('is_lockpick') === '1')>Да</option>
-                                                </select>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

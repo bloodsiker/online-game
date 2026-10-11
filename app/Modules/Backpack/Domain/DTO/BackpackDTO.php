@@ -25,6 +25,11 @@ final class BackpackDTO
         return $this->items;
     }
 
+    public function getTradeGoods(): Collection
+    {
+        return $this->items->get('trade_goods', new Collection);
+    }
+
     public function getCountItems(): int
     {
         return $this->countItems;

@@ -54,7 +54,6 @@ class ItemDuplicateTest extends TestCase
             $table->boolean('is_weight')->default(true);
             $table->boolean('is_slot_usable')->default(false);
             $table->boolean('is_use')->default(false);
-            $table->boolean('is_lockpick')->default(false);
             $table->unsignedBigInteger('skill_id')->nullable();
             $table->integer('skill_lvl')->nullable();
             $table->integer('skill_exp')->nullable();

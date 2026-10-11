@@ -285,8 +285,8 @@ class LockpickingFlowTest extends TestCase
     {
         DB::table('skills')->insert(['id' => 1, 'name' => LockpickingService::SKILL_NAME, 'type' => 'peaceful']);
         DB::table('share_items')->insert([
-            ['id' => 10, 'name' => 'Сундук', 'type' => 'chest', 'is_lockpick' => false],
-            ['id' => 20, 'name' => 'Отмычка', 'type' => 'misc', 'is_lockpick' => true],
+            ['id' => 10, 'name' => 'Сундук', 'type' => 'chest'],
+            ['id' => 20, 'name' => 'Отмычка', 'type' => 'lockpick'],
         ]);
         DB::table('share_item_lock_configs')->insert([
             'share_item_id' => 10,
@@ -368,7 +368,6 @@ class LockpickingFlowTest extends TestCase
             $table->id();
             $table->string('name');
             $table->string('type');
-            $table->boolean('is_lockpick')->default(false);
             $table->timestamps();
         });
         Schema::create('share_item_lock_configs', function (Blueprint $table): void {

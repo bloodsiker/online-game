@@ -86,12 +86,13 @@
 
 ## Модель данных
 
-- **trade_posts** — id, npc_id (уникальный), location_id, name, license_price.
+- **trade_posts** — id, npc_id (уникальный), name, license_price, is_active. Локация берётся у НПС — отдельное дублирующее поле не хранится.
 - **trade_goods** — id, trade_post_id, share_item_id (уникальный во всей торговой сети), base_price, required_skill_lvl, sort_order. Закупочная цена фиксирована; каждый предмет продаётся только одной исходной точкой.
-- **trade_post_stock** — trade_post_id, share_item_id, current_quantity, max_quantity, restock_amount, restock_interval_minutes, last_restock_at. Глобальный (не per-player) запас, пополняется по интервалу (пример: +5 раз в 30 минут, потолок 30).
+- **trade_post_stocks** — id, trade_good_id (уникальный), current_quantity, max_quantity, restock_amount, restock_interval_minutes, last_restock_at. Глобальный (не per-player) запас: +5 раз в 30 минут, потолок 30. Пополнение рассчитывается при просмотре и покупке, без отдельного крона.
 - **trade_routes** — id, trade_post_a_id, trade_post_b_id (пара, порядок не важен), distance_tier (near/mid/far), exp_per_unit. 3 строки на v1 (по одной на пару точек). Маршрут задаёт опыт; лицензий и множителей прибыли на нём нет.
 - **trade_buy_offers** — id, trade_post_id (принимающий НПС), trade_good_id, buy_price (ручная цена скупки), is_active. Уникальная пара `trade_post_id + trade_good_id`; собственные товары исходной точки не принимаются.
 - **player_trade_licenses** — player_id, trade_post_id, purchased_at. Уникальная пара `player_id + trade_post_id`. Наличие записи открывает покупку и продажу у этого НПС.
+- **trade_logs** — player_id, trade_post_id, trade_good_id, request_key, action, quantity, amount, experience, skill_level, message, timestamps. Уникальный `player_id + request_key` защищает от повторной обработки запроса.
 - **skills** — новая строка «Вольный торг» (тип: мирная профессия, как «Рыбак»/«Травник»).
 - **player_skills** / **skill_level_requirements** — переиспользуются как есть, без изменений схемы.
 

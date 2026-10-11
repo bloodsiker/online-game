@@ -18,5 +18,6 @@ final readonly class LocationDungeonSessionDTO
         public ?int $expiresAtTimestamp,
         public bool $canExit,
         public string $exitUrl,
+        public int $sessionId = 0,
     ) {}
 }

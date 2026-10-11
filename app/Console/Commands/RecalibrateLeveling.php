@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\Experience;
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Domain\Services\ExperienceCurve;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

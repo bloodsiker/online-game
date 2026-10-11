@@ -4,97 +4,120 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Расставляет монстров WatchHillsMonsterSeeder по локациям «Сторожевых
- * Холмов» (1117-1278, без входа 1116). Карта делится пополам по уровню —
- * та же логика пула, что в OvergrownRoadMonsterPlacementSeeder.
+ * Расставляет монстров «Сторожевых Холмов» (map_id=10, локации 1116-1278) в
+ * пул респавна `location_has_monsters` — по прямому указанию пользователя,
+ * 3 полосы по глубине зоны, вход (1116, «Вход в Сторожевые Холмы») без
+ * монстров, локация 1127 отсутствует в БД (пропускается сама собой).
+ *
+ * Правило пользователя: если уровень вида в полосе не указан явно — ставятся
+ * ОБА уровня этого вида (не только младший); если указан явно (один
+ * конкретный уровень) — ставится только он.
+ *
+ * Полоса 1 (1117-1164, 47 локаций) — 4 стартовых вида, оба уровня каждого:
+ *   Земляной страж (35+38), Ветряной страж (36+39), Костяной Часовой (37+40),
+ *   Дух Павшего Знаменосца (35+39).
+ * Полоса 2 (1165-1231, 67 локаций) — Костяной Часовой/Дух Павшего ТОЛЬКО на
+ *   старшем уровне (40/39, явно указано) + 2 новых вида, оба уровня каждого:
+ *   Стальной Страж (38+42), Пепельный Страж (39+43).
+ * Полоса 3 (1232-1278, 47 локаций) — Стальной Страж/Пепельный Страж ТОЛЬКО на
+ *   старшем уровне (42/43, явно указано) + 2 новых вида, оба уровня каждого:
+ *   Теневой Страж (40+44), Туманный Страж (41+45).
+ *
+ * Все 8 видов (16 monster-строк из WatchHillsMonsterSeeder +
+ * WatchHillsAdditionalMonsterSeeder) задействованы полностью — ни один
+ * уровень не остаётся без места.
+ *
+ * Каждая локация полосы получает по одной строке на каждую monster-запись
+ * списка (aggression=null, как в GranitePassMonsterPlacementSeeder).
  */
 class WatchHillsMonsterPlacementSeeder extends Seeder
 {
-    private const FIRST_HALF_RANGE = [1117, 1197];
-
-    private const SECOND_HALF_RANGE = [1198, 1278];
-
-    private const FIRST_HALF_MONSTERS = [
-        ['Земляной страж', 38],
-        ['Ветряной страж', 38],
+    /** @var array<int, array{range: array{0:int,1:int}, monsters: array<int, array{string,int}>}> */
+    private const BANDS = [
+        [
+            'range' => [1117, 1164],
+            'monsters' => [
+                ['Земляной страж', 35], ['Земляной страж', 38],
+                ['Ветряной страж', 36], ['Ветряной страж', 39],
+                ['Костяной Часовой', 37], ['Костяной Часовой', 40],
+                ['Дух Павшего Знаменосца', 35], ['Дух Павшего Знаменосца', 39],
+            ],
+        ],
+        [
+            'range' => [1165, 1231],
+            'monsters' => [
+                ['Костяной Часовой', 40],
+                ['Дух Павшего Знаменосца', 39],
+                ['Стальной Страж', 38], ['Стальной Страж', 42],
+                ['Пепельный Страж', 39], ['Пепельный Страж', 43],
+            ],
+        ],
+        [
+            'range' => [1232, 1278],
+            'monsters' => [
+                ['Стальной Страж', 42],
+                ['Пепельный Страж', 43],
+                ['Теневой Страж', 40], ['Теневой Страж', 44],
+                ['Туманный Страж', 41], ['Туманный Страж', 45],
+            ],
+        ],
     ];
-
-    private const SECOND_HALF_MONSTERS = [
-        ['Земляной страж', 41],
-        ['Ветряной страж', 41],
-    ];
-
-    private const PERCENT_RESPAWN_MONSTER = 70;
-
-    private const TIME_NOT_ATTACK = 15;
-
-    private const COUNT_MONSTER_CYCLE = [1, 2, 1, 2, 3];
 
     public function run(): void
     {
-        $firstHalfIds = $this->monsterIds(self::FIRST_HALF_MONSTERS);
-        $secondHalfIds = $this->monsterIds(self::SECOND_HALF_MONSTERS);
+        $inserted = 0;
 
-        $placedLocations = $this->placeMonsters(self::FIRST_HALF_RANGE, $firstHalfIds)
-            + $this->placeMonsters(self::SECOND_HALF_RANGE, $secondHalfIds);
+        foreach (self::BANDS as $band) {
+            [$fromId, $toId] = $band['range'];
 
-        $this->command?->info("WatchHillsMonsterPlacementSeeder: расставлено локаций — {$placedLocations}");
-    }
+            $monsterIds = [];
+            foreach ($band['monsters'] as [$name, $lvl]) {
+                $monster = DB::table('monsters')->where('name', $name)->where('lvl', $lvl)->first();
+                if ($monster === null) {
+                    $this->command?->warn("не найден монстр «{$name}» lvl {$lvl}");
 
-    /** @param  array<int, array{0: string, 1: int}>  $pairs
-     * @return array<int, int> */
-    private function monsterIds(array $pairs): array
-    {
-        return array_map(
-            fn (array $pair) => Monster::where('name', $pair[0])->where('lvl', $pair[1])->value('id')
-                ?? throw new \RuntimeException("Монстр «{$pair[0]}» lvl {$pair[1]} не найден — прогоните WatchHillsMonsterSeeder сначала"),
-            $pairs,
-        );
-    }
-
-    /**
-     * @param  array{0: int, 1: int}  $range
-     * @param  int[]  $monsterIds
-     */
-    private function placeMonsters(array $range, array $monsterIds): int
-    {
-        [$min, $max] = $range;
-        $now = now();
-        $rows = [];
-        $locationUpdates = [];
-
-        for ($locationId = $min; $locationId <= $max; $locationId++) {
-            foreach ($monsterIds as $monsterId) {
-                $rows[] = [
-                    'location_id' => $locationId,
-                    'monster_id' => $monsterId,
-                    'aggression' => null,
-                ];
+                    continue;
+                }
+                $monsterIds[] = $monster->id;
             }
 
-            $locationUpdates[] = $locationId;
+            $locationIds = DB::table('locations')
+                ->whereBetween('id', [$fromId, $toId])
+                ->pluck('id');
+
+            $rows = [];
+            foreach ($locationIds as $locationId) {
+                foreach ($monsterIds as $monsterId) {
+                    $exists = DB::table('location_has_monsters')
+                        ->where('location_id', $locationId)
+                        ->where('monster_id', $monsterId)
+                        ->exists();
+                    if ($exists) {
+                        continue;
+                    }
+                    $rows[] = [
+                        'location_id' => $locationId,
+                        'monster_id' => $monsterId,
+                        'aggression' => null,
+                    ];
+                }
+            }
+
+            foreach (array_chunk($rows, 500) as $chunk) {
+                DB::table('location_has_monsters')->insert($chunk);
+                $inserted += count($chunk);
+            }
+
+            $this->command?->info(sprintf(
+                'полоса %d-%d: %d локаций × %d видов = %d строк',
+                $fromId, $toId, $locationIds->count(), count($monsterIds), count($rows),
+            ));
         }
 
-        foreach (array_chunk($rows, 500) as $chunk) {
-            DB::table('location_has_monsters')->insert($chunk);
-        }
-
-        foreach ($locationUpdates as $locationId) {
-            $countMonster = self::COUNT_MONSTER_CYCLE[$locationId % 5];
-
-            DB::table('locations')->where('id', $locationId)->update([
-                'count_monster' => $countMonster,
-                'percent_respawn_monster' => self::PERCENT_RESPAWN_MONSTER,
-                'time_not_attack' => self::TIME_NOT_ATTACK,
-                'updated_at' => $now,
-            ]);
-        }
-
-        return count($locationUpdates);
+        $this->command?->info("WatchHillsMonsterPlacementSeeder: вставлено строк — {$inserted}");
     }
 }

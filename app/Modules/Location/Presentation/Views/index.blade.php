@@ -83,7 +83,7 @@
         }
     </style>
 </head>
-<body>
+<body data-sound-context="location" data-sound-battle="{{ $page->hasBattle ? basename($page->battleUrl ?? '') : '' }}" data-sound-dungeon="{{ $page->dungeonSession?->sessionId ?? '' }}">
 @php($moves = $page->moves)
 <table class="main-table" width="100%" height="100%" style="height: 100%" cellpadding="10" cellspacing="0" border="0">
     <tbody>

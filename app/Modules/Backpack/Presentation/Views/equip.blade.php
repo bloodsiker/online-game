@@ -199,7 +199,7 @@
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
     <script src="{{ asset('js/injury_timer.js') }}?v={{ filemtime(public_path('js/injury_timer.js')) }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/injury.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/injury.css') }}?v={{ filemtime(public_path('css/injury.css')) }}">
 </head>
 <body class="regcolor">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0; top: 0"></div>

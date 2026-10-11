@@ -1127,6 +1127,12 @@ function getIframeShift() {
 }
 
 function artifactAlt(obj, evnt, show) {
+    if (show && _top().gameSettings?.show_item_tooltips === false) {
+        var disabledTooltip = _top().gebi('artifact_alt');
+        if (disabledTooltip) disabledTooltip.style.display = 'none';
+        document.onmousemove = null;
+        return;
+    }
     // Сортировка в рюкзаке
     if (typeof (iam_sorting_now) !== 'undefined' && iam_sorting_now) {
         show = 0;
@@ -1492,9 +1498,9 @@ function renderArtifactAlt(id) {
     }
     content += '</td></tr></table>';
     content += '</td><td>';
-    content += '<div><img src="images/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle">&nbsp;' + a.kind + '</div>';
+    content += '<div><img src="/img/icon/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle">&nbsp;' + a.kind + '</div>';
     if (a.dur && a.dur != undefined) {
-        content += '<div><img src="images/tbl-shp_item-iznos.gif" width="11" height="10" align="absmiddle"> <span class="red">' + a.dur + '</span>/' + a.dur_max + '</div>';
+        content += '<div><span class="red">' + a.dur + '</span>/' + a.dur_max + '</div>';
     }
     if (a.price && a.price != undefined) {
         content += '<div class="b red">' + a.price.replace(/&quot;/g, '"') + '</div>';
@@ -1507,10 +1513,10 @@ function renderArtifactAlt(id) {
     }
     content += '</td><td>';
     if (a.lev && a.lev != undefined) {
-        content += '<div><img src="images/tbl-shp_level-icon.gif" width="11" height="10" align="absmiddle"> ' + a.lev.title + ' <b class="red">' + a.lev.value + '</b></div>';
+        content += '<div><img src="/img/icon/tbl-shp_level-icon.gif" width="11" height="10" align="absmiddle"> ' + a.lev.title + ' <b class="red">' + a.lev.value + '</b></div>';
     }
     if (a.trend && a.trend != undefined) {
-        content += '<div><img src="images/tbl-shp_item-trend.gif" width="11" height="10" align="absmiddle">&nbsp;' + a.trend.replace(/&quot;/g, '"') + '</div>';
+        content += '<div>' + a.trend.replace(/&quot;/g, '"') + '</div>';
     }
     if (a.cls && a.cls != undefined) {
         content += '<div><img src="images/class.gif" width="11" height="10" align="absmiddle"> ';

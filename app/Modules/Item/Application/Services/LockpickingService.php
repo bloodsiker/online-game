@@ -426,7 +426,7 @@ class LockpickingService
             ->where('user_id', $user->id)
             ->where('equipped', 0)
             ->where('count', '>', 0)
-            ->whereHas('item.itemInfo', fn ($query) => $query->where('is_lockpick', true));
+            ->whereHas('item.itemInfo', fn ($query) => $query->where('type', ShareItemType::LOCKPICK->value));
 
         return $lock ? $query->lockForUpdate() : $query;
     }

@@ -321,7 +321,7 @@
 </style>
     @include('battle::partials.fight_styles')
 </head>
-<body>
+<body data-sound-context="battle" data-sound-battle="{{ $battle && $battle->status->isActive() ? $battle->id : '' }}">
 
 <div class="battle-layout">
     @if($battle)

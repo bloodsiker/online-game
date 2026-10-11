@@ -72,6 +72,23 @@
             margin: 0 3px;
             flex-shrink: 0;
         }
+
+        .infoportal-menu { position: relative; flex-shrink: 0; }
+        .infoportal-menu summary { list-style: none; }
+        .infoportal-menu summary::-webkit-details-marker { display: none; }
+        .infoportal-submenu {
+            position: absolute;
+            right: 0;
+            top: 24px;
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 2px;
+            animation: infoportal-reveal .2s ease-out;
+        }
+        @keyframes infoportal-reveal {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
 
     <script src="{{ asset('main/js/canvas/pixi.js') }}"></script>
@@ -90,6 +107,7 @@
     <a class="menu-btn" href="#" onclick="goToGathering(); return false;">Добыча</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">Персонаж</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('character.professions') }}', true); return false;">Профессии</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('settings') }}', true); return false;">Настройки</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">Вещи</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Клан</a>
     <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
@@ -102,7 +120,14 @@
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">События</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('post') }}', true); return false;">Почта</a>
     <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('fights') }}', true); return false;">Бои</a>
-    <a class="menu-btn" href="#" onclick="try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} return false;">Инфопортал</a>
+    <details class="infoportal-menu">
+        <summary class="menu-btn">Инфопортал</summary>
+        <div class="infoportal-submenu">
+            <a class="menu-btn" href="{{ route('forum.index') }}" target="_blank" rel="noopener">Форум</a>
+            <a class="menu-btn" href="{{ route('library.index') }}" target="_blank" rel="noopener">Библиотека</a>
+            <a class="menu-btn" href="#" onclick="processMenu('m_telegram'); return false;">Telegram</a>
+        </div>
+    </details>
 </div>
 
 <script>
@@ -154,7 +179,12 @@
         m_events:      function () { menuGo(false, '{{ route('events') }}', true); },
         m_post:        function () { menuGo(false, '{{ route('post') }}', true); },
         m_fights:      function () { menuGo(false, '{{ route('fights') }}', true); },
-        m_infoportal:  function () { try { window.top.systemInfo('Инфопортал в разработке.', 'Инфопортал'); } catch (e) {} }
+        m_forum:       function () { window.open(@json(route('forum.index')), '_blank', 'noopener'); },
+        m_library:     function () { window.open(@json(route('library.index')), '_blank', 'noopener'); },
+        m_telegram:    function () {
+            window.top.systemInfo('Ссылка на Telegram пока не указана.', 'Telegram');
+        },
+        m_settings:    function () { menuGo(false, '{{ route('settings') }}', true); }
     };
 
     // Канвас-меню вызывает глобальный processMenu(command) при клике по пункту
@@ -166,7 +196,7 @@
     var buttonIds = {
         location: 1, gathering: 2, character: 3, backpack: 4, clan: 3,
         quests: 5, dungeon: 6, maps: 7, friends: 3, rating: 8, referral: 3, premium: 9,
-        events: 10, post: 11, fights: 12, infoportal: 13
+        events: 10, post: 11, fights: 12, infoportal: 13, settings: 3
     };
     var menuButtonBlinkStates = {};
 
@@ -214,6 +244,9 @@
             'top/prof': '/data/canvas/ui/prof.webp',
             'top/post': '/data/canvas/ui/mail.webp',
             'top/world': '/data/canvas/ui/map.webp',
+            'top/forum': '/data/canvas/ui/forum.webp',
+            'top/library': '/data/canvas/ui/library.webp',
+            'top/telegram': '/data/canvas/ui/telegram.webp',
         };
         canvas.ResourceLoader.getImage = function (atlas, frame) {
             if (externalTopIconPaths[frame]) {
@@ -229,6 +262,19 @@
         var itemViewInit = ItemView.prototype.init;
         ItemView.prototype.init = function () {
             itemViewInit.call(this);
+            if (this.isSmall && this.image && ['forum', 'library', 'telegram'].indexOf(this.data.pict) >= 0) {
+                var submenuImage = this.image;
+                var fitSubmenuIcon = function () {
+                    var scale = Math.min(45 / submenuImage.texture.width, 51 / submenuImage.texture.height) * 0.95;
+                    submenuImage.scale.set(scale);
+                    submenuImage.position.set(8 + (45 - submenuImage.width) / 2, (51 - submenuImage.height) / 2);
+                };
+                if (submenuImage.texture.baseTexture.hasLoaded) {
+                    fitSubmenuIcon();
+                } else {
+                    submenuImage.texture.baseTexture.once('loaded', fitSubmenuIcon);
+                }
+            }
             var isExternalTopIcon = ['mining', 'quest', 'inst', 'post', 'world', 'prof'].indexOf(this.data.pict) >= 0;
             var needsExternalTopIconFit = ['mining', 'quest', 'inst'].indexOf(this.data.pict) >= 0;
             if (!this.isSmall && this.image && !isExternalTopIcon) {
@@ -364,9 +410,9 @@
         });
 
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои|добыча|профессии',
+            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои|добыча|профессии|настройки|форум|библиотека|Telegram',
             dragDropItems: '0',
-            configXml: '/data/locale/ru/topMenu.xml?v=3',
+            configXml: '/data/locale/ru/topMenu.xml?v=7',
             blink: '',
             js_popup: '1',
             lang: 'ru',

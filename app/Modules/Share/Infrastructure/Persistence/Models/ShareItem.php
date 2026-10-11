@@ -15,7 +15,7 @@ use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -52,7 +52,7 @@ use Illuminate\Support\Carbon;
  * @property array|null $gem_stats
  * @property RuneRarity|null $rune_rarity
  * @property array|null $rune_stat_pool
- * @property RunePassiveType|null $innate_passive_type Встроенная пассивка (для оружия/брони без руны), см. PlayerRunePassiveService
+ * @property CombatPassiveType|null $innate_passive_type Встроенная пассивка (для оружия/брони без руны), см. PlayerRunePassiveService
  * @property int|null $innate_passive_value
  * @property int|null $required_active_effect_id Предмет выпадает с монстра только если у игрока активен этот эффект, см. DropService
  * @property bool $drop_direct_to_backpack Выпадает прямо в рюкзак, минуя землю локации
@@ -65,7 +65,6 @@ use Illuminate\Support\Carbon;
  * @property int|null $skill_exp
  * @property int|null $gathering_time_seconds
  * @property int|null $gathering_respawn_seconds
- * @property bool $is_lockpick
  * @property-read ShareItemLockConfig|null $lockConfig
  * @property-read ShareItemLockpickConfig|null $lockpickConfig
  * @property-read ShareItemInstantReward|null $instantReward
@@ -105,6 +104,18 @@ class ShareItem extends Model
         );
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $item): void {
+            if ($item->type === ShareItemType::TRADE_GOODS) {
+                foreach (['is_sell', 'is_give', 'is_droppable', 'is_auction_sellable', 'is_clan_warehouse_allowed', 'is_use', 'is_slot_usable', 'is_weight'] as $flag) {
+                    $item->$flag = false;
+                }
+                $item->is_stackable = true;
+            }
+        });
+    }
+
     protected $attributes = [
         'count_use' => 0,
         'is_active' => true,
@@ -138,7 +149,7 @@ class ShareItem extends Model
         'gem_stats' => 'array',
         'rune_rarity' => RuneRarity::class,
         'rune_stat_pool' => 'array',
-        'innate_passive_type' => RunePassiveType::class,
+        'innate_passive_type' => CombatPassiveType::class,
         'rarity' => ItemRarity::class,
         'gathering_time_seconds' => 'integer',
         'gathering_respawn_seconds' => 'integer',
@@ -146,7 +157,6 @@ class ShareItem extends Model
         'gathering_double_chance_percent' => 'integer',
         'upgrade_gold_cost' => 'integer',
         'drop_direct_to_backpack' => 'boolean',
-        'is_lockpick' => 'boolean',
     ];
 
     protected $fillable = ['name', 'description', 'is_two_hand', 'type', 'image', 'skill_id', 'skill_lvl', 'skill_exp'];

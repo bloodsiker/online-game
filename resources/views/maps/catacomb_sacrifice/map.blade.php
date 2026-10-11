@@ -293,7 +293,7 @@
                                 <div class="common-header common-header__small">
                                     <div class="h-inner">
                                         <div class="h-txt">
-                                            Город Нейрин
+                                            Катакомбы Жертвоприношений
                                         </div>
                                     </div>
                                 </div>

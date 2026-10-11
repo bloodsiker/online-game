@@ -433,15 +433,29 @@
                                             <span class="char-stat-label">Урон</span>
                                             <span class="char-stat-val">
                                                 {{ format_money($character->weaponDamage['min']) }} – {{ format_money($character->weaponDamage['max']) }}
+                                                @php $dmgDebuffAvg = (int) round(($character->weaponDamageDebuff['min'] + $character->weaponDamageDebuff['max']) / 2); @endphp
+                                                @if($dmgDebuffAvg > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $dmgDebuffAvg }})</span>
+                                                @endif
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Броня</span>
-                                            <span class="char-stat-val">{{ $character->stats->getArmor() }}</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getArmor() }}
+                                                @if($character->stats->getDebuffReduction('armor') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('armor') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Крит</span>
-                                            <span class="char-stat-val">{{ $character->stats->getCritical() }}</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getCritical() }}
+                                                @if($character->stats->getDebuffReduction('critical') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('critical') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row" title="Множитель урона при физическом или магическом критическом ударе">
                                             <span class="char-stat-label">Сила крит. удара</span>
@@ -449,7 +463,12 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Уворот</span>
-                                            <span class="char-stat-val">{{ $character->stats->getDodge() }}</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getDodge() }}
+                                                @if($character->stats->getDebuffReduction('dodge') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('dodge') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row" title="Вероятность срабатывания блока при экипированном щите">
                                             <span class="char-stat-label">Шанс блока щитом</span>
@@ -481,15 +500,30 @@
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">Магическая атака</span>
-                                            <span class="char-stat-val">{{ $character->stats->getMagicAttack() }}</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getMagicAttack() }}
+                                                @if($character->stats->getDebuffReduction('magic_attack') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_attack') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row" title="Снижает получаемый магический урон">
                                             <span class="char-stat-label">Магическое сопротивление</span>
-                                            <span class="char-stat-val">{{ $character->stats->getMagicResistance() }}</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getMagicResistance() }}
+                                                @if($character->stats->getDebuffReduction('magic_resistance') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_resistance') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="char-stat-row" title="Вероятность критического срабатывания атакующего заклинания">
                                             <span class="char-stat-label">Магический крит</span>
-                                            <span class="char-stat-val">{{ $character->stats->getMagicCriticalChance() }}%</span>
+                                            <span class="char-stat-val">
+                                                {{ $character->stats->getMagicCriticalChance() }}%
+                                                @if($character->stats->getDebuffReduction('magic_critical') > 0)
+                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_critical') }})</span>
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

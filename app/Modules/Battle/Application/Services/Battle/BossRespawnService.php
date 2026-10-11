@@ -6,7 +6,7 @@ namespace App\Modules\Battle\Application\Services\Battle;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Repositories\MonsterOnLocationRepository;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 
 /**
  * Боси не підпорядковані загальній percent/count-механіці респауну —

@@ -192,10 +192,23 @@ class MessageRenderer
             );
         }
 
-        // Highlight to[NAME] prefix
-        $rendered = preg_replace(
-            '/^to\[([^\]]+)\]\s*-?\s*/u',
-            '<span class="chat-to">»$1</span> ',
+        // Resolve a lightweight cached ID so mentions support the shared player context menu.
+        $rendered = preg_replace_callback(
+            '/^to\[([^\]]+)\]\s*-?\s*/iu',
+            static function (array $matches): string {
+                $nickname = html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $name = e($nickname);
+                $userId = Cache::remember(
+                    'chat:mention:user-id:'.hash('sha256', $nickname),
+                    now()->addMinute(),
+                    static fn (): ?int => User::query()->without('player')->where('name', $nickname)->value('id'),
+                );
+                $class = 'chat-to-recipient n'.($userId ? ' player-link' : '');
+                $idAttribute = $userId ? ' data-uid="'.(int) $userId.'"' : '';
+
+                return '<span class="chat-to">» <a href="#" class="'.$class.'"'.$idAttribute.' data-name="'.$name.'"'
+                    .' onclick="chatPlayerClick(Number(this.dataset.uid || 0), this.dataset.name); return false;">'.$name.'</a></span> ';
+            },
             $rendered,
         );
 

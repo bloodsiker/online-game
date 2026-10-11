@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Rating\Infrastructure\Persistence;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Monster\Infrastructure\Persistence\Models\BossDefeatLog;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Rating\Domain\Contracts\RatingReadRepository;
@@ -17,7 +20,11 @@ class EloquentRatingReadRepository implements RatingReadRepository
 {
     public function getSkills(): Collection
     {
-        return Skill::query()->orderBy('id')->get();
+        return Skill::query()
+            ->orderByRaw("CASE WHEN type = 'peaceful' THEN 1 ELSE 0 END")
+            ->orderBy('type')
+            ->orderBy('id')
+            ->get();
     }
 
     public function paginateLevelRating(int $perPage): LengthAwarePaginator
@@ -64,9 +71,36 @@ class EloquentRatingReadRepository implements RatingReadRepository
             ->withQueryString();
     }
 
-    public function paginateInfluenceRating(int $perPage): LengthAwarePaginator
+    public function getDefeatedBosses(): Collection
     {
-        return $this->influenceRatingQuery()
+        return Monster::query()
+            ->where('is_boss', true)
+            ->whereIn('id', BossDefeatLog::query()->select('monster_id')->distinct())
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function paginateBossDefeatRating(int $monsterId, int $perPage): LengthAwarePaginator
+    {
+        return $this->bossDefeatRatingQuery($monsterId)
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    public function getInfluenceMaps(): Collection
+    {
+        return Map::query()
+            ->where(function (Builder $query): void {
+                $query->whereHas('influenceLevels')
+                    ->orWhereIn('id', DB::table('map_influences')->select('map_id'));
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function paginateMapInfluenceRating(int $mapId, int $perPage): LengthAwarePaginator
+    {
+        return $this->mapInfluenceRatingQuery($mapId)
             ->paginate($perPage)
             ->withQueryString();
     }
@@ -124,9 +158,14 @@ class EloquentRatingReadRepository implements RatingReadRepository
         );
     }
 
-    public function findInfluenceRatingPosition(string $nick): ?int
+    public function findBossDefeatRatingPosition(int $monsterId, string $nick): ?int
     {
-        return $this->findPlayerPosition($this->influenceRatingQuery(), $nick);
+        return $this->findPlayerPosition($this->bossDefeatRatingQuery($monsterId), $nick);
+    }
+
+    public function findMapInfluenceRatingPosition(int $mapId, string $nick): ?int
+    {
+        return $this->findPlayerPosition($this->mapInfluenceRatingQuery($mapId), $nick);
     }
 
     public function findSkillRatingPosition(int $skillId, string $nick): ?int
@@ -171,18 +210,31 @@ class EloquentRatingReadRepository implements RatingReadRepository
         return $position;
     }
 
-    private function influenceRatingQuery(): Builder
+    private function mapInfluenceRatingQuery(int $mapId): Builder
     {
-        $totals = DB::table('map_influences')
-            ->selectRaw('user_id, SUM(influence) AS influence_total')
-            ->groupBy('user_id');
+        return Player::query()
+            ->with(['user.clanMembership.clan'])
+            ->join('map_influences', 'players.user_id', '=', 'map_influences.user_id')
+            ->where('map_influences.map_id', $mapId)
+            ->select('players.*')
+            ->selectRaw('map_influences.influence AS map_influence')
+            ->orderByDesc('map_influence')
+            ->orderBy('players.id');
+    }
+
+    private function bossDefeatRatingQuery(int $monsterId): Builder
+    {
+        $defeats = BossDefeatLog::query()
+            ->selectRaw('player_id, COUNT(*) AS boss_defeats')
+            ->where('monster_id', $monsterId)
+            ->groupBy('player_id');
 
         return Player::query()
             ->with(['user.clanMembership.clan'])
-            ->joinSub($totals, 'influence_totals', 'players.user_id', '=', 'influence_totals.user_id')
+            ->joinSub($defeats, 'boss_defeats', 'boss_defeats.player_id', '=', 'players.id')
             ->select('players.*')
-            ->selectRaw('influence_totals.influence_total AS influence_total')
-            ->orderByDesc('influence_total')
+            ->selectRaw('boss_defeats.boss_defeats')
+            ->orderByDesc('boss_defeats.boss_defeats')
             ->orderBy('players.id');
     }
 }

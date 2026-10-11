@@ -21,26 +21,38 @@
                 @foreach($abilities as $ability)
                     @php
                         $isEffect = $kind === 'effect';
-                        $name = $isEffect ? $ability->name : $ability->getLabel();
-                        $image = $ability->image ?: $fallbackImage;
-                        $description = $isEffect
-                            ? strip_tags((string) $ability->description)
-                            : strip_tags((string) ($ability->config['description'] ?? ''));
-                        $meta = $isEffect
-                            ? array_values(array_filter([
+                        $isPassive = $kind === 'passive';
+                        $name = match (true) {
+                            $isEffect => $ability->name,
+                            $isPassive => $ability->type->label(),
+                            default => $ability->getLabel(),
+                        };
+                        $image = $isPassive ? $ability->type->iconUrl() : ($ability->image ?: $fallbackImage);
+                        $description = match (true) {
+                            $isEffect => strip_tags((string) $ability->description),
+                            $isPassive => $ability->type->monsterDescription($ability->value),
+                            default => strip_tags((string) ($ability->config['description'] ?? '')),
+                        };
+                        $meta = match (true) {
+                            $isEffect => array_values(array_filter([
                                 ['label' => 'Механика', 'value' => $ability->resolvedActiveType()?->label() ?? 'Дебаф'],
                                 ['label' => 'Шанс', 'value' => $ability->pivot->chance.'%'],
                                 ['label' => 'Длительность', 'value' => $ability->pivot->duration_seconds.' сек.'],
                                 $ability->pivot->power_percent !== null ? ['label' => 'Сила', 'value' => $ability->pivot->power_percent.'%'] : null,
-                            ]))
-                            : array_values(array_filter([
+                            ])),
+                            $isPassive => [
+                                ['label' => 'Тип', 'value' => 'Встроенная пассивка'],
+                                ['label' => 'Значение', 'value' => $ability->value.'%'],
+                            ],
+                            default => array_values(array_filter([
                                 ['label' => 'Тип', 'value' => $ability->getLabel()],
                                 $ability->trigger_hp_percent !== null ? ['label' => 'Условие', 'value' => 'HP ≤ '.$ability->trigger_hp_percent.'%'] : null,
                                 $ability->trigger_turn !== null ? ['label' => 'Условие', 'value' => 'Ход '.$ability->trigger_turn] : null,
-                            ]));
+                            ])),
+                        };
                     @endphp
                     <a href="#" class="monster-ability-icon"
-                       data-tooltip-type="{{ $isEffect ? 'Эффект' : 'Умение' }}"
+                       data-tooltip-type="{{ $isEffect ? 'Эффект' : ($isPassive ? 'Пассивка' : 'Умение') }}"
                        data-tooltip-name="{{ $name }}"
                        data-tooltip-image="{{ $image }}"
                        data-tooltip-description="{{ $description }}"

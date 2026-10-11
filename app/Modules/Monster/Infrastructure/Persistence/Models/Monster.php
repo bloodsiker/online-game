@@ -9,6 +9,7 @@ use App\Modules\Battle\Domain\Enums\CombatClass;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,8 +24,8 @@ class Monster extends Model implements FightHitInterface
 
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
-        'exp', 'min_money', 'max_money', 'attack_type', 'magic_attack', 'magic_power_coefficient', 'magic_resistance',
-        'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
+        'passive_type', 'passive_value', 'exp', 'min_money', 'max_money', 'attack_type', 'magic_attack',
+        'magic_power_coefficient', 'magic_resistance', 'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
     protected $attributes = [
@@ -34,6 +35,7 @@ class Monster extends Model implements FightHitInterface
     protected $casts = [
         'is_boss' => 'boolean',
         'attack_type' => MonsterAttackType::class,
+        'passive_type' => CombatPassiveType::class,
         'respawn_at' => 'datetime',
     ];
 

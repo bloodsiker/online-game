@@ -21,5 +21,6 @@ final readonly class ChatMessageDTO
         public ?string $sender_clan_icon,
         public ?int $sender_clan_id,
         public ?string $expires_at,
+        public ?int $target_user_id = null,
     ) {}
 }

@@ -9,6 +9,7 @@ use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 
 /**
@@ -37,7 +38,7 @@ final class ItemTooltipStatsBuilder
             ];
         }
 
-        if ($item->is_lockpick && $item->lockpickConfig !== null) {
+        if ($item->type === ShareItemType::LOCKPICK && $item->lockpickConfig !== null) {
             $config = $item->lockpickConfig;
             $requiredSkill = $config->tier === 1 ? 1 : ($config->tier - 1) * 50;
             array_push($stats,

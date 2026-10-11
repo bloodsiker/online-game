@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Онлайн Игра</title>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
+    <script>window.gameSettings = @js($gameSettings ?? \App\Modules\User\Domain\Settings\GameSettingsDefinition::defaults());</script>
+    <script src="{{ asset('js/notification-sounds.js') }}?v={{ filemtime(public_path('js/notification-sounds.js')) }}" data-sound-base="{{ asset('audio/notifications') }}/" defer></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}?v={{ filemtime(public_path('css/main.css')) }}">
     @vite('resources/js/app.js')
     <style>
         html {
@@ -122,6 +124,9 @@
             width: 0;
             opacity: 0;
         }
+        @if(!($gameSettings['show_item_tooltips'] ?? true))
+        #hotbar .slot[data-entity-type="item"] .tooltip { display: none; }
+        @endif
 
         .map-toggle-btn {
             position: absolute;
@@ -267,6 +272,8 @@
                         <iframe width="100%" name="game" height="100%" frameborder="0" id="game-frame" src="{{ route('location') }}"></iframe>
 
                         <div class="drag-overlay" id="drag-overlay"></div>
+                        {{-- Optional hotbar --}}
+                        @if($gameSettings['show_hotbar'] ?? true)
                         <div class="hotbar-container" id="hotbar">
                             <div class="hotbar-drag-handle">⋮⋮</div>
 
@@ -492,6 +499,8 @@
 
                             toggleButton.addEventListener('click', (e) => {
                                 e.stopPropagation();
+                                const rect = hotbar.getBoundingClientRect();
+                                const parentRect = bodyContent.getBoundingClientRect();
                                 isCollapsed = !isCollapsed;
 
                                 if (isCollapsed) {
@@ -502,6 +511,19 @@
                                     toggleIcon.textContent = '◀';
                                 }
 
+                                // Сохраняем правый край панели при изменении ширины.
+                                const width = hotbar.getBoundingClientRect().width;
+                                const left = rect.right - parentRect.left - bodyContent.clientLeft - width;
+                                const maxLeft = Math.max(0, bodyContent.clientWidth - width);
+                                hotbar.style.left = Math.max(0, Math.min(left, maxLeft)) + 'px';
+                                hotbar.style.top = (rect.top - parentRect.top - bodyContent.clientTop) + 'px';
+                                hotbar.style.bottom = 'auto';
+                                hotbar.style.transform = 'none';
+
+                                localStorage.setItem('hotbar-position', JSON.stringify({
+                                    left: hotbar.style.left,
+                                    top: hotbar.style.top
+                                }));
                                 localStorage.setItem('hotbar-collapsed', isCollapsed);
                             });
 
@@ -586,9 +608,12 @@
                                 if (isDragging) e.preventDefault();
                             });
                         </script>
-
+                        @else
+                            <script>window.refreshHotbar = () => {};</script>
+                        @endif
+                        {{-- End hotbar --}}
                         <script>
-                            let mapVisible = localStorage.getItem('map-visible') !== 'false';
+                            let mapVisible = @json($gameSettings['show_map'] ?? true);
                             let mapHiddenForGathering = false;
 
                             function applyMapState() {
@@ -613,7 +638,6 @@
                                 } else {
                                     mapVisible = !!show;
                                 }
-                                localStorage.setItem('map-visible', mapVisible);
                                 applyMapState();
                             }
 
@@ -651,11 +675,13 @@
             </table>
         </td>
 
+        {{-- Optional sidebar map --}}
+        @if($gameSettings['show_map'] ?? true)
         <td class="td-map" id="td-map" style="position: relative; overflow: visible;">
             <div class="map-toggle-btn" onclick="toggleMap()" title="Карта">
-                <span class="map-toggle-arrow open" id="map-toggle-arrow"></span>
+                <span class="map-toggle-arrow{{ ($gameSettings['show_map'] ?? true) ? ' open' : '' }}" id="map-toggle-arrow"></span>
             </div>
-            <div id="map-wrapper" class="map-wrapper">
+            <div id="map-wrapper" class="map-wrapper{{ ($gameSettings['show_map'] ?? true) ? '' : ' hidden' }}">
             <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
                 <tr height="33">
@@ -709,6 +735,8 @@
             </table>
             </div>
         </td>
+        @endif
+        {{-- End sidebar map --}}
     </tr>
     <tr>
         <td colspan="4" height="9">
@@ -1280,10 +1308,15 @@
         frameId: 'game-frame',
         routes: {
             backpack: '{{ route('backpack') }}',
+            magicSkill: '{{ url('/magic-skill?group=magic_skill') }}',
             character: '{{ route('character') }}',
             location: '{{ route('location') }}',
         },
         navigate: toLocation,
+        openMap: function () {
+            toggleMap(false);
+            toLocation('{{ route('maps') }}');
+        },
     });
 
     // Обработка сообщений от игрового iframe
@@ -1320,7 +1353,14 @@
             parent.actionRequestLockedUntil = now + 1200;
         }
 
-        document.getElementById('game-frame').contentWindow.location.href = url;
+        const gameFrame = document.getElementById('game-frame');
+        gameFrame.contentWindow.hideItemTooltip?.();
+        const tooltip = document.getElementById('artifact_alt');
+        if (tooltip) {
+            tooltip.style.display = 'none';
+            tooltip.removeAttribute('data-id');
+        }
+        gameFrame.contentWindow.location.href = url;
 
         return true;
     }
@@ -1373,7 +1413,10 @@
         if (! window.Echo || userId <= 0 || mailboxChannel) return;
 
         mailboxChannel = window.Echo.private(userChannelName)
-            .listen('.post.unread.updated', event => applyUnreadMailState(event.has_unread));
+            .listen('.post.unread.updated', event => {
+                applyUnreadMailState(event.has_unread);
+                if (event.new_letter) window.GameAudio?.event('mail');
+            });
     }
 
     // Регенерация и периодические эффекты обрабатываются серверным scheduler.
@@ -1881,6 +1924,8 @@
                 }
             }
 
+            // The sidebar map may be disabled in the player's settings.
+            if (frameIdOrName === 'map-frame') return false;
             console.error(`❌ iframe "${frameIdOrName}" не найден`);
             return false;
 
@@ -2116,7 +2161,7 @@
     </script>
 @endif
 
-{{-- Модальное окно смены имени (сертификат «Новое имя», открывается из backpack-frame) --}}
+{{-- Модальное окно смены никнейма (сертификат «Новое имя», открывается из backpack-frame) --}}
 <style>
     .rename-form {
         display: grid;
@@ -2138,6 +2183,47 @@
         background: #f7ead0;
         color: #2a1a0e;
         font: 11px Tahoma, Arial, sans-serif;
+    }
+    .game-select {
+        position: relative;
+    }
+    .game-select::after {
+        content: '▾';
+        position: absolute;
+        top: 50%;
+        right: 9px;
+        color: #6c3116;
+        font-size: 15px;
+        line-height: 1;
+        pointer-events: none;
+        transform: translateY(-55%);
+        text-shadow: 0 1px #ffe7b4;
+    }
+    .game-select select {
+        appearance: none;
+        width: 100%;
+        min-height: 26px;
+        padding: 5px 28px 5px 8px;
+        border: 1px solid #86572f;
+        border-radius: 2px;
+        outline: none;
+        background: linear-gradient(to bottom, #fff1c9 0%, #e5bd78 48%, #d29b55 100%);
+        box-shadow: inset 0 1px rgba(255, 255, 255, .65), 0 1px 1px rgba(75, 34, 13, .35);
+        color: #4b210e;
+        font: bold 12px Tahoma, Arial, sans-serif;
+        text-shadow: 0 1px rgba(255, 245, 205, .75);
+        cursor: pointer;
+    }
+    .game-select select:hover,
+    .game-select select:focus {
+        border-color: #5e260e;
+        background: linear-gradient(to bottom, #fff6d7 0%, #f0cc86 48%, #ddaa61 100%);
+        box-shadow: inset 0 1px rgba(255, 255, 255, .8), 0 0 0 1px rgba(111, 48, 15, .2);
+    }
+    .game-select select option {
+        background: #f7e3b6;
+        color: #4b210e;
+        font-weight: normal;
     }
     .rename-actions {
         display: flex;
@@ -2165,7 +2251,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title">Новое имя</div>
+                    <div class="popup_global_title">Новый никнейм</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closeRenameModal()"></div>
@@ -2175,7 +2261,7 @@
                 <div class="popup_global_content" style="padding:10px 18px 5px;">
                     <form id="rename-form" class="rename-form" onsubmit="submitRenameModal(event)">
                         <div class="rename-field">
-                            <label for="rename-new-name">Введите новое имя</label>
+                            <label for="rename-new-name">Введите новый никнейм</label>
                             <input id="rename-new-name" name="new_name" type="text" minlength="3" maxlength="50" required>
                         </div>
                         <div class="rename-actions">
@@ -2238,8 +2324,8 @@
 
             closeRenameModal();
             openGameMessageModal({
-                title: 'Новое имя',
-                message: data.message || 'Имя изменено.',
+                title: 'Новый никнейм',
+                message: data.message || 'Никнейм изменён.',
                 actions: [{ label: 'Ок', onClick: function () { closeGameMessageModal(); location.reload(); } }],
             });
         } catch (error) {
@@ -2270,11 +2356,13 @@
                     <form id="race-change-form" class="rename-form" onsubmit="submitRaceChangeModal(event)">
                         <div class="rename-field">
                             <label for="race-change-select">Выберите новую расу</label>
-                            <select id="race-change-select" name="new_race_id" required>
-                                @foreach($races ?? [] as $race)
-                                    <option value="{{ $race->id }}">{{ $race->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="game-select">
+                                <select id="race-change-select" name="new_race_id" required>
+                                    @foreach($races ?? [] as $race)
+                                        <option value="{{ $race->id }}">{{ $race->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="rename-actions">
                             <b class="butt1 pointer"><b><input value="Применить" type="submit"></b></b>
@@ -2786,5 +2874,10 @@
     document.getElementById('pts-overlay').addEventListener('click', closePtsModal);
 </script>
 
+@if(session('message'))
+    <script>
+        document.addEventListener('DOMContentLoaded', () => showErrorIframe(@js(session('message'))));
+    </script>
+@endif
 </body>
 </html>

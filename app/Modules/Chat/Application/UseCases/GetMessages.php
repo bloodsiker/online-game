@@ -43,6 +43,9 @@ class GetMessages
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
+        if ($msg->type === ChatMessageType::Mention && $targetName === null && preg_match('/^to\[([^\]]+)\]/i', $msg->message, $matches)) {
+            $targetName = trim($matches[1]);
+        }
         $trusted = in_array($msg->type, [
             ChatMessageType::System,
             ChatMessageType::Information,
@@ -69,6 +72,7 @@ class GetMessages
             channel: $msg->channel->value,
             sender_name: $senderName,
             target_name: $targetName,
+            target_user_id: $msg->target_user_id === null ? null : (int) $msg->target_user_id,
             sender_id: $msg->user_id ?? 0,
             content: $content,
             time: $msg->created_at->format('H:i'),

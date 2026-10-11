@@ -13,7 +13,6 @@ declare(strict_types=1);
  * Последний отчёт сохраняется в storage/app/live_progression_result.json.
  */
 
-use App\Models\Map;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Battle\Application\Services\Combat\FightOrchestrator;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
@@ -23,7 +22,9 @@ use App\Modules\Item\Application\UseCases\UnequipItem;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Presentation\Http\ItemController;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use App\Modules\Player\Application\UseCases\AllocateStats;
 use App\Modules\Player\Application\UseCases\RegisterPlayerProfile;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -37,7 +38,6 @@ use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\Structure\Shop\Application\UseCases\PurchaseCart;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Repositories\MonsterOnLocationRepository;
 use App\Services\ItemRequirementService;
 use App\Services\Recovery\Strategies\FullHealStrategy;
 use Illuminate\Contracts\Console\Kernel;

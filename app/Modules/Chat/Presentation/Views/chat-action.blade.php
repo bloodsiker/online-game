@@ -77,7 +77,7 @@
                 </a>
             </td>
             <td width="68" class="tbl-main_chat-btn">
-                <a href="#" onclick="chatShowSmiles(this); return false;">
+                <a href="#" onclick="chatShowSmiles(); return false;">
                     <img id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34" border="0" title="Смайлики">
                 </a>
             </td>
@@ -180,7 +180,7 @@
         } catch (e) {}
     }
 
-    function chatShowSmiles(el) {
+    function chatShowSmiles() {
         try { window.top.toggleSmiles(); } catch (e) {}
     }
 
@@ -212,6 +212,20 @@
         } catch (e) {}
     }
 
+    function setChatRecipient(name, forcedMode) {
+        if (typeof name !== 'string' || !name.trim()) return;
+        name = name.trim();
+        var input = gebi('message');
+        var current = input.value.match(/^\s*(to|prv)\[([^\]]+)\](\s*-?\s*)/i);
+        var sameRecipient = current && current[2].toLocaleLowerCase() === name.toLocaleLowerCase();
+        var mode = forcedMode || (sameRecipient && current[1].toLowerCase() === 'to' ? 'prv' : 'to');
+        var text = current ? input.value.slice(current[0].length) : input.value;
+        var separator = current && current[3] ? current[3] : ' ';
+        input.value = mode + '[' + name + ']' + separator + text;
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+
     // ---- Receive messages from parent / sibling frames ----
     window.addEventListener('message', function (event) {
         if (!event.data || !event.data.type) return;
@@ -221,13 +235,9 @@
             gebi('channel').value = event.data.channel;
         }
 
-        // Click on player name → to[NAME]
+        // Repeated clicks on the same nickname toggle to[NAME] ↔ prv[NAME].
         if (event.data.type === 'insertName') {
-            var input = gebi('message');
-            var prefix = 'to[' + event.data.name + '] ';
-            input.value = prefix;
-            input.focus();
-            input.setSelectionRange(prefix.length, prefix.length);
+            setChatRecipient(event.data.name);
         }
 
         if (event.data.type === 'insertItem') {
@@ -241,11 +251,7 @@
 
         // Click on timestamp of private message → prv[NAME]
         if (event.data.type === 'insertPrivate') {
-            var input = gebi('message');
-            var prefix = 'prv[' + event.data.name + '] ';
-            input.value = prefix;
-            input.focus();
-            input.setSelectionRange(prefix.length, prefix.length);
+            setChatRecipient(event.data.name, 'prv');
         }
     });
 

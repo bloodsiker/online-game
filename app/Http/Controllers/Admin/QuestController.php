@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Quest\Application\Services\QuestTreeService;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
@@ -14,12 +15,22 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class QuestController extends Controller
 {
+    public function tree(Request $request, QuestTreeService $service): View
+    {
+        $relation = $request->query('relation') === 'parent_quest_id' ? 'parent_quest_id' : 'after_quest_id';
+        $search = trim((string) $request->query('q', ''));
+        $tree = $service->getTree(relation: $relation, search: $search);
+
+        return view('admin.quest.tree', [...$tree, 'relation' => $relation, 'search' => $search]);
+    }
+
     public function list(Request $request)
     {
         $filters = [

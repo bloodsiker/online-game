@@ -3422,7 +3422,7 @@
         border-spacing: 0px;
     }
     .a511 {
-        background-color: rgba(233, 233, 233, 0.6);
+        background-color: rgba(230, 215, 223, 0.5);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;

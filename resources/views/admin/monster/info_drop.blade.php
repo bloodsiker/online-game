@@ -31,6 +31,7 @@
                                         <th width="40" class="text-center">Картинка</th>
                                         <th>Название</th>
                                         <th width="100">Шанс</th>
+                                        <th width="110" title="Один дроп в среднем на указанное количество монстров">В среднем</th>
                                         <th width="100">Кол-во</th>
                                         <th width="100">Цена</th>
                                         <th width="70"></th>
@@ -43,6 +44,7 @@
                                             <td class="text-center"><img src="{{ $item->image }}" width="40" alt=""></td>
                                             <td><a href="{{ route('admin.item.info', ['item' => $item->id]) }}" target="_blank">{{ $item->name }}</a></td>
                                             <td>{{ $item->pivot->drop_chance }}</td>
+                                            <td>@include('admin.monster._drop_frequency', ['chance' => $item->pivot->drop_chance])</td>
                                             <td>{{ $item->pivot->min_count }} - {{ $item->pivot->max_count }}</td>
                                             <td>{{ number_format($item->price, 0, '', ' ') }}</td>
                                             <td>

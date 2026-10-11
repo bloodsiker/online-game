@@ -99,6 +99,22 @@
                                     <input type="number" class="form-control" name="aggression" value="{{ old('aggression', 0) }}">
                                 </div>
                                 <div class="form-group">
+                                    <label class="col-form-label">Встроенная пассивка</label>
+                                    <select class="form-control" name="passive_type">
+                                        <option value="">— нет —</option>
+                                        @foreach(\App\Modules\Share\Domain\Enums\CombatPassiveType::cases() as $passiveType)
+                                            <option value="{{ $passiveType->value }}" @selected(old('passive_type') === $passiveType->value)>
+                                                {{ $passiveType->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Значение пассивки, %</label>
+                                    <input type="number" min="1" max="255" class="form-control" name="passive_value" value="{{ old('passive_value') }}">
+                                    <small class="form-text text-muted">Например, для «Вампиризм» — % от нанесённого удара, который монстр восстанавливает себе как HP.</small>
+                                </div>
+                                <div class="form-group">
                                     <label class="col-form-label">Опыт</label>
                                     <input type="number" class="form-control" name="exp" value="{{ old('exp', 0) }}">
                                 </div>

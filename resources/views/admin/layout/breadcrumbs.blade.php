@@ -13,7 +13,7 @@
         request()->routeIs('admin.players', 'admin.player.*') => ['label' => 'Игроки', 'route' => 'admin.players'],
         request()->routeIs('admin.clans', 'admin.clan.*') => ['label' => 'Кланы', 'route' => 'admin.clans'],
         request()->routeIs('admin.reputations', 'admin.reputation.*') => ['label' => 'Репутации', 'route' => 'admin.reputations'],
-        request()->routeIs('admin.quests', 'admin.quest.*') => ['label' => 'Квесты', 'route' => 'admin.quests'],
+        request()->routeIs('admin.quests', 'admin.quests.*', 'admin.quest.*') => ['label' => 'Квесты', 'route' => 'admin.quests'],
         request()->routeIs('admin.monsters', 'admin.monster.*') => ['label' => 'Монстры', 'route' => 'admin.monsters'],
         request()->routeIs('admin.dungeons', 'admin.dungeon.*') => ['label' => 'Данжи', 'route' => 'admin.dungeons'],
         request()->routeIs('admin.structures', 'admin.structure.*') => ['label' => 'Построения', 'route' => 'admin.structures'],

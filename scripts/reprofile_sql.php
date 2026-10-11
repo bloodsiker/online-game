@@ -13,10 +13,10 @@ declare(strict_types=1);
 use App\Modules\Battle\Application\Services\Combat\FightOrchestrator;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Location\Application\UseCases\MoveToLocation;
-use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
-use App\Repositories\MonsterOnLocationRepository;
-use App\Modules\User\Infrastructure\Persistence\Models\User;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +67,7 @@ if ($direction === null) {
 }
 
 // Монстр с большим запасом HP, чтобы одиночный раунд его не убил
-$spawn = \App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation::query()
+$spawn = MonsterOnLocation::query()
     ->with(['monster', 'location'])
     ->where('active', 1)
     ->orderByDesc('hp_max')
@@ -102,7 +102,7 @@ $runRound = function () use ($fight, $battleRepo, $monsterRepo, $user, $monster,
 };
 
 // ── Сценарий: бой до убийства монстра (дроп + квесты) ──────────────────────
-$weakSpawn = \App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation::query()
+$weakSpawn = MonsterOnLocation::query()
     ->with(['monster', 'location'])
     ->where('active', 1)
     ->where('hp_max', '>', 0)

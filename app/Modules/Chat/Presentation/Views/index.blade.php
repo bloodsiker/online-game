@@ -150,9 +150,6 @@
             background: url({{ asset('img/bg/chat/cht-btn-center-act.png') }}) right top repeat-x;
             color: #f9dfa1;
         }
-        #channel_tabs li.hid {
-            display: none;
-        }
         .tbl-main_chatchng-ina-c {
             background-image: url({{ asset('img/bg/chat/4_center_inact.png') }});
             background-repeat: repeat-x;
@@ -265,63 +262,51 @@
                                             <td height="35">
 
                                                 <div class="channel-tabs-container" style="width: 100%;">
-                                                    <ul id="channel_tabs" title="Каналы чата" class="ui-sortable">
-                                                        <li class="moveable channel ui-sortable-handle selected"
+                                                    <ul id="channel_tabs" title="Каналы чата">
+                                                        <li class="channel selected"
                                                             data-channel="main" data-channel-code="1"
-                                                            channel-serialize="channel_main"
                                                             onclick="chatChangePreset(1)"><span
-                                                                class="ch settings"
-                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #5A0000;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Основной</span></li>
-                                                        <li class="moveable channel ui-sortable-handle"
+                                                        <li class="channel"
                                                             data-channel="location" data-channel-code="2"
-                                                            channel-serialize="channel_location"
                                                             onclick="chatChangePreset(2)"><span
-                                                                class="ch settings"
-                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #0055cc"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Местность</span></li>
-                                                        <li class="moveable channel ui-sortable-handle"
+                                                        <li class="channel"
                                                             data-channel="trade" data-channel-code="8"
-                                                            channel-serialize="channel_trade"
                                                             onclick="chatChangePreset(8)"><span
-                                                                class="ch settings"
-                                                                onclick="event.stopPropagation(); return false;"><span
+                                                                class="ch settings"><span
                                                                     class="settings-color"
                                                                     style="background-color: #cc6600;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Торговый</span></li>
                                                         @if($hasClan)
-                                                            <li class="moveable channel ui-sortable-handle"
+                                                            <li class="channel"
                                                                 data-channel="clan" data-channel-code="4"
-                                                                channel-serialize="channel_clan"
                                                                 onclick="chatChangePreset(4)"><span
-                                                                    class="ch settings"
-                                                                    onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                    class="ch settings"><span class="settings-color"
                                                                                               style="background-color: #007a03;"></span><span
                                                                         class="settings-cover"></span></span><span
                                                                     class="text">Клан</span></li>
                                                         @endif
                                                         @if($hasParty)
-                                                            <li class="moveable channel ui-sortable-handle"
+                                                            <li class="channel"
                                                                 data-channel="party" data-channel-code="16"
-                                                                channel-serialize="channel_party"
                                                                 onclick="chatChangePreset(16)"><span
-                                                                    class="ch settings"
-                                                                    onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                    class="ch settings"><span class="settings-color"
                                                                                               style="background-color: #009999;"></span><span
                                                                         class="settings-cover"></span></span><span
                                                                     class="text">Группа</span></li>
                                                         @endif
-                                                        <li class="moveable channel ui-sortable-handle"
+                                                        <li class="channel"
                                                             data-channel="private" data-channel-code="32"
-                                                            channel-serialize="channel_private"
                                                             onclick="chatChangePreset(32)"><span
-                                                                class="ch settings"
-                                                                onclick="event.stopPropagation(); return false;"><span class="settings-color"
+                                                                class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #660066;"></span><span
                                                                     class="settings-cover"></span></span><span
                                                                 class="text">Личные</span></li>
@@ -330,49 +315,6 @@
                                                 </div>
 
                                                 <script>
-                                                    $channel_tabs = null;
-                                                    var channel_list = {};
-
-                                                    function chat_channel_init() {
-                                                        if ($channel_tabs === null) $channel_tabs = $('#channel_tabs');
-                                                        $channel_tabs.find('li.channel').each(function (i, el) {
-                                                            var $el = $(el);
-                                                            var channel = $el.data('channel');
-                                                            var code = parseInt($el.data('channel-code'));
-                                                            $el.attr('channel-serialize', 'channel_' + channel);
-                                                            channel_list[code] = $el;
-                                                        });
-                                                        $channel_tabs.sortable({
-                                                            items: "li.channel.moveable",
-                                                            revert: 10,
-                                                            helper: fixWidthHelper,
-                                                            update: function (e, ui) {
-                                                                var serialized = $(e.target).sortable('serialize', {attribute: 'channel-serialize'});
-                                                                serialized += '&action=tabs_sort';
-                                                                $.ajax({
-                                                                    url: '/pub/cht_data_save.php',
-                                                                    cache: false,
-                                                                    type: 'POST',
-                                                                    data: serialized,
-                                                                    success: function (data) {
-                                                                    },
-                                                                    error: function () {
-                                                                        $(e.target).sortable('cancel');
-                                                                    }
-                                                                });
-                                                            }
-                                                        }).disableSelection();
-                                                    };
-
-                                                    function fixWidthHelper(e, ui) {
-                                                        ui.children().each(function () {
-                                                            $(this).width($(this).width());
-                                                        });
-                                                        return ui;
-                                                    }
-
-                                                    chat_channel_init();
-
                                                     var fightlogOpen = false;
 
                                                     function chatToggleFightlog() {
@@ -458,14 +400,6 @@
 
                                             <td>&nbsp;
                                             </td>
-                                            <td width="60" id="fightexlog" style="display: none;">
-                                                <img src="images/d.gif" width="1" height="1" alt="" border="0"><br>
-                                                <img src="images/chat-exlog-l.gif" width="36" height="34" alt=""
-                                                     border="0"><a href="#" onclick="exlog(); return false;"><img
-                                                        src="images/chat-exlog-r.gif" width="24" height="34" alt=""
-                                                        border="0"></a><br>
-                                            </td>
-
                                             <td width="13"><img id="fightlog_but_IMGL" src="{{ asset('img/bg/chat/4_left_inact.png') }}"></td>
                                             <td id="fightlog_but_TD" width="50" class="tbl-main_chatchng-ina-c">
                                                 <a id="fightlog_but_A" onclick="chatToggleFightlog();return false;" href="#" class="tbl-main_chatchng-link_inact">Лог боя</a>

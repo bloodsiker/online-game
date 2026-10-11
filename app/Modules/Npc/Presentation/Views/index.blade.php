@@ -191,6 +191,9 @@
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
                                     <table class="coll w100 p6h p2v brd2-all">
                                         <tbody>
+                                        @if($tradePost ?? null)
+                                            @include('trade::npc-shop', ['post' => $tradePost])
+                                        @endif
                                         @if($dialogueStartNode)
                                             <tr class="bg_l"
                                                 onclick="location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}'"
@@ -406,6 +409,7 @@
 
                                         @php
                                             $hasAnything = $npc->structures->count()
+                                                || ($tradePost ?? null)
                                                 || $dialogueStartNode
                                                 || ($isClanRegistrar ?? false)
                                                 || collect($reputationShops ?? [])->count()
@@ -461,7 +465,7 @@
                             <tr>
                                 <td class="tbl-shp-sides ls">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
-                                    <img src="{{ $npc->image }}" alt="{{ $npc->name }}" width="190"><br>
+                                    <img src="{{ $npc->image }}" alt="{{ $npc->name }}" width="197"><br>
                                     <div class="p2v">
                                         {!! $npc->description !!}
                                     </div>

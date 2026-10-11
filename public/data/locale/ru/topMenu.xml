@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data version="3">
+<data version="7">
 	<item id="1" label="0" command="m_location" pict="location"/>
 	<item id="2" label="16" command="m_gathering" pict="mining"/>
 	<item id="3" label="1" command="" pict="character">
 		<item id="21" label="1" command="m_character" pict="char_portrait"/>
 		<item id="23" label="17" command="m_professions" pict="prof"/>
+		<item id="26" label="18" command="m_settings" pict="form"/>
 		<item id="22" label="3" command="m_clan" pict="clan"/>
 		<item id="24" label="7" command="m_friends" pict="contacts"/>
 		<item id="25" label="9" command="m_referral" pict="refferals"/>
@@ -18,5 +19,9 @@
 	<item id="10" label="11" command="m_events" pict="p_event"/>
 	<item id="11" label="13" command="m_post" pict="post"/>
 	<item id="12" label="15" command="m_fights" pict="fights"/>
-	<item id="13" label="12" command="m_infoportal" pict="infoPortal"/>
+	<item id="13" label="12" command="" pict="infoPortal">
+		<item id="31" label="19" command="m_forum" pict="forum"/>
+		<item id="32" label="20" command="m_library" pict="library"/>
+		<item id="33" label="21" command="m_telegram" pict="telegram"/>
+	</item>
 </data>

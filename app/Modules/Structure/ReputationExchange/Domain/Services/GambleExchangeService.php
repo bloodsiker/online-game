@@ -38,8 +38,9 @@ readonly class GambleExchangeService implements ReputationExchangeStrategy
 
     public function getPageData(User $user, Structure $structure): array
     {
-        $reputation = Reputation::where('npc_id', $structure->npc_id)->firstOrFail();
+        $reputation = Reputation::with('tiers')->where('npc_id', $structure->npc_id)->firstOrFail();
         $currentPoints = $this->reputationService->getOrCreate($user->player, $reputation)->points;
+        $progress = $this->reputationService->getProgress($reputation, (int) $currentPoints);
         $offeringCooldown = $this->reputationService->getOfferingCooldownDiff($user->player, $reputation);
 
         $options = ReputationGambleOption::with('shareItem')
@@ -83,6 +84,8 @@ readonly class GambleExchangeService implements ReputationExchangeStrategy
             currentPoints: $currentPoints,
             resources: $resources,
             offeringCooldown: $offeringCooldown,
+            progressPercent: $progress['percent'],
+            progressTitle: $progress['title'],
         )];
     }
 

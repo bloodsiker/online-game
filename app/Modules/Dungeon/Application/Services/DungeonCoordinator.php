@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Dungeon\Application\Services;
 
-use App\Models\Party\Party;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Dungeon\Domain\Contracts\DungeonCooldownRepository;
 use App\Modules\Dungeon\Domain\Contracts\DungeonSessionRepository;
@@ -18,6 +17,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonRunParticipant;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Party\Infrastructure\Persistence\Models\Party;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;

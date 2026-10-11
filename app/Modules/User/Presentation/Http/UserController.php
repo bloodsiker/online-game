@@ -33,6 +33,7 @@ final class UserController
     public function info(int $id): Response
     {
         $user = User::with([
+            'profile',
             'player.race',
             'player.playerEquip',
             'player.artifacts.item.itemInfo',

@@ -107,43 +107,62 @@ final class MonsterStatFormulas
     }
 
     /**
-     * Затухание доли денег с монстра, СБРАСЫВАЕТСЯ на 100% в начале каждого тира
-     * (см. docs/economy-pricing-tier1-tier2.md, docs/economy-pricing-tier3.md):
-     * ExperienceCurve::killsPerLevel() намеренно взрывается внутри каждого тира
-     * (21→100→экспоненциально до 9000 килов к 100 lvl) — без затухания суммарный
-     * доход на верхнем чекпоинте тира оказывается в сотни раз больше дохода на
-     * нижнем, что при цене «150% от накопленного дохода с начала тира» даёт либо
-     * смешные, либо многомиллионные числа. Коэффициент каждого тира подобран
-     * бинарным поиском под свой целевой разрыв (Тир2: 933x→300x, Тир3: 308x→40x).
-     * Затухание СБРАСЫВАЕТСЯ на границе, а не продолжается глобально — иначе на
-     * Тир3 (50-89) множитель от Тир2-коэффициента упал бы до ~1.6% к 90 lvl.
-     * Тир1 (1-19) не затрагивается — там экономика уже откалибрована без затухания.
+     * ИСТОРИЯ: раньше доля денег с монстра «сбрасывалась» на 100% в начале
+     * каждого тира (20, 50 lvl) — см. git-историю и docs/economy-pricing-*.md.
+     * Проблема была реальной (ExperienceCurve::killsPerLevel() взрывается
+     * экспоненциально — 21→100→~9000 килов к 100 lvl, без сдерживания доход
+     * рос в сотни раз внутри тира), но сброс на границе тира создавал ОБРАТНУЮ
+     * проблему: деньги с монстра резко ПАДАЛИ весь тир, а на границе следующего
+     * тира внезапно ПОДСКАКИВАЛИ обратно (лвл49 94-187 → лвл50 530-1061) —
+     * не «плавный рост», а зигзаг.
      *
-     * @var array<int, float> нижняя граница тира (уровень) => коэффициент затухания за уровень
+     * ТЕКУЩЕЕ РЕШЕНИЕ (по прямому указанию пользователя): деньги с монстра
+     * растут МОНОТОННО на каждом уровне (никогда не меньше, чем у монстра
+     * более низкого уровня) степенной кривой от уровня — `(level/20)^p` —
+     * без каких-либо сбросов на границах тиров. Показатель степени p<1 даёт
+     * ту же форму, что уже используется в ExperienceCurve::referenceMonsterExp
+     * (сам exp растёт на ~7.6% на 21 lvl и всего на ~1.7% на 90 lvl — рост
+     * есть всегда, но процент прироста сам плавно уменьшается) — деньги
+     * наследуют эту же форму вместо резких искусственных скачков.
+     *
+     * MONEY_GROWTH_EXPONENT подобран бинарным поиском так, чтобы суммарный
+     * накопленный доход игрока за весь диапазон 20-89 lvl (сумма
+     * killsPerLevel(lvl) × money(lvl) по всем уровням) равнялся ~30 000 000 —
+     * целевая цифра, заданная пользователем как компромисс между «деньги не
+     * падают» и «экономика не взрывается» (для сравнения: без всякого
+     * сдерживания эта же сумма получилась бы ~122 000 000).
+     *
+     * $difficultyRatio сохраняет пропорциональность деньгам от `exp` для
+     * мобов с expMultiplier ≠ 1.0 (боссы/элиты) — обычный моб (multiplier=1)
+     * получает ровно точку на степенной кривой, более «жирный» по exp моб
+     * получает пропорционально больше денег.
      */
-    private const MONEY_DECAY_BY_TIER_START = [
-        20 => 0.9429,
-        50 => 0.9220,
-    ];
+    private const MONEY_GROWTH_REFERENCE_LEVEL = 20;
 
-    /** @return array{0: int, 1: int} [min, max] денег с монстра, как доля от опыта (с затуханием доли, сброс на границе тира — см. MONEY_DECAY_BY_TIER_START) */
+    private const MONEY_GROWTH_EXPONENT = 0.4363;
+
+    private const MONEY_MIN_PERCENT_OF_EXP = 0.15;
+
+    private const MONEY_MAX_PERCENT_OF_EXP = 0.30;
+
+    /** @return array{0: int, 1: int} [min, max] денег с монстра — монотонно растущая степенная кривая от уровня, без сбросов на границах тиров (см. докблок выше) */
     public static function moneyRange(int $exp, int $level = 1): array
     {
-        $tierStart = 1;
-        $decayPerLevel = 1.0;
-
-        foreach (self::MONEY_DECAY_BY_TIER_START as $start => $decay) {
-            if ($level >= $start) {
-                $tierStart = $start;
-                $decayPerLevel = $decay;
-            }
+        if ($level < self::MONEY_GROWTH_REFERENCE_LEVEL) {
+            return [
+                (int) round($exp * self::MONEY_MIN_PERCENT_OF_EXP),
+                (int) round($exp * self::MONEY_MAX_PERCENT_OF_EXP),
+            ];
         }
 
-        $multiplier = $decayPerLevel ** ($level - $tierStart);
+        $referenceExp = ExperienceCurve::referenceMonsterExp(self::MONEY_GROWTH_REFERENCE_LEVEL);
+        $typicalExpAtLevel = ExperienceCurve::referenceMonsterExp($level);
+        $difficultyRatio = $exp / max(1, $typicalExpAtLevel);
+        $growthScale = ($level / self::MONEY_GROWTH_REFERENCE_LEVEL) ** self::MONEY_GROWTH_EXPONENT;
 
         return [
-            (int) round($exp * 0.15 * $multiplier),
-            (int) round($exp * 0.30 * $multiplier),
+            (int) round($referenceExp * self::MONEY_MIN_PERCENT_OF_EXP * $growthScale * $difficultyRatio),
+            (int) round($referenceExp * self::MONEY_MAX_PERCENT_OF_EXP * $growthScale * $difficultyRatio),
         ];
     }
 }

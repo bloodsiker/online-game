@@ -13,20 +13,14 @@ use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Repositories\AbstractRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-class BattleRepository extends AbstractRepository
+class BattleRepository
 {
-    public function getModelClass(): string
-    {
-        return Battle::class;
-    }
-
     public function getQuery(): Builder
     {
-        return $this->model->query()->select(['battles.*']);
+        return Battle::query()->select(['battles.*']);
     }
 
     public function findActiveBattleOnLocation(Location $location, ?int $dungeonRunId = null): ?Battle
@@ -54,7 +48,11 @@ class BattleRepository extends AbstractRepository
 
     public function finishBattle(int $id): Battle
     {
-        return $this->update(['status' => BattleStatus::FINISH], $id);
+        /** @var Battle $battle */
+        $battle = Battle::query()->findOrFail($id);
+        $battle->update(['status' => BattleStatus::FINISH]);
+
+        return $battle;
     }
 
     public function createBattle(Location $location, ?int $dungeonRunId = null): Battle
@@ -68,7 +66,7 @@ class BattleRepository extends AbstractRepository
             $attributes['dungeon_run_id'] = $dungeonRunId;
         }
 
-        return $this->create($attributes);
+        return Battle::query()->create($attributes);
     }
 
     public function createBattleDetails(Battle $battle, ?User $user = null, ?MonsterOnLocation $monsterOnLocation = null): BattleDetail

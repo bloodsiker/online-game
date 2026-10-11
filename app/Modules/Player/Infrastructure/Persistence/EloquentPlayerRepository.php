@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Infrastructure\Persistence;
 
-use App\Models\Experience;
 use App\Modules\Player\Application\DTOs\InitialExperienceDTO;
 use App\Modules\Player\Domain\Repositories\PlayerRepositoryInterface;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\User\Infrastructure\Persistence\Models\User;

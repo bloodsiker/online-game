@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Player\Domain\Services;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 
 /**
  * Пассивки читаются live из экипировки игрока (см.
@@ -22,7 +22,7 @@ class PlayerRunePassiveService
     ) {}
 
     /**
-     * @return list<array{type: RunePassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>
+     * @return list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>
      */
     public function resolve(Player $player): array
     {
@@ -69,7 +69,7 @@ class PlayerRunePassiveService
                 }
 
                 $passives[] = [
-                    'type' => RunePassiveType::from($rune->passive_skill['type']),
+                    'type' => CombatPassiveType::from($rune->passive_skill['type']),
                     'value' => (int) $rune->passive_skill['value'],
                     'runeName' => $rune->runeInfo->name,
                     'runeShareItemId' => $rune->runeInfo->id,
@@ -86,7 +86,7 @@ class PlayerRunePassiveService
                 }
 
                 $passives[] = [
-                    'type' => RunePassiveType::from($rune->passive_skill['type']),
+                    'type' => CombatPassiveType::from($rune->passive_skill['type']),
                     'value' => (int) $rune->passive_skill['value'],
                     'runeName' => $rune->runeInfo->name,
                     'runeShareItemId' => $rune->runeInfo->id,
@@ -114,9 +114,9 @@ class PlayerRunePassiveService
      * специально: руна оружия в руке всё равно должна сработать, даже если
      * урон в этот раз нанесён заклинанием, а не самим оружием.
      *
-     * @param  list<array{type: RunePassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>  $passives
+     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, runeShareItemId: int, itemName: string, handSide: ?string}>  $passives
      */
-    public function totalValue(array $passives, RunePassiveType $type, ?string $requiredHandSide = null): int
+    public function totalValue(array $passives, CombatPassiveType $type, ?string $requiredHandSide = null): int
     {
         return array_sum(array_map(
             fn (array $p) => $p['value'],

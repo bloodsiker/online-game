@@ -51,6 +51,7 @@ class ChatController extends Controller
             'activeWorldEvents' => $this->getActiveWorldEventWidget->execute(),
             'realtime' => [
                 'userId' => (int) $user->id,
+                'userName' => (string) $user->name,
                 'mapId' => $user->currentLocation?->map_id === null ? null : (int) $user->currentLocation->map_id,
                 'clanId' => $this->hasActiveClan($user) ? (int) $user->clanMembership->clan_id : null,
                 'partyId' => $party?->id === null ? null : (int) $party->id,

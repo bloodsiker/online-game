@@ -31,7 +31,7 @@ use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Reputation\Domain\Enums\DivineFavorType;
 use App\Modules\Reputation\Domain\Services\DivineFavorService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 
 readonly class AttackService
 {
@@ -147,6 +147,7 @@ readonly class AttackService
 
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
             $this->awardMonsterExperience($player, $locMonster->monster, $exp);
+            $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
 
             $this->playerSkillService->gainExperienceSkill($player, $hit->getSkill(), $hit->getWeapon());
 
@@ -304,7 +305,7 @@ readonly class AttackService
 
     /**
      * Триггеры пассивок рун при успешной атаке игрока: Вампиризм (лечение %
-     * от урона), Оглушение (шанс оглушить моба на 1 ход), Двойной удар (шанс
+     * от урона), Оглушение (шанс оглушить моба на 10 секунд), Двойной удар (шанс
      * повторить урон этого хита) и Цепная атака (шанс задеть второго живого
      * моба в этом же бою за 50% урона). Реагируют строго на реально
      * нанесённый урон, поэтому применяются уже после вычитания HP у моба.
@@ -313,7 +314,7 @@ readonly class AttackService
      * пассивка руны из оружия в другой руке при дуал-вилде не участвует —
      * только руны этого оружия и руны вне рук (броня и т.п.).
      *
-     * @param  list<array{type: RunePassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>  $runePassives
+     * @param  list<array{type: CombatPassiveType, value: int, runeName: string, itemName: string, handSide: ?string}>  $runePassives
      */
     private function applyOffensiveRunePassives(
         Player $player,
@@ -330,7 +331,7 @@ readonly class AttackService
             return;
         }
 
-        $vampirism = $this->runePassiveService->totalValue($runePassives, RunePassiveType::VAMPIRISM, $handSide);
+        $vampirism = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::VAMPIRISM, $handSide);
         if ($vampirism > 0 && $this->random->chance($vampirism)) {
             $heal = max(1, (int) round($damage * 0.10));
             $before = $player->hp_now;
@@ -345,19 +346,19 @@ readonly class AttackService
             }
         }
 
-        $stun = $this->runePassiveService->totalValue($runePassives, RunePassiveType::STUN, $handSide);
+        $stun = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::STUN, $handSide);
         if ($stun > 0 && $locMonster->hp_now > 0 && $this->random->chance($stun)) {
             $this->effectService->applyCustomEffectToMonster(
                 ActiveEffectType::STUN,
                 0,
-                1,
+                10,
                 $locMonster,
                 $battle,
                 $result,
             );
         }
 
-        $doubleStrike = $this->runePassiveService->totalValue($runePassives, RunePassiveType::DOUBLE_STRIKE, $handSide);
+        $doubleStrike = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::DOUBLE_STRIKE, $handSide);
         if ($doubleStrike > 0 && $locMonster->hp_now > 0 && $this->random->chance($doubleStrike)) {
             $extraDamage = min($locMonster->hp_now, $damage);
             $extraExp = $this->calculateExperience($player, $locMonster->monster, $extraDamage, $locMonster->hp_max, $xpMultiplier);
@@ -373,9 +374,47 @@ readonly class AttackService
             ));
         }
 
-        $chainAttack = $this->runePassiveService->totalValue($runePassives, RunePassiveType::CHAIN_ATTACK, $handSide);
+        $chainAttack = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::CHAIN_ATTACK, $handSide);
         if ($chainAttack > 0 && $this->random->chance($chainAttack)) {
             $this->applyChainAttack($player, $locMonster, $battle, $damage, $xpMultiplier, $result);
+        }
+    }
+
+    /**
+     * Встроенная пассивка «Отражение» у МОНСТРА (monsters.passive_type===
+     * CombatPassiveType::REFLECT) — зеркально applyVampirism() в
+     * MonsterAttackService, но срабатывает от удара ИГРОКА по монстру, а
+     * не удара монстра по игроку: монстр возвращает % только что
+     * нанесённого ему урона игроку как входящий урон. Без своего шанса
+     * срабатывания — действует от каждого удара, passive_value задаёт
+     * саму величину, не вероятность (тот же принцип, что и у вампиризма).
+     *
+     * НЕ путать с reflectDamage() выше — тот readState из
+     * battle.boss_metadata (временный боссовый баф «отражение», задаётся
+     * механикой боя на несколько ходов), этот — постоянная пассивка
+     * обычного монстра.
+     */
+    private function applyMonsterReflectPassive(
+        Monster $monster,
+        Player $player,
+        int $damage,
+        AttackResultDTO $result,
+    ): void {
+        if ($monster->passive_type !== CombatPassiveType::REFLECT || ($monster->passive_value ?? 0) <= 0 || $damage <= 0) {
+            return;
+        }
+
+        $reflected = max(1, (int) round($damage * $monster->passive_value / 100));
+        $before = $player->hp_now;
+        $player->hp_now = max(0, $player->hp_now - $reflected);
+        $actualReflected = $before - $player->hp_now;
+
+        if ($actualReflected > 0) {
+            $result->log(sprintf(
+                '<p><b class="color-reflect">🔁 %s отражает удар! Вы получаете %d урона!</b></p>',
+                $monster->name,
+                $actualReflected,
+            ));
         }
     }
 
@@ -426,7 +465,7 @@ readonly class AttackService
      */
     private function applyRageBonus(Player $player, int $damage, array $runePassives, int $effectiveHpMax): int
     {
-        $rage = $this->runePassiveService->totalValue($runePassives, RunePassiveType::RAGE);
+        $rage = $this->runePassiveService->totalValue($runePassives, CombatPassiveType::RAGE);
 
         if ($rage <= 0) {
             return $damage;
@@ -656,7 +695,11 @@ readonly class AttackService
 
     public function checkLevelUp(Player $player, AttackResultDTO $result)
     {
-        if ($player->exp >= $player->exp_up) {
+        // while, не if: один хит может принести сразу несколько уровней опыта
+        // (например, крупный килл-добивающий урон или активный Эликсир
+        // опыта) — exp при этом не урезается до exp_up, поэтому избыток
+        // должен быть разобран по уровням сразу, а не по одному за хит.
+        while ($player->exp >= $player->exp_up) {
             $player->lvl++;
             $player->save();
 

@@ -196,7 +196,7 @@
                         <tbody>
                             <tr><td>Вампиризм</td><td>8-15%</td><td>Шанс восстановить 10% нанесенного урона</td></tr>
                             <tr><td>Цепная атака</td><td>15-25%</td><td>Шанс ударить второго врага за 50% урона</td></tr>
-                            <tr><td>Оглушение</td><td>8-15%</td><td>Шанс оглушить цель на 1 ход</td></tr>
+                            <tr><td>Оглушение</td><td>8-15%</td><td>Шанс оглушить цель сокрушительным ударом на 10 секунд</td></tr>
                             <tr><td>Двойной удар</td><td>12-20%</td><td>Шанс ударить дважды</td></tr>
                             <tr><td>Отражение</td><td>5-10%</td><td>Отражает процент входящего урона</td></tr>
                             <tr><td>Ярость</td><td>15-25%</td><td>Увеличивает урон при HP ниже 30%</td></tr>
@@ -215,7 +215,7 @@
                             <tr><td>Камни</td><td><span class="model-name">GemService</span>, <span class="model-name">GemSeeder</span>, <span class="model-name">PlayerStatService</span></td></tr>
                             <tr><td>Оправы</td><td><span class="model-name">MountRarityConfig</span>, <span class="model-name">GemService::openSocket()</span></td></tr>
                             <tr><td>Руны</td><td><span class="model-name">RuneService</span>, <span class="model-name">RuneSeeder</span>, <span class="model-name">RuneRarity</span></td></tr>
-                            <tr><td>Пассивки рун</td><td><span class="model-name">RunePassiveType</span></td></tr>
+                            <tr><td>Пассивки рун</td><td><span class="model-name">CombatPassiveType</span></td></tr>
                             <tr><td>Статы в персонаже</td><td><span class="model-name">PlayerStatService</span></td></tr>
                         </tbody>
                     </table>

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(DungeonSeeder::class);
+        $this->call(VolnyyTorgSeeder::class);
         $this->call(SurvivalArenaSeeder::class);
         $this->call(TowerDungeonSeeder::class);
         $this->call(BuffSkillSeeder::class);
@@ -40,5 +41,6 @@ class DatabaseSeeder extends Seeder
         $this->call(GranitePassSeeder::class);
         $this->call(LibraryEquipmentSeeder::class);
         $this->call(LibraryEventsSeeder::class);
+        $this->call(LibrarySkillsSeeder::class);
     }
 }

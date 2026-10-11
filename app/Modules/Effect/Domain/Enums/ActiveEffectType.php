@@ -12,6 +12,7 @@ enum ActiveEffectType: string
     case BLEED = 'bleed';
     case BURN = 'burn';
     case REGEN = 'regen';
+    case EXP_BOOST = 'exp_boost';
 
     public function isStun(): bool
     {
@@ -48,6 +49,7 @@ enum ActiveEffectType: string
             self::BLEED => '🩸',
             self::BURN => '🔥',
             self::REGEN => '💚',
+            self::EXP_BOOST => '✨',
         };
     }
 
@@ -60,6 +62,7 @@ enum ActiveEffectType: string
             self::BLEED => 'Кровотечение',
             self::BURN => 'Ожог',
             self::REGEN => 'Регенерация',
+            self::EXP_BOOST => 'Прилив опыта',
         };
     }
 }

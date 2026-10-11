@@ -13,6 +13,7 @@ use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NpcController extends Controller
 {
@@ -30,6 +31,7 @@ class NpcController extends Controller
 
         return view('npc::index', [
             'npc' => $page->npc,
+            'tradePost' => DB::table('trade_posts')->where('npc_id', $id)->where('is_active', true)->first(),
             'quests' => $page->quests,
             'questsInProgress' => $page->questsInProgress,
             'questsOnCooldown' => $page->questsOnCooldown,

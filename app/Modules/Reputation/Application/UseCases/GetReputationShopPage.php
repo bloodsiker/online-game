@@ -32,8 +32,10 @@ class GetReputationShopPage
         // Активная категория: из запроса, иначе первая. null → товары без категории.
         $activeCategoryId = $categoryId ?? $categories->first()?->id;
         $items = $this->readRepository->getShopItemsByCategory($reputation->id, $activeCategoryId);
+        $cart = $this->cartService->getCart($user, $reputation->id);
 
         $this->tooltipCollector->collectFrom(new PremiumShopItemTooltipStrategy($items));
+        $this->tooltipCollector->collectFrom(new PremiumShopItemTooltipStrategy($cart->getItems()->pluck('shopItem')));
 
         return new ReputationShopPageDTO(
             reputation: $reputation,
@@ -41,7 +43,7 @@ class GetReputationShopPage
             categories: $categories,
             activeCategoryId: $activeCategoryId,
             items: $items,
-            cart: $this->cartService->getCart($user, $reputation->id),
+            cart: $cart,
             message: session('shop_error') ?? session('shop_success'),
             messageType: session()->has('shop_success') ? 'success' : 'error',
             player: $user->player,

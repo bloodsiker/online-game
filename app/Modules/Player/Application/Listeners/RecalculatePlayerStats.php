@@ -2,9 +2,9 @@
 
 namespace App\Modules\Player\Application\Listeners;
 
-use App\Models\Experience;
 use App\Modules\Player\Domain\Events\PlayerChangeStat;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 
 class RecalculatePlayerStats
 {

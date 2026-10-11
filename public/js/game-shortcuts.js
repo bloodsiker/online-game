@@ -7,7 +7,7 @@
             && (target.matches('input, textarea, select, [contenteditable="true"]') || target.isContentEditable);
     }
 
-    function handleShortcut(event, routes, navigate, actionDocument) {
+    function handleShortcut(event, routes, navigate, actionDocument, openMap) {
         if (event.ctrlKey || event.metaKey || event.altKey || isEditableTarget(event.target)) {
             return;
         }
@@ -19,7 +19,9 @@
             ArrowRight: 'arrowright',
             KeyF: 'f',
             KeyI: 'i',
+            KeyB: 'b',
             KeyC: 'c',
+            KeyM: 'm',
             KeyQ: 'q',
             Space: 'space',
         }[event.code];
@@ -29,8 +31,11 @@
             'і': 'i',
             'и': 'i',
             'ш': 'i',
+            b: 'b',
             c: 'c',
             'с': 'c',
+            m: 'm',
+            'ь': 'm',
             f: 'f',
             'ф': 'f',
             'а': 'f',
@@ -55,7 +60,9 @@
             space: 'attack',
         };
 
-        if (actionElementIds[shortcut]) {
+        if (shortcut === 'm') {
+            openMap?.();
+        } else if (actionElementIds[shortcut]) {
             const actionElement = actionDocument?.getElementById(actionElementIds[shortcut]);
 
             if (!actionElement) {
@@ -76,7 +83,7 @@
 
             actionElement.click();
         } else {
-            const url = ({ i: routes.backpack, c: routes.character })[shortcut];
+            const url = ({ i: routes.backpack, b: routes.magicSkill, c: routes.character })[shortcut];
 
             if (!url) {
                 return;
@@ -89,14 +96,14 @@
         event.stopImmediatePropagation();
     }
 
-    function bindDocument(targetDocument, routes, navigate, getActionDocument) {
+    function bindDocument(targetDocument, routes, navigate, getActionDocument, openMap) {
         if (!targetDocument || targetDocument.documentElement.dataset.gameShortcutsBound === 'true') {
             return;
         }
 
         targetDocument.documentElement.dataset.gameShortcutsBound = 'true';
         targetDocument.addEventListener('keydown', function (event) {
-            handleShortcut(event, routes, navigate, getActionDocument());
+            handleShortcut(event, routes, navigate, getActionDocument(), openMap);
         }, true);
     }
 
@@ -114,7 +121,7 @@
             const bindFrame = function (frame) {
                 const bindFrameDocument = function () {
                     try {
-                        bindDocument(frame.contentDocument, options.routes, options.navigate, getActionDocument);
+                        bindDocument(frame.contentDocument, options.routes, options.navigate, getActionDocument, options.openMap);
                         frame.contentDocument.querySelectorAll('iframe').forEach(bindFrame);
                     } catch (error) {
                         // Iframe может быть загружен с другого origin.
@@ -126,7 +133,7 @@
             };
 
             try {
-                bindDocument(document, options.routes, options.navigate, getActionDocument);
+                bindDocument(document, options.routes, options.navigate, getActionDocument, options.openMap);
                 document.querySelectorAll('iframe').forEach(bindFrame);
             } catch (error) {
                 // Основной игровой iframe должен оставаться доступным в текущем origin.

@@ -57,6 +57,7 @@
         .user-rating th span { padding: 0 0 1px 20px; background: url({{ asset('img/icon/rating_headers_sprite.png') }}) 0 0 no-repeat; }
         .user-rating th .user-rating-reputation { background-position: 0 -44px; }
         .user-rating th .user-rating-progress { background-position: 0 -67px; }
+        .rating-skill-group { padding: 5px 8px 3px; color: #8b3d17; font-weight: bold; text-transform: uppercase; }
         .bg_l3 { background-image: url({{ asset('img/bg/bg_l3.gif') }}); cursor: pointer; }
     </style>
 </head>
@@ -87,11 +88,26 @@
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0 4px 0">
                         <table class="w100 ach_menu" cellpadding="0" cellspacing="0">
                             <tbody>
-                            @php $firstSkillSeen = false; @endphp
+                            @php $skillGroup = null; $influenceGroupSeen = false; $bossGroupSeen = false; @endphp
                             @foreach($page->menu as $menuItem)
-                                @if(!$firstSkillSeen && $menuItem->isSkill)
-                                    @php $firstSkillSeen = true; @endphp
+                                @if(str_starts_with($menuItem->key, 'influence_') && !$influenceGroupSeen)
+                                    @php $influenceGroupSeen = true; @endphp
                                     <tr><td height="6"></td></tr>
+                                    <tr><td class="rating-skill-group">Влияние</td></tr>
+                                @endif
+                                @if(str_starts_with($menuItem->key, 'boss_') && !$bossGroupSeen)
+                                    @php $bossGroupSeen = true; @endphp
+                                    <tr><td height="6"></td></tr>
+                                    <tr><td class="rating-skill-group">Боссы</td></tr>
+                                @endif
+                                @if($menuItem->isSkill && $menuItem->skillGroup !== $skillGroup)
+                                    @php $skillGroup = $menuItem->skillGroup; @endphp
+                                    <tr><td height="6"></td></tr>
+                                    <tr>
+                                        <td class="rating-skill-group">
+                                            {{ $skillGroup === 'peaceful' ? 'Мирные навыки' : 'Боевые навыки' }}
+                                        </td>
+                                    </tr>
                                 @endif
                                 <tr>
                                     <td height="10" class="@if($menuItem->isActive) c-s-n-fon ach_menu_act @else ach_menu_pas @endif">

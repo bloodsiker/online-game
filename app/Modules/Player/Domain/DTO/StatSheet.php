@@ -81,6 +81,24 @@ class StatSheet implements FightHitInterface
     /** @var StatModifier[] */
     public array $modifiers = [];
 
+    /**
+     * На сколько каждая характеристика СЕЙЧАС занижена активными дебаффами
+     * (Страх, Разрыв брони, Обморожение, Слабость...) — положительное число,
+     * «на сколько единиц меньше, чем было бы без них». Считается в
+     * PlayerStatService::buildSheet() вторым проходом без отрицательных
+     * модификаторов, тем же алгоритмом, что и основной расчёт — не
+     * приближение, а точная разница. Ключи — те же, что у StatModifier::$stat
+     * (armor, dodge, critical, magic_attack, left_min_dmg, ...).
+     *
+     * @var array<string, int>
+     */
+    public array $debuffReduction = [];
+
+    public function getDebuffReduction(string $stat): int
+    {
+        return $this->debuffReduction[$stat] ?? 0;
+    }
+
     // FightHitInterface
     public function getArmor(): int
     {

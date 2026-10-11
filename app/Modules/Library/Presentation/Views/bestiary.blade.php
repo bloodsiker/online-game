@@ -76,7 +76,6 @@
     <div class="library-bestiary-grid">
         @forelse($monsters as $monster)
             @php
-                $locationNames = $monster->locations->pluck('name')->unique()->values();
                 $mapNames = $monster->locations->pluck('map.name')->filter()->unique()->values();
             @endphp
             <a class="library-bestiary-card {{ $monster->is_boss ? 'library-bestiary-card--boss' : '' }}"
@@ -103,15 +102,12 @@
                     </span>
                     <span class="library-bestiary-card__habitat">
                         <b>Обитает:</b>
-                        @if($locationNames->isNotEmpty())
-                            {{ $locationNames->take(3)->implode(', ') }}@if($locationNames->count() > 3) и ещё {{ $locationNames->count() - 3 }}@endif
+                        @if($mapNames->isNotEmpty())
+                            {{ $mapNames->implode(', ') }}
                         @else
                             местонахождение неизвестно
                         @endif
                     </span>
-                    @if($mapNames->isNotEmpty())
-                        <span class="library-bestiary-card__maps">{{ $mapNames->implode(', ') }}</span>
-                    @endif
                 </span>
             </a>
         @empty

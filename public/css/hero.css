@@ -435,7 +435,7 @@
 
 .effect-timeline-progress {
     stroke: #8fd354;
-    stroke-linecap: round;
+    stroke-linecap: butt;
     stroke-dasharray: 100 100;
     stroke-dashoffset: 0;
     filter: drop-shadow(0 0 1px rgba(174, 242, 104, 0.75));

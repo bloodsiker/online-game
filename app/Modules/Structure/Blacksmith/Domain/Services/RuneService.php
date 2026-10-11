@@ -9,7 +9,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemRune;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
@@ -258,7 +258,7 @@ class RuneService
             return null;
         }
 
-        $passives = RunePassiveType::cases();
+        $passives = CombatPassiveType::cases();
         $passive = $passives[array_rand($passives)];
         [$min, $max] = $passive->valueRange();
         $value = random_int($min, $max);

@@ -6,9 +6,10 @@
     <title>Магазин — {{ $page->reputation->name }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
-        body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 12px; }
-        a { color: #000000; }
-        a:hover { color: #353434; }
+        * { font-family: Tahoma, Geneva, sans-serif; font-size: 11px; }
+        body { height: 100%; margin: 0; color: #000; font-family: Tahoma, Geneva, sans-serif; font-size: 11px; }
+        a { color: #000000; text-decoration: none; }
+        a:hover { color: #353434; text-decoration: none; }
         .grnn, .grnn * { color: #114d01 !important; }
         .redd, .redd * { color: #8a0108 !important; }
         .b { font-weight: bold; }
@@ -144,6 +145,8 @@
                                         <tr>
                                             <td colspan="3">
                                                 <a href="{{ route('items.info.share', ['id' => $item->item->id]) }}"
+                                                   data-id="{{ $item->item->id }}"
+                                                   onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                                    onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
                                                    class="b" style="color: {{ $item->item->rarity?->color() ?? '#333333' }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;">{{ $item->item->name }}</a>
                                             </td>
@@ -245,7 +248,13 @@
                                     <tbody>
                                     @foreach($page->cart->getItems() as $cartItem)
                                         <tr class="bg_l">
-                                            <td><span class="redd b">{{ $cartItem->shopItem->item->name }}</span></td>
+                                            <td>
+                                                <a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
+                                                   data-id="{{ $cartItem->shopItem->item->id }}"
+                                                   onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                   onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
+                                                   class="b" style="color: {{ $cartItem->shopItem->item->rarity?->color() ?? '#333333' }};">{{ $cartItem->shopItem->item->name }}</a>
+                                            </td>
                                             <td class="b red" align="center">
                                                 @if($cartItem->shopItem->price)
                                                     <span title="Монет"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($cartItem->shopItem->price * $cartItem->quantity) }}<br>

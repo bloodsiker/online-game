@@ -34,6 +34,26 @@ class ReputationService
             ->first();
     }
 
+    /** @return array{percent: float|int, title: string} */
+    public function getProgress(Reputation $reputation, int $points): array
+    {
+        $currentTier = $this->getCurrentTier($reputation, $points);
+        $nextTier = $reputation->tiers->firstWhere('min_points', '>', $points);
+        $start = (int) ($currentTier?->min_points ?? 0);
+        $end = (int) ($nextTier?->min_points ?? $currentTier?->max_points ?? $points);
+        $range = max(0, $end - $start);
+
+        if ($range === 0) {
+            return [
+                'percent' => $currentTier ? 100 : 0,
+                'title' => $currentTier ? 'Максимальный уровень репутации' : 'Уровни репутации не настроены',
+            ];
+        }
+        $earned = max(0, min($range, $points - $start));
+
+        return ['percent' => round($earned * 100 / $range, 2), 'title' => $earned.' из '.$range];
+    }
+
     public function canTakeQuest(Player $player, Reputation $reputation): bool
     {
         $hasActive = QuestPlayer::where('player_id', $player->id)

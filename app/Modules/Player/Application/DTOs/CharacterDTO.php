@@ -51,5 +51,13 @@ final readonly class CharacterDTO
          * @var array{min: int, max: int}
          */
         public array $weaponDamage = ['min' => 0, 'max' => 0],
+        /**
+         * На сколько урон оружия сейчас занижен активными дебаффами (Страх,
+         * Слабость...) — точная разница, не приближение, см.
+         * StatSheet::$debuffReduction / GetCharacter::weaponDamageDebuffReduction().
+         *
+         * @var array{min: int, max: int}
+         */
+        public array $weaponDamageDebuff = ['min' => 0, 'max' => 0],
     ) {}
 }

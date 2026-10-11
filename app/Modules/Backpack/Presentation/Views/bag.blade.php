@@ -500,11 +500,11 @@
                                                                           class="popup-artifact__img"></span>
                                                                     <div id="ask_confirm_title_amount"
                                                                          class="popup-artifact__title popup-artifact__left"></div>
-                                                                    <div><img src="images/tbl-shp_item-icon.gif"
+                                                                    <div><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}"
                                                                               width="11" height="10"
                                                                               class="tbl-shp_item-ico" alt=""> <span
                                                                             id="ask_confirm_type_amount"></span></div>
-                                                                    <div><img src="images/tbl-shp_level-icon.gif"
+                                                                    <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}"
                                                                               width="11" height="10"
                                                                               class="tbl-shp_item-ico" alt=""> Уровень
                                                                         <span id="ask_confirm_level_amount"></span>
@@ -657,11 +657,11 @@
                                                                     <div id="ask_confirm_title_sell"
                                                                          class="popup-artifact__title popup-artifact__left"
                                                                          style="color: rgb(255, 0, 0);"></div>
-                                                                    <div><img src="images/tbl-shp_item-icon.gif"
+                                                                    <div><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}"
                                                                               width="11" height="10"
                                                                               class="tbl-shp_item-ico" alt=""> <span
                                                                             id="ask_confirm_type_sell"></span></div>
-                                                                    <div><img src="images/tbl-shp_level-icon.gif"
+                                                                    <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}"
                                                                               width="11" height="10"
                                                                               class="tbl-shp_item-ico" alt=""> Рівень
                                                                         <span id="ask_confirm_level_sell">0</span></div>
@@ -909,15 +909,13 @@
                                                                 <span id="art" class="popup-artifact__img"></span>
                                                                 <div id="ask_confirm_title"
                                                                      class="popup-artifact__title popup-artifact__left"></div>
-                                                                <div><img src="images/tbl-shp_item-icon.gif" width="11"
+                                                                <div><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11"
                                                                           height="10" class="tbl-shp_item-ico" alt="">
                                                                     <span id="ask_confirm_type"></span></div>
-                                                                <div><img src="images/tbl-shp_level-icon.gif" width="11"
+                                                                <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}" width="11"
                                                                           height="10" class="tbl-shp_item-ico" alt="">
                                                                     Уровень <span id="ask_confirm_level"></span></div>
-                                                                <div id="sellAskDurability" style=""><img
-                                                                        src="images/tbl-shp_item-iznos.gif" width="11"
-                                                                        height="10" class="tbl-shp_item-ico" alt="">
+                                                                <div id="sellAskDurability" style="">
                                                                     Прочность <span
                                                                         id="ask_confirm_durability_amount"></span></div>
                                                                 <div id="price_container" style="display: none">Цена:
@@ -1611,6 +1609,43 @@
                                                         @endif
                                                     @endif
 
+                                                    @if($data->getGroup() === 'main' && $data->getTradeGoods()->count())
+                                                        <div id="bag_section_trade_goods" class="bag_section">
+                                                            <div align="center">
+                                                                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                                                                    <tbody>
+                                                                    <tr height="22">
+                                                                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
+                                                                        <td align="center" class="tbl-usi-hdr mbg">Торговые товары</td>
+                                                                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <br>
+                                                            <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable">
+                                                                @foreach($data->getTradeGoods() as $cargo)
+                                                                    <li class="item ui-sortable-handle" data-backpack-id="{{ $cargo->id }}" style="opacity: 1;">
+                                                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
+                                                                               style="float: left; margin: 1px; background: url('{{ asset($cargo->item->itemInfo->image) }}'); background-size: cover;">
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <td data-id="{{ $cargo->item->id }}" data-sid="{{ $cargo->item->share_item_id }}" data-type="{{ $cargo->item->itemInfo->type->value }}" data-equipped="0" data-count="{{ $cargo->count }}" data-name="{{ $cargo->item->itemInfo->name }}" data-image="{{ asset($cargo->item->itemInfo->image) }}" data-is-use="0" data-wearable="0" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
+                                                                                    &nbsp;
+                                                                                    @if($cargo->count > 1)
+                                                                                        <div class="bpdig">{{ $cargo->count }}</div>
+                                                                                    @endif
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                        <br>
+                                                    @endif
+
                                                     @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift' || $data->getGroup() === 'misc')
                                                         <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
                                                             @foreach($data->getBackpack() as $item)
@@ -2117,9 +2152,9 @@
                 } else if (_debuffTargetItemIds.indexOf(parseInt(id, 10)) !== -1) {
                     openDebuffTargetDialog(id);
                 } else if (_renameItemIds.indexOf(parseInt(id, 10)) !== -1) {
-                    try { parent.openRenameModal?.(id); } catch (e) { window.top.openRenameModal?.(id); }
+                    window.top.openRenameModal?.(id);
                 } else if (_changeRaceItemIds.indexOf(parseInt(id, 10)) !== -1) {
-                    try { parent.openRaceChangeModal?.(id); } catch (e) { window.top.openRaceChangeModal?.(id); }
+                    window.top.openRaceChangeModal?.(id);
                 } else {
                     useItemAjax(id);
                 }

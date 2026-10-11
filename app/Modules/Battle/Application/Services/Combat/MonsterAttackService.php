@@ -18,7 +18,7 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 
 readonly class MonsterAttackService
 {
@@ -66,7 +66,63 @@ readonly class MonsterAttackService
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
 
+        $this->applyPassive($monster, $locationMonster, $hit, $result);
+
         $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
+    }
+
+    /**
+     * Встроенная пассивка монстра (monsters.passive_type/passive_value) —
+     * зеркало ShareItem::innate_passive_type/innate_passive_value (пассивка
+     * оружия без руны, см. PlayerRunePassiveService) и игровых
+     * CombatPassiveType в целом (AttackService::applyOffensiveRunePassives).
+     * Одна универсальная пара колонок на любой будущий CombatPassiveType —
+     * новая пассивка монстра добавляется новым case здесь, БЕЗ новой
+     * колонки/миграции.
+     *
+     * Сейчас обработан только VAMPIRISM («Кровавый Голод»): действует от
+     * каждого удара без своего шанса срабатывания, раз passive_value у
+     * монстра задаёт саму величину хила, а не вероятность (в отличие от
+     * рун, где есть отдельный rune-шанс на срабатывание).
+     */
+    private function applyPassive(
+        Monster $monster,
+        MonsterOnLocation $locationMonster,
+        FightHitDTO $hit,
+        AttackResultDTO $result,
+    ): void {
+        if ($monster->passive_type === null || ($monster->passive_value ?? 0) <= 0) {
+            return;
+        }
+
+        match ($monster->passive_type) {
+            CombatPassiveType::VAMPIRISM => $this->applyVampirism($monster, $locationMonster, $hit, $result),
+            default => null, // остальные CombatPassiveType ещё не реализованы для монстров
+        };
+    }
+
+    private function applyVampirism(
+        Monster $monster,
+        MonsterOnLocation $locationMonster,
+        FightHitDTO $hit,
+        AttackResultDTO $result,
+    ): void {
+        if ($hit->getDamage() <= 0 || $locationMonster->hp_now <= 0) {
+            return;
+        }
+
+        $heal = max(1, (int) round($hit->getDamage() * $monster->passive_value / 100));
+        $before = $locationMonster->hp_now;
+        $locationMonster->hp_now = min($locationMonster->hp_max, $locationMonster->hp_now + $heal);
+        $actualHeal = $locationMonster->hp_now - $before;
+
+        if ($actualHeal > 0) {
+            $result->log(sprintf(
+                '<p><b class="color-debuff">🩸 Кровавый Голод восстанавливает %s %d HP!</b></p>',
+                $monster->name,
+                $actualHeal,
+            ));
+        }
     }
 
     /**
@@ -84,7 +140,7 @@ readonly class MonsterAttackService
             return;
         }
 
-        $shield = $this->runePassiveService->totalValue($passives, RunePassiveType::SHIELD);
+        $shield = $this->runePassiveService->totalValue($passives, CombatPassiveType::SHIELD);
         if ($shield > 0 && $this->random->chance($shield)) {
             $hit->setDamage(0);
 
@@ -93,7 +149,7 @@ readonly class MonsterAttackService
             return;
         }
 
-        $reflect = $this->runePassiveService->totalValue($passives, RunePassiveType::REFLECT);
+        $reflect = $this->runePassiveService->totalValue($passives, CombatPassiveType::REFLECT);
         if ($reflect > 0 && $hit->getDamage() > 0) {
             $reflectedDamage = max(1, (int) round($hit->getDamage() * $reflect / 100));
             $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflectedDamage);
@@ -306,6 +362,8 @@ readonly class MonsterAttackService
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
 
+        $this->applyPassive($monster, $locationMonster, $hit, $result);
+
         $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
     }
 
@@ -401,6 +459,8 @@ readonly class MonsterAttackService
         if (! $isMagic) {
             $this->applyShieldBlockReflect($player, $hit, $locationMonster, $result);
         }
+
+        $this->applyPassive($monster, $locationMonster, $hit, $result);
 
         $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
 

@@ -316,13 +316,6 @@
                                                 <small class="text-muted">Для типов вне белого списка (potion/eat/scroll/artifact/chest/gift) — например «Разное».</small>
                                             </div>
                                             <div class="form-group">
-                                                <label class="col-form-label">Является отмычкой</label>
-                                                <select class="form-control" name="is_lockpick">
-                                                    <option value="0" @selected(!$item->is_lockpick)>Нет</option>
-                                                    <option value="1" @selected($item->is_lockpick)>Да</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="col-form-label">Тир отмычки</label>
                                                 <input type="number" min="1" max="6" class="form-control" name="lockpick_tier" value="{{ old('lockpick_tier', $item->lockpickConfig?->tier ?? 1) }}">
                                             </div>
@@ -496,7 +489,7 @@
                                                     <label class="col-form-label">Тип пассивки</label>
                                                     <select class="form-control" name="innate_passive_type">
                                                         <option value="">— нет —</option>
-                                                        @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType::cases() as $passiveType)
+                                                        @foreach(\App\Modules\Share\Domain\Enums\CombatPassiveType::cases() as $passiveType)
                                                             <option value="{{ $passiveType->value }}"
                                                                 @selected(old('innate_passive_type', $item->innate_passive_type?->value) === $passiveType->value)>
                                                                 {{ $passiveType->label() }}
@@ -515,7 +508,7 @@
                                             </div>
                                             <div class="col-lg-5">
                                                 <label class="col-form-label">Все типы пассивок</label>
-                                                @foreach(\App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType::cases() as $passiveType)
+                                                @foreach(\App\Modules\Share\Domain\Enums\CombatPassiveType::cases() as $passiveType)
                                                     <div class="mb-1">
                                                         <strong>{{ $passiveType->label() }}</strong>
                                                         <span class="text-muted small"> — {{ $passiveType->description(0) }}</span>

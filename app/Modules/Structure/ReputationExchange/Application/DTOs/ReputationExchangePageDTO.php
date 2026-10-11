@@ -14,5 +14,7 @@ final readonly class ReputationExchangePageDTO
         public string $reputationName,
         public int $currentPoints,
         public array $items,
+        public float|int $progressPercent = 0,
+        public string $progressTitle = '',
     ) {}
 }

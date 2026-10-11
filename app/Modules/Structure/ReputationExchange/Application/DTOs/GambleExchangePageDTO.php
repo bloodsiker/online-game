@@ -15,5 +15,7 @@ final readonly class GambleExchangePageDTO
         public int $currentPoints,
         public array $resources,
         public ?string $offeringCooldown,
+        public float|int $progressPercent = 0,
+        public string $progressTitle = '',
     ) {}
 }

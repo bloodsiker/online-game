@@ -5,7 +5,7 @@ namespace App\Modules\Battle\Application\Services\Battle;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Repositories\MonsterOnLocationRepository;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use Illuminate\Support\Collection;
 
 readonly class MonsterSpawner

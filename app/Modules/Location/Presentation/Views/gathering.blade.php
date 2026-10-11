@@ -253,7 +253,26 @@
         updateProgressModal(progress * 100); if (progress < 1) { window.requestAnimationFrame(updateProgress); return; } if (!state.completing) completeGathering();
     }
     function completeGathering() {
-        state.completing = true; request(urls.complete, 'POST').then(function (data) { state.attempt = null; state.completing = false; state.lastResult = data.ok ? null : data.message; if (!data.ok) { showProgressModalError(data.message); renderSelection(); setLog(data.message, 'is-error'); return refreshState(); } closeProgressModal(); if (data.reward) addRewardToInventory(data.reward); (data.bonusRewards || []).forEach(addRewardToInventory); setLog(data.message); renderSelection(); renderBag(); return refreshState(); }).catch(function (error) { state.completing = false; state.lastResult = error.message || 'Не удалось завершить добычу.'; showProgressModalError(state.lastResult); renderSelection(); setLog(state.lastResult, 'is-error'); refreshState(); });
+        state.completing = true;
+        request(urls.complete, 'POST').then(function (data) {
+            state.attempt = null;
+            state.completing = false;
+            state.lastResult = data.ok ? null : data.message;
+            if (!data.ok) {
+                showProgressModalError(data.message); renderSelection(); setLog(data.message, 'is-error');
+                return refreshState();
+            }
+            closeProgressModal();
+            try { window.top.GameAudio?.event('gathering'); } catch (error) {}
+            if (data.reward) addRewardToInventory(data.reward);
+            (data.bonusRewards || []).forEach(addRewardToInventory);
+            setLog(data.message); renderSelection(); renderBag();
+            return refreshState();
+        }).catch(function (error) {
+            state.completing = false;
+            state.lastResult = error.message || 'Не удалось завершить добычу.';
+            showProgressModalError(state.lastResult); renderSelection(); setLog(state.lastResult, 'is-error'); refreshState();
+        });
     }
     function cancelGathering() {
         if (!state.attempt || state.completing) return;

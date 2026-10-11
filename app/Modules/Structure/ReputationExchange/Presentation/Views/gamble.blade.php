@@ -41,7 +41,25 @@
         .pointer, .pointer input { cursor: pointer; }
         .gamble-resource-row { cursor: pointer; }
         .gamble-options { display: none; }
-        .gamble-options.open { display: table-row; }
+        .gamble-modal {
+            width: 600px;
+            max-width: calc(100vw - 24px);
+            max-height: calc(100vh - 24px);
+            margin: auto;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #461c0b;
+        }
+        .gamble-modal::backdrop { background: rgba(0, 0, 0, .45); }
+        .gamble-modal .popup_global_container { width: 100%; }
+        .gamble-modal .popup_global_content {
+            padding: 10px 18px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            text-align: center;
+        }
+        .gamble-modal__actions { margin: 10px 0 4px; }
 
         .gamble-option {
             position: relative;
@@ -118,6 +136,7 @@
         .gamble-option__row { padding: 1px 4px; color: #5c4433; }
         .gamble-option__footer { margin-top: 8px; }
     </style>
+    @include('reputation_exchange::_compact-progress-styles')
     {!! $itemTooltipScript !!}
     <script>
         window.gebi = window.gebi || function (id) { return document.getElementById(id); };
@@ -171,6 +190,7 @@
                     <td align="left" width="50%" nowrap="">
                         <b>Репутация «{{ $page->reputationName }}»:</b>
                         <b class="redd">{{ number_format($page->currentPoints, 0, '', ' ') }}</b>
+                        @include('reputation_exchange::_compact-progress')
                     </td>
                 </tr>
                 </tbody>
@@ -191,7 +211,7 @@
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
                 @foreach($page->resources as $resource)
-                    <tr class="gamble-resource-row" onclick="toggleGambleOptions({{ $resource->shareItemId }})">
+                    <tr class="gamble-resource-row" data-resource-name="{{ $resource->name }}" onclick="openGambleOptions({{ $resource->shareItemId }})">
                         <td colspan="3">
                             <table class="coll w100 p10h p6v brd2-all">
                                 <tbody>
@@ -201,7 +221,7 @@
                                             <img src="{{ asset($resource->image) }}" class="relic-img" alt="{{ $resource->name }}"
                                                  data-id="{{ $resource->shareItemId }}"
                                                  onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
-                                                 onclick="event.stopPropagation(); window.open('{{ route('items.info.share', ['id' => $resource->shareItemId]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                                 onclick="event.stopPropagation(); openGambleOptions({{ $resource->shareItemId }}); return false;">
                                         </div>
                                     </td>
                                     <td>
@@ -220,6 +240,7 @@
                     </tr>
                     <tr id="gamble-options-{{ $resource->shareItemId }}" class="gamble-options">
                         <td colspan="3" style="padding: 4px 10px 10px;">
+                            <div class="gamble-options-content">
                             @foreach($resource->options as $option)
                                 @php
                                     $chanceClass = $option->successChance >= 80 ? 'high' : ($option->successChance >= 40 ? 'mid' : 'low');
@@ -244,6 +265,7 @@
                                     </div>
                                 </form>
                             @endforeach
+                            </div>
                         </td>
                     </tr>
                 @endforeach
@@ -260,13 +282,66 @@
     </tbody>
 </table>
 
+<dialog id="gamble-modal" class="gamble-modal" aria-labelledby="gamble-modal-title">
+    <div class="popup_global_container">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div id="gamble-modal-title" class="popup_global_title">Варианты сдачи</div>
+                </div>
+            </div>
+            <button type="button" class="popup_global_close_btn" aria-label="Закрыть" onclick="closeGambleOptions()" style="border:0;padding:0;"></button>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content">
+                    <div id="gamble-modal-options"></div>
+                    <div class="gamble-modal__actions">
+                        <span class="butt1 pointer"><span><input type="button" value="Закрыть" onclick="closeGambleOptions()"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom"><div class="popup-bottom-center"></div></div>
+        </div>
+    </div>
+</dialog>
+
 <script>
-    function toggleGambleOptions(shareItemId) {
-        const row = document.getElementById('gamble-options-' + shareItemId);
-        if (row) {
-            row.classList.toggle('open');
-        }
+    const gambleModal = document.getElementById('gamble-modal');
+    let gambleOptionsOrigin = null;
+
+    function restoreGambleOptions() {
+        const content = document.getElementById('gamble-modal-options').firstElementChild;
+        if (content && gambleOptionsOrigin) gambleOptionsOrigin.appendChild(content);
+        gambleOptionsOrigin = null;
     }
+
+    function openGambleOptions(shareItemId) {
+        const row = document.getElementById('gamble-options-' + shareItemId);
+        if (!row) return;
+        restoreGambleOptions();
+        const content = row.querySelector('.gamble-options-content');
+        if (!content) return;
+        gambleOptionsOrigin = content.parentElement;
+        document.getElementById('gamble-modal-options').appendChild(content);
+        document.getElementById('gamble-modal-title').textContent = row.previousElementSibling.dataset.resourceName;
+        const tooltip = document.getElementById('artifact_alt');
+        if (tooltip) tooltip.style.display = 'none';
+        if (!gambleModal.open) gambleModal.showModal();
+    }
+
+    function closeGambleOptions() {
+        gambleModal.close();
+    }
+
+    gambleModal.addEventListener('close', restoreGambleOptions);
+    gambleModal.addEventListener('click', function (event) {
+        if (event.target !== gambleModal) return;
+        const bounds = gambleModal.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeGambleOptions();
+    });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

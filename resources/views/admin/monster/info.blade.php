@@ -168,6 +168,23 @@
                                                 <input type="number" class="form-control" name="aggression" value="{{ $monster->aggression }}">
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Встроенная пассивка</label>
+                                                <select class="form-control" name="passive_type">
+                                                    <option value="">— нет —</option>
+                                                    @foreach(\App\Modules\Share\Domain\Enums\CombatPassiveType::cases() as $passiveType)
+                                                        <option value="{{ $passiveType->value }}"
+                                                            @selected(old('passive_type', $monster->passive_type?->value) === $passiveType->value)>
+                                                            {{ $passiveType->label() }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label">Значение пассивки, %</label>
+                                                <input type="number" min="1" max="255" class="form-control" name="passive_value" value="{{ old('passive_value', $monster->passive_value) }}">
+                                                <small class="form-text text-muted">Например, для «Вампиризм» — % от нанесённого удара, который монстр восстанавливает себе как HP.</small>
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Опыт</label>
                                                 <input type="number" class="form-control" name="exp" value="{{ $monster->exp }}">
                                             </div>
@@ -210,6 +227,7 @@
                                                 <th width="45"></th>
                                                 <th>Название</th>
                                                 <th width="100">Шанс (%)</th>
+                                                <th width="110" title="Один дроп в среднем на указанное количество монстров">В среднем</th>
                                                 <th width="140">Кол-во (мин – макс)</th>
                                                 <th width="100">Цена</th>
                                                 <th width="120"></th>
@@ -225,6 +243,7 @@
                                                         <input form="drop-update-{{ $item->id }}" type="number" step="0.001" min="0" max="100"
                                                                class="form-control form-control-sm" name="drop_chance" value="{{ $item->pivot->drop_chance }}">
                                                     </td>
+                                                    <td>@include('admin.monster._drop_frequency', ['chance' => $item->pivot->drop_chance])</td>
                                                     <td>
                                                         <div class="d-flex" style="gap:4px;">
                                                             <input form="drop-update-{{ $item->id }}" type="number" min="1"
@@ -242,7 +261,7 @@
                                                     </td>
                                                 </tr>
                                             @empty
-                                                <tr><td colspan="7" class="text-center text-muted">Нет предметов</td></tr>
+                                                <tr><td colspan="8" class="text-center text-muted">Нет предметов</td></tr>
                                             @endforelse
                                             </tbody>
                                         </table>

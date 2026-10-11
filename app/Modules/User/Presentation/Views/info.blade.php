@@ -121,7 +121,7 @@
     </script>
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
     <script src="{{ asset('js/injury_timer.js') }}?v={{ filemtime(public_path('js/injury_timer.js')) }}" defer></script>
-    <link rel="stylesheet" href="{{ asset('css/injury.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/injury.css') }}?v={{ filemtime(public_path('css/injury.css')) }}">
 </head>
 <body class="bg2 regcolor" topmargin="0" leftmargin="0">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
@@ -635,18 +635,7 @@
                                                     <col>
                                                 </colgroup>
                                                 <tbody>
-                                                <tr class="bg_l">
-                                                    <td class="brd2-top brd2-bt b" nowrap>Имя:</td>
-                                                    <td class="brd2-top brd2-bt b redd">{{ $user->name }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="brd2-top brd2-bt b" nowrap>В игре</td>
-                                                    <td class="brd2-top brd2-bt b redd">{{ $age }}</td>
-                                                </tr>
-                                                <tr class="bg_l">
-                                                    <td class="brd2-top brd2-bt b" nowrap>Инфо:</td>
-                                                    <td class="brd2-top brd2-bt b redd">&nbsp;</td>
-                                                </tr>
+                                                @include('user::partials.personal-info', ['profile' => $user->profile, 'nickname' => $user->name, 'age' => $age])
                                                 </tbody>
                                             </table>
                                         </td>

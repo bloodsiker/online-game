@@ -12,5 +12,6 @@ final readonly class RatingMenuItemDTO
         public string $name,
         public bool $isActive,
         public bool $isSkill,
+        public ?string $skillGroup,
     ) {}
 }

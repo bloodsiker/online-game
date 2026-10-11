@@ -35,7 +35,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemUseLimit;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
-use App\Modules\Structure\Blacksmith\Domain\Enums\RunePassiveType;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Services\Media\AdminImageStorage;
@@ -660,7 +660,6 @@ class ItemController extends Controller
         $item->is_weight = (bool) $request->input('is_weight', true);
         $item->is_slot_usable = (bool) $request->input('is_slot_usable', false);
         $item->is_use = (bool) $request->input('is_use', false);
-        $item->is_lockpick = (bool) $request->input('is_lockpick', false);
         if ($request->filled('instant_reward_type')) {
             // Мгновенная награда существует только как шаблон для добычи.
             $item->is_sell = false;
@@ -717,7 +716,7 @@ class ItemController extends Controller
         // Встроенная пассивка (оружие/щит)
         if (in_array($type, [ShareItemType::WEAPON, ShareItemType::SHIELD], true)) {
             $raw = $request->input('innate_passive_type');
-            $item->innate_passive_type = $raw ? RunePassiveType::from($raw) : null;
+            $item->innate_passive_type = $raw ? CombatPassiveType::from($raw) : null;
             $item->innate_passive_value = $item->innate_passive_type !== null && $request->filled('innate_passive_value')
                 ? (int) $request->input('innate_passive_value')
                 : null;
@@ -768,7 +767,7 @@ class ItemController extends Controller
 
     private function syncLockpickConfig(ShareItem $item, Request $request): void
     {
-        if (! $item->is_lockpick) {
+        if ($item->type !== ShareItemType::LOCKPICK) {
             $item->lockpickConfig()->delete();
 
             return;

@@ -4125,7 +4125,7 @@
                     <div id="l395" class="s2box bt bb">
                         <s id="z395">0</s>395
                         <a name="395"></a>
-                        <a href="?m=MjA#100" class="awest">←</a>
+                        <a href="{{ map_transition_url('6BJcCXXPZR', 1630) }}" class="awest">←</a>
                     </div>
                 </div>
             </div>
@@ -4404,19 +4404,19 @@
         border-spacing: 0px;
     }
     .a3 {
-        background-color: rgba(233, 233, 233, 0.6);
+        background-color: rgba(235, 224, 184, 0.6);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;
     }
     .a4 {
-        background-color: rgba(245, 215, 180, 0.6);
+        background-color: rgba(232, 198, 176, 0.6);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;
     }
     .a5 {
-        background-color: rgba(206, 209, 253, 0.6);
+        background-color: rgba(210, 210, 225, 0.5);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;

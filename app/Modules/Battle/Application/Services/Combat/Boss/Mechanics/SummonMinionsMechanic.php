@@ -8,7 +8,7 @@ use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossMechanic;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
-use App\Repositories\MonsterOnLocationRepository;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use Illuminate\Support\Collection;
 
 /**

@@ -92,6 +92,7 @@
         .skill_list td { padding: 0 7px; }
         .red, .red * { color: #d00000; }
     </style>
+    @include('reputation_exchange::_compact-progress-styles')
     {!! $itemTooltipScript !!}
     <script>
         window.gebi = window.gebi || function (id) { return document.getElementById(id); };
@@ -145,6 +146,7 @@
                     <td align="left" width="50%" nowrap="">
                         <b>Репутация «{{ $page->reputationName }}»:</b>
                         <b class="redd">{{ number_format($page->currentPoints, 0, '', ' ') }}</b>
+                        @include('reputation_exchange::_compact-progress')
                     </td>
                 </tr>
                 </tbody>

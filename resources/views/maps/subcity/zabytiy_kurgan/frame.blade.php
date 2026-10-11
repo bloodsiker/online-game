@@ -1398,7 +1398,7 @@
 <style>
     .a883 {
         /*background-color: rgba(255, 247, 205, 0.6);*/
-        background-color: rgba(200, 200, 200, 0.4);
+        background-color: rgba(205, 210, 190, 0.5);
         margin: 0px;
         padding: 0px;
         border-spacing: 0px;

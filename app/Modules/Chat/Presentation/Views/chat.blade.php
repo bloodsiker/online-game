@@ -66,6 +66,7 @@
         .msg-time-reply   { cursor: pointer; text-decoration: underline dotted #999; color: #ff0000; }
         .msg-time-reply:hover { opacity: 0.75; }
         .chat-to          { color: #996600; font-weight: bold; }
+        .chat-to .chat-to-recipient { color: inherit; font-weight: inherit; }
         .chat-item        { color: #006699; font-weight: bold; cursor: pointer; text-decoration: underline; }
         .chat-item:hover  { text-decoration: underline; }
         .chat-item-unknown{ color: #999; }
@@ -73,6 +74,7 @@
         .chat-user:hover  { color: #990000; }
         .player-link      { color: #990000; font-weight: bold; }
         .player-link:hover { text-decoration: underline; }
+        a.player-link.prv-name { color: #ff0000; }
         .chat-clan-icon   { vertical-align: middle; margin-right: 3px; }
         .chat-level       { color: #666; font-weight: normal; }
 
@@ -233,10 +235,9 @@
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
                                 <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
                             @endif
-                            <span class="prv-name">{{ $msg->sender_name }}</span>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
+                            <a href="#" class="player-link n prv-name" data-uid="{{ $msg->sender_id }}" data-name="{{ $msg->sender_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
                             <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
-                            »
-                            <span class="prv-name">{{ $msg->target_name ?? '?' }}</span> {!! $msg->content !!}
+                            <span class="chat-private-recipient">» @if($msg->target_user_id && $msg->target_name)<a href="#" class="player-link n prv-name" data-uid="{{ $msg->target_user_id }}" data-name="{{ $msg->target_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->target_name }}</a>@else<span class="prv-name">{{ $msg->target_name ?? '?' }}</span>@endif</span> {!! $msg->content !!}
 
                         @else
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
@@ -489,11 +490,14 @@
             html += msg.content;
         } else if (msg.type === 'private') {
             html += clanIconHtml(msg)
-                  + '<span class="prv-name">' + escapeHtml(msg.sender_name) + '</span>'
+                  + '<a href="#" class="player-link n prv-name" data-uid="' + Number(msg.sender_id) + '" data-name="' + safeAttr(msg.sender_name) + '" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">' + escapeHtml(msg.sender_name) + '</a>'
                   + levelHtml(msg)
                   + ' ' + playerInfoIconHtml(msg.sender_id)
-                  + ' » '
-                  + '<span class="prv-name">' + escapeHtml(msg.target_name || '?') + '</span>'
+                  + '<span class="chat-private-recipient">» '
+                  + (msg.target_user_id && msg.target_name
+                      ? '<a href="#" class="player-link n prv-name" data-uid="' + Number(msg.target_user_id) + '" data-name="' + safeAttr(msg.target_name) + '" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">' + escapeHtml(msg.target_name) + '</a>'
+                      : '<span class="prv-name">' + escapeHtml(msg.target_name || '?') + '</span>')
+                  + '</span>'
                   + '&nbsp;' +msg.content;
         } else {
             html += clanIconHtml(msg)
@@ -653,6 +657,14 @@
                 insertSorted(content, buildDiv(msg), msg.id);
                 domIds[msg.id] = true;
                 added = true;
+                try {
+                    window.top.GameAudio?.message({
+                        message_id: msg.id, type: msg.type, channel: msg.channel,
+                        sender_user_id: msg.sender_id,
+                        target_user_id: msg.target_user_id,
+                        target_name: msg.target_name,
+                    });
+                } catch (error) {}
             }
             if (msg.id > lastMessageId) lastMessageId = msg.id;
         });
@@ -772,6 +784,7 @@
         }
 
         realtimeInitialized = true;
+        try { window.top.GameAudio?.watchChat(echo, realtime, @json(array_map('intval', $ignoredUserIds))); } catch (error) {}
         realtimePersonalChannel = echo.private('App.Models.User.' + realtime.userId)
             .listen('.chat.message.created', handleRealtimeMessage)
             .listen('.chat.message.expired', handleRealtimeExpiration)

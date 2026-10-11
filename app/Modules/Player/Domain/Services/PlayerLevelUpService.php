@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
-use App\Models\Experience;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Closure;
 use Illuminate\Support\Facades\DB;

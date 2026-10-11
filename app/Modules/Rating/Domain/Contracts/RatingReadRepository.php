@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Rating\Domain\Contracts;
 
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,7 +27,19 @@ interface RatingReadRepository
 
     public function paginateReputationRating(int $perPage): LengthAwarePaginator;
 
-    public function paginateInfluenceRating(int $perPage): LengthAwarePaginator;
+    /**
+     * @return Collection<int, Monster>
+     */
+    public function getDefeatedBosses(): Collection;
+
+    public function paginateBossDefeatRating(int $monsterId, int $perPage): LengthAwarePaginator;
+
+    /**
+     * @return Collection<int, Map>
+     */
+    public function getInfluenceMaps(): Collection;
+
+    public function paginateMapInfluenceRating(int $mapId, int $perPage): LengthAwarePaginator;
 
     public function paginateSkillRating(int $skillId, int $perPage): LengthAwarePaginator;
 
@@ -39,7 +53,9 @@ interface RatingReadRepository
 
     public function findReputationRatingPosition(string $nick): ?int;
 
-    public function findInfluenceRatingPosition(string $nick): ?int;
+    public function findBossDefeatRatingPosition(int $monsterId, string $nick): ?int;
+
+    public function findMapInfluenceRatingPosition(int $mapId, string $nick): ?int;
 
     public function findSkillRatingPosition(int $skillId, string $nick): ?int;
 }

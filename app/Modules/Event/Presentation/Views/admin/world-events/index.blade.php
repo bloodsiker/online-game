@@ -44,12 +44,21 @@
         </div>
     </form>
     <div class="table-responsive"><table class="table table-bordered table-hover">
-        <thead><tr><th>ID</th><th>Событие</th><th>Карта / влияние</th><th>Цель</th><th>Общий / личный лимит</th><th>Следующий запуск</th><th>Состояние</th><th></th></tr></thead>
+        <thead><tr><th>ID</th><th>Картинка</th><th>Событие</th><th>Карта / влияние</th><th>Цель</th><th>Общий / личный лимит</th><th>Следующий запуск</th><th>Состояние</th><th></th></tr></thead>
         <tbody>
         @forelse($events as $event)
             @php($stage = $event->activeRun?->currentStage ?? $event->stages->first())
             <tr class="{{ $event->is_active ? '' : 'text-muted' }}">
                 <td>{{ $event->id }}</td>
+                <td class="text-center">
+                    @if($event->image)
+                        <a href="{{ route('admin.event.world-events.edit', $event) }}" title="Изменить событие">
+                            <img src="{{ $event->image }}" alt="{{ $event->title }}" loading="lazy" style="width:80px;height:80px;object-fit:contain;">
+                        </a>
+                    @else
+                        <span class="text-muted">—</span>
+                    @endif
+                </td>
                 <td><a href="{{ route('admin.event.world-events.edit', $event) }}"><b>{{ $event->title }}</b></a><br><small>{{ $event->locations->isEmpty() ? 'Все локации карты' : $event->locations->count().' локаций' }}</small></td>
                 <td>{{ $event->map?->name }}<br><small>Влияние: {{ $event->influenceMap?->name ?? $event->map?->name }}</small></td><td>{{ $event->stages->count() }} этап(а)<br><small>{{ $stage?->title }}: {{ $stage?->objective_type?->label() }} — {{ $stage?->targets?->map(fn($target) => $target->item?->name ?? $target->monster?->name)->filter()->join(', ') }}</small></td>
                 <td>{{ $stage?->global_limit }} / {{ $stage?->player_limit }}</td>
@@ -65,7 +74,7 @@
                     <form class="d-inline" method="post" action="{{ route('admin.event.world-events.destroy', $event) }}" onsubmit="return confirm('Удалить событие?')">@csrf @method('DELETE')<button class="btn btn-xs btn-danger">Удалить</button></form>
                 </td>
             </tr>
-        @empty<tr><td colspan="8" class="text-center text-muted">События ещё не созданы.</td></tr>@endforelse
+        @empty<tr><td colspan="9" class="text-center text-muted">События ещё не созданы.</td></tr>@endforelse
         </tbody>
     </table></div>
 </div></section>

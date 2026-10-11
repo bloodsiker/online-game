@@ -69,12 +69,16 @@
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Локация возрождения</label>
-                                                <select name="resp_location_id" class="form-control" required>
-                                                    @foreach($locations->sortBy('name') as $location)
-                                                        <option value="{{ $location->id }}" @selected((int) old('resp_location_id', $map->resp_location_id) === $location->id)>
-                                                            [{{ $location->id }}] {{ $location->name }}
+                                                @php
+                                                    $selectedRespLocationId = (int) old('resp_location_id', $map->resp_location_id);
+                                                    $selectedRespLocation = \App\Modules\Location\Infrastructure\Persistence\Models\Location::with('map:id,name')->find($selectedRespLocationId);
+                                                @endphp
+                                                <select name="resp_location_id" id="resp-location-select" class="form-control" required>
+                                                    @if($selectedRespLocation)
+                                                        <option value="{{ $selectedRespLocation->id }}" selected>
+                                                            [{{ $selectedRespLocation->id }}] {{ $selectedRespLocation->name }}{{ $selectedRespLocation->map ? " ({$selectedRespLocation->map->name})" : '' }}
                                                         </option>
-                                                    @endforeach
+                                                    @endif
                                                 </select>
                                                 <small class="form-text text-muted">После обычной смерти игрок перемещается в эту локацию.</small>
                                             </div>
@@ -92,7 +96,7 @@
                                                 @if($map->gathering_field_image)
                                                     <div class="mb-1">
                                                         <img src="{{ $map->gathering_field_image }}" alt=""
-                                                             style="width:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
+                                                             style="width:400px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
                                                         <small class="text-muted d-block">{{ $map->gathering_field_image }}</small>
                                                     </div>
                                                 @endif
@@ -265,6 +269,23 @@
         dropdownParent: $('#modalAddLocation'),
         placeholder: 'Выберите локацию',
         allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.locations') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    $('#resp-location-select').select2({
+        theme: 'bootstrap',
+        placeholder: 'Выберите локацию',
         ajax: {
             url: '{{ route('admin.api.locations') }}',
             dataType: 'json',

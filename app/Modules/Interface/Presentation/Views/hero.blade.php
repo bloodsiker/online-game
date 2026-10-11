@@ -454,15 +454,24 @@
                 existing.name = effect.name;
                 existing.image = effect.image ?? null;
                 existing.description = effect.description ?? null;
-                existing.total = effect.total_duration > 0 ? effect.total_duration * 1000 : durationMs;
+
+                const newTotal = effect.total_duration > 0 ? effect.total_duration * 1000 : durationMs;
 
                 // Heartbeat присылает оставшееся, а не исходное время эффекта.
                 // Не сбрасываем кольцо к 100% на каждом обновлении: продлеваем
-                // клиентский таймер только если сервер действительно обновил эффект.
+                // клиентский таймер только если сервер действительно обновил эффект
+                // (duration выросло). total — знаменатель процента заполнения кольца —
+                // по той же причине может только расти, никогда не уменьшаться:
+                // иначе временная просадка total (напр. applied_at сервера сдвинулся
+                // вперёд без полного обновления expires_at) выглядит как кольцо,
+                // которое само по себе заново "запустилось" с начала.
                 const localRemainingMs = Math.max(0, existing.endTime - Date.now());
                 if (durationMs > localRemainingMs + 1500) {
                     existing.endTime = Date.now() + durationMs;
                     existing.duration = durationMs;
+                    existing.total = newTotal;
+                } else if (newTotal > existing.total) {
+                    existing.total = newTotal;
                 }
 
                 const element = document.querySelector(`[data-effect-id="${effect.id}"]`);

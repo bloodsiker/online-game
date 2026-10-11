@@ -386,6 +386,7 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
 /*******   HOT SLOT  ***********/
 .hotbar-container {
     position: absolute;
+    min-height: 44px;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
@@ -598,14 +599,13 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
     justify-content: center;
     color: rgba(255, 255, 255, 0.6);
     font-size: 12px;
-    transition: all 0.2s;
+    transition: background-color 0.2s, color 0.2s;
     user-select: none;
 }
 
 .hotbar-toggle:hover {
     background: rgba(233, 169, 108, 0.9);
     color: rgba(255, 255, 255, 0.8);
-    width: 15px;
 }
 
 /* Свернутое состояние */
@@ -614,22 +614,15 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
 }
 
 .hotbar-container.collapsed {
-    width: auto;
-    padding: 8px 12px;
+    width: 40px;
 }
 
 .hotbar-container.collapsed .hotbar-toggle {
-    position: relative;
-    right: 0;
-    transform: none;
-    width: 25px;
-    height: 25px;
+    right: 50%;
+    transform: translate(50%, -50%);
+    width: 30px;
+    height: 30px;
     border-radius: 6px;
-    font-size: 12px;
-}
-
-.hotbar-container.collapsed .hotbar-drag-handle {
-    left: -12px;
 }
 
 .hotbar-collapsed-label {

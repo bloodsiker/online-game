@@ -14,6 +14,9 @@
             <nav id="menu" class="nav-main" role="navigation">
 
                 <ul class="nav nav-main">
+                    <li class="{{ request()->routeIs('admin.trade.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.trade.index') }}"><i class="bx bx-transfer"></i><span>Вольный торг</span></a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.dashboard') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">
                             <i class="bx bx-home-alt" aria-hidden="true"></i>

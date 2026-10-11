@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Console\Seeders\ItemsSeeder;
-use App\Models\Experience;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
@@ -18,6 +17,7 @@ use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
 use App\Modules\Player\Domain\Services\ExperienceCurve;
+use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;

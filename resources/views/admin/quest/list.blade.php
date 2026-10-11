@@ -10,6 +10,7 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
+                    @include('admin.quest._tabs')
                     <div class="mb-3">
                         <a href="{{ route('admin.quest.create') }}" class="btn btn-primary btn-sm">Создать квест</a>
                     </div>

@@ -12,8 +12,8 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Repositories\MonsterOnLocationRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 

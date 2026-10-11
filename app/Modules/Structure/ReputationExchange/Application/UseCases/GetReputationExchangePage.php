@@ -28,8 +28,9 @@ class GetReputationExchangePage
             throw new DomainException('Вы находитесь не в том месте для обмена.');
         }
 
-        $reputation = Reputation::where('npc_id', $structure->npc_id)->firstOrFail();
+        $reputation = Reputation::with('tiers')->where('npc_id', $structure->npc_id)->firstOrFail();
         $currentPoints = $this->reputationService->getOrCreate($user->player, $reputation)->points;
+        $progress = $this->reputationService->getProgress($reputation, (int) $currentPoints);
 
         $exchangeItems = ReputationExchange::with('shareItem')
             ->where('structure_id', $structureId)
@@ -63,6 +64,8 @@ class GetReputationExchangePage
             reputationName: (string) $reputation->name,
             currentPoints: $currentPoints,
             items: $items,
+            progressPercent: $progress['percent'],
+            progressTitle: $progress['title'],
         );
     }
 }

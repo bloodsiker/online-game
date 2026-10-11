@@ -7,7 +7,7 @@ namespace Tests\Feature\Modules\Battle;
 use App\Modules\Battle\Application\Services\Battle\BossRespawnService;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Repositories\MonsterOnLocationRepository;
+use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

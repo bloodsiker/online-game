@@ -14,7 +14,7 @@ final readonly class BroadcastMailboxUnreadState
 
     public function markUnread(User|int $user): void
     {
-        MailboxUnreadStateUpdated::dispatch($this->userId($user), true);
+        MailboxUnreadStateUpdated::dispatch(userId: $this->userId($user), hasUnread: true, newLetter: true);
     }
 
     public function sync(User $user): void

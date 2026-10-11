@@ -105,6 +105,7 @@ class LocationPageViewMapper
             || ($isTower && $dungeonSession->run?->status === DungeonRunStatus::COMPLETED);
 
         return new LocationDungeonSessionDTO(
+            sessionId: (int) $dungeonSession->id,
             name: (string) $dungeonSession->dungeon->name,
             isSurvival: $isSurvival,
             isTower: $isTower,

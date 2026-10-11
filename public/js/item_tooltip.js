@@ -1,4 +1,21 @@
+function hideItemTooltip() {
+    const tooltip = itemTooltipTopWindow().document.getElementById('artifact_alt');
+    if (tooltip) {
+        tooltip.style.display = 'none';
+        tooltip.removeAttribute('data-id');
+    }
+    document.onmousemove = null;
+}
+
+// The tooltip lives in the parent window and survives iframe navigation.
+// Keyboard navigation does not trigger mouseout on the hovered item.
+window.addEventListener('pagehide', hideItemTooltip);
+
 let showItemInfo = (obj, evnt, show) => {
+    if (show && itemTooltipTopWindow().gameSettings?.show_item_tooltips === false) {
+        hideItemTooltip();
+        return;
+    }
     // Сортировка в рюкзаке
     if (typeof(iam_sorting_now) !== 'undefined' && iam_sorting_now) {
         show = 0;
@@ -291,10 +308,10 @@ let renderItemInfo = (id) => {
     content += '</td><td>';
     content += '<div><img src="/img/icon/tbl-shp_item-icon.gif" width="11" height="10" align="absmiddle">&nbsp;' + a.kind + '</div>';
     if (a.dur && a.dur != undefined && !(a.nobreaks && a.nobreaks != undefined)) {
-        content += '<div><img src="/img/bg/item_info/tbl-shp_item-iznos.gif" width="11" height="10" align="absmiddle"> <span class="red">' + a.dur + '</span>/' + a.dur_max + '</div>';
+        content += '<div><span class="red">' + a.dur + '</span>/' + a.dur_max + '</div>';
     }
     if (a.nobreaks && a.nobreaks != undefined) {
-        content += '<div><img src="/img/bg/item_info/tbl-shp_item-iznos.gif" width="11" height="10" align="absmiddle"> <span class="red">' + a.nobreaks + '</span></div>';
+        content += '<div><span class="red">' + a.nobreaks + '</span></div>';
     }
     if (a.diamond && a.diamond != undefined && a.diamond.length > 0) {
         content += '<div class="b red">' + a.diamond + '</div>';

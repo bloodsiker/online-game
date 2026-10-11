@@ -286,9 +286,21 @@
                                     $monsterSkills = $page->monster->mechanics
                                         ->where('is_active', true)
                                         ->sortBy('priority');
+                                    // Встроенная пассивка (monsters.passive_type/passive_value, см.
+                                    // CombatPassiveType) — не из monster_effects/boss_mechanics, поэтому
+                                    // отдельная мини-коллекция из максимум одной записи.
+                                    $monsterPassives = $page->monster->passive_type !== null
+                                        ? collect([(object) [
+                                            'type' => $page->monster->passive_type,
+                                            'value' => $page->monster->passive_value,
+                                        ]])
+                                        : collect();
                                 @endphp
                                 @if($monsterEffects->isNotEmpty())
                                     @include('monster::info-partials.abilities', ['title' => 'Эффекты', 'abilities' => $monsterEffects, 'kind' => 'effect'])
+                                @endif
+                                @if($monsterPassives->isNotEmpty())
+                                    @include('monster::info-partials.abilities', ['title' => 'Пассивные способности', 'abilities' => $monsterPassives, 'kind' => 'passive'])
                                 @endif
                                 @if($monsterSkills->isNotEmpty())
                                     @include('monster::info-partials.abilities', ['title' => 'Умения', 'abilities' => $monsterSkills, 'kind' => 'skill'])

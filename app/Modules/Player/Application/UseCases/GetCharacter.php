@@ -58,6 +58,7 @@ class GetCharacter
             stats: $stats,
             skills: $skills,
             weaponDamage: $this->weaponDamageRange($player, $stats),
+            weaponDamageDebuff: $this->weaponDamageDebuffReduction($player, $stats),
         );
     }
 
@@ -95,6 +96,41 @@ class GetCharacter
             default => [
                 'min' => $stats->getLeftHandMinDmg(),
                 'max' => $stats->getLeftHandMaxDmg(),
+            ],
+        };
+    }
+
+    /**
+     * Та же логика выбора руки(рук), что и weaponDamageRange(), но суммирует
+     * StatSheet::getDebuffReduction() вместо самих значений — точная разница
+     * «на сколько единиц урон занижен активными дебаффами».
+     *
+     * @return array{min: int, max: int}
+     */
+    private function weaponDamageDebuffReduction(Player $player, StatSheet $stats): array
+    {
+        $equip = $player->playerEquip;
+        $left = $equip?->handLeft;
+        $right = $equip?->handRight;
+
+        $isWeapon = fn (?Item $item): bool => $item !== null
+            && $item->itemInfo?->type === ShareItemType::WEAPON;
+
+        $leftWeapon = $isWeapon($left);
+        $rightWeapon = $isWeapon($right);
+
+        return match (true) {
+            $leftWeapon && $rightWeapon => [
+                'min' => $stats->getDebuffReduction('left_min_dmg') + $stats->getDebuffReduction('right_min_dmg'),
+                'max' => $stats->getDebuffReduction('left_max_dmg') + $stats->getDebuffReduction('right_max_dmg'),
+            ],
+            ! $leftWeapon && $rightWeapon => [
+                'min' => $stats->getDebuffReduction('right_min_dmg'),
+                'max' => $stats->getDebuffReduction('right_max_dmg'),
+            ],
+            default => [
+                'min' => $stats->getDebuffReduction('left_min_dmg'),
+                'max' => $stats->getDebuffReduction('left_max_dmg'),
             ],
         };
     }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Domain\Services;
 
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
 
 class ExperienceService
 {
@@ -14,14 +16,31 @@ class ExperienceService
 
     /**
      * Рассчитывает фактически начисляемый опыт с учётом персонального
-     * коэффициента игрока. Значение не сохраняется — способ сохранения
-     * остаётся у вызывающего сценария.
+     * коэффициента игрока и временного баффа «Прилив опыта» (эликсиры из
+     * премиум-магазина, см. ActiveEffectType::EXP_BOOST) — бафф умножает
+     * результат ДОПОЛНИТЕЛЬНО к статическому коэффициенту, не заменяет его.
+     * Значение не сохраняется — способ сохранения остаётся у вызывающего
+     * сценария.
      */
     public function calculateGain(Player $player, int $baseExperience): int
     {
         $multiplier = max(0.0, (float) $player->experience_multiplier);
+        $multiplier *= 1 + $this->activeExpBoostPercent($player) / 100;
 
         return (int) round(max(0, $baseExperience) * $multiplier);
+    }
+
+    /** Активный процент «Прилив опыта» (0, если баффа нет или он истёк). */
+    private function activeExpBoostPercent(Player $player): float
+    {
+        $boost = PlayerActiveEffect::query()
+            ->where('player_id', $player->id)
+            ->where('type', ActiveEffectType::EXP_BOOST)
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->orderByDesc('current_value')
+            ->first();
+
+        return max(0.0, (float) ($boost?->current_value ?? 0));
     }
 
     /**

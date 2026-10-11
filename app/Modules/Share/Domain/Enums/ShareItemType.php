@@ -18,6 +18,8 @@ enum ShareItemType: string
     case BELT = 'belt';
     case BAG = 'bag';
     case KEY = 'key';
+    case LOCKPICK = 'lockpick';
+    case TRADE_GOODS = 'trade_goods';
     case POTION = 'potion';
     case EAT = 'eat';
     case QUEST = 'quest';
@@ -82,6 +84,8 @@ enum ShareItemType: string
             self::BELT => 'Пояс',
             self::BAG => 'Сумка',
             self::KEY => 'Ключ',
+            self::LOCKPICK => 'Отмычка',
+            self::TRADE_GOODS => 'Торговый товар',
             self::POTION => 'Эликсир',
             self::SCROLL => 'Свиток',
             self::QUEST => 'Квест',
@@ -118,6 +122,8 @@ enum ShareItemType: string
                 self::RECIPE,
                 self::BOOK,
                 self::CHEST,
+                self::LOCKPICK,
+                self::TRADE_GOODS,
                 self::SCROLL,
                 self::GEM,
                 self::MOUNT,

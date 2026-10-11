@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Auth\AuthServiceProvider;
 use App\Modules\Backpack\BackpackServiceProvider;
 use App\Modules\Battle\BattleServiceProvider;
 use App\Modules\Chat\ChatServiceProvider;
@@ -16,6 +17,7 @@ use App\Modules\Library\LibraryServiceProvider;
 use App\Modules\Location\LocationServiceProvider;
 use App\Modules\MagicSkill\MagicSkillServiceProvider;
 use App\Modules\Monster\MonsterServiceProvider;
+use App\Modules\News\NewsServiceProvider;
 use App\Modules\Npc\NpcServiceProvider;
 use App\Modules\Party\PartyServiceProvider;
 use App\Modules\Player\PlayerServiceProvider;
@@ -27,11 +29,13 @@ use App\Modules\Referral\ReferralServiceProvider;
 use App\Modules\Reputation\ReputationServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
+use App\Modules\Trade\TradeServiceProvider;
 use App\Modules\User\UserServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
     AppServiceProvider::class,
+    AuthServiceProvider::class,
     BattleServiceProvider::class,
     ChatServiceProvider::class,
     DungeonServiceProvider::class,
@@ -45,6 +49,7 @@ return [
     LocationServiceProvider::class,
     MagicSkillServiceProvider::class,
     MonsterServiceProvider::class,
+    NewsServiceProvider::class,
     NpcServiceProvider::class,
     PartyServiceProvider::class,
     PlayerServiceProvider::class,
@@ -56,6 +61,7 @@ return [
     UserServiceProvider::class,
     ReferralServiceProvider::class,
     StructureServiceProvider::class,
+    TradeServiceProvider::class,
     ClanServiceProvider::class,
     BackpackServiceProvider::class,
     EventServiceProvider::class,
