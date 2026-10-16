@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <style>
         *{
             font-size: 11px;
@@ -169,6 +170,44 @@
             border-collapse: separate;
             border-spacing: 2px;
         }
+        .profile-avatar-cell { padding: 4px 7px; vertical-align: middle; }
+        .profile-avatar-frame {
+            position: relative;
+            box-sizing: border-box;
+            width: 170px;
+            height: 238px;
+            margin: 0 auto;
+            padding: 5px;
+            border: 1px solid #d6b16d;
+            background: linear-gradient(135deg, #eed59a 0%, #825526 18%, #3b2415 48%, #9c6a31 78%, #f0d18c 100%);
+            box-shadow: 0 2px 7px rgba(45, 24, 10, .55), inset 0 0 0 1px #3b2415;
+        }
+        .profile-avatar-frame::before {
+            position: absolute;
+            z-index: 1;
+            inset: 3px;
+            border: 1px solid rgba(245, 220, 163, .72);
+            content: '';
+            pointer-events: none;
+        }
+        .profile-avatar-frame::after {
+            position: absolute;
+            right: 7px;
+            bottom: 7px;
+            left: 7px;
+            height: 24px;
+            background: linear-gradient(180deg, transparent, rgba(29, 17, 10, .82));
+            content: '';
+            pointer-events: none;
+        }
+        .profile-avatar-frame__image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #302216 url({{ asset('img/bg/bgg2.gif') }}) repeat;
+            object-fit: cover;
+            object-position: center 20%;
+        }
         .artifact-grid {
             display: flex;
             flex-wrap: wrap;
@@ -219,7 +258,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->helmet)
                             <img src="{{ $playerEquip->helmetSlot->itemInfo->image }}" class="hero-itm" id="i2n1" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->helmetSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->helmetSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -234,13 +273,15 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->shoulder)
                             <img src="{{ $playerEquip->shoulderSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->shoulderSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->shoulderSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
                     </td>
-                    <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
-                        <img src="https://game.elders.com.ua/img/avatar/dark_elf.jpg" width="130" height="170" border="0" hspace="0" vspace="0">
+                    <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
+                        <div class="profile-avatar-frame">
+                            <img class="profile-avatar-frame__image" src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ auth()->user()?->name }}">
+                        </div>
                     </td>
                     <td class="item-hero"
                         @if(!$injuriesBySlot->has('forearm') && $playerEquip->forearm) data-id="{{ $playerEquip->forearmSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
@@ -248,7 +289,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->forearm)
                             <img src="{{ $playerEquip->forearmSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->forearmSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->forearmSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -261,7 +302,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->handLeft)
                             <img src="{{ $playerEquip->handLeft->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->handLeft->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->handLeft->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @elseif($playerEquip->hand_left_mirror)
                             {{-- Зеркало дворучного оружия из второй руки --}}
                             <img src="{{ $playerEquip->hand_left_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
@@ -275,7 +316,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->handRight)
                             <img src="{{ $playerEquip->handRight->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->handRight->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->handRight->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @elseif($playerEquip->hand_right_mirror)
                             {{-- Зеркало дворучного оружия из первой руки --}}
                             <img src="{{ $playerEquip->hand_right_mirror->itemInfo->image }}" class="hero-itm" style="opacity: .6; background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
@@ -291,7 +332,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->armor)
                             <img src="{{ $playerEquip->armorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->armorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->armorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -302,7 +343,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->legging)
                             <img src="{{ $playerEquip->leggingSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->leggingSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->leggingSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -315,7 +356,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->chain_armor)
                             <img src="{{ $playerEquip->chainArmorSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->chainArmorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->chainArmorSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -326,7 +367,7 @@
                             @include('backpack::partials.injury_slot', compact('injury'))
                         @elseif($playerEquip->shoes)
                             <img src="{{ $playerEquip->shoesSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->shoesSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->shoesSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm" id="i4n1">
                         @endif
@@ -351,7 +392,7 @@
                         @if($playerEquip->belt_first) data-id="{{ $playerEquip->beltFirstSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->belt_first)
                             <img src="{{ $playerEquip->beltFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
                         @endif
@@ -361,7 +402,7 @@
                         @if($playerEquip->belt_second) data-id="{{ $playerEquip->beltSecondSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->belt_second)
                             <img src="{{ $playerEquip->beltSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->beltSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
                         @endif
@@ -371,7 +412,7 @@
                         @if($playerEquip->bag_first) data-id="{{ $playerEquip->bagFirstSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->bag_first)
                             <img src="{{ $playerEquip->bagFirstSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagFirstSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
                         @endif
@@ -381,7 +422,7 @@
                         @if($playerEquip->bag_second) data-id="{{ $playerEquip->bagSecondSlot->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" @endif>
                         @if($playerEquip->bag_second)
                             <img src="{{ $playerEquip->bagSecondSlot->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerEquip->bagSecondSlot->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         @else
                             <img src="{{ asset('img/bg/empty_slot.gif') }}" class="hero-itm">
                         @endif
@@ -396,7 +437,7 @@
                     <tbody>
                     <tr height="22">
                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                        <td align="center" class="tbl-usi-hdr mbg">Артефакты</td>
+                        <td align="center" class="tbl-usi-hdr mbg">{{ __("Артефакты") }}</td>
                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
                     </tbody>
@@ -405,7 +446,7 @@
                     @foreach($playerArtifacts as $playerArtifact)
                         <div class="item-hero" data-id="{{ $playerArtifact->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
                             <img src="{{ $playerArtifact->item->itemInfo->image }}" class="hero-itm" style="background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); border-color: rgb(206, 187, 170);">
-                            <a href="{{ route('items.put_off', ['id' => $playerArtifact->item->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">снять</a>
+                            <a href="{{ route('items.put_off', ['id' => $playerArtifact->item->id]) }}" class="item-put-off" onclick="hideEquippedItemTooltip()">{{ __("снять") }}</a>
                         </div>
                     @endforeach
                 </div>

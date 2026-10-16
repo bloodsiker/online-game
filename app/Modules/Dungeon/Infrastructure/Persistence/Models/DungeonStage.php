@@ -7,6 +7,7 @@ namespace App\Modules\Dungeon\Infrastructure\Persistence\Models;
 use App\Modules\Dungeon\Domain\Enums\DungeonStageCompletionType;
 use App\Modules\Dungeon\Domain\Enums\DungeonStageSpawnType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,9 +15,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DungeonStage extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name'];
+
     protected $fillable = [
         'dungeon_id', 'number', 'name', 'time_limit_seconds', 'completion_type',
         'spawn_type', 'total_monsters', 'next_stage_id',
+        'max_hits_per_user', 'personal_cooldown_seconds', 'clan_cooldown_seconds',
+        'gold_budget',
     ];
 
     protected $casts = [

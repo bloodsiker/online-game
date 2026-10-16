@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Application\UseCases;
 
 use App\Modules\Clan\Application\DTOs\ClanMemberPageDTO;
+use App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -24,7 +25,7 @@ class GetClanMemberPage
             ->with(['members.user.currentLocation.map', 'members.role', 'roles'])
             ->firstOrFail();
 
-        $onlineThreshold = Carbon::now()->subMinutes(10);
+        $onlineThreshold = Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         $memberRows = $clan->members->map(fn ($member) => [
             'type' => 'member',
@@ -35,7 +36,8 @@ class GetClanMemberPage
         ]);
 
         $requestRows = ClanJoinRequest::where('clan_id', $clan->id)
-            ->with('user')
+            ->whereIn('status', [ClanJoinRequestStatus::INVITE, ClanJoinRequestStatus::REQUEST])
+            ->with(['user.player', 'user.currentLocation.map'])
             ->get()
             ->map(fn ($request) => [
                 'type' => 'request',

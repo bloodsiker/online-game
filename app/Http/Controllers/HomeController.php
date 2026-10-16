@@ -143,12 +143,12 @@ class HomeController extends Controller
     public function publicMapMonsters(Map $map): JsonResponse
     {
         $monsters = Cache::remember(
-            MapMonstersCache::key($map->id),
+            MapMonstersCache::key($map->id).':'.app()->getLocale(),
             now()->addMinutes(MapMonstersCache::TTL_MINUTES),
             function () use ($map): Collection {
                 return Monster::query()
                     ->whereHas('locations', fn ($query) => $query->where('locations.map_id', $map->id))
-                    ->orderBy('name')
+                    ->orderBy('name->ru')
                     ->get(['id', 'name', 'lvl', 'image', 'is_boss'])
                     ->groupBy('name')
                     ->map(static function ($sameNameMonsters): array {

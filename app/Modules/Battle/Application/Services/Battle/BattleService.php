@@ -71,7 +71,8 @@ class BattleService
 
             $monsterQuery = MonsterOnLocation::with(['monster'])
                 ->where('location_id', $location->id)
-                ->where('active', 1);
+                ->where('active', 1)
+                ->visibleTo($user);
 
             if ($dungeonSessionId !== null) {
                 $monsterQuery->where('dungeon_session_id', $dungeonSessionId);
@@ -172,7 +173,10 @@ class BattleService
             : null;
         $dungeonSessionId = $session?->monsterSessionId();
 
-        $monsterAttacked = MonsterOnLocation::with(['monster'])->where(['id' => $id, 'active' => 1])->first();
+        $monsterAttacked = MonsterOnLocation::with(['monster'])
+            ->where(['id' => $id, 'active' => 1])
+            ->visibleTo($user)
+            ->first();
 
         if ($monsterAttacked instanceof MonsterOnLocation
             && ((int) $monsterAttacked->location_id !== (int) $location->id

@@ -23,6 +23,7 @@ use App\Modules\Structure\Exchange\Domain\Contracts\TransactionManager as Exchan
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\EloquentExchangeInventoryRepository;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\EloquentExchangeReadRepository;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\LaravelTransactionManager as ExchangeLaravelTransactionManager;
+use App\Modules\Structure\Presentation\Http\Middleware\EnsureStructureActionIsActive;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\TransactionManager as ShopTransactionManager;
@@ -63,6 +64,7 @@ class StructureServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->app['router']->pushMiddlewareToGroup('web', EnsureStructureActionIsActive::class);
         $this->loadViewsFrom(__DIR__.'/Auction/Presentation/Views', 'auction');
 
         $this->loadViewsFrom(__DIR__.'/Bank/Presentation/Views', 'bank');
@@ -81,40 +83,49 @@ class StructureServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/ClanSkillHall/Presentation/Views', 'clan_skill_hall');
 
+        $this->loadViewsFrom(__DIR__.'/ClanBoss/Presentation/Views', 'clan_boss');
+        $this->loadViewsFrom(__DIR__.'/Prison/Presentation/Views', 'prison');
+
         $this->loadViewsFrom(__DIR__.'/Workshop/Presentation/Views', 'workshop');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Auction/Presentation/Http/Route/web.php');
 
         // Bank routes — only web middleware
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Bank/Presentation/Http/Route/web.php');
 
         Route::middleware(['web'])
             ->group(__DIR__.'/PremiumShop/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Shop/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Exchange/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Blacksmith/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Warehouse/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/ReputationExchange/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/ClanSkillHall/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
+            ->group(__DIR__.'/ClanBoss/Presentation/Http/Route/web.php');
+
+        Route::middleware(['web', 'prison.context'])
+            ->group(__DIR__.'/Prison/Presentation/Http/Route/web.php');
+
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/Workshop/Presentation/Http/Route/web.php');
 
-        Route::middleware(['web'])
+        Route::middleware(['web', 'prison.context'])
             ->group(__DIR__.'/ToolWorkshop/Presentation/Http/Route/web.php');
     }
 }

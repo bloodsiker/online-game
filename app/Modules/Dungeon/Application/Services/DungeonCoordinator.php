@@ -19,6 +19,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Party\Infrastructure\Persistence\Models\Party;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,7 @@ class DungeonCoordinator
         private readonly DungeonStageService $stageService,
         private readonly DungeonRewardService $rewardService,
         private readonly TransactionManager $transactionManager,
+        private readonly DetentionService $detentionService,
     ) {}
 
     public function enterSolo(Dungeon $dungeon, User $user): DungeonSession
@@ -408,6 +410,10 @@ class DungeonCoordinator
 
     private function validateEntry(Dungeon $dungeon, User $user): void
     {
+        if ($detentionMessage = $this->detentionService->blockLeaving($user)) {
+            throw new RuntimeException($detentionMessage);
+        }
+
         if (! $dungeon->is_active) {
             throw new RuntimeException('Данж недоступен.');
         }

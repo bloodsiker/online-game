@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Application\UseCases;
 
 use App\Modules\Chat\Application\DTOs\ChatMessageDTO;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Domain\ChatMessageLifetime;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
+use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +22,8 @@ class GetMessages
     public function __construct(
         private readonly ChatMessageRepositoryInterface $repository,
         private readonly MessageRenderer $renderer,
+        private readonly ChatMessageTranslator $translator,
+        private readonly GameSettingsService $settings,
     ) {}
 
     /**
@@ -31,7 +36,9 @@ class GetMessages
     {
         $messages = $this->repository->getForChannel($user, $channel, $afterId, $limit);
 
-        return array_map(fn (ChatMessage $msg) => $this->mapToDTO($msg, $user, $channel), $messages);
+        $locale = $this->settings->get((int) $user->id)['language'];
+
+        return array_map(fn (ChatMessage $msg) => $this->mapToDTO($msg, $user, $channel, $locale), $messages);
     }
 
     public function filterValidIds(User $user, ChatChannel $channel, array $ids): array
@@ -39,7 +46,7 @@ class GetMessages
         return $this->repository->filterValidIds($user, $channel, $ids);
     }
 
-    private function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel): ChatMessageDTO
+    private function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel, string $locale): ChatMessageDTO
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
@@ -55,8 +62,14 @@ class GetMessages
             ChatMessageType::QuestItem,
             ChatMessageType::Loot,
             ChatMessageType::WorldEvent,
+            ChatMessageType::ClanBoss,
+            ChatMessageType::ClanInvite,
         ]);
-        $content = $this->renderer->render($msg->message, $trusted);
+        $text = $msg->message;
+        if ($trusted && $msg->translation_key !== null) {
+            $text = $this->translator->render(new LocalizedChatMessage($msg->translation_key, $msg->translation_params ?? []), $locale) ?: $text;
+        }
+        $content = $this->renderer->render($text, $trusted);
         $isOwn = $msg->user_id === $user->id;
 
         $replyTo = null;
@@ -88,6 +101,7 @@ class GetMessages
     private function expirationTime(ChatMessage $message, ChatChannel $viewChannel): ?string
     {
         $expiresAt = match (true) {
+            $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
             $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private && $viewChannel !== ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),

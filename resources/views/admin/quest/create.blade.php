@@ -15,14 +15,10 @@
                         <div class="row pt-2 pb-3">
 
                             <div class="col-md-8">
-                                <div class="form-group">
-                                    <label class="col-form-label">Название</label>
-                                    <input type="text" class="form-control" name="title" value="{{ old('title') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-form-label">Описание</label>
-                                    <textarea class="form-control" name="description" rows="4">{{ old('description') }}</textarea>
-                                </div>
+                                @include('admin.partials.content-translations', [
+                                    'prefix' => 'quest-new', 'content' => null,
+                                    'fields' => ['title' => ['label' => 'Название'], 'description' => ['label' => 'Описание', 'multiline' => true]],
+                                ])
                             </div>
 
                             <div class="col-md-4">

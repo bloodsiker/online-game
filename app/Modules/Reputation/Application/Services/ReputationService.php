@@ -26,6 +26,14 @@ class ReputationService
         );
     }
 
+    public function getOrZero(Player $player, Reputation $reputation): PlayerReputation
+    {
+        return PlayerReputation::firstOrNew(
+            ['player_id' => $player->id, 'reputation_id' => $reputation->id],
+            ['points' => 0],
+        );
+    }
+
     public function getCurrentTier(Reputation $reputation, int $points): ?ReputationTier
     {
         return $reputation->tiers
@@ -88,7 +96,7 @@ class ReputationService
 
     public function assignQuest(Player $player, Reputation $reputation): ?QuestPlayer
     {
-        $pr = $this->getOrCreate($player, $reputation);
+        $pr = $this->getOrZero($player, $reputation);
         $tier = $this->getCurrentTier($reputation, $pr->points);
 
         if (! $tier) {
@@ -157,7 +165,7 @@ class ReputationService
 
         // Обычная медаль: игрок только что пересёк порог тира, у которого она есть.
         if ($tierAfter
-            && $tierAfter->medal_name !== null
+            && $tierAfter->hasRegularMedal()
             && $tierAfter->id !== $tierBefore?->id
         ) {
             event(new ReputationMedalEarned($player, $tierAfter, $tierAfter->medal_name, isFeat: false));
@@ -266,7 +274,10 @@ class ReputationService
 
     public function touchOfferingCooldown(Player $player, Reputation $reputation): void
     {
-        $this->getOrCreate($player, $reputation)->update(['last_offering_at' => now()]);
+        $playerReputation = $this->getOrZero($player, $reputation);
+        if ($playerReputation->exists) {
+            $playerReputation->update(['last_offering_at' => now()]);
+        }
     }
 
     /**
@@ -276,7 +287,7 @@ class ReputationService
     public function getEarnedMedals(Reputation $reputation, int $points, Player $player): Collection
     {
         $eligibleTiers = $reputation->tiers
-            ->filter(fn ($tier) => $tier->medal_name && $points >= $tier->min_points);
+            ->filter(fn ($tier) => $tier->hasRegularMedal() && $points >= $tier->min_points);
 
         $completedFeatQuestIds = $this->completedQuestIds(
             $player,
@@ -285,7 +296,7 @@ class ReputationService
 
         return $eligibleTiers
             ->filter(fn ($tier) => ! $tier->feat_quest_id
-                || $tier->feat_medal_name
+                || $tier->hasFeatMedal()
                 || $completedFeatQuestIds->has($tier->feat_quest_id))
             ->sortBy('min_points')
             ->values();
@@ -297,7 +308,7 @@ class ReputationService
     public function getEarnedFeatMedals(Reputation $reputation, int $points, Player $player): Collection
     {
         $eligibleTiers = $reputation->tiers
-            ->filter(fn ($tier) => $tier->feat_medal_name
+            ->filter(fn ($tier) => $tier->hasFeatMedal()
                 && $tier->feat_quest_id
                 && $points >= $tier->min_points);
 

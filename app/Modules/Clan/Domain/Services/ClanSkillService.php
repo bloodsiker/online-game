@@ -87,8 +87,8 @@ class ClanSkillService
                     $player->user_id,
                     $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
                     $isNew
-                        ? "Изучен новый навык «{$definition->name}»"
-                        : "Изучен уровень {$nextLevel} навыка «{$definition->name}»",
+                        ? 'Изучен новый навык «'.$definition->getTranslation('name', 'ru', false).'»'
+                        : 'Изучен уровень '.$nextLevel.' навыка «'.$definition->getTranslation('name', 'ru', false).'»',
                 );
             });
         } catch (\RuntimeException $e) {

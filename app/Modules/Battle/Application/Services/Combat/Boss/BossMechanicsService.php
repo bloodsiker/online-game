@@ -3,6 +3,7 @@
 namespace App\Modules\Battle\Application\Services\Combat\Boss;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Domain\Enums\BossMechanicType;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossDefeatLog;
@@ -91,9 +92,9 @@ class BossMechanicsService
 
                 $mechanic->execute($context);
 
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p><b class="color-death">%s умирает: %s</b></p>',
-                    $monster->name,
+                    BattleLogTranslator::contentName($monster),
                     $mechanic->getDescription()
                 ));
             } catch (\Exception $e) {
@@ -114,9 +115,9 @@ class BossMechanicsService
             'final_phase' => $locationMonster->current_phase ?? 1,
         ]);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-legendary">🏆 Вы победили босса %s! 🏆</b></p>',
-            $monster->name
+            BattleLogTranslator::contentName($monster)
         ));
     }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,7 @@ class LibraryArticleController extends Controller
             ->with('category')
             ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', (int) $request->input('category_id')))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
-            ->when($request->filled('q'), fn ($query) => $query->where('title', 'like', '%'.$request->input('q').'%'))
+            ->when($request->filled('q'), fn ($query) => $query->searchTranslations('%'.mb_strtolower($request->string('q')->toString()).'%', ['title', 'excerpt', 'content']))
             ->orderByDesc('updated_at')
             ->paginate(50)
             ->withQueryString();
@@ -52,13 +53,13 @@ class LibraryArticleController extends Controller
         return $this->formView(null);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $article = new LibraryArticle;
         $data = $this->validated($request, $article);
 
-        DB::transaction(function () use ($article, $data, $request): void {
-            $this->fill($article, $data, $request);
+        DB::transaction(function () use ($article, $data, $request, $translationEditor): void {
+            $this->fill($article, $data, $request, $translationEditor);
             $article->author_id = auth()->id();
             $article->save();
             $this->syncLinks($article, $data['links'] ?? []);
@@ -74,12 +75,12 @@ class LibraryArticleController extends Controller
         return $this->formView($article);
     }
 
-    public function update(Request $request, LibraryArticle $article): RedirectResponse
+    public function update(Request $request, LibraryArticle $article, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $data = $this->validated($request, $article);
 
-        DB::transaction(function () use ($article, $data, $request): void {
-            $this->fill($article, $data, $request);
+        DB::transaction(function () use ($article, $data, $request, $translationEditor): void {
+            $this->fill($article, $data, $request, $translationEditor);
             $article->save();
             $this->syncLinks($article, $data['links'] ?? []);
         });
@@ -124,10 +125,7 @@ class LibraryArticleController extends Controller
     {
         $data = $request->validate([
             'category_id' => ['required', 'integer', 'exists:library_categories,id'],
-            'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('library_articles', 'slug')->ignore($article->id)],
-            'excerpt' => ['nullable', 'string', 'max:2000'],
-            'content' => ['required', 'string'],
             'cover_image' => ['nullable', 'image', 'max:4096'],
             'status' => ['required', Rule::in(array_keys(LibraryArticle::STATUSES))],
             'published_at' => ['nullable', 'date'],
@@ -163,15 +161,13 @@ class LibraryArticleController extends Controller
     }
 
     /** @param array<string, mixed> $data */
-    private function fill(LibraryArticle $article, array $data, Request $request): void
+    private function fill(LibraryArticle $article, array $data, Request $request, ContentTranslationEditor $translationEditor): void
     {
+        $translationEditor->fill($article, $request, ['title', 'excerpt', 'content'], ['title', 'content']);
         $status = $data['status'];
         $article->fill([
             'category_id' => (int) $data['category_id'],
-            'title' => $data['title'],
-            'slug' => $data['slug'] ?: $this->uniqueSlug($data['title'], $article),
-            'excerpt' => $data['excerpt'] ?? null,
-            'content' => $data['content'],
+            'slug' => $data['slug'] ?: $this->uniqueSlug((string) $article->getTranslation('title', 'ru', false), $article),
             'status' => $status,
             'published_at' => $status === LibraryArticle::STATUS_PUBLISHED
                 ? ($data['published_at'] ?? $article->published_at ?? now())

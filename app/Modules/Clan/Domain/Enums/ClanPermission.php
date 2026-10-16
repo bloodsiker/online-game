@@ -17,6 +17,7 @@ enum ClanPermission: string
     case WITHDRAW_ITEMS = 'withdraw_items';
     case LEARN_SKILL = 'learn_skill';
     case PAY_TAX = 'pay_tax';
+    case START_CLAN_BOSS = 'start_clan_boss';
 
     public function bit(): int
     {
@@ -32,40 +33,43 @@ enum ClanPermission: string
             self::WITHDRAW_ITEMS => 8192,
             self::LEARN_SKILL => 16384,
             self::PAY_TAX => 32768,
+            self::START_CLAN_BOSS => 65536,
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::INVITE => 'Принимать в клан',
-            self::KICK => 'Исключать из клана',
-            self::CHAT => 'Писать в клан чат',
-            self::CHANGE_PERMS => 'Менять полномочия',
-            self::CHANGE_RANKS => 'Изменение званий',
-            self::CHANGE_NEWS => 'Изменение новостей',
-            self::DEPOSIT => 'Добавление в ячейку',
-            self::WITHDRAW_MONEY => 'Забирать деньги',
-            self::WITHDRAW_ITEMS => 'Забирать вещи',
-            self::LEARN_SKILL => 'Изучать навыки',
-            self::PAY_TAX => 'Платить налог',
+            self::INVITE => __('Принимать в клан'),
+            self::KICK => __('Исключать из клана'),
+            self::CHAT => __('Писать в клан чат'),
+            self::CHANGE_PERMS => __('Менять полномочия'),
+            self::CHANGE_RANKS => __('Изменение званий'),
+            self::CHANGE_NEWS => __('Изменение новостей'),
+            self::DEPOSIT => __('Добавление в ячейку'),
+            self::WITHDRAW_MONEY => __('Забирать деньги'),
+            self::WITHDRAW_ITEMS => __('Забирать вещи'),
+            self::LEARN_SKILL => __('Изучать навыки'),
+            self::PAY_TAX => __('Платить налог'),
+            self::START_CLAN_BOSS => __('Начинать бой с клан-боссом'),
         };
     }
 
     public function columnTitle(): string
     {
         return match ($this) {
-            self::INVITE => 'Принимать <br>в клан',
-            self::KICK => 'Исключать <br>из клана',
-            self::CHAT => 'Писать в <br>клан чат',
-            self::CHANGE_PERMS => 'Менять <br>полномочия',
-            self::CHANGE_RANKS => 'Изменение<br>званий',
-            self::CHANGE_NEWS => 'Изменение<br>новостей',
-            self::DEPOSIT => 'Добавление<br>в ячейку',
-            self::WITHDRAW_MONEY => 'Забирать<br>деньги',
-            self::WITHDRAW_ITEMS => 'Забирать<br>вещи',
-            self::LEARN_SKILL => 'Изучать<br>навыки',
-            self::PAY_TAX => 'Платить<br>налог',
+            self::INVITE => __('Принимать') . ' <br>' . __('в клан'),
+            self::KICK => __('Исключать') . ' <br>' . __('из клана'),
+            self::CHAT => __('Писать в') . ' <br>' . __('клан чат'),
+            self::CHANGE_PERMS => __('Менять') . ' <br>' . __('полномочия'),
+            self::CHANGE_RANKS => __('Изменение') . '<br>' . __('званий'),
+            self::CHANGE_NEWS => __('Изменение') . '<br>' . __('новостей'),
+            self::DEPOSIT => __('Добавление') . '<br>' . __('в ячейку'),
+            self::WITHDRAW_MONEY => __('Забирать') . '<br>' . __('деньги'),
+            self::WITHDRAW_ITEMS => __('Забирать') . '<br>' . __('вещи'),
+            self::LEARN_SKILL => __('Изучать') . '<br>' . __('навыки'),
+            self::PAY_TAX => __('Платить') . '<br>' . __('налог'),
+            self::START_CLAN_BOSS => __('Начинать бой') . '<br>' . __('с клан-боссом'),
         };
     }
 

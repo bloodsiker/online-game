@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 
@@ -32,9 +33,9 @@ class LifeDrainMechanic extends BaseBossMechanic
         $context->healBoss($actualDamage);
         $actualHeal = $context->getBossCurrentHp() - $oldHp;
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-life-drain">🩸 %s высасывает жизнь! Вы получили %d урон, босс восстановил %d HP!</b></p>',
-            $monster->name,
+            BattleLogTranslator::contentName($monster),
             $actualDamage,
             $actualHeal
         ));

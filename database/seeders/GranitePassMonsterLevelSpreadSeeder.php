@@ -51,7 +51,7 @@ class GranitePassMonsterLevelSpreadSeeder extends Seeder
         $updated = 0;
 
         foreach (self::CHANGES as $c) {
-            $monster = Monster::query()->where('name', $c['name'])->where('lvl', $c['currentLvl'])->first();
+            $monster = Monster::query()->where('name->ru', $c['name'])->where('lvl', $c['currentLvl'])->first();
 
             if ($monster === null) {
                 $this->command?->warn(sprintf('не найден: «%s» lvl %d', $c['name'], $c['currentLvl']));

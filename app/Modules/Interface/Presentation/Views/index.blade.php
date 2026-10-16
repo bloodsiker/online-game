@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Онлайн Игра</title>
+    <title>{{ __('ui.game') }}</title>
     <script>window.gameSettings = @js($gameSettings ?? \App\Modules\User\Domain\Settings\GameSettingsDefinition::defaults());</script>
     <script src="{{ asset('js/notification-sounds.js') }}?v={{ filemtime(public_path('js/notification-sounds.js')) }}" data-sound-base="{{ asset('audio/notifications') }}/" defer></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}?v={{ filemtime(public_path('css/main.css')) }}">
@@ -166,6 +167,19 @@
         .map-toggle-arrow.open {
             transform: rotate(180deg);
         }
+        .td-map--left .map-toggle-btn {
+            left: auto;
+            right: -3px;
+            border-right: 1px solid #7a4010;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 2px 0 6px rgba(0,0,0,0.35);
+            transition: background 0.15s, right 0.3s ease;
+        }
+        .td-map--left .map-toggle-arrow {
+            border-right: none;
+            border-left: 6px solid #4a1a00;
+        }
     </style>
 </head>
 <body class="bg">
@@ -242,7 +256,10 @@
                 </tbody>
             </table>
         </td>
-        <td width="100%" height="100%">
+        @if(($gameSettings['show_map'] ?? true) && ($gameSettings['map_side'] ?? 'right') === 'left')
+            @include('interface::partials.sidebar-map')
+        @endif
+        <td id="game-panel" width="100%" height="100%">
             <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
                 <tr height="33">
@@ -307,11 +324,11 @@
                                 const icon = slot.image
                                     ? `<img src="${slot.image}" class="slot-img" alt="" style="width:40px;height:40px;object-fit:cover;display:block;border-radius:5px;">`
                                     : `<span class="icon"></span>`;
-                                const name = slot.name ?? 'Пустой слот';
+                                const name = slot.name ?? gameTranslate('Пустой слот');
                                 const cooldown = slot.cooldown ?? 0;
                                 const cooldownUntil = slot.cooldown_until ?? '';
                                 const countLine = (!empty && slot.entity_type === 'item' && slot.count != null)
-                                    ? `<div class="tooltip-count">Количество: <span class="count-val">${slot.count}</span></div>`
+                                    ? `<div class="tooltip-count">${gameTranslate('Количество:')} <span class="count-val">${slot.count}</span></div>`
                                     : '';
                                 return `
                                     <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-cooldown-until="${cooldownUntil}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
@@ -429,7 +446,7 @@
                                             showHotbarMessage(data.message);
                                         }
                                     })
-                                    .catch(() => showHotbarMessage('Не удалось использовать предмет.'));
+                                    .catch(() => showHotbarMessage(gameTranslate('Не удалось использовать предмет.')));
                                 }
 
                                 if (entityType === 'skill') {
@@ -455,7 +472,7 @@
                                     .then(async response => {
                                         const data = await response.json();
                                         if (!response.ok || data.status !== 'success') {
-                                            throw new Error(data.message || 'Не удалось применить заклинание.');
+                                            throw new Error(data.message || gameTranslate('Не удалось применить заклинание.'));
                                         }
 
                                         showHotbarMessage(data.message);
@@ -621,14 +638,15 @@
                                 const mapArrow   = document.getElementById('map-toggle-arrow');
                                 const mapBtn     = document.querySelector('.map-toggle-btn');
                                 if (!mapWrapper || !mapArrow || !mapBtn) return;
+                                const mapOnLeft = mapBtn.closest?.('.td-map--left');
                                 if (mapVisible && !mapHiddenForGathering) {
                                     mapWrapper.classList.remove('hidden');
                                     mapArrow.classList.add('open');
-                                    mapBtn.style.left = '-3px';
+                                    mapBtn.style[mapOnLeft ? 'right' : 'left'] = '-3px';
                                 } else {
                                     mapWrapper.classList.add('hidden');
                                     mapArrow.classList.remove('open');
-                                    mapBtn.style.left = '-16px';
+                                    mapBtn.style[mapOnLeft ? 'right' : 'left'] = mapOnLeft ? '-8px' : '-16px';
                                 }
                             }
 
@@ -676,65 +694,8 @@
         </td>
 
         {{-- Optional sidebar map --}}
-        @if($gameSettings['show_map'] ?? true)
-        <td class="td-map" id="td-map" style="position: relative; overflow: visible;">
-            <div class="map-toggle-btn" onclick="toggleMap()" title="Карта">
-                <span class="map-toggle-arrow{{ ($gameSettings['show_map'] ?? true) ? ' open' : '' }}" id="map-toggle-arrow"></span>
-            </div>
-            <div id="map-wrapper" class="map-wrapper{{ ($gameSettings['show_map'] ?? true) ? '' : ' hidden' }}">
-            <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" align="center">
-                <tbody>
-                <tr height="33">
-                    <td width="19" valign="bottom" align="right" class="tbl-sts tbl-sts-lt"><b></b></td>
-                    <td class="tbl-sts_top" align="left" valign="top"></td>
-                    <td width="19" valign="bottom" class="tbl-sts tbl-sts-rt"><b></b></td>
-                </tr>
-                <tr height="100%">
-                    <td class="tbl-sts_left" valign="top">
-                        <table width="19" height="100%" border="0" cellspacing="0" cellpadding="0">
-                            <tbody>
-                            <tr>
-                                <td valign="top" align="right" class="tbl-sts tbl-sts-ltb"><b></b></td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td valign="bottom" align="right" class="tbl-sts tbl-sts-lbt"><b></b></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                    <td id="map_content" class="bgg" align="left" valign="top" width="100%">
-
-                        <iframe width="300px" name="map" height="100%" frameborder="0" id="map-frame" src="{{ route('on_map', ['hide' => 1]) }}"></iframe>
-
-                    </td>
-                    <td valign="top" class="tbl-sts_right">
-                        <table width="19" height="100%" border="0" cellspacing="0" cellpadding="0">
-                            <tbody>
-                            <tr>
-                                <td valign="top" class="tbl-sts tbl-sts-rtb"><b></b></td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td valign="bottom" class="tbl-sts tbl-sts-rbt"><b></b></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-                <tr height="19">
-                    <td align="right" class="tbl-sts tbl-sts-lb"><b></b></td>
-                    <td class="tbl-sts tbl-sts-bb">&nbsp;</td>
-                    <td class="tbl-sts tbl-sts-rb"><b></b></td>
-                </tr>
-                </tbody>
-            </table>
-            </div>
-        </td>
+        @if(($gameSettings['show_map'] ?? true) && ($gameSettings['map_side'] ?? 'right') !== 'left')
+            @include('interface::partials.sidebar-map')
         @endif
         {{-- End sidebar map --}}
     </tr>
@@ -1019,7 +980,7 @@
 
                 </div>
                 <div style="text-align: center;">
-                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="ОТМЕНА" type="button" style="width:60px"></b></b>
+                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="{{ __('ОТМЕНА') }}" type="button" style="width:60px"></b></b>
                 </div>
             </div>
         </div>
@@ -1034,10 +995,10 @@
 
 
 <div id="error_div" class="error_div" style="display: none; z-index: 1000; width: 100%; height: 100vh;"></div>
-<img src="{{ asset('data/img/close.png') }}" width="27" height="27" alt="Выход" title="Выход из игры"
+<img src="{{ asset('data/img/close.png') }}" width="27" height="27" alt="{{ __('Выход') }}" title="{{ __('Выход из игры') }}"
      style="position: absolute; top: 0; right: 8px; z-index: 1005; cursor: pointer;" onclick="showLogoutConfirm()">
 
-<div id="fullscreen_button" title="Полноэкранный режим"
+<div id="fullscreen_button" title="{{ __('Полноэкранный режим') }}"
      style="position: absolute; top: 50px; right: 3px; z-index: 1005; cursor: pointer;" onclick="toggleFullscreen()">
     <img id="fsc_img" src="{{ asset('data/img/fscreen.png') }}" width="20" height="20" alt="">
 </div>
@@ -1111,15 +1072,15 @@
         <table>
             <tbody>
             <tr>
-                <td class="lbl"><nobr>Страницы:&nbsp;</nobr></td>
+                <td class="lbl"><nobr>{{ __('Страницы:') }}&nbsp;</nobr></td>
                 @foreach($smilePages as $p => $pageSmiles)
                     <td class="pg-num{{ $p === 0 ? ' active' : '' }}" data-page="{{ $p }}" onclick="smilesPage({{ $p }})"><a href="#" onclick="return false;">{{ $p + 1 }}</a></td>
                 @endforeach
                 <td style="text-align: left;"></td>
                 <td width="1%" nowrap style="text-align: right;">
-                    <img id="smiles-prev" class="pg-arrow" src="{{ asset('data/img/p-left-gray.gif') }}" width="29" height="17" title="Предыдущая" onclick="smilesPageShift(-1)">
+                    <img id="smiles-prev" class="pg-arrow" src="{{ asset('data/img/p-left-gray.gif') }}" width="29" height="17" title="{{ __('Предыдущая') }}" onclick="smilesPageShift(-1)">
                     <img src="{{ asset('data/img/pg-act.gif') }}" width="17" height="17" style="vertical-align: middle;">
-                    <img id="smiles-next" class="pg-arrow" src="{{ asset('data/img/p-right-red.gif') }}" width="29" height="17" title="Следующая" onclick="smilesPageShift(1)">
+                    <img id="smiles-next" class="pg-arrow" src="{{ asset('data/img/p-right-red.gif') }}" width="29" height="17" title="{{ __('Следующая') }}" onclick="smilesPageShift(1)">
                 </td>
             </tr>
             </tbody>
@@ -1187,7 +1148,7 @@
     <div class="popup-top-left">
         <div class="popup-top-right">
             <div class="popup-top-center">
-                <div class="popup_global_title">Выход из игры</div>
+                <div class="popup_global_title">{{ __('Выход из игры') }}</div>
             </div>
         </div>
         <div class="popup_global_close_btn" onclick="hideLogoutConfirm();"></div>
@@ -1196,11 +1157,11 @@
         <div class="popup-right-center">
             <div class="popup_global_content" style="padding: 20px;">
                 <div style="text-align: center;">
-                    <b>Вы уверены, что хотите выйти из игры?</b>
+                    <b>{{ __('Вы уверены, что хотите выйти из игры?') }}</b>
                 </div>
                 <div style="margin-top: 25px; text-align: center;">
-                    <b class="butt1 pointer"><b><input value="Выход" type="button" onclick="confirmLogout();" style="width: 100px;"></b></b>
-                    <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="hideLogoutConfirm();" style="width: 100px;"></b></b>
+                    <b class="butt1 pointer"><b><input value="{{ __('ui.exit') }}" type="button" onclick="confirmLogout();" style="width: 100px;"></b></b>
+                    <b class="butt1 pointer"><b><input value="{{ __('ui.cancel') }}" type="button" onclick="hideLogoutConfirm();" style="width: 100px;"></b></b>
                 </div>
             </div>
         </div>
@@ -1453,6 +1414,15 @@
         sendToFrame('character-frame', message, window.location.origin);
         const gameFrame = document.getElementById('game-frame');
         gameFrame?.contentWindow?.postMessage(message, window.location.origin);
+
+        if (state.detention_url) {
+            const isMapOverview = gameFrame?.contentWindow?.location.href.includes(@js(route('maps')));
+            if (gameFrame?.contentWindow && !isMapOverview && !gameFrame.contentWindow.location.href.includes(state.detention_url)) {
+                gameFrame.contentWindow.location.replace(state.detention_url);
+            }
+        } else if (state.prison_released_url) {
+            gameFrame?.contentWindow?.location.replace(state.prison_released_url);
+        }
 
         if (state.dead && state.death_url && gameFrame?.contentWindow) {
             if (state.death_message) {
@@ -1720,11 +1690,19 @@
     });
 
     function attackMonster(id, monsterId, action) {
-        let routeTemplate = "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
-        return toLocation(routeTemplate
-            .replace(':id', id)
-            .replace(':monsterId', monsterId)
-            .replace(':action', action));
+        let target = null;
+        try {
+            target = document.getElementById('game-frame')?.contentWindow?.battleTarget ?? null;
+        } catch (e) {}
+
+        let routeTemplate = target?.attackUrlTemplate || "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
+        if (target?.attackUrlTemplate) {
+            routeTemplate = routeTemplate.replace('__MONSTER__', monsterId).replace('__ACTION__', action);
+        } else {
+            routeTemplate = routeTemplate.replace(':id', id).replace(':monsterId', monsterId).replace(':action', action);
+        }
+
+        return toLocation(routeTemplate);
     }
 
     function navigateGameAction(url) {
@@ -1942,9 +1920,10 @@
 @if(auth()->user()->is_admin)
     <style>
         .admin-tools-menu {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
             gap: 10px;
-            justify-content: center;
+            justify-items: center;
             padding: 12px 0 10px;
         }
         .admin-tools-form {
@@ -2001,7 +1980,7 @@
             <div class="popup-top-left">
                 <div class="popup-top-right">
                     <div class="popup-top-center">
-                        <div class="popup_global_title" id="admin-tools-title">Админ</div>
+                        <div class="popup_global_title" id="admin-tools-title">{{ __('Админ') }}</div>
                     </div>
                 </div>
                 <div class="popup_global_close_btn" onclick="closeAdminToolsModal()"></div>
@@ -2009,57 +1988,97 @@
             <div class="popup-left-center">
                 <div class="popup-right-center">
                     <div class="popup_global_content" style="padding:10px 18px 5px;">
-                        <div id="admin-tools-menu" class="admin-tools-menu">
-                            <b class="butt1 pointer"><b><input value="Телепорт" type="button" onclick="showAdminToolsPanel('teleport')"></b></b>
-                            <b class="butt1 pointer"><b><input value="Наложить молчание" type="button" onclick="showAdminToolsPanel('mute')"></b></b>
+                        <div id="admin-tools-menu" class="admin-tools-menu" style="display:none;">
+                            <b class="butt1 pointer"><b><input value="{{ __('Телепорт') }}" type="button" onclick="showAdminToolsPanel('teleport')"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Наложить молчание') }}" type="button" onclick="showAdminToolsPanel('mute')"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Темница') }}" type="button" onclick="showAdminToolsPanel('detain')"></b></b>
                         </div>
 
                         <form id="admin-tools-teleport" class="admin-tools-form" style="display:none;" onsubmit="submitAdminTeleport(event)">
                             <div class="admin-tools-field">
-                                <label for="admin-teleport-user">Игрок</label>
+                                <label for="admin-teleport-user">{{ __('Игрок') }}</label>
                                 <select id="admin-teleport-user" name="user_id" required>
                                     @foreach($adminToolUsers as $adminToolUser)
-                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — вы@endif</option>
+                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="admin-tools-field">
-                                <label for="admin-teleport-location">Номер локации</label>
+                                <label for="admin-teleport-location">{{ __('Номер локации') }}</label>
                                 <input id="admin-teleport-location" name="location_id" type="number" min="1" step="1" inputmode="numeric" required>
                             </div>
                             <div class="admin-tools-actions">
-                                <b class="butt1 pointer"><b><input value="Телепортировать" type="submit"></b></b>
-                                <b class="butt1 pointer"><b><input value="Назад" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Телепортировать') }}" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                            </div>
+                        </form>
+
+                        <form id="admin-tools-detain" class="admin-tools-form" style="display:none;" onsubmit="submitAdminDetain(event)">
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-user">{{ __('Игрок') }}</label>
+                                <select id="admin-detain-user" name="user_id" required>
+                                    @foreach($adminToolUsers as $adminToolUser)
+                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-prison">{{ __('Темница') }}</label>
+                                <select id="admin-detain-prison" name="prison_structure_id" required>
+                                    @foreach($adminToolPrisons as $adminToolPrison)
+                                        <option value="{{ $adminToolPrison->id }}">{{ $adminToolPrison->name }} — {{ $adminToolPrison->location?->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-duration">{{ __('Продолжительность, минут') }}</label>
+                                <input id="admin-detain-duration" name="duration_minutes" type="number" min="1" max="525600" value="60" required>
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-fine-money">{{ __('Штраф за весь срок, монет') }}</label>
+                                <input id="admin-detain-fine-money" name="fine_money" type="number" min="0" value="0">
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-fine-diamond">{{ __('Штраф за весь срок, бриллиантов') }}</label>
+                                <input id="admin-detain-fine-diamond" name="fine_diamond" type="number" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="admin-tools-field">
+                                <label for="admin-detain-reason">{{ __('Причина наказания') }}</label>
+                                <textarea id="admin-detain-reason" name="reason" maxlength="1000" required></textarea>
+                            </div>
+                            <div class="admin-tools-actions">
+                                <b class="butt1 pointer"><b><input value="{{ __('Поместить в Темницу') }}" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
                             </div>
                         </form>
 
                         <form id="admin-tools-mute" class="admin-tools-form" style="display:none;" onsubmit="submitAdminMute(event)">
                             <div class="admin-tools-field">
-                                <label for="admin-mute-user">Игрок</label>
+                                <label for="admin-mute-user">{{ __('Игрок') }}</label>
                                 <select id="admin-mute-user" name="user_id" required>
                                     @foreach($adminToolUsers as $adminToolUser)
-                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — вы@endif</option>
+                                        <option value="{{ $adminToolUser->id }}" @selected($adminToolUser->id === auth()->id())>{{ $adminToolUser->name }}@if($adminToolUser->id === auth()->id()) — {{ __('вы') }}@endif</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="admin-tools-field">
-                                <label for="admin-mute-scope">Где запретить общение</label>
+                                <label for="admin-mute-scope">{{ __('Где запретить общение') }}</label>
                                 <select id="admin-mute-scope" name="scope" required>
-                                    <option value="chat">Игровой чат</option>
-                                    <option value="forum">Форум</option>
+                                    <option value="chat">{{ __('Игровой чат') }}</option>
+                                    <option value="forum">{{ __('Форум') }}</option>
                                 </select>
                             </div>
                             <div class="admin-tools-field">
-                                <label for="admin-mute-duration">Продолжительность, минут</label>
+                                <label for="admin-mute-duration">{{ __('Продолжительность, минут') }}</label>
                                 <input id="admin-mute-duration" name="duration_minutes" type="number" min="1" max="525600" value="60" required>
                             </div>
                             <div class="admin-tools-field">
-                                <label for="admin-mute-reason">Причина</label>
+                                <label for="admin-mute-reason">{{ __('Причина') }}</label>
                                 <textarea id="admin-mute-reason" name="reason" maxlength="500"></textarea>
                             </div>
                             <div class="admin-tools-actions">
-                                <b class="butt1 pointer"><b><input value="Наложить" type="submit"></b></b>
-                                <b class="butt1 pointer"><b><input value="Назад" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Наложить') }}" type="submit"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="showAdminToolsPanel('menu')"></b></b>
                             </div>
                         </form>
 
@@ -2077,7 +2096,6 @@
 
     <script>
         const adminToolsSelfId = {{ auth()->id() }};
-        const adminToolsCsrf = document.querySelector('meta[name="csrf-token"]').content;
 
         function openAdminToolsModal() {
             showAdminToolsPanel('menu');
@@ -2092,12 +2110,14 @@
 
         function showAdminToolsPanel(panel) {
             const isMenu = panel === 'menu';
-            document.getElementById('admin-tools-menu').style.display = isMenu ? 'flex' : 'none';
+            document.getElementById('admin-tools-menu').style.display = isMenu ? 'grid' : 'none';
             document.getElementById('admin-tools-teleport').style.display = panel === 'teleport' ? 'grid' : 'none';
             document.getElementById('admin-tools-mute').style.display = panel === 'mute' ? 'grid' : 'none';
+            document.getElementById('admin-tools-detain').style.display = panel === 'detain' ? 'grid' : 'none';
             document.getElementById('admin-tools-title').textContent = panel === 'teleport'
-                ? 'Телепорт'
-                : panel === 'mute' ? 'Наложить молчание' : 'Админ';
+                ? gameTranslate('Телепорт')
+                : panel === 'mute' ? gameTranslate('Наложить молчание')
+                    : panel === 'detain' ? gameTranslate('Поместить в Темницу') : gameTranslate('Админ');
             const message = document.getElementById('admin-tools-message');
             message.style.display = 'none';
             message.classList.remove('is-error');
@@ -2120,7 +2140,7 @@
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': adminToolsCsrf,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify(Object.fromEntries(new FormData(form))),
                 });
@@ -2130,13 +2150,13 @@
                     const validationMessage = data.errors
                         ? Object.values(data.errors).flat()[0]
                         : data.message;
-                    throw new Error(validationMessage || 'Не удалось выполнить действие.');
+                    throw new Error(validationMessage || gameTranslate('Не удалось выполнить действие.'));
                 }
 
-                showAdminToolsMessage(data.message || 'Действие выполнено.');
+                showAdminToolsMessage(data.message || gameTranslate('Действие выполнено.'));
                 return data;
             } catch (error) {
-                showAdminToolsMessage(error.message || 'Не удалось выполнить действие.', true);
+                showAdminToolsMessage(error.message || gameTranslate('Не удалось выполнить действие.'), true);
                 return null;
             } finally {
                 submit.disabled = false;
@@ -2157,6 +2177,17 @@
         async function submitAdminMute(event) {
             event.preventDefault();
             await submitAdminToolsForm(event.currentTarget, @json(route('admin.game_tools.mute')));
+        }
+
+        async function submitAdminDetain(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const targetUserId = Number(form.elements.user_id.value);
+            const result = await submitAdminToolsForm(form, @json(route('admin.game_tools.detain')));
+
+            if (result && targetUserId === adminToolsSelfId) {
+                setTimeout(() => toLocation(@json(route('location'))), 700);
+            }
         }
     </script>
 @endif
@@ -2251,7 +2282,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title">Новый никнейм</div>
+                    <div class="popup_global_title">{{ __('Новый никнейм') }}</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closeRenameModal()"></div>
@@ -2261,12 +2292,12 @@
                 <div class="popup_global_content" style="padding:10px 18px 5px;">
                     <form id="rename-form" class="rename-form" onsubmit="submitRenameModal(event)">
                         <div class="rename-field">
-                            <label for="rename-new-name">Введите новый никнейм</label>
+                            <label for="rename-new-name">{{ __('Введите новый никнейм') }}</label>
                             <input id="rename-new-name" name="new_name" type="text" minlength="3" maxlength="50" required>
                         </div>
                         <div class="rename-actions">
-                            <b class="butt1 pointer"><b><input value="Применить" type="submit"></b></b>
-                            <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeRenameModal()"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Применить') }}" type="submit"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('ui.cancel') }}" type="button" onclick="closeRenameModal()"></b></b>
                         </div>
                     </form>
                     <div id="rename-message" class="rename-message"></div>
@@ -2319,17 +2350,17 @@
             var data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Не удалось выполнить действие.');
+                throw new Error(data.message || gameTranslate('Не удалось выполнить действие.'));
             }
 
             closeRenameModal();
             openGameMessageModal({
-                title: 'Новый никнейм',
-                message: data.message || 'Никнейм изменён.',
-                actions: [{ label: 'Ок', onClick: function () { closeGameMessageModal(); location.reload(); } }],
+                title: @json(__('Новый никнейм')),
+                message: data.message || @json(__('Никнейм изменён.')),
+                actions: [{ label: @json(__('Ок')), onClick: function () { closeGameMessageModal(); location.reload(); } }],
             });
         } catch (error) {
-            message.textContent = error.message || 'Не удалось выполнить действие.';
+            message.textContent = error.message || gameTranslate('Не удалось выполнить действие.');
             message.classList.add('is-error');
             message.style.display = 'block';
         } finally {
@@ -2345,7 +2376,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title">Новая раса</div>
+                    <div class="popup_global_title">{{ __('Новая раса') }}</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closeRaceChangeModal()"></div>
@@ -2355,7 +2386,7 @@
                 <div class="popup_global_content" style="padding:10px 18px 5px;">
                     <form id="race-change-form" class="rename-form" onsubmit="submitRaceChangeModal(event)">
                         <div class="rename-field">
-                            <label for="race-change-select">Выберите новую расу</label>
+                            <label for="race-change-select">{{ __('Выберите новую расу') }}</label>
                             <div class="game-select">
                                 <select id="race-change-select" name="new_race_id" required>
                                     @foreach($races ?? [] as $race)
@@ -2365,8 +2396,8 @@
                             </div>
                         </div>
                         <div class="rename-actions">
-                            <b class="butt1 pointer"><b><input value="Применить" type="submit"></b></b>
-                            <b class="butt1 pointer"><b><input value="Отмена" type="button" onclick="closeRaceChangeModal()"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Применить') }}" type="submit"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('ui.cancel') }}" type="button" onclick="closeRaceChangeModal()"></b></b>
                         </div>
                     </form>
                     <div id="race-change-message" class="rename-message"></div>
@@ -2418,17 +2449,17 @@
             var data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Не удалось выполнить действие.');
+                throw new Error(data.message || gameTranslate('Не удалось выполнить действие.'));
             }
 
             closeRaceChangeModal();
             openGameMessageModal({
-                title: 'Новая раса',
-                message: data.message || 'Раса изменена.',
-                actions: [{ label: 'Ок', onClick: function () { closeGameMessageModal(); location.reload(); } }],
+                title: @json(__('Новая раса')),
+                message: data.message || @json(__('Раса изменена.')),
+                actions: [{ label: @json(__('Ок')), onClick: function () { closeGameMessageModal(); location.reload(); } }],
             });
         } catch (error) {
-            message.textContent = error.message || 'Не удалось выполнить действие.';
+            message.textContent = error.message || gameTranslate('Не удалось выполнить действие.');
             message.classList.add('is-error');
             message.style.display = 'block';
         } finally {
@@ -2444,7 +2475,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title" id="pts-modal-title">Распределение очков</div>
+                    <div class="popup_global_title" id="pts-modal-title">{{ __('Распределение очков') }}</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closePtsModal()"></div>
@@ -2454,13 +2485,13 @@
                 <div class="popup_global_content" id="pts-modal-content" style="padding:10px 18px 4px;">
                     <div id="pts-modal-points-content">
                     <div style="text-align:center;margin-bottom:8px;font-size:11px;color:#2a1a0e;">
-                        Свободно очков: <b id="pts-modal-free" style="color:#8b2000;"></b>
+                        {{ __('Свободно очков:') }} <b id="pts-modal-free" style="color:#8b2000;"></b>
                     </div>
                     <div id="pts-rows"></div>
                     <div id="pts-msg" style="display:none;margin-top:8px;padding:5px 8px;background:#FEEFB6;border:1px solid #e0d080;border-radius:4px;font-size:11px;color:#5a4a00;"></div>
                     <div style="display:flex;gap:8px;margin:12px 0 6px;justify-content:center;">
-                        <b class="butt1 pointer" onclick="ptsSave()"><b><input value="Сохранить" type="button"></b></b>
-                        <b class="butt1 pointer" onclick="closePtsModal()"><b><input value="Отмена" type="button"></b></b>
+                        <b class="butt1 pointer" onclick="ptsSave()"><b><input value="{{ __('ui.save') }}" type="button"></b></b>
+                        <b class="butt1 pointer" onclick="closePtsModal()"><b><input value="{{ __('ui.cancel') }}" type="button"></b></b>
                     </div>
                     </div>
                     <div id="pts-modal-map-monsters-content" style="display:none;max-height:min(480px,calc(100vh - 150px));overflow:auto;"></div>
@@ -2482,7 +2513,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title">Открытие сундука</div>
+                    <div class="popup_global_title">{{ __('Открытие сундука') }}</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="closeLockpickingModal()"></div>
@@ -2490,7 +2521,7 @@
         <div class="popup-left-center">
             <div class="popup-right-center">
                 <div class="popup_global_content" style="padding:8px 12px 3px;">
-                    <iframe id="lockpicking-modal-frame" src="about:blank" title="Открытие сундука" style="display:block;width:100%;height:280px;border:0;"></iframe>
+                    <iframe id="lockpicking-modal-frame" src="about:blank" title="{{ __('Открытие сундука') }}" style="display:block;width:100%;height:280px;border:0;"></iframe>
                 </div>
             </div>
         </div>
@@ -2509,14 +2540,14 @@
     function openPtsModal(data) {
         _ptsData = data;
         _ptsModalMode = 'points';
-        document.getElementById('pts-modal-title').textContent = 'Распределение очков';
+        document.getElementById('pts-modal-title').textContent = gameTranslate('Распределение очков');
         document.getElementById('pts-modal-points-content').style.display = '';
         document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
 
         document.getElementById('pts-modal-free').textContent = data.free;
         document.getElementById('pts-msg').style.display = 'none';
 
-        const labels = { strength: 'Сила', intuition: 'Интуиция', agility: 'Ловкость', intelligence: 'Интеллект', wisdom: 'Мудрость', endurance: 'Выносливость' };
+        const labels = { strength: gameTranslate('Сила'), intuition: gameTranslate('Интуиция'), agility: gameTranslate('Ловкость'), intelligence: gameTranslate('Интеллект'), wisdom: gameTranslate('Мудрость'), endurance: gameTranslate('Выносливость') };
         const rows   = document.getElementById('pts-rows');
         const btnStyle = 'width:24px;height:24px;border:1px solid #a07040;background:url(/img/bg/table-header.jpg) repeat-x top left #c8924a;color:#461c0b;font-weight:bold;font-size:15px;cursor:pointer;border-radius:3px;padding:0;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);';
         const inpStyle = 'width:34px;text-align:center;border:1px solid #CEBBAA;border-radius:3px;padding:3px 0;font-family:Tahoma;font-size:12px;color:#461c0b;font-weight:bold;background:#fffaf3;';
@@ -2606,7 +2637,7 @@
         const monstersContent = document.getElementById('pts-modal-map-monsters-content');
 
         _ptsModalMode = 'map-monsters';
-        title.textContent = 'Монстры: ' + data.map;
+        title.textContent = gameTranslate('Монстры:') + ' ' + data.map;
         pointsContent.style.display = 'none';
         monstersContent.style.display = '';
         monstersContent.replaceChildren();
@@ -2614,9 +2645,9 @@
         if (data.error) {
             monstersContent.textContent = data.error;
         } else if (!Array.isArray(data.monsters)) {
-            monstersContent.textContent = 'Загрузка…';
+            monstersContent.textContent = gameTranslate('Загрузка…');
         } else if (data.monsters.length === 0) {
-            monstersContent.textContent = 'На этой карте монстры не указаны.';
+            monstersContent.textContent = gameTranslate('На этой карте монстры не указаны.');
         } else {
             const list = document.createElement('ul');
             list.style.cssText = 'margin:0;padding:7px;list-style:none;';
@@ -2640,7 +2671,7 @@
 
                 const levels = document.createElement('span');
                 levels.style.cssText = 'margin-left:4px;color:#89552e;';
-                levels.append('(ур. ');
+                levels.append('(' + gameTranslate('ур.') + ' ');
                 monster.levels.forEach(function (levelData, index) {
                     if (index > 0) levels.append(', ');
 
@@ -2648,7 +2679,7 @@
                     level.textContent = levelData.value;
                     if (levelData.info_url) {
                         level.href = levelData.info_url;
-                        level.title = 'Открыть информацию о монстре';
+                        level.title = gameTranslate('Открыть информацию о монстре');
                         level.style.cssText = 'color:inherit;';
                         level.addEventListener('click', function (event) {
                             event.preventDefault();
@@ -2662,7 +2693,7 @@
 
                 if (monster.is_boss) {
                     const boss = document.createElement('span');
-                    boss.textContent = 'БОСС';
+                    boss.textContent = gameTranslate('БОСС');
                     boss.style.cssText = 'margin-left:5px;color:#8b2000;font-size:10px;font-weight:bold;';
                     item.appendChild(boss);
                 }
@@ -2683,7 +2714,7 @@
         _ptsModalMode = 'points';
         document.getElementById('pts-overlay').style.display = 'none';
         document.getElementById('pts-modal').style.display = 'none';
-        document.getElementById('pts-modal-title').textContent = 'Распределение очков';
+        document.getElementById('pts-modal-title').textContent = gameTranslate('Распределение очков');
         document.getElementById('pts-modal-points-content').style.display = '';
         document.getElementById('pts-modal-map-monsters-content').style.display = 'none';
     }
@@ -2694,7 +2725,7 @@
         const resourcesContent = document.getElementById('pts-modal-map-monsters-content');
 
         _ptsModalMode = 'map-resources';
-        title.textContent = 'Ресурсы: ' + data.map;
+        title.textContent = gameTranslate('Ресурсы:') + ' ' + data.map;
         pointsContent.style.display = 'none';
         resourcesContent.style.display = '';
         resourcesContent.replaceChildren();
@@ -2702,9 +2733,9 @@
         if (data.error) {
             resourcesContent.textContent = data.error;
         } else if (!Array.isArray(data.resources)) {
-            resourcesContent.textContent = 'Загрузка…';
+            resourcesContent.textContent = gameTranslate('Загрузка…');
         } else if (data.resources.length === 0) {
-            resourcesContent.textContent = 'На этой карте добываемые ресурсы не настроены.';
+            resourcesContent.textContent = gameTranslate('На этой карте добываемые ресурсы не настроены.');
         } else {
             const list = document.createElement('ul');
             list.style.cssText = 'margin:0;padding:7px;list-style:none;';
@@ -2715,7 +2746,7 @@
 
                 if (resource.info_url) {
                     item.href = resource.info_url;
-                    item.title = 'Открыть информацию о ресурсе';
+                    item.title = gameTranslate('Открыть информацию о ресурсе');
                     item.style.cursor = 'pointer';
                     item.addEventListener('click', function (event) {
                         event.preventDefault();
@@ -2740,7 +2771,7 @@
                 details.appendChild(name);
 
                 const skill = document.createElement('span');
-                skill.textContent = resource.skill_name + ' ' + resource.required_level + ' ур.';
+                skill.textContent = resource.skill_name + ' ' + resource.required_level + ' ' + gameTranslate('ур.');
                 skill.style.cssText = 'color:#89552e;font-size:10px;';
                 details.appendChild(skill);
 
@@ -2758,7 +2789,7 @@
     function openGameMessageModal(data) {
         document.getElementById('game-message-title').textContent = data.title;
         document.getElementById('game-message-content').textContent = data.message;
-        setGameMessageModalActions(data.actions || [{ label: 'Закрыть', onClick: closeGameMessageModal }]);
+        setGameMessageModalActions(data.actions || [{ label: gameTranslate('Закрыть'), onClick: closeGameMessageModal }]);
         document.getElementById('game-message-overlay').style.display = 'block';
         document.getElementById('game-message-modal').style.display = 'block';
     }
@@ -2768,9 +2799,9 @@
             title: data.title,
             message: data.message,
             actions: [
-                { label: data.cancelLabel || 'Отмена', onClick: closeGameMessageModal },
+                { label: data.cancelLabel || gameTranslate('Отмена'), onClick: closeGameMessageModal },
                 {
-                    label: data.confirmLabel || 'Ок',
+                    label: data.confirmLabel || gameTranslate('Ок'),
                     onClick: function () {
                         closeGameMessageModal();
                         data.onConfirm();
@@ -2806,8 +2837,15 @@
 
     @if(session('party_success') || session('party_error'))
         openGameMessageModal({
-            title: @json(session('party_error') ? 'Ошибка группы' : 'Группа'),
+            title: @json(session('party_error') ? __('Ошибка группы') : __('Группа')),
             message: @json(session('party_success') ?? session('party_error')),
+        });
+    @endif
+
+    @if(session('clan_success') || session('clan_error'))
+        openGameMessageModal({
+            title: @json(session('clan_error') ? __('Ошибка клана') : __('Клан')),
+            message: @json(session('clan_success') ?? session('clan_error')),
         });
     @endif
 

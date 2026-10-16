@@ -71,7 +71,7 @@ class ClanSkillReagentSeeder extends Seeder
         $created = 0;
 
         foreach (self::ITEMS as $data) {
-            $item = ShareItem::firstOrNew(['name' => $data['name']]);
+            $item = ShareItem::query()->where('name->ru', $data['name'])->first() ?? new ShareItem(['name' => $data['name']]);
 
             if ($item->exists) {
                 continue;

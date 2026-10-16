@@ -4,6 +4,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
@@ -16,9 +17,9 @@ use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Share\Domain\Enums\CombatPassiveType;
 
 readonly class MonsterAttackService
 {
@@ -43,7 +44,7 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $monster->min_dmg, $monster->max_dmg, $isMagic);
 
         if (! $isMagic && $hit->isDodge()) {
-            $result->log(sprintf('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', $monster->name));
+            $result->log(BattleLogTranslator::format('<p>%s атакует неудачно... Вы <b class="color-green">увернулись</b></p>', BattleLogTranslator::contentName($monster)));
 
             return;
         }
@@ -55,10 +56,10 @@ readonly class MonsterAttackService
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $msg = $isMagic
-            ? sprintf('<p>%s использует магическую атаку! <br>Повреждения: <b class="color-magic">%s</b></p>', $monster->name, $hit->getDamage())
+            ? BattleLogTranslator::format('<p>%s использует магическую атаку! <br>Повреждения: <b class="color-magic">%s</b></p>', BattleLogTranslator::contentName($monster), $hit->getDamage())
             : ($hit->isCritical()
-            ? sprintf('<p>%s прыгнул на вас. <b class="color-red">нанесен критический удар!</b> <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage())
-            : sprintf('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', $locationMonster->monster->name, $hit->getDamage()));
+            ? BattleLogTranslator::format('<p>%s прыгнул на вас. <b class="color-red">нанесен критический удар!</b> <br>Повреждения: <b>%s</b></p>', BattleLogTranslator::contentName($locationMonster->monster), $hit->getDamage())
+            : BattleLogTranslator::format('<p>%s прыгнул на вас. <br>Повреждения: <b>%s</b></p>', BattleLogTranslator::contentName($locationMonster->monster), $hit->getDamage()));
 
         $result->log($msg);
 
@@ -117,9 +118,9 @@ readonly class MonsterAttackService
         $actualHeal = $locationMonster->hp_now - $before;
 
         if ($actualHeal > 0) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-debuff">🩸 Кровавый Голод восстанавливает %s %d HP!</b></p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $actualHeal,
             ));
         }
@@ -144,7 +145,7 @@ readonly class MonsterAttackService
         if ($shield > 0 && $this->random->chance($shield)) {
             $hit->setDamage(0);
 
-            $result->log('<p><b class="color-reflect">🛡 Руна полностью заблокировала атаку!</b></p>');
+            $result->log(BattleLogTranslator::format('<p><b class="color-reflect">🛡 Руна полностью заблокировала атаку!</b></p>'));
 
             return;
         }
@@ -154,10 +155,10 @@ readonly class MonsterAttackService
             $reflectedDamage = max(1, (int) round($hit->getDamage() * $reflect / 100));
             $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflectedDamage);
 
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-reflect">🔁 Руна отражает %d%% урона назад! %s получает %d урона!</b></p>',
                 $reflect,
-                $locationMonster->monster->name,
+                BattleLogTranslator::contentName($locationMonster->monster),
                 $reflectedDamage
             ));
         }
@@ -183,7 +184,7 @@ readonly class MonsterAttackService
 
         $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflected);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-reflect">🛡 Щит заблокировал удар и отразил %d урона обратно!</b></p>',
             $reflected
         ));
@@ -317,9 +318,9 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $minDmg, $maxDmg, $isMagic);
 
         if (! $isMagic && $hit->isDodge()) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> атакует неудачно... Вы <b class="color-green">увернулись</b></p>',
-                $monster->name
+                BattleLogTranslator::contentName($monster)
             ));
 
             return;
@@ -332,26 +333,26 @@ readonly class MonsterAttackService
         $player->hp_now = max(0, $player->hp_now - $hit->getDamage());
 
         $modifierText = $totalModifier > 0
-            ? sprintf(' <span class="color-enrage">(урон +%d%%)</span>', $totalModifier)
+            ? BattleLogTranslator::format(' <span class="color-enrage">(урон +%d%%)</span>', $totalModifier)
             : '';
 
         $msg = $isMagic
-            ? sprintf(
+            ? BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует магическую атаку%s! <br>Повреждения: <b class="color-magic">%s</b></p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $modifierText,
                 $hit->getDamage(),
             )
             : ($hit->isCritical()
-            ? sprintf(
+            ? BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> набрасывается на вас%s. <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b></p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $modifierText,
                 $hit->getDamage()
             )
-            : sprintf(
+            : BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> атакует вас%s! <br>Повреждения: <b>%s</b></p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $modifierText,
                 $hit->getDamage()
             ));
@@ -410,9 +411,9 @@ readonly class MonsterAttackService
         $hit = $this->resolveHit($monster, $sheet, $skillMinDmg, $skillMaxDmg, $isMagic, $powerCoefficient);
 
         if (! $isMagic && $hit->isDodge()) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b>%s</b>, но вы <b class="color-green">увернулись</b>!</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $skill->skill_name ?? $randomSkill
             ));
 
@@ -428,26 +429,26 @@ readonly class MonsterAttackService
         $skillEmoji = $this->getSkillEmoji($randomSkill);
 
         $msg = $isMagic
-            ? sprintf(
+            ? BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-magic">Магический урон: %s</b> (x%.1f)</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $skillEmoji,
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
                 $damageMultiplier,
             )
             : ($hit->isCritical()
-            ? sprintf(
+            ? BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <b class="color-red">⚡ Критический удар!</b> <br>Повреждения: <b class="color-damage">%s</b> (x%.1f)</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $skillEmoji,
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
                 $damageMultiplier
             )
-            : sprintf(
+            : BattleLogTranslator::format(
                 '<p><b class="color-boss">%s</b> использует <b class="color-skill">%s %s</b>! <br>Повреждения: <b>%s</b> (x%.1f)</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 $skillEmoji,
                 $skill->skill_name ?? $randomSkill,
                 $hit->getDamage(),
@@ -465,7 +466,7 @@ readonly class MonsterAttackService
         $this->onHitEffectService->apply($player, $monster, $hit, $result, $sheet->getHpMax());
 
         if (isset($skill->parameters['effects'])) {
-            $this->applySkillEffects($player, $battle, $skill->parameters['effects'], $monster->name, $result);
+            $this->applySkillEffects($player, $battle, $skill->parameters['effects'], BattleLogTranslator::contentName($monster), $result);
         }
     }
 

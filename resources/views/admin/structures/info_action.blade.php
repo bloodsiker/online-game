@@ -30,6 +30,7 @@
                                         <th width="50" class="text-center">ID</th>
                                         <th width="100" class="text-center">Alias</th>
                                         <th>Название</th>
+                                        <th width="160">Активность</th>
                                         <th width="70"></th>
                                     </tr>
                                     </thead>
@@ -39,6 +40,7 @@
                                             <td class="text-center">{{ $action->id }}</td>
                                             <td class="text-center">{{ $action->alias }}</td>
                                             <td><a href="{{ route('admin.item.info', ['item' => $action->id]) }}" target="_blank">{{ $action->name }}</a></td>
+                                            <td>@include('admin.structures.partials.action-status')</td>
                                             <td><a href="{{ route('admin.structure.info.action_delete', ['structure' => $structure->id, 'action' => $action->id]) }}" class="mb-1 mt-1 me-1 btn btn-xs btn-danger">Удалить</a></td>
                                         </tr>
                                     @endforeach
@@ -68,6 +70,13 @@
                                     @foreach($allActions as $action)
                                         <option value="{{ $action->id }}">{{ $action->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Активность</label>
+                                <select name="is_active" class="form-control">
+                                    <option value="1">Активно</option>
+                                    <option value="0">Отключено</option>
                                 </select>
                             </div>
                         </div>

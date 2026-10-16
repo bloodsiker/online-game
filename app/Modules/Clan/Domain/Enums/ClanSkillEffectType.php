@@ -20,16 +20,16 @@ enum ClanSkillEffectType: string
     public function label(): string
     {
         return match ($this) {
-            self::STRENGTH => 'Сила',
-            self::INTUITION => 'Интуиция',
-            self::AGILITY => 'Ловкость',
-            self::INTELLIGENCE => 'Интеллект',
-            self::WISDOM => 'Мудрость',
-            self::HP_MAX => 'Макс. HP',
-            self::MP_MAX => 'Макс. MP',
-            self::ATTACK => 'Атака',
-            self::DEFENSE => 'Защита',
-            self::MAGIC_RESISTANCE => 'Магическое сопротивление',
+            self::STRENGTH => __('Сила'),
+            self::INTUITION => __('Интуиция'),
+            self::AGILITY => __('Ловкость'),
+            self::INTELLIGENCE => __('Интеллект'),
+            self::WISDOM => __('Мудрость'),
+            self::HP_MAX => __('Макс. HP'),
+            self::MP_MAX => __('Макс. MP'),
+            self::ATTACK => __('Атака'),
+            self::DEFENSE => __('Защита'),
+            self::MAGIC_RESISTANCE => __('Магическое сопротивление'),
         };
     }
 }

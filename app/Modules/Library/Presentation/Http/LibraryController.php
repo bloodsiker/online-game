@@ -86,10 +86,7 @@ class LibraryController extends Controller
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->with('category')
             ->when($categoryIds !== [], fn ($query) => $query->whereIn('category_id', $categoryIds))
-            ->when($request->filled('q'), fn ($query) => $query->where(function ($query) use ($request): void {
-                $search = '%'.$request->input('q').'%';
-                $query->where('title', 'like', $search)->orWhere('excerpt', 'like', $search)->orWhere('content', 'like', $search);
-            }))
+            ->when($request->filled('q'), fn ($query) => $query->searchTranslations('%'.mb_strtolower($request->string('q')->toString()).'%', ['title', 'excerpt', 'content']))
             ->orderBy('sort_order')
             ->orderByDesc('published_at')
             ->orderBy('id');

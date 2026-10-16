@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,7 @@ class EffectController extends Controller
             ->withCount(['magicSkills', 'monsters'])
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['q']).'%';
-                $query->where(fn ($query) => $query->where('name', 'like', $search)->orWhere('slug', 'like', $search));
+                $query->where(fn ($query) => $query->searchTranslations($search)->orWhere('slug', 'like', $search));
             })
             ->when($filters['type'] !== '' && $types->contains($filters['type']), fn ($query) => $query->where('type', $filters['type']))
             ->when(ActiveEffectType::tryFrom($filters['active_type']) !== null, fn ($query) => $query->where('active_type', $filters['active_type']))
@@ -82,7 +83,7 @@ class EffectController extends Controller
 
     private function fillEffect(Effect $effect, Request $request): void
     {
-        $effect->name = $request->input('name');
+        app(ContentTranslationEditor::class)->fill(model: $effect, request: $request);
         $effect->slug = $request->input('slug');
         $effect->type = $request->input('type');
         $effect->active_type = $request->filled('active_type')
@@ -91,7 +92,6 @@ class EffectController extends Controller
         $effect->damage_scaling_type = $request->filled('damage_scaling_type')
             ? EffectDamageScalingType::tryFrom((string) $request->input('damage_scaling_type'))
             : null;
-        $effect->description = $request->input('description');
         $effect->chance = (int) $request->input('chance', 0);
         $effect->is_stackable = (bool) $request->input('is_stackable', false);
         $effect->max_stacks = (int) $request->input('max_stacks', 1);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Battle\Domain\Contracts\FightHitInterface;
 use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
@@ -28,7 +29,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             return [
                 (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage('Заклинание не изучено или отключено'),
+                    ->setMessage(__('Заклинание не изучено или отключено')),
             ];
         }
 
@@ -36,7 +37,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             return [
                 (new FightHitDTO)
                     ->setCantCast(true)
-                    ->setMessage('Это не атакующее заклинание'),
+                    ->setMessage(__('Это не атакующее заклинание')),
             ];
         }
 
@@ -68,7 +69,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
         return [
             $hit
                 ->setMagicSkill($this->magicSkill)
-                ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))
+                ->setWeaponName(BattleLogTranslator::format('заклинанием «%s»', BattleLogTranslator::contentName($this->magicSkill)))
                 ->setWeapon(null)
                 ->setSkill($this->magicSkill->skill),
         ];

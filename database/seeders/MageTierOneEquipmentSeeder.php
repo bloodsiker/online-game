@@ -11,6 +11,7 @@ use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
@@ -89,7 +90,7 @@ class MageTierOneEquipmentSeeder extends Seeder
         $created = 0;
 
         foreach (self::ITEMS as $definition) {
-            $item = ShareItem::firstOrCreate(
+            $item = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $definition['name']],
                 [
                     'type' => ShareItemType::ARMOR,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Trade;
 
+use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use Database\Seeders\LibraryFreeTradeSeeder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -66,6 +67,10 @@ class LibraryFreeTradeSeederTest extends TestCase
 
     public function test_publishes_article_and_appends_link_without_replacing_existing_content(): void
     {
+        $overviewArticle = LibraryArticle::query()->where('slug', 'mirnye-navyki')->firstOrFail();
+        $overviewArticle->setTranslation('content', 'uk', '<p>Українське авторське оформлення</p>');
+        $overviewArticle->save();
+
         (new LibraryFreeTradeSeeder)->run();
 
         $article = DB::table('library_articles')->where('slug', 'volnyy-torg')->first();
@@ -75,9 +80,10 @@ class LibraryFreeTradeSeederTest extends TestCase
         $this->assertStringContainsString('[[item:123]]', $article->content);
         $this->assertStringContainsString('Хельга', $article->content);
         $this->assertStringContainsString('Навык 50', $article->content);
-        $overview = DB::table('library_articles')->where('slug', 'mirnye-navyki')->value('content');
-        $this->assertStringStartsWith('<p>Авторское оформление</p>', $overview);
-        $this->assertStringContainsString('/library/volnyy-torg?category=professii', $overview);
+        $overview = json_decode(DB::table('library_articles')->where('slug', 'mirnye-navyki')->value('content'), true);
+        $this->assertStringStartsWith('<p>Авторское оформление</p>', $overview['ru']);
+        $this->assertStringContainsString('/library/volnyy-torg?category=professii', $overview['ru']);
+        $this->assertSame('<p>Українське авторське оформлення</p>', $overview['uk']);
     }
 
     public function test_repeated_run_does_not_duplicate_link_or_replace_manual_edits(): void

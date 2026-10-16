@@ -11,7 +11,7 @@
         <td class="tbl-shp_sml-top" valign="top" align="center">
             <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt=""></td>
-                <td class="tbl-usi_label-center">Изученные навыки</td>
+                <td class="tbl-usi_label-center">{{ __('Изученные навыки') }}</td>
                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt=""></td>
             </tr></tbody></table>
         </td>
@@ -28,14 +28,14 @@
                         $magicSkill = $levelData?->magicSkill;
                         $image = $magicSkill?->image ?: resolve_storage_image_url($definition->icon) ?: $fallbackImage;
                         $meta = [
-                            ['label' => 'Уровень', 'value' => $learnedSkill->current_level.' / '.$definition->max_level],
+                            ['label' => __('Уровень'), 'value' => $learnedSkill->current_level.' / '.$definition->max_level],
                         ];
 
                         if ($magicSkill) {
-                            $meta[] = ['label' => 'Тип', 'value' => $magicSkill->is_passive ? 'Пассивный навык' : 'Активный навык'];
+                            $meta[] = ['label' => __('Тип'), 'value' => $magicSkill->is_passive ? __('Пассивный навык') : __('Активный навык')];
 
                             foreach ($magicSkill->effects ?? [] as $effect) {
-                                $effectName = ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? 'Бонус');
+                                $effectName = ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? __('Бонус'));
                                 $effectValue = ($effect['value'] ?? 0).(! empty($effect['is_percent']) ? '%' : '');
                                 $meta[] = ['label' => $effectName, 'value' => '+'.$effectValue];
                             }
@@ -45,7 +45,7 @@
                     @endphp
                     <a href="{{ $skillUrl }}" class="clan-skill-icon"
                        data-tooltip-container="clan_skill_alt"
-                       data-tooltip-type="Клановый навык"
+                       data-tooltip-type="{{ __('Клановый навык') }}"
                        data-tooltip-name="{{ $definition->name }}"
                        data-tooltip-image="{{ $image }}"
                        data-tooltip-description="{{ strip_tags((string) $definition->description) }}"
@@ -60,7 +60,7 @@
                         <img src="{{ $image }}" width="60" height="60" alt="{{ $definition->name }}">
                     </a>
                 @empty
-                    <div style="padding: 22px 4px; text-align: center;">Клан пока не изучил ни одного навыка.</div>
+                    <div style="padding: 22px 4px; text-align: center;">{{ __('Клан пока не изучил ни одного навыка.') }}</div>
                 @endforelse
             </div>
         </td>

@@ -28,7 +28,7 @@ class AddReputationCartItem
         }
 
         $shopItem = $this->readRepository->findShopItemOrFail($reputation->id, $shopItemId);
-        $pr = $this->reputationService->getOrCreate($user->player, $reputation);
+        $pr = $this->reputationService->getOrZero($user->player, $reputation);
 
         if ($pr->points < $shopItem->min_points) {
             return new ReputationActionResultDTO(false, 'Недостаточно очков репутации для этого товара.');

@@ -35,7 +35,7 @@ class PremiumShopItemTooltipStrategy implements ItemTooltipStrategyInterface
                 diamond: $shopItem->diamond
                     ? sprintf('<span title=""><img src="%s" border=0 width=11 height=11 align=absmiddle></span> %s', asset('img/icon/m_dmd.gif'), $shopItem->diamond)
                     : '',
-                lev: ['title' => ' Уровень ', 'value' => '1'],
+                lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
                 desc: $itemInfo->description ?? '',
                 store: true,

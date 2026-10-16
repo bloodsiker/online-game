@@ -3,6 +3,7 @@
 namespace App\Modules\Battle\Application\Services\Combat\Boss;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 
 readonly class BossShieldService
@@ -61,14 +62,14 @@ readonly class BossShieldService
 
         // Логуємо урон по щиту
         if ($shield['hp'] > 0) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-shield">🛡️ Щит поглинає %d урону! (Залишилось: %d/%d)</b></p>',
                 $damageToShield,
                 $shield['hp'],
                 $shield['max_hp']
             ));
         } else {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-shield-break">💥 Щит зламано! Поглинуто %d урону, пробито %d урону!</b></p>',
                 $damageToShield,
                 $remainingDamage
@@ -104,7 +105,7 @@ readonly class BossShieldService
 
         // Перевіряємо чи закінчився щит
         if ($shield['expires_at_turn'] <= $battle->rounds) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-info">🛡️ Щит босса рассеялся!</b></p>'
             ));
             $this->removeShield($battle);

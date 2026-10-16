@@ -27,7 +27,7 @@ class OrdenHuntersReworkSeeder extends Seeder
 
     private function deleteOldQuests(): void
     {
-        $oldQuests = Quest::where('title', 'like', '[Орден]%')->get();
+        $oldQuests = Quest::where('title->ru', 'like', '[Орден]%')->get();
 
         foreach ($oldQuests as $quest) {
             $questPlayerIds = QuestPlayer::where('quest_id', $quest->id)->pluck('id');
@@ -37,7 +37,7 @@ class OrdenHuntersReworkSeeder extends Seeder
 
         // Сначала рвём self-FK цепочек, затем удаляем
         // (objectives/rewards/tier-links удаляются каскадом)
-        Quest::where('title', 'like', '[Орден]%')->update(['after_quest_id' => null, 'parent_quest_id' => null]);
+        Quest::where('title->ru', 'like', '[Орден]%')->update(['after_quest_id' => null, 'parent_quest_id' => null]);
         foreach ($oldQuests as $quest) {
             $quest->delete();
         }

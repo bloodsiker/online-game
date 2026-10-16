@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Interface\Application\Jobs;
 
+use App\Modules\Interface\Application\Services\PlayerOnlinePresenceService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -30,13 +31,12 @@ final class UpdatePlayerOnlinePresence implements ShouldQueue
     public function handle(): void
     {
         $seenAt = CarbonImmutable::instance($this->seenAt);
-
-        User::query()
+        $userId = User::query()
             ->where('player_id', $this->playerId)
-            ->where(function ($query) use ($seenAt): void {
-                $query->whereNull('last_online_at')
-                    ->orWhere('last_online_at', '<', $seenAt);
-            })
-            ->update(['last_online_at' => $seenAt]);
+            ->value('id');
+
+        if ($userId !== null) {
+            app(PlayerOnlinePresenceService::class)->touch((int) $userId, $seenAt);
+        }
     }
 }

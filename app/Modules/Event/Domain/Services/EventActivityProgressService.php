@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Event\Domain\Services;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Event\Domain\Enums\ActivityBonusRewardType;
 use App\Modules\Event\Infrastructure\Persistence\Models\EventActivity;
@@ -67,7 +68,10 @@ class EventActivityProgressService
 
             $this->chatService->sendSystemToUser(
                 $player->user,
-                "Активность «{$activity->title}» выполнена! Награда: ".implode(' | ', $rewardParts),
+                new LocalizedChatMessage('chat.activity_completed', [
+                    'title' => ['translations' => $activity->getTranslations('title')],
+                    'reward' => implode(' | ', $rewardParts),
+                ]),
             );
         });
     }

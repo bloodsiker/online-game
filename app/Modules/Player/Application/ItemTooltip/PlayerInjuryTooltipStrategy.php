@@ -29,7 +29,7 @@ final readonly class PlayerInjuryTooltipStrategy implements ItemTooltipStrategyI
                 image: $injury->imageUrl() ?? asset('img/bg/empty_slot.gif'),
                 kind: 'Травма: '.e($injury->body_part->label()),
                 price: '',
-                diamond: 'Действует ещё: '.$injury->remainingLabel(),
+                diamond: '',
                 lev: [],
                 skills: [],
                 desc: nl2br(e($injury->injuryType?->description ?? 'До окончания травмы этот слот экипировки заблокирован.')),

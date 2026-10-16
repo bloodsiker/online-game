@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -39,18 +40,18 @@ class BerserkMechanic extends BaseBossMechanic
             ? 'до конца боя'
             : "в течение {$duration} ходов";
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-berserk">😡 %s входит в состояние берсерка %s!</b></p>',
-            $context->getLocationMonster()->monster->name,
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster),
             $durationText
         ));
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p class="color-stat-change">⬆️ Атака: +%d%%</p>',
             $attackIncrease
         ));
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p class="color-stat-change">⬇️ Защита: -%d%%</p>',
             $defenseDecrease
         ));

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Распределение очков</title>
+    <title>{{ __('Распределение очков') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { height: 100%; margin: 0; }
@@ -177,25 +177,25 @@
     <div class="pts-wrap">
 
         <div class="pts-header">
-            <span class="pts-header-title">Распределение очков</span>
+            <span class="pts-header-title">{{ __('Распределение очков') }}</span>
             <span class="pts-points-badge">
-                Свободно: <b><input type="text" value="{{ $character->freeStats }}" name="points"
+                {{ __('Свободно:') }} <b><input type="text" value="{{ $character->freeStats }}" name="points"
                     style="background:transparent;border:0;font-weight:bold;font-size:13px;color:#8b2000;width:30px;padding:0;font-family:Tahoma;" readonly></b>
             </span>
         </div>
 
         <div class="pts-body">
             @foreach([
-                ['Сила',       'strength',     $character->stats->getStrength(),     $character->baseStrength],
-                ['Интуиция',   'intuition',    $character->stats->getInt(),          $character->baseIntuition],
-                ['Ловкость',   'agility',      $character->stats->getAgility(),      $character->baseAgility],
-                ['Интеллект',  'intelligence', $character->stats->getIntelligence(), $character->baseIntelligence],
-                ['Мудрость',   'wisdom',       $character->stats->getMud(),          $character->baseWisdom],
-                ['Выносливость', 'endurance',  $character->stats->getEndurance(),    $character->baseEndurance],
+                [__('Сила'),       'strength',     $character->stats->getStrength(),     $character->baseStrength],
+                [__('Интуиция'),   'intuition',    $character->stats->getInt(),          $character->baseIntuition],
+                [__('Ловкость'),   'agility',      $character->stats->getAgility(),      $character->baseAgility],
+                [__('Интеллект'),  'intelligence', $character->stats->getIntelligence(), $character->baseIntelligence],
+                [__('Мудрость'),   'wisdom',       $character->stats->getMud(),          $character->baseWisdom],
+                [__('Выносливость'), 'endurance',  $character->stats->getEndurance(),    $character->baseEndurance],
             ] as [$label, $key, $full, $base])
                 <div class="pts-row">
                     <span class="pts-row-name">{{ $label }}</span>
-                    <span class="pts-row-current" title="Полное значение">{{ $full }}</span>
+                    <span class="pts-row-current" title="{{ __('Полное значение') }}">{{ $full }}</span>
                     <div class="pts-row-controls">
                         <button type="button" class="pts-btn" onclick="decval('{{ $key }}')">−</button>
                         <input type="text" name="{{ $key }}" value="0" size="3"
@@ -209,12 +209,12 @@
         </div>
 
         <div class="pts-save-wrap">
-            <span class="butt1 pointer"><span><input value="Сохранить" type="submit"></span></span>
+            <span class="butt1 pointer"><span><input value="{{ __('Сохранить') }}" type="submit"></span></span>
         </div>
 
         <div class="pts-tip">
-            <b>Подсказка:</b> На первых порах лучше распределять под оружие, так как оно в начале важнее.
-            <br><a href="/help/lib/" target="_blank">Справочник: Вещи и оружие (минимальные требования и свойства) »</a>
+            <b>{{ __('Подсказка:') }}</b> {{ __('На первых порах лучше распределять под оружие, так как оно в начале важнее.') }}
+            <br><a href="/help/lib/" target="_blank">{{ __('Справочник: Вещи и оружие (минимальные требования и свойства) »') }}</a>
         </div>
 
     </div>

@@ -17,4 +17,6 @@ enum ChatMessageType: string
     case QuestItem = 'quest_item';
     case Loot = 'loot';
     case WorldEvent = 'world_event';
+    case ClanBoss = 'clan_boss';
+    case ClanInvite = 'clan_invite';
 }

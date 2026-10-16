@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
@@ -231,10 +232,10 @@ class BattleEffectService
         $this->notifyPlayerFrame($result, $activeEffect, $displayDuration);
 
         $durationText = $isTimedControl
-            ? sprintf('%d сек.', max(1, $durationOrTicks))
-            : sprintf('%d тиков', $durationOrTicks);
+            ? BattleLogTranslator::format('%d сек.', max(1, $durationOrTicks))
+            : BattleLogTranslator::format('%d тиков', $durationOrTicks);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p class="color-debuff">%s На вас наложен эффект: <b>%s</b> (%s)</p>',
             $type->emoji(),
             $type->label(),
@@ -258,7 +259,7 @@ class BattleEffectService
 
         $result->notifyPlayerEffect(new PlayerEffectNotificationDTO(
             id: ($definition?->slug ?? 'effect').'_'.$activeEffect->id,
-            name: $definition?->name ?? ($type?->label() ?? 'Эффект'),
+            name: $definition?->name ?? __($type?->label() ?? 'Эффект'),
             duration: $durationSeconds,
             isCurse: $isCurse,
             image: $definition?->image,
@@ -310,13 +311,13 @@ class BattleEffectService
         ]);
 
         $durationText = $isTimedControl
-            ? sprintf('%d сек.', max(1, $durationSeconds))
-            : sprintf('%d ход(а)', $durationSeconds);
+            ? BattleLogTranslator::format('%d сек.', max(1, $durationSeconds))
+            : BattleLogTranslator::format('%d ход(а)', $durationSeconds);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p class="color-debuff">%s %s получает эффект: <b>%s</b> (%s)</p>',
             $type->emoji(),
-            $locMonster->monster->name,
+            BattleLogTranslator::contentName($locMonster->monster),
             $type->label(),
             $durationText,
         ));
@@ -331,7 +332,7 @@ class BattleEffectService
         $now = now();
         $tickResult = $this->timedEffectService->process($player, $now);
         foreach ($tickResult->effects as $processedEffect) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
                 $processedEffect['emoji'],
                 $processedEffect['label'],
@@ -353,7 +354,7 @@ class BattleEffectService
 
             if ($effect->expires_at !== null && $effect->expires_at->lte($now) && ! $effect->isDoT()) {
                 if ($effect->isControl()) {
-                    $result->log(sprintf(
+                    $result->log(BattleLogTranslator::format(
                         '<p class="color-info">%s Эффект <b>%s</b> рассеялся.</p>',
                         $effect->type->emoji(),
                         $effect->type->label(),
@@ -368,7 +369,7 @@ class BattleEffectService
             if ($effect->isControl()) {
                 $isStunned = true;
                 $remainingSeconds = max(1, (int) $now->diffInSeconds($effect->expires_at, false));
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p class="color-debuff">%s Вы под эффектом <b>%s</b> и не можете атаковать! (осталось %d сек.)</p>',
                     $effect->type->emoji(),
                     $effect->type->label(),
@@ -386,7 +387,7 @@ class BattleEffectService
                 $heal = (int) $effect->current_value;
                 $player->hp_now = min($player->hp_max, $player->hp_now + $heal);
 
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p class="color-buff">%s <b>Регенерация</b> восстанавливает %d HP!</p>',
                     $effect->type->emoji(),
                     $heal
@@ -437,10 +438,10 @@ class BattleEffectService
             // DoT сначала обязан забрать все тики, накопившиеся до момента
             // истечения; остальные эффекты можно снять сразу.
             if ($effect->expires_at !== null && $effect->expires_at->lte($now) && ! $effect->isDoT()) {
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p class="color-info">✨ Эффект <b>%s</b> на %s рассеялся.</p>',
-                    $effect->effect?->name ?? 'заклинания',
-                    $locMonster->monster->name,
+                    $effect->effect ? BattleLogTranslator::contentName($effect->effect) : 'заклинания',
+                    BattleLogTranslator::contentName($locMonster->monster),
                 ));
                 $effect->delete();
 
@@ -450,10 +451,10 @@ class BattleEffectService
             if ($effect->isControl()) {
                 $isStunned = true;
                 $remainingSeconds = max(1, (int) $now->diffInSeconds($effect->expires_at, false));
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p class="color-debuff">%s %s под эффектом <b>%s</b> и не может атаковать! (осталось %d сек.)</p>',
                     $effect->type->emoji(),
-                    $locMonster->monster->name,
+                    BattleLogTranslator::contentName($locMonster->monster),
                     $effect->type->label(),
                     $remainingSeconds,
                 ));
@@ -483,22 +484,22 @@ class BattleEffectService
                     $effect->last_tick_at = $lastTickAt->copy()->addSeconds($dueTicks * $tickSeconds);
                     $effect->stacks = max(0, (int) $effect->stacks - $dueTicks);
 
-                    $result->log(sprintf(
+                    $result->log(BattleLogTranslator::format(
                         '<p class="color-debuff">%s <b>%s</b> от вашего заклинания наносит %s %d урона!</p>',
                         $effect->type->emoji(),
                         $effect->type->label(),
-                        $locMonster->monster->name,
+                        BattleLogTranslator::contentName($locMonster->monster),
                         $damage,
                     ));
 
                 }
 
                 if ($effect->expires_at !== null && $effect->expires_at->lte($now)) {
-                    $result->log(sprintf(
+                    $result->log(BattleLogTranslator::format(
                         '<p class="color-info">%s Эффект <b>%s</b> на %s рассеялся.</p>',
                         $effect->type->emoji(),
                         $effect->type->label(),
-                        $locMonster->monster->name,
+                        BattleLogTranslator::contentName($locMonster->monster),
                     ));
                     $effect->delete();
                 } elseif ($dueTicks > 0) {

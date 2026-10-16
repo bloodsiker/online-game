@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клан — Логи</title>
+    <title>{{ __('Клан — Логи') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html { height: 100%; }
@@ -56,7 +56,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.logs'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.logs'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
@@ -70,7 +70,7 @@
                         <table border="0" cellspacing="0" cellpadding="0">
                             <tbody><tr height="22">
                                 <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                                <td align="center" class="tbl-usi_label-center">Логи клана</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Логи клана') }}</td>
                                 <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                             </tr></tbody>
                         </table>
@@ -85,10 +85,10 @@
                         <form method="get" action="{{ route('clan.logs') }}">
                             <table border="0" cellpadding="0" cellspacing="0" class="pg" style="margin-bottom:6px;width:60%">
                                 <tbody><tr>
-                                    <td class="b" style="padding: 3px 6px; white-space:nowrap">Тип события:</td>
+                                    <td class="b" style="padding: 3px 6px; white-space:nowrap">{{ __('Тип события:') }}</td>
                                     <td style="padding:2px 4px">
                                         <select name="action" class="dbgl brd" style="font-family:Tahoma;font-size:11px;color:#631c0b">
-                                            <option value="">— все —</option>
+                                            <option value="">— {{ __('все') }} —</option>
                                             @foreach($actions as $action)
                                                 <option value="{{ $action->value }}" {{ $filterAction === $action->value ? 'selected' : '' }}>
                                                     {{ $action->label() }}
@@ -96,16 +96,16 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td class="b" style="padding: 3px 6px; white-space:nowrap">Игрок:</td>
+                                    <td class="b" style="padding: 3px 6px; white-space:nowrap">{{ __('Игрок:') }}</td>
                                     <td style="padding:2px 4px">
                                         <input type="text" name="player" value="{{ $filterUser }}" class="dbgl brd" style="width:128px;font-family:Tahoma;font-size:11px">
                                     </td>
                                     <td style="padding:2px 6px">
-                                        <b class="butt2 pointer"><b><input value="Применить" type="submit" style="width:80px"></b></b>
+                                        <b class="butt2 pointer"><b><input value="{{ __('Применить') }}" type="submit" style="width:80px"></b></b>
                                     </td>
                                     @if($filterAction || $filterUser)
                                         <td style="padding:2px 6px">
-                                            <b class="butt2 pointer"><b><a href="{{ route('clan.logs') }}" style="color:#8b0000"><input value="Сбросить" type="button" onclick="location.href='{{ route('clan.logs') }}'" style="width:80px"></a></b></b>
+                                            <b class="butt2 pointer"><b><a href="{{ route('clan.logs') }}" style="color:#8b0000"><input value="{{ __('Сбросить') }}" type="button" onclick="location.href='{{ route('clan.logs') }}'" style="width:80px"></a></b></b>
                                         </td>
                                     @endif
                                 </tr></tbody>
@@ -119,10 +119,10 @@
                         <table class="log-table coll" style="margin-top:4px;width:60%">
                             <thead>
                             <tr>
-                                <th width="120">Дата</th>
-                                <th width="140">Тип события</th>
-                                <th width="110">Игрок</th>
-                                <th>Описание</th>
+                                <th width="120">{{ __('Дата') }}</th>
+                                <th width="140">{{ __('Тип события') }}</th>
+                                <th width="110">{{ __('Игрок') }}</th>
+                                <th>{{ __('Описание') }}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -135,7 +135,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" align="center" style="padding:10px;color:#888">Записей не найдено</td>
+                                    <td colspan="4" align="center" style="padding:10px;color:#888">{{ __('Записей не найдено') }}</td>
                                 </tr>
                             @endforelse
                             </tbody>

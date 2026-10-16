@@ -20,6 +20,43 @@ if (! function_exists('format_cooldown')) {
     }
 }
 
+if (! function_exists('format_game_duration')) {
+    function format_game_duration(int $seconds): string
+    {
+        $remaining = max(0, $seconds);
+        $units = [
+            [86400, ['день', 'дня', 'дней']],
+            [3600, ['час', 'часа', 'часов']],
+            [60, ['минута', 'минуты', 'минут']],
+        ];
+        $parts = [];
+
+        foreach ($units as [$unitSeconds, $forms]) {
+            $count = intdiv($remaining, $unitSeconds);
+            $remaining %= $unitSeconds;
+
+            if ($count > 0) {
+                $lastTwoDigits = $count % 100;
+                $lastDigit = $count % 10;
+                $formIndex = $lastTwoDigits >= 11 && $lastTwoDigits <= 14
+                    ? 2
+                    : match ($lastDigit) {
+                        1 => 0,
+                        2, 3, 4 => 1,
+                        default => 2,
+                    };
+                $parts[] = $count.' '.$forms[$formIndex];
+            }
+        }
+
+        if ($remaining > 0 && $parts === []) {
+            $parts[] = $remaining.' сек.';
+        }
+
+        return $parts === [] ? '0 минут' : implode(' ', $parts);
+    }
+}
+
 if (! function_exists('format_money')) {
     function format_money($money, $decimal = 0, $decimalSeparator = '', $thousandsSeparator = ' '): string
     {

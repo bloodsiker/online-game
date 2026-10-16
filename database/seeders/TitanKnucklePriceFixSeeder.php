@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Кастет «Титан» (все 4 тира, включая только что достроенный uncommon
@@ -35,7 +35,7 @@ class TitanKnucklePriceFixSeeder extends Seeder
     {
         $updated = 0;
         foreach (self::PRICES as $itemId => $price) {
-            $updated += DB::table('share_items')->where('id', $itemId)->update([
+            $updated += LocalizedItemSeederQuery::items()->where('id', $itemId)->update([
                 'price' => $price,
                 'updated_at' => now(),
             ]);

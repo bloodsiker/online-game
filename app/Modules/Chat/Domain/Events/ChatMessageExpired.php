@@ -26,12 +26,18 @@ final class ChatMessageExpired implements ShouldBroadcastNow
 
     public readonly ?int $targetUserId;
 
+    public readonly ?int $clanId;
+
+    public readonly string $type;
+
     public function __construct(ChatMessage $message)
     {
         $this->messageId = (int) $message->id;
         $this->channel = $message->channel;
         $this->senderUserId = $message->user_id === null ? null : (int) $message->user_id;
         $this->targetUserId = $message->target_user_id === null ? null : (int) $message->target_user_id;
+        $this->clanId = $message->clan_id === null ? null : (int) $message->clan_id;
+        $this->type = $message->type?->value ?? 'message';
     }
 
     /** @return list<PrivateChannel> */
@@ -39,6 +45,16 @@ final class ChatMessageExpired implements ShouldBroadcastNow
     {
         if ($this->channel === ChatChannel::System) {
             return [new PrivateChannel('chat.system')];
+        }
+
+        if ($this->channel === ChatChannel::Clan && $this->type === 'clan_boss') {
+            return array_map(
+                static fn (string $name): PrivateChannel => new PrivateChannel($name),
+                array_filter([
+                    $this->clanId === null ? null : 'chat.clan.'.$this->clanId,
+                    'chat.main',
+                ]),
+            );
         }
 
         return collect([$this->senderUserId, $this->targetUserId])

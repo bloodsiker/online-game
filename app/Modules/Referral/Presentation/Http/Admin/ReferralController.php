@@ -18,7 +18,7 @@ final class ReferralController
     {
         $stages = ReferralRewardStage::with('rewardItem')->orderBy('level_threshold')->get();
         $rewardTypes = ReferralRewardType::cases();
-        $items = ShareItem::orderBy('name')->get(['id', 'name']);
+        $items = ShareItem::orderBy('name->ru')->get(['id', 'name']);
 
         return view('referral::admin.stages', compact('stages', 'rewardTypes', 'items'));
     }

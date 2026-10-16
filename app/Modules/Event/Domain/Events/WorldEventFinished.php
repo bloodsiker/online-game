@@ -14,5 +14,6 @@ final class WorldEventFinished
         public readonly int $eventId,
         public readonly int $runId,
         public readonly string $title,
+        public readonly ?array $titleTranslations = null,
     ) {}
 }

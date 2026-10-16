@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Список игнора</title>
+    <title>{{ __('Список игнора') }}</title>
     <style>
         body { font-family: Tahoma; font-size: 12px; background: #ffe4aa; margin: 5px; }
         table { border-collapse: collapse; width: 100%; }
@@ -14,14 +14,14 @@
     </style>
 </head>
 <body>
-    <h3>Список игнора</h3>
+    <h3>{{ __('Список игнора') }}</h3>
 
     @if ($ignores->isEmpty())
-        <p>Список пуст.</p>
+        <p>{{ __('Список пуст.') }}</p>
     @else
         <table>
             <thead>
-                <tr><th>Игрок</th><th></th></tr>
+                <tr><th>{{ __('Игрок') }}</th><th></th></tr>
             </thead>
             <tbody>
                 @foreach ($ignores as $ignore)
@@ -32,7 +32,7 @@
                             <a class="btn-remove"
                                href="#"
                                onclick="removeIgnore({{ $targetUser?->id }}); return false;">
-                                удалить
+                                {{ __('удалить') }}
                             </a>
                         </td>
                     </tr>

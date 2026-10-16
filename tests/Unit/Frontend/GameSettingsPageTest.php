@@ -113,7 +113,7 @@ final class GameSettingsPageTest extends TestCase
         @$document->loadHTML('<?xml encoding="UTF-8">'.$html);
         $xpath = new \DOMXPath($document);
         $controls = $xpath->query('//div[@class="game-settings-control" or @class="game-settings-security"]');
-        $this->assertSame(15, $controls->length);
+        $this->assertSame(17, $controls->length);
         foreach ($controls as $control) {
             $this->assertNotEmpty($control->getAttribute('data-setting-hint'));
         }

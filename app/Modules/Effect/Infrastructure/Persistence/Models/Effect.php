@@ -9,6 +9,7 @@ use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Effect extends Model
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
 
     protected $table = 'effects';
 

@@ -101,7 +101,7 @@ final class MapInfluenceService
                 user: $user,
                 mapName: $map instanceof Map
                     ? $map->name
-                    : (string) (Map::query()->whereKey($mapId)->value('name') ?? "Карта #{$mapId}"),
+                    : (string) (Map::query()->find($mapId)?->name ?? "Карта #{$mapId}"),
                 amount: $amount,
                 total: $after,
             );

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Location\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Location\Application\UseCases\GetGatheringPage;
 use App\Modules\Location\Application\UseCases\GetLocationPage;
 use App\Modules\Location\Application\UseCases\GetMapsPage;
@@ -27,6 +28,7 @@ class LocationController extends Controller
         private readonly GetTakeItemsPage $getTakeItemsPage,
         private readonly PassThroughGate $passThroughGate,
         private readonly GatheringService $gatheringService,
+        private readonly ClanBossService $clanBossService,
     ) {}
 
     public function index(): mixed
@@ -41,6 +43,7 @@ class LocationController extends Controller
                 'player' => $result->fight->player,
                 'playerDecorator' => $result->fight->playerDecorator,
                 'randomAttackedMonster' => $result->fight->randomAttackedMonster,
+                'hitsLeft' => $this->clanBossService->hitsLeftForBattleDetail($result->fight->randomAttackedMonster, $user),
             ]);
         }
 

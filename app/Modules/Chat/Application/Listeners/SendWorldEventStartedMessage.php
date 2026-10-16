@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Application\Listeners;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Event\Domain\Events\WorldEventStarted;
@@ -15,25 +16,19 @@ final class SendWorldEventStartedMessage
     public function handle(WorldEventStarted $event): void
     {
         $url = route('events', ['mode' => 'events']).'#event-run-'.$event->runId;
-        $eventLink = sprintf(
-            '<a href="%s" style="color:inherit;text-decoration:underline" onclick="try{window.top.toggleMap(false);window.top.toLocation(this.href,true);return false;}catch(e){}"><em>«%s»</em></a>',
-            e($url),
-            e($event->title),
-        );
-        $mapLink = '<em>«'.e($event->mapName).'»</em>';
+        $eventTitle = $event->titleTranslations === null
+            ? $event->title
+            : ['translations' => $event->titleTranslations];
+        $mapTitle = $event->mapNameTranslations === null
+            ? $event->mapName
+            : ['translations' => $event->mapNameTranslations];
+        $eventLink = new LocalizedChatMessage('chat.event_link', ['url' => $url, 'title' => $eventTitle]);
+        $mapLink = new LocalizedChatMessage('chat.map_name', ['title' => $mapTitle]);
         if ($event->mapSlug !== null) {
-            $mapLink = sprintf(
-                '<a href="%s" style="color:inherit;text-decoration:underline" onclick="window.open(this.href,\'\',\'width=1000,height=750,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no\');return false;"><em>«%s»</em></a>',
-                e(route('map.public', ['slug' => $event->mapSlug])),
-                e($event->mapName),
-            );
+            $mapLink = new LocalizedChatMessage('chat.map_link', ['url' => route('map.public', ['slug' => $event->mapSlug]), 'title' => $mapTitle]);
         }
 
-        $message = sprintf(
-            ':speak: Началось событие %s! Отправляйтесь на карту %s.',
-            $eventLink,
-            $mapLink,
-        );
+        $message = new LocalizedChatMessage('chat.world_event_started', ['event' => $eventLink, 'map' => $mapLink]);
 
         $this->chatService->sendSystem(
             message: $message,

@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
         $this->call(VolnyyTorgSeeder::class);
         $this->call(SurvivalArenaSeeder::class);
         $this->call(TowerDungeonSeeder::class);
+        $this->call(ClanBossStructureSeeder::class);
+        $this->call(ClanBossDungeonSeeder::class);
         $this->call(BuffSkillSeeder::class);
         // Порядок важен: MagicBookStarterSeeder::bookifyExistingAttackSpells()
         // оборачивает в книги три заклинания (fire_spark/flame_barrage/
@@ -42,5 +44,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LibraryEquipmentSeeder::class);
         $this->call(LibraryEventsSeeder::class);
         $this->call(LibrarySkillsSeeder::class);
+        $this->call(LibraryClanBossesSeeder::class);
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 final class UserProfile extends Model
 {
-    protected $fillable = ['user_id', 'real_name', 'birth_date', 'residence', 'motto', 'about'];
+    protected $fillable = ['user_id', 'sex', 'real_name', 'birth_date', 'residence', 'motto', 'about', 'avatar'];
 
     protected function casts(): array
     {

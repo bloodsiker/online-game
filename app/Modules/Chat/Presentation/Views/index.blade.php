@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __('Игра') }}</title>
     <style>
         html {
             height: 100%;
@@ -262,21 +262,21 @@
                                             <td height="35">
 
                                                 <div class="channel-tabs-container" style="width: 100%;">
-                                                    <ul id="channel_tabs" title="Каналы чата">
+                                                    <ul id="channel_tabs" title="{{ __('Каналы чата') }}">
                                                         <li class="channel selected"
                                                             data-channel="main" data-channel-code="1"
                                                             onclick="chatChangePreset(1)"><span
                                                                 class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #5A0000;"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Основной</span></li>
+                                                                class="text">{{ __('Основной') }}</span></li>
                                                         <li class="channel"
                                                             data-channel="location" data-channel-code="2"
                                                             onclick="chatChangePreset(2)"><span
                                                                 class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #0055cc"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Местность</span></li>
+                                                                class="text">{{ __('Местность') }}</span></li>
                                                         <li class="channel"
                                                             data-channel="trade" data-channel-code="8"
                                                             onclick="chatChangePreset(8)"><span
@@ -284,7 +284,7 @@
                                                                     class="settings-color"
                                                                     style="background-color: #cc6600;"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Торговый</span></li>
+                                                                class="text">{{ __('Торговый') }}</span></li>
                                                         @if($hasClan)
                                                             <li class="channel"
                                                                 data-channel="clan" data-channel-code="4"
@@ -292,7 +292,7 @@
                                                                     class="ch settings"><span class="settings-color"
                                                                                               style="background-color: #007a03;"></span><span
                                                                         class="settings-cover"></span></span><span
-                                                                    class="text">Клан</span></li>
+                                                                    class="text">{{ __('Клан') }}</span></li>
                                                         @endif
                                                         @if($hasParty)
                                                             <li class="channel"
@@ -301,7 +301,7 @@
                                                                     class="ch settings"><span class="settings-color"
                                                                                               style="background-color: #009999;"></span><span
                                                                         class="settings-cover"></span></span><span
-                                                                    class="text">Группа</span></li>
+                                                                    class="text">{{ __('Группа') }}</span></li>
                                                         @endif
                                                         <li class="channel"
                                                             data-channel="private" data-channel-code="32"
@@ -309,7 +309,7 @@
                                                                 class="ch settings"><span class="settings-color"
                                                                                           style="background-color: #660066;"></span><span
                                                                     class="settings-cover"></span></span><span
-                                                                class="text">Личные</span></li>
+                                                                class="text">{{ __('Личные') }}</span></li>
                                                     </ul>
 
                                                 </div>
@@ -402,7 +402,7 @@
                                             </td>
                                             <td width="13"><img id="fightlog_but_IMGL" src="{{ asset('img/bg/chat/4_left_inact.png') }}"></td>
                                             <td id="fightlog_but_TD" width="50" class="tbl-main_chatchng-ina-c">
-                                                <a id="fightlog_but_A" onclick="chatToggleFightlog();return false;" href="#" class="tbl-main_chatchng-link_inact">Лог боя</a>
+                                                <a id="fightlog_but_A" onclick="chatToggleFightlog();return false;" href="#" class="tbl-main_chatchng-link_inact">{{ __('Лог боя') }}</a>
                                             </td>
                                             <td width="20"><img id="fightlog_but_IMGR" src="{{ asset('img/bg/chat/4_right_inact.png') }}"></td>
                                         </tr>
@@ -435,31 +435,31 @@
                             <tr height="35">
                                 <td colspan="3" class="tbl-main_chat-top-right">
                                     <ul id="chat_user_list">
-                                        <li class="online selected" data-type="online" title="Список персонажей на локации" onclick="chatFrameSelect('online');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-area-icon.png') }}" alt="Локация"></span>
-                                            <span class="title">Локация</span>
+                                        <li class="online selected" data-type="online" title="{{ __('Список персонажей на локации') }}" onclick="chatFrameSelect('online');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-area-icon.png') }}" alt="{{ __('Локация') }}"></span>
+                                            <span class="title">{{ __('Локация') }}</span>
                                         </li>
                                         <li class="party" data-type="party"
-                                            title="Группа" onclick="chatFrameSelect('party');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Группа"></span>
-                                            <span class="title">Группа</span>
+                                            title="{{ __('Группа') }}" onclick="chatFrameSelect('party');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="{{ __('Группа') }}"></span>
+                                            <span class="title">{{ __('Группа') }}</span>
                                         </li>
                                         <li class="friends" data-type="friends"
-                                            title="Список друзей" onclick="chatFrameSelect('friends');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-friends-icon.png') }}" alt="Друзья"></span>
-                                            <span class="title">Друзья</span>
+                                            title="{{ __('Список друзей') }}" onclick="chatFrameSelect('friends');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-friends-icon.png') }}" alt="{{ __('Друзья') }}"></span>
+                                            <span class="title">{{ __('Друзья') }}</span>
                                         </li>
                                         @if($hasClan)
                                         <li class="clan" data-type="clan"
-                                            title="Участники клана" onclick="chatFrameSelect('clan');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="Клан"></span>
-                                            <span class="title">Клан</span>
+                                            title="{{ __('Участники клана') }}" onclick="chatFrameSelect('clan');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-party-icon.png') }}" alt="{{ __('Клан') }}"></span>
+                                            <span class="title">{{ __('Клан') }}</span>
                                         </li>
                                         @endif
                                         <li class="referrals" data-type="referrals"
-                                            title="Приглашённые игроки" onclick="chatFrameSelect('referrals');">
-                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-referals-icon.png') }}" alt="Рефералы"></span>
-                                            <span class="title">Рефералы</span>
+                                            title="{{ __('Приглашённые игроки') }}" onclick="chatFrameSelect('referrals');">
+                                            <span class="icon"><img src="{{ asset('img/bg/chat/cht-referals-icon.png') }}" alt="{{ __('Рефералы') }}"></span>
+                                            <span class="title">{{ __('Рефералы') }}</span>
                                         </li>
                                     </ul>
                                 </td>

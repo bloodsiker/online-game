@@ -12,7 +12,7 @@ use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
@@ -229,7 +229,7 @@ class HighTierEquipmentSeeder extends Seeder
     ): bool {
         $isWeapon = $type === ShareItemType::WEAPON;
 
-        $item = ShareItem::firstOrCreate(
+        $item = LocalizedItemSeederQuery::firstOrCreate(
             ['name' => $name],
             [
                 'type' => $type,
@@ -312,7 +312,7 @@ class HighTierEquipmentSeeder extends Seeder
     {
         return match ($type) {
             ShareItemType::WEAPON => self::WEAPON_SKILL_ID,
-            ShareItemType::SHIELD => Skill::where('name', self::SHIELD_SKILL_NAME)->value('id'),
+            ShareItemType::SHIELD => Skill::where('name->ru', self::SHIELD_SKILL_NAME)->value('id'),
             default => null,
         };
     }

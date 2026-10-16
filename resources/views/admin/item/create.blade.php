@@ -16,6 +16,9 @@
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" data-bs-target="#tab-translations" href="#tab-translations" data-bs-toggle="tab">Переводы</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-lock" href="#tab-lock" data-bs-toggle="tab">Замок и ловушка</a>
                             </li>
                             <li class="nav-item">
@@ -35,15 +38,12 @@
                         <form id="item-create-form" action="{{ route('admin.item.store') }}" method="post" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="tab-content">
+                                @include('admin.item.partials.translations')
 
                                 {{-- ОСНОВНАЯ --}}
                                 <div id="tab-main" class="tab-pane active">
                                     <div class="row form-group pb-3 pt-3">
                                         <div class="col-lg-4">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="name">Название</label>
-                                                <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" placeholder="">
-                                            </div>
 
                                             <div class="form-group">
                                                 <label class="col-form-label" for="type">Тип</label>
@@ -113,10 +113,6 @@
                                                 <small class="form-text text-muted">Для карточек и интерфейсов с прозрачным фоном.</small>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="description">Описание</label>
-                                                <textarea class="form-control" name="description" rows="5" id="description">{{ old('description') }}</textarea>
-                                            </div>
                                         </div>
 
                                         <div class="col-lg-3">
@@ -505,7 +501,7 @@
         </div>
     </div>
 
-@include('admin.layout.summernote', ['selector' => 'textarea[name=description]'])
+@include('admin.layout.summernote', ['selector' => 'textarea[name=description], .item-translation-description'])
 
 @push('footer_scripts')
 <script>

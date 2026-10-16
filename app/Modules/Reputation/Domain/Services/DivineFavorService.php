@@ -69,10 +69,10 @@ class DivineFavorService
 
     private function hasCurrentTierMedal(Player $player, Reputation $reputation): bool
     {
-        $playerReputation = $this->reputationService->getOrCreate($player, $reputation);
+        $playerReputation = $this->reputationService->getOrZero($player, $reputation);
         $currentTier = $this->reputationService->getCurrentTier($reputation, $playerReputation->points);
 
-        return $currentTier !== null && $currentTier->medal_name !== null;
+        return $currentTier !== null && $currentTier->hasRegularMedal();
     }
 
     private function resolveOne(Player $player, Reputation $reputation): ?array
@@ -98,7 +98,7 @@ class DivineFavorService
             ];
         }
 
-        $playerReputation = $this->reputationService->getOrCreate($player, $reputation);
+        $playerReputation = $this->reputationService->getOrZero($player, $reputation);
         $currentTier = $this->reputationService->getCurrentTier($reputation, $playerReputation->points);
 
         if ($currentTier === null || $currentTier->favor_percent === null) {
@@ -108,7 +108,7 @@ class DivineFavorService
         // Обычная медаль текущего тира уже получена (у тира есть medal_name,
         // т.е. это не самый первый безмедальный тир) — % этого тира закрепляется
         // навсегда, эликсир для него больше не нужен.
-        if ($currentTier->medal_name !== null) {
+        if ($currentTier->hasRegularMedal()) {
             return [
                 'reputation' => $reputation,
                 'type' => $type,

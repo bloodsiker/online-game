@@ -10,6 +10,7 @@ use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Enums\MonsterAttackType;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,11 +22,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Monster extends Model implements FightHitInterface
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public array $translatable = ['name', 'description'];
 
     protected $fillable = [
         'lvl', 'name', 'description', 'image', 'hp', 'armor', 'dodge', 'critical', 'min_dmg', 'max_dmg', 'aggression',
         'passive_type', 'passive_value', 'exp', 'min_money', 'max_money', 'attack_type', 'magic_attack',
-        'magic_power_coefficient', 'magic_resistance', 'is_boss', 'respawn_min_minutes', 'respawn_max_minutes',
+        'magic_power_coefficient', 'magic_resistance', 'is_boss', 'does_not_regenerate_hp', 'respawn_min_minutes', 'respawn_max_minutes',
     ];
 
     protected $attributes = [
@@ -34,6 +38,7 @@ class Monster extends Model implements FightHitInterface
 
     protected $casts = [
         'is_boss' => 'boolean',
+        'does_not_regenerate_hp' => 'boolean',
         'attack_type' => MonsterAttackType::class,
         'passive_type' => CombatPassiveType::class,
         'respawn_at' => 'datetime',

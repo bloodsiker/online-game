@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Хранилище клана</title>
+    <title>{{ __('Хранилище клана') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 12px; }
@@ -47,10 +47,10 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" nowrap="">
-                        <b>Клан:</b> {{ $clan->name }}
+                        <b>{{ __('Клан:') }}</b> {{ $clan->name }}
                     </td>
                     <td align="right" nowrap="">
-                        <b>Вместимость хранилища:</b>
+                        <b>{{ __('Вместимость хранилища:') }}</b>
                         <b class="redd">{{ $countInWarehouse }}/{{ $clan->warehouse_capacity }}</b>
                     </td>
                 </tr>
@@ -72,12 +72,12 @@
                     <tbody>
                     <tr height="17" class="bg_l">
                         <td class="brd2-top brd2" align="center">
-                            <b class="butt2 pointer" style="margin-bottom: 3px"><b><input value="забрать" type="submit" class="sell-item"></b></b>
+                            <b class="butt2 pointer" style="margin-bottom: 3px"><b><input value="{{ __('забрать') }}" type="submit" class="sell-item"></b></b>
                         </td>
-                        <td class="brd2-top brd2" align="center">К-во (шт)</td>
+                        <td class="brd2-top brd2" align="center">{{ __('К-во (шт)') }}</td>
                         <td class="brd2-top brd2" align="center"></td>
-                        <td class="brd2-top brd2" align="center">Предмет</td>
-                        <td class="brd2-top brd2" align="center">Владелец</td>
+                        <td class="brd2-top brd2" align="center">{{ __('Предмет') }}</td>
+                        <td class="brd2-top brd2" align="center">{{ __('Владелец') }}</td>
                     </tr>
                     @forelse($warehouseItems as $wItem)
                         <tr height="17" class="brd2-top brd2" align="center">
@@ -92,8 +92,8 @@
                                     <span class="cart-amount-input-cont">
                                         <span class="b-input">
                                             <span class="b-input__inner">
-                                                <span class="arrow left @if($wItem->count === 1) left-disabled @endif" onclick="shopItemCounter(this);" title="Уменьшить кол-во"></span>
-                                                <span class="arrow right right-disabled" onclick="shopItemCounter(this);" title="Увеличить кол-во"></span>
+                                                <span class="arrow left @if($wItem->count === 1) left-disabled @endif" onclick="shopItemCounter(this);" title="{{ __('Уменьшить кол-во') }}"></span>
+                                                <span class="arrow right right-disabled" onclick="shopItemCounter(this);" title="{{ __('Увеличить кол-во') }}"></span>
                                                 <input type="text" data-id="{{ $wItem->id }}" data-max="{{ $wItem->count }}" name="item[{{ $wItem->id }}][count]" value="{{ $wItem->count }}" class="cart_amount_sell_input count_sell" autocomplete="off">
                                             </span>
                                         </span>
@@ -116,12 +116,12 @@
                             <td align="left">
                                 <a href="{{ route('items.info', ['id' => $wItem->item->id]) }}" style="color:#666666" class="b">{{ $wItem->item->itemInfo->name }}</a>
                                 <br>
-                                <span title="Тип предмета">
+                                <span title="{{ __('Тип предмета') }}">
                                     <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $wItem->item->itemInfo->getTypeName() }}
                                 </span>
                             </td>
                             <td align="center">
-                                <span class="depositor-label" title="Положил: {{ $wItem->depositor->name }}">
+                                <span class="depositor-label" title="{{ __('Положил:') }} {{ $wItem->depositor->name }}">
                                     {{ $wItem->depositor->name }}<br>
                                     <span style="font-size:11px;color:#aaa;">{{ $wItem->created_at->format('d.m.Y H:i') }}</span>
                                 </span>
@@ -129,17 +129,17 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" align="center" style="padding: 10px;">Хранилище клана пусто</td>
+                            <td colspan="5" align="center" style="padding: 10px;">{{ __('Хранилище клана пусто') }}</td>
                         </tr>
                     @endforelse
                     <tr height="17" class="bg_l">
                         <td class="brd2-top brd2" align="center">
-                            <b class="butt2 pointer" style="margin-bottom: 3px"><b><input value="забрать" type="submit" class="sell-item"></b></b>
+                            <b class="butt2 pointer" style="margin-bottom: 3px"><b><input value="{{ __('забрать') }}" type="submit" class="sell-item"></b></b>
                         </td>
-                        <td class="brd2-top brd2" align="center">К-во (шт)</td>
+                        <td class="brd2-top brd2" align="center">{{ __('К-во (шт)') }}</td>
                         <td class="brd2-top brd2" align="center"></td>
-                        <td class="brd2-top brd2" align="center">Предмет</td>
-                        <td class="brd2-top brd2" align="center">Владелец</td>
+                        <td class="brd2-top brd2" align="center">{{ __('Предмет') }}</td>
+                        <td class="brd2-top brd2" align="center">{{ __('Владелец') }}</td>
                     </tr>
                     </tbody>
                 </table>

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Chat;
 
 use App\Modules\Chat\Application\Listeners\SendChatMuteSystemMessage;
+use App\Modules\Chat\Application\Listeners\SendClanBossDefeatedMessage;
+use App\Modules\Chat\Application\Listeners\SendClanBossRunExpiredMessage;
+use App\Modules\Chat\Application\Listeners\SendClanBossRunStartedMessage;
+use App\Modules\Chat\Application\Listeners\SendClanMemberOnlineMessage;
 use App\Modules\Chat\Application\Listeners\SendLevelUpSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendMapInfluenceAwardedMessage;
 use App\Modules\Chat\Application\Listeners\SendMedalEarnedSystemMessage;
@@ -14,9 +18,13 @@ use App\Modules\Chat\Application\Listeners\SendWorldEventFinishedMessage;
 use App\Modules\Chat\Application\Listeners\SendWorldEventStartedMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
+use App\Modules\Dungeon\Domain\Events\ClanBossDefeated;
+use App\Modules\Dungeon\Domain\Events\ClanBossRunExpired;
+use App\Modules\Dungeon\Domain\Events\ClanBossRunStarted;
 use App\Modules\Event\Domain\Events\WorldEventFinished;
 use App\Modules\Event\Domain\Events\WorldEventStarted;
 use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
+use App\Modules\Interface\Domain\Events\PlayerCameOnline;
 use App\Modules\Moderation\Domain\Events\ChatMuteImposed;
 use App\Modules\Player\Domain\Events\PlayerInjured;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
@@ -46,6 +54,10 @@ class ChatServiceProvider extends ServiceProvider
         Event::listen(MapInfluenceAwarded::class, SendMapInfluenceAwardedMessage::class);
         Event::listen(WorldEventStarted::class, SendWorldEventStartedMessage::class);
         Event::listen(WorldEventFinished::class, SendWorldEventFinishedMessage::class);
+        Event::listen(ClanBossRunStarted::class, SendClanBossRunStartedMessage::class);
+        Event::listen(ClanBossDefeated::class, SendClanBossDefeatedMessage::class);
+        Event::listen(ClanBossRunExpired::class, SendClanBossRunExpiredMessage::class);
+        Event::listen(PlayerCameOnline::class, SendClanMemberOnlineMessage::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'chat');
 

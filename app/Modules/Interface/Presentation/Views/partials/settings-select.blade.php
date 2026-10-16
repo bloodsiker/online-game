@@ -8,6 +8,6 @@
         </select>
     </span>
     @if($soundPreview ?? false)
-        <button type="button" class="settings-sound-preview" data-sound-preview="{{ $name }}" title="Прослушать выбранный звук" aria-label="Прослушать: {{ $label }}">&#9835;</button>
+        <button type="button" class="settings-sound-preview" data-sound-preview="{{ $name }}" title="{{ __('ui.preview_sound') }}" aria-label="{{ __('ui.preview_sound_label', ['label' => $label]) }}">&#9835;</button>
     @endif
 </div>

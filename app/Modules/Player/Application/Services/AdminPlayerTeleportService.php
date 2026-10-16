@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Player\Application\Services;
 
+use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Item\Infrastructure\Persistence\Models\LockpickingAttempt;
 use App\Modules\Location\Infrastructure\Persistence\Models\GatheringAttempt;
@@ -11,6 +12,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final readonly class AdminPlayerTeleportService
 {
@@ -24,6 +26,17 @@ final readonly class AdminPlayerTeleportService
                 ->whereKey($user->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            $hasActiveDetention = PlayerDetention::query()
+                ->where('user_id', $lockedUser->id)
+                ->whereNull('released_at')
+                ->where('release_at', '>', now())
+                ->exists();
+            if ($hasActiveDetention) {
+                throw ValidationException::withMessages([
+                    'player' => 'Нельзя телепортировать игрока, пока он отбывает наказание в Темнице.',
+                ]);
+            }
 
             GatheringAttempt::query()->where('player_id', $lockedUser->player_id)->delete();
             LockpickingAttempt::query()->where('player_id', $lockedUser->player_id)->delete();

@@ -9,7 +9,7 @@
 <table border="0" cellpadding="0" cellspacing="0" class="pg" style="margin: 4px 0; width: 60%">
     <tbody>
     <tr>
-        <td class="b" width="10"><nobr>Страницы:&nbsp;</nobr></td>
+        <td class="b" width="10"><nobr>{{ __('Страницы:') }}&nbsp;</nobr></td>
 
         @if($pgFrom > 1)
             <td class="pg-inact"><a href="{{ $paginator->url(1) }}" class="pg-inact_lnk">1</a></td>
@@ -31,19 +31,19 @@
 
         <td width="1%" style="text-align:right" nowrap="">
             @if($paginator->onFirstPage())
-                <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="{{ __('Предыдущая') }}">
             @else
                 <a href="{{ $paginator->previousPageUrl() }}">
-                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="{{ __('Предыдущая') }}">
                 </a>
             @endif
             <img src="{{ asset('img/bg/pg-act.gif') }}" border="0" width="17" height="17">
             @if($paginator->hasMorePages())
                 <a href="{{ $paginator->nextPageUrl() }}">
-                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
+                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="{{ __('Следующая') }}">
                 </a>
             @else
-                <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="Следующая">
+                <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="{{ __('Следующая') }}">
             @endif
         </td>
     </tr>

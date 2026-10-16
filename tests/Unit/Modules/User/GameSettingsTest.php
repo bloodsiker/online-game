@@ -44,6 +44,22 @@ final class GameSettingsTest extends TestCase
         $this->get(route('settings'))->assertOk()->assertViewHas('gameSettings', GameSettingsDefinition::defaults());
     }
 
+    public function test_language_is_saved_validated_and_preserved_by_partial_updates(): void
+    {
+        $this->signIn();
+        $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'language' => 'uk'])
+            ->assertOk()->assertJsonPath('settings.language', 'uk');
+        $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'volume' => 30])
+            ->assertOk()->assertJsonPath('settings.language', 'uk');
+        foreach (['en', '<script>', '', null, []] as $language) {
+            $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'language' => $language])
+                ->assertUnprocessable()->assertJsonValidationErrors('language');
+        }
+        $this->get(route('settings'))->assertOk()->assertSee('name="language"', false)->assertSee('Українська');
+        $this->assertSame('uk', app(GameSettingsService::class)->get(userId: 1)['language']);
+        $this->assertSame('ru', app(GameSettingsService::class)->get(userId: 2)['language']);
+    }
+
     public function test_save_map_setting_is_scoped_to_owner_and_applies_through_session(): void
     {
         $this->signIn();
@@ -83,6 +99,35 @@ final class GameSettingsTest extends TestCase
                 ->assertUnprocessable()->assertJsonValidationErrors('show_map');
         }
         $this->assertSame(0, UserGameSetting::query()->count());
+    }
+
+    public function test_map_side_is_saved_and_invalid_values_are_rejected(): void
+    {
+        $this->assertSame('right', app(GameSettingsService::class)->get(userId: 1)['map_side']);
+        $this->signIn();
+        $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'map_side' => 'left'])->assertSuccessful();
+        $this->assertSame('left', app(GameSettingsService::class)->get(userId: 1)['map_side']);
+        $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'map_side' => 'bottom'])->assertUnprocessable()->assertJsonValidationErrors('map_side');
+        $this->assertSame('right', GameSettingsDefinition::normalize(['map_side' => 'invalid'])['map_side']);
+    }
+
+    public function test_sidebar_is_rendered_on_the_selected_side_only_once(): void
+    {
+        $source = file_get_contents(app_path('Modules/Interface/Presentation/Views/index.blade.php'));
+        $leftStart = strpos($source, "@if((\$gameSettings['show_map'] ?? true) && (\$gameSettings['map_side'] ?? 'right') === 'left')");
+        $gameStart = strpos($source, '<td id="game-panel"');
+        $rightStart = strpos($source, '{{-- Optional sidebar map --}}');
+        $rightEnd = strpos($source, '{{-- End sidebar map --}}', $rightStart);
+        $this->assertLessThan($gameStart, $leftStart);
+        $this->assertLessThan($rightStart, $gameStart);
+        $template = substr($source, $leftStart, $gameStart - $leftStart).'<td id="game-panel"></td>'.substr($source, $rightStart, $rightEnd - $rightStart);
+        foreach (['left', 'right'] as $side) {
+            $html = Blade::render($template, ['gameSettings' => ['show_map' => true, 'map_side' => $side]]);
+            $this->assertSame(1, substr_count($html, 'id="map-frame"'));
+            $this->assertSame($side === 'left', strpos($html, 'id="td-map"') < strpos($html, 'id="game-panel"'));
+            $hidden = Blade::render($template, ['gameSettings' => ['show_map' => false, 'map_side' => $side]]);
+            $this->assertStringNotContainsString('id="map-frame"', $hidden);
+        }
     }
 
     public function test_disabled_map_is_not_rendered_including_its_sidebar_and_toggle(): void

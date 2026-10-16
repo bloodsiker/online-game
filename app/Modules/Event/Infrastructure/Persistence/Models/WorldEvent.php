@@ -8,6 +8,7 @@ use App\Modules\Event\Domain\Enums\WorldEventObjectiveType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,10 @@ use Illuminate\Support\Carbon;
 
 final class WorldEvent extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['title', 'description', 'influence_name'];
+
     protected $fillable = [
         'title', 'description', 'objective_type', 'image', 'map_id', 'influence_map_id', 'share_item_id', 'monster_id', 'influence_name', 'next_start_at',
         'repeat_interval_minutes', 'duration_minutes', 'global_limit', 'player_limit',

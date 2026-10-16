@@ -7,12 +7,16 @@ namespace App\Modules\Player\Domain\Services;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 
 class ExperienceService
 {
     public const DEATH_PENALTY_EXPERIENCE = 0.1;
 
-    public function __construct(private PlayerStatService $statService) {}
+    public function __construct(
+        private PlayerStatService $statService,
+        private DetentionService $detentionService,
+    ) {}
 
     /**
      * Рассчитывает фактически начисляемый опыт с учётом персонального
@@ -58,7 +62,8 @@ class ExperienceService
             ->firstOrFail();
         $respawnLocationId = $user->currentLocation?->map?->resp_location_id;
 
-        if ($respawnLocationId !== null) {
+        $this->detentionService->releaseIfExpired($user);
+        if ($this->detentionService->activeFor($user) === null && $respawnLocationId !== null) {
             $user->prev_location_id = $user->location_id;
             $user->location_id = $respawnLocationId;
         }

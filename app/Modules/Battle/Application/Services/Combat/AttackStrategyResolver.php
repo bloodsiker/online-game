@@ -19,7 +19,9 @@ use App\Modules\Monster\Domain\Services\MonsterCombatantFactory;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 
 readonly class AttackStrategyResolver
 {
@@ -72,41 +74,94 @@ readonly class AttackStrategyResolver
 
         // Пустые руки, щиты и инструменты не считаются оружием.
         if (! $leftIsWeapon && ! $rightIsWeapon) {
-            return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
+            $skillLevels = $this->playerSkillLevels($player, [Skill::SKILL_HAND_ID]);
+
+            return new FistAttackStrategy(
+                hitCalc: $this->hitCalc,
+                player: $sheet,
+                monster: $monster,
+                weaponSkillLevel: $this->skillLevelFrom($skillLevels, Skill::SKILL_HAND_ID),
+            );
         }
 
         // Weapon in left hand + shield in right hand — only left weapon
         if ($leftIsWeapon && $rightIsShield) {
+            $skillId = $left->itemInfo->skill_id;
+            $skillLevels = $this->playerSkillLevels($player, [$skillId]);
+
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
                 monster: $monster,
-                equip: $player->playerEquip
+                equip: $player->playerEquip,
+                weaponSkillLevel: $this->skillLevelFrom($skillLevels, $skillId),
             );
         }
 
         // Two weapons — dual
         if ($leftIsWeapon && $rightIsWeapon) {
+            $leftSkillId = $left->itemInfo->skill_id;
+            $rightSkillId = $right->itemInfo->skill_id;
+            $skillLevels = $this->playerSkillLevels($player, [$leftSkillId, $rightSkillId]);
+
             return new DualWieldStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
                 monster: $monster,
                 leftWeapon: $left->itemInfo,
-                rightWeapon: $right->itemInfo
+                rightWeapon: $right->itemInfo,
+                leftWeaponSkillLevel: $this->skillLevelFrom($skillLevels, $leftSkillId),
+                rightWeaponSkillLevel: $this->skillLevelFrom($skillLevels, $rightSkillId),
             );
         }
 
         // Одно оружие; во второй руке может быть инструмент.
         if ($leftIsWeapon || $rightIsWeapon) {
+            $skillId = ($leftIsWeapon ? $left : $right)->itemInfo->skill_id;
+            $skillLevels = $this->playerSkillLevels($player, [$skillId]);
+
             return new OneHandWeaponStrategy(
                 hitCalc: $this->hitCalc,
                 player: $sheet,
                 monster: $monster,
-                equip: $player->playerEquip
+                equip: $player->playerEquip,
+                weaponSkillLevel: $this->skillLevelFrom($skillLevels, $skillId),
             );
         }
 
         // Защитный fallback для неизвестной комбинации слотов.
-        return new FistAttackStrategy(hitCalc: $this->hitCalc, player: $sheet, monster: $monster);
+        $skillLevels = $this->playerSkillLevels($player, [Skill::SKILL_HAND_ID]);
+
+        return new FistAttackStrategy(
+            hitCalc: $this->hitCalc,
+            player: $sheet,
+            monster: $monster,
+            weaponSkillLevel: $this->skillLevelFrom($skillLevels, Skill::SKILL_HAND_ID),
+        );
+    }
+
+    /** @param array<int, int> $skillLevels */
+    private function skillLevelFrom(array $skillLevels, ?int $skillId): int
+    {
+        return $skillId === null ? 0 : ($skillLevels[$skillId] ?? 0);
+    }
+
+    /** @param array<int, int|null> $skillIds
+     * @return array<int, int>
+     */
+    private function playerSkillLevels(Player $player, array $skillIds): array
+    {
+        $skillIds = array_values(array_unique(array_filter($skillIds)));
+
+        if ($skillIds === []) {
+            return [];
+        }
+
+        return PlayerSkill::query()
+            ->where('player_id', $player->id)
+            ->whereIn('skill_id', $skillIds)
+            ->pluck('lvl', 'skill_id')
+            ->map(fn ($level): int => (int) $level)
+            ->all();
     }
 }

@@ -6,6 +6,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Application\Services\DropService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
@@ -76,9 +77,9 @@ readonly class AttackService
             }
 
             if ($hit->isDodge()) {
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p>Вы атакуете неудачно... %s <b class="color-green">увернулся</b></p>',
-                    $locMonster->monster->name
+                    BattleLogTranslator::contentName($locMonster->monster)
                 ));
 
                 continue;
@@ -97,10 +98,10 @@ readonly class AttackService
                         $result,
                         (int) $effect->pivot->duration_seconds,
                     );
-                    $result->log(sprintf(
+                    $result->log(BattleLogTranslator::format(
                         '<p>Заклинание %s наложило на вас: <b class="color-purple">%s</b></p>',
-                        $hit->getMagicSkill()->name,
-                        $effect->name
+                        BattleLogTranslator::contentName($hit->getMagicSkill()),
+                        BattleLogTranslator::contentName($effect)
                     ));
                 }
 
@@ -152,16 +153,16 @@ readonly class AttackService
             $this->playerSkillService->gainExperienceSkill($player, $hit->getSkill(), $hit->getWeapon());
 
             $result->log($hit->isCritical()
-                ? sprintf(
+                ? BattleLogTranslator::format(
                     '<p>Вы ударили %s оружием %s... <b class="color-red">нанесен критический урон!</b> <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
-                    $locMonster->monster->name,
+                    BattleLogTranslator::contentName($locMonster->monster),
                     $hit->getWeaponName(),
                     $damage,
                     $exp
                 )
-                : sprintf(
+                : BattleLogTranslator::format(
                     '<p>Вы ударили %s оружием %s! <br>Повреждения: <b>%s</b> (ваш опыт +%s) </p>',
-                    $locMonster->monster->name,
+                    BattleLogTranslator::contentName($locMonster->monster),
                     $hit->getWeaponName(),
                     $damage,
                     $exp
@@ -179,11 +180,11 @@ readonly class AttackService
                         $applied['tickValue'],
                     );
 
-                    $result->log(sprintf(
+                    $result->log(BattleLogTranslator::format(
                         '<p>%s получил эффект от вашего заклинания %s: <b class="color-purple">%s</b></p>',
-                        $locMonster->monster->name,
-                        $hit->getMagicSkill()->name,
-                        $applied['effect']->name
+                        BattleLogTranslator::contentName($locMonster->monster),
+                        BattleLogTranslator::contentName($hit->getMagicSkill()),
+                        BattleLogTranslator::contentName($applied['effect'])
                     ));
                 }
             }
@@ -239,7 +240,7 @@ readonly class AttackService
         $totalHeal = max($ticks, (int) round($effectiveHpMax * $effect->value_per_tick / 100));
         $tickValue = max(1, (int) round($totalHeal / $ticks));
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-buff">🙏 Милость «%s» нисходит на вас — тело начинает восстанавливаться!</b></p>',
             $favor['reputation']->name,
         ));
@@ -271,10 +272,10 @@ readonly class AttackService
         $totalDamage = max($ticks, (int) round($locMonster->hp_max * $effect->value_per_tick / 100));
         $tickValue = max(1, (int) round($totalDamage / $ticks));
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-debuff">☠️ Милость «%s» отравляет %s!</b></p>',
             $favor['reputation']->name,
-            $locMonster->monster->name,
+            BattleLogTranslator::contentName($locMonster->monster),
         ));
 
         $this->effectService->applyEffectToMonster(
@@ -297,7 +298,7 @@ readonly class AttackService
 
         $this->effectService->applyEffectToPlayer($effect, $player, $battle, $result, $favor['durationSeconds']);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-buff">⚔ Милость «%s» разгорается в вас яростью боя!</b></p>',
             $favor['reputation']->name,
         ));
@@ -339,7 +340,7 @@ readonly class AttackService
             $actualHeal = $player->hp_now - $before;
 
             if ($actualHeal > 0) {
-                $result->log(sprintf(
+                $result->log(BattleLogTranslator::format(
                     '<p><b class="color-buff">🩸 Вампиризм руны восстанавливает вам %d HP!</b></p>',
                     $actualHeal
                 ));
@@ -366,10 +367,10 @@ readonly class AttackService
             $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
             $this->awardMonsterExperience($player, $locMonster->monster, $extraExp);
 
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-red">⚔ Двойной удар руны! Вы наносите ещё %d урона %s (опыт +%d)</b></p>',
                 $damage,
-                $locMonster->monster->name,
+                BattleLogTranslator::contentName($locMonster->monster),
                 $extraExp
             ));
         }
@@ -410,7 +411,7 @@ readonly class AttackService
         $actualReflected = $before - $player->hp_now;
 
         if ($actualReflected > 0) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-reflect">🔁 %s отражает удар! Вы получаете %d урона!</b></p>',
                 $monster->name,
                 $actualReflected,
@@ -451,9 +452,9 @@ readonly class AttackService
         $secondMonster->save();
         $this->awardMonsterExperience($player, $secondMonster->monster, $exp);
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-purple">🔗 Цепная атака руны поражает %s! <br>Повреждения: %d (ваш опыт +%d)</b></p>',
-            $secondMonster->monster->name,
+            BattleLogTranslator::contentName($secondMonster->monster),
             $chainDamage,
             $exp
         ));
@@ -501,7 +502,7 @@ readonly class AttackService
             $battle->boss_metadata = $metadata;
             $battle->save();
 
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p class="color-info">💉 Конвертация урона в лечение закончилась!</p>'
             ));
 
@@ -532,7 +533,7 @@ readonly class AttackService
 
         // Логування
         if ($conversionPercent === 100) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-damage-to-heal">💉 Ваш урон (%d) превращено в лечение! Босс восстановил %d HP!</b></p>',
                 $damage,
                 $actualHeal
@@ -541,7 +542,7 @@ readonly class AttackService
             $convertedDamage = (int) (($damage * $conversionPercent) / 100);
             $normalDamage = $damage - $convertedDamage;
 
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-damage-to-heal">💉 %d%% вашего урона (%d з %d) превращено в лечение! Босс восстановил %d HP!</b></p>',
                 $conversionPercent,
                 $convertedDamage,
@@ -598,7 +599,7 @@ readonly class AttackService
             $battle->boss_metadata = $metadata;
             $battle->save();
 
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-immunity">✨ Босс иммунен к этому типу урона! (%d урон заблокирован)</b></p>',
                 $damage
             ));
@@ -643,7 +644,7 @@ readonly class AttackService
         $battle->boss_metadata = $metadata;
         $battle->save();
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-reflect">🔁 %d%% урон отбит назад! Вы получили %d урона!</b></p>',
             $reflect['percent'],
             $actualReflected
@@ -676,9 +677,9 @@ readonly class AttackService
         $eventProgress = $this->worldEventKillService->progressKill($player, $locationMonster);
         if ($eventProgress?->allowed) {
             $nextStageMessage = $eventProgress->stageAdvanced
-                ? sprintf(' Начался следующий этап: <b>«%s»</b>.', e($eventProgress->nextStageTitle ?? ''))
+                ? BattleLogTranslator::format(' Начался следующий этап: <b>«%s»</b>.', e($eventProgress->nextStageTitle ?? ''))
                 : '';
-            $result->logSide(sprintf(
+            $result->logSide(BattleLogTranslator::format(
                 '<p class="message-event"><b>Событие:</b> +%d влияния. Ваш прогресс: %d/%d.%s</p>',
                 $eventProgress->influenceAwarded,
                 $eventProgress->playerProgress,
@@ -705,7 +706,7 @@ readonly class AttackService
 
             event(new PlayerLeveledUp($player));
 
-            $result->logSide(sprintf('<p class="msg-levelup">&#9650; Вы получили новый уровень <b>%s</b>!</p>', $player->lvl));
+            $result->logSide(BattleLogTranslator::format('<p class="msg-levelup">&#9650; Вы получили новый уровень <b>%s</b>!</p>', $player->lvl));
         }
     }
 

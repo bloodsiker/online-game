@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,13 +19,14 @@ class ActionController extends Controller
         return view('admin.action.list', compact('listActions'));
     }
 
-    public function create(Request $request): mixed
+    public function create(Request $request, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
-            $action = ShareAction::create([
-                'alias' => $request->input('alias'),
-                'name' => $request->input('name'),
-            ]);
+            $data = $request->validate(['alias' => ['required', 'string', 'max:255']]);
+            $action = new ShareAction;
+            $translationEditor->fill($action, $request, ['name']);
+            $action->alias = $data['alias'];
+            $action->save();
 
             return redirect()->route('admin.action.info', $action->id)->with('success', 'Действие создано.');
         }
@@ -32,11 +34,12 @@ class ActionController extends Controller
         return view('admin.action.create');
     }
 
-    public function info(Request $request, ShareAction $action): mixed
+    public function info(Request $request, ShareAction $action, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
-            $action->alias = $request->input('alias');
-            $action->name = $request->input('name');
+            $data = $request->validate(['alias' => ['required', 'string', 'max:255']]);
+            $translationEditor->fill($action, $request, ['name']);
+            $action->alias = $data['alias'];
             $action->save();
 
             return redirect()->back()->with('success', 'Сохранено.');

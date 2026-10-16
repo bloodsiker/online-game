@@ -31,6 +31,10 @@ class SaveInjuryTypeRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:120'],
+            'translations' => ['sometimes', 'array:uk'],
+            'translations.uk' => ['sometimes', 'array:name,description'],
+            'translations.uk.name' => ['nullable', 'string', 'max:120'],
+            'translations.uk.description' => ['nullable', 'string', 'max:2000'],
             'slug' => [
                 'required',
                 'string',

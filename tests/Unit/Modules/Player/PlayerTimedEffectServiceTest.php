@@ -29,6 +29,7 @@ class PlayerTimedEffectServiceTest extends TestCase
         Schema::connection('sqlite')->create('players', function (Blueprint $table): void {
             $table->id();
             $table->float('experience_multiplier')->default(1.0);
+            $table->unsignedInteger('reputation_rating')->default(0);
             $table->integer('hp_now');
             $table->integer('hp_max');
             $table->integer('mp_now')->default(0);

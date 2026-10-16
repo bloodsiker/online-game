@@ -70,7 +70,7 @@ class HotbarController extends Controller
             ->first();
 
         if (! $playerSlot || $playerSlot->entity_type !== 'item') {
-            return response()->json(['status' => 'error', 'message' => 'Слот пуст.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('Слот пуст.')], 422);
         }
 
         $backpack = Backpack::with('item.itemInfo.effects')
@@ -82,7 +82,7 @@ class HotbarController extends Controller
         if (! $backpack) {
             $this->hotbarService->clearSlot($player, $playerSlot->slot_number);
 
-            return response()->json(['status' => 'error', 'message' => 'Предмет закончился.', 'slot_cleared' => true], 422);
+            return response()->json(['status' => 'error', 'message' => __('Предмет закончился.'), 'slot_cleared' => true], 422);
         }
 
         $stats = $this->statService->resolve($player);

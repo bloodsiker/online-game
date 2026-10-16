@@ -10,15 +10,11 @@
 
 <div class="row">
     <div class="col-md-8">
-        <div class="form-group">
-            <label class="col-form-label">Заголовок</label>
-            <input type="text" class="form-control" name="title" value="{{ old('title', $news?->title) }}" required>
-        </div>
-        <div class="form-group">
-            <label class="col-form-label">Описание</label>
-            <textarea id="news-description-editor" class="form-control" name="description" rows="12" required>{{ old('description', $news?->description) }}</textarea>
-            <small class="text-muted">Можно использовать HTML для форматирования новости.</small>
-        </div>
+        @include('admin.partials.content-translations', ['prefix' => 'news-post', 'content' => $news, 'fields' => [
+            'title' => ['label' => 'Заголовок'],
+            'description' => ['label' => 'Описание', 'multiline' => true],
+        ]])
+        <small class="text-muted">Можно использовать HTML для форматирования новости.</small>
         <div class="form-group">
             <label class="col-form-label">Шорткод предмета</label>
             <div class="row g-2 align-items-end">
@@ -59,7 +55,7 @@
 </div>
 
 @include('admin.layout.summernote', [
-    'selector' => '#news-description-editor',
+    'selector' => '#news-post-ru-description, #news-post-uk-description',
     'height' => 260,
     'placeholder' => 'Введите текст новости',
     'imageUploadUrl' => route('admin.news.upload-image'),
@@ -124,7 +120,10 @@
                 ? '[[item:' + itemId + '; count:' + count + ']]'
                 : '[[item:' + itemId + ']]';
 
-            $('#news-description-editor').summernote('insertText', shortcode);
+            var $editor = $('.content-translations .tab-pane.active textarea').first();
+            if ($editor.length) {
+                $editor.summernote('insertText', shortcode);
+            }
         });
     })();
 </script>

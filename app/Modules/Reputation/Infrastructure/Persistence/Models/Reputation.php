@@ -7,6 +7,7 @@ namespace App\Modules\Reputation\Infrastructure\Persistence\Models;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Reputation\Domain\Enums\DivineFavorType;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\ReputationExchange\Infrastructure\Persistence\Models\ReputationExchange;
@@ -18,6 +19,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reputation extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $table = 'reputations';
 
     protected $fillable = [

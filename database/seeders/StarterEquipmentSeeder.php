@@ -12,6 +12,7 @@ use App\Modules\Share\Domain\Enums\ShareItemRequirementType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemRequirement;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
@@ -448,9 +449,9 @@ class StarterEquipmentSeeder extends Seeder
         $level = self::TIER2_SLOT_LEVEL['weapon'];
         $fullWeaponPrice = (int) round(80 * $level ** 1.5);
         $swordPrice = (int) ceil($fullWeaponPrice / 2);
-        $swordSkillId = Skill::where('name', self::SWORD_SKILL_NAME)->value('id');
+        $swordSkillId = Skill::where('name->ru', self::SWORD_SKILL_NAME)->value('id');
 
-        $item = ShareItem::firstOrCreate(
+        $item = LocalizedItemSeederQuery::firstOrCreate(
             ['name' => self::TIER2_EXECUTIONER_SWORD_NAME],
             [
                 'description' => 'Одноручный клинок сета «Палач». Используйте два меча для быстрого стиля боя или выберите двуручный топор для более сильного единичного удара.',
@@ -503,15 +504,15 @@ class StarterEquipmentSeeder extends Seeder
     /** Исправляет старую привязку топора к навыку мечей, не затрагивая остальные поля предмета. */
     private function synchronizeExecutionerAxeSkill(): void
     {
-        $swordSkillId = Skill::where('name', self::SWORD_SKILL_NAME)->value('id');
-        $axeSkillId = Skill::where('name', self::AXE_SKILL_NAME)->value('id');
+        $swordSkillId = Skill::where('name->ru', self::SWORD_SKILL_NAME)->value('id');
+        $axeSkillId = Skill::where('name->ru', self::AXE_SKILL_NAME)->value('id');
 
         if ($swordSkillId === null || $axeSkillId === null) {
             return;
         }
 
         ShareItem::query()
-            ->where('name', self::TIER2_AXE_NAME)
+            ->where('name->ru', self::TIER2_AXE_NAME)
             ->where('skill_id', $swordSkillId)
             ->update([
                 'skill_id' => $axeSkillId,
@@ -530,8 +531,8 @@ class StarterEquipmentSeeder extends Seeder
             self::TIER2_EXECUTIONER_SWORD_NAME => [self::SWORD_SKILL_NAME, self::TIER2_EXECUTIONER_SWORD_SKILL_REQUIREMENT],
             self::TIER2_AXE_NAME => [self::AXE_SKILL_NAME, self::TIER2_EXECUTIONER_AXE_SKILL_REQUIREMENT],
         ] as $itemName => [$skillName, $requiredLevel]) {
-            $itemId = ShareItem::where('name', $itemName)->value('id');
-            $skillId = Skill::where('name', $skillName)->value('id');
+            $itemId = ShareItem::where('name->ru', $itemName)->value('id');
+            $skillId = Skill::where('name->ru', $skillName)->value('id');
 
             if ($itemId === null || $skillId === null) {
                 continue;
@@ -558,7 +559,7 @@ class StarterEquipmentSeeder extends Seeder
     private function synchronizeExecutionerAxeTrainingWeaponsInShop(): void
     {
         ShareItem::query()
-            ->whereIn('name', self::EXECUTIONER_AXE_TRAINING_WEAPONS)
+            ->whereIn('name->ru', self::EXECUTIONER_AXE_TRAINING_WEAPONS)
             ->get()
             ->each(function (ShareItem $item): void {
                 ShopItem::firstOrCreate(
@@ -597,7 +598,7 @@ class StarterEquipmentSeeder extends Seeder
 
         foreach ($sourceNames as $sourceName) {
             $source = ShareItem::query()
-                ->where('name', $sourceName)
+                ->where('name->ru', $sourceName)
                 ->with(['stats', 'requirements'])
                 ->first();
 
@@ -609,10 +610,10 @@ class StarterEquipmentSeeder extends Seeder
             // Совместимость с первым запуском этой синхронизации, где для
             // предметов во множественном числе использовалось «Усиленный».
             ShareItem::query()
-                ->where('name', 'Усиленный '.$sourceName)
+                ->where('name->ru', 'Усиленный '.$sourceName)
                 ->update(['name' => $targetName, 'updated_at' => now()]);
 
-            $target = ShareItem::firstOrCreate(
+            $target = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $targetName],
                 [
                     'description' => trim(($source->description ?? '').' Необычная версия сета «Палач».'),
@@ -668,7 +669,7 @@ class StarterEquipmentSeeder extends Seeder
             // администратор уже настроил свои материалы, не заменяем их.
             if ($source->rarityUpgradeMaterials()->count() === 0) {
                 $materialIds = ShareItem::query()
-                    ->whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])
+                    ->whereIn('name->ru', ['Осколок возвышения', 'Кристалл возвышения'])
                     ->pluck('id');
 
                 if ($materialIds->isNotEmpty()) {
@@ -695,7 +696,7 @@ class StarterEquipmentSeeder extends Seeder
         $sources = ShareItem::query()
             ->where('rarity', ItemRarity::UNCOMMON)
             ->where(function ($query): void {
-                $query->where('name', 'like', 'Усиленный%палача')
+                $query->where('name->ru', 'like', 'Усиленный%палача')
                     ->orWhere('name', 'like', 'Усиленные%палача')
                     ->orWhere('name', 'like', 'Усиленная%палача');
             })
@@ -709,11 +710,11 @@ class StarterEquipmentSeeder extends Seeder
             }
 
             ShareItem::query()
-                ->where('name', preg_replace('/^Усиленн(ый|ые|ая)/u', 'Закалён$1', $source->name))
+                ->where('name->ru', preg_replace('/^Усиленн(ый|ые|ая)/u', 'Закалён$1', $source->name))
                 ->where('rarity', ItemRarity::RARE)
                 ->update(['name' => $targetName, 'updated_at' => now()]);
 
-            $target = ShareItem::firstOrCreate(
+            $target = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $targetName, 'rarity' => ItemRarity::RARE],
                 [
                     'description' => trim(($source->description ?? '').' Редкая версия сета «Палач». '),
@@ -759,7 +760,7 @@ class StarterEquipmentSeeder extends Seeder
 
             if ($source->rarityUpgradeMaterials()->count() === 0) {
                 $materialIds = ShareItem::query()
-                    ->whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])
+                    ->whereIn('name->ru', ['Осколок возвышения', 'Кристалл возвышения'])
                     ->pluck('id');
                 if ($materialIds->isNotEmpty()) {
                     $source->rarityUpgradeMaterials()->syncWithoutDetaching(
@@ -780,7 +781,7 @@ class StarterEquipmentSeeder extends Seeder
         $sources = ShareItem::query()
             ->where('rarity', $sourceRarity)
             ->where(function ($query) use ($sourcePrefix): void {
-                $query->where('name', 'like', $sourcePrefix.'%палача');
+                $query->where('name->ru', 'like', $sourcePrefix.'%палача');
             })
             ->with(['stats', 'requirements'])
             ->get();
@@ -797,7 +798,7 @@ class StarterEquipmentSeeder extends Seeder
                 continue;
             }
 
-            $target = ShareItem::firstOrCreate(
+            $target = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $targetName, 'rarity' => $targetRarity],
                 [
                     'description' => trim(($source->description ?? '').' Версия сета «Палач». '),
@@ -834,7 +835,7 @@ class StarterEquipmentSeeder extends Seeder
             ])->save();
 
             if ($source->rarityUpgradeMaterials()->count() === 0) {
-                $ids = ShareItem::whereIn('name', ['Осколок возвышения', 'Кристалл возвышения'])->pluck('id');
+                $ids = ShareItem::whereIn('name->ru', ['Осколок возвышения', 'Кристалл возвышения'])->pluck('id');
                 if ($ids->isNotEmpty()) {
                     $source->rarityUpgradeMaterials()->syncWithoutDetaching($ids->mapWithKeys(fn (int $id): array => [$id => ['count' => 1]])->all());
                 }
@@ -846,7 +847,7 @@ class StarterEquipmentSeeder extends Seeder
     {
         $level = self::TIER1_WEAPON_UPGRADE_LEVEL;
 
-        $item = ShareItem::firstOrCreate(
+        $item = LocalizedItemSeederQuery::firstOrCreate(
             ['name' => self::TIER1_WEAPON_UPGRADE_NAME],
             [
                 'type' => ShareItemType::WEAPON,
@@ -907,7 +908,7 @@ class StarterEquipmentSeeder extends Seeder
         // (Необычный) и крафт/апгрейд (остальные), не как отдельный сид.
         $rarity = ItemRarity::COMMON;
 
-        $item = ShareItem::firstOrCreate(
+        $item = LocalizedItemSeederQuery::firstOrCreate(
             ['name' => $name],
             [
                 'type' => $type,
@@ -961,7 +962,7 @@ class StarterEquipmentSeeder extends Seeder
     {
         return match ($type) {
             ShareItemType::WEAPON => self::TIER1_WEAPON_SKILL_ID,
-            ShareItemType::SHIELD => Skill::where('name', self::SHIELD_SKILL_NAME)->value('id'),
+            ShareItemType::SHIELD => Skill::where('name->ru', self::SHIELD_SKILL_NAME)->value('id'),
             default => null,
         };
     }
@@ -1051,7 +1052,7 @@ class StarterEquipmentSeeder extends Seeder
         };
         $name = $nameOverride ?? "{$material} {$noun} {$variantSuffix}";
 
-        $item = ShareItem::firstOrCreate(
+        $item = LocalizedItemSeederQuery::firstOrCreate(
             ['name' => $name],
             [
                 'type' => $type,

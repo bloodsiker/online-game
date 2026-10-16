@@ -2,6 +2,7 @@
 
 namespace App\Modules\Chat\Application\Listeners;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 
@@ -13,6 +14,6 @@ class SendLevelUpSystemMessage
     {
         $player = $event->player;
 
-        $this->chatService->sendSystem("Уровень [[user_{$player->user_id}]] увеличен до {$player->lvl}!");
+        $this->chatService->sendSystem(new LocalizedChatMessage('chat.level_up', ['user_id' => $player->user_id, 'level' => $player->lvl]));
     }
 }

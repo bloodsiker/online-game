@@ -13,6 +13,8 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use Illuminate\Database\Seeder;
@@ -50,7 +52,7 @@ class ReputationSeeder extends Seeder
     {
         $npc = Npc::findOrFail(1);
 
-        $reputation = Reputation::firstOrCreate(
+        $reputation = LocalizedContentSeederQuery::firstOrCreateFor(Reputation::class,
             ['name' => 'Городская стража'],
             [
                 'description' => 'Помогайте городской страже защищать жителей от монстров и тёмных сил.',
@@ -280,7 +282,7 @@ class ReputationSeeder extends Seeder
     // ─────────────────────────────────────────────────────────────
     private function seedOkhota(): void
     {
-        $npc = Npc::updateOrCreate(
+        $npc = LocalizedContentSeederQuery::updateOrCreateFor(Npc::class,
             ['name' => 'Егерь Вульфгар'],
             [
                 'location_id' => self::OKHOTA_NPC_LOCATION_ID,
@@ -289,7 +291,7 @@ class ReputationSeeder extends Seeder
             ]
         );
 
-        $reputation = Reputation::updateOrCreate(
+        $reputation = LocalizedContentSeederQuery::updateOrCreateFor(Reputation::class,
             ['name' => 'Орден Охотников'],
             [
                 'description' => 'Докажите своё мастерство охотника, выполняя контракты егеря Вульфгара и уничтожая сильнейших существ долины.',
@@ -299,7 +301,7 @@ class ReputationSeeder extends Seeder
         );
 
         // Все квесты Ордена всегда указывают на текущего НПС репутации
-        Quest::where('title', 'like', '[Орден]%')
+        Quest::where('title->ru', 'like', '[Орден]%')
             ->update(['start_npc_id' => $npc->id, 'complete_npc_id' => $npc->id]);
 
         $this->seedOkhotaDialogue($npc);
@@ -492,9 +494,9 @@ class ReputationSeeder extends Seeder
         $this->seedOkhotaFeats($tiers, $npc, $reputation, $m, $t);
 
         // ── Магазин (категории + товары) ──────────────────────────
-        $catElixirs = ShareStructureCategory::firstOrCreate(['name' => 'Эликсиры']);
-        $catArmor = ShareStructureCategory::firstOrCreate(['name' => 'Броня']);
-        $catWeapons = ShareStructureCategory::firstOrCreate(['name' => 'Оружие']);
+        $catElixirs = LocalizedContentSeederQuery::firstOrCreateFor(ShareStructureCategory::class, ['name' => 'Эликсиры']);
+        $catArmor = LocalizedContentSeederQuery::firstOrCreateFor(ShareStructureCategory::class, ['name' => 'Броня']);
+        $catWeapons = LocalizedContentSeederQuery::firstOrCreateFor(ShareStructureCategory::class, ['name' => 'Оружие']);
 
         // Привязываем категории к магазину этой репутации
         $reputation->categories()->syncWithoutDetaching([
@@ -567,7 +569,7 @@ class ReputationSeeder extends Seeder
 
         $monsters = [];
         foreach ($names as $name) {
-            $monsters[$name] = Monster::where('name', $name)->firstOrFail();
+            $monsters[$name] = Monster::where('name->ru', $name)->firstOrFail();
         }
 
         return $monsters;
@@ -586,7 +588,7 @@ class ReputationSeeder extends Seeder
 
         $trophies = [];
         foreach ($defs as $name => $description) {
-            $trophies[$name] = ShareItem::firstOrCreate(
+            $trophies[$name] = LocalizedItemSeederQuery::firstOrCreate(
                 ['name' => $name],
                 [
                     'type' => 'quest',
@@ -714,7 +716,7 @@ class ReputationSeeder extends Seeder
     /** Квест Ордена: objs = [type, Monster, amount, desc, ?ShareItem trophy, ?dropChance] */
     private function createOkhotaQuest(array $qd, Npc $npc, Reputation $reputation, ?int $afterQuestId = null): Quest
     {
-        $quest = Quest::firstOrCreate(
+        $quest = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => $qd['title']],
             [
                 'description' => $qd['desc'],
@@ -778,7 +780,7 @@ class ReputationSeeder extends Seeder
     private function addTierQuests(ReputationTier $tier, Npc $npc, Reputation $reputation, array $quests): void
     {
         foreach ($quests as $qd) {
-            $quest = Quest::firstOrCreate(
+            $quest = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
                 ['title' => $qd['title']],
                 [
                     'description' => $qd['desc'],

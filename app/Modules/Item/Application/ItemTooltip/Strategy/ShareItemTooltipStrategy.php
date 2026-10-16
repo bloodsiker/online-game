@@ -36,7 +36,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
                 // конкретного экземпляра: заточки, камней и рун.
                 price: ItemTooltipPriceFormatter::money((int) $shareItem->price),
                 diamond: '',
-                lev: ['title' => ' Уровень ', 'value' => '1'],
+                lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
                 desc: $shareItem->description ?? '',
                 store: false,

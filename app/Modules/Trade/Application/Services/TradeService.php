@@ -14,6 +14,7 @@ use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Trade\Domain\Services\TradeBalance;
+use App\Modules\Trade\Infrastructure\Persistence\Models\TradePost;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,7 @@ class TradeService
     {
         $post = $this->accessiblePost($user, $postId);
         $playerSkill = PlayerSkill::query()->where('player_id', $user->player_id)
-            ->whereHas('skill', fn ($query) => $query->where('name', TradeBalance::SKILL_NAME))->first();
+            ->whereHas('skill', fn ($query) => $query->where('name->ru', TradeBalance::SKILL_NAME))->first();
         $level = max(1, min(300, (int) ($playerSkill?->lvl ?? 1)));
         $experienceNeeded = max(1, (int) ($playerSkill?->exp_diff ?? 100));
         $levelStart = (int) ($playerSkill?->exp_up ?? 100) - $experienceNeeded;
@@ -105,7 +106,7 @@ class TradeService
                 DB::table('player_trade_licenses')->insert([
                     'player_id' => $player->id, 'trade_post_id' => $postId, 'purchased_at' => now(),
                 ]);
-                $skill = Skill::query()->where('name', TradeBalance::SKILL_NAME)->firstOrFail();
+                $skill = Skill::query()->where('name->ru', TradeBalance::SKILL_NAME)->firstOrFail();
                 PlayerSkill::query()->firstOrCreate(['player_id' => $player->id, 'skill_id' => $skill->id], [
                     'lvl' => 1, 'exp' => 0, 'exp_up' => TradeBalance::levelThreshold(1), 'exp_diff' => 100,
                 ]);
@@ -161,7 +162,7 @@ class TradeService
                     $amount = TradeBalance::salePrice($good->base_price, $offer->buy_price, $level) * $quantity;
                     $user->increment('money', $amount);
                     $experience = (int) $route->exp_per_unit * $quantity;
-                    $skill = Skill::query()->where('name', TradeBalance::SKILL_NAME)->firstOrFail();
+                    $skill = Skill::query()->where('name->ru', TradeBalance::SKILL_NAME)->firstOrFail();
                     if ($experience > 0) {
                         $this->experience->award($player, $skill, $experience);
                     }
@@ -181,9 +182,9 @@ class TradeService
 
     private function accessiblePost(User $user, int $id, bool $lock = false): object
     {
-        $query = DB::table('trade_posts as posts')->join('npcs', 'npcs.id', '=', 'posts.npc_id')
-            ->where('posts.id', $id)->where('posts.is_active', true)->where('npcs.is_active', true)
-            ->select('posts.*', 'npcs.location_id');
+        $query = TradePost::query()->join('npcs', 'npcs.id', '=', 'trade_posts.npc_id')
+            ->where('trade_posts.id', $id)->where('trade_posts.is_active', true)->where('npcs.is_active', true)
+            ->select('trade_posts.*', 'npcs.location_id');
         $post = ($lock ? $query->lockForUpdate() : $query)->first();
         abort_if($post === null, 404);
         $this->require((int) $user->location_id === (int) $post->location_id, 'Торговец находится на другой локации.');
@@ -195,7 +196,7 @@ class TradeService
 
     private function skillLevel(int $playerId): int
     {
-        $skillId = Skill::query()->where('name', TradeBalance::SKILL_NAME)->value('id');
+        $skillId = Skill::query()->where('name->ru', TradeBalance::SKILL_NAME)->value('id');
 
         return max(1, min(300, (int) PlayerSkill::query()->where('player_id', $playerId)
             ->where('skill_id', $skillId)->value('lvl')));

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -35,19 +36,19 @@ class DamageToHealMechanic extends BaseBossMechanic
             ? 'Весь урон'
             : "{$conversionPercent}% урону";
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-damage-to-heal">💉 %s активирует конвертацию урона в лечение!</b></p>',
-            $context->getLocationMonster()->monster->name
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster)
         ));
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p class="color-info">%s будет превращаться в здоровье в течение %d ходов!</p>',
             $conversionText,
             $duration
         ));
 
         if ($maxHealPerHit) {
-            $context->addLog(sprintf(
+            $context->addLog(BattleLogTranslator::format(
                 '<p class="color-info">Максимум за один хит: %d HP</p>',
                 $maxHealPerHit
             ));

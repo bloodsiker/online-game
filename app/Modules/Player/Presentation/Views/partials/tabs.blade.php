@@ -7,12 +7,12 @@
     $btnRight2  = 'img/bg/btn/btn-right2.gif';
 
     $tabs = [
-        ['group' => 'character',   'route' => 'character',        'params' => ['group' => 'character'],   'label' => 'Персонаж'],
-        ['group' => 'professions', 'route' => 'character.professions', 'params' => [],                    'label' => 'Профессии'],
-        ['group' => 'magic_skill', 'route' => 'magic_skill',      'params' => ['group' => 'magic_skill'], 'label' => 'Книга заклинаний'],
-        ['group' => 'slots',       'route' => 'slots',            'params' => ['group' => 'slots'],       'label' => 'Слоты'],
-        ['group' => 'reputation',  'route' => 'reputation.list',  'params' => ['group' => 'reputation'],  'label' => 'Репутации'],
-        ['group' => 'influence',   'route' => 'character.influence', 'params' => [],                       'label' => 'Влияние'],
+        ['group' => 'character',   'route' => 'character',        'params' => ['group' => 'character'],   'label' => __('Персонаж')],
+        ['group' => 'professions', 'route' => 'character.professions', 'params' => [],                    'label' => __('Профессии')],
+        ['group' => 'magic_skill', 'route' => 'magic_skill',      'params' => ['group' => 'magic_skill'], 'label' => __('Книга заклинаний')],
+        ['group' => 'slots',       'route' => 'slots',            'params' => ['group' => 'slots'],       'label' => __('Слоты')],
+        ['group' => 'reputation',  'route' => 'reputation.list',  'params' => ['group' => 'reputation'],  'label' => __('Репутации')],
+        ['group' => 'influence',   'route' => 'character.influence', 'params' => [],                       'label' => __('Влияние')],
     ];
 @endphp
 <table border="0" cellspacing="0" cellpadding="0" style="position: relative; top: -2px;">

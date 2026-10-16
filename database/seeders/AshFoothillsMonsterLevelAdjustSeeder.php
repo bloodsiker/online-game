@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Корректирует уровни 6 монстров «Пепельных Предгорий»
@@ -33,7 +33,7 @@ class AshFoothillsMonsterLevelAdjustSeeder extends Seeder
 
         $updated = 0;
         foreach ($updates as $monsterId => $data) {
-            $updated += DB::table('monsters')->where('id', $monsterId)->update([
+            $updated += LocalizedContentSeederQuery::forTable('monsters')->where('id', $monsterId)->update([
                 ...$data,
                 'updated_at' => now(),
             ]);

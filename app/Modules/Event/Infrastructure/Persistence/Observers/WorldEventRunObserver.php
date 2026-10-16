@@ -36,6 +36,7 @@ final class WorldEventRunObserver
             eventId: (int) $worldEvent->id,
             runId: (int) $run->id,
             title: $worldEvent->title,
+            titleTranslations: $worldEvent->getTranslations('title'),
         );
     }
 }

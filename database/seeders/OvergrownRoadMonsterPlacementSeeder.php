@@ -87,7 +87,7 @@ class OvergrownRoadMonsterPlacementSeeder extends Seeder
     private function monsterIds(array $pairs): array
     {
         return array_map(
-            fn (array $pair) => Monster::where('name', $pair[0])->where('lvl', $pair[1])->value('id')
+            fn (array $pair) => Monster::where('name->ru', $pair[0])->where('lvl', $pair[1])->value('id')
                 ?? throw new \RuntimeException("Монстр «{$pair[0]}» lvl {$pair[1]} не найден — прогоните OvergrownRoadMonsterSeeder сначала"),
             $pairs,
         );

@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Influence\Infrastructure\Persistence\Models;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MapInfluenceLevel extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name'];
+
     protected $fillable = ['map_id', 'level', 'name', 'required_influence', 'influence_medal_id', 'is_active', 'sort_order'];
 
     protected $casts = [

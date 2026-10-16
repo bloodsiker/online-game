@@ -12,10 +12,7 @@
                 <div class="card-body">
                     <form action="{{ route('admin.race.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'race-new', 'content' => null, 'fields' => ['name' => ['label' => 'Название']]])
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

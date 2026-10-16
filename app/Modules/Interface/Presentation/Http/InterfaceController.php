@@ -12,6 +12,8 @@ use App\Modules\Interface\Application\UseCases\GetWhoPage;
 use App\Modules\Interface\Application\UseCases\HeartbeatPlayer;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -89,8 +91,17 @@ class InterfaceController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $detentionService = app(DetentionService::class);
+        $released = $detentionService->releaseIfExpired($user);
         $heartbeat = $this->heartbeatPlayer->execute($user);
         $payload = $heartbeat->toArray();
+
+        $detention = $detentionService->activeFor($user);
+        if ($detention !== null) {
+            $payload['detention_url'] = route('prison.index', ['id' => $detention->prison_structure_id]);
+        } elseif ($released) {
+            $payload['prison_released_url'] = route('location');
+        }
 
         if ($heartbeat->dead) {
             $payload['death_url'] = route('location');
@@ -123,12 +134,21 @@ class InterfaceController extends Controller
                 ->orderBy('name')
                 ->get()
             : collect();
+        $adminToolPrisons = $user->is_admin
+            ? Structure::query()
+                ->with('location')
+                ->where('type', Structure::TYPE_PRISON)
+                ->whereNotNull('location_id')
+                ->orderBy('id')
+                ->get()
+            : collect();
 
         $races = Race::query()->select(['id', 'name'])->orderBy('name')->get();
 
         return view('interface::index', [
             'hasUnreadMail' => $this->mailbox->hasUnread($user),
             'adminToolUsers' => $adminToolUsers,
+            'adminToolPrisons' => $adminToolPrisons,
             'races' => $races,
             'gameSettings' => $this->gameSettings->get($user->id),
         ]);

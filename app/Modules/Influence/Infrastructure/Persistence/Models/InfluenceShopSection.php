@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Influence\Infrastructure\Persistence\Models;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InfluenceShopSection extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name'];
+
     protected $fillable = ['structure_id', 'map_id', 'name', 'icon', 'required_influence', 'sort_order', 'is_active'];
 
     protected $casts = ['required_influence' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean'];

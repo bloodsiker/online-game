@@ -59,7 +59,7 @@ class ItemUsagePolicyService
         if ($state->uses_count >= $limit->max_uses) {
             throw new ItemUseBlockedException(
                 sprintf(
-                    'Предмет можно использовать %d %s за %s. Следующее использование будет доступно через %s.',
+                    __('Предмет можно использовать %d %s за %s. Следующее использование будет доступно через %s.'),
                     $limit->max_uses,
                     $this->usesWord($limit->max_uses),
                     $this->formatPeriod($limit->period_seconds),
@@ -94,9 +94,9 @@ class ItemUsagePolicyService
             return;
         }
 
-        $message = sprintf('Эффект «%s» уже действует.', $activeEffect->effect?->name ?? 'предмета');
+        $message = sprintf(__('Эффект «%s» уже действует.'), $activeEffect->effect?->name ?? __('предмета'));
         if ($activeEffect->expires_at !== null) {
-            $message .= sprintf(' Повторное использование будет доступно через %s.', $this->remainingTime($activeEffect->expires_at));
+            $message .= sprintf(__(' Повторное использование будет доступно через %s.'), $this->remainingTime($activeEffect->expires_at));
         }
 
         throw new ItemUseBlockedException(
@@ -108,16 +108,16 @@ class ItemUsagePolicyService
 
     private function remainingTime(CarbonInterface $availableAt): string
     {
-        return $availableAt->locale('ru')->diffForHumans(now(), true, false, 2);
+        return $availableAt->locale(app()->getLocale())->diffForHumans(now(), true, false, 2);
     }
 
     private function formatPeriod(int $seconds): string
     {
         return match (true) {
-            $seconds % 86400 === 0 => $this->formatAmount((int) ($seconds / 86400), 'день', 'дня', 'дней'),
-            $seconds % 3600 === 0 => $this->formatAmount((int) ($seconds / 3600), 'час', 'часа', 'часов'),
-            $seconds % 60 === 0 => $this->formatAmount((int) ($seconds / 60), 'минуту', 'минуты', 'минут'),
-            default => $this->formatAmount($seconds, 'секунду', 'секунды', 'секунд'),
+            $seconds % 86400 === 0 => $this->formatAmount((int) ($seconds / 86400), __('день'), __('дня'), __('дней')),
+            $seconds % 3600 === 0 => $this->formatAmount((int) ($seconds / 3600), __('час'), __('часа'), __('часов')),
+            $seconds % 60 === 0 => $this->formatAmount((int) ($seconds / 60), __('минуту'), __('минуты'), __('минут')),
+            default => $this->formatAmount($seconds, __('секунду'), __('секунды'), __('секунд')),
         };
     }
 
@@ -142,13 +142,13 @@ class ItemUsagePolicyService
         $mod10 = $count % 10;
 
         if ($mod100 >= 11 && $mod100 <= 14) {
-            return 'раз';
+            return __('раз');
         }
 
         return match ($mod10) {
-            1 => 'раз',
-            2, 3, 4 => 'раза',
-            default => 'раз',
+            1 => __('раз'),
+            2, 3, 4 => __('раза'),
+            default => __('раз'),
         };
     }
 }

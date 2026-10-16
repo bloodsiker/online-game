@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source = readFileSync(new URL('../../public/js/change-password-modal.js', import.meta.url), 'utf8');
 
-function setup() {
+function setup(translations = {}) {
     function element() {
         return {
             value: '', hidden: true, disabled: false, validityMessage: '', attributes: {}, handlers: {},
@@ -21,6 +21,7 @@ function setup() {
         'password-message', 'password-save', 'password-cancel', 'password-modal-close', 'password-confirmation-error',
     ].map(id => [id, element()]));
     const form = ids['change-password-form'];
+    form.dataset = { translations: JSON.stringify(translations) };
     form.elements = { current_password: element(), password: element(), password_confirmation: element() };
     form.reset = () => Object.values(form.elements).forEach(input => { input.value = ''; });
     vm.runInNewContext(source, { document: { getElementById: id => ids[id], addEventListener() {} } });
@@ -38,6 +39,13 @@ test('mismatch is displayed immediately and blocks save', () => {
     assert.equal(ids['password-save'].disabled, true);
     assert.equal(form.elements.password_confirmation.attributes['aria-invalid'], 'true');
     assert.equal(form.elements.password_confirmation.validityMessage, 'Пароли не совпадают.');
+});
+
+test('confirmation validation uses the selected language supplied by the server', () => {
+    const { form, type } = setup({ password_mismatch: 'Паролі не збігаються.' });
+    type('password', 'new-password');
+    type('password_confirmation', 'other-password');
+    assert.equal(form.elements.password_confirmation.validityMessage, 'Паролі не збігаються.');
 });
 
 test('matching confirmation clears the error and unlocks save', () => {

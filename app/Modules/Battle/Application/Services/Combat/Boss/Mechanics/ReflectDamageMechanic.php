@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -28,9 +29,9 @@ class ReflectDamageMechanic extends BaseBossMechanic
         $battle->boss_metadata = $metadata;
         $battle->save();
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-reflect">🔁 %s активирует отражение урона! %d%% урон будет возвращен вам в течение %d ходов!</b></p>',
-            $context->getLocationMonster()->monster->name,
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster),
             $reflectPercent,
             $duration
         ));

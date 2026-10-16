@@ -8,13 +8,14 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 class ClanMentorNpcSeeder extends Seeder
 {
     public function run(): void
     {
-        $mentor = Npc::updateOrCreate(
+        $mentor = LocalizedContentSeederQuery::updateOrCreateFor(Npc::class,
             ['name' => config('game.clan_mentor_npc_name')],
             [
                 'location_id' => Location::query()->findOrFail(28)->id,

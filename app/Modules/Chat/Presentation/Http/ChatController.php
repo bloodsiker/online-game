@@ -103,7 +103,7 @@ class ChatController extends Controller
             }
 
             $isOnline = $target->last_online_at
-                && $target->last_online_at->gt(Carbon::now()->subMinutes(10));
+                && $target->last_online_at->gt(Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30)));
 
             if (! $isOnline) {
                 return response()->json(['ok' => false, 'error' => "Игрок {$target->name} не в сети."]);

@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\News\Infrastructure\Persistence\Models;
 
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NewsPost extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['title', 'description'];
+
     protected $fillable = [
         'title',
         'description',

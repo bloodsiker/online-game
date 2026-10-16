@@ -11,6 +11,7 @@ use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +39,7 @@ class MagicSkillController extends Controller
             ->withCount('skillEffects')
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $filters['q']).'%';
-                $query->where(fn ($query) => $query->where('name', 'like', $search)->orWhere('slug', 'like', $search));
+                $query->where(fn ($query) => $query->searchTranslations($search)->orWhere('slug', 'like', $search));
             })
             ->when($filters['type'] !== '' && $types->contains($filters['type']), fn ($query) => $query->where('type', $filters['type']))
             ->when(in_array($filters['is_passive'], ['0', '1'], true), fn ($query) => $query->where('is_passive', (int) $filters['is_passive']))
@@ -72,8 +73,8 @@ class MagicSkillController extends Controller
         }
 
         $magic_skill->load('skillEffects', 'requirements.skill');
-        $effects = Effect::orderBy('name')->get();
-        $skills = Skill::orderBy('name')->get();
+        $effects = Effect::orderBy('name->ru')->get();
+        $skills = Skill::orderBy('name->ru')->get();
 
         return view('admin.magic_skill.info', [
             'magicSkill' => $magic_skill,
@@ -170,9 +171,8 @@ class MagicSkillController extends Controller
 
     private function fillMagicSkill(MagicSkill $magicSkill, Request $request): void
     {
-        $magicSkill->name = $request->input('name');
+        app(ContentTranslationEditor::class)->fill(model: $magicSkill, request: $request);
         $magicSkill->slug = $request->input('slug');
-        $magicSkill->description = $request->input('description');
         $magicSkill->level = (int) $request->input('level', 1);
         $magicSkill->type = $request->input('type');
         $magicSkill->target_type = $request->input('target_type');

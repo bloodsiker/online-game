@@ -8,6 +8,7 @@ use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Influence\Domain\Services\MapInfluenceBonusService;
 use App\Modules\Item\Infrastructure\Persistence\Models\LockpickingAttempt;
@@ -82,7 +83,7 @@ class GatheringService
 
         return [
             'enabled' => true,
-            'message' => $nodes === [] ? 'На этой карте пока не настроены ресурсы.' : null,
+            'message' => $nodes === [] ? __('На этой карте пока не настроены ресурсы.') : null,
             'serverTime' => now()->toIso8601String(),
             'nodes' => $nodes,
             'professions' => $this->professionStates($user->player),
@@ -104,14 +105,14 @@ class GatheringService
         if ($location === null || $location->map_id === null || $location->map === null || ! $location->map->has_gathering_field) {
             return [
                 'available' => false,
-                'message' => 'На этой локации невозможно добывать ресурсы.',
+                'message' => __('На этой локации невозможно добывать ресурсы.'),
             ];
         }
 
         if ($location->dungeon_id !== null) {
             return [
                 'available' => false,
-                'message' => 'В инстансах добыча ресурсов недоступна.',
+                'message' => __('В инстансах добыча ресурсов недоступна.'),
             ];
         }
 
@@ -128,7 +129,7 @@ class GatheringService
                 $lockedPlayer = Player::query()->whereKey($user->player->id)->lockForUpdate()->first();
                 $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->first();
                 if ($lockedPlayer === null || $lockedUser === null) {
-                    return $this->failure('Игрок не найден.', 404);
+                    return $this->failure(__('Игрок не найден.'), 404);
                 }
 
                 $lockedUser->setRelation('player', $lockedPlayer);
@@ -141,7 +142,7 @@ class GatheringService
 
                 $this->deleteExpiredAttempts();
                 if (GatheringAttempt::query()->where('player_id', $lockedPlayer->id)->exists()) {
-                    return $this->failure('Сначала завершите текущую добычу.', 409);
+                    return $this->failure(__('Сначала завершите текущую добычу.'), 409);
                 }
 
                 $node = GatheringNode::query()
@@ -150,11 +151,11 @@ class GatheringService
                     ->with(['mapResource.resource.skill'])
                     ->first();
                 if ($node === null || (int) $node->mapResource->map_id !== (int) $location->map_id) {
-                    return $this->failure('Ресурс не найден на этой карте.', 404);
+                    return $this->failure(__('Ресурс не найден на этой карте.'), 404);
                 }
 
                 if ($node->respawn_at !== null && $node->respawn_at->isFuture()) {
-                    return $this->failure('Этот ресурс ещё не появился.', 409);
+                    return $this->failure(__('Этот ресурс ещё не появился.'), 409);
                 }
 
                 $resource = $node->mapResource->resource;
@@ -184,7 +185,7 @@ class GatheringService
 
                 return new GatheringActionResultDTO(
                     ok: true,
-                    message: sprintf('Вы начали добывать «%s».', $resource->name),
+                    message: sprintf(__('Вы начали добывать «%s».'), $resource->name),
                     data: [
                         'attempt' => [
                             'nodeId' => (int) $node->id,
@@ -200,7 +201,7 @@ class GatheringService
                 throw $exception;
             }
 
-            return $this->failure('Этот ресурс уже занят.', 409);
+            return $this->failure(__('Этот ресурс уже занят.'), 409);
         }
     }
 
@@ -214,7 +215,7 @@ class GatheringService
                 ->first();
 
             if ($attempt === null) {
-                return $this->failure('Активная добыча не найдена.', 404);
+                return $this->failure(__('Активная добыча не найдена.'), 404);
             }
 
             $mapId = (int) $attempt->node->mapResource->map_id;
@@ -229,18 +230,18 @@ class GatheringService
                 $attempt->delete();
                 GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-expired');
 
-                return $this->failure('Время завершения добычи истекло.', 409);
+                return $this->failure(__('Время завершения добычи истекло.'), 409);
             }
 
             if ($attempt->completes_at->isFuture()) {
-                return $this->failure('Добыча ещё не завершена.', 409);
+                return $this->failure(__('Добыча ещё не завершена.'), 409);
             }
 
             if ((int) $lockedUser->location_id !== (int) $attempt->location_id) {
                 $attempt->delete();
                 GatheringMapUpdated::dispatch($mapId, $nodeId, 'attempt-cancelled');
 
-                return $this->failure('Добыча отменена из-за перехода на другую локацию.', 409);
+                return $this->failure(__('Добыча отменена из-за перехода на другую локацию.'), 409);
             }
 
             $blocked = $this->areaBlockReason($lockedUser, $lockedUser->currentLocation);
@@ -262,7 +263,7 @@ class GatheringService
 
                 return new GatheringActionResultDTO(
                     ok: false,
-                    message: 'Добыча не удалась: ресурс уже собран другим игроком.',
+                    message: __('Добыча не удалась: ресурс уже собран другим игроком.'),
                 );
             }
 
@@ -281,24 +282,23 @@ class GatheringService
 
             $backpackItem = $this->backpackService->addItemByShareItem($lockedUser, $resource, $count);
             $bonusRewards = $this->rollBonusResources($lockedUser, $resource, $mapId);
-            $lootMessage = sprintf(
-                'Вы получили вещь <b>%s</b> %d шт. (в рюкзаке %d шт.)',
-                e((string) $resource->name),
-                $count,
-                (int) $backpackItem->count,
-            );
+            $resourceMessage = new LocalizedChatMessage('chat.gathering_resource', [
+                'name' => $resource->name, 'count' => $count, 'backpack_count' => (int) $backpackItem->count,
+            ]);
+            $bonusMessage = '';
             if ($bonusRewards !== []) {
-                $lootMessage .= ' Дополнительно: '.implode('; ', array_map(
-                    fn (array $bonus): string => sprintf(
-                        '<b>%s</b> %d шт. (в рюкзаке %d шт.)',
-                        e($bonus['name']),
-                        $bonus['count'],
-                        $bonus['backpackCount'],
-                    ),
-                    $bonusRewards,
-                ));
+                $bonusParts = [];
+                foreach ($bonusRewards as $bonus) {
+                    if ($bonusParts !== []) {
+                        $bonusParts[] = '; ';
+                    }
+                    $bonusParts[] = new LocalizedChatMessage('chat.gathering_resource', [
+                        'name' => $bonus['name'], 'count' => $bonus['count'], 'backpack_count' => $bonus['backpackCount'],
+                    ]);
+                }
+                $bonusMessage = new LocalizedChatMessage('chat.gathering_bonus', ['resources' => $bonusParts]);
             }
-            $this->chatService->sendLootToUser($lockedUser, $lootMessage);
+            $this->chatService->sendLootToUser($lockedUser, new LocalizedChatMessage('chat.gathering', ['resource' => $resourceMessage, 'bonus' => $bonusMessage]));
             $profession = $this->awardExperience($player, $resource->skill, max(1, (int) $resource->skill_exp));
             $this->incrementGatheringStat($player, (int) $resource->id, $count);
 
@@ -315,10 +315,10 @@ class GatheringService
                 ->afterCommit();
 
             $message = $isDouble
-                ? sprintf('Удача! Получено: %s ×2 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp))
-                : sprintf('Получено: %s ×1 · опыт +%d.', $resource->name, max(1, (int) $resource->skill_exp));
+                ? sprintf(__('Удача! Получено: %s ×2 · опыт +%d.'), $resource->name, max(1, (int) $resource->skill_exp))
+                : sprintf(__('Получено: %s ×1 · опыт +%d.'), $resource->name, max(1, (int) $resource->skill_exp));
             if ($bonusRewards !== []) {
-                $message .= ' Также найдено: '.implode(', ', array_map(
+                $message .= __(' Также найдено: ').implode(', ', array_map(
                     fn (array $bonus): string => sprintf('%s ×%d', $bonus['name'], $bonus['count']),
                     $bonusRewards,
                 )).'.';
@@ -349,7 +349,7 @@ class GatheringService
 
         return new GatheringActionResultDTO(
             ok: true,
-            message: $deleted > 0 ? 'Добыча отменена.' : 'Активной добычи нет.',
+            message: $deleted > 0 ? __('Добыча отменена.') : __('Активной добычи нет.'),
         );
     }
 
@@ -414,7 +414,7 @@ class GatheringService
             'description' => (string) ($resource->description ?? ''),
             'image' => $this->gatheringImage($resource),
             'rarity' => $resource->rarity->value,
-            'rarityLabel' => $resource->rarity->label(),
+            'rarityLabel' => __($resource->rarity->label()),
             'rarityColor' => $resource->rarity->color(),
             'x' => (float) $node->x_percent,
             'y' => (float) $node->y_percent,
@@ -481,16 +481,16 @@ class GatheringService
             || $resource->gathering_time_seconds === null
             || $resource->gathering_respawn_seconds === null
             || $resource->gathering_tool_family === null) {
-            return 'Ресурс настроен не полностью.';
+            return __('Ресурс настроен не полностью.');
         }
 
         $playerSkill = $this->ensureProfession($player, $resource->skill);
         if ($playerSkill->lvl < max(1, (int) $resource->skill_lvl)) {
-            return sprintf('Требуется %s %d уровня.', $resource->skill->name, max(1, (int) $resource->skill_lvl));
+            return sprintf(__('Требуется %s %d уровня.'), $resource->skill->name, max(1, (int) $resource->skill_lvl));
         }
 
         if ($this->equippedToolBonusPercent($player, $resource->gathering_tool_family) === null) {
-            return sprintf('Возьмите в руку инструмент «%s».', $this->toolFamilyLabel($resource->gathering_tool_family));
+            return sprintf(__('Возьмите в руку инструмент «%s».'), $this->toolFamilyLabel($resource->gathering_tool_family));
         }
 
         return null;
@@ -499,26 +499,26 @@ class GatheringService
     private function areaBlockReason(User $user, ?Location $location): ?string
     {
         if ($location === null || $location->map_id === null) {
-            return 'Эта локация не привязана к карте.';
+            return __('Эта локация не привязана к карте.');
         }
 
         if ($location->dungeon_id !== null) {
-            return 'В инстансах добыча ресурсов недоступна.';
+            return __('В инстансах добыча ресурсов недоступна.');
         }
 
         if ((int) $user->player->hp_now <= 0) {
-            return 'Мёртвый персонаж не может добывать ресурсы.';
+            return __('Мёртвый персонаж не может добывать ресурсы.');
         }
 
         if ($this->hasActiveBattle((int) $user->id, (int) $location->id)) {
-            return 'Во время боя добыча ресурсов недоступна.';
+            return __('Во время боя добыча ресурсов недоступна.');
         }
 
         if (LockpickingAttempt::query()
             ->where('player_id', $user->player->id)
             ->where('expires_at', '>', now())
             ->exists()) {
-            return 'Сначала завершите взлом сундука.';
+            return __('Сначала завершите взлом сундука.');
         }
 
         return null;
@@ -564,7 +564,9 @@ class GatheringService
 
     private function toolFamilyLabel(?string $toolFamily): string
     {
-        return GatheringToolFamily::tryFrom((string) $toolFamily)?->label() ?? 'неизвестный инструмент';
+        $label = GatheringToolFamily::tryFrom((string) $toolFamily)?->label();
+
+        return $label === null ? __('неизвестный инструмент') : __($label);
     }
 
     private function hasActiveBattle(int $userId, int $locationId): bool
@@ -648,9 +650,10 @@ class GatheringService
     {
         return Skill::query()
             ->where('type', 'peaceful')
-            ->whereIn('name', self::PROFESSION_NAMES)
-            ->orderByRaw("CASE name WHEN 'Травник' THEN 1 WHEN 'Рыбак' THEN 2 WHEN 'Геолог' THEN 3 WHEN 'Лесоруб' THEN 4 ELSE 5 END")
+            ->whereIn('name->ru', self::PROFESSION_NAMES)
             ->get()
+            ->sortBy(fn (Skill $skill): int => array_search($skill->getTranslation('name', 'ru'), self::PROFESSION_NAMES, true))
+            ->values()
             ->map(fn (Skill $skill): array => $this->professionState($this->ensureProfession($player, $skill)))
             ->all();
     }

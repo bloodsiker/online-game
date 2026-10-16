@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клан</title>
+    <title>{{ __('Клан') }}</title>
     <style>
         html { height: 100%; width: 100%; }
         body {
@@ -53,11 +53,11 @@
                     <div class="info">
                         <span class="{{ $isOnline ? '' : 'user_offline' }}">
                             <span class="time">{{ $user->last_online_at?->format('H:i') }}</span>
-                            <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
-                                 onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приват">
+                            <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="{{ __('Написать в приват') }}"
+                                 onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="{{ __('Приват') }}">
                             <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                                class="pnick {{ $isOnline ? '' : 'user_offline' }}"
-                               title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
+                               title="{{ __('Информация о персонаже') }}"><b>{{ $user->name }} [{{ $user->player->lvl }}]</b></a>
                             @if($member->role)
                                 <span class="role">({{ $member->role->name }})</span>
                             @endif
@@ -65,7 +65,7 @@
                     </div>
                 @endforeach
             @else
-                <div class="empty">Вы не состоите в клане</div>
+                <div class="empty">{{ __('Вы не состоите в клане') }}</div>
             @endif
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
@@ -75,7 +75,7 @@
             <img src="{{ asset('img/bg/separator_v.gif') }}" width="3" height="1">
         </td>
         <td width="100%" height="18" style="background: url({{ asset('img/bg/tbl-main_users-bottom.gif') }}) repeat-x; padding-left: 14px; color: rgb(66, 42, 23);">
-            <b>Клан:</b> <b style="color:#FF0000;">{{ $members->count() }}</b>
+            <b>{{ __('Клан:') }}</b> <b style="color:#FF0000;">{{ $members->count() }}</b>
         </td>
     </tr>
     </tbody>

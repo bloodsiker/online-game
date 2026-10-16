@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $tab === 'profile' ? 'Анкета' : 'Настройки игры' }}</title>
+    <title>{{ $tab === 'profile' ? __('ui.profile') : __('ui.game_settings') }}</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}?v={{ filemtime(public_path('css/main.css')) }}">
     <style>
         html { min-height: 100%; }
@@ -89,11 +89,11 @@
 </head>
 <body>
     <section class="settings-frame">
-        <table class="settings-tabs" cellpadding="0" cellspacing="0" aria-label="Разделы настроек">
+        <table class="settings-tabs" cellpadding="0" cellspacing="0" aria-label="{{ __('ui.settings_sections') }}">
             <tbody><tr>
                 @foreach([
-                    ['id' => 'game', 'route' => 'settings', 'label' => 'Настройки игры'],
-                    ['id' => 'profile', 'route' => 'settings.profile', 'label' => 'Анкета'],
+                    ['id' => 'game', 'route' => 'settings', 'label' => __('ui.game_settings')],
+                    ['id' => 'profile', 'route' => 'settings.profile', 'label' => __('ui.profile')],
                 ] as $item)
                     @php($active = $tab === $item['id'])
                     @php($suffix = $active ? '2' : '1')

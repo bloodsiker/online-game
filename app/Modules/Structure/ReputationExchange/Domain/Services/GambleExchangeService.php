@@ -6,6 +6,7 @@ namespace App\Modules\Structure\ReputationExchange\Domain\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Reputation\Application\Services\ReputationService;
@@ -144,17 +145,14 @@ readonly class GambleExchangeService implements ReputationExchangeStrategy
         });
 
         $elixirNote = $elixir !== null ? sprintf(' Получен «%s» ×1.', $elixir->name) : '';
-        $elixirChatNote = $elixir !== null ? sprintf(' Получен [[share_item_%d]] ×1.', $elixir->id) : '';
+        $elixirChatNote = $elixir !== null ? new LocalizedChatMessage('chat.received_item', ['item_id' => $elixir->id, 'count' => 1]) : '';
 
         if ($succeeded) {
-            $this->chatService->sendQuestToUser($user, sprintf(
-                'Вы поднесли %d×«%s» и получили <b>+%d</b> репутации <b>«%s»</b>.%s',
-                $option->resource_cost,
-                $option->shareItem->name,
-                $option->reward_points,
-                $option->reputation->name,
-                $elixirChatNote,
-            ));
+            $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.reputation_offering', [
+                'count' => $option->resource_cost, 'item' => $option->shareItem->name,
+                'points' => $option->reward_points, 'reputation' => LocalizedChatMessage::contentName($option->reputation),
+                'reward' => $elixirChatNote,
+            ]));
 
             return new ReputationExchangeResultDTO(true, sprintf(
                 'Успех! Потрачено %d×«%s», получено +%d репутации.%s',

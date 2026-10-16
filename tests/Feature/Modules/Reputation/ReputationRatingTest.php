@@ -136,6 +136,21 @@ class ReputationRatingTest extends TestCase
         $this->assertSame(480, (int) $player->fresh()->reputation_rating);
     }
 
+    public function test_missing_player_reputation_is_read_as_zero_without_creating_a_row(): void
+    {
+        $player = Player::query()->create();
+        $reputation = Reputation::query()->create(['name' => 'Test reputation']);
+
+        $playerReputation = app(ReputationService::class)->getOrZero($player, $reputation);
+
+        $this->assertFalse($playerReputation->exists);
+        $this->assertSame(0, $playerReputation->points);
+        $this->assertDatabaseMissing('player_reputations', [
+            'player_id' => $player->id,
+            'reputation_id' => $reputation->id,
+        ]);
+    }
+
     private function tierAt(int $points): ReputationTier
     {
         return (new ReputationTier)->forceFill([

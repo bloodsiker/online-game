@@ -12,9 +12,8 @@
                 <div class="card-body">
                     <form action="{{ route('admin.npc.create') }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Имя</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => null, 'active' => true])
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Локация</label>
@@ -27,10 +26,6 @@
                         <div class="checkbox-custom checkbox-default mt-2">
                             <input type="checkbox" id="is-active" name="is_active" value="1" @checked(old('is_active', true))>
                             <label for="is-active">Активен и отображается на локации</label>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ old('description') }}</textarea>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Изображение</label>

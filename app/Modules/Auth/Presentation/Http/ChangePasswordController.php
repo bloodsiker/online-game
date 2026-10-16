@@ -26,6 +26,6 @@ final class ChangePasswordController extends Controller
         $request->session()->migrate(true);
         $request->session()->put('password_hash_web', $user->password);
 
-        return response()->json(['ok' => true, 'message' => 'Пароль успешно изменён.']);
+        return response()->json(['ok' => true, 'message' => __('ui.password_changed')]);
     }
 }

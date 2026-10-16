@@ -16,8 +16,9 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\BossPhase;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterSummonPool;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
+use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,18 +46,17 @@ class MonsterController extends Controller
         ];
 
         $monsterNames = Monster::query()
-            ->select('name')
+            ->select('name->ru as canonical_name')
             ->distinct()
-            ->orderBy('name')
-            ->pluck('name');
+            ->orderBy('name->ru')
+            ->pluck('canonical_name');
 
         $listMonsters = Monster::query()
-            ->when($filters['monster_name'] !== '', fn ($query) => $query->where('name', $filters['monster_name']))
+            ->when($filters['monster_name'] !== '', fn ($query) => $query->where('name->ru', $filters['monster_name']))
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
                 $query->where(function ($query) use ($search): void {
-                    $query->where('name', 'like', $search)
-                        ->orWhere('description', 'like', $search);
+                    $query->searchTranslations($search, ['name', 'description']);
                 });
             })
             ->when(is_numeric($filters['level_from']), fn ($query) => $query->where('lvl', '>=', (int) $filters['level_from']))
@@ -98,14 +98,14 @@ class MonsterController extends Controller
         }
 
         $mechanicTypes = BossMechanicType::cases();
-        $allMonsters = Monster::orderBy('name')->get();
+        $allMonsters = Monster::orderBy('name->ru')->get();
         $availableEffects = Effect::query()
             ->where('type', 'debuff')
             ->where(fn ($query) => $query
                 ->whereIn('active_type', $this->assignableEffectTypes())
                 ->orWhereNotNull('stat_modifiers'))
             ->whereNotIn('id', $monster->effects->modelKeys())
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get();
 
         return view('admin.monster.info', compact('monster', 'mechanicTypes', 'allMonsters', 'availableEffects'));
@@ -203,7 +203,7 @@ class MonsterController extends Controller
     public function infoLocation(Monster $monster): View
     {
         $monster->load(['locations.map']);
-        $locations = Location::orderBy('name')->get();
+        $locations = Location::orderBy('name->ru')->get();
 
         return view('admin.monster.info_location', compact('monster', 'locations'));
     }
@@ -273,26 +273,29 @@ class MonsterController extends Controller
 
     // ── Boss Phases ───────────────────────────────────────────────────────────
 
-    public function addPhase(Request $request, Monster $monster): RedirectResponse
+    public function addPhase(Request $request, Monster $monster, ContentTranslationEditor $translationEditor): RedirectResponse
     {
-        BossPhase::create([
+        $phase = new BossPhase;
+        $translationEditor->fill($phase, $request, ['description'], []);
+        $phase->fill([
             'monster_id' => $monster->id,
             'phase_number' => (int) $request->input('phase_number', 1),
             'hp_threshold' => (int) $request->input('hp_threshold', 50),
-            'description' => $request->input('description'),
             'stats_modifiers' => $request->filled('stats_modifiers') ? json_decode($request->input('stats_modifiers'), true) : null,
             'new_skills' => $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null,
             'removed_skills' => $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null,
         ]);
+        $phase->save();
 
         return redirect()->back()->with('success', 'Фаза добавлена.');
     }
 
-    public function updatePhase(Request $request, Monster $monster, BossPhase $phase): RedirectResponse
+    public function updatePhase(Request $request, Monster $monster, BossPhase $phase, ContentTranslationEditor $translationEditor): RedirectResponse
     {
+        abort_unless((int) $phase->monster_id === (int) $monster->id, 404);
+        $translationEditor->fill($phase, $request, ['description'], []);
         $phase->phase_number = (int) $request->input('phase_number', 1);
         $phase->hp_threshold = (int) $request->input('hp_threshold', 50);
-        $phase->description = $request->input('description');
         $phase->stats_modifiers = $request->filled('stats_modifiers') ? json_decode($request->input('stats_modifiers'), true) : null;
         $phase->new_skills = $request->filled('new_skills') ? json_decode($request->input('new_skills'), true) : null;
         $phase->removed_skills = $request->filled('removed_skills') ? json_decode($request->input('removed_skills'), true) : null;
@@ -380,8 +383,7 @@ class MonsterController extends Controller
 
     private function fillMonster(Monster $monster, Request $request): void
     {
-        $monster->name = $request->input('name');
-        $monster->description = $request->input('description');
+        app(ContentTranslationEditor::class)->fill($monster, $request);
         $monster->lvl = (int) $request->input('lvl', 1);
         $monster->hp = (int) $request->input('hp', 1);
         $monster->armor = (int) $request->input('armor', 0);
@@ -406,6 +408,7 @@ class MonsterController extends Controller
         $monster->min_money = (int) $request->input('min_money', 0);
         $monster->max_money = (int) $request->input('max_money', 0);
         $monster->is_boss = (bool) $request->input('is_boss', false);
+        $monster->does_not_regenerate_hp = $request->boolean('does_not_regenerate_hp', $monster->is_boss);
         $monster->respawn_min_minutes = $request->filled('respawn_min_minutes') ? (int) $request->input('respawn_min_minutes') : null;
         $monster->respawn_max_minutes = $request->filled('respawn_max_minutes') ? (int) $request->input('respawn_max_minutes') : null;
         $monster->respawn_at = $request->filled('respawn_at') ? $request->input('respawn_at') : null;

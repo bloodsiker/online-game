@@ -156,4 +156,32 @@
     }
     .bp-footer a { color: #5a1f00; font-weight: bold; }
     .bp-footer a:hover { color: #8b2f00; }
+
+    .bp-hits-card {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 8px;
+        padding: 4px 7px;
+        border: 1px solid #DB9F73;
+        border-radius: 4px;
+        background: #fff8ec url({{ asset('img/bg/bg_l.gif') }});
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 1px 2px rgba(60, 30, 10, .15);
+    }
+    .bp-hits-icon { font-size: 11px; line-height: 1; }
+    .bp-hits-label { flex: 1; color: #5a1f00; font-size: 10px; font-weight: bold; white-space: nowrap; text-align: left; }
+    .bp-hits-value {
+        min-width: 18px;
+        padding: 1px 6px;
+        border-radius: 9px;
+        font-size: 11px;
+        font-weight: bold;
+        color: #fff8ec;
+        text-align: center;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+    }
+    .bp-hits-ok .bp-hits-value { background: linear-gradient(to bottom, #7ec24a, #2f8212 55%, #1d5407); border: 1px solid #1d5407; }
+    .bp-hits-low .bp-hits-value { background: linear-gradient(to bottom, #ffc36a, #d97806 55%, #9a5200); border: 1px solid #7a4100; }
+    .bp-hits-empty .bp-hits-value { background: linear-gradient(to bottom, #d24a35, #a02020 55%, #6e1515); border: 1px solid #6e1515; }
+    .bp-hits-empty { opacity: .85; }
 </style>

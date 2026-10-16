@@ -7,6 +7,11 @@ use App\Modules\Clan\Presentation\Http\ClanWarehouseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/clan-info/{clan}', [ClanController::class, 'publicInfo'])->name('clan.public');
+Route::get('/clan/rating', [ClanController::class, 'rating'])->middleware('auth')->name('clan.rating');
+Route::post('/clan/apply/{clan}', [ClanController::class, 'apply'])->middleware('auth')->name('clan.application.apply');
+Route::post('/clan/applications/{application}/accept', [ClanController::class, 'acceptApplication'])->middleware('auth')->name('clan.application.accept');
+Route::post('/clan/applications/{application}/decline', [ClanController::class, 'declineApplication'])->middleware('auth')->name('clan.application.decline');
+Route::post('/clan/applications/{application}/withdraw', [ClanController::class, 'withdrawApplication'])->middleware('auth')->name('clan.application.withdraw');
 Route::get('/clan/member', [ClanController::class, 'member'])->name('clan.member');
 Route::post('/clan/member/save-roles', [ClanController::class, 'saveMemberRoles'])->name('clan.member.save-roles');
 Route::post('/clan/member/leave', [ClanController::class, 'leaveClan'])->name('clan.member.leave');
@@ -16,10 +21,13 @@ Route::post('/clan/role/add', [ClanController::class, 'addRole'])->name('clan.ro
 Route::post('/clan/role/save', [ClanController::class, 'saveRoles'])->name('clan.role.save');
 Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name('clan.role.delete');
 Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
+Route::get('/clan/invite/accept/{inviteUuid}', [ClanController::class, 'acceptInvite'])->whereUuid('inviteUuid')->name('clan.invite.accept');
+Route::get('/clan/invite/decline/{inviteUuid}', [ClanController::class, 'declineInvite'])->whereUuid('inviteUuid')->name('clan.invite.decline');
 Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
 Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
 Route::get('/clan/characteristics', [ClanController::class, 'characteristics'])->name('clan.characteristics');
 Route::get('/clan/logs', [ClanController::class, 'logs'])->name('clan.logs');
+Route::get('/clan/boss', [ClanController::class, 'boss'])->name('clan.boss');
 Route::get('/clan/quests', [ClanController::class, 'quests'])->name('clan.quests');
 Route::post('/clan/information/description', [ClanController::class, 'saveDescription'])->name('clan.information.save-description');
 Route::post('/clan/information/news', [ClanController::class, 'saveNews'])->name('clan.information.save-news');

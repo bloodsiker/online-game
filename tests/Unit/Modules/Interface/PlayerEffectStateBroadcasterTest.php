@@ -57,4 +57,21 @@ final class PlayerEffectStateBroadcasterTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_background_broadcast_uses_recipient_language_not_worker_locale(): void
+    {
+        app()->setLocale('ru');
+        request()->attributes->set('game_settings.10', ['language' => 'uk']);
+        Event::fake([PlayerStateUpdated::class]);
+        $effect = new Effect(['name' => ['ru' => 'Ожог', 'uk' => 'Опік'], 'description' => ['ru' => 'Урон', 'uk' => 'Шкода'], 'slug' => 'burn']);
+        $active = (new PlayerActiveEffect)->forceFill(['id' => 21, 'player_id' => 7, 'applied_at' => now(), 'expires_at' => now()->addMinute()]);
+        $active->setRelation('effect', $effect);
+        $repository = $this->createMock(InterfaceReadRepository::class);
+        $repository->method('getPlayerActiveEffects')->willReturn(new Collection([$active]));
+        $player = (new Player)->forceFill(['id' => 7, 'user_id' => 10]);
+        (new PlayerEffectStateBroadcaster($repository, new HeroPageViewMapper))->broadcast($player);
+        Event::assertDispatched(PlayerStateUpdated::class, fn (PlayerStateUpdated $event): bool => $event->state['effects'][0]['name'] === 'Опік'
+            && $event->state['effects'][0]['description'] === 'Шкода');
+        $this->assertSame('ru', app()->getLocale());
+    }
 }

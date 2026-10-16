@@ -33,12 +33,15 @@ class ChatMessage extends Model
         'map_id',
         'party_id',
         'message',
+        'translation_key',
+        'translation_params',
         'type',
     ];
 
     protected $casts = [
         'channel' => ChatChannel::class,
         'type' => ChatMessageType::class,
+        'translation_params' => 'array',
     ];
 
     public function sender(): BelongsTo

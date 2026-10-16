@@ -348,7 +348,7 @@ let renderItemInfo = (id) => {
         }
     }
     if (a.requirements && a.requirements.length > 0) {
-        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#8b4a00;">Требования:</b></td></tr>';
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#8b4a00;">' + itemTooltipTranslate("Требования:") + '</b></td></tr>';
         bg = !bg;
         for (i in a.requirements) {
             var req = a.requirements[i];
@@ -359,7 +359,7 @@ let renderItemInfo = (id) => {
         }
     }
     if (a.gems && a.gems.length > 0) {
-        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#3300ff;">Камни:</b></td></tr>';
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#3300ff;">' + itemTooltipTranslate("Камни:") + '</b></td></tr>';
         bg = !bg;
         for (i in a.gems) {
             var gemColor = a.gems[i].color || '#3300ff';
@@ -372,7 +372,7 @@ let renderItemInfo = (id) => {
         }
     }
     if (a.runes && a.runes.length > 0) {
-        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#990099;">Руны:</b></td></tr>';
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td colspan="2"><b style="color:#990099;">' + itemTooltipTranslate("Руны:") + '</b></td></tr>';
         bg = !bg;
         for (i in a.runes) {
             var runeColor = a.runes[i].color || '#990099';
@@ -456,7 +456,7 @@ let renderItemInfo = (id) => {
         bg = !bg;
     }
     if (a.remainingUses !== null && a.remainingUses !== undefined) {
-        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td><b>Количество использований</b></td><td class="red b" align="right">' + a.remainingUses + '</td></tr>';
+        content += '<tr class="skill_list ' + (bg ? 'list_dark' : '') + '"><td><b>' + itemTooltipTranslate("Количество использований") + '</b></td><td class="red b" align="right">' + a.remainingUses + '</td></tr>';
         bg = !bg;
     }
     if (a.specialInfo && a.specialInfo.length > 0) {
@@ -612,4 +612,7 @@ let itemTooltipIframeShift = () => {
         top: top,
         left: left
     };
+}
+function itemTooltipTranslate(text) {
+    return typeof window.gameTranslate === 'function' ? window.gameTranslate(text) : text;
 }

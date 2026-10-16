@@ -41,7 +41,7 @@ class ItemRequirementService
             };
 
             if (! $met) {
-                return 'Требование не выполнено: '.$req->label().' ≥ '.$req->min_value;
+                return __('Требование не выполнено: ').$req->label().' ≥ '.$req->min_value;
             }
         }
 

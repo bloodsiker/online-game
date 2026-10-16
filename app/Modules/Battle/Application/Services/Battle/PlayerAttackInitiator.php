@@ -26,6 +26,7 @@ readonly class PlayerAttackInitiator
             ->where('id', $monsterId)
             ->where('location_id', $location->id)
             ->where('active', 1)
+            ->visibleTo($user)
             ->when(
                 $session !== null,
                 fn ($query) => $query->where('dungeon_session_id', $session->monsterSessionId()),

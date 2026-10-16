@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>{{ __("Персонаж") }}</title>
     <style>
         html { height: 100%; }
         body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 14px; }
@@ -20,7 +21,7 @@
 <body>
 @if($page->message !== '')<p>{!! $page->message !!}</p>@endif
 @if($page->count)
-    <p>В сундуке вы обнаружили: </p>
+    <p>{{ __("В сундуке вы обнаружили:") }} </p>
     <table cellspacing="1" cellpadding="1" border="0" class="b"><tbody><tr><td class="tbgr">
         <table cellspacing="1" cellpadding="5" border="0" width="100%" class="b"><tbody>
         @foreach($page->items as $item)
@@ -28,7 +29,7 @@
                 <td class="itm"><img src="{{ $item->image }}" class="itm">{{ $item->name }}</td>
                 <td width="70" align="center">
                     @if($item->rewardType === 'money')
-                        {{ format_money($item->count) }} монет
+                        {{ format_money($item->count) }} {{ __("монет") }}
                     @else
                         x{{ $item->count }}
                     @endif
@@ -36,17 +37,17 @@
                 <td>
                     <form method="post" action="{{ $item->pickupUrl }}" style="display:inline">
                         @csrf
-                        <button type="submit" style="border:0;background:none;padding:0;color:#000;text-decoration:underline;cursor:pointer;font:inherit">поднять</button>&nbsp;»
+                        <button type="submit" style="border:0;background:none;padding:0;color:#000;text-decoration:underline;cursor:pointer;font:inherit">{{ __("поднять") }}</button>&nbsp;»
                     </form>
                 </td>
             </tr>
         @endforeach
-        <tr class="t0"><td colspan="3"><b>Bceгo: {{ $page->count }}</b></td></tr>
+        <tr class="t0"><td colspan="3"><b>{{ __('Всего:') }} {{ $page->count }}</b></td></tr>
         </tbody></table>
     </td></tr></tbody></table>
 @endif
-<p><a href="{{ $page->backpackUrl }}">Список ваших вещей</a> »</p>
-<p>« <a href="{{ $page->locationUrl }}" target="game">Описание местности</a></p>
+<p><a href="{{ $page->backpackUrl }}">{{ __("Список ваших вещей") }}</a> »</p>
+<p>« <a href="{{ $page->locationUrl }}" target="game">{{ __("Описание местности") }}</a></p>
 <script>
     try {
         window.top.sendToFrame('character-frame', { money: @json($page->money) }, window.location.origin);

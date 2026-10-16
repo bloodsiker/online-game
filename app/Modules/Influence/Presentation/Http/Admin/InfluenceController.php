@@ -19,6 +19,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map as GameMap;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Services\Media\AdminImageStorage;
@@ -37,7 +38,7 @@ final class InfluenceController extends Controller
         $maps = GameMap::query()
             ->withCount(['locations'])
             ->withCount(['influenceLevels'])
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get();
 
         return view('influence::admin.index', compact('maps'));
@@ -46,7 +47,7 @@ final class InfluenceController extends Controller
     public function show(GameMap $map): View
     {
         $map->load(['influenceLevels.medal.stats', 'influenceLevels.bonuses', 'influenceLevels.rewards.item']);
-        $medals = InfluenceMedal::query()->where('map_id', $map->id)->with('stats')->orderBy('name')->get();
+        $medals = InfluenceMedal::query()->where('map_id', $map->id)->with('stats')->orderBy('name->ru')->get();
         $requirements = collect([
             'npc' => DB::table('npc_influence_requirements')->where('map_id', $map->id)->get(),
             'quest' => DB::table('quest_influence_requirements')->where('map_id', $map->id)->get(),
@@ -57,6 +58,13 @@ final class InfluenceController extends Controller
             ->with(['structure', 'items.item'])
             ->orderBy('sort_order')
             ->get();
+        $newShopSection = new InfluenceShopSection;
+        foreach (['ru', 'uk'] as $locale) {
+            $mapName = $map->getTranslation('name', $locale, false);
+            if (is_string($mapName) && $mapName !== '') {
+                $newShopSection->setTranslation('name', $locale, $mapName);
+            }
+        }
         $transactions = MapInfluenceTransaction::query()
             ->where('map_id', $map->id)
             ->with(['user' => static fn ($query) => $query->without('player')])
@@ -71,43 +79,46 @@ final class InfluenceController extends Controller
             'rewardTypes' => InfluenceRewardType::cases(),
             'statTypes' => $this->supportedMedalStatTypes(),
             'requirements' => $requirements,
-            'npcs' => Npc::query()->orderBy('name')->get(['id', 'name']),
-            'quests' => Quest::query()->orderBy('title')->get(['id', 'title']),
+            'npcs' => Npc::query()->orderBy('name->ru')->get(['id', 'name']),
+            'quests' => Quest::query()->orderBy('title->ru')->get(['id', 'title']),
             'gates' => LocationGate::query()->with(['fromLocation', 'toLocation'])->orderBy('id')->get(),
-            'structures' => Structure::query()->where('type', Structure::TYPE_SHOP)->orderBy('name')->get(['id', 'name']),
+            'structures' => Structure::query()->where('type', Structure::TYPE_SHOP)->orderBy('name->ru')->get(['id', 'name']),
             'shopSections' => $shopSections,
+            'newShopSection' => $newShopSection,
             'transactions' => $transactions,
         ]);
     }
 
-    public function storeLevel(Request $request, GameMap $map): RedirectResponse
+    public function storeLevel(Request $request, GameMap $map, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $data = $request->validate([
             'level' => ['required', 'integer', 'min:1', 'max:65535'],
-            'name' => ['required', 'string', 'max:255'],
             'required_influence' => ['required', 'integer', 'min:0'],
             'influence_medal_id' => ['nullable', 'integer', 'exists:influence_medals,id'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]);
-        $data['map_id'] = $map->id;
-        $data['is_active'] = $request->boolean('is_active', true);
-        MapInfluenceLevel::query()->create($data);
+        $level = new MapInfluenceLevel;
+        $translationEditor->fill($level, $request, ['name'], ['name']);
+        $level->fill($data + [
+            'map_id' => $map->id,
+            'is_active' => $request->boolean('is_active', true),
+        ])->save();
 
         return back()->with('success', 'Уровень влияния добавлен.');
     }
 
-    public function updateLevel(Request $request, GameMap $map, MapInfluenceLevel $level): RedirectResponse
+    public function updateLevel(Request $request, GameMap $map, MapInfluenceLevel $level, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         abort_unless((int) $level->map_id === (int) $map->id, 404);
-        $level->update($request->validate([
+        $translationEditor->fill($level, $request, ['name'], ['name']);
+        $level->fill($request->validate([
             'level' => ['required', 'integer', 'min:1', 'max:65535'],
-            'name' => ['required', 'string', 'max:255'],
             'required_influence' => ['required', 'integer', 'min:0'],
             'influence_medal_id' => ['nullable', 'integer', 'exists:influence_medals,id'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
-        ]) + ['is_active' => $request->boolean('is_active')]);
+        ]) + ['is_active' => $request->boolean('is_active')])->save();
 
         return back()->with('success', 'Уровень обновлён.');
     }
@@ -122,6 +133,8 @@ final class InfluenceController extends Controller
 
     public function storeMedal(Request $request, GameMap $map): RedirectResponse
     {
+        $medal = new InfluenceMedal;
+        app(ContentTranslationEditor::class)->fill(model: $medal, request: $request);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -132,7 +145,7 @@ final class InfluenceController extends Controller
         if ($request->hasFile('icon')) {
             $data['icon'] = $this->imageStorage->storeOnPublicDisk($request->file('icon'), 'influence/medals');
         }
-        InfluenceMedal::query()->create($data);
+        $medal->fill($data)->save();
 
         return back()->with('success', 'Медаль создана.');
     }
@@ -148,6 +161,7 @@ final class InfluenceController extends Controller
     public function updateMedal(Request $request, GameMap $map, InfluenceMedal $medal): RedirectResponse
     {
         abort_unless((int) $medal->map_id === (int) $map->id, 404);
+        app(ContentTranslationEditor::class)->fill(model: $medal, request: $request);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -265,21 +279,27 @@ final class InfluenceController extends Controller
         return back()->with('success', 'Требование удалено.');
     }
 
-    public function storeShopSection(Request $request, GameMap $map): RedirectResponse
+    public function storeShopSection(Request $request, GameMap $map, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $data = $request->validate([
             'structure_id' => ['required', 'integer', 'exists:structures,id'],
-            'name' => ['required', 'string', 'max:255'],
             'required_influence' => ['required', 'integer', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
-        InfluenceShopSection::query()->create([
-            ...$data,
-            'map_id' => $map->id,
-            'is_active' => true,
-        ]);
+        $section = new InfluenceShopSection;
+        $translationEditor->fill($section, $request, ['name'], ['name']);
+        $section->fill([...$data, 'map_id' => $map->id, 'is_active' => true])->save();
 
         return back()->with('success', 'Раздел магазина добавлен.');
+    }
+
+    public function updateShopSection(Request $request, GameMap $map, InfluenceShopSection $section, ContentTranslationEditor $translationEditor): RedirectResponse
+    {
+        abort_unless((int) $section->map_id === (int) $map->id, 404);
+        $translationEditor->fill($section, $request, ['name'], ['name']);
+        $section->save();
+
+        return back()->with('success', 'Название раздела магазина сохранено.');
     }
 
     public function destroyShopSection(GameMap $map, InfluenceShopSection $section): RedirectResponse

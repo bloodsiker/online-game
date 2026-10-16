@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Media\AdminImageStorage;
@@ -39,7 +40,7 @@ class MapController extends Controller
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
                 $query->where(function ($query) use ($search): void {
-                    $query->where('name', 'like', $search)
+                    $query->searchTranslations($search)
                         ->orWhere('slug', 'like', $search)
                         ->orWhere('folder', 'like', $search);
                 });
@@ -56,34 +57,35 @@ class MapController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        $allMaps = Map::orderBy('name')->get();
+        $allMaps = Map::orderBy('name->ru')->get();
 
         return view('admin.map.list', compact('listMaps', 'filters', 'allMaps'));
     }
 
-    public function create(Request $request): mixed
+    public function create(Request $request, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
             $data = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
                 'slug' => ['nullable', 'string', 'max:100'],
                 'folder' => ['nullable', 'string', 'max:100'],
                 'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
                 'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
             ]);
 
-            $map = Map::create([
-                'name' => $data['name'],
+            $map = new Map;
+            $translationEditor->fill($map, $request, ['name']);
+            $map->fill([
                 'slug' => $data['slug'] ?? null,
                 'folder' => $data['folder'] ?? null,
                 'parent_id' => $data['parent_id'] ?? null,
                 'resp_location_id' => (int) $data['resp_location_id'],
             ]);
+            $map->save();
 
             return redirect()->route('admin.map.info', $map->id)->with('success', 'Карта создана.');
         }
 
-        $allMaps = Map::orderBy('name')->get();
+        $allMaps = Map::orderBy('name->ru')->get();
         $selectedRespawnLocation = null;
 
         if (old('resp_location_id')) {
@@ -95,18 +97,17 @@ class MapController extends Controller
         return view('admin.map.create', compact('allMaps', 'selectedRespawnLocation'));
     }
 
-    public function info(Request $request, Map $map): mixed
+    public function info(Request $request, Map $map, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
             $data = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
                 'slug' => ['nullable', 'string', 'max:100'],
                 'folder' => ['nullable', 'string', 'max:100'],
                 'parent_id' => ['nullable', 'integer', 'exists:maps,id'],
                 'resp_location_id' => ['required', 'integer', 'exists:locations,id'],
             ]);
 
-            $map->name = $data['name'];
+            $translationEditor->fill($map, $request, ['name']);
             $map->slug = $data['slug'] ?? null;
             $map->folder = $data['folder'] ?? null;
             $map->parent_id = $data['parent_id'] ?? null;
@@ -127,7 +128,7 @@ class MapController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $allMaps = Map::where('id', '!=', $map->id)->orderBy('name')->get();
+        $allMaps = Map::where('id', '!=', $map->id)->orderBy('name->ru')->get();
         $locations = Location::where('map_id', $map->id)->orderByDesc('id')->get();
         $mapResources = $map->gatheringResources()->with(['resource.skill', 'nodes.attempts'])->orderBy('id')->get();
         $gatheringResources = ShareItem::query()
@@ -136,7 +137,7 @@ class MapController extends Controller
             ->whereNotNull('gathering_respawn_seconds')
             ->whereNotNull('gathering_tool_family')
             ->with('skill')
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get();
 
         return view('admin.map.info', compact('map', 'allMaps', 'locations', 'mapResources', 'gatheringResources'));

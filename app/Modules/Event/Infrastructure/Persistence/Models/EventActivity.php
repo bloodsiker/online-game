@@ -7,6 +7,7 @@ namespace App\Modules\Event\Infrastructure\Persistence\Models;
 use App\Modules\Event\Domain\Enums\ActivityBonusRewardType;
 use App\Modules\Event\Domain\Enums\ActivityPeriod;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EventActivity extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLegacyTranslations;
+
+    public $translatable = ['title', 'description'];
 
     protected $table = 'event_activities';
 

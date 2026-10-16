@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -88,7 +89,7 @@ class PalachOneHandAxeSeeder extends Seeder
 
     public function run(): void
     {
-        if (DB::table('share_items')->where('name', self::TIERS[0]['name'])->exists()) {
+        if (LocalizedItemSeederQuery::items()->where('name', self::TIERS[0]['name'])->exists()) {
             $this->command?->info('PalachOneHandAxeSeeder: «Секач палача» уже существует, пропускаю.');
 
             return;
@@ -97,7 +98,7 @@ class PalachOneHandAxeSeeder extends Seeder
         $itemIds = [];
 
         foreach (self::TIERS as $tier) {
-            $itemIds[] = DB::table('share_items')->insertGetId([
+            $itemIds[] = LocalizedItemSeederQuery::items()->insertGetId([
                 'type' => 'weapon',
                 'name' => $tier['name'],
                 'description' => $tier['description'],
@@ -149,7 +150,7 @@ class PalachOneHandAxeSeeder extends Seeder
         foreach ($itemIds as $index => $itemId) {
             $nextItemId = $itemIds[$index + 1] ?? null;
 
-            DB::table('share_items')->where('id', $itemId)->update([
+            LocalizedItemSeederQuery::items()->where('id', $itemId)->update([
                 'upgrade_to_share_item_id' => $nextItemId,
                 'updated_at' => now(),
             ]);

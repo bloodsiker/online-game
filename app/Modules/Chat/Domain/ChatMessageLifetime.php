@@ -8,5 +8,7 @@ final class ChatMessageLifetime
 {
     public const SYSTEM_MINUTES = 30;
 
+    public const CLAN_SYSTEM_MINUTES = 15;
+
     public const PERSONAL_MINUTES = 10;
 }

@@ -9,6 +9,7 @@ use App\Modules\Dungeon\Domain\Enums\DungeonRewardType;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +44,7 @@ class SurvivalArenaSeeder extends Seeder
 
     public function run(): void
     {
-        if (Dungeon::where('name', 'Арена Испытания')->exists()) {
+        if (LocalizedContentSeederQuery::forTable('dungeons')->where('name', 'Арена Испытания')->exists()) {
             $this->command->info('SurvivalArenaSeeder: уже существует, пропускаем.');
 
             return;

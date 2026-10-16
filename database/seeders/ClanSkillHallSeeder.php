@@ -14,7 +14,7 @@ class ClanSkillHallSeeder extends Seeder
     public function run(): void
     {
         $location = Location::query()->findOrFail(28);
-        $mentor = Npc::query()->where('name', config('game.clan_mentor_npc_name'))->first();
+        $mentor = Npc::query()->where('name->ru', config('game.clan_mentor_npc_name'))->first();
 
         Structure::query()->updateOrCreate(
             [

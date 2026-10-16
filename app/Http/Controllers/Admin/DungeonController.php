@@ -13,6 +13,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonStage;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,14 +32,23 @@ class DungeonController extends Controller
         return view('admin.dungeon.list', compact('dungeons'));
     }
 
-    public function info(Request $request, Dungeon $dungeon): View|RedirectResponse
+    public function info(Request $request, Dungeon $dungeon, ContentTranslationEditor $translationEditor): View|RedirectResponse
     {
         if ($request->isMethod('POST')) {
             $validated = $request->validate([
+                'name' => ['required', 'string', 'max:150'],
+                'translations.uk.name' => ['nullable', 'string', 'max:150'],
+                'description' => ['nullable', 'string'],
+                'translations.uk.description' => ['nullable', 'string'],
                 'death_behavior' => ['required', Rule::enum(DungeonDeathBehavior::class)],
                 'death_return_location_id' => ['nullable', 'integer', 'exists:locations,id'],
                 'type' => ['required', Rule::enum(DungeonType::class)],
+                'is_clan_boss' => ['sometimes', 'boolean'],
+                'time_limit_seconds' => ['nullable', 'integer', 'min:60', 'max:259200'],
+                'clan_boss_hit_batch_size' => ['required', 'integer', 'min:1', 'max:1000'],
+                'clan_boss_hit_batch_cooldown_seconds' => ['required', 'integer', 'min:0', 'max:259200'],
             ]);
+            $translationEditor->fill($dungeon, $request, ['name', 'description']);
 
             $deathReturnLocationId = $validated['death_return_location_id'] ?? null;
 
@@ -61,21 +71,38 @@ class DungeonController extends Controller
             $dungeon->death_behavior = DungeonDeathBehavior::from($validated['death_behavior']);
             $dungeon->type = DungeonType::from($validated['type']);
             $dungeon->death_return_location_id = $deathReturnLocationId;
+            $dungeon->is_clan_boss = (bool) ($validated['is_clan_boss'] ?? false);
+            $dungeon->time_limit_seconds = $validated['time_limit_seconds'] ?? null;
+            $dungeon->clan_boss_hit_batch_size = $validated['clan_boss_hit_batch_size'];
+            $dungeon->clan_boss_hit_batch_cooldown_seconds = $validated['clan_boss_hit_batch_cooldown_seconds'];
             $dungeon->save();
 
-            return redirect()->back()->with('success', 'Настройки смерти в данже сохранены.');
+            return redirect()->back()->with('success', 'Настройки данжа сохранены.');
         }
 
         $dungeon->load(['firstLocation', 'exitLocation', 'returnLocation', 'deathReturnLocation', 'stages.locations', 'stages.monsters.monster']);
         $deathBehaviors = DungeonDeathBehavior::cases();
         $locations = $dungeon->locations()->orderBy('id')->get();
-        $monsters = Monster::query()->orderBy('lvl')->orderBy('name')->get(['id', 'name', 'lvl']);
+        $monsterIds = $dungeon->stages
+            ->flatMap(fn (DungeonStage $stage) => $stage->monsters->pluck('monster_id'))
+            ->merge(collect(session()->getOldInput('monsters', []))->pluck('monster_id'))
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+        $monsters = $monsterIds->isNotEmpty()
+            ? Monster::query()->whereIn('id', $monsterIds)->get(['id', 'name', 'lvl'])->keyBy('id')
+            : collect();
 
         return view('admin.dungeon.info', compact('dungeon', 'deathBehaviors', 'locations', 'monsters'));
     }
 
-    public function saveStage(Request $request, Dungeon $dungeon): RedirectResponse
+    public function saveStage(Request $request, Dungeon $dungeon, ContentTranslationEditor $translationEditor): RedirectResponse
     {
+        $request->validate([
+            'name' => ['required', 'string', 'max:150'],
+            'translations.uk.name' => ['nullable', 'string', 'max:150'],
+        ]);
         $validated = $request->validate([
             'stage_id' => ['nullable', 'integer', Rule::exists('dungeon_stages', 'id')->where('dungeon_id', $dungeon->id)],
             'number' => [
@@ -87,8 +114,9 @@ class DungeonController extends Controller
                     ->where('dungeon_id', $dungeon->id)
                     ->ignore($request->integer('stage_id')),
             ],
-            'name' => ['required', 'string', 'max:150'],
             'time_limit_seconds' => ['nullable', 'integer', 'min:10', 'max:86400'],
+            'clan_cooldown_seconds' => ['nullable', 'integer', 'min:0', 'max:2592000'],
+            'gold_budget' => ['nullable', 'integer', 'min:0', 'max:1000000000'],
             'spawn_type' => ['required', Rule::enum(DungeonStageSpawnType::class)],
             'total_monsters' => ['required', 'integer', 'min:1', 'max:1000'],
             'location_ids' => ['required', 'array', 'min:1'],
@@ -104,6 +132,8 @@ class DungeonController extends Controller
                 Rule::exists('locations', 'id')->where('dungeon_id', $dungeon->id),
             ],
         ]);
+        $stageContent = new DungeonStage;
+        $translationEditor->fill($stageContent, $request, ['name']);
 
         $locationIds = array_map('intval', $validated['location_ids']);
         if (! in_array((int) $validated['entry_location_id'], $locationIds, true)) {
@@ -119,7 +149,7 @@ class DungeonController extends Controller
             }
         }
 
-        DB::transaction(function () use ($dungeon, $validated): void {
+        DB::transaction(function () use ($dungeon, $validated, $stageContent): void {
             $spawnType = DungeonStageSpawnType::from($validated['spawn_type']);
             $totalMonsters = $spawnType === DungeonStageSpawnType::FIXED
                 ? array_sum(array_column($validated['monsters'], 'quantity'))
@@ -129,8 +159,10 @@ class DungeonController extends Controller
                 ['id' => $validated['stage_id'] ?? null, 'dungeon_id' => $dungeon->id],
                 [
                     'number' => $validated['number'],
-                    'name' => $validated['name'],
+                    'name' => $stageContent->getTranslations('name'),
                     'time_limit_seconds' => $validated['time_limit_seconds'] ?? null,
+                    'clan_cooldown_seconds' => $validated['clan_cooldown_seconds'] ?? null,
+                    'gold_budget' => $validated['gold_budget'] ?? null,
                     'completion_type' => DungeonStageCompletionType::KILL_ALL,
                     'spawn_type' => $spawnType,
                     'total_monsters' => $totalMonsters,

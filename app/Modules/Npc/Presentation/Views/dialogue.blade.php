@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ $npc->name }} - {{ $node->title }}</title>
@@ -60,7 +60,7 @@
         <td></td>
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="140" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('npc', ['id' => $npc->id]) }}" class="btn_1">Вернуться к НПС</a>
+            <a href="{{ route('npc', ['id' => $npc->id]) }}" class="btn_1">{{ __('Вернуться к НПС') }}</a>
         </td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
@@ -86,7 +86,7 @@
                                         <tbody>
                                         <tr height="22">
                                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                                            <td align="center" class="tbl-usi_label-center">Диалог</td>
+                                            <td align="center" class="tbl-usi_label-center">{{ __('Диалог') }}</td>
                                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                                         </tr>
                                         </tbody>
@@ -130,7 +130,7 @@
                                                 onclick="location.href='{{ route('npc.dialogue', ['id' => $npc->id, 'node' => $backNode->id]) }}'"
                                                 onmouseover="this.className += ' bg_l2';" onmouseout="this.className = this.className.split(' bg_l2').join('');">
                                                 <td width="1%"><img src="{{ asset('img/icon/qst_talk.gif') }}" alt=""></td>
-                                                <td class="ajustify" colspan="2"><b>« Назад</b></td>
+                                                <td class="ajustify" colspan="2"><b>« {{ __('Назад') }}</b></td>
                                             </tr>
                                         @endif
                                         {{-- Завершение разговора --}}
@@ -138,7 +138,7 @@
                                             onclick="location.href='{{ route('npc', ['id' => $npc->id]) }}'"
                                             onmouseover="this.className += ' bg_l2';" onmouseout="this.className = this.className.split(' bg_l2').join('');">
                                             <td width="1%"><img src="{{ asset('img/icon/qst_talk.gif') }}" alt=""></td>
-                                            <td class="ajustify" colspan="2"><b>Закончить разговор.</b></td>
+                                            <td class="ajustify" colspan="2"><b>{{ __('Закончить разговор.') }}</b></td>
                                         </tr>
                                         </tbody>
                                     </table>

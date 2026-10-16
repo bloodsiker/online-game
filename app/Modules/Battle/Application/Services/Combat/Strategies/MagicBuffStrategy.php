@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat\Strategies;
 
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -41,7 +42,7 @@ class MagicBuffStrategy implements AttackStrategyInterface
         $hit = (new FightHitDTO)
             ->setDamage(0)
             ->setWeapon(null)
-            ->setWeaponName(sprintf('заклинанием «%s»', $this->magicSkill->name))
+            ->setWeaponName(BattleLogTranslator::format('заклинанием «%s»', BattleLogTranslator::contentName($this->magicSkill)))
             ->setMagicSkill($this->magicSkill);
 
         // Healing — та же формула, что и у внебоевого каста (UseMagicSkill):
@@ -58,9 +59,9 @@ class MagicBuffStrategy implements AttackStrategyInterface
                 $this->casterSheet->getHpMax(),
                 $this->playerModel->hp_now + $heal
             );
-            $hit->setMessage(sprintf(
+            $hit->setMessage(BattleLogTranslator::format(
                 'Заклинание «%s» восстановило <b class="color-green">%d HP</b>',
-                $this->magicSkill->name,
+                BattleLogTranslator::contentName($this->magicSkill),
                 $heal
             ));
         }

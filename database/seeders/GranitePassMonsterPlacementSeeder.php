@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -113,7 +114,7 @@ class GranitePassMonsterPlacementSeeder extends Seeder
         $result = [];
         foreach (self::SPECIES as $species) {
             foreach ($species['levels'] as $level) {
-                $monster = DB::table('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
+                $monster = LocalizedContentSeederQuery::forTable('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
                 if ($monster === null) {
                     $this->command?->warn("не найден монстр «{$species['name']}» lvl {$level}");
 

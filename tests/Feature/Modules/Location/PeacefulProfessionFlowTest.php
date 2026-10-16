@@ -7,6 +7,8 @@ namespace Tests\Feature\Modules\Location;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Domain\Services\InstantItemRewardService;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
@@ -19,6 +21,7 @@ use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
 use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Structure\Workshop\Application\UseCases\CraftProfessionItem;
 use App\Modules\Structure\Workshop\Application\UseCases\LearnRecipe;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -62,7 +65,8 @@ class PeacefulProfessionFlowTest extends TestCase
         $chat = Mockery::mock(ChatService::class);
         $chat->shouldReceive('sendLootToUser')
             ->once()
-            ->with(Mockery::type(User::class), 'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 5 шт.)');
+            ->with(Mockery::type(User::class), Mockery::on(fn ($message): bool => $message instanceof LocalizedChatMessage
+                && app(ChatMessageTranslator::class)->render($message, 'ru') === 'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 5 шт.)'));
         $service = new GatheringService($backpack, $chat);
         $user = User::query()->findOrFail(1);
 
@@ -220,7 +224,8 @@ class PeacefulProfessionFlowTest extends TestCase
             ->once()
             ->with(
                 Mockery::type(User::class),
-                'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 4 шт.) Дополнительно: <b>Смола</b> 2 шт. (в рюкзаке 7 шт.)',
+                Mockery::on(fn ($message): bool => $message instanceof LocalizedChatMessage
+                    && app(ChatMessageTranslator::class)->render($message, 'ru') === 'Вы получили вещь <b>Лечебная трава</b> 1 шт. (в рюкзаке 4 шт.) Дополнительно: <b>Смола</b> 2 шт. (в рюкзаке 7 шт.)'),
             );
         $service = new GatheringService($backpack, $chat);
         $user = User::query()->findOrFail(1);
@@ -457,7 +462,7 @@ class PeacefulProfessionFlowTest extends TestCase
         DB::table('maps')->insert(['id' => 1, 'name' => 'Заросшая дорога']);
         DB::table('locations')->insert(['id' => 1, 'map_id' => 1, 'name' => 'Поляна']);
         DB::table('users')->insert(['id' => 1, 'player_id' => 1, 'location_id' => 1, 'name' => 'Игрок', 'email' => 'player@test.local', 'password' => 'x']);
-        DB::table('skills')->insert(['id' => 10, 'name' => 'Травник', 'type' => 'peaceful']);
+        LocalizedContentSeederQuery::forTable('skills')->insert(['id' => 10, 'name' => 'Травник', 'type' => 'peaceful']);
         DB::table('skill_level_requirements')->insert([
             ['skill_id' => 10, 'lvl' => 1, 'exp_required' => 100, 'exp_diff' => 100],
             ['skill_id' => 10, 'lvl' => 2, 'exp_required' => 400, 'exp_diff' => 300],
@@ -503,6 +508,15 @@ class PeacefulProfessionFlowTest extends TestCase
 
     private function createTables(): void
     {
+        // Completion also records gathering statistics; keep the isolated fixture current.
+        Schema::create('player_gathering_stats', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedBigInteger('total_gathered')->default(0);
+            $table->timestamps();
+            $table->unique(['player_id', 'share_item_id']);
+        });
         Schema::create('races', function (Blueprint $table): void {
             $table->id();
             $table->string('name');

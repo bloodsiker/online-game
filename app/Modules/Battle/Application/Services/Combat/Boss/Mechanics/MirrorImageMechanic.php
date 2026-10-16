@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -36,13 +37,13 @@ class MirrorImageMechanic extends BaseBossMechanic
         $battle->boss_metadata = $metadata;
         $battle->save();
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-mirror">👯 %s создает %d зеркальных отражений!</b></p>',
-            $context->getLocationMonster()->monster->name,
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster),
             $imageCount
         ));
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p class="color-info">Каждое отображение имеет %d%% HP и наносит %d%% ущерб оригиналу!</p>',
             $imageHpPercent,
             $imageDamagePercent

@@ -15,14 +15,7 @@
                 <section class="card">
                     <header class="card-header"><h2 class="card-title">Основная информация</h2></header>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ $location->name }}">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ $location->description }}</textarea>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'location-'.$location->id, 'content' => $location])
                         <div class="form-group">
                             <label class="col-form-label">Изображение</label>
                             @if($location->image)

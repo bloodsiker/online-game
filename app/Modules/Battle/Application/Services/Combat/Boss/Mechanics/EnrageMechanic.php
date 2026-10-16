@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -22,9 +23,9 @@ class EnrageMechanic extends BaseBossMechanic
         $context->getBattle()->boss_metadata = $metadata;
         $context->getBattle()->save();
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-enrage">💢 %s впадает в ярость! Урон увеличен на %d%%!</b></p>',
-            $monster->name,
+            BattleLogTranslator::contentName($monster),
             $damageIncrease
         ));
 

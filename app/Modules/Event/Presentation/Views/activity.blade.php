@@ -6,7 +6,7 @@
     <td class="tbl-shp-sml tt" valign="top" align="center">
         <table border="0" cellspacing="0" cellpadding="0">
             <tr height="22">
-                @foreach(['daily' => 'Дневные', 'weekly' => 'Недельные'] as $groupKey => $groupLabel)
+                @foreach(['daily' => __('Дневные'), 'weekly' => __('Недельные')] as $groupKey => $groupLabel)
                     <td width="27" class="tbl-usi-hdr lc"><b></b></td>
                     <td align="center" class="tbl-usi-hdr mbg">
                         <a href="{{ route('events', ['mode' => 'activity', 'group' => $groupKey]) }}"
@@ -26,7 +26,7 @@
     <td class="tbl-usi_bg" align="center">
         <a href="javascript:void(0);" class="activity-spoiler-btn" onclick="return toggleActivitySpoiler('main');">
             <img id="activity_spoiler_img_main" src="{{ asset('main/images/flag_green.png') }}">
-            <span id="activity_spoiler_text_main">Свернуть</span>
+            <span id="activity_spoiler_text_main">{{ __('Свернуть') }}</span>
         </a>
     </td>
     <td class="tbl-shp-sides rs">&nbsp;</td>
@@ -68,14 +68,14 @@
                                     <table class="coll w100 p10h p4v brd2-all">
                                         <col><col width="10%">
                                         <tr class="bg_l">
-                                            <td class="brd2-top brd2-bt"><b>Прогресс:</b></td>
+                                            <td class="brd2-top brd2-bt"><b>{{ __('Прогресс:') }}</b></td>
                                             <td class="brd2-top brd2-bt b red" nowrap>
                                                 <b style="color:darkgreen;">{{ $activity->progressCurrent }}</b> / {{ $activity->progressTotal }}
                                             </td>
                                         </tr>
                                         <tr class="bg_l">
-                                            <td class="brd2-top brd2-bt"><b>Бонус:</b></td>
-                                            <td class="brd2-top brd2-bt" nowrap>{!! $activity->bonusHtml ?? 'Нет' !!}</td>
+                                            <td class="brd2-top brd2-bt"><b>{{ __('Бонус:') }}</b></td>
+                                            <td class="brd2-top brd2-bt" nowrap>{!! $activity->bonusHtml ?? __('Нет') !!}</td>
                                         </tr>
                                     </table>
                                 </td>
@@ -106,7 +106,7 @@
 </table>
 
 <script>
-    var activitySpoilerTitles = { main: 'Активности' };
+    var activitySpoilerTitles = { main: @json(__('Активности')) };
     function toggleActivitySpoiler(type) {
         var row  = document.getElementById('activity_spoiler_content_' + type);
         var img  = document.getElementById('activity_spoiler_img_' + type);
@@ -115,7 +115,7 @@
         if (row.style.display === 'none') {
             row.style.display = '';
             img.src = '{{ asset('main/images/flag_green.png') }}';
-            text.innerHTML = 'Свернуть';
+            text.innerHTML = @json(__('Свернуть'));
         } else {
             row.style.display = 'none';
             img.src = '{{ asset('main/images/flag_red.png') }}';

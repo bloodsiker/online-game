@@ -8,6 +8,7 @@
     let busy = false;
     let previousFocus;
     if (!opener || !modal || !form) return;
+    const texts = JSON.parse(form.dataset?.translations || '{}');
     const confirmation = form.elements.password_confirmation;
     const confirmationError = document.getElementById('password-confirmation-error');
 
@@ -15,7 +16,7 @@
         const mismatch = (force || confirmation.value.length > 0)
             && form.elements.password.value !== confirmation.value;
         confirmationError.hidden = !mismatch;
-        confirmation.setCustomValidity(mismatch ? 'Пароли не совпадают.' : '');
+        confirmation.setCustomValidity(mismatch ? (texts.password_mismatch || 'Пароли не совпадают.') : '');
         confirmation.setAttribute('aria-invalid', String(mismatch));
         save.disabled = busy || mismatch;
         return !mismatch;
@@ -75,7 +76,7 @@
         }
         busy = true;
         save.disabled = true;
-        save.value = 'Сохраняем…';
+        save.value = texts.saving || 'Сохраняем…';
         message.hidden = true;
         try {
             const response = await fetch(form.action, {
@@ -85,20 +86,20 @@
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
                 const errors = Object.values(data.errors || {}).flat();
-                const fallback = response.status === 419 ? 'Сессия устарела. Обновите страницу и повторите попытку.'
-                    : response.status === 429 ? 'Слишком много попыток. Попробуйте через минуту.'
-                    : response.status === 401 ? 'Войдите в игру заново.' : 'Не удалось изменить пароль. Попробуйте позже.';
+                const fallback = response.status === 419 ? (texts.session_expired || 'Сессия устарела. Обновите страницу и повторите попытку.')
+                    : response.status === 429 ? (texts.too_many_attempts || 'Слишком много попыток. Попробуйте через минуту.')
+                    : response.status === 401 ? (texts.login_again || 'Войдите в игру заново.') : (texts.password_failed || 'Не удалось изменить пароль. Попробуйте позже.');
                 showMessage(errors.join(' ') || fallback);
                 return;
             }
             form.reset();
-            showMessage(data.message || 'Пароль успешно изменён.', true);
+            showMessage(data.message || texts.password_changed || 'Пароль успешно изменён.', true);
         } catch (error) {
-            showMessage('Не удалось связаться с сервером. Попробуйте ещё раз.');
+            showMessage(texts.connection_failed || 'Не удалось связаться с сервером. Попробуйте ещё раз.');
         } finally {
             busy = false;
             validateConfirmation();
-            save.value = 'Сохранить';
+            save.value = texts.save || 'Сохранить';
         }
     });
 })();

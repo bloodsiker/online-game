@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -29,9 +30,9 @@ class ShieldMechanic extends BaseBossMechanic
         $battle->boss_metadata = $metadata;
         $battle->save();
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-shield">🛡️ %s создает щит на %d HP (продолжительность: %d ходов)!</b></p>',
-            $context->getLocationMonster()->monster->name,
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster),
             $shieldHp,
             $duration
         ));

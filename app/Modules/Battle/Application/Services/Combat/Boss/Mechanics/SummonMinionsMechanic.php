@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\BattleRepository;
@@ -81,7 +82,7 @@ class SummonMinionsMechanic extends BaseBossMechanic
 
         $this->rememberSummoned($context, $spawnedLocationMonsterIds);
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-summon">👥 %s призывает на помощь: %s!</b></p>',
             $bossMonster->name,
             implode(', ', $spawnedNames)

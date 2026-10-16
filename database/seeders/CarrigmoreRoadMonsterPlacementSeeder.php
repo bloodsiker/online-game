@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class CarrigmoreRoadMonsterPlacementSeeder extends Seeder
 
     public function run(): void
     {
-        $monsterIds = DB::table('monsters')
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')
             ->whereIn('name', self::MONSTER_NAMES)
             ->whereIn('lvl', [48, 51, 54, 49, 52, 55])
             ->pluck('id');

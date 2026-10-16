@@ -19,21 +19,16 @@
 
                 <div class="row">
                     <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input class="form-control" name="title" value="{{ old('title', $article?->title) }}" required>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'library-article', 'content' => $article, 'fields' => [
+                            'title' => ['label' => 'Название'],
+                            'excerpt' => ['label' => 'Краткое описание', 'multiline' => true],
+                            'content' => ['label' => 'Содержание', 'multiline' => true, 'html_editor' => true, 'rows' => 16],
+                        ]])
                         <div class="form-group">
                             <label class="col-form-label">Адрес (slug)</label>
                             <input class="form-control" name="slug" value="{{ old('slug', $article?->slug) }}" placeholder="Создастся автоматически">
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Краткое описание</label>
-                            <textarea class="form-control" name="excerpt" rows="3" maxlength="2000">{{ old('excerpt', $article?->excerpt) }}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Содержание</label>
-                            <textarea id="library-content-editor" class="form-control" name="content" rows="16" required>{{ old('content', $article?->content) }}</textarea>
                             <div class="library-editor-tools mt-2">
                                 <div class="mb-2">
                                     <span class="text-muted me-2">Готовые блоки:</span>
@@ -186,13 +181,15 @@
         </div>
     </template>
 
-    @include('admin.layout.summernote', [
-        'selector' => '#library-content-editor',
-        'height' => 360,
-        'placeholder' => 'Введите содержание статьи',
-        'imageUploadUrl' => route('admin.library.articles.upload-image'),
-        'toolbarPreset' => 'extended',
-    ])
+    @foreach(['ru', 'uk'] as $locale)
+        @include('admin.layout.summernote', [
+            'selector' => '#library-article-'.$locale.'-content',
+            'height' => 360,
+            'placeholder' => 'Введите содержание статьи',
+            'imageUploadUrl' => route('admin.library.articles.upload-image'),
+            'toolbarPreset' => 'extended',
+        ])
+    @endforeach
 @endsection
 
 @push('styles')
@@ -210,6 +207,10 @@
 @push('footer_scripts')
 <script>
     (function () {
+        function activeContentEditor() {
+            return $('.content-translations .tab-pane.active textarea[name="content"], .content-translations .tab-pane.active textarea[name="translations[uk][content]"]').first();
+        }
+
         var container = document.getElementById('library-links');
         var template = document.getElementById('library-link-template');
         var nextIndex = container.querySelectorAll('.library-link-row').length;
@@ -262,11 +263,11 @@
             var shortcode = count > 1
                 ? '[[item:' + itemId + '; count:' + count + ']]'
                 : '[[item:' + itemId + ']]';
-            $('#library-content-editor').summernote('insertText', shortcode);
+            activeContentEditor().summernote('insertText', shortcode);
         });
 
         $('.library-symbol-insert').on('click', function () {
-            $('#library-content-editor').summernote('insertText', $(this).data('symbol'));
+            activeContentEditor().summernote('insertText', $(this).data('symbol'));
         });
 
         $('.library-block-insert').on('click', function () {
@@ -275,7 +276,7 @@
             var html = '<div class="library-info-block library-info-block--' + kind + '"><strong>'
                 + title + ':</strong> Текст блока</div><p><br></p>';
 
-            $('#library-content-editor').summernote('pasteHTML', html);
+            activeContentEditor().summernote('pasteHTML', html);
         });
 
         function insertGameFrame(withTitle) {
@@ -311,7 +312,7 @@
                 + '</tbody>'
                 + '</table><p><br></p>';
 
-            $('#library-content-editor').summernote('pasteHTML', html);
+            activeContentEditor().summernote('pasteHTML', html);
         }
 
         $('.library-game-frame-insert').on('click', function () {
@@ -328,7 +329,7 @@
             var html = '<img src="' + src + '" width="11" height="11" alt="' + title
                 + '" title="' + title + '" style="vertical-align:middle">&nbsp;';
 
-            $('#library-content-editor').summernote('pasteHTML', html);
+            activeContentEditor().summernote('pasteHTML', html);
         });
 
         var entityEndpoints = {
@@ -371,7 +372,7 @@
             var display = $('#library-entity-shortcode-display').val();
             if (!entityId) return;
 
-            $('#library-content-editor').summernote('insertText', '[[' + type + ':' + entityId + '; display:' + display + ']]');
+            activeContentEditor().summernote('insertText', '[[' + type + ':' + entityId + '; display:' + display + ']]');
         });
     })();
 </script>

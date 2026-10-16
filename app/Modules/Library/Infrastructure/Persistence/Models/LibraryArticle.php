@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Library\Infrastructure\Persistence\Models;
 
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LibraryArticle extends Model
 {
-    use SoftDeletes;
+    use HasLegacyTranslations, SoftDeletes;
+
+    public $translatable = ['title', 'excerpt', 'content'];
 
     public const STATUS_DRAFT = 'draft';
 

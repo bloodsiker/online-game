@@ -16,8 +16,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app('translator')->setFallback('ru');
+        if (! in_array(app()->getLocale(), ['ru', 'uk'], true)) {
+            app()->setLocale('ru');
+        }
         View::composer(['main.index', 'auth.register', 'library::layout'], function ($view) {
-            $tenMinutesAgo = Carbon::now()->subMinutes(10);
+            $tenMinutesAgo = Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
             $onlineCount = User::where('last_online_at', '>=', $tenMinutesAgo)->count();
             $view->with('onlineCount', $onlineCount);
         });

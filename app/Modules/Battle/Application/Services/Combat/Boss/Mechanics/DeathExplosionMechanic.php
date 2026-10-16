@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -24,9 +25,9 @@ class DeathExplosionMechanic extends BaseBossMechanic
         $actualDamage = max(1, $damage - $context->getPlayer()->getArmor());
         $context->dealDamageToPlayer($actualDamage);
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-death">💀 %s взрывается при смерти! Получено %d урона!</b></p>',
-            $context->getLocationMonster()->monster->name,
+            BattleLogTranslator::contentName($context->getLocationMonster()->monster),
             $actualDamage
         ));
     }

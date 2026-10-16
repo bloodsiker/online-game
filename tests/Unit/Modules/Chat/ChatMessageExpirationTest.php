@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
+use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Mockery;
 use Tests\TestCase;
 
@@ -57,7 +62,18 @@ class ChatMessageExpirationTest extends TestCase
         $user = new User;
         $user->id = 99;
 
-        return (new GetMessages($repository, new MessageRenderer))->execute($user, $viewChannel)[0];
+        if (DB::connection()->getDriverName() !== 'sqlite' || DB::connection()->getDatabaseName() !== ':memory:') {
+            $this->markTestSkipped('Only SQLite :memory: is allowed.');
+        }
+        if (! Schema::hasTable('user_game_settings')) {
+            Schema::create('user_game_settings', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('user_id');
+                $table->json('settings');
+            });
+        }
+
+        return (new GetMessages($repository, new MessageRenderer, app(ChatMessageTranslator::class), new GameSettingsService))->execute($user, $viewChannel)[0];
     }
 
     private function message(ChatChannel $channel, ChatMessageType $type): ChatMessage

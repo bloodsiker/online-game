@@ -6,6 +6,7 @@ namespace App\Modules\Player\Infrastructure\Persistence\Models;
 
 use App\Modules\Player\Domain\Enums\InjuryBodyPart;
 use App\Modules\Player\Domain\Enums\InjurySeverity;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class InjuryType extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $fillable = [
         'name',
         'slug',

@@ -12,7 +12,7 @@ class TradeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'trade');
-        Route::middleware(['web', 'auth'])->group(__DIR__.'/Presentation/Http/Route/web.php');
+        Route::middleware(['web', 'auth', 'prison.context'])->group(__DIR__.'/Presentation/Http/Route/web.php');
         Route::middleware(['web', 'isAdmin'])->prefix('admin')->name('admin.')
             ->group(__DIR__.'/Presentation/Http/Route/admin.php');
     }

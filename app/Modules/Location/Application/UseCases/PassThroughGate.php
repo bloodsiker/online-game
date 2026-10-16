@@ -14,6 +14,7 @@ use App\Modules\Location\Application\Mappers\LocationPageViewMapper;
 use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class PassThroughGate
@@ -27,11 +28,16 @@ class PassThroughGate
         private readonly LocationPageViewMapper $mapper,
         private readonly MapInfluenceRequirementService $influenceRequirements,
         private readonly ExpireDungeonSession $expireDungeonSession,
+        private readonly DetentionService $detentionService,
     ) {}
 
     public function execute(User $user, int $gateId): LocationPageDTO
     {
-        $expired = $this->expireDungeonSession->execute($user);
+        if ($detentionMessage = $this->detentionService->blockLeaving($user)) {
+            session()->flash('message', $detentionMessage);
+        }
+
+        $expired = $detentionMessage === null && $this->expireDungeonSession->execute($user);
         if ($expired) {
             session()->flash('message', 'Время этажа истекло! Вы выброшены из данжа.');
         }
@@ -40,6 +46,8 @@ class PassThroughGate
 
         if ($expired) {
             // Игрок уже перемещён наружу сервисом завершения данжа.
+        } elseif ($detentionMessage !== null) {
+            // The player is serving a sentence and cannot leave the prison.
         } elseif ($gate === null || $gate->mode !== 'presence_pass' || $gate->from_location_id !== $user->location_id) {
             session()->flash('message', 'Проход недоступен.');
         } elseif (! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {

@@ -1,13 +1,11 @@
 {{-- Форма активности: $activity = null для создания, модель — для редактирования --}}
 
-<h4 class="mb-3">Основное</h4>
+<h4 class="mb-3">Название и описание</h4>
+@include('admin.partials.content-translations', ['prefix' => 'event-activity', 'content' => $activity, 'fields' => [
+    'title' => ['label' => 'Название'],
+    'description' => ['label' => 'Описание', 'multiline' => true],
+]])
 <div class="row">
-    <div class="col-md-6">
-        <div class="form-group mb-3">
-            <label class="form-label">Название</label>
-            <input type="text" name="title" class="form-control" value="{{ old('title', $activity?->title) }}" placeholder="Например: Охота на мышей" required>
-        </div>
-    </div>
     <div class="col-md-3">
         <div class="form-group mb-3">
             <label class="form-label">Период</label>
@@ -28,11 +26,7 @@
     </div>
 </div>
 
-<div class="form-group mb-3">
-    <label class="form-label">Описание</label>
-    <textarea id="description-editor" name="description" class="form-control" rows="2">{{ old('description', $activity?->description) }}</textarea>
-    <small class="text-muted">Отображается на карточке активности. Кнопка &lt;/&gt; — правка HTML напрямую</small>
-</div>
+<small class="text-muted">Описание отображается на карточке активности. Кнопка &lt;/&gt; — правка HTML напрямую</small>
 
 <hr>
 
@@ -126,7 +120,7 @@
     </div>
 </div>
 
-@include('admin.layout.summernote', ['selector' => '#description-editor', 'placeholder' => 'Убейте Мышь 10 раз'])
+@include('admin.layout.summernote', ['selector' => '#event-activity-ru-description, #event-activity-uk-description', 'placeholder' => 'Убейте Мышь 10 раз'])
 
 @push('footer_scripts')
 <script>

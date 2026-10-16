@@ -16,6 +16,7 @@ use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Share\Application\UseCases\Admin\DeleteShareItem;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
@@ -35,7 +36,6 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemUseLimit;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
-use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Services\Media\AdminImageStorage;
@@ -67,8 +67,7 @@ class ItemController extends Controller
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
                 $query->where(function ($query) use ($search): void {
-                    $query->where('name', 'like', $search)
-                        ->orWhere('description', 'like', $search);
+                    $query->searchTranslations($search, ['name', 'description']);
                 });
             })
             ->when(ShareItemType::tryFrom($filters['type']) !== null, fn ($query) => $query->where('type', $filters['type']))
@@ -87,11 +86,11 @@ class ItemController extends Controller
 
     public function create(): View
     {
-        $skills = Skill::orderBy('name')->get();
+        $skills = Skill::orderBy('name->ru')->get();
         $toolFamilies = GatheringToolFamily::cases();
-        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $magicSkills = MagicSkill::orderBy('name->ru')->get(['id', 'name'])->mapWithKeys(fn (MagicSkill $skill): array => [$skill->id => $skill->name]);
         $claimedMagicSkillIds = MagicSkillBook::pluck('magic_skill_id')->all();
-        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name')->get();
+        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name->ru')->get();
 
         return view('admin.item.create', compact('skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'debuffEffects'));
     }
@@ -156,24 +155,24 @@ class ItemController extends Controller
             'magicSkillBook',
             'rarityUpgradeTarget',
             'rarityUpgradeMaterials',
-            'itemHasItems' => fn ($query) => $query->orderBy('share_items.name'),
+            'itemHasItems' => fn ($query) => $query->orderBy('share_items.name->ru'),
             'lockConfig.trapEffect',
         ]);
 
-        $skills = Skill::orderBy('name')->get();
+        $skills = Skill::orderBy('name->ru')->get();
         $toolFamilies = GatheringToolFamily::cases();
-        $magicSkills = MagicSkill::orderBy('name')->pluck('name', 'id');
+        $magicSkills = MagicSkill::orderBy('name->ru')->get(['id', 'name'])->mapWithKeys(fn (MagicSkill $skill): array => [$skill->id => $skill->name]);
         $claimedMagicSkillIds = MagicSkillBook::where('share_item_id', '!=', $item->id)->pluck('magic_skill_id')->all();
         $statTypes = ShareItemStatType::cases();
         $effectTypes = ItemEffectType::cases();
         $requirementTypes = ShareItemRequirementType::cases();
         $playerStatKeys = PlayerStatKey::cases();
         $rarities = ItemRarity::cases();
-        $buffEffects = Effect::query()->where('type', 'buff')->orderBy('name')->get();
-        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name')->get();
+        $buffEffects = Effect::query()->where('type', 'buff')->orderBy('name->ru')->get();
+        $debuffEffects = Effect::query()->where('type', 'debuff')->orderBy('name->ru')->get();
         $upgradeTargets = ShareItem::query()
             ->whereKeyNot($item->id)
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get(['id', 'name', 'type', 'rarity']);
 
         return view('admin.item.info', compact('item', 'skills', 'toolFamilies', 'magicSkills', 'claimedMagicSkillIds', 'statTypes', 'effectTypes', 'requirementTypes', 'playerStatKeys', 'rarities', 'buffEffects', 'debuffEffects', 'upgradeTargets'));
@@ -183,7 +182,7 @@ class ItemController extends Controller
     {
         $item->load([
             'monsters' => fn ($query) => $query
-                ->orderBy('monsters.name')
+                ->orderBy('monsters.name->ru')
                 ->orderBy('monsters.lvl')
                 ->orderBy('monsters.id'),
         ]);
@@ -237,7 +236,9 @@ class ItemController extends Controller
 
         $copy = DB::transaction(function () use ($item): ShareItem {
             $copy = $item->replicate();
-            $copy->name = $item->name.' (копия)';
+            foreach ($item->getTranslations('name') as $locale => $name) {
+                $copy->setTranslation('name', $locale, $name.' (копия)');
+            }
             $copy->save();
 
             foreach ($item->stats as $stat) {
@@ -579,6 +580,12 @@ class ItemController extends Controller
     private function fillItem(ShareItem $item, Request $request): void
     {
         $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'translations' => ['sometimes', 'array:uk'],
+            'translations.uk' => ['sometimes', 'array:name,description'],
+            'translations.uk.name' => ['nullable', 'string', 'max:255'],
+            'translations.uk.description' => ['nullable', 'string'],
             'expire' => ['nullable', 'integer', 'min:1'],
             'max_drop_level_difference' => ['nullable', 'integer', 'between:0,255'],
             'gathering_time_seconds' => ['nullable', 'integer', 'min:1', 'max:86400'],
@@ -606,9 +613,19 @@ class ItemController extends Controller
 
         $type = ShareItemType::from($request->input('type'));
 
-        $item->name = $request->input('name');
+        $item->setTranslation('name', 'ru', $request->input('name'));
         $item->type = $type;
-        $item->description = $request->input('description');
+        $item->setTranslation('description', 'ru', $request->input('description') ?? '');
+        foreach (['name', 'description'] as $field) {
+            if ($request->has('translations.uk.'.$field)) {
+                $value = $request->input('translations.uk.'.$field);
+                if ($value === null || trim($value) === '') {
+                    $item->forgetTranslation($field, 'uk');
+                } else {
+                    $item->setTranslation($field, 'uk', $value);
+                }
+            }
+        }
         $image = $request->file('image');
         if ($image instanceof UploadedFile) {
             $oldImage = $item->getRawOriginal('image');

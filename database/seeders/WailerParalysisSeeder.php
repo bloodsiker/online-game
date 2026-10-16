@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +24,7 @@ class WailerParalysisSeeder extends Seeder
 
     public function run(): void
     {
-        $monsterIds = DB::table('monsters')->where('name', 'Плакальщица')->pluck('id');
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Плакальщица')->pluck('id');
 
         $attached = 0;
         foreach ($monsterIds as $monsterId) {

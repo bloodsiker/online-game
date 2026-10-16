@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Listeners\SendPlayerInjuryMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Player\Domain\Enums\InjuryBodyPart;
@@ -29,24 +31,33 @@ final class PlayerInjuryNotificationTest extends TestCase
         $player->setRelation('user', $user);
 
         $injuryType = new InjuryType([
-            'name' => 'Перелом левой руки',
-            'body_part' => InjuryBodyPart::LEFT_HAND,
-            'severity' => InjurySeverity::SEVERE,
+            'name' => 'Лёгкая травма ног',
+            'body_part' => InjuryBodyPart::LEGS,
+            'severity' => InjurySeverity::LIGHT,
             'duration_seconds' => 1800,
         ]);
         $injury = new PlayerInjury([
-            'body_part' => InjuryBodyPart::LEFT_HAND,
-            'severity' => InjurySeverity::SEVERE,
+            'body_part' => InjuryBodyPart::LEGS,
+            'severity' => InjurySeverity::LIGHT,
             'applied_at' => Carbon::parse('2026-09-07 12:00:00'),
             'expires_at' => Carbon::parse('2026-09-07 12:30:00'),
         ]);
         $injury->setRelation('injuryType', $injuryType);
 
-        $expected = '<b style="color:#ba0000">Получена травма: Перелом левой руки на 30 мин.</b>';
         $chatService = Mockery::mock(ChatService::class);
         $chatService->shouldReceive('sendSystemToUser')
             ->once()
-            ->with($user, $expected)
+            ->withArgs(function (User $actualUser, LocalizedChatMessage $message) use ($user): bool {
+                self::assertSame($user, $actualUser);
+                self::assertSame('Лёгкая травма ног', $message->params['name']['translations']['ru']);
+                self::assertSame('Легка травма ніг', $message->params['name']['translations']['uk']);
+                self::assertSame(
+                    '<b style="color:#ba0000">Отримано травму: Легка травма ніг на 30 хв.</b>',
+                    app(ChatMessageTranslator::class)->render($message, 'uk'),
+                );
+
+                return true;
+            })
             ->andReturn(new ChatMessage);
 
         (new SendPlayerInjuryMessage($chatService))->handle(new PlayerInjured($player, $injury));

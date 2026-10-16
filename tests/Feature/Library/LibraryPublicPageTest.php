@@ -18,6 +18,7 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
+use Database\Seeders\LibraryClanBossesSeeder;
 use Database\Seeders\LibraryEquipmentSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -26,6 +27,25 @@ use Tests\TestCase;
 class LibraryPublicPageTest extends TestCase
 {
     use DatabaseTransactions;
+
+    public function test_clan_boss_article_is_published_in_the_clan_category_in_both_languages(): void
+    {
+        $this->seed(LibraryClanBossesSeeder::class);
+
+        $article = LibraryArticle::query()->where('slug', 'klanovye-bossy')->firstOrFail();
+
+        $this->assertSame('Клан', $article->category->name);
+        $this->assertSame('Клановые боссы', $article->getTranslation('title', 'ru'));
+        $this->assertSame('Кланові боси', $article->getTranslation('title', 'uk'));
+        $this->assertStringContainsString('10 ударов подряд', $article->getTranslation('content', 'ru'));
+        $this->assertStringContainsString('6 годин', $article->getTranslation('content', 'uk'));
+
+        $this->get(route('library.show', ['slug' => 'klanovye-bossy', 'category' => 'klan']))
+            ->assertOk()
+            ->assertSee('Клановые боссы')
+            ->assertSee('Каменный Страж')
+            ->assertSee('10 ударов подряд');
+    }
 
     public function test_equipment_seeder_creates_tier_articles_with_item_cards(): void
     {

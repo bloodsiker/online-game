@@ -167,7 +167,7 @@ class PlayerInjuryServiceTest extends TestCase
 
         $this->assertSame('Перелом левой руки', $tooltip['title']);
         $this->assertSame('Травма: Левая рука', $tooltip['kind']);
-        $this->assertSame('Действует ещё: 30:00', $tooltip['diamond']);
+        $this->assertSame('', $tooltip['diamond']);
         $this->assertSame('/storage/injuries/broken-left-hand.png', $tooltip['image']);
         $this->assertContains(['title' => 'Сила', 'value' => '−15%'], $tooltip['stats']);
     }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use Illuminate\Database\Seeder;
 
@@ -51,7 +51,7 @@ class RuneSeeder extends Seeder
             foreach (RuneRarity::cases() as $rarity) {
                 $name = "Руна {$theme} ({$rarity->label()})";
 
-                ShareItem::firstOrCreate(
+                LocalizedItemSeederQuery::firstOrCreate(
                     [
                         'type' => ShareItemType::RUNE->value,
                         'name' => $name,
@@ -77,7 +77,7 @@ class RuneSeeder extends Seeder
 
     private function seedRuneKey(): void
     {
-        ShareItem::firstOrCreate(
+        LocalizedItemSeederQuery::firstOrCreate(
             [
                 'type' => ShareItemType::RUNE_KEY->value,
                 'name' => 'Рунный ключ',

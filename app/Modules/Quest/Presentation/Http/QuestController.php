@@ -6,6 +6,7 @@ namespace App\Modules\Quest\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Models\Clan;
@@ -341,11 +342,11 @@ class QuestController extends Controller
                 $clan,
                 $user,
                 ClanLogAction::QUEST_STARTED,
-                "Квест: {$quest->title}",
+                'Квест: '.$quest->getTranslation('title', 'ru', false),
             );
         });
 
-        $this->chatService->sendQuestToUser($user, "Для вашего клана начался квест <b>«{$quest->title}»</b>. Удачи!");
+        $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.clan_quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
 
         return redirect()->route('npc', ['id' => $npcId]);
     }
@@ -428,7 +429,7 @@ class QuestController extends Controller
                 $clan,
                 $user,
                 ClanLogAction::QUEST_CANCELLED,
-                "Квест: {$progress->quest->title}",
+                'Квест: '.$progress->quest->getTranslation('title', 'ru', false),
             );
         });
 
@@ -636,7 +637,7 @@ class QuestController extends Controller
                 $clan,
                 $user,
                 ClanLogAction::QUEST_COMPLETED,
-                "Квест: {$quest->title}",
+                'Квест: '.$quest->getTranslation('title', 'ru', false),
             );
         });
 
@@ -718,7 +719,7 @@ class QuestController extends Controller
                 $this->giveDeliverItems($existingQuestPlayer->player->user, $quest, $firstStage?->id);
             });
 
-            $this->chatService->sendQuestToUser($user, "Для Вас начался квест <b>«{$quest->title}»</b>. Желаем удачи!");
+            $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
 
             return redirect()->route('npc', ['id' => $npcId]);
         }
@@ -775,7 +776,7 @@ class QuestController extends Controller
             $existingQuestPlayer = $questPlayer;
         });
 
-        $this->chatService->sendQuestToUser($user, "Для Вас начался квест <b>«{$quest->title}»</b>. Желаем удачи!");
+        $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
 
         return redirect()->route('npc', ['id' => $npcId]);
     }
@@ -996,7 +997,7 @@ class QuestController extends Controller
 
         // Квест-подвиг: если для него настроена отдельная feat-медаль — объявляем всем.
         $featTier = ReputationTier::where('feat_quest_id', $quest->id)->with('reputation')->first();
-        if ($featTier && $featTier->feat_medal_name !== null) {
+        if ($featTier && $featTier->hasFeatMedal()) {
             event(new ReputationMedalEarned($player, $featTier, $featTier->feat_medal_name, isFeat: true));
         }
 
@@ -1004,26 +1005,29 @@ class QuestController extends Controller
             ->with('quest_success', 'Квест выполнен! Награда получена.');
     }
 
-    private function buildQuestCompleteMessage(Quest $quest): string
+    private function buildQuestCompleteMessage(Quest $quest): LocalizedChatMessage
     {
-        $parts = ["Квест «{$quest->title}» выполнен! Награда:"];
+        $parts = [];
 
         foreach ($quest->rewards as $reward) {
+            if ($parts !== []) {
+                $parts[] = ' | ';
+            }
             $parts[] = match ($reward->type) {
-                QuestRewardType::EXP => "+{$reward->amount} опыта",
-                QuestRewardType::MONEY => "+{$reward->amount} монет",
-                QuestRewardType::ITEM => ($reward->amount > 1 ? "{$reward->amount}x " : '').(
+                QuestRewardType::EXP => new LocalizedChatMessage('chat.reward_exp', ['amount' => $reward->amount]),
+                QuestRewardType::MONEY => new LocalizedChatMessage('chat.reward_money', ['amount' => $reward->amount]),
+                QuestRewardType::ITEM => [($reward->amount > 1 ? "{$reward->amount}x " : ''), (
                     $reward->share_item_id && $reward->itemInfo
                         ? "[[share_item_{$reward->share_item_id}]]"
-                        : 'предмет'
-                ),
-                QuestRewardType::LOCATION_ACCESS => 'открыт доступ к «'.($reward->location?->name ?? 'локации').'»',
-                QuestRewardType::CLAN_POINTS => "+{$reward->amount} клановых очков",
-                QuestRewardType::REPUTATION_POINTS => "+{$reward->amount} очков репутации",
+                        : new LocalizedChatMessage('chat.reward_item')
+                )],
+                QuestRewardType::LOCATION_ACCESS => new LocalizedChatMessage('chat.reward_access', ['location' => $reward->location?->name ?? new LocalizedChatMessage('chat.location')]),
+                QuestRewardType::CLAN_POINTS => new LocalizedChatMessage('chat.reward_clan', ['amount' => $reward->amount]),
+                QuestRewardType::REPUTATION_POINTS => new LocalizedChatMessage('chat.reward_reputation', ['amount' => $reward->amount]),
             };
         }
 
-        return implode(' | ', array_filter($parts));
+        return new LocalizedChatMessage('chat.quest_completed', ['title' => LocalizedChatMessage::contentName($quest, 'title'), 'reward' => new LocalizedChatMessage('chat.reward', ['parts' => $parts])]);
     }
 
     private function giveClanPoints(Clan $clan, int $amount, $user): void

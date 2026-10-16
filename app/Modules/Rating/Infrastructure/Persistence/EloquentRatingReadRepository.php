@@ -76,7 +76,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
         return Monster::query()
             ->where('is_boss', true)
             ->whereIn('id', BossDefeatLog::query()->select('monster_id')->distinct())
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get();
     }
 
@@ -94,7 +94,7 @@ class EloquentRatingReadRepository implements RatingReadRepository
                 $query->whereHas('influenceLevels')
                     ->orWhereIn('id', DB::table('map_influences')->select('map_id'));
             })
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get();
     }
 

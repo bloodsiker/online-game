@@ -49,14 +49,14 @@
                     <input type="hidden" name="max_size" value="{{ $maxSize }}">
                     <div align="center" style="width:100%;">
                         <span class="butt1 pointer">
-                            <span><input value="Создать группу на {{ $maxSize }} воинов" type="submit" onclick="if(document._submit)return false;document._submit=true;" class="grnn"></span>
+                            <span><input value="{{ __('Создать группу на :count воинов', ['count' => $maxSize]) }}" type="submit" onclick="if(document._submit)return false;document._submit=true;" class="grnn"></span>
                         </span>
                     </div>
                 </form>
                 <div class="rules">
-                    Принимать новых членов в группу может только лидер.<br>
-                    Расформировать группу может только лидер группы.<br>
-                    Для решения спорных вопросов, таких как распределение вещей, напишите в канал группы команду <b>/rand</b>
+                    {{ __('Принимать новых членов в группу может только лидер.') }}<br>
+                    {{ __('Расформировать группу может только лидер группы.') }}<br>
+                    {{ __('Для решения спорных вопросов, таких как распределение вещей, напишите в канал группы команду') }} <b>/rand</b>
                 </div>
             @else
                 @php $isLeader = $party->isLeader($myUserId); @endphp
@@ -90,7 +90,7 @@
                         <input type="hidden" name="party_id" value="{{ $party->id }}">
                         <table class="coll p0 w100" height="18" cellspacing="0" cellpadding="0" border="0"><tr valign="top">
                             <td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" align="absbottom"></td>
-                            <td class="curly_label_c b redd" align="center">пригласить в группу</td>
+                            <td class="curly_label_c b redd" align="center">{{ __('пригласить в группу') }}</td>
                             <td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" align="absbottom"></td>
                         </tr></table>
                         <center>

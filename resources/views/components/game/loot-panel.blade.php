@@ -5,7 +5,7 @@
     'message' => '',
     'backpackUrl' => null,
     'itemTooltipScript' => '',
-    'emptyMessage' => 'На земле ничего не осталось.',
+    'emptyMessage' => __('На земле больше ничего нет.'),
 ])
 
 <style>
@@ -337,11 +337,11 @@
                 <header class="loot-header">
                     <span class="loot-emblem" aria-hidden="true"></span>
                     <div class="loot-heading">
-                        <div class="loot-kicker">Найденная добыча</div>
-                        <div class="loot-title">Предметы на локации</div>
-                        <div class="loot-subtitle">Выберите предмет, который хотите забрать с собой</div>
+                        <div class="loot-kicker">{{ __("Найденная добыча") }}</div>
+                        <div class="loot-title">{{ __("Предметы на локации") }}</div>
+                        <div class="loot-subtitle">{{ __("Выберите предмет, который хотите забрать с собой") }}</div>
                     </div>
-                    <div class="loot-total" title="Количество найденных позиций">{{ $count }}</div>
+                    <div class="loot-total" title="{{ __("Количество найденных позиций") }}">{{ $count }}</div>
                 </header>
 
                 @if($message !== '')
@@ -369,7 +369,7 @@
                                             @if(isset($item->infoUrl, $item->shareItemId))
                                                 <a data-id="{{ $item->shareItemId }}"
                                                    href="{{ $item->infoUrl }}"
-                                                   title="Открыть информацию о предмете"
+                                                   title="{{ __("Открыть информацию о предмете") }}"
                                                    onmouseover="showItemInfo(this,event,2)"
                                                    onmouseout="showItemInfo(this,event,0)"
                                                    onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
@@ -381,27 +381,27 @@
                                         </div>
                                         <div class="loot-item-hint">
                                             {{ $item->actionLabel === 'Поднять'
-                                                ? 'Предмет можно забрать в рюкзак'
-                                                : 'Сундук можно открыть и осмотреть' }}
+                                                ? __('Предмет можно забрать в рюкзак')
+                                                : __('Сундук можно открыть и осмотреть') }}
                                         </div>
                                     </div>
                                     <div class="loot-card-action">
                                         @if($item->lockpickingUrl !== null)
                                             <b class="butt2 pointer"><b>
-                                                <input value="{{ $item->actionLabel }}" type="button"
+                                                <input value="{{ __($item->actionLabel) }}" type="button"
                                                        @if($loop->first) id="weapon-attack" title="{{ $item->actionLabel }} первый предмет (Q)" @endif
                                                        onclick="window.parent.openLockpickingModal(@js($item->lockpickingUrl))">
                                             </b></b>
                                         @elseif($item->actionLabel === 'Открыть')
                                             <form method="post" action="{{ $item->actionUrl }}">
                                                 @csrf
-                                                <b class="butt2 pointer"><b><input value="{{ $item->actionLabel }}" type="submit"
-                                                    @if($loop->first) id="weapon-attack" title="Открыть первый предмет (Q)" @endif></b></b>
+                                                <b class="butt2 pointer"><b><input value="{{ __($item->actionLabel) }}" type="submit"
+                                                    @if($loop->first) id="weapon-attack" title="{{ __('Открыть первый предмет (Q)') }}" @endif></b></b>
                                             </form>
                                         @else
                                             <b class="butt2 pointer"><b>
-                                                <input value="{{ $item->actionLabel }}" type="button"
-                                                       @if($loop->first) id="weapon-attack" title="Поднять первый предмет (Q)" @endif
+                                                <input value="{{ __($item->actionLabel) }}" type="button"
+                                                       @if($loop->first) id="weapon-attack" title="{{ __('Поднять первый предмет (Q)') }}" @endif
                                                        onclick="window.location.href = @js($item->actionUrl)">
                                             </b></b>
                                         @endif
@@ -412,18 +412,18 @@
                     </div>
                 @else
                     <div class="loot-empty">
-                        <div class="loot-empty-title">Добыча уже собрана</div>
+                        <div class="loot-empty-title">{{ __('Добыча уже собрана') }}</div>
                         <div class="loot-empty-text">{{ $emptyMessage }}</div>
                     </div>
                 @endif
 
                 <footer class="loot-footer">
                     <b class="butt2 pointer"><b>
-                        <input value="« Описание местности" type="button" onclick="window.parent.sendDataToGame(@js($locationUrl))">
+                        <input value="{{ __("« Описание местности") }}" type="button" onclick="window.parent.sendDataToGame(@js($locationUrl))">
                     </b></b>
                     @if($backpackUrl !== null)
                         <b class="butt2 pointer"><b>
-                            <input value="Рюкзак" type="button" onclick="window.parent.sendDataToGame(@js($backpackUrl))">
+                            <input value="{{ __("Рюкзак") }}" type="button" onclick="window.parent.sendDataToGame(@js($backpackUrl))">
                         </b></b>
                     @endif
                 </footer>

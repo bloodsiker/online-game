@@ -30,7 +30,7 @@ class EloquentNpcReadRepository implements NpcReadRepository
 
     public function findNpcByNameOrFail(string $name): Npc
     {
-        return Npc::query()->where('name', $name)->firstOrFail();
+        return Npc::query()->where('name->ru', $name)->firstOrFail();
     }
 
     public function getPlayerQuestStateGroups(int $playerId): array

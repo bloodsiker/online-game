@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +44,7 @@ class BarrenValleyCoyoteExtraTiersSeeder extends Seeder
         foreach (self::PLACEMENTS as $placement) {
             $level = $placement['level'];
 
-            $monster = DB::table('monsters')->where('name', 'Пепельный Койот')->where('lvl', $level)->first();
+            $monster = LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Пепельный Койот')->where('lvl', $level)->first();
 
             if ($monster === null) {
                 $a = self::ARCHETYPE;
@@ -55,7 +56,7 @@ class BarrenValleyCoyoteExtraTiersSeeder extends Seeder
                 $exp = MonsterStatFormulas::expReward($level, 1.0);
                 [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $level);
 
-                $monsterId = DB::table('monsters')->insertGetId([
+                $monsterId = LocalizedContentSeederQuery::forTable('monsters')->insertGetId([
                     'name' => 'Пепельный Койот',
                     'description' => 'Поджарый степной хищник пепельного окраса — держится по одному, полагаясь не на силу, а на увёртливость и выносливость погони.',
                     'image' => null,

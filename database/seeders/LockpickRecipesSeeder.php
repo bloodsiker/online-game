@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -101,7 +103,7 @@ class LockpickRecipesSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
-            $skillId = DB::table('skills')
+            $skillId = LocalizedContentSeederQuery::forTable('skills')
                 ->where('name', self::PROFESSION)
                 ->where('type', 'peaceful')
                 ->value('id');
@@ -125,7 +127,7 @@ class LockpickRecipesSeeder extends Seeder
     private function upsertRecipeItem(array $definition, int $skillId): int
     {
         $name = sprintf('Рецепт «%s»', $definition['result']);
-        $item = DB::table('share_items')->where('name', $name)->first();
+        $item = LocalizedItemSeederQuery::items()->where('name', $name)->first();
         $now = now();
         $attributes = [
             'type' => 'recipe',
@@ -149,7 +151,7 @@ class LockpickRecipesSeeder extends Seeder
         ];
 
         if ($item === null) {
-            return (int) DB::table('share_items')->insertGetId([
+            return (int) LocalizedItemSeederQuery::items()->insertGetId([
                 'name' => $name,
                 'image' => self::RECIPE_IMAGE,
                 ...$attributes,
@@ -161,7 +163,7 @@ class LockpickRecipesSeeder extends Seeder
             $attributes['image'] = self::RECIPE_IMAGE;
         }
 
-        DB::table('share_items')->where('id', $item->id)->update($attributes);
+        LocalizedItemSeederQuery::items()->where('id', $item->id)->update($attributes);
 
         return (int) $item->id;
     }
@@ -210,7 +212,7 @@ class LockpickRecipesSeeder extends Seeder
 
     private function itemId(string $name): int
     {
-        $id = DB::table('share_items')->where('name', $name)->value('id');
+        $id = LocalizedItemSeederQuery::items()->where('name', $name)->value('id');
         if ($id === null) {
             throw new RuntimeException("Не найден предмет «{$name}» для рецепта отмычки.");
         }

@@ -15,7 +15,7 @@ final class GetMapsPage
     public function execute(?int $currentMapId = null): MapsPageDTO
     {
         $maps = Map::query()
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get(['id', 'parent_id', 'name', 'slug'])
             ->keyBy('id');
 

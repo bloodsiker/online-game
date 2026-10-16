@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Ошибка</title>
+        <title>{{ __('Ошибка') }}</title>
         <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -23,7 +23,7 @@
         <div class="popup-top-left">
             <div class="popup-top-right">
                 <div class="popup-top-center">
-                    <div class="popup_global_title" id="action_title_amount">Сообщение</div>
+                    <div class="popup_global_title" id="action_title_amount">{{ __('Сообщение') }}</div>
                 </div>
             </div>
             <div class="popup_global_close_btn" onclick="window.parent.hideErrorIframe();"></div>
@@ -35,7 +35,7 @@
                         <b>{!! $message !!}</b><br>
                     </div>
                     <div style="margin-top: 25px; text-align: center;">
-                        <b class="butt1 pointer"><b><input value="Закрыть" type="button" onclick="window.parent.hideErrorIframe();" class="redd" style="width: 100px;"></b></b>
+                        <b class="butt1 pointer"><b><input value="{{ __('Закрыть') }}" type="button" onclick="window.parent.hideErrorIframe();" class="redd" style="width: 100px;"></b></b>
                     </div>
                 </div>
             </div>

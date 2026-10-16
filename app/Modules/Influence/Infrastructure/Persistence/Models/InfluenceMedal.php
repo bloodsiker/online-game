@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Influence\Infrastructure\Persistence\Models;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InfluenceMedal extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $fillable = ['map_id', 'name', 'description', 'icon', 'rating_points'];
 
     protected $casts = ['rating_points' => 'integer'];

@@ -39,7 +39,14 @@ readonly class BattleFinishService
         $battle = $this->battleRepository->finishBattle($battle->id);
 
         $dungeonSessionId = $battle->detailsWithMonsters->first()?->locationMonster?->dungeon_session_id;
-        $this->dropService->dropItemsFromMonsters($battle, $location, $dropRecipient, $dungeonSessionId);
+
+        // Клан-босс: дроп с босса уходит в клановый склад через ClanBossRewardService,
+        // на землю ничего не падает.
+        $isClanBossBattle = $battle->detailsWithMonsters->first()?->locationMonster?->clan_boss_stage_state_id !== null;
+
+        if (! $isClanBossBattle) {
+            $this->dropService->dropItemsFromMonsters($battle, $location, $dropRecipient, $dungeonSessionId);
+        }
 
         $location->last_respawn_monster_at = Carbon::now();
         $location->save();

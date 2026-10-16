@@ -54,7 +54,7 @@ final class UserController
             ->collectFrom(new PlayerInjuryTooltipStrategy($injuriesBySlot));
 
         $isOnline = $user->last_online_at !== null
-            && Carbon::parse($user->last_online_at)->gt(Carbon::now()->subMinutes(10));
+            && Carbon::parse($user->last_online_at)->gt(Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30)));
 
         return response()->view('user::info', [
             'user' => $user,

@@ -7,6 +7,7 @@ namespace App\Modules\MagicSkill\Infrastructure\Persistence\Models;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEffect;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MagicSkill extends Model
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
 
     protected $table = 'magic_skills';
 

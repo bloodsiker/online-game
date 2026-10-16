@@ -9,14 +9,11 @@
         <div class="col-md-12">
             <section class="card">
                 <div class="card-body">
-                    <form action="{{ route('admin.structure.create') }}" method="post">
+                    <form action="{{ route('admin.structure.create') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="row pb-3">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="col-form-label">Название</label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
-                                </div>
+                                @include('admin.partials.content-translations', ['prefix' => 'structure-new', 'content' => null])
                                 <div class="form-group">
                                     <label class="col-form-label">Тип</label>
                                     <select class="form-control" name="type" data-plugin-selectTwo required>
@@ -28,16 +25,24 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="col-form-label">Описание</label>
-                                    <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
-                                </div>
-                                <div class="form-group">
                                     <label class="col-form-label">Локация</label>
                                     <select id="sel-location" name="location_id" class="form-control"></select>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-form-label">НПС</label>
                                     <select id="sel-npc" name="npc_id" class="form-control"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Данж (для логова клан-босса)</label>
+                                    <select id="sel-dungeon" name="dungeon_id" class="form-control"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-form-label">Изображение</label>
+                                    <div class="mb-1">
+                                        <img id="structure-preview" src="" alt=""
+                                             style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                    </div>
+                                    <input type="file" class="form-control mt-1" name="image" id="structure-image" accept="image/*">
                                 </div>
                             </div>
                         </div>
@@ -76,5 +81,14 @@
 
         initStructureSelect('#sel-location', '{{ route('admin.api.locations') }}', 'Выберите локацию');
         initStructureSelect('#sel-npc', '{{ route('admin.api.npcs') }}', 'Выберите НПС');
+        initStructureSelect('#sel-dungeon', '{{ route('admin.api.dungeons') }}', 'Без данжа');
+
+        document.getElementById('structure-image').addEventListener('change', function () {
+            const preview = document.getElementById('structure-preview');
+            if (this.files[0]) {
+                preview.src = URL.createObjectURL(this.files[0]);
+                preview.style.display = 'block';
+            }
+        });
     </script>
 @endpush

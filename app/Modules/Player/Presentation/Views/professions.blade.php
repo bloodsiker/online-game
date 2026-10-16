@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Профессии</title>
+    <title>{{ __('Профессии') }}</title>
     <style>
         * { box-sizing: border-box; }
         html, body { min-height: 100%; }
@@ -89,9 +89,9 @@
                 <td class="tbl-usi_bg" valign="top">
                     <main class="professions-wrap">
                         @if($page['professions'] === [])
-                            <div class="empty-page">Мирные профессии ещё не настроены.</div>
+                            <div class="empty-page">{{ __('Мирные профессии ещё не настроены.') }}</div>
                         @else
-                            <nav class="profession-tabs" aria-label="Мирные профессии" role="tablist">
+                            <nav class="profession-tabs" aria-label="{{ __('Мирные профессии') }}" role="tablist">
                                 @foreach($page['professions'] as $profession)
                                     <button type="button"
                                             class="profession-tab @if($profession['id'] === $page['activeProfessionId']) active @endif"
@@ -99,7 +99,7 @@
                                             role="tab"
                                             aria-selected="{{ $profession['id'] === $page['activeProfessionId'] ? 'true' : 'false' }}">
                                         <span class="profession-tab-name">{{ $profession['name'] }}</span>
-                                        <span class="profession-tab-caption">{{ $profession['isGathering'] ? 'добыто ресурсов' : 'изученные рецепты' }}</span>
+                                        <span class="profession-tab-caption">{{ $profession['isGathering'] ? __('добыто ресурсов') : __('изученные рецепты') }}</span>
                                         <span class="profession-count">{{ $profession['isGathering'] ? $profession['totalGathered'] : $profession['recipesCount'] }}</span>
                                     </button>
                                 @endforeach
@@ -108,12 +108,12 @@
                             @foreach($page['professions'] as $profession)
                                 <section class="profession-panel @if($profession['id'] === $page['activeProfessionId']) active @endif" data-profession-panel="{{ $profession['id'] }}">
                                     <header class="profession-summary">
-                                        <div class="profession-level"><b>{{ $profession['level'] }}</b><span>уровень</span></div>
+                                        <div class="profession-level"><b>{{ $profession['level'] }}</b><span>{{ __('уровень') }}</span></div>
                                         <div class="profession-info">
                                             <div class="profession-name">{{ $profession['name'] }}</div>
-                                            <div class="profession-description">{{ $profession['description'] ?: 'Мирная профессия.' }}</div>
+                                            <div class="profession-description">{{ $profession['description'] ?: __('Мирная профессия.') }}</div>
                                             <div class="profession-progress-head">
-                                                <span>Прогресс текущего уровня</span>
+                                                <span>{{ __('Прогресс текущего уровня') }}</span>
                                                 <b>{{ $profession['experiencePercent'] }}%</b>
                                             </div>
                                             <div class="profession-progress" title="{{ $profession['levelExperience'] }} / {{ $profession['levelExperienceRequired'] }}">
@@ -123,9 +123,9 @@
                                     </header>
 
                                     @if($profession['isGathering'])
-                                        <div class="recipes-heading">Добыто ресурсов <span class="profession-count">{{ number_format($profession['totalGathered'], 0, '.', ' ') }}</span></div>
+                                        <div class="recipes-heading">{{ __('Добыто ресурсов') }} <span class="profession-count">{{ number_format($profession['totalGathered'], 0, '.', ' ') }}</span></div>
                                         @if($profession['gatheredResources'] === [])
-                                            <div class="empty-recipes">Этим персонажем ещё не добыто ни одного ресурса.</div>
+                                            <div class="empty-recipes">{{ __('Этим персонажем ещё не добыто ни одного ресурса.') }}</div>
                                         @else
                                             <div class="gathering-grid">
                                                 @foreach($profession['gatheredResources'] as $resource)
@@ -133,16 +133,16 @@
                                                         <div class="gathering-icon"><img src="{{ asset($resource['image']) }}" alt="{{ $resource['name'] }}"></div>
                                                         <div class="gathering-card-body">
                                                             <a class="gathering-card-name" href="{{ route('items.info.share', ['id' => $resource['shareItemId']]) }}" target="_blank" style="text-decoration:none;">{{ $resource['name'] }}</a>
-                                                            <div class="gathering-card-count">добыто: <b>{{ number_format($resource['totalGathered'], 0, '.', ' ') }}</b></div>
+                                                            <div class="gathering-card-count">{{ __('добыто:') }} <b>{{ number_format($resource['totalGathered'], 0, '.', ' ') }}</b></div>
                                                         </div>
                                                     </article>
                                                 @endforeach
                                             </div>
                                         @endif
                                     @else
-                                    <div class="recipes-heading">Изученные рецепты <span class="profession-count">{{ $profession['recipesCount'] }}</span></div>
+                                    <div class="recipes-heading">{{ __('Изученные рецепты') }} <span class="profession-count">{{ $profession['recipesCount'] }}</span></div>
                                     @if($profession['recipes'] === [])
-                                        <div class="empty-recipes">У этой профессии пока нет изученных рецептов.</div>
+                                        <div class="empty-recipes">{{ __('У этой профессии пока нет изученных рецептов.') }}</div>
                                     @else
                                         <div class="recipes-grid">
                                             @foreach($profession['recipes'] as $recipe)
@@ -152,12 +152,12 @@
                                                         <a class="recipe-name" href="{{ route('items.info.share', ['id' => $recipe['shareItemId']]) }}" target="_blank">{{ $recipe['name'] }}</a>
                                                         @if($recipe['description'] !== '')<div class="recipe-description">{{ $recipe['description'] }}</div>@endif
                                                         <div class="recipe-meta">
-                                                            <span>Требуется: <b>{{ $recipe['requiredLevel'] }} ур.</b></span>
-                                                            <span>Опыт: <b>+{{ $recipe['experience'] }}</b></span>
-                                                            @if($recipe['learnedAt'])<span>Изучен: <b>{{ $recipe['learnedAt'] }}</b></span>@endif
+                                                            <span>{{ __('Требуется:') }} <b>{{ $recipe['requiredLevel'] }} {{ __('ур.') }}</b></span>
+                                                            <span>{{ __('Опыт:') }} <b>+{{ $recipe['experience'] }}</b></span>
+                                                            @if($recipe['learnedAt'])<span>{{ __('Изучен:') }} <b>{{ $recipe['learnedAt'] }}</b></span>@endif
                                                         </div>
                                                         <div class="recipe-result">
-                                                            <span>Результат:</span>
+                                                            <span>{{ __('Результат:') }}</span>
                                                             <img src="{{ asset($recipe['resultImage']) }}" alt="">
                                                             <a href="{{ route('items.info.share', ['id' => $recipe['resultShareItemId']]) }}" target="_blank">{{ $recipe['resultName'] }}</a>
                                                         </div>

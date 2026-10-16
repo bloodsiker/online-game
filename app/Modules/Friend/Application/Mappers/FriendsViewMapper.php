@@ -51,7 +51,7 @@ class FriendsViewMapper
      */
     private function mapRelationships(Collection $relationships, bool $usePlayerSide): array
     {
-        $onlineThreshold = CarbonImmutable::now()->subMinutes(10);
+        $onlineThreshold = CarbonImmutable::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         return $relationships->map(
             static function (PlayerRelationship $relationship) use ($onlineThreshold, $usePlayerSide): FriendEntryDTO {
@@ -68,6 +68,7 @@ class FriendsViewMapper
                     isOnline: $isOnline,
                     lastOnlineLabel: $user->last_online_at?->diffForHumans(),
                     lastOnlineTime: $user->last_online_at?->format('H:i'),
+                    clanId: $clan?->id,
                     clanName: $clan?->name,
                     clanIconUrl: $clan?->icon ? Storage::disk('public')->url($clan->icon) : null,
                 );

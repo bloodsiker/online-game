@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Проставляет share_items.is_weight=1 для ВСЕЙ экипировки и оружия
@@ -27,7 +27,7 @@ class EquipmentWeightFlagFixSeeder extends Seeder
 
     public function run(): void
     {
-        $updated = DB::table('share_items')
+        $updated = LocalizedItemSeederQuery::items()
             ->whereIn('type', self::TYPES)
             ->where('is_weight', false)
             ->update(['is_weight' => true, 'updated_at' => now()]);

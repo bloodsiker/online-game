@@ -8,7 +8,9 @@ final class GameSettingsDefinition
 {
     /** Only implemented settings belong here. Add each new key with its type, default and validation. */
     private const DEFINITIONS = [
+        'language' => ['default' => 'ru', 'type' => 'language', 'rules' => ['sometimes', 'required', 'string', 'in:ru,uk']],
         'show_map' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
+        'map_side' => ['default' => 'right', 'type' => 'map_side', 'rules' => ['sometimes', 'required', 'string', 'in:left,right']],
         'show_hotbar' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
         'show_item_tooltips' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
         'chat_sound_enabled' => ['default' => false, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
@@ -42,6 +44,8 @@ final class GameSettingsDefinition
                 $result[$key] = match ($definition['type']) {
                     'bool' => (bool) $values[$key],
                     'int' => self::normalizeInteger(key: $key, value: $values[$key]),
+                    'language' => in_array($values[$key], ['ru', 'uk'], true) ? $values[$key] : 'ru',
+                    'map_side' => in_array($values[$key], ['left', 'right'], true) ? $values[$key] : 'right',
                 };
             }
         }

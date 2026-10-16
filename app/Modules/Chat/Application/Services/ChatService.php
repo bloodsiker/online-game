@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Application\Services;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\ManageIgnore;
 use App\Modules\Chat\Application\UseCases\SendMessage;
@@ -31,19 +32,24 @@ class ChatService
         return $this->sendMessage->execute($sender, $raw, $defaultChannel);
     }
 
-    public function sendSystemToUser(User $user, string $message): ChatMessage
+    public function sendSystemToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Information);
     }
 
-    public function sendPartyInviteToUser(User $user, string $message): ChatMessage
+    public function sendPartyInviteToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::PartyInvite);
     }
 
-    public function sendPartyNoticeToUser(User $user, string $message): ChatMessage
+    public function sendPartyNoticeToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::PartyNotice);
+    }
+
+    public function sendClanInviteToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::ClanInvite);
     }
 
     /** Удаляет персональное системное сообщение, не затрагивая чужой чат. */
@@ -63,23 +69,23 @@ class ChatService
         }
     }
 
-    public function sendQuestToUser(User $user, string $message): ChatMessage
+    public function sendQuestToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Quest);
     }
 
-    public function sendQuestItemDropToUser(User $user, string $message): ChatMessage
+    public function sendQuestItemDropToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::QuestItem);
     }
 
-    public function sendLootToUser(User $user, string $message): ChatMessage
+    public function sendLootToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::Loot);
     }
 
     public function sendSystem(
-        string $message,
+        string|LocalizedChatMessage $message,
         ?int $mapId = null,
         ?int $clanId = null,
         ChatMessageType $type = ChatMessageType::System,
@@ -87,9 +93,14 @@ class ChatService
         return $this->sendSystemMessage->toChannel($message, $mapId, $clanId, $type);
     }
 
-    public function sendSystemToParty(int $partyId, string $message): ChatMessage
+    public function sendSystemToParty(int $partyId, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toParty($partyId, $message);
+    }
+
+    public function sendClanNotice(int $clanId, string|LocalizedChatMessage $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toClan($clanId, $message);
     }
 
     public function getMessages(User $user, ChatChannel $channel, ?int $afterId = null, int $limit = 60): Collection

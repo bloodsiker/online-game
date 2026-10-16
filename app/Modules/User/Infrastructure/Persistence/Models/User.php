@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Infrastructure\Persistence\Models;
 
+use App\Modules\Auth\Application\Notifications\GameEmailVerificationNotification;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
@@ -121,6 +122,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify((new GameEmailVerificationNotification)->locale(app()->getLocale()));
     }
 
     public function communicationMutes(): HasMany

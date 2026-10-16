@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Structure\ReputationExchange\Domain\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Reputation\Application\Services\ReputationService;
@@ -67,12 +68,9 @@ readonly class ReputationExchangeService
             $this->reputationService->addPoints($player, $exchange->reputation, $earnedPoints, touchCooldown: false);
         });
 
-        $this->chatService->sendQuestToUser($user, sprintf(
-            'Вы сдали %d×«%s» и получили <b>+%d</b> репутации «%s».',
-            $count,
-            $exchange->shareItem->name,
-            $earnedPoints,
-            $exchange->reputation->name,
-        ));
+        $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.reputation_exchange', [
+            'count' => $count, 'item' => $exchange->shareItem->name,
+            'points' => $earnedPoints, 'reputation' => LocalizedChatMessage::contentName($exchange->reputation),
+        ]));
     }
 }

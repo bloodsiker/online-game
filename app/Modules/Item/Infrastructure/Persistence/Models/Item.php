@@ -79,7 +79,7 @@ class Item extends Model
     public function expiryTooltipInfo(): array
     {
         return $this->expires_at === null ? [] : [[
-            'title' => 'Исчезнет',
+            'title' => __('Исчезнет'),
             'value' => $this->expires_at->format('d.m.Y H:i'),
         ]];
     }

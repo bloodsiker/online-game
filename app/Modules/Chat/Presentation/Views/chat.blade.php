@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
-    <title>Чат</title>
+    <title>{{ __('Чат') }}</title>
     <style>
         html {
             scrollbar-width: none;
@@ -30,6 +31,8 @@
             line-height: 1.4;
             word-break: break-word;
         }
+        .message.msg-message { white-space: nowrap; }
+        .chat-smile { vertical-align: middle; }
         small { font-size: 11px; color: #666; }
         a { color: navy; text-decoration: none; }
         a:hover { text-decoration: underline; }
@@ -50,11 +53,17 @@
         .msg-world_event       { border-left: 2px solid #000; padding-left: 3px; color: #000; font-weight: bold; }
         .msg-world_event small { color: #000; }
         .msg-world_event em    { font-style: italic; }
+        .msg-clan_boss         { border-left: 2px solid #007a03; padding-left: 3px; color: #007a03; font-style: italic; }
+        .msg-clan_boss small   { color: #007a03; }
         .msg-party_invite      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
         .msg-party_invite small { color: #000; }
         .msg-party_invite .party-invite-action { font-weight: bold; }
         .msg-party_notice      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
         .msg-party_notice small { color: #000; }
+        .msg-clan_invite      { border-left: 2px solid #000; padding-left: 3px; color: #000; font-style: italic; }
+        .msg-clan_invite small { color: #000; }
+        .msg-clan_invite .clan-invite-action { font-weight: bold; }
+        .msg-clan_invite .clan-invite-clan { color: #000; font-weight: bold; white-space: nowrap; }
         .msg-quest             { border-left: 2px solid #000000; padding-left: 3px; color: #000000; font-style: italic; }
         .msg-quest small       { color: #000000; font-style: normal; }
         .msg-quest_item            { border-left: 2px solid #009900; padding-left: 3px; color: #009900; font-weight: bold; }
@@ -204,7 +213,7 @@
                         @if ($msg->type === 'private' && $msg->reply_to)
                             <small class="msg-time-reply"
                                    onclick="replyToUser('{{ addslashes($msg->reply_to) }}')"
-                                   title="Ответить {{ $msg->reply_to }}">{{ $msg->time }}</small>
+                                   title="{{ __('Ответить') }} {{ $msg->reply_to }}">{{ $msg->time }}</small>
                         @else
                             <small>{{ $msg->time }}</small>
                         @endif
@@ -219,7 +228,10 @@
                         @elseif ($msg->type === 'world_event')
                             {!! $msg->content !!}
 
-                        @elseif (in_array($msg->type, ['party_invite', 'party_notice'], true))
+                        @elseif ($msg->type === 'clan_boss')
+                            {!! $msg->content !!}
+
+                        @elseif (in_array($msg->type, ['party_invite', 'party_notice', 'clan_invite'], true))
                             {!! $msg->content !!}
 
                         @elseif ($msg->type === 'quest')
@@ -233,15 +245,15 @@
 
                         @elseif ($msg->type === 'private')
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
-                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
+                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
                             @endif
                             <a href="#" class="player-link n prv-name" data-uid="{{ $msg->sender_id }}" data-name="{{ $msg->sender_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
-                            <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                            <a href="#" title="{{ __('Информация о персонаже') }}" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                             <span class="chat-private-recipient">» @if($msg->target_user_id && $msg->target_name)<a href="#" class="player-link n prv-name" data-uid="{{ $msg->target_user_id }}" data-name="{{ $msg->target_name }}" onclick="chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;">{{ $msg->target_name }}</a>@else<span class="prv-name">{{ $msg->target_name ?? '?' }}</span>@endif</span> {!! $msg->content !!}
 
                         @else
                             @if ($msg->sender_clan_icon && $msg->sender_clan_id)
-                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
+                                <a href="{{ route('clan.public', ['clan' => $msg->sender_clan_id]) }}" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;"><img src="{{ $msg->sender_clan_icon }}" class="chat-clan-icon" width="13" height="13" alt=""></a>
                             @endif
                             <a href="#"
                                class="player-link n"
@@ -249,7 +261,7 @@
                                data-name="{{ $msg->sender_name }}"
                                onclick="chatPlayerClick({{ $msg->sender_id }}, '{{ addslashes($msg->sender_name) }}'); return false;"
                             >{{ $msg->sender_name }}</a>@if ($msg->sender_level) <small class="chat-level">[{{ $msg->sender_level }}]</small>@endif
-                            <a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                            <a href="#" title="{{ __('Информация о персонаже') }}" onclick="chatOpenUserInfo({{ $msg->sender_id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                             {!! $msg->content !!}
                         @endif
                     </div>
@@ -308,7 +320,7 @@
 
         var heading = document.createElement('div');
         heading.className = 'world-event-widget__heading';
-        heading.textContent = 'Активные события';
+        heading.textContent = gameTranslate('Активные события');
         widget.appendChild(heading);
 
         events.forEach(function (event) {
@@ -326,7 +338,7 @@
 
             var progress = document.createElement('div');
             progress.className = 'world-event-widget__progress';
-            progress.textContent = 'Этап ' + parseInt(event.stage_position, 10) + ': '
+            progress.textContent = gameTranslate('Этап') + ' ' + parseInt(event.stage_position, 10) + ': '
                 + event.stage_title + '. ' + event.progress_label + ': '
                 + parseInt(event.collected_count, 10) + ' / '
                 + parseInt(event.global_limit, 10);
@@ -337,7 +349,7 @@
 
             var timerLabel = document.createElement('span');
             timerLabel.className = 'world-event-widget__timer-label';
-            timerLabel.textContent = 'Осталось:';
+            timerLabel.textContent = gameTranslate('Осталось:');
 
             var timerValue = document.createElement('span');
             timerValue.className = 'world-event-widget__timer-value';
@@ -362,10 +374,10 @@
         var seconds = totalSeconds % 60;
         var parts = [];
 
-        if (days > 0) parts.push(days + 'д');
-        if (days > 0 || hours > 0) parts.push(hours + 'ч');
-        parts.push(minutes + 'м');
-        parts.push(seconds + 'с');
+        if (days > 0) parts.push(days + gameTranslate('д'));
+        if (days > 0 || hours > 0) parts.push(hours + gameTranslate('ч'));
+        parts.push(minutes + gameTranslate('м'));
+        parts.push(seconds + gameTranslate('с'));
 
         return parts.join(' ');
     }
@@ -389,7 +401,7 @@
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(function (response) {
-                if (!response.ok) throw new Error('Не удалось обновить события.');
+                if (!response.ok) throw new Error(gameTranslate('Не удалось обновить события.'));
                 return response.json();
             })
             .then(function (events) {
@@ -434,7 +446,7 @@
     function clanIconHtml(msg) {
         if (!msg.sender_clan_icon || !msg.sender_clan_id) return '';
         var clanUrl = '{{ url('/clan-info') }}/' + parseInt(msg.sender_clan_id, 10);
-        return '<a href="' + clanUrl + '" title="Информация о клане" onclick="chatOpenClanInfo(this.href); return false;">'
+        return '<a href="' + clanUrl + '" title="{{ __('Информация о клане') }}" onclick="chatOpenClanInfo(this.href); return false;">'
              + '<img src="' + safeAttr(msg.sender_clan_icon) + '" class="chat-clan-icon" width="13" height="13" alt=""></a>';
     }
 
@@ -444,13 +456,13 @@
     }
 
     function playerInfoIconHtml(userId) {
-        return '<a href="#" title="Информация о персонаже" onclick="chatOpenUserInfo(' + parseInt(userId, 10) + '); return false;">'
+        return '<a href="#" title="' + gameTranslate('Информация о персонаже') + '" onclick="chatOpenUserInfo(' + parseInt(userId, 10) + '); return false;">'
              + '<img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>';
     }
 
     // Иконка информации о персонаже возле ника — открывает карточку игрока в отдельном окне
     function chatOpenUserInfo(userId) {
-        window.open('{{ url('/info/u') }}/' + userId, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        window.open('{{ url('/info/u') }}/' + userId, '', 'width=930,height=800,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');
         return false;
     }
 
@@ -465,7 +477,7 @@
         if (msg.type === 'private' && msg.reply_to) {
             timeHtml = '<small class="msg-time-reply"'
                      + ' onclick="replyToUser(\'' + safeAttr(msg.reply_to) + '\')"'
-                     + ' title="Ответить ' + safeAttr(msg.reply_to) + '">'
+                     + ' title="' + gameTranslate('Ответить') + ' ' + safeAttr(msg.reply_to) + '">'
                      + escapeHtml(msg.time) + '</small>';
         } else {
             timeHtml = '<small>' + escapeHtml(msg.time) + '</small>';
@@ -480,7 +492,9 @@
             html += '<span class="msg-information-icon">✔</span> ' + msg.content;
         } else if (msg.type === 'world_event') {
             html += msg.content;
-        } else if (msg.type === 'party_invite' || msg.type === 'party_notice') {
+        } else if (msg.type === 'clan_boss') {
+            html += msg.content;
+        } else if (msg.type === 'party_invite' || msg.type === 'party_notice' || msg.type === 'clan_invite') {
             html += msg.content;
         } else if (msg.type === 'quest') {
             html += msg.content;
@@ -509,7 +523,7 @@
         return html;
     }
 
-    function handlePartyInviteAction(link) {
+    function handleInviteAction(link, modalTitle) {
         if (!link || link.dataset.pending === '1') return false;
 
         link.dataset.pending = '1';
@@ -522,7 +536,7 @@
         })
             .then(function (response) {
                 return response.json().then(function (data) {
-                    if (!response.ok) throw new Error(data.message || 'Не удалось обработать приглашение.');
+                    if (!response.ok) throw new Error(data.message || gameTranslate('Не удалось обработать приглашение.'));
                     return data;
                 });
             })
@@ -530,7 +544,7 @@
                 try {
                     if (window.top.refreshChatChannels) window.top.refreshChatChannels();
                     if (window.top.openGameMessageModal) {
-                        window.top.openGameMessageModal({ title: 'Группа', message: data.message });
+                        window.top.openGameMessageModal({ title: modalTitle, message: data.message });
                     }
                 } catch (e) {}
             })
@@ -538,12 +552,20 @@
                 link.dataset.pending = '0';
                 try {
                     if (window.top.openGameMessageModal) {
-                        window.top.openGameMessageModal({ title: 'Группа', message: error.message });
+                        window.top.openGameMessageModal({ title: modalTitle, message: error.message });
                     }
                 } catch (e) {}
             });
 
         return false;
+    }
+
+    function handlePartyInviteAction(link) {
+        return handleInviteAction(link, gameTranslate('Группа'));
+    }
+
+    function handleClanInviteAction(link) {
+        return handleInviteAction(link, gameTranslate('Клан'));
     }
 
     function replyToUser(name) {

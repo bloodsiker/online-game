@@ -15,6 +15,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\PlayerEquipmentLoader;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -25,26 +26,31 @@ final readonly class PlayerMovementService
         private BackpackService $backpackService,
         private PlayerEquipmentLoader $equipmentLoader,
         private BattleRepository $battleRepository,
+        private DetentionService $detentionService,
         private ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
     public function move(User $user, string $direction): MoveResultDTO
     {
+        if ($detentionMessage = $this->detentionService->blockLeaving($user)) {
+            return MoveResultDTO::blocked($detentionMessage);
+        }
+
         $location = $user->currentLocation;
 
         if ($this->battleRepository->hasLivingPlayerInActiveBattle($user->id, $location->id)) {
-            return MoveResultDTO::blocked('Нельзя покинуть локацию во время боя.');
+            return MoveResultDTO::blocked(__('Нельзя покинуть локацию во время боя.'));
         }
 
         if (! $location->$direction) {
-            return MoveResultDTO::blocked('Нельзя идти в этом направлении');
+            return MoveResultDTO::blocked(__('Нельзя идти в этом направлении'));
         }
 
         $this->equipmentLoader->load($user->player);
         $backpackUsed = $this->backpackService->getCountableItemsCount($user);
 
         if ($backpackUsed > $user->getBagCount()) {
-            return MoveResultDTO::blocked('У вас перегружен рюкзак. Нельзя перемещаться.');
+            return MoveResultDTO::blocked(__('У вас перегружен рюкзак. Нельзя перемещаться.'));
         }
 
         $destLocation = Location::find($location->$direction);
@@ -56,7 +62,7 @@ final readonly class PlayerMovementService
                 ->exists();
 
             if (! $hasAccess) {
-                return MoveResultDTO::blocked('Проход закрыт. Для доступа необходимо выполнить квест.');
+                return MoveResultDTO::blocked(__('Проход закрыт. Для доступа необходимо выполнить квест.'));
             }
         }
 
@@ -116,7 +122,7 @@ final readonly class PlayerMovementService
         }
 
         if ($query->count() > 0) {
-            return 'Проход заблокирован. Уничтожьте всех монстров в этой зоне.';
+            return __('Проход заблокирован. Уничтожьте всех монстров в этой зоне.');
         }
 
         return null;
@@ -135,7 +141,7 @@ final readonly class PlayerMovementService
 
         $hasItem = $this->backpackService->getItem($user, $shareItem) !== null;
         if (! $hasItem) {
-            return 'Проход заблокирован. Нужен ключ от босса.';
+            return __('Проход заблокирован. Нужен ключ от босса.');
         }
 
         return null;
@@ -144,11 +150,11 @@ final readonly class PlayerMovementService
     private function checkLocationGate(LocationGate $gate, User $user): ?string
     {
         if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {
-            return 'Проход закрыт. Недостаточно влияния на территории.';
+            return __('Проход закрыт. Недостаточно влияния на территории.');
         }
 
         if ($gate->mode === 'teleport_use') {
-            return 'Проход закрыт. Нужно использовать ключ из инвентаря.';
+            return __('Проход закрыт. Нужно использовать ключ из инвентаря.');
         }
 
         $shareItem = ShareItem::find($gate->share_item_id);
@@ -158,7 +164,7 @@ final readonly class PlayerMovementService
 
         $hasItem = $this->backpackService->getItem($user, $shareItem) !== null;
         if (! $hasItem) {
-            return 'Проход закрыт. Нужен специальный предмет.';
+            return __('Проход закрыт. Нужен специальный предмет.');
         }
 
         return null;

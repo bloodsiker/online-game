@@ -45,14 +45,7 @@
                                     {{ csrf_field() }}
                                     <div class="row pt-3 pb-3">
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="col-form-label">Название</label>
-                                                <input type="text" class="form-control" name="name" value="{{ $reputation->name }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Описание</label>
-                                                <textarea class="form-control" name="description" rows="4">{{ $reputation->description }}</textarea>
-                                            </div>
+                                            @include('admin.partials.content-translations', ['prefix' => 'reputation-content', 'content' => $reputation])
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -228,10 +221,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="form-group mb-2">
-                                                            <label>Название медали</label>
-                                                            <input type="text" class="form-control" name="medal_name" value="{{ $tier->medal_name }}">
-                                                        </div>
+                                                        @include('admin.reputation.partials.medal-translations', ['content' => $tier, 'prefix' => 'reputation-tier-'.$tier->id])
                                                         <div class="form-group mb-2">
                                                             <label>Изображение медали (URL или путь от <code>public</code>)</label>
                                                             <input type="text" class="form-control" name="medal_icon" value="{{ $tier->medal_icon }}">
@@ -264,14 +254,6 @@
                                                                     <option value="{{ $tier->featQuest->id }}" selected>[{{ $tier->featQuest->id }}] {{ $tier->featQuest->title }}</option>
                                                                 @endif
                                                             </select>
-                                                        </div>
-                                                        <div class="form-group mb-2">
-                                                            <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
-                                                            <textarea class="form-control" name="feat_description" rows="2">{{ $tier->feat_description }}</textarea>
-                                                        </div>
-                                                        <div class="form-group mb-2">
-                                                            <label>Отдельная медаль за подвиг <small class="text-muted">(пусто = подвиг блокирует обычную медаль)</small></label>
-                                                            <input type="text" class="form-control" name="feat_medal_name" value="{{ $tier->feat_medal_name }}">
                                                         </div>
                                                         <div class="form-group mb-2">
                                                             <label>Изображение медали за подвиг (URL или путь от <code>public</code>)</label>
@@ -483,10 +465,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group mb-2">
-                        <label>Название медали</label>
-                        <input type="text" class="form-control" name="medal_name">
-                    </div>
+                    @include('admin.reputation.partials.medal-translations', ['content' => null, 'prefix' => 'reputation-tier-new'])
                     <div class="form-group mb-2">
                         <label>Изображение медали (URL или путь от <code>public</code>)</label>
                         <input type="text" class="form-control" name="medal_icon">
@@ -512,14 +491,6 @@
                     <div class="form-group mb-2">
                         <label>⚔ Квест-подвиг <small class="text-muted">(без него медаль не выдаётся; для цепочки — финальный квест)</small></label>
                         <select class="form-control tier-feat-select" name="feat_quest_id" data-modal="#modalTier"></select>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label>Описание подвига <small class="text-muted">(видно игроку у заблокированной медали)</small></label>
-                        <textarea class="form-control" name="feat_description" rows="2"></textarea>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label>Отдельная медаль за подвиг <small class="text-muted">(пусто = подвиг блокирует обычную медаль)</small></label>
-                        <input type="text" class="form-control" name="feat_medal_name">
                     </div>
                     <div class="form-group mb-2">
                         <label>Изображение медали за подвиг (URL или путь от <code>public</code>)</label>

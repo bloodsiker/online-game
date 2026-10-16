@@ -118,21 +118,21 @@ class LockpickingService
             $context = $item === null ? null : $this->itemService->accessibleChest($lockedUser, $itemId, $item);
             $config = $item?->itemInfo->lockConfig;
             if ($context === null || $config === null || $config->lock_required_skill <= 0) {
-                return new LockpickingActionResultDTO(false, 'Сундук больше недоступен.', 409);
+                return new LockpickingActionResultDTO(false, __('Сундук больше недоступен.'), 409);
             }
             if ($item->is_open) {
-                return new LockpickingActionResultDTO(false, 'Сундук уже открыт.', 409);
+                return new LockpickingActionResultDTO(false, __('Сундук уже открыт.'), 409);
             }
             $lockpick = $this->selectedLockpick($lockedUser, $lockpickShareItemId, true);
             if ($lockpick === null) {
-                return new LockpickingActionResultDTO(false, 'Для взлома нужна отмычка.', 422);
+                return new LockpickingActionResultDTO(false, __('Для взлома нужна отмычка.'), 422);
             }
             $skillLevel = $this->skillLevel($player);
             $lockpickTier = max(1, (int) ($lockpick->item->itemInfo->lockpickConfig?->tier ?? 1));
             $requiredLockpickSkill = $this->lockpickRequiredSkill($lockpickTier);
             if ($skillLevel < $requiredLockpickSkill) {
                 return new LockpickingActionResultDTO(false, sprintf(
-                    'Для этой отмычки требуется навык «%s» %d уровня.',
+                    __('Для этой отмычки требуется навык «%s» %d уровня.'),
                     self::SKILL_NAME,
                     $requiredLockpickSkill,
                 ), 422);
@@ -140,7 +140,7 @@ class LockpickingService
 
             $existing = LockpickingAttempt::query()->where('player_id', $user->player_id)->lockForUpdate()->first();
             if ($existing !== null) {
-                return new LockpickingActionResultDTO(false, 'Вы уже взламываете другой сундук.', 409);
+                return new LockpickingActionResultDTO(false, __('Вы уже взламываете другой сундук.'), 409);
             }
 
             [$lockedItem, $source] = $context;
@@ -174,7 +174,7 @@ class LockpickingService
                 'expires_at' => $startedAt->copy()->addSeconds($duration + self::CLAIM_GRACE_SECONDS),
             ]);
 
-            return new LockpickingActionResultDTO(true, 'Взлом начат.', 200, [
+            return new LockpickingActionResultDTO(true, __('Взлом начат.'), 200, [
                 'status' => 'started',
                 'completes_at' => $attempt->completes_at->toIso8601String(),
                 'duration_seconds' => $duration,
@@ -199,17 +199,17 @@ class LockpickingService
                 ->first();
 
             if ($attempt === null) {
-                return new LockpickingActionResultDTO(false, 'Активная попытка не найдена.', 409);
+                return new LockpickingActionResultDTO(false, __('Активная попытка не найдена.'), 409);
             }
             if (now()->lt($attempt->completes_at)) {
-                return new LockpickingActionResultDTO(false, 'Замок ещё не вскрыт.', 425, [
+                return new LockpickingActionResultDTO(false, __('Замок ещё не вскрыт.'), 425, [
                     'completes_at' => $attempt->completes_at->toIso8601String(),
                 ]);
             }
             if (now()->gt($attempt->expires_at)) {
                 $attempt->delete();
 
-                return new LockpickingActionResultDTO(false, 'Время на завершение попытки истекло.', 409);
+                return new LockpickingActionResultDTO(false, __('Время на завершение попытки истекло.'), 409);
             }
             if ($blocked = $this->actionBlockReason($lockedUser)) {
                 $attempt->delete();
@@ -219,7 +219,7 @@ class LockpickingService
             if (! $attempt->is_inventory && (int) $attempt->location_id !== (int) $lockedUser->location_id) {
                 $attempt->delete();
 
-                return new LockpickingActionResultDTO(false, 'Взлом прерван: вы покинули локацию.', 409);
+                return new LockpickingActionResultDTO(false, __('Взлом прерван: вы покинули локацию.'), 409);
             }
 
             $item = Item::query()->with('itemInfo.lockConfig.trapEffect')->whereKey($itemId)->lockForUpdate()->first();
@@ -228,11 +228,11 @@ class LockpickingService
                 $this->writeLog($attempt, $item, 'taken', false);
                 $attempt->delete();
 
-                return new LockpickingActionResultDTO(true, 'Сундук уже открыл другой игрок.', 200, ['status' => 'taken']);
+                return new LockpickingActionResultDTO(true, __('Сундук уже открыл другой игрок.'), 200, ['status' => 'taken']);
             }
             $lockpick = $this->selectedLockpick($lockedUser, $attempt->lockpick_share_item_id, true);
             if ($lockpick === null) {
-                return new LockpickingActionResultDTO(false, 'Отмычки больше нет в рюкзаке.', 422);
+                return new LockpickingActionResultDTO(false, __('Отмычки больше нет в рюкзаке.'), 422);
             }
 
             $success = random_int(1, 10_000) <= (int) round($attempt->chance_snapshot * 100);
@@ -261,18 +261,18 @@ class LockpickingService
                 $hasLockpick = collect($this->availableLockpicks($lockedUser, $config, (int) $attempt->skill_snapshot))
                     ->contains('canUse', true);
 
-                $message = $lockpickBroken ? 'Замок не поддался, отмычка сломана.' : 'Замок не поддался, но отмычка сохранилась.';
+                $message = $lockpickBroken ? __('Замок не поддался, отмычка сломана.') : __('Замок не поддался, но отмычка сохранилась.');
                 if ($trapAvoided) {
-                    $message .= ' Ловушка обезврежена.';
+                    $message .= __(' Ловушка обезврежена.');
                 }
                 if ($trapTriggered) {
-                    $message .= ' Ловушка сработала.';
+                    $message .= __(' Ловушка сработала.');
                     if ($trapResult['damage'] > 0) {
-                        $message .= sprintf(' Получено урона: %d HP.', $trapResult['damage']);
+                        $message .= sprintf(__(' Получено урона: %d HP.'), $trapResult['damage']);
                     }
                 }
                 if (! $hasLockpick) {
-                    $message .= ' Отмычек больше нет.';
+                    $message .= __(' Отмычек больше нет.');
                 }
 
                 return new LockpickingActionResultDTO(true, $message, 200, [
@@ -293,7 +293,7 @@ class LockpickingService
 
                 return new LockpickingActionResultDTO(
                     false,
-                    $eventCollection->error ?? 'Цель события больше недоступна.',
+                    $eventCollection->error ?? __('Цель события больше недоступна.'),
                     409,
                 );
             }
@@ -309,8 +309,8 @@ class LockpickingService
             $attempt->delete();
 
             return new LockpickingActionResultDTO(true, $loot === []
-                ? 'Сундук открыт, но он оказался пуст.'
-                : 'Сундук успешно открыт.', 200, [
+                ? __('Сундук открыт, но он оказался пуст.')
+                : __('Сундук успешно открыт.'), 200, [
                     'status' => 'success',
                     'loot' => $loot,
                     'money' => (int) $lockedUser->money,
@@ -333,14 +333,14 @@ class LockpickingService
                 ->lockForUpdate()
                 ->first();
             if ($attempt === null) {
-                return new LockpickingActionResultDTO(false, 'Активная попытка не найдена.', 404);
+                return new LockpickingActionResultDTO(false, __('Активная попытка не найдена.'), 404);
             }
 
             $item = Item::query()->with('itemInfo')->find($itemId);
             $this->writeLog($attempt, $item, 'cancelled', false);
             $attempt->delete();
 
-            return new LockpickingActionResultDTO(true, 'Взлом отменён.', 200, ['status' => 'cancelled']);
+            return new LockpickingActionResultDTO(true, __('Взлом отменён.'), 200, ['status' => 'cancelled']);
         });
     }
 
@@ -417,7 +417,7 @@ class LockpickingService
 
     private function lockpickingSkill(): ?Skill
     {
-        return Skill::query()->where('name', self::SKILL_NAME)->first();
+        return Skill::query()->where('name->ru', self::SKILL_NAME)->first();
     }
 
     private function lockpickBackpackQuery(User $user, bool $lock = false)
@@ -561,7 +561,7 @@ class LockpickingService
     private function actionBlockReason(User $user, bool $checkGathering = true): ?string
     {
         if ((int) $user->player->hp_now <= 0) {
-            return 'Мёртвый персонаж не может взламывать сундуки.';
+            return __('Мёртвый персонаж не может взламывать сундуки.');
         }
 
         if (BattleDetail::query()
@@ -571,14 +571,14 @@ class LockpickingService
                 ->where('status', BattleStatus::ACTIVE->value)
                 ->where('location_id', $user->location_id))
             ->exists()) {
-            return 'Во время боя взлом сундуков недоступен.';
+            return __('Во время боя взлом сундуков недоступен.');
         }
 
         if ($checkGathering && GatheringAttempt::query()
             ->where('player_id', $user->player_id)
             ->where('expires_at', '>', now())
             ->exists()) {
-            return 'Сначала завершите добычу ресурса.';
+            return __('Сначала завершите добычу ресурса.');
         }
 
         return null;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -143,7 +144,7 @@ class AbandonedCemeteryMonsterSeeder extends Seeder
 
         foreach (self::SPECIES as $species) {
             foreach ($species['levels'] as $level) {
-                $existing = DB::table('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
+                $existing = LocalizedContentSeederQuery::forTable('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
 
                 if ($existing !== null) {
                     $result[$species['name']][$level] = $existing->id;
@@ -159,7 +160,7 @@ class AbandonedCemeteryMonsterSeeder extends Seeder
                 $exp = MonsterStatFormulas::expReward($level, 1.0);
                 [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $level);
 
-                $monsterId = DB::table('monsters')->insertGetId([
+                $monsterId = LocalizedContentSeederQuery::forTable('monsters')->insertGetId([
                     'name' => $species['name'],
                     'description' => $species['description'],
                     'image' => null,

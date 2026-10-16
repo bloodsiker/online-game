@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Меню</title>
+    <title>{{ __('ui.menu') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -94,8 +94,11 @@
     <script src="{{ asset('main/js/canvas/pixi.js') }}"></script>
     {{-- pixi-filters.js не нужен: обрезанный бандл использует только core-фильтры (ColorMatrix/Alpha) --}}
     <script src="{{ asset('main/js/canvas/canvas.all.js') }}"></script>
+    <script src="{{ asset('js/menu-bitmap-font.js') }}?v={{ filemtime(public_path('js/menu-bitmap-font.js')) }}"></script>
 </head>
 <body>
+
+@php($clanMenuUrl = auth()->user()?->clanMembership !== null ? route('clan.member') : route('clan.rating'))
 
 <div class="canvas-menu-wrap">
     <div id="top_mnu_cont"></div>
@@ -103,28 +106,28 @@
 
 {{-- Fallback: обычное HTML-меню, включается если канвас не стартовал --}}
 <div class="menu-wrap" id="html-menu">
-    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('location') }}'); return false;">Перемещение</a>
-    <a class="menu-btn" href="#" onclick="goToGathering(); return false;">Добыча</a>
-    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">Персонаж</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('character.professions') }}', true); return false;">Профессии</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('settings') }}', true); return false;">Настройки</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">Вещи</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('clan.member') }}', true); return false;">Клан</a>
-    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">Квесты</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">Данжи</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('maps') }}', true); return false;">Карты</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('friends') }}', true); return false;">Друзья</a>
-    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">Рейтинг</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">Рефералы</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">Премиум</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">События</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('post') }}', true); return false;">Почта</a>
-    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('fights') }}', true); return false;">Бои</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('location') }}'); return false;">{{ __('ui.location') }}</a>
+    <a class="menu-btn" href="#" onclick="goToGathering(); return false;">{{ __('ui.gathering') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('character') }}', true); return false;">{{ __('ui.character') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('character.professions') }}', true); return false;">{{ __('ui.professions') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('settings') }}', true); return false;">{{ __('ui.settings') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('backpack') }}', true); return false;">{{ __('ui.backpack') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ $clanMenuUrl }}', true); return false;">{{ __('ui.clan') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('quests') }}', true); return false;">{{ __('ui.quests') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('dungeon.index') }}', true); return false;">{{ __('ui.dungeon') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('maps') }}', true); return false;">{{ __('ui.maps') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('friends') }}', true); return false;">{{ __('ui.friends') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(true, '{{ route('rating') }}', true); return false;">{{ __('ui.rating') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('referral') }}', true); return false;">{{ __('ui.referral') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('premium.shop') }}', true); return false;">{{ __('ui.premium') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('events') }}', true); return false;">{{ __('ui.events') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('post') }}', true); return false;">{{ __('ui.post') }}</a>
+    <a class="menu-btn" href="#" onclick="menuGo(false, '{{ route('fights') }}', true); return false;">{{ __('ui.fights') }}</a>
     <details class="infoportal-menu">
-        <summary class="menu-btn">Инфопортал</summary>
+        <summary class="menu-btn">{{ __('ui.infoportal') }}</summary>
         <div class="infoportal-submenu">
-            <a class="menu-btn" href="{{ route('forum.index') }}" target="_blank" rel="noopener">Форум</a>
-            <a class="menu-btn" href="{{ route('library.index') }}" target="_blank" rel="noopener">Библиотека</a>
+            <a class="menu-btn" href="{{ route('forum.index') }}" target="_blank" rel="noopener">{{ __('ui.forum') }}</a>
+            <a class="menu-btn" href="{{ route('library.index') }}" target="_blank" rel="noopener">{{ __('ui.library') }}</a>
             <a class="menu-btn" href="#" onclick="processMenu('m_telegram'); return false;">Telegram</a>
         </div>
     </details>
@@ -146,8 +149,8 @@
 
             if (!response.ok || !availability.available) {
                 window.top.openGameMessageModal({
-                    title: 'Добыча ресурсов',
-                    message: availability.message || 'На этой локации невозможно добывать ресурсы.',
+                    title: {{ \Illuminate\Support\Js::from(__('Добыча ресурсов')) }},
+                    message: availability.message || {{ \Illuminate\Support\Js::from(__('На этой локации невозможно добывать ресурсы.')) }},
                 });
                 return;
             }
@@ -155,8 +158,8 @@
             menuGo(false, '{{ route('gathering') }}', true);
         } catch (error) {
             window.top.openGameMessageModal({
-                title: 'Добыча ресурсов',
-                message: 'Не удалось проверить доступность добычи. Попробуйте ещё раз.',
+                title: {{ \Illuminate\Support\Js::from(__('Добыча ресурсов')) }},
+                message: {{ \Illuminate\Support\Js::from(__('Не удалось проверить доступность добычи. Попробуйте ещё раз.')) }},
             });
         }
     }
@@ -168,7 +171,7 @@
         m_character:   function () { menuGo(true,  '{{ route('character') }}', true); },
         m_professions: function () { menuGo(false, '{{ route('character.professions') }}', true); },
         m_backpack:    function () { menuGo(false, '{{ route('backpack') }}', true); },
-        m_clan:        function () { menuGo(false, '{{ route('clan.member') }}', true); },
+        m_clan:        function () { menuGo(false, '{{ $clanMenuUrl }}', true); },
         m_quests:      function () { menuGo(true,  '{{ route('quests') }}', true); },
         m_dungeon:     function () { menuGo(false, '{{ route('dungeon.index') }}', true); },
         m_maps:        function () { menuGo(false, '{{ route('maps') }}', true); },
@@ -182,7 +185,7 @@
         m_forum:       function () { window.open(@json(route('forum.index')), '_blank', 'noopener'); },
         m_library:     function () { window.open(@json(route('library.index')), '_blank', 'noopener'); },
         m_telegram:    function () {
-            window.top.systemInfo('Ссылка на Telegram пока не указана.', 'Telegram');
+            window.top.systemInfo(@json(__('ui.telegram_missing')), 'Telegram');
         },
         m_settings:    function () { menuGo(false, '{{ route('settings') }}', true); }
     };
@@ -361,6 +364,7 @@
         // Ряд иконок центрируется по ширине канваса (движок прижимает его влево)
         var topMenuReady = canvas.app.CanvasTopMenu.prototype.ready;
         canvas.app.CanvasTopMenu.prototype.ready = function () {
+            window.extendMenuBitmapFont(canvas.px, canvas.px.BitmapText.fonts[canvas.Const.FONT_TAHOMA_11_BOLD_STROKE]);
             topMenuReady.call(this);
             this.main.x = Math.round((this.par.width - this.main.view.items.length * 55) / 2);
 
@@ -410,7 +414,7 @@
         });
 
         window.top_mnu = new canvas.app.CanvasTopMenu({
-            labels: 'локация|персонаж|вещи|клан|состав клана|квесты|данжи|друзья|рейтинг|рефералы|премиум|события|инфопортал|почта|карты|бои|добыча|профессии|настройки|форум|библиотека|Telegram',
+            labels: @json(__('ui.menu_labels')),
             dragDropItems: '0',
             configXml: '/data/locale/ru/topMenu.xml?v=7',
             blink: '',

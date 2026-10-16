@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 /**
@@ -131,7 +132,7 @@ class WatchHillsAdditionalMonsterSeeder extends Seeder
             $exp = MonsterStatFormulas::expReward($p['lvl'], $p['expMultiplier']);
             [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $p['lvl']);
 
-            $monster = Monster::firstOrNew(['name' => $p['name'], 'lvl' => $p['lvl']]);
+            $monster = LocalizedContentSeederQuery::firstOrNewFor(Monster::class, ['name' => $p['name'], 'lvl' => $p['lvl']]);
 
             if ($monster->exists) {
                 continue;

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>{{ __("Персонаж") }}</title>
     <style>
         html { height: 100%; }
         body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 14px; }
@@ -16,26 +17,26 @@
 <body>
 <table cellspacing="0" cellpadding="10" width="100%" height="100%"><tbody><tr valign="top"><td>
     @if($page->isHandedItem)
-        <p>Вы передали предмет "<b>{{ $page->itemName }}</b>" персонажу <a href="">{{ $page->toUserName }}</a></p>
-        <p><a href="{{ $page->backpackUrl }}">История передачи предметов</a> »</p>
-        <p>« <a href="{{ $page->sameItemsUrl }}">Аналогичные предметы в мешке</a><br>« <a href="{{ $page->backpackUrl }}">Список ваших вещей</a></p>
+        <p>{{ __('Вы передали предмет') }} "<b>{{ $page->itemName }}</b>" {{ __('персонажу') }} <a href="">{{ $page->toUserName }}</a></p>
+        <p><a href="{{ $page->backpackUrl }}">{{ __('История передачи предметов') }}</a> »</p>
+        <p>« <a href="{{ $page->sameItemsUrl }}">{{ __('Аналогичные предметы в мешке') }}</a><br>« <a href="{{ $page->backpackUrl }}">{{ __("Список ваших вещей") }}</a></p>
     @else
         @if($page->isUserMoved && $page->toUserName !== null)
-            <p>Персонаж <a href="">{{ $page->toUserName }}</a> не находиться рядом возле вас</p>
+            <p>{{ __("Персонаж") }} <a href="">{{ $page->toUserName }}</a> {{ __('не находиться рядом возле вас') }}</p>
         @endif
         @if($page->candidates !== [])
-            Вы можете передать предмет "<b>{{ $page->itemName }}</b>" персонажам, которые находятся поблизости:
+            {{ __('Вы можете передать предмет') }} "<b>{{ $page->itemName }}</b>" {{ __('персонажам, которые находятся поблизости:') }}
             <ul>
                 @foreach($page->candidates as $user)
                     <li><a href="{{ $user->url }}">{{ $user->name }}</a></li>
                 @endforeach
             </ul>
         @else
-            <p>Поблизости нет персонажей, которым вы могли бы передать предмет "<b>{{ $page->itemName }}</b>"</p>
+            <p>{{ __('Поблизости нет персонажей, которым вы могли бы передать предмет') }} "<b>{{ $page->itemName }}</b>"</p>
         @endif
-        <p>Примечание:<br>Невозможно передать предмет персонажу неактивному более 10 минут.</p>
-        <p><a href="{{ $page->backpackUrl }}">Список ваших вещей</a> »</p>
-        <p>« <a href="{{ $page->locationUrl }}" target="game">Описание местности</a></p>
+        <p>{{ __('Примечание:') }}<br>{{ __('Невозможно передать предмет персонажу неактивному более 10') }} {{ __("минут") }}.</p>
+        <p><a href="{{ $page->backpackUrl }}">{{ __("Список ваших вещей") }}</a> »</p>
+        <p>« <a href="{{ $page->locationUrl }}" target="game">{{ __("Описание местности") }}</a></p>
     @endif
 </td></tr></tbody></table>
 <script>

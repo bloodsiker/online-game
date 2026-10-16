@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +74,7 @@ class LockpickingChestsSeeder extends Seeder
 
     private function upsertChest(int $tier, int $variant, int $difficulty, string $name): ShareItem
     {
-        $chest = ShareItem::query()->where('name', $name)->first() ?? new ShareItem;
+        $chest = ShareItem::query()->where('name->ru', $name)->first() ?? new ShareItem;
         $chest->forceFill([
             'name' => $name,
             'description' => sprintf(
@@ -134,7 +135,7 @@ class LockpickingChestsSeeder extends Seeder
     private function syncLoot(ShareItem $chest, int $tier, int $variant): void
     {
         $lootIds = collect(self::LOOT_NAMES[$tier])
-            ->mapWithKeys(fn (string $name): array => [$name => ShareItem::query()->where('name', $name)->value('id')]);
+            ->mapWithKeys(fn (string $name): array => [$name => ShareItem::query()->where('name->ru', $name)->value('id')]);
         if ($lootIds->contains(null)) {
             throw new RuntimeException("Не найдены предметы для содержимого сундука «{$chest->name}».");
         }
@@ -202,7 +203,7 @@ class LockpickingChestsSeeder extends Seeder
 
     private function effectId(string $name): int
     {
-        $id = DB::table('effects')->where('name', $name)->value('id');
+        $id = LocalizedContentSeederQuery::forTable('effects')->where('name', $name)->value('id');
         if ($id === null) {
             throw new RuntimeException("Не найден эффект ловушки «{$name}».");
         }

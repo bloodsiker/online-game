@@ -19,6 +19,9 @@ class TradeAdminService
                 'posts' => 'trade_posts', 'goods' => 'trade_goods', 'routes' => 'trade_routes',
                 'offers' => 'trade_buy_offers', 'stocks' => 'trade_post_stocks',
             };
+            if ($section === 'posts' && is_array($data['name'] ?? null)) {
+                $data['name'] = json_encode($data['name'], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            }
             $existing = $id ? DB::table($table)->where('id', $id)->lockForUpdate()->first() : null;
             abort_if($id && ! $existing, 404);
             if ($section === 'goods') {

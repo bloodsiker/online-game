@@ -12,6 +12,7 @@
                 <div class="card-body">
                     <div class="tabs">
                         <ul class="nav nav-tabs">
+                            <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-translations" href="#tab-translations">Переводы</a></li>
                             <li class="nav-item active">
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
@@ -50,26 +51,19 @@
                         </ul>
 
                         <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => $monster, 'formId' => 'monster-info-form'])
 
                             {{-- ОСНОВНАЯ --}}
                             <div id="tab-main" class="tab-pane active">
-                                <form action="{{ route('admin.monster.info', $monster->id) }}" method="post" enctype="multipart/form-data">
+                                <form id="monster-info-form" action="{{ route('admin.monster.info', $monster->id) }}" method="post" enctype="multipart/form-data">
                                     {{ csrf_field() }}
                                     <div class="row pb-3 pt-3">
 
                                         <div class="col-lg-4">
                                             <h6 class="text-muted mb-3">Основное</h6>
                                             <div class="form-group">
-                                                <label class="col-form-label">Название</label>
-                                                <input type="text" class="form-control" name="name" value="{{ $monster->name }}">
-                                            </div>
-                                            <div class="form-group">
                                                 <label class="col-form-label">Уровень</label>
                                                 <input type="number" class="form-control" name="lvl" value="{{ $monster->lvl }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Описание</label>
-                                                <textarea class="form-control" name="description" rows="4">{{ $monster->description }}</textarea>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Изображение</label>
@@ -97,6 +91,11 @@
                                                     <option value="0" @selected(!$monster->is_boss)>Нет</option>
                                                     <option value="1" @selected($monster->is_boss)>Да</option>
                                                 </select>
+                                            </div>
+                                            <div class="checkbox-custom checkbox-primary mb-3">
+                                                <input type="hidden" name="does_not_regenerate_hp" value="0">
+                                                <input type="checkbox" id="does-not-regenerate-hp" name="does_not_regenerate_hp" value="1" @checked($monster->does_not_regenerate_hp)>
+                                                <label for="does-not-regenerate-hp">Не восстанавливает HP</label>
                                             </div>
                                             @if($monster->is_boss)
                                                 <div class="form-group">
@@ -428,7 +427,7 @@
                                                     data-phase-id="{{ $phase->id }}"
                                                     data-phase-number="{{ $phase->phase_number }}"
                                                     data-hp-threshold="{{ $phase->hp_threshold }}"
-                                                    data-description="{{ $phase->description }}"
+                                                    data-description-translations="{{ json_encode($phase->getTranslations('description'), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) }}"
                                                     data-stats-modifiers="{{ json_encode($phase->stats_modifiers) }}"
                                                     data-new-skills="{{ json_encode($phase->new_skills) }}"
                                                     data-removed-skills="{{ json_encode($phase->removed_skills) }}">
@@ -438,7 +437,7 @@
                                                             ≤ {{ $phase->hp_threshold }}%
                                                         </span>
                                                     </td>
-                                                    <td>{{ $phase->description }}</td>
+                                                    <td>{{ $phase->getTranslation('description', app()->getLocale()) }}</td>
                                                     <td>
                                                         @if($phase->stats_modifiers)
                                                             <code class="text-muted small">{{ count($phase->stats_modifiers) }} статов</code>
@@ -768,12 +767,7 @@
                                 <input type="number" class="form-control" name="hp_threshold" id="hp_threshold" value="50" min="1" max="100">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="col-form-label">Описание</label>
-                                <input type="text" class="form-control" name="description" id="phase_description">
-                            </div>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'boss-phase', 'content' => null, 'fields' => ['description' => ['label' => 'Описание']]])
                     </div>
                     <div class="row">
                         <div class="col-md-4">
@@ -917,7 +911,9 @@
             document.getElementById('phase-submit-btn').textContent = 'Сохранить';
             document.getElementById('phase_number').value    = row.dataset.phaseNumber;
             document.getElementById('hp_threshold').value    = row.dataset.hpThreshold;
-            document.getElementById('phase_description').value = row.dataset.description || '';
+            const descriptions = JSON.parse(row.dataset.descriptionTranslations || '{}');
+            document.getElementById('boss-phase-ru-description').value = descriptions.ru || '';
+            document.getElementById('boss-phase-uk-description').value = descriptions.uk || '';
 
             const mods = row.dataset.statsModifiers;
             document.getElementById('stats_modifiers').value = mods && mods !== 'null' ? JSON.stringify(JSON.parse(mods), null, 2) : '';
@@ -938,7 +934,8 @@
         document.getElementById('phase-submit-btn').textContent = 'Добавить';
         document.getElementById('phase_number').value = '';
         document.getElementById('hp_threshold').value = '50';
-        document.getElementById('phase_description').value = '';
+        document.getElementById('boss-phase-ru-description').value = '';
+        document.getElementById('boss-phase-uk-description').value = '';
         document.getElementById('stats_modifiers').value = '';
         document.getElementById('new_skills').value = '';
         document.getElementById('removed_skills').value = '';

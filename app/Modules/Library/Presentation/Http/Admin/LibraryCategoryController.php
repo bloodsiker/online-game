@@ -7,6 +7,7 @@ namespace App\Modules\Library\Presentation\Http\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -46,10 +47,10 @@ class LibraryCategoryController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $category = new LibraryCategory;
-        $this->fill($category, $request);
+        $this->fill($category, $request, $translationEditor);
         $category->save();
 
         return redirect()->route('admin.library.categories.index')->with('success', 'Категория создана.');
@@ -64,9 +65,9 @@ class LibraryCategoryController extends Controller
         ]);
     }
 
-    public function update(Request $request, LibraryCategory $category): RedirectResponse
+    public function update(Request $request, LibraryCategory $category, ContentTranslationEditor $translationEditor): RedirectResponse
     {
-        $this->fill($category, $request);
+        $this->fill($category, $request, $translationEditor);
         $category->save();
 
         return redirect()->route('admin.library.categories.index')->with('success', 'Категория сохранена.');
@@ -88,13 +89,11 @@ class LibraryCategoryController extends Controller
         return redirect()->route('admin.library.categories.index')->with('success', 'Категория удалена.');
     }
 
-    private function fill(LibraryCategory $category, Request $request): void
+    private function fill(LibraryCategory $category, Request $request, ContentTranslationEditor $translationEditor): void
     {
         $data = $request->validate([
             'parent_id' => ['nullable', 'integer', 'exists:library_categories,id'],
-            'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('library_categories', 'slug')->ignore($category->id)],
-            'description' => ['nullable', 'string'],
             'content_type' => ['required', Rule::enum(LibraryCategoryContentType::class)],
             'image' => ['nullable', 'image', 'max:4096'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -109,13 +108,12 @@ class LibraryCategoryController extends Controller
 
         $category->fill([
             'parent_id' => $parentId,
-            'name' => $data['name'],
-            'slug' => $data['slug'] ?: $this->uniqueSlug($data['name'], $category),
-            'description' => $data['description'] ?? null,
+            'slug' => $data['slug'] ?: $this->uniqueSlug((string) $request->input('name'), $category),
             'content_type' => $data['content_type'],
             'sort_order' => (int) ($data['sort_order'] ?? 0),
             'is_active' => $request->boolean('is_active'),
         ]);
+        $translationEditor->fill($category, $request, ['name', 'description'], ['name']);
 
         if ($request->hasFile('image')) {
             $category->image = $this->imageStorage->storeInPublicDirectory(

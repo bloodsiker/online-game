@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class QuestObjective extends Model
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public array $translatable = ['description'];
 
     protected $casts = [
         'drop_chance' => 'float',

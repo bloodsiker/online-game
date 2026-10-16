@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Монстры для «Ожившая окраина» (map 4) — по прямому указанию
@@ -29,7 +29,7 @@ class ReawakenedOutskirtsMonsterSeeder extends Seeder
 {
     public function run(): void
     {
-        if (DB::table('monsters')->where('name', 'Терновый Волк')->where('lvl', 36)->exists()) {
+        if (LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Терновый Волк')->where('lvl', 36)->exists()) {
             $this->command?->info('ReawakenedOutskirtsMonsterSeeder: уже существует, пропускаю.');
 
             return;
@@ -71,7 +71,7 @@ class ReawakenedOutskirtsMonsterSeeder extends Seeder
         ];
 
         foreach ($rows as $row) {
-            DB::table('monsters')->insert([
+            LocalizedContentSeederQuery::forTable('monsters')->insert([
                 'name' => $row['name'],
                 'description' => $row['description'],
                 'image' => null,

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Информация о клане: {{ $clan->name }}</title>
+    <title>{{ __('Информация о клане') }}: {{ $clan->name }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * { font-family: Tahoma, sans-serif; font-size: 11px; }
@@ -143,57 +143,57 @@
                                 <td class="tbl-usi_left">&nbsp;</td>
                                 <td class="tbl-usi_bg" valign="top" align="left" style="padding: 0 0 3px;">
                                     @if($mode === 'information')
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Глава</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Глава') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
                                         <table class="coll w100 p6v p10h brd2-all"><tbody><tr class="bg_l"><td align="center">
                                             @if($iconUrl)<img src="{{ $iconUrl }}" width="13" height="13" alt="{{ $clan->name }}">&nbsp;@endif
                                             @if($clan->owner)
-                                                <a href="{{ route('info.user', ['id' => $clan->owner->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $clan->owner->name }}&nbsp;[{{ $clan->owner->player?->lvl ?? '?' }}]</a>&nbsp;<a href="{{ route('info.user', ['id' => $clan->owner->id]) }}" title="Информация о персонаже" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" border="0" alt=""></a>
+                                                <a href="{{ route('info.user', ['id' => $clan->owner->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $clan->owner->name }}&nbsp;[{{ $clan->owner->player?->lvl ?? '?' }}]</a>&nbsp;<a href="{{ route('info.user', ['id' => $clan->owner->id]) }}" title="{{ __('Информация о персонаже') }}" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" border="0" alt=""></a>
                                             @else
                                                 Не назначен
                                             @endif
                                         </td></tr></tbody></table>
 
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Статус</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Статус') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
                                         <table class="coll w100 p6v p10h brd2-all"><tbody><tr class="bg_l"><td align="center">
                                             @if($iconUrl)<img src="{{ $iconUrl }}" width="13" height="13" alt="{{ $clan->name }}">&nbsp;@endif
                                             <b>{{ $clan->name }} [{{ $clan->lvl }}]</b>&nbsp;·&nbsp;{{ $membersCount }} {{ trans_choice('участник|участника|участников', $membersCount) }}
                                         </td></tr></tbody></table>
 
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Рейтинг клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
-                                        <table class="user-rating"><thead><tr><td>Название рейтинга</td><td>Значение в рейтинге</td><td>Место в глобальном рейтинге</td></tr></thead><tbody>
-                                            <tr class="bg_l"><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_honor.png') }}" alt="">Уровень клана</span></td><td>{{ $clan->lvl }}</td><td>{{ $levelRank }}-е место</td></tr>
-                                            <tr><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_exp.png') }}" alt="">Опыт</span></td><td>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</td><td>{{ $experienceRank }}-е место</td></tr>
-                                            <tr class="bg_l"><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_rep.png') }}" alt="">Бонусные очки</span></td><td>{{ number_format((int) $clan->points, 0, '.', ' ') }}</td><td>—</td></tr>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Рейтинг клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="user-rating"><thead><tr><td>{{ __('Название рейтинга') }}</td><td>{{ __('Значение в рейтинге') }}</td><td>{{ __('Место в глобальном рейтинге') }}</td></tr></thead><tbody>
+                                            <tr class="bg_l"><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_honor.png') }}" alt="">{{ __('Уровень клана') }}</span></td><td>{{ $clan->lvl }}</td><td>{{ $levelRank }}-{{ __('е место') }}</td></tr>
+                                            <tr><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_exp.png') }}" alt="">{{ __('Опыт') }}</span></td><td>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</td><td>{{ $experienceRank }}-{{ __('е место') }}</td></tr>
+                                            <tr class="bg_l"><td><span class="user-rating-container"><img src="{{ asset('main/images/data/rating/rat_rep.png') }}" alt="">{{ __('Бонусные очки') }}</span></td><td>{{ number_format((int) $clan->points, 0, '.', ' ') }}</td><td>—</td></tr>
                                         </tbody></table>
 
                                         @include('clan::partials.learned-skills', ['skills' => $learnedSkills])
 
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Описание клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Описание клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
                                         <table class="coll w100 p6v p10h brd2-all"><tbody><tr class="bg_l"><td class="clan-description">{{ $clan->description ?: 'Описание клана ещё не добавлено.' }}</td></tr></tbody></table>
 
                                         @php
                                             $news = collect([$clan->news_1, $clan->news_2, $clan->news_3])->filter();
                                         @endphp
                                         @if($news->isNotEmpty())
-                                            <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Новости клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                            <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Новости клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
                                             <table class="coll w100 p6v p10h brd2-all"><tbody>@foreach($news as $newsItem)<tr class="{{ $loop->odd ? 'bg_l' : '' }}"><td class="clan-description">{{ $newsItem }}</td></tr>@endforeach</tbody></table>
                                         @endif
                                     @elseif($mode === 'members')
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">Состав клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
-                                        <table class="clan-members"><thead><tr><th>Игрок</th><th>Звание</th><th>Уровень</th><th>Статус</th></tr></thead><tbody>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Состав клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="clan-members"><thead><tr><th>{{ __('Игрок') }}</th><th>{{ __('Звание') }}</th><th>{{ __('Уровень') }}</th><th>{{ __('Статус') }}</th></tr></thead><tbody>
                                         @forelse($members as $member)
                                             <tr class="{{ $loop->odd ? 'bg_l' : '' }}"><td>@if($iconUrl)<img src="{{ $iconUrl }}" width="13" height="13" alt="">&nbsp;@endif<a href="{{ route('info.user', ['id' => $member['user']->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $member['user']->name }}</a></td><td align="center">{{ $member['role']?->name ?? '—' }}</td><td align="center">{{ $member['user']->player?->lvl ?? '—' }}</td><td align="center">@if($member['is_online'])<b class="clan-member-online">online</b>@else<b>offline</b>@endif</td></tr>
                                         @empty
-                                            <tr><td colspan="4" class="clan-empty">В клане пока нет участников.</td></tr>
+                                            <tr><td colspan="4" class="clan-empty">{{ __('В клане пока нет участников.') }}</td></tr>
                                         @endforelse
                                         </tbody></table>
                                     @else
-                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">История клана</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
-                                        <table class="clan-history"><thead><tr><th width="105">Дата</th><th>Событие</th><th width="105">Участник</th></tr></thead><tbody>
+                                        <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('История клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
+                                        <table class="clan-history"><thead><tr><th width="105">{{ __('Дата') }}</th><th>{{ __('Событие') }}</th><th width="105">{{ __('Участник') }}</th></tr></thead><tbody>
                                         @forelse($logs as $log)
                                             <tr class="{{ $loop->odd ? 'bg_l' : '' }}"><td align="center">{{ $log->created_at?->format('d.m.Y H:i') }}</td><td>{{ $log->details ?: $log->action->label() }}</td><td align="center">@if($log->user)<a href="{{ route('info.user', ['id' => $log->user->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $log->user->name }}</a>@else—@endif</td></tr>
                                         @empty
-                                            <tr><td colspan="3" class="clan-empty">История клана пока пуста.</td></tr>
+                                            <tr><td colspan="3" class="clan-empty">{{ __('История клана пока пуста.') }}</td></tr>
                                         @endforelse
                                         </tbody></table>
                                         @if($logs->hasPages())<div class="pagination">{{ $logs->links() }}</div>@endif

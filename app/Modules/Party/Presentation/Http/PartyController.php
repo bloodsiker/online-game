@@ -44,7 +44,7 @@ class PartyController extends Controller
                 maxSize: (int) $request->input('max_size', PartyService::MAX_SIZE),
             );
 
-            return $this->backToFrame('Группа создана.');
+            return $this->backToFrame(__('Группа создана.'));
         } catch (RuntimeException $e) {
             return $this->backToFrame(error: $e->getMessage());
         }

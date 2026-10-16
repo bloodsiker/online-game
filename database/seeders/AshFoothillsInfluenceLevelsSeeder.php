@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -56,7 +57,7 @@ class AshFoothillsInfluenceLevelsSeeder extends Seeder
             foreach (self::TIERS as $index => $tier) {
                 $level = $index + 1;
 
-                $medalId = DB::table('influence_medals')->insertGetId([
+                $medalId = LocalizedContentSeederQuery::forTable('influence_medals')->insertGetId([
                     'map_id' => $map['map_id'],
                     'name' => $this->medalName($tier['name']).' — '.$map['map_name'],
                     'description' => sprintf('Награда за достижение уровня влияния «%s» на территории «%s».', $tier['name'], $map['map_name']),

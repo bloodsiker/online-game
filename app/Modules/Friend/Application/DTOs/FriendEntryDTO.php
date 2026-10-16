@@ -14,6 +14,7 @@ final readonly class FriendEntryDTO
         public bool $isOnline,
         public ?string $lastOnlineLabel,
         public ?string $lastOnlineTime,
+        public ?int $clanId,
         public ?string $clanName,
         public ?string $clanIconUrl,
     ) {}

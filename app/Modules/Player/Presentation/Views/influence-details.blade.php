@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Влияние: {{ $page['map']->name }}</title>
+    <title>{{ __('Влияние:') }} {{ $page['map']->name }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { min-height: 100%; }
@@ -104,27 +104,27 @@
                 <td class="tbl-shp-sides ls">&nbsp;</td>
                 <td class="tbl-usi_bg" valign="top">
                     <main class="influence-detail">
-                        <div class="influence-detail__back">← <a href="{{ route('character.influence') }}">Все территории</a></div>
+                        <div class="influence-detail__back">← <a href="{{ route('character.influence') }}">{{ __('Все территории') }}</a></div>
                         <section class="influence-summary">
-                            <h1>Влияние в {{ $page['map']->name }}</h1>
-                            <div class="influence-summary__points">Ваше влияние: <b>{{ number_format($page['influence'], 0, '', ' ') }}</b></div>
-                            <div class="rep-progress-bar" title="{{ $page['influence'] }} из {{ $page['nextLevel']?->required_influence ?? $page['influence'] }}">
+                            <h1>{{ __('Влияние в') }} {{ $page['map']->name }}</h1>
+                            <div class="influence-summary__points">{{ __('Ваше влияние:') }} <b>{{ number_format($page['influence'], 0, '', ' ') }}</b></div>
+                            <div class="rep-progress-bar" title="{{ $page['influence'] }} {{ __('из') }} {{ $page['nextLevel']?->required_influence ?? $page['influence'] }}">
                                 <div class="rep-progress-bar__bg"><div class="rep-progress-bar__fill" style="width: {{ $page['progressPercent'] }}%;"></div></div>
                                 <div class="rep-progress-bar__border"><div class="rep-progress-bar__border-left"></div><div class="rep-progress-bar__border-right"></div><div class="rep-progress-bar__border-center"></div></div>
                                 <div class="rep-progress-bar__text">{{ $page['progressPercent'] }}%</div>
                             </div>
                             <div class="influence-summary__next">
                                 @if($page['levels']->isEmpty())
-                                    Шкала уровней для этой территории пока не настроена
+                                    {{ __('Шкала уровней для этой территории пока не настроена') }}
                                 @elseif($page['nextLevel'])
-                                    До уровня «{{ $page['nextLevel']->name }}» осталось <b>{{ number_format(max(0, $page['nextLevel']->required_influence - $page['influence']), 0, '', ' ') }}</b>
+                                    {{ __('До уровня') }} «{{ $page['nextLevel']->name }}» {{ __('осталось') }} <b>{{ number_format(max(0, $page['nextLevel']->required_influence - $page['influence']), 0, '', ' ') }}</b>
                                 @else
-                                    Достигнут максимальный уровень влияния
+                                    {{ __('Достигнут максимальный уровень влияния') }}
                                 @endif
                             </div>
                         </section>
 
-                        <h2 class="influence-scale-title">Шкала уровней влияния</h2>
+                        <h2 class="influence-scale-title">{{ __('Шкала уровней влияния') }}</h2>
                         @forelse($page['levels'] as $level)
                             @php
                                 $reached = $page['influence'] >= $level->required_influence;
@@ -133,38 +133,38 @@
                             @endphp
                             <article class="influence-level-card {{ $current ? 'is-current' : ($reached ? 'is-reached' : 'is-locked') }}">
                                 <div class="influence-level-card__medal">
-                                    <div class="influence-medal-frame" title="{{ $medal?->description ?? 'Медаль не предусмотрена' }}">
+                                    <div class="influence-medal-frame" title="{{ $medal?->description ?? __('Медаль не предусмотрена') }}">
                                         <img src="{{ $medal?->iconUrl() ?: asset('img/bg/empty_slot.gif') }}" alt="">
                                     </div>
-                                    <div class="influence-level-card__number">Уровень {{ $level->level }}</div>
+                                    <div class="influence-level-card__number">{{ __('Уровень') }} {{ $level->level }}</div>
                                 </div>
                                 <div class="influence-level-card__main">
                                     <h2>{{ $level->name }}</h2>
-                                    <div class="influence-level-card__threshold">От {{ number_format($level->required_influence, 0, '', ' ') }} влияния</div>
-                                    <span class="influence-level-card__state">{{ $current ? 'Текущий уровень' : ($reached ? 'Достигнут' : 'Не достигнут') }}</span>
+                                    <div class="influence-level-card__threshold">{{ __('От') }} {{ number_format($level->required_influence, 0, '', ' ') }} {{ __('влияния') }}</div>
+                                    <span class="influence-level-card__state">{{ $current ? __('Текущий уровень') : ($reached ? __('Достигнут') : __('Не достигнут')) }}</span>
                                     @if($medal)
                                         <div class="influence-level-card__description"><b>{{ $medal->name }}</b>@if($medal->description)<br>{{ $medal->description }}@endif</div>
                                     @endif
                                 </div>
                                 <div class="influence-benefits">
                                     <section class="influence-benefit">
-                                        <h3>Бонусы территории</h3>
+                                        <h3>{{ __('Бонусы территории') }}</h3>
                                         @if($level->bonuses->isNotEmpty())
                                             <ul>@foreach($level->bonuses as $bonus)<li>{{ $bonus->bonus_type->label() }}: <b>+{{ rtrim(rtrim(number_format($bonus->value, 3, '.', ''), '0'), '.') }}</b></li>@endforeach</ul>
                                         @else
-                                            <span class="influence-benefit__empty">Нет бонусов</span>
+                                            <span class="influence-benefit__empty">{{ __('Нет бонусов') }}</span>
                                         @endif
                                     </section>
                                     <section class="influence-benefit">
-                                        <h3>Характеристики медали</h3>
+                                        <h3>{{ __('Характеристики медали') }}</h3>
                                         @if($medal?->stats->isNotEmpty())
                                             <ul>@foreach($medal->stats as $stat)<li>{{ $stat->stat_type->label() }}: <b>+{{ rtrim(rtrim(number_format($stat->value, 3, '.', ''), '0'), '.') }}{{ $stat->is_percent ? '%' : '' }}</b></li>@endforeach</ul>
                                         @else
-                                            <span class="influence-benefit__empty">Нет характеристик</span>
+                                            <span class="influence-benefit__empty">{{ __('Нет характеристик') }}</span>
                                         @endif
                                     </section>
                                     <section class="influence-benefit">
-                                        <h3>Награды уровня</h3>
+                                        <h3>{{ __('Награды уровня') }}</h3>
                                         @if($level->rewards->isNotEmpty())
                                             <ul>
                                                 @foreach($level->rewards as $reward)
@@ -178,15 +178,15 @@
                                                 @endforeach
                                             </ul>
                                         @else
-                                            <span class="influence-benefit__empty">Нет разовой награды</span>
+                                            <span class="influence-benefit__empty">{{ __('Нет разовой награды') }}</span>
                                         @endif
                                     </section>
                                 </div>
                             </article>
                         @empty
-                            <div class="influence-empty">Для этой территории пока не настроена шкала влияния.</div>
+                            <div class="influence-empty">{{ __('Для этой территории пока не настроена шкала влияния.') }}</div>
                         @endforelse
-                        <p class="influence-note">Действуют бонусы текущего уровня и характеристики самой высокой полученной медали этой территории.</p>
+                        <p class="influence-note">{{ __('Действуют бонусы текущего уровня и характеристики самой высокой полученной медали этой территории.') }}</p>
                     </main>
                 </td>
                 <td class="tbl-shp-sides rs">&nbsp;</td>

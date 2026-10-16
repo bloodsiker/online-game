@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
-    <title>{{ $page->name }} - информация о предмете</title>
+    <title>{{ $page->name }} - {{ __("информация о предмете") }}</title>
     <style>
         html, body { height: 100%; margin: 0; }
         body {
@@ -116,7 +117,7 @@
                             <div class="bg-t">
                                 <div class="common-header__small">
                                     <div class="h-inner">
-                                        <div class="h-txt">Информация о предмете</div>
+                                        <div class="h-txt">{{ __("Информация о предмете") }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -156,7 +157,7 @@
                                                                                     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-ati_brd-all">
                                                                                         <tbody>
                                                                                         <tr>
-                                                                                            <td width="70" class="tbl-sts_bg-light"><b>Название:</b></td>
+                                                                                            <td width="70" class="tbl-sts_bg-light"><b>{{ __("Название:") }}</b></td>
                                                                                             <td class="tbl-sts_bg-light">
                                                                                                 <h1 style="display: inline; font-size: 11px; margin: 0;"><b style="color:{{ $page->color }}">{{ $page->name }}</b></h1>
                                                                                             </td>
@@ -166,12 +167,12 @@
                                                                                 </td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td class="tbl-ati_regular" title="Тип предмета"><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" class="tbl-shp_item-ico" alt="">{{ $page->typeName }}</td>
+                                                                                <td class="tbl-ati_regular" title="{{ __("Тип предмета") }}"><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" class="tbl-shp_item-ico" alt="">{{ $page->typeName }}</td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td class="tbl-ati_regular b red" title="Цена" nowrap>
+                                                                                <td class="tbl-ati_regular b red" title="{{ __("Цена") }}" nowrap>
                                                                                     @if ($page->price > 0)
-                                                                                        <span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->price) }}
+                                                                                        <span title="{{ __("Золотой") }}"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($page->price) }}
                                                                                     @else
                                                                                         &nbsp;
                                                                                     @endif
@@ -203,7 +204,7 @@
                                                                             <tbody>
                                                                             <tr height="22">
                                                                                 <td><img src="{{ asset('data/img/tbl-usi_label-left.gif') }}" width="27" height="22" alt=""></td>
-                                                                                <td class="tbl-usi_label-center">Характеристики предмета</td>
+                                                                                <td class="tbl-usi_label-center">{{ __("Характеристики предмета") }}</td>
                                                                                 <td><img src="{{ asset('data/img/tbl-usi_label-right.gif') }}" width="27" height="22" alt=""></td>
                                                                             </tr>
                                                                             </tbody>
@@ -230,32 +231,32 @@
 
                                                                             @if ($page->gatheringRequirement !== null)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Требуемое умение</b></td>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->gatheringRequirement['skillName'] }} {{ $page->gatheringRequirement['level'] }} ур.</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">{{ __("Требуемое умение") }}</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->gatheringRequirement['skillName'] }} {{ $page->gatheringRequirement['level'] }} {{ __("ур.") }}</b></td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
                                                                             @if ($page->recipeCraft !== null)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Изготавливает</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">{{ __("Изготавливает") }}</b></td>
                                                                                     <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b><a href="{{ $page->recipeCraft['resultUrl'] }}" style="color: {{ $page->recipeCraft['resultColor'] }};" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $page->recipeCraft['resultName'] }}</a></b></td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">Требуемое умение</b></td>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->recipeCraft['profession'] }} {{ $page->recipeCraft['level'] }} ур.</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b style="color:#8b4a00;">{{ __("Требуемое умение") }}</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $page->recipeCraft['profession'] }} {{ $page->recipeCraft['level'] }} {{ __("ур.") }}</b></td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                                 @if (count($page->recipeCraft['ingredients']) > 0)
                                                                                     <tr>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Ингредиенты:</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">{{ __("Ингредиенты:") }}</b></td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp
                                                                                     @foreach ($page->recipeCraft['ingredients'] as $ingredient)
                                                                                         <tr>
                                                                                             <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><a href="{{ $ingredient['url'] }}" style="color: {{ $ingredient['color'] }};" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $ingredient['name'] }}</a></td>
-                                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $ingredient['count'] }} шт.</b></td>
+                                                                                            <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $ingredient['count'] }} {{ __("шт.") }}</b></td>
                                                                                         </tr>
                                                                                         @php $light = ! $light; @endphp
                                                                                     @endforeach
@@ -264,13 +265,13 @@
 
                                                                             @if (count($page->craftUsages) > 0)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Используется в рецептах:</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">{{ __("Используется в рецептах:") }}</b></td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                                 @foreach ($page->craftUsages as $usage)
                                                                                     <tr>
                                                                                         <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><a href="{{ $usage['resultUrl'] }}" onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $usage['resultName'] }}</a></td>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $usage['profession'] }} {{ $usage['level'] }} ур.</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $usage['profession'] }} {{ $usage['level'] }} {{ __("ур.") }}</b></td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp
                                                                                 @endforeach
@@ -278,7 +279,7 @@
 
                                                                             @if (count($page->requirements) > 0)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">Требования:</b></td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#8b4a00;">{{ __("Требования:") }}</b></td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                                 @foreach ($page->requirements as $req)
@@ -293,7 +294,7 @@
 
                                                                             @if (count($page->gems) > 0)
                                                                 <tr>
-                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#3300ff;">Камни:</b></td>
+                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#3300ff;">{{ __("Камни:") }}</b></td>
                                                                 </tr>
                                                                 @php $light = ! $light; @endphp
                                                                 @foreach ($page->gems as $gem)
@@ -315,7 +316,7 @@
 
                                                             @if (count($page->runes) > 0)
                                                                 <tr>
-                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#990099;">Руны:</b></td>
+                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2"><b style="color:#990099;">{{ __("Руны:") }}</b></td>
                                                                 </tr>
                                                                 @php $light = ! $light; @endphp
                                                                 @foreach ($page->runes as $rune)
@@ -337,14 +338,14 @@
 
                                                             @if ($page->noGive)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom redd b" colspan="2">Предмет нельзя передать!</td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom redd b" colspan="2">{{ __("Предмет нельзя передать!") }}</td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
                                                                             @if ($page->noWeight)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom grnn b" colspan="2">Предмет не занимает места в рюкзаке</td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom grnn b" colspan="2">{{ __("Предмет не занимает места в рюкзаке") }}</td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
@@ -358,14 +359,14 @@
 
                                                                             @if ($page->gateLocations)
                                                                                 <tr>
-                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">Открывает переход: {{ $page->gateLocations }}</td>
+                                                                                    <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" colspan="2">{{ __("Открывает переход:") }} {{ $page->gateLocations }}</td>
                                                                                 </tr>
                                                                                 @php $light = ! $light; @endphp
                                                                             @endif
 
                                                                             @if ($page->stats === [] && $page->gatheringRequirement === null && $page->recipeCraft === null && $page->craftUsages === [] && $page->requirements === [] && $page->gems === [] && $page->runes === [] && ! $page->noGive && ! $page->noWeight && ! $page->description && ! $page->gateLocations)
                                                                                 <tr>
-                                                                                    <td class="tbl-sts_bg-light" colspan="2">Обычный предмет без особых свойств.</td>
+                                                                                    <td class="tbl-sts_bg-light" colspan="2">{{ __("Обычный предмет без особых свойств.") }}</td>
                                                                                 </tr>
                                                                             @endif
                                                                             </tbody>

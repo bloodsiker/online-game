@@ -25,7 +25,7 @@ class RelicSeekersReputationSeeder extends Seeder
     {
         $reputation = Reputation::query()
             ->with('npc')
-            ->where('name', self::REPUTATION_NAME)
+            ->where('name->ru', self::REPUTATION_NAME)
             ->first();
 
         if (! $reputation || ! $reputation->npc) {
@@ -33,7 +33,7 @@ class RelicSeekersReputationSeeder extends Seeder
         }
 
         $worshipItem = ShareItem::query()
-            ->where('name', self::WORSHIP_ITEM_NAME)
+            ->where('name->ru', self::WORSHIP_ITEM_NAME)
             ->firstOrFail();
 
         $monsterIds = DB::table('monster_has_items')
@@ -49,7 +49,7 @@ class RelicSeekersReputationSeeder extends Seeder
         }
 
         DB::transaction(function () use ($reputation, $worshipItem, $monsterIds): void {
-            $quest = Quest::query()->updateOrCreate(
+            $quest = LocalizedContentSeederQuery::updateOrCreateFor(Quest::class,
                 ['title' => self::WORSHIP_QUEST_TITLE],
                 [
                     'description' => 'Хальдор готов признать вас достойным поклонения Искателей. Добудьте 5 сердец древних механизмов и принесите их ему.',

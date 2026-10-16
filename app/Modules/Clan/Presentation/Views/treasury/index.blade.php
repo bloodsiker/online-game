@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Казна клана</title>
+    <title>{{ __('Казна клана') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 12px; }
@@ -50,8 +50,8 @@
                 $activeTab = 'treasury';
 
                 $tabs = [
-                    'treasury' => ['route' => route('clan.treasury', ['id' => $clanWarehouse->id]), 'label' => 'Казна'],
-                    'clan'     => ['route' => route('clan.member'), 'label' => 'Клан'],
+                    'treasury' => ['route' => route('clan.treasury', ['id' => $clanWarehouse->id]), 'label' => __('Казна')],
+                    'clan'     => ['route' => route('clan.member'), 'label' => __('Клан')],
                 ];
             @endphp
             <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
@@ -89,16 +89,16 @@
                 <tbody>
                 <tr class="bg_l">
                     <td align="left" nowrap="">
-                        <b>Клан:</b> {{ $clan->name }}
+                        <b>{{ __('Клан:') }}</b> {{ $clan->name }}
                         &nbsp;
-                        <b>Казна:</b>
+                        <b>{{ __('Казна:') }}</b>
                         <b class="redd">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                             {{ format_money($clan->treasury) }}
                         </b>
                     </td>
                     <td align="right" nowrap="">
-                        <b>Ваши монеты:</b>
+                        <b>{{ __('Ваши монеты:') }}</b>
                         <b class="redd">
                             <img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle">
                             {{ format_money($membership->user->money) }}
@@ -118,15 +118,15 @@
                 <tbody>
                 <tr class="bg_l">
                     <td class="brd2 p6h" style="padding: 8px 10px;">
-                        <b>Ежемесячный налог:</b>
+                        <b>{{ __('Ежемесячный налог:') }}</b>
                         @if($taxPaid)
-                            <span style="color:#397323;">оплачен до {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
+                            <span style="color:#397323;">{{ __('оплачен до') }} {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
                         @else
-                            <span class="redd">просрочен — чат, навыки и хранилище заблокированы</span>
+                            <span class="redd">{{ __('просрочен — чат, навыки и хранилище заблокированы') }}</span>
                         @endif
                         <br>
                         <span style="color:#777;">
-                            Стоимость: {{ format_money($taxAmount) }} монет из казны за один месяц.
+                            {{ __('Стоимость:') }} {{ format_money($taxAmount) }} {{ __('монет из казны за один месяц.') }}
                         </span>
                     </td>
                     @if($canPayTax)
@@ -134,7 +134,7 @@
                             <form action="{{ route('clan.treasury', ['id' => $clanWarehouse->id]) }}" method="post">
                                 @csrf
                                 <input type="hidden" name="action" value="pay_tax">
-                                <b class="butt1 pointer"><b><input type="submit" value="Оплатить налог" class="pointer btn_1"></b></b>
+                                <b class="butt1 pointer"><b><input type="submit" value="{{ __('Оплатить налог') }}" class="pointer btn_1"></b></b>
                             </form>
                         </td>
                     @endif
@@ -151,33 +151,33 @@
                 <tr class="bg_l">
                     <td class="brd2 p6h" style="padding: 8px 10px;" width="50%">
                         <div style="text-align: center;">
-                            <b>Пополнить казну</b><br><br>
+                            <b>{{ __('Пополнить казну') }}</b><br><br>
                             <form action="{{ route('clan.treasury', ['id' => $clanWarehouse->id]) }}" method="post">
                                 @csrf
                                 <input type="hidden" name="action" value="deposit">
-                                <input type="number" name="amount" min="1" value="" class="money-input" placeholder="Сумма">
+                                <input type="number" name="amount" min="1" value="" class="money-input" placeholder="{{ __('Сумма') }}">
                                 &nbsp;
-                                <b class="butt1 pointer"><b><input type="submit" value="Внести" class="pointer btn_1"></b></b>
+                                <b class="butt1 pointer"><b><input type="submit" value="{{ __('Внести') }}" class="pointer btn_1"></b></b>
                             </form>
                         </div>
                     </td>
                     @if($canWithdraw)
                     <td class="brd2 p6h" style="padding: 8px 10px;" width="50%">
                         <div style="text-align: center;">
-                            <b>Снять из казны</b><br><br>
+                            <b>{{ __('Снять из казны') }}</b><br><br>
                             <form action="{{ route('clan.treasury', ['id' => $clanWarehouse->id]) }}" method="post">
                                 @csrf
                                 <input type="hidden" name="action" value="withdraw">
-                                <input type="number" name="amount" min="1" value="" class="money-input" placeholder="Сумма">
+                                <input type="number" name="amount" min="1" value="" class="money-input" placeholder="{{ __('Сумма') }}">
                                 &nbsp;
-                                <b class="butt1 pointer"><b><input type="submit" value="Снять" class="pointer btn_1"></b></b>
+                                <b class="butt1 pointer"><b><input type="submit" value="{{ __('Снять') }}" class="pointer btn_1"></b></b>
                             </form>
                         </div>
                     </td>
                     @else
                     <td class="brd2 p6h" style="padding: 8px 10px; color: #999; text-align: center;" width="50%">
-                        <b>Снять из казны</b><br><br>
-                        У вас нет прав снимать деньги из казны клана.
+                        <b>{{ __('Снять из казны') }}</b><br><br>
+                        {{ __('У вас нет прав снимать деньги из казны клана.') }}
                     </td>
                     @endif
                 </tr>
@@ -199,11 +199,11 @@
                 </colgroup>
                 <tbody>
                 <tr height="17" class="bg_l">
-                    <td class="brd2 p6h" align="center"><b>Дата</b></td>
-                    <td class="brd2 p6h" align="center"><b>Игрок</b></td>
-                    <td class="brd2 p6h" align="center"><b>Сумма</b></td>
-                    <td class="brd2 p6h" align="center"><b>Баланс казны</b></td>
-                    <td class="brd2 p6h" align="center"><b>Действие</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Дата') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Игрок') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Сумма') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Баланс казны') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Действие') }}</b></td>
                 </tr>
                 @forelse($logs as $log)
                     <tr height="17" class="brd2-top">
@@ -221,15 +221,15 @@
                         </td>
                         <td class="brd2 p6h" align="center">
                             @if($log->action === 'deposit')
-                                <span class="action-deposit">Пополнение</span>
+                                <span class="action-deposit">{{ __('Пополнение') }}</span>
                             @else
-                                <span class="action-withdraw">Снятие</span>
+                                <span class="action-withdraw">{{ __('Снятие') }}</span>
                             @endif
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" align="center" style="padding: 10px;">Журнал пуст</td>
+                        <td colspan="5" align="center" style="padding: 10px;">{{ __('Журнал пуст') }}</td>
                     </tr>
                 @endforelse
                 </tbody>
@@ -245,7 +245,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" class="pg w100" style="margin-top: 6px;">
                     <tbody>
                     <tr>
-                        <td class="b" width="10"><nobr>Страницы:&nbsp;</nobr></td>
+                        <td class="b" width="10"><nobr>{{ __('Страницы:') }}&nbsp;</nobr></td>
                         @if($pgFrom > 1)
                             <td class="pg-inact"><a href="{{ $logs->url(1) }}" class="pg-inact_lnk">1</a></td>
                             @if($pgFrom > 2)<td class="b" style="padding:0 2px">…</td>@endif

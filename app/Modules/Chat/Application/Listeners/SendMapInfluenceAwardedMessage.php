@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Chat\Application\Listeners;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
 
@@ -15,11 +16,7 @@ final readonly class SendMapInfluenceAwardedMessage
     {
         $this->chatService->sendQuestToUser(
             $event->user,
-            sprintf(
-                'Ваше влияние на карте <b>«%s»</b> увеличено на <b>+%d</b>.',
-                e($event->mapName),
-                $event->amount,
-            ),
+            new LocalizedChatMessage('chat.influence', ['map' => $event->mapName, 'amount' => $event->amount]),
         );
     }
 }

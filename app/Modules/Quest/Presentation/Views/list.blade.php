@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Квесты</title>
+    <title>{{ __('Квесты') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html {
@@ -158,10 +158,10 @@
     $btnRight2 = 'img/bg/btn/btn-right2.gif';
 
     $tabs = [
-        'started'    => 'Взятые',
-        'repeatable' => 'Повторяющиеся',
-        'completed'  => 'Завершенные',
-        'clan'       => 'Клановые',
+        'started'    => __('Взятые'),
+        'repeatable' => __('Повторяющиеся'),
+        'completed'  => __('Завершенные'),
+        'clan'       => __('Клановые'),
     ];
 @endphp
 
@@ -181,7 +181,7 @@
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="80" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('location') }}" title="Вернуться" class="btn_1">Вернуться</a></td>
+            <a href="{{ route('location') }}" title="{{ __('Вернуться') }}" class="btn_1">{{ __('Вернуться') }}</a></td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
     </tbody>
@@ -199,7 +199,7 @@
                 <tr>
                     <td>
                         <span class="butt1 pointer ">
-                            <span><input value="Свернуть/Развернуть" type="button" onclick="quest_folding.toggle_all();"></span>
+                            <span><input value="{{ __('Свернуть/Развернуть') }}" type="button" onclick="quest_folding.toggle_all();"></span>
                         </span>
                     </td>
                 </tr>
@@ -237,12 +237,12 @@
                                     @php
                                         function renderQuestReward($reward): string {
                                             return match($reward->type) {
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' опыта',
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' монет',
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::LOCATION_ACCESS => 'Открыт доступ: ' . ($reward->location?->name ?? 'локация'),
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' клановых очков',
-                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' очков репутации',
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP             => '+' . $reward->amount . ' ' . __('опыта'),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY           => '+' . $reward->amount . ' ' . __('монет'),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM            => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? __('предмет')),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::LOCATION_ACCESS => __('Открыт доступ:') . ' ' . ($reward->location?->name ?? __('локация')),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS        => '+' . $reward->amount . ' ' . __('клановых очков'),
+                                                \App\Modules\Quest\Domain\Enums\QuestRewardType::REPUTATION_POINTS  => '+' . $reward->amount . ' ' . __('очков репутации'),
                                             };
                                         }
                                     @endphp
@@ -259,7 +259,7 @@
                                                     </td>
                                                     <td class="brd2-top b" onclick="quest_folding.toggle({{ $cp->id }});">
                                                         {{ $cp->quest->title }}
-                                                        <span style="color:#777; font-weight:normal;">— взял: {{ $cp->user->name }}</span>
+                                                        <span style="color:#777; font-weight:normal;">— {{ __('взял:') }} {{ $cp->user->name }}</span>
                                                     </td>
                                                     <td class="brd2-top" align="right">
                                                         @if($cp->status === \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::IN_PROGRESS)
@@ -267,17 +267,17 @@
                                                                 <form id="clan-cancel-{{ $cp->id }}" method="POST" action="{{ route('quest.clan.cancel', $cp->id) }}" style="display:inline;">
                                                                     @csrf
                                                                     <b class="butt2 pointer">
-                                                                        <b><input value="Отменить" type="button" onclick="return top.systemConfirm('Вы действительно хотите отменить клановый квест?','Действие',false,function(){document.getElementById('clan-cancel-{{ $cp->id }}').submit();})"></b>
+                                                                        <b><input value="{{ __('Отменить') }}" type="button" onclick="return top.systemConfirm('{{ __('Вы действительно хотите отменить клановый квест?') }}','{{ __('Действие') }}',false,function(){document.getElementById('clan-cancel-{{ $cp->id }}').submit();})"></b>
                                                                     </b>
                                                                 </form>
                                                             @else
-                                                                <span style="color:#c8990a;">В процессе</span>
+                                                                <span style="color:#c8990a;">{{ __('В процессе') }}</span>
                                                             @endif
                                                         @elseif($cp->status === \App\Modules\Quest\Domain\Enums\QuestPlayerStatus::COMPLETED)
                                                             @if($cp->reset_at && now()->lt($cp->reset_at))
-                                                                <span style="color:#888;">Доступен через {{ $cp->reset_at->locale('ru')->diffForHumans(now(), true, false, 2) }}</span>
+                                                                <span style="color:#888;">{{ __('Доступен через') }} {{ $cp->reset_at->locale(app()->getLocale())->diffForHumans(now(), true, false, 2) }}</span>
                                                             @else
-                                                                <span style="color:#4a7a1e;">Выполнен</span>
+                                                                <span style="color:#4a7a1e;">{{ __('Выполнен') }}</span>
                                                             @endif
                                                         @endif
                                                     </td>
@@ -306,7 +306,7 @@
                                                                 @if(!$isDone && !$isCurrent) @continue @endif
                                                                 <div style="margin-top:4px; {{ $isDone ? 'color:#999!important;' : 'color:#461C0B;' }} font-weight:bold;">
                                                                     @if($isDone) ✓ @endif
-                                                                    Этап {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}
+                                                                    {{ __('Этап') }} {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}
                                                                 </div>
                                                                 @php $stageObjs = $cp->objectives->filter(fn($o) => $o->questObjective->stage_id === $stage->id); @endphp
                                                                 @foreach($stageObjs as $obj)
@@ -330,7 +330,7 @@
                                                                 <tbody>
                                                                 @foreach($cp->quest->rewards as $reward)
                                                                     <tr class="b" style="color:#339900!important;">
-                                                                        <td nowrap style="color:#339900!important;">{!! $loop->first ? 'Награда:' : '&nbsp;' !!}</td>
+                                                                        <td nowrap style="color:#339900!important;">{!! $loop->first ? __('Награда:') : '&nbsp;' !!}</td>
                                                                         <td style="color:#339900!important;">{{ renderQuestReward($reward) }}</td>
                                                                     </tr>
                                                                 @endforeach
@@ -342,7 +342,7 @@
                                             @empty
                                                 <tr>
                                                     <td colspan="3" style="padding:8px; text-align:center; color:#888;">
-                                                        Нет клановых квестов
+                                                        {{ __('Нет клановых квестов') }}
                                                     </td>
                                                 </tr>
                                             @endforelse
@@ -386,14 +386,14 @@
                                                         <form id="cancel-quest-{{ $quest->id }}" method="POST" action="{{ route('quest.cancel', $quest->id) }}" style="display:none">@csrf</form>
                                                         <b class="butt2 pointer ">
                                                             <b>
-                                                                <input value="Отказаться" type="button" onclick="return top.systemConfirm('Вы действительно хотите отказаться от квеста?','Действие',false,function(){document.getElementById('cancel-quest-{{ $quest->id }}').submit();});">
+                                                                <input value="{{ __('Отказаться') }}" type="button" onclick="return top.systemConfirm('{{ __('Вы действительно хотите отказаться от квеста?') }}','{{ __('Действие') }}',false,function(){document.getElementById('cancel-quest-{{ $quest->id }}').submit();});">
                                                             </b>
                                                         </b>
                                                     @elseif($quest->status->isCompleted())
                                                         @if($quest->reset_at && now()->lt($quest->reset_at))
-                                                            <span style="color:#888;">Доступен через {{ $quest->reset_at->locale('ru')->diffForHumans(now(), true, false, 2) }}</span>
+                                                            <span style="color:#888;">{{ __('Доступен через') }} {{ $quest->reset_at->locale(app()->getLocale())->diffForHumans(now(), true, false, 2) }}</span>
                                                         @else
-                                                            <span style="color:#4a7a1e;">Выполнен</span>
+                                                            <span style="color:#4a7a1e;">{{ __('Выполнен') }}</span>
                                                         @endif
                                                     @endif
                                                 </td>
@@ -424,7 +424,7 @@
                                                             @if(!$isDone && !$isCurrent) @continue @endif
                                                             <div style="margin-top:4px; {{ $isDone ? 'color:#999!important;' : 'color:#461C0B;' }} font-weight:bold;">
                                                                 @if($isDone) ✓ @endif
-                                                                Этап {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}
+                                                                {{ __('Этап') }} {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}
                                                             </div>
                                                             @if($stage->description && ($isCurrent || $isDone))
                                                                 <div style="margin:1px 0 2px 10px; {{ $isDone ? 'color:#bbb;' : 'color:#555;' }} font-style:italic;">
@@ -439,7 +439,7 @@
                                                                     @foreach($stageObjs as $obj)
                                                                         @php $objDone = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
                                                                         <div class="b" style="{{ $isDone ? 'color:#999;' : 'color:#8B0000;' }}">
-                                                                            @if($loop->first)<span>Цель:</span>@endif
+                                                                            @if($loop->first)<span>{{ __('Цель:') }}</span>@endif
                                                                             {{ $obj->questObjective->description }}
                                                                             ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
                                                                         </div>
@@ -454,7 +454,7 @@
                                                                 @foreach($stageObjectives as $obj)
                                                                     @php $objDone = $obj->questObjective->type === 'deliver' ? $obj->questObjective->required_amount : $obj->amount; @endphp
                                                                     <div class="redd b">
-                                                                        @if($loop->first)<span>Текущая цель:</span>@endif
+                                                                        @if($loop->first)<span>{{ __('Текущая цель:') }}</span>@endif
                                                                         {{ $obj->questObjective->description }}
                                                                         ({{ $objDone }}/{{ $obj->questObjective->required_amount }})
                                                                     </div>
@@ -467,7 +467,7 @@
                                                             <tbody>
                                                             @foreach($quest->quest->rewards as $reward)
                                                                 <tr class="b" style="color: #339900 !important;">
-                                                                    <td nowrap="" style="color: #339900 !important;">{!! $loop->first ? 'Награда:' : '&nbsp;' !!}</td>
+                                                                    <td nowrap="" style="color: #339900 !important;">{!! $loop->first ? __('Награда:') : '&nbsp;' !!}</td>
                                                                     <td style="color: #339900 !important;">{{ renderQuestReward($reward) }}</td>
                                                                 </tr>
                                                             @endforeach
@@ -479,7 +479,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="3" style="padding: 8px; text-align: center; color: #888;">
-                                                    Нет квестов в этой категории
+                                                    {{ __('Нет квестов в этой категории') }}
                                                 </td>
                                             </tr>
                                         @endforelse

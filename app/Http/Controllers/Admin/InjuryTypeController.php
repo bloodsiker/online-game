@@ -12,6 +12,7 @@ use App\Modules\Player\Domain\Enums\InjuryBodyPart;
 use App\Modules\Player\Domain\Enums\InjurySeverity;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\InjuryType;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,7 +29,7 @@ class InjuryTypeController extends Controller
             ->when($query !== '', function ($builder) use ($query): void {
                 $search = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $query).'%';
                 $builder->where(fn ($builder) => $builder
-                    ->where('name', 'like', $search)
+                    ->searchTranslations($search, ['name', 'description'])
                     ->orWhere('slug', 'like', $search));
             })
             ->when($bodyPart !== null, fn ($builder) => $builder->where('body_part', $bodyPart->value))
@@ -49,10 +50,12 @@ class InjuryTypeController extends Controller
         return $this->formView(new InjuryType);
     }
 
-    public function store(SaveInjuryTypeRequest $request, SaveInjuryType $save): RedirectResponse
+    public function store(SaveInjuryTypeRequest $request, SaveInjuryType $save, ContentTranslationEditor $translationEditor): RedirectResponse
     {
+        $injuryType = new InjuryType;
+        $translationEditor->fill($injuryType, $request, ['name', 'description'], ['name']);
         $injuryType = $save->execute(
-            new InjuryType,
+            $injuryType,
             $request->validated(),
             $request->file('image'),
             $request->boolean('delete_image'),
@@ -71,7 +74,9 @@ class InjuryTypeController extends Controller
         SaveInjuryTypeRequest $request,
         InjuryType $injuryType,
         SaveInjuryType $save,
+        ContentTranslationEditor $translationEditor,
     ): RedirectResponse {
+        $translationEditor->fill($injuryType, $request, ['name', 'description'], ['name']);
         $save->execute(
             $injuryType,
             $request->validated(),

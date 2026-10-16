@@ -20,7 +20,7 @@ class ClanJoinRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['clan_id', 'user_id', 'status', 'message'];
+    protected $fillable = ['clan_id', 'user_id', 'status', 'message', 'uuid', 'chat_message_id'];
 
     protected $casts = [
         'status' => ClanJoinRequestStatus::class,
@@ -34,5 +34,10 @@ class ClanJoinRequest extends Model
     public function clan(): BelongsTo
     {
         return $this->belongsTo(Clan::class);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === ClanJoinRequestStatus::INVITE;
     }
 }

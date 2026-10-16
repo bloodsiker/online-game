@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\Request;
 
@@ -70,7 +71,8 @@ class NpcController extends Controller
 
     public function addDialogueNode(Request $request, Npc $npc): mixed
     {
-        $data = $this->validateDialogueNode($request);
+        $node = new NpcDialogueNode;
+        $data = $this->validateDialogueNode($request, $node);
         $data['npc_id'] = $npc->id;
         $data['is_start'] = $request->boolean('is_start') || ! $npc->dialogueNodes()->exists();
         $data['is_active'] = $request->boolean('is_active');
@@ -79,7 +81,7 @@ class NpcController extends Controller
             $npc->dialogueNodes()->update(['is_start' => false]);
         }
 
-        NpcDialogueNode::create($data);
+        $node->fill($data)->save();
 
         return redirect()->route('admin.npc.info', $npc->id)->with('success', 'Ветка диалога добавлена.');
     }
@@ -88,7 +90,7 @@ class NpcController extends Controller
     {
         $this->ensureNodeBelongsToNpc($npc, $node);
 
-        $data = $this->validateDialogueNode($request);
+        $data = $this->validateDialogueNode($request, $node);
         $data['is_start'] = $request->boolean('is_start');
         $data['is_active'] = $request->boolean('is_active');
 
@@ -127,11 +129,12 @@ class NpcController extends Controller
     public function addDialogueOption(Request $request, Npc $npc, NpcDialogueNode $node): mixed
     {
         $this->ensureNodeBelongsToNpc($npc, $node);
-        $data = $this->validateDialogueOption($request, $npc);
+        $option = new NpcDialogueOption;
+        $data = $this->validateDialogueOption($request, $npc, $option);
         $data['npc_dialogue_node_id'] = $node->id;
         $data['is_active'] = $request->boolean('is_active');
 
-        NpcDialogueOption::create($data);
+        $option->fill($data)->save();
 
         return redirect()->route('admin.npc.info', $npc->id)->with('success', 'Кнопка диалога добавлена.');
     }
@@ -143,7 +146,7 @@ class NpcController extends Controller
             abort(404);
         }
 
-        $data = $this->validateDialogueOption($request, $npc);
+        $data = $this->validateDialogueOption($request, $npc, $option);
         $data['is_active'] = $request->boolean('is_active');
         $option->update($data);
 
@@ -166,8 +169,7 @@ class NpcController extends Controller
 
     private function fillNpc(Npc $npc, Request $request): void
     {
-        $npc->name = $request->input('name');
-        $npc->description = $request->input('description');
+        app(ContentTranslationEditor::class)->fill($npc, $request);
         $npc->location_id = $request->input('location_id') ?: null;
         $npc->hide_location = (bool) $request->input('hide_location', false);
         $npc->is_active = $request->boolean('is_active');
@@ -185,14 +187,15 @@ class NpcController extends Controller
     /**
      * @return array{title: string, description: string, sort_order: int}
      */
-    private function validateDialogueNode(Request $request): array
+    private function validateDialogueNode(Request $request, NpcDialogueNode $node): array
     {
+        app(ContentTranslationEditor::class)->fill($node, $request, ['title', 'description'], ['title', 'description']);
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
         ]);
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+        $data['title'] = $node->getTranslations('title');
+        $data['description'] = $node->getTranslations('description');
 
         return $data;
     }
@@ -200,10 +203,10 @@ class NpcController extends Controller
     /**
      * @return array{button_text: string, to_node_id: int, sort_order: int}
      */
-    private function validateDialogueOption(Request $request, Npc $npc): array
+    private function validateDialogueOption(Request $request, Npc $npc, NpcDialogueOption $option): array
     {
+        app(ContentTranslationEditor::class)->fill($option, $request, ['button_text'], ['button_text']);
         $data = $request->validate([
-            'button_text' => ['required', 'string', 'max:255'],
             'to_node_id' => ['required', 'integer'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
         ]);
@@ -215,6 +218,7 @@ class NpcController extends Controller
         }
 
         $data['to_node_id'] = (int) $data['to_node_id'];
+        $data['button_text'] = $option->getTranslations('button_text');
 
         return $data;
     }

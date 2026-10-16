@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -99,12 +100,12 @@ class HaraldWatchKeyQuestSeeder extends Seeder
 
     private function createBannerItem(): int
     {
-        $existing = DB::table('share_items')->where('name', self::BANNER_ITEM_NAME)->first();
+        $existing = LocalizedItemSeederQuery::items()->where('name', self::BANNER_ITEM_NAME)->first();
         if ($existing !== null) {
             return $existing->id;
         }
 
-        return DB::table('share_items')->insertGetId([
+        return LocalizedItemSeederQuery::items()->insertGetId([
             'type' => 'quest',
             'name' => self::BANNER_ITEM_NAME,
             'description' => 'Клочок ткани, истлевшей почти до нитей — но на свету ещё различим узор старой заставы. Достаточно, чтобы узнать, чьё это знамя, и слишком мало, чтобы сшить его заново.',
@@ -157,12 +158,13 @@ class HaraldWatchKeyQuestSeeder extends Seeder
 
     private function createQuest(string $title, string $description, int $afterQuestId): int
     {
-        $existing = DB::table('quests')->where('title', $title)->first();
+        $quests = LocalizedContentSeederQuery::forTable('quests');
+        $existing = (clone $quests)->where('title', $title)->first();
         if ($existing !== null) {
             return $existing->id;
         }
 
-        return DB::table('quests')->insertGetId([
+        return $quests->insertGetId([
             'title' => $title,
             'description' => $description,
             'type' => 'main',

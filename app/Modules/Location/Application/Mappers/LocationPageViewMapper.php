@@ -200,6 +200,9 @@ class LocationPageViewMapper
 
             $actions = [];
             foreach ($structure->actions as $action) {
+                if (! ($action->pivot?->is_active ?? true)) {
+                    continue;
+                }
                 $url = $this->resolveActionUrl($structure, (string) $action->alias);
                 if ($url === null) {
                     continue;
@@ -234,6 +237,8 @@ class LocationPageViewMapper
             $structure->isBank() => route('bank', ['id' => $structure->id]),
             $structure->isClanBank() => route('clan.treasury', ['id' => $structure->id]),
             $structure->isClanSkillHall() => route('clan_skill_hall', ['id' => $structure->id]),
+            $structure->isClanBoss() => route('clan_boss', ['id' => $structure->id]),
+            $structure->isPrison() => route('prison.index', ['id' => $structure->id]),
             $structure->isAuction() => route('auction', ['id' => $structure->id]),
             $structure->isAuctionExchange() => route('auction.exchange', ['id' => $structure->id]),
             $structure->isBlacksmith() => route('blacksmith', ['id' => $structure->id]),
@@ -275,7 +280,7 @@ class LocationPageViewMapper
 
     private function mapLocationUsersJson(Collection $users): string
     {
-        $tenMinutesAgo = Carbon::now()->subMinutes(10);
+        $tenMinutesAgo = Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         return json_encode(
             $users->map(function (User $user) use ($tenMinutesAgo): array {

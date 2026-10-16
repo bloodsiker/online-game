@@ -12,23 +12,12 @@
                 <div class="card-body">
                     <form action="{{ route('admin.effect.create') }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label class="col-form-label">Название</label>
-                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="col-form-label">Slug <small class="text-muted">(уникальный код)</small></label>
-                                    <input type="text" class="form-control" name="slug" value="{{ old('slug') }}" placeholder="poison">
-                                </div>
-                            </div>
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => null, 'active' => true])
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
+                            <label class="col-form-label">Slug <small class="text-muted">(уникальный код)</small></label>
+                            <input type="text" class="form-control" name="slug" value="{{ old('slug') }}" placeholder="poison">
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Картинка</label>

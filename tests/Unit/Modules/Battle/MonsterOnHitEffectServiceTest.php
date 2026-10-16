@@ -6,6 +6,7 @@ namespace Tests\Unit\Modules\Battle;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\MonsterOnHitEffectService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
@@ -104,7 +105,7 @@ class MonsterOnHitEffectServiceTest extends TestCase
 
         $this->assertStringContainsString(
             'После удара Кровавый волк на вас наложен эффект <b>Кровотечение</b>',
-            $result->getLog(),
+            BattleLogTranslator::render($result->getLog()),
         );
         $this->assertStringNotContainsString('7% от максимального HP', $result->getLog());
     }

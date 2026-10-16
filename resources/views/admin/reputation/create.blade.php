@@ -12,14 +12,7 @@
                 <div class="card-body">
                     <form action="{{ route('admin.reputation.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="3">{{ old('description') }}</textarea>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'reputation-content', 'content' => null])
                         <div class="form-group">
                             <label class="col-form-label">NPC</label>
                             <select id="sel-npc" name="npc_id" class="form-control"></select>

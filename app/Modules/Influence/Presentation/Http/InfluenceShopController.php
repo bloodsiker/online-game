@@ -100,7 +100,7 @@ final class InfluenceShopController extends Controller
                     'unit_diamond' => (int) $item->diamond,
                     'metadata' => [
                         'required_influence' => $required,
-                        'section_name' => $item->section->name,
+                        'section_name' => $item->section->getTranslation('name', 'ru', false),
                     ],
                 ]],
                 structure: $shop,

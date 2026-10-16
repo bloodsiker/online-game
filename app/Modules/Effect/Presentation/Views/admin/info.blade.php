@@ -12,23 +12,12 @@
                 <div class="card-body">
                     <form action="{{ route('admin.effect.info', $effect->id) }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label class="col-form-label">Название</label>
-                                    <input type="text" class="form-control" name="name" value="{{ $effect->name }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="col-form-label">Slug <small class="text-muted">(уникальный код)</small></label>
-                                    <input type="text" class="form-control" name="slug" value="{{ $effect->slug }}">
-                                </div>
-                            </div>
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => $effect, 'active' => true])
                         </div>
                         <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea id="effect-description-editor" class="form-control" name="description" rows="3">{{ $effect->description }}</textarea>
+                            <label class="col-form-label">Slug <small class="text-muted">(уникальный код)</small></label>
+                            <input type="text" class="form-control" name="slug" value="{{ $effect->slug }}">
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Картинка</label>
@@ -199,7 +188,7 @@
     </div>
 
     @include('admin.layout.summernote', [
-        'selector' => '#effect-description-editor',
+        'selector' => '#item-description-ru, #item-description-uk',
         'height' => 160,
         'placeholder' => 'Введите описание эффекта',
     ])

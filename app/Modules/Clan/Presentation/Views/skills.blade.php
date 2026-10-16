@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навыки клана</title>
+    <title>{{ __('Навыки клана') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html { height: 100%; }
@@ -31,6 +31,7 @@
         .skill-name { font-weight: bold; font-size: 12px; color: #461c0b; }
         .skill-level { color: #8D2616; font-weight: bold; }
         .skill-desc { color: #555; margin: 2px 0 4px; }
+        .skill-hall-note { margin-bottom: 10px; padding: 7px 10px; border: 1px solid #DB9F73; background: #fff8ec url(/img/bg/info/bg_l.gif) repeat; color: #461c0b; }
         .req-ok { color: #2a7a2a; font-weight: bold; }
         .effect-tag { color: #1a4d8a; font-weight: bold; }
         .skill-kind { display: inline-block; margin-left: 4px; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
@@ -53,7 +54,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.skills'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.skills'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
@@ -68,7 +69,7 @@
                             <tbody>
                             <tr height="22">
                                 <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                                <td align="center" class="tbl-usi_label-center">Навыки клана</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Навыки клана') }}</td>
                                 <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                             </tr>
                             </tbody>
@@ -80,17 +81,19 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 8px 10px;">
 
+                        <div class="skill-hall-note">{{ __('Изучение навыков клана производится в Зале клановых наставлений.') }}</div>
+
                         {{-- Clan info bar --}}
                         <table class="coll w100 p10h brd2-all" border="0" style="margin-bottom: 10px;">
                             <tbody>
                             <tr class="bg_l">
                                 <td align="left" nowrap="" style="padding: 4px 10px;">
-                                    <b>Клан:</b> {{ $clan->name }}
+                                    <b>{{ __('Клан') }}:</b> {{ $clan->name }}
                                     &nbsp;&nbsp;
-                                    <b>Уровень:</b> {{ $clan->lvl }}
+                                    <b>{{ __('Уровень') }}:</b> {{ $clan->lvl }}
                                 </td>
                                 <td align="right" nowrap="" style="padding: 4px 10px;">
-                                    <b>Бонусные очки:</b>
+                                    <b>{{ __('Бонусные очки') }}:</b>
                                     <b class="req-ok">{{ number_format($clan->points, 0, '.', ' ') }}</b>
                                 </td>
                             </tr>
@@ -107,10 +110,10 @@
                                 $skillIcon = $displayMagicSkill?->image ?: $def->icon ?: asset('img/icon/qst_default_start_new_m.gif');
                                 $skillIconAlt = $displayMagicSkill?->name ?? $def->name;
                                 $skillTooltipMeta = $displayMagicSkill ? array_merge([
-                                    ['label' => 'Тип', 'value' => $displayMagicSkill->is_passive ? 'Пассивный навык' : 'Активный навык'],
-                                    ['label' => 'Уровень', 'value' => $displayMagicSkill->level],
+                                    ['label' => __('Тип'), 'value' => $displayMagicSkill->is_passive ? __('Пассивный навык') : __('Активный навык')],
+                                    ['label' => __('Уровень'), 'value' => $displayMagicSkill->level],
                                 ], array_map(static fn (array $effect): array => [
-                                    'label' => 'Бонус',
+                                    'label' => __('Бонус'),
                                     'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
                                 ], $displayMagicSkill->effects ?? [])) : [];
                             @endphp
@@ -140,11 +143,11 @@
                                             <span class="skill-name">{{ $def->name }}</span>
                                             &nbsp;
                                             <span class="skill-level">
-                                                Ур. {{ $currentLevel }} / {{ $def->max_level }}
+                                                {{ __('Ур.') }} {{ $currentLevel }} / {{ $def->max_level }}
                                             </span>
                                             @if($displayMagicSkill)
                                                 <span class="skill-kind {{ $displayMagicSkill->is_passive ? 'passive' : 'active' }}">
-                                                    {{ $displayMagicSkill->is_passive ? 'Пассивный' : 'Активный' }}
+                                                    {{ $displayMagicSkill->is_passive ? __('Пассивный') : __('Активный') }}
                                                 </span>
                                             @endif
 
@@ -161,7 +164,7 @@
                                             <div class="skill-desc">{{ $def->description }}</div>
 
                                             @if(!$currentLevel)
-                                                <span style="color:#777;">Не изучен</span>
+                                                <span style="color:#777;">{{ __('Не изучен') }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -170,7 +173,7 @@
                             </div>
                         @empty
                             <div align="center" style="padding: 20px; color: #49382d;">
-                                <b>Навыки клана пока не добавлены.</b>
+                                <b>{{ __('Навыки клана пока не добавлены.') }}</b>
                             </div>
                         @endforelse
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Создаёт новые, более высокие ступени двух УЖЕ СУЩЕСТВУЮЩИХ видов —
@@ -51,7 +51,7 @@ class CarrigmoreRoadMonsterSeeder extends Seeder
     {
         foreach (self::SPECIES as $species) {
             foreach ($species['levels'] as $level) {
-                $existing = DB::table('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
+                $existing = LocalizedContentSeederQuery::forTable('monsters')->where('name', $species['name'])->where('lvl', $level)->first();
 
                 if ($existing !== null) {
                     $this->command?->info("{$species['name']} lvl{$level} уже существует (id={$existing->id}), пропускаю");
@@ -67,7 +67,7 @@ class CarrigmoreRoadMonsterSeeder extends Seeder
                 $exp = MonsterStatFormulas::expReward($level, 1.0);
                 [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $level);
 
-                $monsterId = DB::table('monsters')->insertGetId([
+                $monsterId = LocalizedContentSeederQuery::forTable('monsters')->insertGetId([
                     'name' => $species['name'],
                     'description' => $species['name'] === 'Вепрь'
                         ? 'Матёрый кабан, что пасётся у самой дороги на Карригмор — издали кажется безобидным, но стоит подойти ближе, и он без колебаний идёт на таран.'

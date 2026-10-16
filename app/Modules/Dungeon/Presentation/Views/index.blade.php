@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Подземелья</title>
+    <title>{{ __('Подземелья') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body {
@@ -79,7 +79,7 @@
                         <tbody>
                         <tr height="22">
                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                            <td align="center" class="tbl-usi-hdr mbg">Текущий поход</td>
+                            <td align="center" class="tbl-usi-hdr mbg">{{ __('Текущий поход') }}</td>
                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                         </tr>
                         </tbody>
@@ -93,30 +93,30 @@
                     <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                         <tbody>
                         <tr class="bg_l">
-                            <td class="b" width="30%" align="right" nowrap>Вы в подземелье:</td>
+                            <td class="b" width="30%" align="right" nowrap>{{ __('Вы в подземелье:') }}</td>
                             <td class="b black">{{ $page->activeSession->dungeonName }}</td>
                             <td width="240" rowspan="2" align="center">
                                 @if ($page->activeSession->canReenter)
                                     <form method="POST" action="{{ route('dungeon.enter', $page->activeSession->dungeonId) }}" style="display:inline; margin:0;">
                                         @csrf
-                                        <b class="butt1 pointer"><b><input value="Вернуться" type="submit" style="width: 100px;" class="redd"></b></b>
+                                        <b class="butt1 pointer"><b><input value="{{ __('Вернуться') }}" type="submit" style="width: 100px;" class="redd"></b></b>
                                     </form>
                                 @else
-                                    <b class="butt1 pointer"><b><input value="В данж" type="button" onclick="location.href='{{ route('location') }}'" style="width: 100px;" class="redd"></b></b>
+                                    <b class="butt1 pointer"><b><input value="{{ __('В данж') }}" type="button" onclick="location.href='{{ route('location') }}'" style="width: 100px;" class="redd"></b></b>
                                 @endif
                                 <form method="POST" action="{{ route('dungeon.exit') }}" style="display:inline; margin:0;">
                                     @csrf
-                                    <b class="butt1 pointer"><b><input value="Покинуть" type="submit" style="width: 100px;"></b></b>
+                                    <b class="butt1 pointer"><b><input value="{{ __('Покинуть') }}" type="submit" style="width: 100px;"></b></b>
                                 </form>
                             </td>
                         </tr>
                         <tr class="brd2-top">
-                            <td class="b" align="right" nowrap>Осталось времени:</td>
+                            <td class="b" align="right" nowrap>{{ __('Осталось времени:') }}</td>
                             <td class="b redd">
                                 @if ($page->activeSession->expiresAtTimestamp)
                                     <span id="dungeon-timer">--:--</span>
                                 @else
-                                    без ограничения
+                                    {{ __('без ограничения') }}
                                 @endif
                             </td>
                         </tr>
@@ -168,7 +168,7 @@
                     <tbody>
                     <tr height="22">
                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                        <td align="center" class="tbl-usi-hdr mbg">Доступные подземелья</td>
+                        <td align="center" class="tbl-usi-hdr mbg">{{ __('Доступные подземелья') }}</td>
                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
                     </tbody>
@@ -180,53 +180,53 @@
             <td class="tbl-shp-sides ls">&nbsp;</td>
             <td class="tbl-usi_bg" valign="top" style="padding: 10px 10px 12px;">
                 @if ($page->dungeons === [])
-                    <div class="dng-empty">Нет доступных подземелий.</div>
+                    <div class="dng-empty">{{ __('Нет доступных подземелий.') }}</div>
                 @else
                     <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                         <tbody>
                         <tr>
-                            <td class="b" width="50" align="center">Тир</td>
-                            <td class="b">Название</td>
-                            <td class="b" width="110" align="center">Требования</td>
-                            <td class="b" width="170" align="center">Условия</td>
-                            <td class="b" width="130" align="center">Действия</td>
+                            <td class="b" width="50" align="center">{{ __('Тир') }}</td>
+                            <td class="b">{{ __('Название') }}</td>
+                            <td class="b" width="110" align="center">{{ __('Требования') }}</td>
+                            <td class="b" width="170" align="center">{{ __('Условия') }}</td>
+                            <td class="b" width="130" align="center">{{ __('Действия') }}</td>
                         </tr>
                         @foreach ($page->dungeons as $dungeon)
                             <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
                                 <td class="brd2-top brd2-bt b redd" align="center">{{ $dungeon->tier }}</td>
                                 <td class="brd2-top brd2-bt">
-                                    <a href="{{ route('dungeon.show', $dungeon->id) }}" class="dng-name" title="Подробнее о подземелье"><b>{{ $dungeon->name }}</b></a>
+                                    <a href="{{ route('dungeon.show', $dungeon->id) }}" class="dng-name" title="{{ __('Подробнее о подземелье') }}"><b>{{ $dungeon->name }}</b></a>
                                     @if ($dungeon->description)
                                         <div class="dng-desc">{{ $dungeon->description }}</div>
                                     @endif
                                 </td>
                                 <td class="brd2-top brd2-bt" align="center">
-                                    <div class="b">{{ $dungeon->maxPlayers === 1 ? 'Соло' : 'До ' . $dungeon->maxPlayers . ' игроков' }}</div>
-                                    <div>Мин. уровень: <b class="redd">{{ $dungeon->minLevel }}</b></div>
+                                    <div class="b">{{ $dungeon->maxPlayers === 1 ? __('Соло') : __('До') . ' ' . $dungeon->maxPlayers . ' ' . __('игроков') }}</div>
+                                    <div>{{ __('Мин. уровень:') }} <b class="redd">{{ $dungeon->minLevel }}</b></div>
                                 </td>
                                 <td class="brd2-top brd2-bt" align="center">
                                     @if ($dungeon->cooldownSeconds > 0)
-                                        <div>Кулдаун: <b>{{ round($dungeon->cooldownSeconds / 3600, 1) }} ч.</b></div>
+                                        <div>{{ __('Кулдаун:') }} <b>{{ round($dungeon->cooldownSeconds / 3600, 1) }} {{ __('ч.') }}</b></div>
                                     @endif
                                     @if ($dungeon->timeLimitSeconds)
-                                        <div>Таймер: <b>{{ round($dungeon->timeLimitSeconds / 60) }} мин.</b></div>
+                                        <div>{{ __('Таймер:') }} <b>{{ round($dungeon->timeLimitSeconds / 60) }} {{ __('мин.') }}</b></div>
                                     @endif
                                     @if ($dungeon->requiresKey)
-                                        <div>Ключ: <b>{{ $dungeon->entryKeyName ?? '?' }}</b></div>
+                                        <div>{{ __('Ключ:') }} <b>{{ $dungeon->entryKeyName ?? '?' }}</b></div>
                                     @endif
-                                    <div class="dng-muted">Смерть: {{ $dungeon->deathBehaviorLabel }}</div>
+                                    <div class="dng-muted">{{ __('Смерть:') }} {{ $dungeon->deathBehaviorLabel }}</div>
                                     @if (! $dungeon->cooldownSeconds && ! $dungeon->timeLimitSeconds && ! $dungeon->requiresKey)
-                                        <div class="dng-muted">Без особых условий</div>
+                                        <div class="dng-muted">{{ __('Без особых условий') }}</div>
                                     @endif
                                 </td>
                                 <td class="brd2-top brd2-bt" align="center">
                                     @if (! $page->activeSession)
                                         <form method="POST" action="{{ route('dungeon.enter', $dungeon->id) }}" style="margin:0 0 4px;">
                                             @csrf
-                                            <b class="butt1 pointer"><b><input value="Войти" type="submit" style="width: 100px;" class="redd"></b></b>
+                                            <b class="butt1 pointer"><b><input value="{{ __('Войти') }}" type="submit" style="width: 100px;" class="redd"></b></b>
                                         </form>
                                     @endif
-                                    <b class="butt1 pointer"><b><input value="Подробнее" type="button" onclick="location.href='{{ route('dungeon.show', $dungeon->id) }}'" style="width: 100px;"></b></b>
+                                    <b class="butt1 pointer"><b><input value="{{ __('Подробнее') }}" type="button" onclick="location.href='{{ route('dungeon.show', $dungeon->id) }}'" style="width: 100px;"></b></b>
                                 </td>
                             </tr>
                         @endforeach

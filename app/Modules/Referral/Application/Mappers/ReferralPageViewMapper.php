@@ -21,11 +21,11 @@ final class ReferralPageViewMapper
      */
     public function map(User $user, ?User $invitedBy, Collection $referrals, Collection $stages): ReferralPageDTO
     {
-        $onlineThreshold = CarbonImmutable::now()->subMinutes(10);
+        $onlineThreshold = CarbonImmutable::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
         $totalStagesCount = $stages->count();
 
         return new ReferralPageDTO(
-            referralLink: route('register').'?ref='.urlencode($user->name),
+            referralLink: route('register').'?ref=U'.$user->id,
             invitedByName: $invitedBy?->name,
             referred: $referrals->map(
                 static function (Referral $referral) use ($onlineThreshold, $totalStagesCount): ReferralInviteDTO {

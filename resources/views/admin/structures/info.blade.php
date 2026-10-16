@@ -31,14 +31,11 @@
 
                             {{-- ОСНОВНАЯ --}}
                             <div id="tab-main" class="tab-pane active">
-                                <form action="{{ route('admin.structure.info', $structure->id) }}" method="post">
+                                <form action="{{ route('admin.structure.info', $structure->id) }}" method="post" enctype="multipart/form-data">
                                     {{ csrf_field() }}
                                     <div class="row pt-3 pb-3">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="col-form-label">Название</label>
-                                                <input type="text" class="form-control" name="name" value="{{ $structure->name }}">
-                                            </div>
+                                        <div class="col-md-6">
+                                            @include('admin.partials.content-translations', ['prefix' => 'structure-'.$structure->id, 'content' => $structure])
                                             <div class="form-group">
                                                 <label class="col-form-label">Тип</label>
                                                 <select class="form-control" name="type" data-plugin-selectTwo>
@@ -48,7 +45,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="col-form-label">Локация</label>
                                                 <select id="sel-location" name="location_id" class="form-control">
@@ -65,17 +62,38 @@
                                                     @endif
                                                 </select>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-8">
                                             <div class="form-group">
-                                                <label class="col-form-label">Описание</label>
-                                                <textarea class="form-control" name="description" rows="3">{{ $structure->description }}</textarea>
-                                                <small class="text-muted">Показывается игроку на странице построения. Если пусто — используется стандартный текст.</small>
+                                                <label class="col-form-label">Данж (для логова клан-босса)</label>
+                                                <select id="sel-dungeon" name="dungeon_id" class="form-control">
+                                                    @if($structure->clanBossDungeon)
+                                                        <option value="{{ $structure->clanBossDungeon->id }}" selected>[{{ $structure->clanBossDungeon->id }}] {{ $structure->clanBossDungeon->name }}</option>
+                                                    @endif
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label class="col-form-label">Изображение</label>
+                                        @if($structure->image)
+                                            <div class="mb-1">
+                                                <img id="structure-preview" src="{{ $structure->image }}" alt=""
+                                                     style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;">
+                                            </div>
+                                        @else
+                                            <div class="mb-1">
+                                                <img id="structure-preview" src="" alt=""
+                                                     style="width:64px;height:64px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#f5f5f5;display:none;">
+                                            </div>
+                                        @endif
+                                        <input type="file" class="form-control mt-1" name="image" id="structure-image" accept="image/*">
+                                        @if($structure->getRawOriginal('image'))
+                                            <div class="checkbox-custom checkbox-danger mt-1">
+                                                <input type="checkbox" id="structure-delete-image" name="delete_image" value="1">
+                                                <label for="structure-delete-image">Удалить картинку</label>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <small class="text-muted">Описание показывается игроку на странице построения. Если пусто — используется стандартный текст.</small>
                                     <div class="row mb-3">
                                         <div class="col-sm-12">
                                             <button class="btn btn-primary">Сохранить</button>
@@ -163,6 +181,7 @@
                                                 <th width="50">ID</th>
                                                 <th width="160">Alias</th>
                                                 <th>Название</th>
+                                                <th width="160">Активность</th>
                                                 <th width="70"></th>
                                             </tr>
                                             </thead>
@@ -172,6 +191,7 @@
                                                     <td>{{ $action->id }}</td>
                                                     <td><code>{{ $action->alias }}</code></td>
                                                     <td>{{ $action->name }}</td>
+                                                    <td>@include('admin.structures.partials.action-status')</td>
                                                     <td>
                                                         <a href="{{ route('admin.structure.info.action_delete', [$structure->id, $action->id]) }}"
                                                            class="btn btn-xs btn-danger"
@@ -179,7 +199,7 @@
                                                     </td>
                                                 </tr>
                                             @empty
-                                                <tr><td colspan="4" class="text-center text-muted">Нет действий</td></tr>
+                                                <tr><td colspan="5" class="text-center text-muted">Нет действий</td></tr>
                                             @endforelse
                                             </tbody>
                                         </table>
@@ -212,9 +232,8 @@
 	                        </select>
 	                    </div>
 	                    <div class="form-group mb-2">
-	                        <label>Или создать новую категорию</label>
-	                        <input type="text" name="category_name" class="form-control" maxlength="255"
-	                               placeholder="Название новой категории">
+                        <label>Или создать новую категорию</label>
+                        @include('admin.partials.content-translations', ['prefix' => 'structure-category-new', 'content' => null, 'fields' => ['name' => ['label' => 'Название']]])
 	                    </div>
 	                </div>
 	                <footer class="card-footer">
@@ -296,6 +315,13 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="form-group mb-2">
+                        <label>Активность</label>
+                        <select name="is_active" class="form-control">
+                            <option value="1">Активно</option>
+                            <option value="0">Отключено</option>
+                        </select>
+                    </div>
                 </div>
                 <footer class="card-footer">
                     <div class="col-md-12 text-end">
@@ -353,6 +379,24 @@
         minimumInputLength: 0
     });
 
+    $('#sel-dungeon').select2({
+        theme: 'bootstrap',
+        placeholder: 'Без данжа',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.dungeons') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
     $('#shop-item-select').select2({
         theme: 'bootstrap',
         dropdownParent: $('#modalShop'),
@@ -395,6 +439,14 @@
             },
             minimumInputLength: 0
         });
+    });
+
+    document.getElementById('structure-image').addEventListener('change', function () {
+        const preview = document.getElementById('structure-preview');
+        if (this.files[0]) {
+            preview.src = URL.createObjectURL(this.files[0]);
+            preview.style.display = 'block';
+        }
     });
 </script>
 @endpush

@@ -20,6 +20,12 @@ final class UserProfileTest extends TestCase
             $this->markTestSkipped('Тест разрешён только в SQLite :memory:.');
         }
         config(['cache.default' => 'array', 'session.driver' => 'array']);
+        Schema::create('user_game_settings', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->json('settings');
+            $table->timestamps();
+        });
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('password')->nullable();

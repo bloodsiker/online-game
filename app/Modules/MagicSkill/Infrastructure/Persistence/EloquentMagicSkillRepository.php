@@ -34,7 +34,7 @@ class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSki
             ->whereHas('user', fn ($query) => $query
                 ->where('location_id', $player->user->location_id)
                 ->where('id', '!=', $player->user_id)
-                ->where('last_online_at', '>=', now()->subMinutes(10))
+                ->where('last_online_at', '>=', now()->subMinutes((int) config('game.online_timeout_minutes', 30)))
             )
             ->with('user:id,name')
             ->get(['id', 'user_id']);
@@ -85,7 +85,7 @@ class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSki
             ->whereKey($targetPlayerId)
             ->whereHas('user', fn ($query) => $query
                 ->where('location_id', $player->user->location_id)
-                ->where('last_online_at', '>=', now()->subMinutes(10))
+                ->where('last_online_at', '>=', now()->subMinutes((int) config('game.online_timeout_minutes', 30)))
             )
             ->with('user')
             ->first();

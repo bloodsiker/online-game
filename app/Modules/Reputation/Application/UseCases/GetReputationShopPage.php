@@ -39,7 +39,7 @@ class GetReputationShopPage
 
         return new ReputationShopPageDTO(
             reputation: $reputation,
-            pr: $this->reputationService->getOrCreate($user->player, $reputation),
+            pr: $this->reputationService->getOrZero($user->player, $reputation),
             categories: $categories,
             activeCategoryId: $activeCategoryId,
             items: $items,

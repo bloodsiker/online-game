@@ -12,6 +12,7 @@ use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonStage;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +30,7 @@ class TowerDungeonSeeder extends Seeder
 
     public function run(): void
     {
-        if (Dungeon::query()->where('name', 'Башня испытаний')->exists()) {
+        if (LocalizedContentSeederQuery::forTable('dungeons')->where('name', 'Башня испытаний')->exists()) {
             $this->command?->info('TowerDungeonSeeder: «Башня испытаний» уже существует.');
 
             return;

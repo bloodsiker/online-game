@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <style>
         *{
             font-size: 11px;
@@ -187,33 +188,33 @@
                             <tr height="21">
                                 <td width="19"><img id="left_1" src="{{ asset($data->getGroup() === 'main' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_1" align="center" style="background: url({{ asset($data->getGroup() === 'main' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_1" href="{{ route('backpack.bag', ['group' => 'main']) }}" title="Доспехи, инструменты, амулеты и прочие полезные вещи" class="{{ $data->getGroup() === 'main' ? 'btn_2' : 'btn_1' }}">Вещи</a>
+                                    <a id="center_1" href="{{ route('backpack.bag', ['group' => 'main']) }}" title="{{ __("Доспехи, инструменты, амулеты и прочие полезные вещи") }}" class="{{ $data->getGroup() === 'main' ? 'btn_2' : 'btn_1' }}">{{ __("Вещи") }}</a>
                                 </td>
                                 <td width="19"><img id="right_1" src="{{ asset($data->getGroup() === 'main' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_misc" align="center" style="background: url({{ asset($data->getGroup() === 'misc' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_misc" href="{{ route('backpack.bag', ['group' => 'misc']) }}" title="Разное" class="{{ $data->getGroup() === 'misc' ? 'btn_2' : 'btn_1' }}">Разное</a></td>
+                                    <a id="center_misc" href="{{ route('backpack.bag', ['group' => 'misc']) }}" title="{{ __("Разное") }}" class="{{ $data->getGroup() === 'misc' ? 'btn_2' : 'btn_1' }}">{{ __("Разное") }}</a></td>
                                 <td width="19"><img id="right_misc" src="{{ asset($data->getGroup() === 'misc' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'key' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'key' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_2" href="{{ route('backpack.bag', ['group' => 'key']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'key' ? 'btn_2' : 'btn_1' }}">Ключи</a></td>
+                                    <a id="center_2" href="{{ route('backpack.bag', ['group' => 'key']) }}" title="{{ __("Квестовые предметы") }}" class="{{ $data->getGroup() === 'key' ? 'btn_2' : 'btn_1' }}">{{ __("Ключи") }}</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'key' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_2" src="{{ asset($data->getGroup() === 'quest' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_2" align="center" style="background: url({{ asset($data->getGroup() === 'quest' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_2" href="{{ route('backpack.bag', ['group' => 'quest']) }}" title="Квестовые предметы" class="{{ $data->getGroup() === 'quest' ? 'btn_2' : 'btn_1' }}">Квесты</a></td>
+                                    <a id="center_2" href="{{ route('backpack.bag', ['group' => 'quest']) }}" title="{{ __("Квестовые предметы") }}" class="{{ $data->getGroup() === 'quest' ? 'btn_2' : 'btn_1' }}">{{ __("Квесты") }}</a></td>
                                 <td width="19"><img id="right_2" src="{{ asset($data->getGroup() === 'quest' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_3" align="center" style="background: url({{ asset($data->getGroup() === 'artifact' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_3" href="{{ route('backpack.bag', ['group' => 'artifact']) }}" title="Артефакты" class="{{ $data->getGroup() === 'artifact' ? 'btn_2' : 'btn_1' }}">Артефакты</a></td>
+                                    <a id="center_3" href="{{ route('backpack.bag', ['group' => 'artifact']) }}" title="{{ __("Артефакты") }}" class="{{ $data->getGroup() === 'artifact' ? 'btn_2' : 'btn_1' }}">{{ __("Артефакты") }}</a></td>
                                 <td width="19"><img id="right_3" src="{{ asset($data->getGroup() === 'artifact' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
                                 <td width="19"><img id="left_4" src="{{ asset($data->getGroup() === 'gift' ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
                                 <td id="tab_4" align="center" style="background: url({{ asset($data->getGroup() === 'gift' ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 4px;">
-                                    <a id="center_4" href="{{ route('backpack.bag', ['group' => 'gift']) }}" title="Подаренные Вам подарки" class="{{ $data->getGroup() === 'gift' ? 'btn_2' : 'btn_1' }}">Подарки</a></td>
+                                    <a id="center_4" href="{{ route('backpack.bag', ['group' => 'gift']) }}" title="{{ __("Подаренные Вам подарки") }}" class="{{ $data->getGroup() === 'gift' ? 'btn_2' : 'btn_1' }}">{{ __("Подарки") }}</a></td>
                                 <td width="19"><img id="right_4" src="{{ asset($data->getGroup() === 'gift' ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
                             </tr>
                             </tbody>
@@ -455,20 +456,20 @@
                                             if (action) {
                                                 $('#action_title_amount').html(action);
                                                 if (action == 'Перемещение предмета') {
-                                                    $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="Переместить" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
+                                                    $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="' + gameTranslate("Переместить") + '" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
                                                 } else if (action == 'Вернуть предмет в казну') {
-                                                    $('#ask_amount_title').html('Вы уверены, что хотите вернуть предмет в казну?');
+                                                    $('#ask_amount_title').html(gameTranslate("Вы уверены, что хотите вернуть предмет в казну?"));
                                                     $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="Ok" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
-                                                } else if (action == 'Переместить предмет') {
-                                                    $('#ask_amount_title').html('Вы уверены, что хотите переместить предмет?');
+                                                } else if (action == '' + gameTranslate("Переместить") + ' предмет') {
+                                                    $('#ask_amount_title').html(gameTranslate("Вы уверены, что хотите переместить предмет?"));
                                                     $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="Ok" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
                                                 } else {
-                                                    $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="Добавить" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
+                                                    $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="' + gameTranslate("Добавить") + '" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
                                                 }
                                             } else {
-                                                $('#action_title_amount').html('Видалення предмета');
-                                                $('#ask_amount_title').html('Ви впевнені що хочете викинути?');
-                                                $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="Викинути" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
+                                                $('#action_title_amount').html(gameTranslate("Видалення предмета"));
+                                                $('#ask_amount_title').html(gameTranslate("Ви впевнені що хочете викинути?"));
+                                                $('#ask_confirm_ok_container').html('<b class="butt1 pointer"><b><input value="' + gameTranslate("Викинути") + '" type="submit" onClick="ask_amount();" style="width: 100px;" class="redd" ></b></b>');
                                             }
                                         }
                                     </script>
@@ -506,11 +507,11 @@
                                                                             id="ask_confirm_type_amount"></span></div>
                                                                     <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}"
                                                                               width="11" height="10"
-                                                                              class="tbl-shp_item-ico" alt=""> Уровень
+                                                                              class="tbl-shp_item-ico" alt=""> {{ __("Уровень") }}
                                                                         <span id="ask_confirm_level_amount"></span>
                                                                     </div>
                                                                     <div id="price_container_amount"
-                                                                         style="display: none">Цена: <span
+                                                                         style="display: none">{{ __("Цена:") }} <span
                                                                             id="price_amount"></span></div>
                                                                 </div>
                                                             </div>
@@ -519,15 +520,15 @@
                                                                 <div class="cart-amount-sell-price"
                                                                      style="text-align: left;">
                                                                     <div>
-                                                                        <b>Количество:</b>
+                                                                        <b>{{ __("Количество:") }}</b>
                                                                         <span class="cart-amount-input-cont">
 											<span class="b-input">
 												<span class="b-input__inner">
 													<span class="arrow left left-disabled"
                                                           onclick="counter_controller.left(this);"
-                                                          title="Уменьшить кол-во"></span>
+                                                          title="{{ __("Уменьшить кол-во") }}"></span>
 													<span class="arrow right" onclick="counter_controller.right(this);"
-                                                          title="Увеличить кол-во"></span>
+                                                          title="{{ __("Увеличить кол-во") }}"></span>
 														<input id="cart_amount" type="text" value="1"
                                                                class="cart_amount_sell_input"
                                                                onchange="counter_controller.change(this, event);"
@@ -536,8 +537,8 @@
 												</span>
 											</span>
 										</span>
-                                                                        из <span id="cart_amount_cnt"></span>
-                                                                        <b class="butt1 pointer"><b><input value="Все"
+                                                                        {{ __("из") }} <span id="cart_amount_cnt"></span>
+                                                                        <b class="butt1 pointer"><b><input value="{{ __("Все") }}"
                                                                                                            type="button"
                                                                                                            style="width: 100px;"
                                                                                                            class="redd"
@@ -547,7 +548,7 @@
                                                             </div>
                                                             <div style="clear: both; margin-top: 10px; text-align: center; padding: 0 11px;">
                                                                 <span id="ask_confirm_ok_container"></span>
-                                                                <b class="butt1 pointer"><b><input value="Отмена"
+                                                                <b class="butt1 pointer"><b><input value="{{ __("Отмена") }}"
                                                                                                    type="button"
                                                                                                    onclick="closeDropPopup();"
                                                                                                    style="width: 100px;"
@@ -634,7 +635,7 @@
                                                         <div class="popup-top-center">
 
                                                             <div class="popup_global_title" id="action_title_sell">
-                                                                Продаж предмета
+                                                                {{ __("Продаж предмета") }}
                                                             </div>
 
                                                         </div>
@@ -663,10 +664,10 @@
                                                                             id="ask_confirm_type_sell"></span></div>
                                                                     <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}"
                                                                               width="11" height="10"
-                                                                              class="tbl-shp_item-ico" alt=""> Рівень
+                                                                              class="tbl-shp_item-ico" alt=""> {{ __("Рівень") }}
                                                                         <span id="ask_confirm_level_sell">0</span></div>
                                                                     <div id="price_container_sell"
-                                                                         style="display: none">Ціна: <span
+                                                                         style="display: none">{{ __("Ціна:") }} <span
                                                                             id="price_sell"></span></div>
                                                                 </div>
                                                             </div>
@@ -676,15 +677,15 @@
                                                                      class="cart-amount-sell-price"
                                                                      style="text-align: left;">
                                                                     <div>
-                                                                        <b>Кількість:</b>
+                                                                        <b>{{ __("Кількість:") }}</b>
                                                                         <span class="cart-amount-input-cont">
 											<span class="b-input">
 												<span class="b-input__inner">
 													<span class="arrow left left-disabled"
                                                           onclick="counter_controller.left(this);"
-                                                          title="Уменьшить кол-во"></span>
+                                                          title="{{ __("Уменьшить кол-во") }}"></span>
 													<span class="arrow right" onclick="counter_controller.right(this);"
-                                                          title="Увеличить кол-во"></span>
+                                                          title="{{ __("Увеличить кол-во") }}"></span>
 														<input id="cart_amount_sell" type="text" value="1"
                                                                class="cart_amount_sell_input"
                                                                onchange="counter_controller.change(this, event);"
@@ -693,8 +694,8 @@
 												</span>
 											</span>
 										</span>
-                                                                        із <span id="cart_amount_sell_cnt">3</span>
-                                                                        <b class="butt1 pointer"><b><input value="Все"
+                                                                        {{ __("із") }} <span id="cart_amount_sell_cnt">3</span>
+                                                                        <b class="butt1 pointer"><b><input value="{{ __("Все") }}"
                                                                                                            type="button"
                                                                                                            style="width: 100px;"
                                                                                                            class="redd"
@@ -702,19 +703,19 @@
                                                                     </div>
 
                                                                     <div>
-                                                                        <b>Ціна:</b> <span class="current_price"></span><span
+                                                                        <b>{{ __("Ціна:") }}</b> <span class="current_price"></span><span
                                                                             class="error" style="display: none;"></span>
                                                                     </div>
                                                                 </div>
 
                                                                 <div
                                                                     style="clear: both; margin-top: 10px; text-align: left;">
-                                                                    <b class="butt1 pointer"><b><input value="Продати"
+                                                                    <b class="butt1 pointer"><b><input value="{{ __("Продати") }}"
                                                                                                        type="submit"
                                                                                                        onclick="ask_amount_sell();"
                                                                                                        style="width: 100px;"
                                                                                                        class="redd"></b></b>
-                                                                    <b class="butt1 pointer"><b><input value="Відміна"
+                                                                    <b class="butt1 pointer"><b><input value="{{ __("Відміна") }}"
                                                                                                        type="button"
                                                                                                        onclick="ask_amount_sell();"
                                                                                                        style="width: 100px;"
@@ -741,17 +742,17 @@
                                         var ask_confirm_title = null;
                                         var ask_confirm_title_actions = {
                                             "3": {
-                                                "title": "ВИКИНУТИ",
-                                                "title_popup": "Удаление предмета"
+                                                "title": gameTranslate("ВИКИНУТИ"),
+                                                "title_popup": gameTranslate("Удаление предмета")
                                             },
                                             "5": {
-                                                "title": "ПРОДАТИ",
-                                                "price_block": "Цена продажи",
-                                                "title_popup": "Продажа предмета"
+                                                "title": gameTranslate("ПРОДАТИ"),
+                                                "price_block": gameTranslate("Цена продажи"),
+                                                "title_popup": gameTranslate("Продажа предмета")
                                             },
                                             "perp": {
-                                                "title": "ОСТАВИТЬ у себя НАВСЕГДА",
-                                                "price_block": "Стоимость"
+                                                "title": gameTranslate("ОСТАВИТЬ у себя НАВСЕГДА"),
+                                                "price_block": gameTranslate("Стоимость")
                                             }
                                         };
 
@@ -779,10 +780,10 @@
                                             var btn_name = '';
 
                                             if (params.action == 'drop') {
-                                                $('#ask_confirm_ok_container_btn').html('<b class="butt1 pointer"><b><input value="Викинути" type="submit" onClick="if(document._submit)return false;document._submit=true;" class="redd" ID="cart_confirm_ok" style="width: 100px;"></b></b>');
+                                                $('#ask_confirm_ok_container_btn').html('<b class="butt1 pointer"><b><input value="' + gameTranslate("Викинути") + '" type="submit" onClick="if(document._submit)return false;document._submit=true;" class="redd" ID="cart_confirm_ok" style="width: 100px;"></b></b>');
                                             } else if (params.action == 'sell') {
-                                                btn_name = 'Продати';
-                                                $('#ask_confirm_ok_container_btn').html('<b class="butt1 pointer"><b><input value="Продати" type="submit" onClick="if(document._submit)return false;document._submit=true;" class="redd" ID="cart_confirm_ok" style="width: 100px;"></b></b>');
+                                                btn_name = gameTranslate("Продати");
+                                                $('#ask_confirm_ok_container_btn').html('<b class="butt1 pointer"><b><input value="' + gameTranslate("Продати") + '" type="submit" onClick="if(document._submit)return false;document._submit=true;" class="redd" ID="cart_confirm_ok" style="width: 100px;"></b></b>');
                                             } else {
                                                 $('#ask_confirm_ok_container_btn').html('<b class="butt1 pointer"><b><input value="Ok" type="submit" onClick="if(document._submit)return false;document._submit=true;" class="redd" ID="cart_confirm_ok" style="width: 100px;"></b></b>');
                                             }
@@ -852,7 +853,7 @@
                                                     action_titl = action.title;
                                                 } catch (e) {
                                                 }
-                                                action_ask_confirm.innerHTML = (params.question) ? params.question : ('Вы уверены, что хотите ' + action_titl + '?');
+                                                action_ask_confirm.innerHTML = (params.question) ? params.question : (gameTranslate("Вы уверены, что хотите ") + action_titl + '?');
                                                 action_block.innerHTML = ask_confirm_title_actions[params.action]['title_popup'] ? ask_confirm_title_actions[params.action]['title_popup'] : action_titl;
                                             }
 
@@ -901,7 +902,7 @@
 
                                                     <div class="popup_global_content" style="padding: 20px;">
                                                         <div id="action_ask_confirm" class="redd"
-                                                             style="text-align: center;">Вы уверены, что хотите ПРОДАТЬ?
+                                                             style="text-align: center;">{{ __("Вы уверены, что хотите ПРОДАТЬ?") }}
                                                         </div>
                                                         <span id="action_description"></span>
                                                         <div class="popup-artifact" id="popup_artifact">
@@ -914,11 +915,11 @@
                                                                     <span id="ask_confirm_type"></span></div>
                                                                 <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}" width="11"
                                                                           height="10" class="tbl-shp_item-ico" alt="">
-                                                                    Уровень <span id="ask_confirm_level"></span></div>
+                                                                   {{ __(" Уровень ") }}<span id="ask_confirm_level"></span></div>
                                                                 <div id="sellAskDurability" style="">
-                                                                    Прочность <span
+                                                                    {{ __("Прочность") }} <span
                                                                         id="ask_confirm_durability_amount"></span></div>
-                                                                <div id="price_container" style="display: none">Цена:
+                                                                <div id="price_container" style="display: none">{{ __("Цена:") }}
                                                                     <span id="price"></span></div>
                                                             </div>
                                                         </div>
@@ -926,7 +927,7 @@
                                                             <b></b> <span></span></div>
                                                         <div style="clear: both; margin-top: 10px; text-align: center;">
                                                             <span id="ask_confirm_ok_container_btn"></span>
-                                                            <b class="butt1 pointer"><b><input value="Отмена"
+                                                            <b class="butt1 pointer"><b><input value="{{ __("Отмена") }}"
                                                                                                type="button"
                                                                                                onclick="ask_confirm();"
                                                                                                class="redd"
@@ -963,11 +964,11 @@
                                                 <table class="coll w100 p10h p2v brd2-all">
                                                     <tbody>
                                                     <tr class="bg_l">
-                                                        <td nowrap=""><b>Вместимость:</b> &nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
+                                                        <td nowrap=""><b>{{ __("Вместимость:") }}</b> &nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
                                                         <td align="right" nowrap="">
-                                                            <b>Монет:</b>
-                                                            &nbsp;<b class="redd"><span title="Золотой"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                                                            &nbsp;&nbsp;&nbsp<b class="redd"><span title="Бриллиант"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                                                            <b>{{ __("Монет:") }}</b>
+                                                            &nbsp;<b class="redd"><span title="{{ __("Золотой") }}"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                                                            &nbsp;&nbsp;&nbsp<b class="redd"><span title="{{ __("Бриллиант") }}"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
                                                         </td>
                                                     </tr>
                                                     </tbody>
@@ -988,7 +989,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Оружие, щиты и инструменты</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Оружие, щиты и инструменты") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1090,7 +1091,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Доспехи</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Доспехи") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1141,7 +1142,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Аксессуары</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Аксессуары") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1225,7 +1226,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Боевые эффекты</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Боевые эффекты") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1276,7 +1277,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Еда</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Еда") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1326,7 +1327,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Ресурсы</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Ресурсы") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1376,7 +1377,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Свитки</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Свитки") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1428,7 +1429,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Рецепты</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Рецепты") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1479,7 +1480,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Шкатулки</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Шкатулки") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1518,7 +1519,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Камни</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Камни") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1567,7 +1568,7 @@
                                                                         <tbody>
                                                                         <tr height="22">
                                                                             <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">Руны</td>
+                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Руны") }}</td>
                                                                             <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                         </tr>
                                                                         </tbody>
@@ -1616,7 +1617,7 @@
                                                                     <tbody>
                                                                     <tr height="22">
                                                                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                        <td align="center" class="tbl-usi-hdr mbg">Торговые товары</td>
+                                                                        <td align="center" class="tbl-usi-hdr mbg">{{ __("Торговые товары") }}</td>
                                                                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                                                                     </tr>
                                                                     </tbody>
@@ -1740,7 +1741,7 @@
                                                     }
 
                                                     if (obj.getAttribute('puton_confirm') > 0) {
-                                                        top.systemConfirm('<span>После того как предмет будет надет, он станет непередаваемым.</span> <br><br>Вы уверены?', 'Действие', false, function () {
+                                                        top.systemConfirm('<span>' + gameTranslate("После того как предмет будет надет, он станет непередаваемым.") + '</span> <br><br>' + gameTranslate("Вы уверены?") + '', gameTranslate("Действие"), false, function () {
 
                                                             getUrl(urlPUTON + '&artifact_id=' + id + '&in[slot_num]=' + slotNum + '&in[variant_effect]=' + isVariant + '&ajax=1&out_ajax=1&update_swf=1', function (s, h, out) {
                                                                 gebi('ajax_loader_inv').style.display = 'block';
@@ -1776,7 +1777,7 @@
                                                                         });
                                                                     } else {
                                                                         gebi('ajax_loader_inv').style.display = 'none';
-                                                                        showError((out['error'] !== undefined ? out['error'] : 'Ошибка'));
+                                                                        showError((out['error'] !== undefined ? out['error'] : gameTranslate("Ошибка")));
                                                                     }
                                                                 } catch (e) {
                                                                     gebi('ajax_loader_inv').style.display = 'none';
@@ -1820,7 +1821,7 @@
                                                                 });
                                                             } else {
                                                                 gebi('ajax_loader_inv').style.display = 'none';
-                                                                showError((out['error'] !== undefined ? out['error'] : 'Ошибка'));
+                                                                showError((out['error'] !== undefined ? out['error'] : gameTranslate("Ошибка")));
                                                             }
                                                         } catch (e) {
                                                             gebi('ajax_loader_inv').style.display = 'none';
@@ -1911,7 +1912,7 @@
                                                                 });
                                                             } else {
                                                                 gebi('ajax_loader_inv').style.display = 'none';
-                                                                showError((out['error'] !== undefined ? out['error'] : 'Ошибка'));
+                                                                showError((out['error'] !== undefined ? out['error'] : gameTranslate("Ошибка")));
                                                             }
                                                         } catch (e) {
                                                             gebi('ajax_loader_inv').style.display = 'none';
@@ -2031,18 +2032,18 @@
 <div id="drop-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:9990;"></div>
 
 <div id="item-ctx-menu" style="display:none; position:fixed; z-index:9999; background:#f5e9d0; border:2px solid #CEBBAA; border-radius:4px; box-shadow:2px 2px 6px rgba(0,0,0,0.35); min-width:130px; font-family:Tahoma; font-size:11px; overflow:hidden;">
-    <div class="ctx-item" id="ctx-info"    onclick="ctxAction('info')">Информация</div>
-    <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">Надеть</div>
-    <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">Снять</div>
-    <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">Использовать</div>
-    <div class="ctx-item" id="ctx-learn"   onclick="ctxAction('learn')">Изучить</div>
-    <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">Отправить в чат</div>
-    <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">Выкинуть</div>
+    <div class="ctx-item" id="ctx-info"    onclick="ctxAction('info')">{{ __("Информация") }}</div>
+    <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">{{ __("Надеть") }}</div>
+    <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">{{ __("Снять") }}</div>
+    <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">{{ __("Использовать") }}</div>
+    <div class="ctx-item" id="ctx-learn"   onclick="ctxAction('learn')">{{ __("Изучить") }}</div>
+    <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">{{ __("Отправить в чат") }}</div>
+    <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">{{ __("Выкинуть") }}</div>
 </div>
 <div id="debuff-target-dialog" style="display:none; position:fixed; z-index:10000; top:50%; left:50%; transform:translate(-50%,-50%); width:260px; padding:14px; background:#f5e9d0; border:2px solid #9d3829; border-radius:4px; box-shadow:2px 2px 12px rgba(0,0,0,.5); font:12px Tahoma; color:#461c0b;">
-    <div style="font-weight:bold;margin-bottom:10px">Выберите цель для дебаффа</div>
+    <div style="font-weight:bold;margin-bottom:10px">{{ __("Выберите цель для дебаффа") }}</div>
     <select id="debuff-target-select" style="width:100%;margin-bottom:10px"></select>
-    <div style="text-align:right"><button type="button" onclick="closeDebuffTargetDialog()">Отмена</button> <button type="button" onclick="confirmDebuffTarget()">Применить</button></div>
+    <div style="text-align:right"><button type="button" onclick="closeDebuffTargetDialog()">{{ __("Отмена") }}</button> <button type="button" onclick="confirmDebuffTarget()">{{ __("Применить") }}</button></div>
 </div>
 <style>
     .ctx-item { padding: 6px 14px; cursor: pointer; color: #461c0b; border-bottom: 1px solid #e0ccb0; }
@@ -2194,7 +2195,7 @@
 
     function openDebuffTargetDialog(itemId) {
         if (!_debuffTargets.length) {
-            try { window.top.showErrorIframe('В этой локации нет другого активного игрока.'); } catch(e) {}
+            try { window.top.showErrorIframe(gameTranslate("В этой локации нет другого активного игрока.")); } catch(e) {}
             return;
         }
         _debuffItemId = itemId;
@@ -2234,7 +2235,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.status !== 'success') {
-                try { window.top.showErrorIframe(data.message || 'Ошибка'); } catch(e) { alert(data.message || 'Ошибка'); }
+                try { window.top.showErrorIframe(data.message || gameTranslate("Ошибка")); } catch(e) { alert(data.message || gameTranslate("Ошибка")); }
                 return;
             }
 
@@ -2261,7 +2262,7 @@
             }
 
             if (data.message) {
-                try { window.top.openGameMessageModal({ title: 'Предмет использован', message: data.message }); } catch(e) {}
+                try { window.top.openGameMessageModal({ title: gameTranslate("Предмет использован"), message: data.message }); } catch(e) {}
             }
 
             if (data.teleport_url) {
@@ -2286,7 +2287,7 @@
             try { window.top.refreshHotbar(); } catch(e) {}
         })
         .catch(function() {
-            try { window.top.showErrorIframe('Ошибка использования предмета'); } catch(e) {}
+            try { window.top.showErrorIframe(gameTranslate("Ошибка использования предмета")); } catch(e) {}
         });
     }
 
@@ -2305,7 +2306,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (!data.ok) {
-                try { window.top.showErrorIframe(data.message || 'Ошибка'); } catch(e) { alert(data.message || 'Ошибка'); }
+                try { window.top.showErrorIframe(data.message || gameTranslate("Ошибка")); } catch(e) { alert(data.message || gameTranslate("Ошибка")); }
                 return;
             }
 
@@ -2328,14 +2329,14 @@
             }
         })
         .catch(function() {
-            try { window.top.showErrorIframe('Ошибка изучения'); } catch(e) {}
+            try { window.top.showErrorIframe(gameTranslate("Ошибка изучения")); } catch(e) {}
         });
     }
 
     function showDropDialog(itemId, count) {
         var base = '{{ url("/items") }}';
-        gebi('action_title_amount').innerHTML = 'Выброс предмета';
-        gebi('ask_amount_title').innerHTML    = 'Вы уверены, что хотите выбросить предмет?';
+        gebi('action_title_amount').innerHTML = gameTranslate("Выброс предмета");
+        gebi('ask_amount_title').innerHTML    = gameTranslate("Вы уверены, что хотите выбросить предмет?");
         gebi('art_amount').innerHTML          = _ctxItemImage ? '<img src="' + _ctxItemImage + '" style="width:60px;height:60px;">' : '';
         gebi('ask_confirm_title_amount').innerHTML = _ctxItemName;
 
@@ -2353,11 +2354,11 @@
                 gebi('cart_amount').value = count;
             };
             gebi('ask_confirm_ok_container').innerHTML =
-                '<b class="butt1 pointer"><b><input value="Выбросить" type="button" onclick="doDropItem(' + itemId + ', \'' + base + '\')" style="width: 100px;" class="redd"></b></b>';
+                '<b class="butt1 pointer"><b><input value="' + gameTranslate("Выбросить") + '" type="button" onclick="doDropItem(' + itemId + ', \'' + base + '\')" style="width: 100px;" class="redd"></b></b>';
         } else {
             qtyRow.style.display = 'none';
             gebi('ask_confirm_ok_container').innerHTML =
-                '<b class="butt1 pointer"><b><input value="Выбросить" type="button" onclick="location.href=\'' + base + '/drop/' + itemId + '?c=1\'" style="width: 100px;" class="redd"></b></b>';
+                '<b class="butt1 pointer"><b><input value="' + gameTranslate("Выбросить") + '" type="button" onclick="location.href=\'' + base + '/drop/' + itemId + '?c=1\'" style="width: 100px;" class="redd"></b></b>';
         }
 
         var div = gebi('cart_amount_div');

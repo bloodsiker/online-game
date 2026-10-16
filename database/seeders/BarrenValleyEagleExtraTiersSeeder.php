@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +41,7 @@ class BarrenValleyEagleExtraTiersSeeder extends Seeder
         foreach (self::PLACEMENTS as $placement) {
             $level = $placement['level'];
 
-            $monster = DB::table('monsters')->where('name', 'Кровавый Орёл')->where('lvl', $level)->first();
+            $monster = LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Кровавый Орёл')->where('lvl', $level)->first();
 
             if ($monster === null) {
                 $a = self::ARCHETYPE;
@@ -52,7 +53,7 @@ class BarrenValleyEagleExtraTiersSeeder extends Seeder
                 $exp = MonsterStatFormulas::expReward($level, 1.0);
                 [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $level);
 
-                $monsterId = DB::table('monsters')->insertGetId([
+                $monsterId = LocalizedContentSeederQuery::forTable('monsters')->insertGetId([
                     'name' => 'Кровавый Орёл',
                     'description' => 'Крупный хищный орёл с тёмно-рыжим оперением на груди — высматривает добычу с воздуха и бьёт в пикировании, не давая опомниться.',
                     'image' => null,

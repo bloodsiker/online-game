@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -68,7 +70,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
             }
 
             foreach (self::CONTENT as $entry) {
-                $skillId = DB::table('skills')
+                $skillId = LocalizedContentSeederQuery::forTable('skills')
                     ->where('name', $entry['profession'])
                     ->where('type', 'peaceful')
                     ->value('id');
@@ -150,11 +152,11 @@ class PeacefulProfessionDemoSeeder extends Seeder
 
     private function upsertShareItem(string $name, array $attributes): int
     {
-        $id = DB::table('share_items')->where('name', $name)->value('id');
+        $id = LocalizedItemSeederQuery::items()->where('name', $name)->value('id');
         $now = now();
 
         if ($id === null) {
-            return (int) DB::table('share_items')->insertGetId([
+            return (int) LocalizedItemSeederQuery::items()->insertGetId([
                 'name' => $name,
                 ...$attributes,
                 'created_at' => $now,
@@ -162,7 +164,7 @@ class PeacefulProfessionDemoSeeder extends Seeder
             ]);
         }
 
-        DB::table('share_items')->where('id', $id)->update([
+        LocalizedItemSeederQuery::items()->where('id', $id)->update([
             ...$attributes,
             'updated_at' => $now,
         ]);

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Социальный список</title>
+    <title>{{ __('Социальный список') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 11px; }
@@ -43,7 +43,7 @@
     <td class="tbl-shp-sml tt" valign="top" align="center">
         <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-            <td align="center" class="tbl-usi_label-center">Социальный список</td>
+            <td align="center" class="tbl-usi_label-center">{{ __('Социальный список') }}</td>
             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
         </tr></tbody></table>
     </td>
@@ -62,10 +62,10 @@
             $btnC2 = asset('img/bg/btn/btn-cent2.gif');
             $btnR2 = asset('img/bg/btn/btn-right2.gif');
             $tabs = [
-                ['id' => 'friends', 'label' => 'Друзья (' . (count($page->friends) + count($page->outgoing)) . ')', 'active' => true],
-                ['id' => 'incoming', 'label' => 'Дружат со мной' . (count($page->incoming) > 0 ? ' (' . count($page->incoming) . ')' : ''), 'active' => false],
-                ['id' => 'enemies', 'label' => 'Враги (' . count($page->enemies) . ')', 'active' => false],
-                ['id' => 'ignores', 'label' => 'Игнор-лист (' . count($page->ignores) . ')', 'active' => false],
+                ['id' => 'friends', 'label' => __('Друзья') . ' (' . (count($page->friends) + count($page->outgoing)) . ')', 'active' => true],
+                ['id' => 'incoming', 'label' => __('Дружат со мной') . (count($page->incoming) > 0 ? ' (' . count($page->incoming) . ')' : ''), 'active' => false],
+                ['id' => 'enemies', 'label' => __('Враги') . ' (' . count($page->enemies) . ')', 'active' => false],
+                ['id' => 'ignores', 'label' => __('Игнор-лист') . ' (' . count($page->ignores) . ')', 'active' => false],
             ];
         @endphp
         <table border="0" cellspacing="0" cellpadding="0" style="margin: 6px 8px 0;"><tbody><tr height="21">
@@ -81,56 +81,56 @@
 
         <div id="tab-friends" class="tab-pane active">
             <div class="add-row">
-                <label>Добавить в друзья:</label>
+                <label>{{ __('Добавить в друзья:') }}</label>
                 <form method="post" action="{{ route('friends.add') }}">
                     @csrf
-                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="Ник персонажа" maxlength="32" style="width:140px"></span></span>
-                    <b class="butt2 pointer"><b><button type="submit" class="pointer">Отправить запрос</button></b></b>
+                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="{{ __('Ник персонажа') }}" maxlength="32" style="width:140px"></span></span>
+                    <b class="butt2 pointer"><b><button type="submit" class="pointer">{{ __('Отправить запрос') }}</button></b></b>
                 </form>
             </div>
             <table class="fr" cellspacing="0" style="margin-top:4px">
-                <thead><tr><th>Персонаж</th><th width="70" align="center">Онлайн</th><th width="120" align="center">Последний раз</th><th width="100" align="center">Статус</th><th width="70" align="center">Действия</th></tr></thead>
+                <thead><tr><th>{{ __('Персонаж') }}</th><th width="70" align="center">{{ __('Онлайн') }}</th><th width="120" align="center">{{ __('Последний раз') }}</th><th width="100" align="center">{{ __('Статус') }}</th><th width="70" align="center">{{ __('Действия') }}</th></tr></thead>
                 <tbody>
                 @foreach($page->friends as $rel)
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                         <td>@include('friend::partials.entry', ['rel' => $rel])</td>
-                        <td align="center" class="b">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">Да</span>@else<span class="offline-dot"></span>Нет @endif</td>
+                        <td align="center" class="b">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">{{ __('Да') }}</span>@else<span class="offline-dot"></span>{{ __('Нет') }} @endif</td>
                         <td align="center" class="last-online b">{{ $rel->lastOnlineLabel ?? '—' }}</td>
-                        <td align="center" class="grnn"><b>друг</b></td>
-                        <td align="center"><form method="post" action="{{ route('friends.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('Удалить из друзей?')">Удалить</button></b></b></form></td>
+                        <td align="center" class="grnn"><b>{{ __('друг') }}</b></td>
+                        <td align="center"><form method="post" action="{{ route('friends.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('{{ __('Удалить из друзей?') }}')">{{ __('Удалить') }}</button></b></b></form></td>
                     </tr>
                 @endforeach
                 @foreach($page->outgoing as $rel)
                     <tr class="{{ (count($page->friends) + $loop->index) % 2 === 0 ? '' : 'bg_l' }}">
                         <td>@include('friend::partials.entry', ['rel' => $rel])</td>
-                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">Да</span>@else<span class="offline-dot"></span>Нет @endif</td>
+                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">{{ __('Да') }}</span>@else<span class="offline-dot"></span>{{ __('Нет') }} @endif</td>
                         <td align="center" class="last-online">{{ $rel->lastOnlineLabel ?? '—' }}</td>
-                        <td align="center" class="pending-status">ожидает ответа…</td>
-                        <td align="center"><form method="post" action="{{ route('friends.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('Отменить запрос?')">Отменить</button></b></b></form></td>
+                        <td align="center" class="pending-status">{{ __('ожидает ответа…') }}</td>
+                        <td align="center"><form method="post" action="{{ route('friends.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('{{ __('Отменить запрос?') }}')">{{ __('Отменить') }}</button></b></b></form></td>
                     </tr>
                 @endforeach
-                @if($page->friends === [] && $page->outgoing === [])<tr><td colspan="5" align="center" style="color:#999;padding:8px">Список друзей пуст</td></tr>@endif
+                @if($page->friends === [] && $page->outgoing === [])<tr><td colspan="5" align="center" style="color:#999;padding:8px">{{ __('Список друзей пуст') }}</td></tr>@endif
                 </tbody>
             </table>
         </div>
 
         <div id="tab-incoming" class="tab-pane">
             <table class="fr" cellspacing="0" style="margin-top:8px">
-                <thead><tr><th>Персонаж</th><th width="70" align="center">Онлайн</th><th width="120" align="center">Последний раз</th><th width="180" align="center">Действия</th></tr></thead>
+                <thead><tr><th>{{ __('Персонаж') }}</th><th width="70" align="center">{{ __('Онлайн') }}</th><th width="120" align="center">{{ __('Последний раз') }}</th><th width="180" align="center">{{ __('Действия') }}</th></tr></thead>
                 <tbody>
                 @forelse($page->incoming as $rel)
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                         <td>@include('friend::partials.entry', ['rel' => $rel])</td>
-                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">Да</span>@else<span class="offline-dot"></span>Нет @endif</td>
+                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">{{ __('Да') }}</span>@else<span class="offline-dot"></span>{{ __('Нет') }} @endif</td>
                         <td align="center" class="last-online">{{ $rel->lastOnlineLabel ?? '—' }}</td>
                         <td align="center">
-                            <form method="post" action="{{ route('friends.accept', $rel->relationshipId) }}" style="display:inline">@csrf<b class="butt2 pointer"><b><button type="submit" class="pointer">Принять</button></b></b></form>
+                            <form method="post" action="{{ route('friends.accept', $rel->relationshipId) }}" style="display:inline">@csrf<b class="butt2 pointer"><b><button type="submit" class="pointer">{{ __('Принять') }}</button></b></b></form>
                             &nbsp;
-                            <form method="post" action="{{ route('friends.decline', $rel->relationshipId) }}" style="display:inline">@csrf<b class="butt2 pointer"><b><button type="submit" class="pointer">Отклонить</button></b></b></form>
+                            <form method="post" action="{{ route('friends.decline', $rel->relationshipId) }}" style="display:inline">@csrf<b class="butt2 pointer"><b><button type="submit" class="pointer">{{ __('Отклонить') }}</button></b></b></form>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Нет входящих запросов</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">{{ __('Нет входящих запросов') }}</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -138,25 +138,25 @@
 
         <div id="tab-enemies" class="tab-pane">
             <div class="add-row">
-                <label>Добавить врага:</label>
+                <label>{{ __('Добавить врага:') }}</label>
                 <form method="post" action="{{ route('enemies.add') }}">
                     @csrf
-                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="Ник персонажа" maxlength="32" style="width:140px"></span></span>
-                    <b class="butt2 pointer"><b><button type="submit" class="pointer">Добавить</button></b></b>
+                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="{{ __('Ник персонажа') }}" maxlength="32" style="width:140px"></span></span>
+                    <b class="butt2 pointer"><b><button type="submit" class="pointer">{{ __('Добавить') }}</button></b></b>
                 </form>
             </div>
             <table class="fr" cellspacing="0" style="margin-top:4px">
-                <thead><tr><th>Персонаж</th><th width="70" align="center">Онлайн</th><th width="120" align="center">Последний раз</th><th width="70" align="center">Действия</th></tr></thead>
+                <thead><tr><th>{{ __('Персонаж') }}</th><th width="70" align="center">{{ __('Онлайн') }}</th><th width="120" align="center">{{ __('Последний раз') }}</th><th width="70" align="center">{{ __('Действия') }}</th></tr></thead>
                 <tbody>
                 @forelse($page->enemies as $rel)
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                         <td>@include('friend::partials.entry', ['rel' => $rel])</td>
-                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">Да</span>@else<span class="offline-dot"></span>Нет @endif</td>
+                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">{{ __('Да') }}</span>@else<span class="offline-dot"></span>{{ __('Нет') }} @endif</td>
                         <td align="center" class="last-online">{{ $rel->lastOnlineLabel ?? '—' }}</td>
-                        <td align="center"><form method="post" action="{{ route('enemies.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('Убрать из врагов?')">Удалить</button></b></b></form></td>
+                        <td align="center"><form method="post" action="{{ route('enemies.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('{{ __('Убрать из врагов?') }}')">{{ __('Удалить') }}</button></b></b></form></td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Список врагов пуст</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">{{ __('Список врагов пуст') }}</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -164,25 +164,25 @@
 
         <div id="tab-ignores" class="tab-pane">
             <div class="add-row">
-                <label>Добавить в игнор:</label>
+                <label>{{ __('Добавить в игнор:') }}</label>
                 <form method="post" action="{{ route('ignores.add') }}">
                     @csrf
-                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="Ник персонажа" maxlength="32" style="width:140px"></span></span>
-                    <b class="butt2 pointer"><b><button type="submit" class="pointer">Игнорировать</button></b></b>
+                    <span class="b-input"><span class="b-input__inner"><input type="text" name="name" placeholder="{{ __('Ник персонажа') }}" maxlength="32" style="width:140px"></span></span>
+                    <b class="butt2 pointer"><b><button type="submit" class="pointer">{{ __('Игнорировать') }}</button></b></b>
                 </form>
             </div>
             <table class="fr" cellspacing="0" style="margin-top:4px">
-                <thead><tr><th>Персонаж</th><th width="70" align="center">Онлайн</th><th width="120" align="center">Последний раз</th><th width="70" align="center">Действия</th></tr></thead>
+                <thead><tr><th>{{ __('Персонаж') }}</th><th width="70" align="center">{{ __('Онлайн') }}</th><th width="120" align="center">{{ __('Последний раз') }}</th><th width="70" align="center">{{ __('Действия') }}</th></tr></thead>
                 <tbody>
                 @forelse($page->ignores as $rel)
                     <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                         <td>@include('friend::partials.entry', ['rel' => $rel])</td>
-                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">Да</span>@else<span class="offline-dot"></span>Нет @endif</td>
+                        <td align="center">@if($rel->isOnline)<span class="online-dot"></span><span class="grnn">{{ __('Да') }}</span>@else<span class="offline-dot"></span>{{ __('Нет') }} @endif</td>
                         <td align="center" class="last-online">{{ $rel->lastOnlineLabel ?? '—' }}</td>
-                        <td align="center"><form method="post" action="{{ route('ignores.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('Убрать из игнора?')">Удалить</button></b></b></form></td>
+                        <td align="center"><form method="post" action="{{ route('ignores.remove', $rel->relationshipId) }}" style="display:inline">@csrf @method('DELETE')<b class="butt2 pointer"><b><button type="submit" class="pointer" onclick="return confirm('{{ __('Убрать из игнора?') }}')">{{ __('Удалить') }}</button></b></b></form></td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">Игнор-лист пуст</td></tr>
+                    <tr><td colspan="4" align="center" style="color:#999;padding:8px">{{ __('Игнор-лист пуст') }}</td></tr>
                 @endforelse
                 </tbody>
             </table>

@@ -91,6 +91,20 @@ class SkillEffectImageUploadTest extends TestCase
         Storage::disk('public')->assertExists($path);
     }
 
+    public function test_admin_saves_russian_and_ukrainian_text_for_spells_and_effects(): void
+    {
+        foreach (['magic_skill' => 'magic_skills', 'effect' => 'effects'] as $route => $table) {
+            $this->post(route('admin.'.$route.'.create'), [
+                'name' => 'Ожог', 'description' => '<p>Урон</p>',
+                'translations' => ['uk' => ['name' => 'Опік', 'description' => '<p>Шкода</p>']],
+                'slug' => 'burn-translation-'.$route, 'type' => 'buff', 'target_type' => 'self',
+            ])->assertRedirect();
+            $row = DB::table($table)->first();
+            $this->assertSame(['ru' => 'Ожог', 'uk' => 'Опік'], json_decode($row->name, true));
+            $this->assertSame(['ru' => '<p>Урон</p>', 'uk' => '<p>Шкода</p>'], json_decode($row->description, true));
+        }
+    }
+
     public function test_admin_stores_passive_stat_bonuses_for_magic_skill(): void
     {
         $this->post(route('admin.magic_skill.create'), [

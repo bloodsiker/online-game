@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Listeners\SendWorldEventFinishedMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
@@ -20,7 +22,8 @@ final class SendWorldEventFinishedMessageTest extends TestCase
         $chatService->shouldReceive('sendSystem')
             ->once()
             ->with(
-                ':speak: Событие <em>«Складские воры»</em> закончилось!',
+                Mockery::on(fn ($message): bool => $message instanceof LocalizedChatMessage
+                    && app(ChatMessageTranslator::class)->render($message, 'ru') === ':speak: Событие <em>«Складские воры»</em> закончилось!'),
                 null,
                 null,
                 ChatMessageType::WorldEvent,

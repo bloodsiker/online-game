@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Репутации</title>
+    <title>{{ __('Репутации') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html { height: 100%; }
@@ -287,7 +287,7 @@
 
                         <div class="rep-rating-summary">
                             <img src="{{ asset('main/images/data/rating/rat_rep.png') }}" width="20" height="16" alt="">
-                            Репутационный рейтинг: <b>{{ number_format($page->reputationRating, 0, '.', ' ') }}</b>
+                            {{ __('Репутационный рейтинг:') }} <b>{{ number_format($page->reputationRating, 0, '.', ' ') }}</b>
                         </div>
 
                         <div class="rep-list">
@@ -305,7 +305,7 @@
                                     $pct         = $nextTier && $tierRange > 0
                                         ? min((int) round($tierPoints * 100 / $tierRange), 100)
                                         : 100;
-                                    $currentRank = $currentTier?->medal_name ?? 'Нейтральный';
+                                    $currentRank = $currentTier?->medal_name ?? __('Нейтральный');
                                     $emblemUrl = $earnedMedalTier?->medalIconUrl();
                                 @endphp
                                 <div class="rep-card">
@@ -326,9 +326,9 @@
                                         @endif
 
                                         <div class="rep-divider"></div>
-                                        <div class="rep-progress-title">Прогресс репутации</div>
+                                        <div class="rep-progress-title">{{ __('Прогресс репутации') }}</div>
 
-                                        <div class="rep-progress-bar" title="{{ $pr->points }} из {{ $maxPoints ?? '∞' }}">
+                                        <div class="rep-progress-bar" title="{{ $pr->points }} {{ __('из') }} {{ $maxPoints ?? '∞' }}">
                                             <div class="rep-progress-bar__bg">
                                                 <div class="rep-progress-bar__fill" style="width: {{ $pct }}%;"></div>
                                             </div>
@@ -344,18 +344,18 @@
                                         <div class="rep-status">
                                             <div class="rep-status-current">{{ $currentRank }}</div>
                                             @if($nextTier)
-                                                <div class="rep-status-next">Следующий ранг: {{ $nextTier->medal_name }}</div>
+                                                <div class="rep-status-next">{{ __('Следующий ранг:') }} {{ $nextTier->medal_name }}</div>
                                             @else
-                                                <div class="rep-status-next">Достигнут высший ранг</div>
+                                                <div class="rep-status-next">{{ __('Достигнут высший ранг') }}</div>
                                             @endif
                                             @if($rep->npc)
-                                                <div class="rep-npc">Наставник: {{ $rep->npc->name }}</div>
+                                                <div class="rep-npc">{{ __('Наставник:') }} {{ $rep->npc->name }}</div>
                                             @endif
                                         </div>
 
                                         <div class="rep-btn">
                                             <b class="butt1 pointer"><b>
-                                                <input value="Подробнее" type="button"
+                                                <input value="{{ __('Подробнее') }}" type="button"
                                                        onclick="location.href='{{ route('reputation.index', $rep->id) }}'"
                                                        style="width: 100px;">
                                             </b></b>
@@ -363,7 +363,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <div style="padding:10px; color:#888; font-size:11px;">Репутации не найдены.</div>
+                                <div style="padding:10px; color:#888; font-size:11px;">{{ __('Репутации не найдены.') }}</div>
                             @endforelse
                         </div>
 

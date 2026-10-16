@@ -8,6 +8,7 @@ use App\Modules\Interface\Application\Mappers\HeroPageViewMapper;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
 use App\Modules\Interface\Domain\Events\PlayerStateUpdated;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\User\Application\Services\GameSettingsService;
 
 class PlayerEffectStateBroadcaster
 {
@@ -18,9 +19,13 @@ class PlayerEffectStateBroadcaster
 
     public function broadcast(Player $player): void
     {
+        $locale = $player->user_id
+            ? app(GameSettingsService::class)->get((int) $player->user_id)['language']
+            : app()->getLocale();
         $effects = $this->heroMapper->mapEffects(
             $this->readRepository->getPlayerActiveEffects((int) $player->id),
             now(),
+            locale: $locale,
         );
 
         PlayerStateUpdated::dispatch((int) $player->id, [

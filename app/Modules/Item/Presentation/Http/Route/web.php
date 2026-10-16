@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/item/info/{id}', [ItemController::class, 'info'])->name('items.info');
 Route::get('/item/info/s/{id}', [ItemController::class, 'infoByShareItem'])->name('items.info.share');
 
-Route::middleware(['auth'])->group(function (): void {
+Route::middleware(['auth', 'prison.context'])->group(function (): void {
     Route::post('/items/use/{id}', [ItemController::class, 'useItem'])->name('items.use');
     Route::get('/items/put-on/{id}', [ItemController::class, 'putOn'])->name('items.put_on');
     Route::get('/items/put-off/{id}', [ItemController::class, 'putOff'])->name('items.put_off');

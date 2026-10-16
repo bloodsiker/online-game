@@ -16,12 +16,12 @@ enum PlayerStatKey: string
     public function label(): string
     {
         return match ($this) {
-            self::STRENGTH => 'Сила',
-            self::AGILITY => 'Ловкость',
-            self::INTUITION => 'Интуиция',
-            self::WISDOM => 'Мудрость',
-            self::INTELLIGENCE => 'Интеллект',
-            self::ENDURANCE => 'Выносливость',
+            self::STRENGTH => __('Сила'),
+            self::AGILITY => __('Ловкость'),
+            self::INTUITION => __('Интуиция'),
+            self::WISDOM => __('Мудрость'),
+            self::INTELLIGENCE => __('Интеллект'),
+            self::ENDURANCE => __('Выносливость'),
         };
     }
 }

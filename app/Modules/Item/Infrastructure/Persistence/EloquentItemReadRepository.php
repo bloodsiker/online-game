@@ -49,7 +49,7 @@ class EloquentItemReadRepository implements ItemReadRepository
         return User::with(['player'])
             ->where('location_id', $user->location_id)
             ->whereNot('id', $user->id)
-            ->where('last_online_at', '>', now()->subMinutes(10))
+            ->where('last_online_at', '>', now()->subMinutes((int) config('game.online_timeout_minutes', 30)))
             ->orderByDesc('last_online_at')
             ->get();
     }

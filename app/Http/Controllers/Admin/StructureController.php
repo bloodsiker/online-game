@@ -5,34 +5,43 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItemRequirement;
+use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class StructureController extends Controller
 {
-    public function create(Request $request): mixed
+    private readonly AdminImageStorage $imageStorage;
+
+    public function __construct(?AdminImageStorage $imageStorage = null)
+    {
+        $this->imageStorage = $imageStorage ?? new AdminImageStorage;
+    }
+
+    public function create(Request $request, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
             $data = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'description' => ['nullable', 'string'],
                 'type' => ['required', 'string', 'in:'.implode(',', array_keys(Structure::TYPES))],
                 'location_id' => ['nullable', 'integer', 'exists:locations,id'],
                 'npc_id' => ['nullable', 'integer', 'exists:npcs,id'],
+                'dungeon_id' => ['nullable', 'integer', 'exists:dungeons,id'],
             ]);
 
             $structure = new Structure;
-            $structure->name = $data['name'];
-            $structure->description = $data['description'] ?? null;
+            $translationEditor->fill($structure, $request, ['name', 'description']);
             $structure->type = $data['type'];
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
+            $structure->dungeon_id = $data['dungeon_id'] ?? null;
+            $this->applyImage($structure, $request);
             $structure->save();
 
             return redirect()
@@ -53,14 +62,21 @@ class StructureController extends Controller
         return view('admin.structures.list', compact('listStructures'));
     }
 
-    public function info(Request $request, Structure $structure): mixed
+    public function info(Request $request, Structure $structure, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
-            $structure->name = $request->input('name');
-            $structure->description = $request->input('description') ?: null;
-            $structure->type = $request->input('type');
-            $structure->location_id = $request->input('location_id') ?: null;
-            $structure->npc_id = $request->input('npc_id') ?: null;
+            $data = $request->validate([
+                'type' => ['required', 'string', 'in:'.implode(',', array_keys(Structure::TYPES))],
+                'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+                'npc_id' => ['nullable', 'integer', 'exists:npcs,id'],
+                'dungeon_id' => ['nullable', 'integer', 'exists:dungeons,id'],
+            ]);
+            $translationEditor->fill($structure, $request, ['name', 'description']);
+            $structure->type = $data['type'];
+            $structure->location_id = $data['location_id'] ?? null;
+            $structure->npc_id = $data['npc_id'] ?? null;
+            $structure->dungeon_id = $data['dungeon_id'] ?? null;
+            $this->applyImage($structure, $request);
             $structure->save();
 
             return redirect()->back()->with('success', 'Сохранено.');
@@ -69,14 +85,15 @@ class StructureController extends Controller
         $structure->load([
             'location',
             'npc',
+            'clanBossDungeon',
             'categories',
             'shopItems.item',
             'shopItems.category',
             'shopItems.requirements.item',
             'actions',
         ]);
-        $allActions = ShareAction::orderBy('name')->get();
-        $allCategories = ShareStructureCategory::orderBy('name')->get();
+        $allActions = ShareAction::orderBy('name->ru')->get();
+        $allCategories = ShareStructureCategory::orderBy('name->ru')->get();
 
         return view('admin.structures.info', compact('structure', 'allActions', 'allCategories'));
     }
@@ -101,16 +118,22 @@ class StructureController extends Controller
         return redirect()->back()->with('success', 'Предмет добавлен.');
     }
 
-    public function infoCategory(Request $request, Structure $structure): RedirectResponse
+    public function infoCategory(Request $request, Structure $structure, ContentTranslationEditor $translationEditor): RedirectResponse
     {
-        $categoryName = trim((string) $request->input('category_name'));
         $categoryId = $request->integer('share_structure_category_id');
 
-        if ($categoryName !== '') {
-            $categoryId = (int) ShareStructureCategory::firstOrCreate(
-                ['name' => $categoryName],
-                ['is_active' => true],
-            )->id;
+        if ($request->filled('name') || $request->filled('translations.uk.name')) {
+            $categoryName = trim((string) $request->input('name'));
+            $category = $categoryName !== ''
+                ? ShareStructureCategory::query()->where('name->ru', $categoryName)->first()
+                : null;
+            if ($category === null) {
+                $category = new ShareStructureCategory;
+                $translationEditor->fill($category, $request, ['name']);
+                $category->is_active = true;
+                $category->save();
+            }
+            $categoryId = (int) $category->id;
         }
 
         if ($categoryId > 0) {
@@ -195,9 +218,24 @@ class StructureController extends Controller
 
     public function infoAction(Request $request, Structure $structure): RedirectResponse
     {
-        $structure->actions()->syncWithoutDetaching([(int) $request->input('share_action_id')]);
+        $data = $request->validate([
+            'share_action_id' => ['required', 'integer', 'exists:share_actions,id'],
+            'is_active' => ['sometimes', 'boolean'],
+        ]);
+        $structure->actions()->syncWithoutDetaching([
+            (int) $data['share_action_id'] => ['is_active' => $request->boolean('is_active', true)],
+        ]);
 
         return redirect()->back()->with('success', 'Действие добавлено.');
+    }
+
+    public function updateAction(Request $request, Structure $structure, ShareAction $action): RedirectResponse
+    {
+        $data = $request->validate(['is_active' => ['required', 'boolean']]);
+        abort_unless($structure->actions()->whereKey($action->id)->exists(), 404);
+        $structure->actions()->updateExistingPivot($action->id, ['is_active' => (bool) $data['is_active']]);
+
+        return redirect()->back()->with('success', 'Состояние действия сохранено.');
     }
 
     public function infoActionDelete(Structure $structure, ShareAction $action): RedirectResponse
@@ -205,6 +243,18 @@ class StructureController extends Controller
         $structure->actions()->detach($action->id);
 
         return redirect()->back()->with('success', 'Действие удалено.');
+    }
+
+    private function applyImage(Structure $structure, Request $request): void
+    {
+        if ($request->hasFile('image')) {
+            $oldImage = $structure->getRawOriginal('image');
+            $structure->image = $this->imageStorage->storeOnPublicDisk($request->file('image'), 'structure');
+            $this->deleteStorageImage($oldImage);
+        } elseif ($request->boolean('delete_image')) {
+            $this->deleteStorageImage($structure->getRawOriginal('image'));
+            $structure->image = null;
+        }
     }
 
     private function ensureShopItemBelongsToStructure(Structure $structure, ShopItem $shopItem): void

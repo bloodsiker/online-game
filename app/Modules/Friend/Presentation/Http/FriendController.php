@@ -108,6 +108,6 @@ class FriendController extends Controller
             return redirect()->back();
         }
 
-        return redirect()->back()->with($result->flashType, $result->message);
+        return redirect()->back()->with($result->flashType, __($result->message));
     }
 }

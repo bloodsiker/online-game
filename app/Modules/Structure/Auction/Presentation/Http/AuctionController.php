@@ -240,7 +240,7 @@ class AuctionController extends Controller
         }
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
-        $shareItems = ShareItem::where('is_auction_sellable', 1)->orderBy('name')->get();
+        $shareItems = ShareItem::where('is_auction_sellable', 1)->orderBy('name->ru')->get();
 
         return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem', 'commissionShop', 'exchange'));
     }

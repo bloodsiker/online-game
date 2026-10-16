@@ -6,6 +6,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
@@ -134,11 +135,11 @@ readonly class MonsterOnHitEffectService
         $activeType = $effect->resolvedActiveType();
         $emoji = $activeType?->emoji() ?? '⚠️';
 
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p class="color-debuff">%s После удара %s на вас наложен эффект <b>%s</b></p>',
             $emoji,
-            $monster->name,
-            $effect->name,
+            BattleLogTranslator::contentName($monster),
+            BattleLogTranslator::contentName($effect),
         ));
     }
 }

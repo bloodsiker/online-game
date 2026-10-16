@@ -27,6 +27,7 @@ class MagicAttackStrategyTest extends TestCase
 
         Schema::create('players', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('reputation_rating')->default(0);
             $table->integer('mp_now')->default(10);
             // Player::$attributes defaults experience_multiplier to 1.0 on every insert.
             $table->float('experience_multiplier')->default(1.0);

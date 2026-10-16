@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>{{ __('Персонаж') }}</title>
+    @include('interface::partials.game-translations')
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/hero.css') }}">
     <style>
@@ -81,7 +82,7 @@
 
 @if($page->player->user->is_admin)
     <div class="influence-card__title">
-        <a href="#" onclick="parent.openAdminToolsModal?.(); return false;">Админ</a>
+        <a href="#" onclick="parent.openAdminToolsModal?.(); return false;">{{ __('Админ') }}</a>
     </div>
 @endif
 
@@ -115,16 +116,16 @@
 
                 <div class="card-money">
                     <b class="redd">
-                        <span title="Монеты">
-                            <img src="{{ asset('img/icon/m_game.gif') }}" alt="Монеты" width="11" height="11" align="absmiddle">
+                        <span title="{{ __('Монеты') }}">
+                            <img src="{{ asset('img/icon/m_game.gif') }}" alt="{{ __('Монеты') }}" width="11" height="11" align="absmiddle">
                         </span>
                         <span id="playerMoney">
                               {{ format_money($page->player->user->money) }}
                         </span>
                     </b>
                     <b class="redd">
-                        <span title="Бриллиант">
-                            <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="Бриллиант" width="11" height="11" align="absmiddle">
+                        <span title="{{ __('Бриллиант') }}">
+                            <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="{{ __('Бриллиант') }}" width="11" height="11" align="absmiddle">
                         </span>
                         <span id="playerDiamond">
                             {{ format_money($page->player->user->diamond) }}
@@ -134,7 +135,7 @@
 
                 <div class="avatar-container">
                     <div class="avatar-frame">
-                        <img src="{{ asset('img/avatar/dark_elf.jpg') }}" alt="Аватар гравця" class="avatar-img" id="avatarImg">
+                        <img src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ __('Аватар гравця') }}" class="avatar-img" id="avatarImg">
                     </div>
                 </div>
 
@@ -359,7 +360,7 @@
     function updateEffectElement(element, effect) {
         element.title = effect.name;
         element.querySelector('.effect-tooltip-name').textContent = effect.name;
-        element.querySelector('.effect-tooltip-description').innerHTML = effect.description || 'Активный эффект.';
+        element.querySelector('.effect-tooltip-description').innerHTML = effect.description || @json(__('Активный эффект.'));
 
         const image = element.querySelector('.effect-icon img');
         const source = effect.image || '{{ asset('main/images/effects-unavailable.png') }}';
@@ -563,9 +564,9 @@
 
     // Створити HTML елемент ефекту
     function formatEffectTime(s) {
-        if (s >= 3600) return Math.floor(s / 3600) + 'ч ' + Math.floor((s % 3600) / 60) + 'м';
-        if (s >= 60)   return Math.floor(s / 60) + 'м ' + (s % 60) + 'с';
-        return s + 'с';
+        if (s >= 3600) return Math.floor(s / 3600) + gameTranslate('ч') + ' ' + Math.floor((s % 3600) / 60) + gameTranslate('м');
+        if (s >= 60)   return Math.floor(s / 60) + gameTranslate('м') + ' ' + (s % 60) + gameTranslate('с');
+        return s + gameTranslate('с');
     }
 
     function positionEffectTooltip(element) {
@@ -661,7 +662,7 @@
 
             const duration = document.querySelector(`[data-tooltip-duration-id="${id}"]`);
             if (duration) {
-                duration.textContent = `Осталось: ${formatEffectTime(remaining)}`;
+                duration.textContent = gameTranslate('Осталось:') + ' ' + formatEffectTime(remaining);
             }
 
             if (remaining <= 0) {

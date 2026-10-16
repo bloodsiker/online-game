@@ -14,6 +14,7 @@
                 <section class="card">
                     <header class="card-header"><h2 class="card-title">Настройки смерти</h2></header>
                     <div class="card-body">
+                        @include('admin.partials.content-translations', ['prefix' => 'dungeon-'.$dungeon->id, 'content' => $dungeon])
                         <div class="form-group">
                             <label class="col-form-label">Тип данжа</label>
                             <select name="type" class="form-control">
@@ -21,6 +22,29 @@
                                     <option value="{{ $type->value }}" @selected(old('type', $dungeon->type->value) === $type->value)>{{ $type->label() }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Общий срок похода, секунд</label>
+                            <input type="number" name="time_limit_seconds" class="form-control" min="60" max="259200" value="{{ old('time_limit_seconds', $dungeon->time_limit_seconds) }}" placeholder="Без ограничения">
+                            <small class="form-text text-muted">Таймер начинается при открытии похода и общий для всей цепочки боссов. 172800 = 2 дня, 259200 = 3 дня.</small>
+                            @error('time_limit_seconds')<div class="text-danger">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">Ударов в пакете на игрока</label>
+                            <input type="number" name="clan_boss_hit_batch_size" class="form-control" min="1" max="1000" value="{{ old('clan_boss_hit_batch_size', $dungeon->clan_boss_hit_batch_size ?? 10) }}">
+                            @error('clan_boss_hit_batch_size')<div class="text-danger">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">КД после пакета, секунд</label>
+                            <input type="number" name="clan_boss_hit_batch_cooldown_seconds" class="form-control" min="0" max="259200" value="{{ old('clan_boss_hit_batch_cooldown_seconds', $dungeon->clan_boss_hit_batch_cooldown_seconds ?? 21600) }}">
+                            <small class="form-text text-muted">По умолчанию 21600 = 6 часов. КД общий для игрока в рамках похода и не сбрасывается при появлении следующего босса.</small>
+                            @error('clan_boss_hit_batch_cooldown_seconds')<div class="text-danger">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label">
+                                <input type="checkbox" name="is_clan_boss" value="1" @checked(old('is_clan_boss', $dungeon->is_clan_boss ?? false))>
+                                Клан-босс (асинхронный рейд клана, боссы по очереди)
+                            </label>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Поведение при смерти</label>
@@ -193,6 +217,30 @@
         const spawnType = form.querySelector('.stage-spawn-type');
         let nextIndex = list.querySelectorAll('.stage-monster-row').length;
 
+        function initializeMonsterSelect(select) {
+            $(select).select2({
+                theme: 'bootstrap',
+                placeholder: 'Выберите монстра',
+                allowClear: true,
+                ajax: {
+                    url: '{{ route('admin.api.monsters') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return { q: params.term, page: params.page || 1 };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return { results: data.results, pagination: { more: data.pagination.more } };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 0
+            });
+        }
+
+        list.querySelectorAll('.stage-monster-select').forEach(initializeMonsterSelect);
+
         function updateSpawnFields() {
             const fixed = spawnType.value === 'fixed';
             form.querySelector('.stage-total-monsters').style.display = fixed ? 'none' : '';
@@ -206,6 +254,7 @@
 
         form.querySelector('.stage-monster-add').addEventListener('click', function () {
             list.insertAdjacentHTML('beforeend', template.innerHTML.replaceAll('__INDEX__', nextIndex++));
+            initializeMonsterSelect(list.querySelector('.stage-monster-row:last-child .stage-monster-select'));
             updateSpawnFields();
         });
 

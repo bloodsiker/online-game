@@ -22,7 +22,13 @@
             @php($formId = 'trade-'.$section.'-'.($row->id ?? 'new'))
             <tr><td>{{ $row->id ?? 'Новая' }}<form id="{{ $formId }}" method="post" action="{{ route('admin.trade.save', $section) }}">@csrf @if($row)<input type="hidden" name="id" value="{{ $row->id }}">@endif</form></td>
                 @foreach($fields as $field => $caption)
-                    <td><input class="form-control form-control-sm" form="{{ $formId }}" name="{{ $field }}" aria-label="{{ $caption }}" type="{{ in_array($field, ['name','distance_tier']) ? 'text' : 'number' }}" value="{{ $row->$field ?? ($field === 'is_active' ? 1 : '') }}" required style="min-width:85px"></td>
+                    <td>
+                        @if($section === 'posts' && $field === 'name')
+                            @include('admin.partials.content-translations', ['prefix' => 'trade-post-'.($row->id ?? 'new'), 'formId' => $formId, 'content' => $row, 'fields' => ['name' => ['label' => 'Название торговца']]])
+                        @else
+                            <input class="form-control form-control-sm" form="{{ $formId }}" name="{{ $field }}" aria-label="{{ $caption }}" type="{{ in_array($field, ['name','distance_tier']) ? 'text' : 'number' }}" value="{{ $row->$field ?? ($field === 'is_active' ? 1 : '') }}" required style="min-width:85px">
+                        @endif
+                    </td>
                 @endforeach
                 <td><button class="btn btn-primary btn-sm" form="{{ $formId }}">{{ $row ? 'Сохранить' : 'Добавить' }}</button></td>
             </tr>

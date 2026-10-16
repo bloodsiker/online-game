@@ -17,6 +17,7 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
         private FightHitInterface $player,
         private FightHitInterface $monster,
         private PlayerEquipment $equip,
+        private int $weaponSkillLevel = 0,
     ) {}
 
     public function getHits(): array
@@ -33,7 +34,7 @@ class OneHandWeaponStrategy implements AttackStrategyInterface
             ? $this->player->getLeftHandMaxDmg()
             : $this->player->getRightHandMaxDmg();
 
-        $hit = $this->hitCalc->hit($this->player, $this->monster, $min, $max);
+        $hit = $this->hitCalc->hit($this->player, $this->monster, $min, $max, $this->weaponSkillLevel);
 
         return [
             $hit

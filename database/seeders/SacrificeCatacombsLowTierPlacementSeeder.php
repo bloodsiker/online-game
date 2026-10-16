@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -45,7 +46,7 @@ class SacrificeCatacombsLowTierPlacementSeeder extends Seeder
         // Для каждого вида — только 2 младшие ступени (<=50).
         $monsterIdsBySpecies = [];
         foreach (self::SPECIES_NAMES as $name) {
-            $rows = DB::table('monsters')->where('name', $name)->where('lvl', '<=', 50)->orderBy('lvl')->pluck('id', 'lvl');
+            $rows = LocalizedContentSeederQuery::forTable('monsters')->where('name', $name)->where('lvl', '<=', 50)->orderBy('lvl')->pluck('id', 'lvl');
             $monsterIdsBySpecies[$name] = $rows->values()->all();
         }
 

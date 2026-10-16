@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -128,12 +129,13 @@ class OlgertWatchSealQuestSeeder extends Seeder
 
     private function createQuest(string $title, string $description, int $startNpcId, int $completeNpcId, int $afterQuestId): int
     {
-        $existing = DB::table('quests')->where('title', $title)->first();
+        $quests = LocalizedContentSeederQuery::forTable('quests');
+        $existing = (clone $quests)->where('title', $title)->first();
         if ($existing !== null) {
             return $existing->id;
         }
 
-        return DB::table('quests')->insertGetId([
+        return $quests->insertGetId([
             'title' => $title,
             'description' => $description,
             'type' => 'main',

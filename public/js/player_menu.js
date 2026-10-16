@@ -18,9 +18,21 @@
         + '.ctx-menu li.ctx-menu__title{margin-bottom:6px;padding:6px 18px 3px;border-bottom:1px solid #e2b25e;'
         + 'font-weight:bold;font-family:Tahoma;font-size:11px;text-align:center;color:#6a382f;}';
 
+    function t(text, params) {
+        if (typeof window.gameTranslate === 'function') {
+            return window.gameTranslate(text, params);
+        }
+        if (!params) {
+            return text;
+        }
+        return Object.keys(params).reduce(function (result, name) {
+            return result.split(':' + name).join(String(params[name]));
+        }, text);
+    }
+
     function showInfo(message, title) {
         try {
-            window.top.systemInfo(message, title || 'Информация');
+            window.top.systemInfo(message, title || t('Информация'));
         } catch (e) {
             alert(message);
         }
@@ -50,8 +62,8 @@
             body: JSON.stringify({ name: name }),
         })
             .then(function (r) { return r.json(); })
-            .then(function (data) { showInfo(data.message, data.ok ? 'Информация' : 'Ошибка'); })
-            .catch(function () { showInfo('Не удалось отправить запрос.', 'Ошибка'); });
+            .then(function (data) { showInfo(data.message, data.ok ? t('Информация') : t('Ошибка')); })
+            .catch(function () { showInfo(t('Не удалось отправить запрос.'), t('Ошибка')); });
     }
 
     function toggleIgnore(uid, name) {
@@ -66,13 +78,13 @@
 
         req.then(function (r) {
             if (!r.ok) {
-                showInfo('Не удалось изменить игнор-лист.', 'Ошибка');
+                showInfo(t('Не удалось изменить игнор-лист.'), t('Ошибка'));
                 return;
             }
             ignored ? ignoredIds.delete(uid) : ignoredIds.add(uid);
-            showInfo(ignored ? name + ' удалён из игнор-листа.' : name + ' добавлен в игнор-лист.');
+            showInfo(t(ignored ? ':name удалён из игнор-листа.' : ':name добавлен в игнор-лист.', { name: name }));
         }).catch(function () {
-            showInfo('Не удалось изменить игнор-лист.', 'Ошибка');
+            showInfo(t('Не удалось изменить игнор-лист.'), t('Ошибка'));
         });
     }
 
@@ -87,14 +99,14 @@
         closeCtxMenu();
 
         var items = [
-            { txt: 'Инфо', click: function () { openUserInfo(uid); } },
-            { txt: 'Приват', click: function () { cfg.sendPrivate(name); } },
-            { txt: 'Скопировать', click: function () { copyNick(name); } },
+            { txt: t('Инфо'), click: function () { openUserInfo(uid); } },
+            { txt: t('Приват'), click: function () { cfg.sendPrivate(name); } },
+            { txt: t('Скопировать'), click: function () { copyNick(name); } },
         ];
         if (uid !== cfg.myUserId) {
-            items.push({ txt: 'Добавить в друзья', click: function () { addFriend(name); } });
+            items.push({ txt: t('Добавить в друзья'), click: function () { addFriend(name); } });
             items.push({
-                txt: ignoredIds.has(uid) ? 'Не игнорировать' : 'Игнорировать',
+                txt: ignoredIds.has(uid) ? t('Не игнорировать') : t('Игнорировать'),
                 click: function () { toggleIgnore(uid, name); },
             });
         }

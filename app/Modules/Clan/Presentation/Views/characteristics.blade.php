@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Характеристики клана</title>
+    <title>{{ __('Характеристики клана') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 12px; }
@@ -40,7 +40,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.characteristics'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.characteristics'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody><tr><td valign="top">
@@ -51,7 +51,7 @@
                 <td class="tbl-shp-sml tt" valign="top" align="center">
                     <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
                         <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                        <td align="center" class="tbl-usi_label-center">Характеристики клана</td>
+                        <td align="center" class="tbl-usi_label-center">{{ __('Характеристики клана') }}</td>
                         <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                     </tr></tbody></table>
                 </td>
@@ -65,26 +65,27 @@
                         @php
                             $rowIndex = 0;
                         @endphp
-                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Клан</th><td><b>{{ $clan->name }}</b></td></tr>
-                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Уровень клана</th><td><span class="level-value">{{ $clan->lvl }}</span></td></tr>
-                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Общий опыт клана</th><td><b>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</b></td></tr>
+                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Клан') }}</th><td><b>{{ $clan->name }}</b></td></tr>
+                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Дата создания клана') }}</th><td>{{ $clan->created_at?->format('d.m.Y H:i') ?? '—' }}</td></tr>
+                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Уровень клана') }}</th><td><span class="level-value">{{ $clan->lvl }}</span></td></tr>
+                        <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Общий опыт клана') }}</th><td><b>{{ number_format((float) $clan->experience, 2, '.', ' ') }}</b></td></tr>
                         <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}">
-                            <th>Налог оплачен до</th>
+                            <th>{{ __('Налог оплачен до') }}</th>
                             <td>
                                 @if($clan->hasPaidTax())
                                     <span class="tax-paid">{{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
                                 @elseif($clan->tax_paid_until)
-                                    <span class="tax-overdue">Просрочен с {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
+                                    <span class="tax-overdue">{{ __('Просрочен с') }} {{ $clan->tax_paid_until->format('d.m.Y H:i') }}</span>
                                 @else
-                                    <span class="tax-overdue">Не оплачен</span>
+                                    <span class="tax-overdue">{{ __('Не оплачен') }}</span>
                                 @endif
                             </td>
                         </tr>
                         @if($nextLevel)
-                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Следующий уровень</th><td>{{ $nextLevel->level }} <span class="muted">(требуется {{ number_format((float) $nextLevel->experience_required, 2, '.', ' ') }} опыта)</span></td></tr>
-                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>До следующего уровня</th><td><b>{{ number_format($experienceToNextLevel, 2, '.', ' ') }}</b></td></tr>
+                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Следующий уровень') }}</th><td>{{ $nextLevel->level }} <span class="muted">({{ __('требуется :amount опыта', ['amount' => number_format((float) $nextLevel->experience_required, 2, '.', ' ')]) }})</span></td></tr>
+                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('До следующего уровня') }}</th><td><b>{{ number_format($experienceToNextLevel, 2, '.', ' ') }}</b></td></tr>
                             <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}">
-                                <th>Прогресс уровня</th>
+                                <th>{{ __('Прогресс уровня') }}</th>
                                 <td>
                                     @php
                                         $levelExperience = max(0, (float) $clan->experience - $currentLevelExperience);
@@ -103,7 +104,7 @@
                                 </td>
                             </tr>
                         @else
-                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>Прогресс уровня</th><td><b class="grnn">Достигнут максимальный уровень</b></td></tr>
+                            <tr class="{{ $rowIndex++ % 2 === 0 ? 'bg_l' : '' }}"><th>{{ __('Прогресс уровня') }}</th><td><b class="grnn">{{ __('Достигнут максимальный уровень') }}</b></td></tr>
                         @endif
                         </tbody>
                     </table>

@@ -11,11 +11,12 @@ use App\Modules\Item\Infrastructure\Persistence\Models\ShareItemLockpickConfig;
 use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
-use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -82,6 +83,10 @@ use Illuminate\Support\Carbon;
  */
 class ShareItem extends Model
 {
+    use HasLegacyTranslations;
+
+    public array $translatable = ['name', 'description'];
+
     /** Единственное место для дефолтной иконки — если у предмета нет своей картинки. Замена картинки — правка только здесь. */
     public const DEFAULT_IMAGE = '/img/bg/empty_slot.gif';
 

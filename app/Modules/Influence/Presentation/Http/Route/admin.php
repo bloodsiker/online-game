@@ -22,6 +22,7 @@ Route::delete('/influence/{map}/levels/{level}/rewards/{reward}', [InfluenceCont
 Route::post('/influence/{map}/requirements', [InfluenceController::class, 'storeRequirement'])->name('influence.requirement.store');
 Route::delete('/influence/{map}/requirements/{type}/{requirement}', [InfluenceController::class, 'destroyRequirement'])->name('influence.requirement.destroy');
 Route::post('/influence/{map}/shop-sections', [InfluenceController::class, 'storeShopSection'])->name('influence.shop.section.store');
+Route::put('/influence/{map}/shop-sections/{section}', [InfluenceController::class, 'updateShopSection'])->name('influence.shop.section.update');
 Route::delete('/influence/{map}/shop-sections/{section}', [InfluenceController::class, 'destroyShopSection'])->name('influence.shop.section.destroy');
 Route::post('/influence/{map}/shop-sections/{section}/items', [InfluenceController::class, 'storeShopItem'])->name('influence.shop.item.store');
 Route::delete('/influence/{map}/shop-sections/{section}/items/{item}', [InfluenceController::class, 'destroyShopItem'])->name('influence.shop.item.destroy');

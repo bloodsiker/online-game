@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Item\Presentation\Services\ItemShortcodeRenderer;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsComment;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsPost;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,6 +50,9 @@ class NewsController extends Controller
             'newsPosts' => $newsPosts,
             'selectedNews' => $selectedNews,
             'newsItemTooltipScript' => $shortcodeRenderer->tooltipScript(),
+            'onlineCount' => User::query()
+                ->where('last_online_at', '>=', now()->subMinutes((int) config('game.online_timeout_minutes', 30)))
+                ->count(),
         ]);
     }
 

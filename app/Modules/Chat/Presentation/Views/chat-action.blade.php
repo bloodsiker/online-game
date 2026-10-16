@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Чат</title>
+    <title>{{ __('Чат') }}</title>
     <style>
         body {
             margin: 0;
@@ -62,37 +62,37 @@
                 <form id="chat-form" onsubmit="chatSend(); return false;">
                     <input type="hidden" id="channel" name="channel" value="{{ $channel->value }}">
                     <input type="image" src="{{ asset('img/icon/d.gif') }}" width="1" height="1"><br>
-                    <input type="text" name="message" id="message" maxlength="500" autocomplete="off" style="width:100%; color:#FFFFCC; background: transparent; border: 0px solid red; cursor:text;" placeholder="Введите сообщение..."><br>
+                    <input type="text" name="message" id="message" maxlength="500" autocomplete="off" style="width:100%; color:#FFFFCC; background: transparent; border: 0px solid red; cursor:text;" placeholder="{{ __('Введите сообщение...') }}"><br>
                 </form>
             </td>
             <td width="30"><img src="{{ asset('img/bg/chat/tbl-main_chat-bg-left.gif') }}" width="30" height="43"></td>
             <td width="52" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatSend(); return false;">
-                    <img id="send_btn" src="{{ asset('img/bg/chat/send-reg.gif') }}" width="52" height="34" border="0" title="Отправить сообщение в чат">
+                    <img id="send_btn" src="{{ asset('img/bg/chat/send-reg.gif') }}" width="52" height="34" border="0" title="{{ __('Отправить сообщение в чат') }}">
                 </a>
             </td>
             <td width="67" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatClearText(); return false;">
-                    <img id="clear_btn" src="{{ asset('img/bg/chat/clear-reg.gif') }}" width="67" height="34" border="0" title="Очистить окно чата">
+                    <img id="clear_btn" src="{{ asset('img/bg/chat/clear-reg.gif') }}" width="67" height="34" border="0" title="{{ __('Очистить окно чата') }}">
                 </a>
             </td>
             <td width="68" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatShowSmiles(); return false;">
-                    <img id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34" border="0" title="Смайлики">
+                    <img id="smile_btn" src="{{ asset('img/bg/chat/smile-reg.gif') }}" width="68" height="34" border="0" title="{{ __('Смайлики') }}">
                 </a>
             </td>
             <td width="68" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatTogglePrivateMode(); return false;">
                     <img id="priv_btn" src="{{ asset('img/bg/chat/priv-reg.gif') }}" width="68" height="34"
                          border="0"
-                         title="Получать только сообщения адресованные вам"
-                         title1="Получать только приватные сообщения"
-                         title2="Получать все сообщения">
+                         title="{{ __('Получать только сообщения адресованные вам') }}"
+                         title1="{{ __('Получать только приватные сообщения') }}"
+                         title2="{{ __('Получать все сообщения') }}">
                 </a>
             </td>
             <td width="74" class="tbl-main_chat-btn">
                 <a href="#" onclick="chatRefreshUsers(); return false;">
-                    <img id="refresh_btn" src="{{ asset('img/bg/chat/refresh-reg.gif') }}" width="74" height="34" border="0" title="Обновить список игроков в этой локации">
+                    <img id="refresh_btn" src="{{ asset('img/bg/chat/refresh-reg.gif') }}" width="74" height="34" border="0" title="{{ __('Обновить список игроков в этой локации') }}">
                 </a>
             </td>
             <td width="15">

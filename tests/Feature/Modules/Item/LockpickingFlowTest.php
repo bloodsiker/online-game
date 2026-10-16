@@ -15,6 +15,7 @@ use App\Modules\Player\Domain\DTO\StatSheet;
 use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Schema\Blueprint;
@@ -283,7 +284,7 @@ class LockpickingFlowTest extends TestCase
 
     private function seedLockedChestAndLockpick(): void
     {
-        DB::table('skills')->insert(['id' => 1, 'name' => LockpickingService::SKILL_NAME, 'type' => 'peaceful']);
+        LocalizedContentSeederQuery::forTable('skills')->insert(['id' => 1, 'name' => LockpickingService::SKILL_NAME, 'type' => 'peaceful']);
         DB::table('share_items')->insert([
             ['id' => 10, 'name' => 'Сундук', 'type' => 'chest'],
             ['id' => 20, 'name' => 'Отмычка', 'type' => 'lockpick'],

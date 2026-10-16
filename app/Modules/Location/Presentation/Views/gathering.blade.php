@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Добыча ресурсов</title>
+    <title>{{ __("Добыча ресурсов") }}</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     @vite('resources/js/app.js')
     <style>
@@ -14,16 +15,16 @@
         .gathering-page { margin: 0 auto; }
         .gathering-layout { display: grid; grid-template-columns: minmax(0, 1fr) 275px; gap: 10px; align-items: start; }
         .gathering-frame { border: 2px ridge #9c815b; background: #c8b792; box-shadow: inset 0 0 0 2px #e8ddc4, 0 2px 8px rgba(0, 0, 0, .35); }
-        .gathering-frame--map { position: relative; overflow: hidden; }
+        .gathering-frame--map { position: relative; height: 100vh; height: 100dvh; min-height: 360px; overflow: hidden; }
         .gathering-frame-head, .gathering-frame-foot { padding: 6px 9px; border: 1px solid #826c4f; background: linear-gradient(#efe5cf, #cdbb98); }
         .gathering-frame-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .gathering-frame-title { color: #6e160f; font-weight: bold; }
         .gathering-frame-meta { color: #4c4031; font-size: 11px; }
         .gathering-frame-foot { min-height: 31px; border-top: 0; background: #eee3ca; font-size: 11px; }
-        .gathering-field-wrap { position: relative; border: 1px solid #7e6b4e; border-top: 0; background: #292a20; }
-        .gathering-field { position: relative; height: 520px; overflow: scroll; cursor: grab; scrollbar-color: #826c4f #d6c6a3; scrollbar-width: auto; }
+        .gathering-field-wrap { position: relative; height: 100%; border: 1px solid #7e6b4e; border-top: 0; background: #292a20; }
+        .gathering-field { position: relative; width: 100%; height: 100%; overflow: scroll; cursor: grab; scrollbar-color: #826c4f #d6c6a3; scrollbar-width: auto; }
         .gathering-field.is-dragging { cursor: grabbing; user-select: none; }
-        .gathering-canvas { position: relative; width: 1254px; height: 1254px; overflow: hidden; background-position: center; background-size: cover; }
+        .gathering-canvas { position: relative; width: 100%; min-width: 100%; height: 1254px; overflow: hidden; background-position: center; background-size: 100% 100%; }
         .gathering-canvas::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(rgba(21,16,10,.03), rgba(21,16,10,.3)); }
         .gathering-help { position: absolute; top: 8px; left: 50%; z-index: 4; transform: translateX(-50%); width: max-content; max-width: calc(100% - 20px); padding: 4px 9px; color: #f7eacb; background: rgba(31,27,22,.82); border: 1px solid rgba(236,214,167,.5); font-size: 10px; text-align: center; }
         .gathering-empty { position: absolute; top: 50%; left: 50%; z-index: 4; transform: translate(-50%, -50%); width: 80%; padding: 12px; color: #f7eacb; background: rgba(31,27,22,.82); border: 1px solid #c5a86d; text-align: center; }
@@ -89,7 +90,7 @@
         @keyframes gathering-pulse { 50% { transform: scale(1.04); } }
         @keyframes gathering-active-pulse { 50% { transform: scale(1.09); box-shadow: 0 0 0 2px rgba(255,240,164,.7), 0 0 13px rgba(255,220,111,.75), inset 0 0 5px rgba(0,0,0,.8); } }
         @keyframes gathering-busy-pulse { 50% { transform: scale(1.08); box-shadow: 0 0 0 2px rgba(220,69,51,.66), 0 0 13px rgba(210,50,36,.76), inset 0 0 5px rgba(0,0,0,.8); } }
-        @media (max-width: 760px) { .gathering-layout { grid-template-columns: 1fr; } .gathering-field { height: 420px; } }
+        @media (max-width: 760px) { .gathering-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -97,10 +98,10 @@
     <div class="gathering-layout">
         <section class="gathering-frame gathering-frame--map">
             <div class="gathering-field-wrap">
-                <div class="gathering-help">Тяните карту или используйте прокрутку · двойной клик — начать добычу</div>
+                <div class="gathering-help">{{ __("Тяните карту или используйте прокрутку · двойной клик — начать добычу") }}</div>
                 <div class="gathering-notice" id="gathering-notice" role="status" aria-live="polite"></div>
                 <div class="gathering-empty" id="gathering-empty" hidden></div>
-                <div class="gathering-field" id="gathering-field" tabindex="0" aria-label="Карта сбора ресурсов. Перемещайте её полосами прокрутки или перетаскиванием мышью.">
+                <div class="gathering-field" id="gathering-field" tabindex="0" aria-label="{{ __("Карта сбора ресурсов. Перемещайте её полосами прокрутки или перетаскиванием мышью.") }}">
                     <div class="gathering-canvas" id="gathering-canvas" style="background-image:linear-gradient(to bottom,rgba(25,31,20,.08),rgba(25,31,20,.45)),url('{{ asset('prototypes/map.png') }}')">
                         <div id="gathering-nodes"></div>
                     </div>
@@ -112,10 +113,10 @@
                     <div class="popup-top-left">
                         <div class="popup-top-right">
                             <div class="popup-top-center">
-                                <div class="popup_global_title" id="gathering-modal-title">Добыча ресурса</div>
+                                <div class="popup_global_title" id="gathering-modal-title">{{ __("Добыча ресурса") }}</div>
                             </div>
                         </div>
-                        <div class="popup_global_close_btn" id="gathering-modal-close" role="button" tabindex="0" aria-label="Отменить добычу"></div>
+                        <div class="popup_global_close_btn" id="gathering-modal-close" role="button" tabindex="0" aria-label="{{ __("Отменить добычу") }}"></div>
                     </div>
                     <div class="popup-left-center">
                         <div class="popup-right-center">
@@ -132,7 +133,7 @@
                                     </div>
                                     <div class="gathering-modal__error" id="gathering-modal-error" role="alert" aria-live="assertive"></div>
                                     <div class="gathering-modal__actions">
-                                        <span class="butt1 pointer"><span><input value="Отменить" id="gathering-modal-cancel" type="button" class="grnn"></span></span>
+                                        <span class="butt1 pointer"><span><input value="{{ __("Отменить") }}" id="gathering-modal-cancel" type="button" class="grnn"></span></span>
                                     </div>
                                 </div>
                             </div>
@@ -147,10 +148,10 @@
             </div>
         </section>
         <aside class="gathering-sidebar">
-            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Выбранный ресурс</span></header><div class="gathering-frame-foot"><div class="gathering-selection empty" id="gathering-selection">Нажмите на ресурс на карте.</div></div></section>
-            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Мирные профессии</span></header><div class="gathering-frame-foot" id="gathering-professions"></div></section>
-            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">Добыто за этот заход</span></header><div class="gathering-frame-foot"><ul class="gathering-bag" id="gathering-bag"><li class="empty">пока ничего</li></ul></div></section>
-            <section class="gathering-frame"><div class="gathering-frame-foot gathering-note">Предмет выдаётся даже при переполненном рюкзаке. Пока рюкзак перегружен, персонаж не сможет перейти на другую локацию.</div></section>
+            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">{{ __("Выбранный ресурс") }}</span></header><div class="gathering-frame-foot"><div class="gathering-selection empty" id="gathering-selection">{{ __("Нажмите на ресурс на карте.") }}</div></div></section>
+            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">{{ __("Мирные профессии") }}</span></header><div class="gathering-frame-foot" id="gathering-professions"></div></section>
+            <section class="gathering-frame"><header class="gathering-frame-head"><span class="gathering-frame-title">{{ __("Добыто за этот заход") }}</span></header><div class="gathering-frame-foot"><ul class="gathering-bag" id="gathering-bag"><li class="empty">{{ __("пока ничего") }}</li></ul></div></section>
+            <section class="gathering-frame"><div class="gathering-frame-foot gathering-note">{{ __("Предмет выдаётся даже при переполненном рюкзаке. Пока рюкзак перегружен, персонаж не сможет перейти на другую локацию.") }}</div></section>
         </aside>
     </div>
 </main>
@@ -191,8 +192,8 @@
     }
     function updateProgressModal(percent) { const normalized = Math.max(0, Math.min(100, Number(percent) || 0)); el.modalFill.style.width = normalized.toFixed(2) + '%'; el.modalPercent.textContent = Math.round(normalized) + '%'; el.modalProgress.setAttribute('aria-valuenow', String(Math.round(normalized))); }
     function setProgressModalBusy(busy) { el.modalCancel.disabled = !!busy; }
-    function clearProgressModalError() { el.modalError.textContent = ''; el.modalError.style.display = 'none'; el.modalCancel.value = 'Отменить'; }
-    function showProgressModalError(message) { el.modalError.textContent = message || 'Не удалось выполнить добычу.'; el.modalError.style.display = 'block'; el.modalCancel.value = state.attempt ? 'Отменить' : 'Закрыть'; setProgressModalBusy(false); el.modalOverlay.style.display = 'block'; el.modal.style.display = 'block'; }
+    function clearProgressModalError() { el.modalError.textContent = ''; el.modalError.style.display = 'none'; el.modalCancel.value = gameTranslate("Отменить"); }
+    function showProgressModalError(message) { el.modalError.textContent = message || gameTranslate('Не удалось выполнить добычу.'); el.modalError.style.display = 'block'; el.modalCancel.value = state.attempt ? gameTranslate("Отменить") : gameTranslate("Закрыть"); setProgressModalBusy(false); el.modalOverlay.style.display = 'block'; el.modal.style.display = 'block'; }
     function closeProgressModal() { el.modal.dataset.nodeId = ''; el.modalOverlay.style.display = 'none'; el.modal.style.display = 'none'; clearProgressModalError(); updateProgressModal(0); setProgressModalBusy(false); }
     function handleProgressModalAction() { if (state.attempt) { cancelGathering(); return; } closeProgressModal(); }
     function positionViewportOnce() { if (state.viewportPositioned) return; state.viewportPositioned = true; window.requestAnimationFrame(function () { el.field.scrollLeft = Math.max(0, (el.field.scrollWidth - el.field.clientWidth) / 2); el.field.scrollTop = Math.max(0, (el.field.scrollHeight - el.field.clientHeight) / 2); }); }
@@ -203,12 +204,12 @@
         state.serverOffset = Date.parse(data.serverTime) - Date.now(); state.professions = data.professions || []; state.attempt = data.activeAttempt || null;
         state.nodes = new Map((data.nodes || []).map(function (node) { return [Number(node.id), node]; }));
         if (state.attempt) state.selectedNodeId = Number(state.attempt.nodeId); else if (state.selectedNodeId !== null && !state.nodes.has(state.selectedNodeId)) state.selectedNodeId = null;
-        el.empty.hidden = data.enabled && state.nodes.size > 0; if (!el.empty.hidden) el.empty.textContent = data.message || 'На карте нет доступных ресурсов.';
+        el.empty.hidden = data.enabled && state.nodes.size > 0; if (!el.empty.hidden) el.empty.textContent = data.message || gameTranslate("На карте нет доступных ресурсов.");
         renderProfessions(); renderNodes(); renderSelection(); renderProgress();
     }
     function renderProfessions() {
-        if (!state.professions.length) { el.professions.innerHTML = '<div class="gathering-note">Профессии ещё не созданы. Выполните миграции.</div>'; return; }
-        el.professions.innerHTML = state.professions.map(function (p) { const progress = Math.min(100, p.levelExperience / p.levelExperienceRequired * 100); return '<div class="gathering-skill"><div class="gathering-skill-row"><span>' + escapeHtml(p.name) + ' <span class="gathering-skill-level">' + p.level + ' ур.</span></span><span>' + Math.round(progress) + '%</span></div><div class="gathering-xp-track"><div class="gathering-xp-fill" style="width:' + progress + '%"></div></div></div>'; }).join('') + '<div class="gathering-note">Опыт начисляется только за успешно добытый ресурс.</div>';
+        if (!state.professions.length) { el.professions.innerHTML = '<div class="gathering-note">' + gameTranslate("Профессии ещё не созданы. Выполните миграции.") + '</div>'; return; }
+        el.professions.innerHTML = state.professions.map(function (p) { const progress = Math.min(100, p.levelExperience / p.levelExperienceRequired * 100); return '<div class="gathering-skill"><div class="gathering-skill-row"><span>' + escapeHtml(p.name) + ' <span class="gathering-skill-level">' + p.level + ' ' + gameTranslate("ур.") + '</span></span><span>' + Math.round(progress) + '%</span></div><div class="gathering-xp-track"><div class="gathering-xp-fill" style="width:' + progress + '%"></div></div></div>'; }).join('') + '<div class="gathering-note">' + gameTranslate("Опыт начисляется только за успешно добытый ресурс.") + '</div>';
     }
     function renderNodes() {
         const existing = new Map(Array.from(el.nodes.querySelectorAll('.gathering-node')).map(function (node) { return [Number(node.dataset.nodeId), node]; }));
@@ -227,27 +228,27 @@
             button.querySelector('.gathering-node-icon').src = node.image; button.querySelector('.gathering-node-icon').alt = node.name;
             const active = !!state.attempt && state.attempt.nodeId === node.id; button.classList.toggle('is-active', active); button.classList.toggle('is-selected', state.selectedNodeId === node.id); button.classList.toggle('is-busy', node.busy);
             button.querySelector('.gathering-node-gatherers').textContent = node.gatheringPlayersCount > 0 ? node.gatheringPlayersCount : '';
-            button.setAttribute('aria-label', node.name + (node.gatheringPlayersCount > 0 ? ': сейчас добывают: ' + node.gatheringPlayersCount + '.' : (node.blockedReason ? ': ' + node.blockedReason : '')));
+            button.setAttribute('aria-label', node.name + (node.gatheringPlayersCount > 0 ? gameTranslate(": сейчас добывают: ") + node.gatheringPlayersCount + '.' : (node.blockedReason ? ': ' + node.blockedReason : '')));
         });
     }
     function selectNode(nodeId) { if (!state.nodes.has(nodeId)) return; state.lastResult = null; state.selectedNodeId = nodeId; renderNodes(); renderSelection(); }
     function renderSelection() {
         const node = state.nodes.get(state.selectedNodeId);
-        if (!node) { el.selection.className = 'gathering-selection empty'; el.selection.textContent = state.lastResult || 'Нажмите на ресурс на карте.'; return; }
+        if (!node) { el.selection.className = 'gathering-selection empty'; el.selection.textContent = state.lastResult || gameTranslate("Нажмите на ресурс на карте."); return; }
         el.selection.className = 'gathering-selection';
-        el.selection.innerHTML = '<img src="' + escapeHtml(node.image) + '" alt=""><div><div class="gathering-selection-name">' + escapeHtml(node.name) + '</div><div class="gathering-selection-meta">Требуется умение: ' + escapeHtml(node.professionName || 'Ресурс') + ' ' + node.requiredLevel + ' ур.</div></div>';
+        el.selection.innerHTML = '<img src="' + escapeHtml(node.image) + '" alt=""><div><div class="gathering-selection-name">' + escapeHtml(node.name) + '</div><div class="gathering-selection-meta">' + gameTranslate("Требуется умение:") + ' ' + escapeHtml(node.professionName || gameTranslate("Ресурс")) + ' ' + node.requiredLevel + ' ' + gameTranslate("ур.") + '</div></div>';
     }
     function showTooltip(event) {
         const node = state.nodes.get(Number(event.currentTarget.dataset.nodeId)); if (!node) return;
-        el.tooltip.innerHTML = '<div class="gathering-tooltip-inner"><div class="gathering-tooltip-head"><img class="gathering-tooltip-icon" src="' + escapeHtml(node.image) + '" alt=""><div><div class="gathering-tooltip-name">' + escapeHtml(node.name) + '</div><div class="gathering-tooltip-rarity" style="color:' + escapeHtml(node.rarityColor) + '">' + escapeHtml(node.rarityLabel) + '</div></div></div><div class="gathering-tooltip-row"><span>Требуется умение</span><span>' + escapeHtml(node.professionName) + ' ' + node.requiredLevel + ' ур.</span></div><div class="gathering-tooltip-row"><span>Инструмент</span><span>' + escapeHtml(node.toolName) + '</span></div>' + (node.blockedReason ? '<div class="gathering-tooltip-warning">' + escapeHtml(node.blockedReason) + '</div>' : '') + '</div>';
+        el.tooltip.innerHTML = '<div class="gathering-tooltip-inner"><div class="gathering-tooltip-head"><img class="gathering-tooltip-icon" src="' + escapeHtml(node.image) + '" alt=""><div><div class="gathering-tooltip-name">' + escapeHtml(node.name) + '</div><div class="gathering-tooltip-rarity" style="color:' + escapeHtml(node.rarityColor) + '">' + escapeHtml(node.rarityLabel) + '</div></div></div><div class="gathering-tooltip-row"><span>' + gameTranslate("Требуется умение") + '</span><span>' + escapeHtml(node.professionName) + ' ' + node.requiredLevel + ' ' + gameTranslate("ур.") + '</span></div><div class="gathering-tooltip-row"><span>' + gameTranslate("Инструмент") + '</span><span>' + escapeHtml(node.toolName) + '</span></div>' + (node.blockedReason ? '<div class="gathering-tooltip-warning">' + escapeHtml(node.blockedReason) + '</div>' : '') + '</div>';
         el.tooltip.style.display = 'block'; positionTooltip(event);
     }
     function positionTooltip(event) { const bounds = el.tooltip.getBoundingClientRect(); let left = event.clientX + 12, top = event.clientY + 12; if (left + bounds.width > innerWidth - 8) left = event.clientX - bounds.width - 12; if (top + bounds.height > innerHeight - 8) top = event.clientY - bounds.height - 12; el.tooltip.style.left = left + 'px'; el.tooltip.style.top = top + 'px'; }
     function startGathering(nodeId) {
-        const node = state.nodes.get(nodeId); if (!node || state.attempt) { setLog('Сначала завершите текущую добычу.', 'is-warn'); return; }
-        state.lastResult = null; state.selectedNodeId = nodeId; openProgressModal(node); clearProgressModalError(); setProgressModalBusy(true); request(urls.start.replace('__NODE__', String(nodeId)), 'POST').then(function (data) { state.attempt = data.attempt; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderSelection(); renderProgress(); }).catch(function (error) { const message = error.message || 'Не удалось начать добычу.'; state.lastResult = message; showProgressModalError(message); setLog(message, 'is-error'); refreshState(); });
+        const node = state.nodes.get(nodeId); if (!node || state.attempt) { setLog(gameTranslate("Сначала завершите текущую добычу."), 'is-warn'); return; }
+        state.lastResult = null; state.selectedNodeId = nodeId; openProgressModal(node); clearProgressModalError(); setProgressModalBusy(true); request(urls.start.replace('__NODE__', String(nodeId)), 'POST').then(function (data) { state.attempt = data.attempt; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderSelection(); renderProgress(); }).catch(function (error) { const message = error.message || gameTranslate("Не удалось начать добычу."); state.lastResult = message; showProgressModalError(message); setLog(message, 'is-error'); refreshState(); });
     }
-    function renderProgress() { if (!state.attempt) { if (el.modalError.style.display !== 'block') closeProgressModal(); else el.modalCancel.value = 'Закрыть'; return; } const node = state.nodes.get(Number(state.attempt.nodeId)); openProgressModal(node); el.modalCancel.value = 'Отменить'; window.requestAnimationFrame(updateProgress); }
+    function renderProgress() { if (!state.attempt) { if (el.modalError.style.display !== 'block') closeProgressModal(); else el.modalCancel.value = gameTranslate("Закрыть"); return; } const node = state.nodes.get(Number(state.attempt.nodeId)); openProgressModal(node); el.modalCancel.value = gameTranslate("Отменить"); window.requestAnimationFrame(updateProgress); }
     function updateProgress() {
         if (!state.attempt) return; const now = Date.now() + state.serverOffset, start = Date.parse(state.attempt.startedAt), end = Date.parse(state.attempt.completesAt); const progress = Math.max(0, Math.min(1, (now - start) / Math.max(1, end - start))), percent = Math.round(progress * 100);
         updateProgressModal(progress * 100); if (progress < 1) { window.requestAnimationFrame(updateProgress); return; } if (!state.completing) completeGathering();
@@ -270,34 +271,34 @@
             return refreshState();
         }).catch(function (error) {
             state.completing = false;
-            state.lastResult = error.message || 'Не удалось завершить добычу.';
+            state.lastResult = error.message || gameTranslate("Не удалось завершить добычу.");
             showProgressModalError(state.lastResult); renderSelection(); setLog(state.lastResult, 'is-error'); refreshState();
         });
     }
     function cancelGathering() {
         if (!state.attempt || state.completing) return;
-        state.completing = true; setProgressModalBusy(true); request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { const message = error.message || 'Не удалось отменить добычу.'; state.completing = false; showProgressModalError(message); setLog(message, 'is-error'); });
+        state.completing = true; setProgressModalBusy(true); request(urls.cancel, 'POST').then(function (data) { state.attempt = null; state.completing = false; setProgressModalBusy(false); setLog(data.message); renderNodes(); renderProgress(); return refreshState(); }).catch(function (error) { const message = error.message || gameTranslate("Не удалось отменить добычу."); state.completing = false; showProgressModalError(message); setLog(message, 'is-error'); });
     }
     function addRewardToInventory(item) { state.inventory[item.shareItemId] = { ...item, count: (state.inventory[item.shareItemId]?.count || 0) + item.count }; }
-    function renderBag() { const items = Object.values(state.inventory); el.bag.innerHTML = items.length ? items.map(function (item) { return '<li><img src="' + escapeHtml(item.image) + '" alt=""><span>' + escapeHtml(item.name) + '</span><span class="gathering-bag-count">×' + item.count + '</span></li>'; }).join('') : '<li class="empty">пока ничего</li>'; }
+    function renderBag() { const items = Object.values(state.inventory); el.bag.innerHTML = items.length ? items.map(function (item) { return '<li><img src="' + escapeHtml(item.image) + '" alt=""><span>' + escapeHtml(item.name) + '</span><span class="gathering-bag-count">×' + item.count + '</span></li>'; }).join('') : '<li class="empty">' + gameTranslate("пока ничего") + '</li>'; }
     function refreshState() {
         if (state.refreshing) return state.refreshing;
-        state.refreshing = request(urls.state).then(applyState).catch(function (error) { const message = error.message || 'Не удалось обновить общее поле карты.'; if (el.modal.style.display === 'block') showProgressModalError(message); setLog(message, 'is-error'); }).finally(function () { state.refreshing = null; });
+        state.refreshing = request(urls.state).then(applyState).catch(function (error) { const message = error.message || gameTranslate("Не удалось обновить общее поле карты."); if (el.modal.style.display === 'block') showProgressModalError(message); setLog(message, 'is-error'); }).finally(function () { state.refreshing = null; });
         return state.refreshing;
     }
     function subscribeToGatheringMap() {
-        if (!window.Echo || mapId < 1) { setLog('Не удалось подключиться к обновлениям карты.', 'is-error'); return; }
+        if (!window.Echo || mapId < 1) { setLog(gameTranslate("Не удалось подключиться к обновлениям карты."), 'is-error'); return; }
         window.Echo.channel('gathering.map.' + mapId).listen('.gathering.map.updated', refreshState);
         const connection = window.Echo.connector && window.Echo.connector.pusher ? window.Echo.connector.pusher.connection : null;
         if (connection) {
             connection.bind('connected', refreshState);
-            connection.bind('unavailable', function () { setLog('Связь с картой потеряна. Выполняется переподключение.', 'is-warn'); });
+            connection.bind('unavailable', function () { setLog(gameTranslate("Связь с картой потеряна. Выполняется переподключение."), 'is-warn'); });
         }
     }
     el.field.addEventListener('pointerdown', startPan); el.field.addEventListener('pointermove', movePan); el.field.addEventListener('pointerup', stopPan); el.field.addEventListener('pointercancel', stopPan);
     el.modalCancel.addEventListener('click', handleProgressModalAction); el.modalClose.addEventListener('click', handleProgressModalAction); el.modalClose.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleProgressModalAction(); } });
     window.addEventListener('pagehide', function () { try { window.parent.setMapHiddenForGathering(false); } catch (e) {} closeProgressModal(); if (window.Echo) window.Echo.leave('gathering.map.' + mapId); if (!state.attempt) return; const form = new FormData(); form.append('_token', csrf); navigator.sendBeacon(urls.cancel, form); });
-    applyState(initial); positionViewportOnce(); setLog(initial.message || 'Ресурсы доступны. Перемещайте карту и дважды нажмите на кружок, чтобы начать добычу.');
+    applyState(initial); positionViewportOnce(); setLog(initial.message || gameTranslate("Ресурсы доступны. Перемещайте карту и дважды нажмите на кружок, чтобы начать добычу."));
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', subscribeToGatheringMap, { once: true }); else subscribeToGatheringMap();
 })();
 </script>

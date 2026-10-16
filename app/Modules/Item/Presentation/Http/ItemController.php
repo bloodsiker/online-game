@@ -32,6 +32,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -60,6 +61,7 @@ class ItemController extends Controller
         private readonly ItemUsagePolicyService $itemUsagePolicyService,
         private readonly LockpickingService $lockpickingService,
         private readonly QuestProgressService $questProgressService,
+        private readonly DetentionService $detentionService,
         private readonly ?MapInfluenceRequirementService $influenceRequirements = null,
     ) {}
 
@@ -246,7 +248,7 @@ class ItemController extends Controller
             ->first();
 
         if (! $backpack) {
-            return response()->json(['status' => 'error', 'message' => 'Предмет не найден.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('Предмет не найден.')], 422);
         }
 
         $gate = $this->locationReadRepository->findTeleportUseGate(
@@ -255,10 +257,14 @@ class ItemController extends Controller
         );
 
         if ($gate !== null) {
+            if ($detentionMessage = $this->detentionService->blockLeaving($user)) {
+                return response()->json(['status' => 'error', 'message' => $detentionMessage], 403);
+            }
+
             if ($this->influenceRequirements !== null && ! $this->influenceRequirements->allowsLocationGate($user->id, $gate->id)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Недостаточно влияния для прохода.',
+                    'message' => __('Недостаточно влияния для прохода.'),
                 ], 422);
             }
 
@@ -310,7 +316,7 @@ class ItemController extends Controller
         if (! $hasRegularEffect && $questUsePlan === []) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Этот предмет нельзя использовать здесь.',
+                'message' => __('Этот предмет нельзя использовать здесь.'),
             ], 422);
         }
 
@@ -325,7 +331,7 @@ class ItemController extends Controller
                 // многоразовый, и заряд не должен списываться впустую.
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Эффект «Возрождение» неактивен — потерянного при смерти опыта для возврата нет.',
+                    'message' => __('Эффект «Возрождение» неактивен — потерянного при смерти опыта для возврата нет.'),
                 ], 422);
             }
 
@@ -341,13 +347,13 @@ class ItemController extends Controller
                 ->whereKeyNot($player->id)
                 ->whereHas('user', fn ($query) => $query
                     ->where('location_id', $user->location_id)
-                    ->where('last_online_at', '>=', now()->subMinutes(10)))
+                    ->where('last_online_at', '>=', now()->subMinutes((int) config('game.online_timeout_minutes', 30))))
                 ->first();
 
             if ($target === null) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Выберите другого игрока в вашей локации.',
+                    'message' => __('Выберите другого игрока в вашей локации.'),
                 ], 422);
             }
         }
@@ -358,10 +364,10 @@ class ItemController extends Controller
                 ['name' => trim((string) $request->input('new_name'))],
                 ['name' => ['required', 'string', 'min:3', 'max:50', 'unique:users,name,'.$user->id]],
                 [
-                    'name.required' => 'Введите новое имя.',
-                    'name.min' => 'Имя должно быть не менее :min символов.',
-                    'name.max' => 'Имя должно быть не более :max символов.',
-                    'name.unique' => 'Такое имя уже занято.',
+                    'name.required' => __('Введите новое имя.'),
+                    'name.min' => __('Имя должно быть не менее :min символов.'),
+                    'name.max' => __('Имя должно быть не более :max символов.'),
+                    'name.unique' => __('Такое имя уже занято.'),
                 ],
             );
 
@@ -383,14 +389,14 @@ class ItemController extends Controller
             if ($newRace === null) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Выберите расу.',
+                    'message' => __('Выберите расу.'),
                 ], 422);
             }
 
             if ((int) $newRace->id === (int) $player->race_id) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Это уже ваша текущая раса.',
+                    'message' => __('Это уже ваша текущая раса.'),
                 ], 422);
             }
         }
@@ -490,15 +496,15 @@ class ItemController extends Controller
             'new_name' => $newName,
             'new_race' => $newRace?->name,
             'message' => match (true) {
-                $newName !== null => sprintf('Имя изменено на «%s».', $newName),
+                $newName !== null => sprintf(__('Имя изменено на «%s».'), $newName),
                 $newRace !== null => sprintf(
-                    'Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.',
+                    __('Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.'),
                     $newRace->name,
                     $raceChangeRefund,
                 ),
-                $expRestored > 0 => sprintf('Возвращено потерянного опыта: %s.', number_format($expRestored, 0, '.', ' ')),
+                $expRestored > 0 => sprintf(__('Возвращено потерянного опыта: %s.'), number_format($expRestored, 0, '.', ' ')),
                 $freeStatsRefunded > 0 => sprintf(
-                    'Характеристики сброшены! Возвращено свободных очков для распределения: %d. Расовый прирост не затронут.',
+                    __('Характеристики сброшены! Возвращено свободных очков для распределения: %d. Расовый прирост не затронут.'),
                     $freeStatsRefunded,
                 ),
                 default => $questUse['messages'][0] ?? null,

@@ -13,9 +13,14 @@ use Illuminate\Support\Collection;
 
 final class EloquentReferralRepository implements ReferralRepository
 {
-    public function findUserByName(string $name): ?User
+    public function findUserByReferralCode(string $code): ?User
     {
-        return User::where('name', $name)->first();
+        if (preg_match('/^U([1-9][0-9]*)$/i', trim($code), $matches) === 1) {
+            return User::query()->find((int) $matches[1]);
+        }
+
+        // Preserve referral links already shared with the old nickname format.
+        return User::query()->where('name', $code)->first();
     }
 
     public function findReferralByReferredUserId(int $referredUserId): ?Referral

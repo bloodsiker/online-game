@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -136,9 +138,9 @@ class MonsterCasketsSeeder extends Seeder
     /** @param array<string, int|string|null> $definition */
     private function upsertCasket(array $definition, int $tier): int
     {
-        $existing = DB::table('share_items')->where('name', $definition['name'])->first();
+        $existing = LocalizedItemSeederQuery::items()->where('name', $definition['name'])->first();
         $image = $existing?->image
-            ?: DB::table('share_items')->where('name', $definition['source_image'])->value('image')
+            ?: LocalizedItemSeederQuery::items()->where('name', $definition['source_image'])->value('image')
             ?: self::FALLBACK_IMAGE;
         $levelRange = $definition['max_level'] === null
             ? "с {$definition['min_level']} уровня"
@@ -166,14 +168,14 @@ class MonsterCasketsSeeder extends Seeder
         ];
 
         if ($existing === null) {
-            return (int) DB::table('share_items')->insertGetId([
+            return (int) LocalizedItemSeederQuery::items()->insertGetId([
                 'name' => $definition['name'],
                 ...$attributes,
                 'created_at' => now(),
             ]);
         }
 
-        DB::table('share_items')->where('id', $existing->id)->update($attributes);
+        LocalizedItemSeederQuery::items()->where('id', $existing->id)->update($attributes);
 
         return (int) $existing->id;
     }
@@ -183,7 +185,7 @@ class MonsterCasketsSeeder extends Seeder
     {
         $effectId = null;
         if ($definition['trap_effect'] !== null) {
-            $effectId = DB::table('effects')->where('name', $definition['trap_effect'])->value('id');
+            $effectId = LocalizedContentSeederQuery::forTable('effects')->where('name', $definition['trap_effect'])->value('id');
             if ($effectId === null) {
                 throw new RuntimeException("Не найден эффект ловушки «{$definition['trap_effect']}».");
             }
@@ -208,7 +210,7 @@ class MonsterCasketsSeeder extends Seeder
     private function syncLoot(int $casketId, int $tier): void
     {
         $lootIds = collect(self::LOOT_NAMES[$tier])
-            ->mapWithKeys(fn (string $name): array => [$name => DB::table('share_items')->where('name', $name)->value('id')]);
+            ->mapWithKeys(fn (string $name): array => [$name => LocalizedItemSeederQuery::items()->where('name', $name)->value('id')]);
         if ($lootIds->contains(null)) {
             $missing = $lootIds->search(null, true);
 
@@ -257,7 +259,7 @@ class MonsterCasketsSeeder extends Seeder
     /** @param array<string, int|string|null> $definition */
     private function syncMonsterDrops(int $casketId, array $definition): void
     {
-        $monsters = DB::table('monsters')
+        $monsters = LocalizedContentSeederQuery::forTable('monsters')
             ->where('lvl', '>=', $definition['min_level'])
             ->when(
                 $definition['max_level'] !== null,

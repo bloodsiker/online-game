@@ -54,12 +54,12 @@
                 </div>
             @empty
                 <br><br>
-                <div align="center"><b class="redd">У Вас нет друзей.</b></div>
+                <div align="center"><b class="redd">{{ __('У Вас нет друзей.') }}</b></div>
             @endforelse
 
             <br>
             <div align="center">
-                <a href="#" class="cht-btn-parent cht-btn-left" onclick="openFriendsPage(); return false;"><span class="cht-btn-right"><span class="cht-btn">Контакты</span></span></a>
+                    <a href="#" class="cht-btn-parent cht-btn-left" onclick="openFriendsPage(); return false;"><span class="cht-btn-right"><span class="cht-btn">{{ __('Контакты') }}</span></span></a>
             </div>
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>

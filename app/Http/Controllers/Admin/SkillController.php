@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
 use Illuminate\Http\RedirectResponse;
@@ -123,8 +124,8 @@ class SkillController extends Controller
 
     private function fillSkill(Skill $skill, Request $request): void
     {
-        $skill->name = $request->input('name');
-        $skill->description = $request->input('description');
-        $skill->type = $request->input('type');
+        $data = $request->validate(['type' => ['required', 'in:combat,magic,peaceful']]);
+        app(ContentTranslationEditor::class)->fill(model: $skill, request: $request);
+        $skill->type = $data['type'];
     }
 }

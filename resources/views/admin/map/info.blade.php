@@ -45,10 +45,7 @@
                                     {{ csrf_field() }}
                                     <div class="row pt-3 pb-3">
                                         <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="col-form-label">Название</label>
-                                                <input type="text" class="form-control" name="name" value="{{ $map->name }}">
-                                            </div>
+                                            @include('admin.partials.content-translations', ['prefix' => 'map-'.$map->id, 'content' => $map, 'fields' => ['name' => ['label' => 'Название']]])
                                             <div class="form-group">
                                                 <label class="col-form-label">Slug</label>
                                                 <input type="text" class="form-control" name="slug" value="{{ $map->slug }}">

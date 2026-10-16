@@ -34,11 +34,11 @@ class SlotsController extends Controller
         );
 
         $hotbarData = $this->hotbarService->getSlotsData($player);
-        $usableItems = Backpack::where('user_id', $user->id)
+        $usableItems = Backpack::query()
+            ->where('user_id', $user->id)
+            ->whereHas('item.itemInfo', fn ($query) => $query->where('is_slot_usable', true))
             ->with('item.itemInfo.effects')
-            ->get()
-            ->filter(fn ($backpack) => $backpack->item?->itemInfo?->is_slot_usable)
-            ->values();
+            ->get();
 
         $itemTooltipScript = $this->itemTooltipCollector
             ->collectFrom(new BackpackItemTooltipStrategy($usableItems))

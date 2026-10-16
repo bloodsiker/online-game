@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -37,10 +38,10 @@ class CollapsedMineMonsterPoisonSeeder extends Seeder
 
     public function run(): void
     {
-        $effectId = DB::table('effects')->where('slug', 'underground_venom')->value('id');
+        $effectId = LocalizedContentSeederQuery::forTable('effects')->where('slug', 'underground_venom')->value('id');
 
         if ($effectId === null) {
-            $effectId = DB::table('effects')->insertGetId([
+            $effectId = LocalizedContentSeederQuery::forTable('effects')->insertGetId([
                 'name' => 'Подземный Яд',
                 'slug' => 'underground_venom',
                 'type' => 'debuff',
@@ -62,7 +63,7 @@ class CollapsedMineMonsterPoisonSeeder extends Seeder
             $this->command?->info("создан эффект «Подземный Яд» (id={$effectId})");
         }
 
-        $monsterIds = DB::table('monsters')->whereIn('name', self::MONSTER_NAMES)->pluck('id');
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')->whereIn('name', self::MONSTER_NAMES)->pluck('id');
 
         $attached = 0;
         foreach ($monsterIds as $monsterId) {

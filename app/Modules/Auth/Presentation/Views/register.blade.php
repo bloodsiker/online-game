@@ -295,79 +295,56 @@
 {{--                                                    @endif--}}
 
                                                     <script>
-                                                        var alternative_nicks = [];
+                                                        let nickCheckRequest = 0;
 
-                                                        window.onload = function () {
+                                                        window.addEventListener('load', function () {
                                                             if ($('#nick').val()) check_nick();
-                                                        }
+                                                        });
 
                                                         function check_nick() {
-                                                            $('#nick_examples').removeClass('tbl-reg_bg-light').removeClass('tbl-reg_brd-all').html('');
-                                                            if ($('#nick').val().length && ($('#nick').val().length < 2 || $('#nick').val().length > 16)) {
-                                                                $('#nick_examples').addClass('tbl-reg_bg-light').addClass('tbl-reg_brd-all').append(
-                                                                    $('<b/>').addClass('tbl-reg_error').append('Длина ника должна быть от 2 до 16 символов.')
-                                                                ).append($('<br/>'));
+                                                            const nick = $('#nick').val().trim();
+                                                            const requestId = ++nickCheckRequest;
+                                                            const examples = $('#nick_examples').empty();
+                                                            $('#nick_ex').hide();
+
+                                                            if (!nick || nick.length < 2 || nick.length > 16) {
+                                                                check_next();
                                                                 return;
                                                             }
-                                                            $.getJSON('{{ route('register.check') }}', {nick: $('#nick').val()}, function (result) {
-                                                                $('#nick_examples').html('');
-                                                                alternative_nicks = [];
-                                                                if (result !== 0) {
-                                                                    if (result[0].length || result[1].length || result[2].length) {
-                                                                        $('#nick_examples').addClass('tbl-reg_bg-light').addClass('tbl-reg_brd-all').append(
-                                                                            $('<b/>').addClass('tbl-reg_error').append('Ник занят. Введите новый или выберите из предложенных:')
-                                                                        ).append($('<br/>'));
-                                                                        $('#nick_ex').show();
+
+                                                            $.getJSON('{{ route('register.check') }}', {nick: nick}, function (result) {
+                                                                if (requestId !== nickCheckRequest || nick !== $('#nick').val().trim()) return;
+
+                                                                const suggestions = result.suggestions || [[], [], []];
+                                                                if (result.exists) {
+                                                                    examples.append(
+                                                                        $('<b/>').addClass('tbl-reg_error').text('Ник занят. Введите другой или выберите вариант:')
+                                                                    );
+
+                                                                    let number = 1;
+                                                                    suggestions.forEach(function (group) {
+                                                                        group.forEach(function (suggestion) {
+                                                                            const link = $('<a/>', {href: '#', text: suggestion}).on('click', function (event) {
+                                                                                event.preventDefault();
+                                                                                change_nick(suggestion);
+                                                                            });
+                                                                            examples.append($('<div/>').append(number++ + '. ', link));
+                                                                        });
+                                                                    });
+
+                                                                    if (number === 1) {
+                                                                        examples.append($('<div/>').text('Свободных вариантов не найдено — введите другой ник.'));
                                                                     }
-                                                                    alternative_nicks = result;
-                                                                    var n = 1;
-                                                                    for (var cur_type = 0; cur_type < 3; cur_type++) {
-                                                                        if (!result[cur_type].length) continue;
-                                                                        var count = 1;
-                                                                        for (var type = 0; type < 3; type++) {
-                                                                            if (cur_type != type && !result[type].length) count++;
-                                                                        }
-                                                                        count = count - n + 1;
-                                                                        if (count < 1) count = 1;
-                                                                        for (var i = 0; i < count; i++) {
-                                                                            var nick = result[cur_type][i];
-                                                                            $('#nick_examples').append(
-                                                                                $('<div/>').html(n + '. <a href="register.html#" class="change_nick" onclick="change_nick(\'' + nick + '\', ' + cur_type + '); return false;">' + nick + '</a>')
-                                                                            );
-                                                                            n++;
-                                                                        }
-                                                                    }
+
+                                                                    examples.addClass('tbl-reg_bg-light tbl-reg_brd-all');
+                                                                    $('#nick_ex').show();
                                                                 }
-                                                            });
-                                                            check_next();
+                                                            }).always(check_next);
                                                         }
 
-                                                        function change_nick(nick, change_type) {
-                                                            var temp_alternative_nicks = alternative_nicks[change_type];
-                                                            alternative_nicks[change_type] = [];
-                                                            for (var i = 0; i < temp_alternative_nicks.length; i++) {
-                                                                if (temp_alternative_nicks[i] != nick) alternative_nicks[change_type].push(temp_alternative_nicks[i]);
-                                                            }
-                                                            alternative_nicks[change_type].push(nick);
+                                                        function change_nick(nick) {
                                                             $('#nick').val(nick);
-                                                            $('#nick_examples').removeClass('tbl-reg_bg-light').removeClass('tbl-reg_brd-all').html('');
-                                                            var n = 1;
-                                                            for (var cur_type = 0; cur_type < 3; cur_type++) {
-                                                                if (!alternative_nicks[cur_type].length) continue;
-                                                                var count = 1;
-                                                                for (var type = 0; type < 3; type++) {
-                                                                    if (cur_type != type && !alternative_nicks[type].length) count++;
-                                                                }
-                                                                count = count - n + 1;
-                                                                if (count < 1) count = 1;
-                                                                for (var i = 0; i < count; i++) {
-                                                                    nick = alternative_nicks[cur_type][i];
-                                                                    $('#nick_examples').addClass('tbl-reg_bg-light').addClass('tbl-reg_brd-all').append(
-                                                                        $('<div/>').html(n + '. <a href="register.html#" class="change_nick" onclick="change_nick(\'' + nick + '\', ' + cur_type + '); return false;">' + nick + '</a>')
-                                                                    );
-                                                                    n++;
-                                                                }
-                                                            }
+                                                            check_nick();
                                                         }
                                                     </script>
                                                     <style>
@@ -377,6 +354,26 @@
                                                             border-radius: 2px;
                                                             padding: 5px;
                                                         }
+                                                        #nick_ex { display: none; margin-top: 6px; }
+                                                        #nick_examples { padding: 6px 8px; }
+                                                        #nick_examples > div { margin-top: 3px; }
+                                                        .registration-avatar-row[hidden] { display: none; }
+                                                        .registration-avatar-preview { display: none; align-items: center; gap: 8px; width: max-content; max-width: 100%; box-sizing: border-box; margin-top: 8px; color: #594133; }
+                                                        .registration-avatar-preview.is-visible { display: flex; }
+                                                        .registration-avatar-preview img { flex: 0 0 160px; width: 160px; object-fit: contain; border: 1px solid #9a7654; }
+                                                        .registration-avatar-preview b { display: none; }
+                                                        .registration-avatar-modal { display: none; position: fixed; z-index: 10000; inset: 0; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 10, 7, .72); }
+                                                        .registration-avatar-modal.is-open { display: flex; }
+                                                        .registration-avatar-dialog { width: min(940px, 100%); max-height: min(820px, 92vh); overflow: auto; padding: 16px; border: 2px solid #87613d; background: url('{{ asset('main/images/theme_old/news_bg2.gif') }}') repeat; box-shadow: 0 8px 28px rgba(0, 0, 0, .55); color: #4c321f; }
+                                                        .registration-avatar-dialog__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid #b79875; font-size: 16px; font-weight: bold; }
+                                                        .registration-avatar-dialog__close { border: 0; background: none; color: #74401f; font-size: 24px; line-height: 1; cursor: pointer; }
+                                                        .registration-avatar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; padding-top: 14px; }
+                                                        .registration-avatar-choice { display: block; width: 100%; min-width: 0; padding: 0; overflow: hidden; border: 1px solid #b99a7c; background: rgba(255, 248, 225, .8); color: #593a24; cursor: pointer; text-align: center; line-height: 0; }
+                                                        .registration-avatar-choice[hidden] { display: none; }
+                                                        .registration-avatar-choice:hover, .registration-avatar-choice:focus { outline: 2px solid #a66b2f; outline-offset: 1px; background: #fff0c9; }
+                                                        .registration-avatar-choice img { display: block; width: 100%; height: 280px; object-fit: cover; border: 0; background: rgba(75, 48, 29, .08); }
+                                                        .registration-avatar-choice span { display: none; }
+                                                        @media (max-width: 520px) { .registration-avatar-dialog { padding: 10px; } .registration-avatar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .registration-avatar-choice img { height: 210px; } }
                                                     </style>
                                                     <table class="b-common-form__table">
                                                         <tr>
@@ -389,6 +386,7 @@
 																	<input type="text" name="name" id="nick" onblur="check_nick();" value="{{ old('name') }}"/>
 																</span>
 															</span>
+                                                                <div id="nick_ex"><div id="nick_examples"></div></div>
                                                             </td>
                                                             <td>
                                                                 <label for="email" class="b-common-form__label">Ваш E-Mail:</label>
@@ -430,44 +428,88 @@
                                                         </tr>
                                                         <tr>
                                                             <td>
-                                                                <label for="answer" class="b-common-form__label">Раса:</label>
+                                                                <label for="sex" class="b-common-form__label">Пол:</label>
                                                             </td>
                                                             <td>
-                                                                <select name="race" id="race" onselect="check_next();" class="tbl-reg_input">
-                                                                    @foreach($races as $race)
-                                                                        <option value="{{ $race->id }}" @selected(old('race') == $race->id)>{{ $race->name }}</option>
-                                                                    @endforeach
+                                                                <select name="sex" id="sex" onchange="check_next();" class="tbl-reg_input">
+                                                                    <option value="male" @selected(old('sex', 'male') === 'male')>Мужской</option>
+                                                                    <option value="female" @selected(old('sex') === 'female')>Женский</option>
                                                                 </select>
-                                                                <script>
-                                                                    obj = document.getElementById('race');
-                                                                    for (i = 0; i < obj.options.length; i++) {
-                                                                        if (obj.options[i].text == "") obj.options[i].selected = true;
-                                                                    }
-                                                                </script>
                                                             </td>
                                                             <td></td>
                                                             <td></td>
                                                         </tr>
                                                         <tr>
                                                             <td>
-                                                                <label for="answer" class="b-common-form__label">Пол:</label>
+                                                                <label for="race" class="b-common-form__label">Раса:</label>
                                                             </td>
                                                             <td>
-                                                                <select name="sex" id="sex" onselect="check_next();" class="tbl-reg_input">
-                                                                    <option value="male" @selected(old('sex') === 'female')>Мужской</option>
-                                                                    <option value="female" @selected(old('sex') === 'female')>Женский</option>
+                                                                <select name="race" id="race" onchange="document.getElementById('registration-avatar-row').hidden = !this.value; check_next();" class="tbl-reg_input">
+                                                                    <option value="" @selected(!old('race')) disabled>Выберите расу</option>
+                                                                    @foreach($races as $race)
+                                                                        <option value="{{ $race->id }}" @selected(old('race') == $race->id)>{{ $race->name }}</option>
+                                                                    @endforeach
                                                                 </select>
-                                                                <script>
-                                                                    obj = document.getElementById('sex');
-                                                                    for (i = 0; i < obj.options.length; i++) {
-                                                                        if (obj.options[i].text == "") obj.options[i].selected = true;
-                                                                    }
-                                                                </script>
                                                             </td>
                                                             <td></td>
                                                             <td></td>
                                                         </tr>
+                                                        <tr id="registration-avatar-row" class="registration-avatar-row" hidden>
+                                                            <td><label class="b-common-form__label">Аватар:</label></td>
+                                                            <td colspan="3">
+                                                                <input type="hidden" name="avatar" id="registration-avatar" value="{{ old('avatar', '') }}">
+                                                                <button type="button" id="open-avatar-picker" class="b-button-red-5">
+                                                                    <span class="b-button-red-5__inner">Выбрать аватар</span>
+                                                                </button>
+                                                                <div id="registration-avatar-preview" class="registration-avatar-preview" aria-live="polite">
+                                                                    <img src="" alt="Выбранный аватар">
+                                                                    <b></b>
+                                                                </div>
+                                                                @error('avatar')
+                                                                    <div class="tbl8" style="margin-top:6px;color:#a40000;">{{ $message }}</div>
+                                                                @enderror
+                                                            </td>
+                                                        </tr>
                                                     </table>
+                                                    <div id="registration-avatar-modal" class="registration-avatar-modal" aria-hidden="true">
+                                                        <section class="registration-avatar-dialog" role="dialog" aria-modal="true" aria-labelledby="registration-avatar-title">
+                                                            <div class="registration-avatar-dialog__head">
+                                                                <span id="registration-avatar-title">Выберите аватар</span>
+                                                                <button type="button" id="close-avatar-picker" class="registration-avatar-dialog__close" aria-label="Закрыть">×</button>
+                                                            </div>
+                                                            <div class="registration-avatar-grid">
+                                                                @if($avatarCatalogReady)
+                                                                    @foreach($races as $raceOption)
+                                                                        @foreach($raceOption->avatars as $avatar)
+                                                                            <button type="button" class="registration-avatar-choice"
+                                                                                    aria-label="{{ $avatar->name }}"
+                                                                                    data-avatar-id="{{ $avatar->id }}"
+                                                                                    data-avatar-race="{{ $raceOption->id }}"
+                                                                                    data-avatar-sex="{{ $avatar->sex }}"
+                                                                                    hidden>
+                                                                                <img src="{{ $avatar->image_url }}" alt="{{ $avatar->name }}">
+                                                                                <span>{{ $avatar->name }}</span>
+                                                                            </button>
+                                                                        @endforeach
+                                                                    @endforeach
+                                                                @else
+                                                                    @foreach($registrationAvatars as $avatarSex => $avatars)
+                                                                        @foreach($avatars as $avatarId => $avatar)
+                                                                            <button type="button" class="registration-avatar-choice"
+                                                                                    aria-label="{{ $avatar['name'] }}"
+                                                                                    data-avatar-id="{{ $avatarId }}"
+                                                                                    data-avatar-sex="{{ $avatarSex }}"
+                                                                                    data-avatar-race="*">
+                                                                                <img src="{{ asset($avatar['image']) }}" alt="{{ $avatar['name'] }}">
+                                                                                <span>{{ $avatar['name'] }}</span>
+                                                                            </button>
+                                                                        @endforeach
+                                                                    @endforeach
+                                                                @endif
+                                                                <p id="registration-avatar-empty" class="text-muted" hidden>Для выбранной расы и пола аватары пока не добавлены.</p>
+                                                            </div>
+                                                        </section>
+                                                    </div>
                                                     <br>
 
                                                     <div class="b-divider-5 b-divider-5_invert b-divider-5_no-center">
@@ -479,10 +521,6 @@
                                                             <div class="b-divider-5__r-inner"></div>
                                                         </div>
                                                     </div>
-
-                                                    <div class="g-recaptcha"
-                                                         data-sitekey="6LeytvYkAAAAACe76N7Hsn5TIpBI1nX7VQUgaN5G"></div>
-                                                    <script src='https://www.google.com/recaptcha/api.js'></script>
 
                                                     <p class="text-center">
                                                         <input type="checkbox" name="license" onclick="check_next();" onchange="check_next();"
@@ -497,6 +535,8 @@
                                                         $ch = true;
                                                         if (!$('#nick').val()) $ch = false;
                                                         if (!$('#email').val()) $ch = false;
+                                                        if (!$('#race').val()) $ch = false;
+                                                        if (!$('#registration-avatar').val()) $ch = false;
                                                         if (!$('#license').is(':checked')) $ch = false;
                                                         if (!common_is_email_valid($('#email').val(), 1)) $ch = false;
                                                         var btn = $('#enter_btn');
@@ -508,6 +548,87 @@
                                                             btn.removeAttr('disabled');
                                                         }
                                                     }
+
+                                                    (function () {
+                                                        var race = document.getElementById('race');
+                                                        var sex = document.getElementById('sex');
+                                                        var avatarRow = document.getElementById('registration-avatar-row');
+                                                        var avatarInput = document.getElementById('registration-avatar');
+                                                        var preview = document.getElementById('registration-avatar-preview');
+                                                        var modal = document.getElementById('registration-avatar-modal');
+                                                        var choices = Array.from(document.querySelectorAll('.registration-avatar-choice'));
+                                                        var emptyMessage = document.getElementById('registration-avatar-empty');
+
+                                                        function closePicker() {
+                                                            modal.classList.remove('is-open');
+                                                            modal.setAttribute('aria-hidden', 'true');
+                                                        }
+
+                                                        function showSelectedAvatar(avatarId) {
+                                                            var choice = choices.find(function (item) {
+                                                                return item.dataset.avatarId === avatarId
+                                                                    && (item.dataset.avatarRace === race.value || item.dataset.avatarRace === '*')
+                                                                    && item.dataset.avatarSex === sex.value;
+                                                            });
+                                                            if (!choice) {
+                                                                avatarInput.value = '';
+                                                                preview.classList.remove('is-visible');
+                                                                preview.querySelector('img').src = '';
+                                                                preview.querySelector('b').textContent = '';
+                                                                return;
+                                                            }
+
+                                                            avatarInput.value = avatarId;
+                                                            preview.querySelector('img').src = choice.querySelector('img').src;
+                                                            preview.querySelector('b').textContent = choice.querySelector('span').textContent;
+                                                            preview.classList.add('is-visible');
+                                                        }
+
+                                                        function updatePicker() {
+                                                            avatarRow.hidden = !race.value;
+                                                            var visibleCount = 0;
+                                                            choices.forEach(function (choice) {
+                                                                choice.hidden = choice.dataset.avatarSex !== sex.value
+                                                                    || (choice.dataset.avatarRace !== race.value && choice.dataset.avatarRace !== '*');
+                                                                if (!choice.hidden) visibleCount++;
+                                                            });
+                                                            emptyMessage.hidden = !race.value || visibleCount > 0;
+                                                            if (avatarInput.value) showSelectedAvatar(avatarInput.value);
+                                                            check_next();
+                                                        }
+
+                                                        document.getElementById('open-avatar-picker').addEventListener('click', function () {
+                                                            if (!race.value) return;
+                                                            updatePicker();
+                                                            modal.classList.add('is-open');
+                                                            modal.setAttribute('aria-hidden', 'false');
+                                                            var firstChoice = choices.find(function (choice) {
+                                                                return choice.dataset.avatarSex === sex.value
+                                                                    && (choice.dataset.avatarRace === race.value || choice.dataset.avatarRace === '*');
+                                                            });
+                                                            firstChoice && firstChoice.focus();
+                                                        });
+                                                        document.getElementById('close-avatar-picker').addEventListener('click', closePicker);
+                                                        modal.addEventListener('click', function (event) {
+                                                            if (event.target === modal) closePicker();
+                                                        });
+                                                        document.addEventListener('keydown', function (event) {
+                                                            if (event.key === 'Escape' && modal.classList.contains('is-open')) closePicker();
+                                                        });
+                                                        choices.forEach(function (choice) {
+                                                            choice.addEventListener('click', function () {
+                                                                showSelectedAvatar(choice.dataset.avatarId);
+                                                                closePicker();
+                                                                check_next();
+                                                            });
+                                                        });
+                                                        race.addEventListener('change', updatePicker);
+                                                        sex.addEventListener('change', function () {
+                                                            updatePicker();
+                                                        });
+
+                                                        updatePicker();
+                                                    })();
                                                 </script>
 
                                                 <div class="b-divider-4"></div>

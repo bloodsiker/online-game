@@ -12,6 +12,9 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRoundHit;
+use App\Modules\Dungeon\Application\Services\ClanBossService;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
+use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,6 +30,7 @@ readonly class FightOrchestrator
         private BossPhaseService $bossPhaseService,
         private BossShieldService $shieldService,
         private BattleEffectService $effectService,
+        private ClanBossService $clanBossService,
     ) {}
 
     public function attack(int $id, int $monsterId, int $action): FightDTO
@@ -46,7 +50,7 @@ readonly class FightOrchestrator
             abort_if(
                 $battle->status->isFinish() || (int) $battle->location_id !== (int) $user->location_id,
                 409,
-                'Вы уже покинули этот бой.',
+                __('Вы уже покинули этот бой.'),
             );
 
             // Юзер тут не потрібен (фіналізатор смерті його не читає) —
@@ -61,7 +65,7 @@ readonly class FightOrchestrator
             abort_if(
                 $attackedPlayer === null || $attackedPlayer->status->isDeath(),
                 409,
-                'Вы уже покинули этот бой.',
+                __('Вы уже покинули этот бой.'),
             );
 
             $battle->increment('rounds');
@@ -89,6 +93,33 @@ readonly class FightOrchestrator
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
 
+            // Клан-босс: общий инстанс на весь клан. Перезагружаем строку под
+            // lockForUpdate (параллельные бои разных сокланов), проверяем лимиты.
+            $clanBossStage = null;
+            if ($locationMonster->isClanBoss()) {
+                $locationMonster = MonsterOnLocation::query()
+                    ->with(['monster.effects'])
+                    ->whereKey($locationMonster->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                $monster = $locationMonster->monster;
+
+                // Босса уже добил соклан в соседнем бою — тихо завершаем раунд.
+                if ($locationMonster->hp_now <= 0 || ! $locationMonster->active) {
+                    return $fightDTO->setBattle($battle)
+                        ->setBattleRound($battleRound)
+                        ->setAttackedMonster($attackedMonster)
+                        ->setPlayer($player)
+                        ->setAttackedMonster(null);
+                }
+
+                try {
+                    $clanBossStage = $this->clanBossService->assertCanHit($user, $locationMonster);
+                } catch (\RuntimeException $e) {
+                    abort(409, $e->getMessage());
+                }
+            }
+
             // player log: effects + player attack + boss mechanics + kill events
             $playerLog = new AttackResultDTO;
             // monster log: only the monster's counterattack
@@ -103,8 +134,17 @@ readonly class FightOrchestrator
 
             if (! $playerIsStunned) {
                 $xpMultiplier = (float) ($user->currentLocation->dungeon?->xp_multiplier ?? 1.0);
+                $hpBeforeHit = $locationMonster->hp_now;
                 $attackLog = $this->attackService->execute($player, $locationMonster, $action, $battle, $xpMultiplier);
                 $playerLog->merge($attackLog);
+
+                if ($clanBossStage !== null) {
+                    $this->clanBossService->recordHit(
+                        $user,
+                        $clanBossStage,
+                        max(0, $hpBeforeHit - $locationMonster->hp_now),
+                    );
+                }
             }
 
             $monsterHpAfterPlayerAttack = $locationMonster->hp_now;
@@ -123,10 +163,21 @@ readonly class FightOrchestrator
             }
 
             if ($locationMonster->hp_now <= 0) {
-                $this->attackService->handleMonsterDeath($player, $locationMonster, $attackedMonster, $playerLog);
+                if ($clanBossStage !== null) {
+                    // Общий инстанс: обычное распределение лута подавлено,
+                    // награды клану раздаёт ClanBossService (идемпотентно).
+                    $attackedMonster->status = 0;
+                    $attackedMonster->save();
 
-                if ($isBoss) {
-                    $this->bossMechanicsService->handleBossDeath($locationMonster, $battle, $player, $playerLog);
+                    MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
+
+                    $this->clanBossService->handleStageKill($locationMonster, $player, $battle->id, $playerLog);
+                } else {
+                    $this->attackService->handleMonsterDeath($player, $locationMonster, $attackedMonster, $playerLog);
+
+                    if ($isBoss) {
+                        $this->bossMechanicsService->handleBossDeath($locationMonster, $battle, $player, $playerLog);
+                    }
                 }
             }
 

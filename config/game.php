@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'online_timeout_minutes' => (int) env('PLAYER_ONLINE_TIMEOUT_MINUTES', 30),
     /*
     |--------------------------------------------------------------------------
     | Синхронизация состояния игрока

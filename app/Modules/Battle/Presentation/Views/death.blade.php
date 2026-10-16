@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <style>
         html {
             height: 100%;
@@ -91,16 +92,16 @@
     <tbody>
     <tr valign="top">
         <td>
-            <p><u><b>Раунд N {{ $battle->rounds }}</b></u> - <a href="{{ route('info.monster', ['id' => $attackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $attackedMonster->locationMonster->monster->name }}</a> {{ $attackedMonster->locationMonster->monster->lvl }} ({{ $attackedMonster->locationMonster->hp_now }}/{{ $attackedMonster->locationMonster->hp_max }})</p>
+            <p><u><b>{{ __("Раунд N") }} {{ $battle->rounds }}</b></u> - <a href="{{ route('info.monster', ['id' => $attackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $attackedMonster->locationMonster->monster->name }}</a> {{ $attackedMonster->locationMonster->monster->lvl }} ({{ $attackedMonster->locationMonster->hp_now }}/{{ $attackedMonster->locationMonster->hp_max }})</p>
 
-            {!! $round->action !!}
+            {!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($round->action) !!}
 
-            {!! $fightDTO->getSideLog() !!}
+            {!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($fightDTO->getSideLog()) !!}
 
-            <p><font color="red">Внимание!</font>  Есть всего 30 минут, пока действует Возрождение! Сферы <font color="#009900">многоразовые</font></p>
-            <p>Теперь вы находитесь здесь: <b>{{ $player->user->currentLocation->name }}</b></p>
+            <p><font color="red">{{ __("Внимание!") }}</font>  {{ __("Есть всего 30 минут, пока действует Возрождение! Сферы") }} <font color="#009900">{{ __("многоразовые") }}</font></p>
+            <p>{{ __("Теперь вы находитесь здесь:") }} <b>{{ $player->user->currentLocation->name }}</b></p>
 
-            <p><a href="{{ route('location') }}">Описание местности</a> »</p>
+            <p><a href="{{ route('location') }}">{{ __("Описание местности") }}</a> »</p>
         </td>
     </tr>
     </tbody>

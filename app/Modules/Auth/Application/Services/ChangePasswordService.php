@@ -19,7 +19,7 @@ final class ChangePasswordService
 
             if (! Hash::check($currentPassword, $lockedUser->password)) {
                 throw ValidationException::withMessages([
-                    'current_password' => 'Текущий пароль указан неверно.',
+                    'current_password' => __('ui.current_password_invalid'),
                 ]);
             }
 

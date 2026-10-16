@@ -9,6 +9,7 @@ use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Clan\Domain\Models\ClanSkillLevelItemRequirement;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,15 +18,18 @@ class ClanSkillController extends Controller
 {
     public function index()
     {
-        $skills = ClanSkillDefinition::withCount('levels')->orderBy('sort_order')->orderBy('name')->get();
+        $skills = ClanSkillDefinition::withCount('levels')->orderBy('sort_order')->orderBy('name->ru')->get();
 
         return view('admin.clan_skill.index', compact('skills'));
     }
 
-    public function create(Request $request): mixed
+    public function create(Request $request, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
-            $skill = ClanSkillDefinition::create($this->definitionData($request));
+            $skill = new ClanSkillDefinition;
+            $translationEditor->fill($skill, $request, ['name', 'description'], ['name']);
+            $skill->fill($this->definitionData($request));
+            $skill->save();
 
             return redirect()->route('admin.clan_skill.edit', $skill)->with('success', 'Клановый навык создан.');
         }
@@ -33,9 +37,10 @@ class ClanSkillController extends Controller
         return view('admin.clan_skill.create');
     }
 
-    public function edit(Request $request, ClanSkillDefinition $clanSkill): mixed
+    public function edit(Request $request, ClanSkillDefinition $clanSkill, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
+            $translationEditor->fill($clanSkill, $request, ['name', 'description'], ['name']);
             $clanSkill->update($this->definitionData($request));
 
             return back()->with('success', 'Основные параметры сохранены.');
@@ -45,8 +50,8 @@ class ClanSkillController extends Controller
 
         return view('admin.clan_skill.edit', [
             'skill' => $clanSkill,
-            'magicSkills' => MagicSkill::orderBy('name')->get(['id', 'name']),
-            'items' => ShareItem::orderBy('name')->get(['id', 'name']),
+            'magicSkills' => MagicSkill::orderBy('name->ru')->get(['id', 'name']),
+            'items' => ShareItem::orderBy('name->ru')->get(['id', 'name']),
         ]);
     }
 
@@ -114,8 +119,6 @@ class ClanSkillController extends Controller
     private function definitionData(Request $request): array
     {
         return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
             'icon' => ['nullable', 'string', 'max:255'],
             'max_level' => ['required', 'integer', 'min:1', 'max:99'],
             'sort_order' => ['required', 'integer', 'min:0'],

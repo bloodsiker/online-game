@@ -736,7 +736,7 @@
         <td width="48" height="48">
             <div class="a1" style="">
                 <div id="u31">
-                    <div id="l31" class="s2box bb bt">
+                    <div id="l31" class="s2box bt">
                         <s id="z31">0</s><a name="31"></a>31
                     </div>
                 </div>
@@ -881,7 +881,15 @@
             </div>
         </td>
         <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a1" style="">
+                <div id="u1700">
+                    <div id="l1700" class="s2box br bl">
+                        <s id="z1700">0</s><a name="1700"></a>1700
+                    </div>
+                </div>
+            </div>
+        </td>
         <td width="48" height="48">
             <div class="a1" style="">
                 <div id="u29">
@@ -985,9 +993,33 @@
                 </div>
             </div>
         </td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a1" style="">
+                <div id="u1703">
+                    <div id="l1703" class="s2box bt bb bl">
+                        <s id="z1703">0</s><a name="1703"></a>1703
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a1" style="">
+                <div id="u1701">
+                    <div id="l1701" class="s2box">
+                        <s id="z1701">0</s><a name="1701"></a>1701
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td width="48" height="48">
+            <div class="a1" style="">
+                <div id="u1704">
+                    <div id="l1704" class="s2box br bt bb">
+                        <s id="z1704">0</s><a name="1704"></a>1704
+                    </div>
+                </div>
+            </div>
+        </td>
         <td width="48" height="48">
             <div class="a1" style="">
                 <div id="u47">
@@ -1065,7 +1097,17 @@
             </div>
         </td>
         <td width="48" height="48"></td>
-        <td width="48" height="48"></td>
+        <td width="48" height="48">
+            <div class="a1" style="">
+                <div id="u1702">
+                    <div id="l1702" class="s2box bl bb br">
+                        <s id="z1702">0</s><a name="1702"></a>
+                        <em>1702</em>
+                        <cite>Темница</cite>
+                    </div>
+                </div>
+            </div>
+        </td>
         <td width="48" height="48"></td>
         <td width="48" height="48">
             <div class="a1" style="">

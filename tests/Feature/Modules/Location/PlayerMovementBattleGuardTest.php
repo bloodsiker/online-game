@@ -12,6 +12,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Location\Domain\Services\PlayerMovementService;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Player\Domain\Services\PlayerEquipmentLoader;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +71,9 @@ class PlayerMovementBattleGuardTest extends TestCase
             Mockery::mock(BackpackService::class),
             new PlayerEquipmentLoader,
             new BattleRepository,
+            Mockery::mock(DetentionService::class, function ($mock): void {
+                $mock->shouldReceive('blockLeaving')->once()->andReturn(null);
+            }),
         );
 
         $result = $service->move($user, 'east');

@@ -12,9 +12,8 @@
                 <div class="card-body">
                     <form action="{{ route('admin.skill.info', $skill->id) }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ $skill->name }}">
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => $skill, 'active' => true])
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Тип навыка</label>
@@ -23,10 +22,6 @@
                                 <option value="magic"    @selected($skill->type === 'magic')>Магический</option>
                                 <option value="peaceful" @selected($skill->type === 'peaceful')>Мирный</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ $skill->description }}</textarea>
                         </div>
                         <div class="mt-3">
                             <button class="btn btn-primary">Сохранить</button>

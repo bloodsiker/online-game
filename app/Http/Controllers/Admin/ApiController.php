@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -30,12 +31,12 @@ class ApiController extends Controller
             })
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
+                    $query->searchTranslations("%{$search}%")
                         ->orWhere('id', is_numeric($search) ? (int) $search : 0);
                 });
             })
-            ->orderByRaw("CASE WHEN name IS NULL OR TRIM(name) = '' THEN 1 ELSE 0 END")
-            ->orderBy('name')
+            ->orderByRaw("CASE WHEN name->>'$.ru' IS NULL OR TRIM(name->>'$.ru') = '' THEN 1 ELSE 0 END")
+            ->orderBy('name->ru')
             ->orderBy('id');
 
         $total = $query->count();
@@ -57,6 +58,35 @@ class ApiController extends Controller
         ]);
     }
 
+    public function dungeons(Request $request): JsonResponse
+    {
+        $search = $request->input('q', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 20;
+
+        $query = Dungeon::query()
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($query) use ($search) {
+                    $query->searchTranslations("%{$search}%")
+                        ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+                });
+            })
+            ->orderBy('id');
+
+        $total = $query->count();
+        $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
+
+        return response()->json([
+            'results' => $results->map(fn (Dungeon $dungeon): array => [
+                'id' => $dungeon->id,
+                'text' => "[{$dungeon->id}] ".trim((string) $dungeon->name)." ({$dungeon->type->value})",
+            ]),
+            'pagination' => [
+                'more' => ($page * $perPage) < $total,
+            ],
+        ]);
+    }
+
     public function items(Request $request): JsonResponse
     {
         $search = $request->input('q', '');
@@ -64,10 +94,10 @@ class ApiController extends Controller
         $perPage = 20;
 
         $query = ShareItem::when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
+            $q->searchTranslations("%{$search}%")
                 ->orWhere('id', is_numeric($search) ? (int) $search : 0);
         })
-            ->orderBy('name');
+            ->orderBy('name->ru');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
@@ -92,10 +122,10 @@ class ApiController extends Controller
         $perPage = 20;
 
         $query = Npc::when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
+            $q->searchTranslations("%{$search}%")
                 ->orWhere('id', is_numeric($search) ? (int) $search : 0);
         })
-            ->orderBy('name');
+            ->orderBy('name->ru');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
@@ -118,10 +148,10 @@ class ApiController extends Controller
 
         $query = Monster::query()
             ->when($search, function ($query) use ($search): void {
-                $query->where('name', 'like', "%{$search}%")
+                $query->searchTranslations("%{$search}%")
                     ->orWhere('id', is_numeric($search) ? (int) $search : 0);
             })
-            ->orderBy('name');
+            ->orderBy('name->ru');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
@@ -144,10 +174,10 @@ class ApiController extends Controller
 
         $query = Reputation::query()
             ->when($search, function ($query) use ($search): void {
-                $query->where('name', 'like', "%{$search}%")
+                $query->searchTranslations("%{$search}%")
                     ->orWhere('id', is_numeric($search) ? (int) $search : 0);
             })
-            ->orderBy('name');
+            ->orderBy('name->ru');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
@@ -169,10 +199,12 @@ class ApiController extends Controller
         $perPage = 20;
 
         $query = Map::when($search, function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            $q->where(function ($query) use ($search): void {
+                $query->searchTranslations("%{$search}%")
+                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            });
         })
-            ->orderBy('name');
+            ->orderBy('name->ru');
 
         $total = $query->count();
         $results = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
@@ -193,8 +225,10 @@ class ApiController extends Controller
         $perPage = 20;
 
         $query = Quest::when($search, function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-                ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            $q->where(function ($query) use ($search): void {
+                $query->searchTranslations("%{$search}%", ['title'])
+                    ->orWhere('id', is_numeric($search) ? (int) $search : 0);
+            });
         })
             ->orderBy('id');
 

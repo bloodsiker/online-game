@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рефералы</title>
+    <title>{{ __('Рефералы') }}</title>
     <style>
         html { height: 100%; width: 100%; }
         body {
@@ -50,20 +50,20 @@
             @forelse($frame->referrals as $referral)
                 <div class="info">
                     <a href="{{ route('info.user', ['id' => $referral->userId]) }}" target="_blank"
-                       class="pnick" title="Информация о персонаже"><b>{{ $referral->name }}</b></a>
-                    <span class="lvl">[{{ $referral->level }} ур.]</span>
+                       class="pnick" title="{{ __('Информация о персонаже') }}"><b>{{ $referral->name }}</b></a>
+                    <span class="lvl">[{{ $referral->level }} {{ __('ур.') }}]</span>
                     @if($referral->claimedRewardsCount > 0)
-                        <span class="claims">&mdash; наград: {{ $referral->claimedRewardsCount }}</span>
+                        <span class="claims">&mdash; {{ __('наград:') }} {{ $referral->claimedRewardsCount }}</span>
                     @endif
                 </div>
             @empty
                 <br><br>
-                <div align="center"><b class="redd">У Вас нет рефералов.</b></div>
+                <div align="center"><b class="redd">{{ __('У Вас нет рефералов.') }}</b></div>
             @endforelse
 
             <br>
             <div align="center">
-                <a href="#" class="cht-btn-parent cht-btn-left" onclick="openReferralPage(); return false;"><span class="cht-btn-right"><span class="cht-btn">Информация</span></span></a>
+                <a href="#" class="cht-btn-parent cht-btn-left" onclick="openReferralPage(); return false;"><span class="cht-btn-right"><span class="cht-btn">{{ __('Информация') }}</span></span></a>
             </div>
         </td>
         <td width="1%" class="lgb-right" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
@@ -73,7 +73,7 @@
             <img src="{{ asset('img/bg/separator_v.gif') }}" width="3" height="1">
         </td>
         <td width="100%" height="18" style="background: url({{ asset('img/bg/tbl-main_users-bottom.gif') }}) repeat-x; padding-left: 14px; color: rgb(66, 42, 23);">
-            <b>Рефералов:</b> <b style="color:#FF0000;">{{ count($frame->referrals) }}</b>
+            <b>{{ __('Рефералов:') }}</b> <b style="color:#FF0000;">{{ count($frame->referrals) }}</b>
         </td>
     </tr>
     </tbody>

@@ -6,6 +6,7 @@ use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 /**
@@ -27,7 +28,7 @@ class ClanQuestSeeder extends Seeder
 {
     public function run(): void
     {
-        $npc = Npc::query()->where('name', config('game.clan_mentor_npc_name'))->firstOrFail();
+        $npc = Npc::query()->where('name->ru', config('game.clan_mentor_npc_name'))->firstOrFail();
 
         $quests = [
             // Quest 1: Easy — kill mice
@@ -180,7 +181,7 @@ class ClanQuestSeeder extends Seeder
         ];
 
         foreach ($quests as $data) {
-            $quest = Quest::firstOrCreate(
+            $quest = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
                 ['title' => $data['quest']['title']],
                 $data['quest']
             );

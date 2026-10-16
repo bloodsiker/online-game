@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Library\Infrastructure\Persistence\Models;
 
 use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LibraryCategory extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $fillable = [
         'parent_id',
         'name',

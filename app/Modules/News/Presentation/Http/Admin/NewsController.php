@@ -7,6 +7,7 @@ namespace App\Modules\News\Presentation\Http\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsComment;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsPost;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -33,10 +34,10 @@ class NewsController extends Controller
         return view('news::admin.news.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $news = new NewsPost;
-        $this->fillNews($news, $request);
+        $this->fillNews($news, $request, $translationEditor);
         $news->save();
 
         return redirect()->route('admin.news.info', $news->id)->with('success', 'Новость создана.');
@@ -53,10 +54,10 @@ class NewsController extends Controller
         return response()->json(['url' => asset($path)]);
     }
 
-    public function info(Request $request, NewsPost $news): View|RedirectResponse
+    public function info(Request $request, NewsPost $news, ContentTranslationEditor $translationEditor): View|RedirectResponse
     {
         if ($request->isMethod('POST')) {
-            $this->fillNews($news, $request);
+            $this->fillNews($news, $request, $translationEditor);
             $news->save();
 
             return redirect()->back()->with('success', 'Новость сохранена.');
@@ -96,11 +97,10 @@ class NewsController extends Controller
         return redirect()->back()->with('success', 'Комментарий обновлен.');
     }
 
-    private function fillNews(NewsPost $news, Request $request): void
+    private function fillNews(NewsPost $news, Request $request, ContentTranslationEditor $translationEditor): void
     {
+        $translationEditor->fill($news, $request, ['title', 'description'], ['title', 'description']);
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
             'views_count' => ['nullable', 'integer', 'min:0'],
             'created_at' => ['nullable', 'date'],
         ]);

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Данж завершён</title>
+    <title>{{ __('Данж завершён') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         body { font-family: Tahoma; font-size: 11px; margin: 4px; }
@@ -15,13 +15,13 @@
 <body>
 
 <div style="font-weight:bold; font-size:13px; color:#1a1; margin-bottom:6px;">
-    ✔ Данж завершён: {{ $run->dungeon->name }}
+    ✔ {{ __('Данж завершён:') }} {{ $run->dungeon->name }}
 </div>
 
 <div class="block">
-    <b>Статус:</b> {{ $run->status->value }}<br>
-    <b>Начат:</b> {{ $run->started_at->format('d.m.Y H:i') }}<br>
-    <b>Завершён:</b> {{ $run->updated_at->format('d.m.Y H:i') }}
+    <b>{{ __('Статус:') }}</b> {{ $run->status->value }}<br>
+    <b>{{ __('Начат:') }}</b> {{ $run->started_at->format('d.m.Y H:i') }}<br>
+    <b>{{ __('Завершён:') }}</b> {{ $run->updated_at->format('d.m.Y H:i') }}
 </div>
 
 @php
@@ -30,7 +30,7 @@
 
 @if ($rewardLogs->isNotEmpty())
     <div class="block">
-        <b>Полученные награды:</b>
+        <b>{{ __('Полученные награды:') }}</b>
         @foreach ($rewardLogs as $log)
             <div class="log-row">
                 @php $p = $log->payload ?? []; @endphp
@@ -43,10 +43,10 @@
         @endforeach
     </div>
 @else
-    <div class="block" style="color:#888;">Наград не получено.</div>
+    <div class="block" style="color:#888;">{{ __('Наград не получено.') }}</div>
 @endif
 
-<p><a href="{{ route('dungeon.index') }}" class="btn">К списку данжей</a></p>
+<p><a href="{{ route('dungeon.index') }}" class="btn">{{ __('К списку данжей') }}</a></p>
 
 </body>
 </html>

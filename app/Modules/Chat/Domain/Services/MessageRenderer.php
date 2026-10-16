@@ -218,7 +218,7 @@ class MessageRenderer
             $smileMap = [];
             foreach (self::SMILES as $code => $file) {
                 $smileMap[$code] = '<img src="'.asset('data/smiles/'.$file)
-                    .'" class="chat-smile" style="max-height: 20px; vertical-align: middle;" alt="'.$code.'" title="'.$code.'">';
+                    .'" class="chat-smile" style="vertical-align: middle;" alt="'.$code.'" title="'.$code.'">';
             }
         }
 

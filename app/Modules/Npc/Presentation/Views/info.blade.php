@@ -1,4 +1,4 @@
-<html>
+<html lang="{{ app()->getLocale() }}">
 <head>
     <title>{{ $page->npc->name }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -112,7 +112,7 @@
                                         <td class="tbl-shp_sml-top" valign="top" align="center">
                                             <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
                                                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
-                                                <td class="tbl-usi_label-center">Описание</td>
+                                                <td class="tbl-usi_label-center">{{ __('Описание') }}</td>
                                                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                             </tr></tbody></table>
                                         </td>
@@ -142,7 +142,7 @@
                                         <td class="tbl-shp_sml-top" valign="top" align="center">
                                             <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
                                                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt></td>
-                                                <td class="tbl-usi_label-center">Информация</td>
+                                                <td class="tbl-usi_label-center">{{ __('Информация') }}</td>
                                                 <td><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt></td>
                                             </tr></tbody></table>
                                         </td>
@@ -154,7 +154,7 @@
                                             <table class="coll w100 p10h p2v brd2-all">
                                                 <tbody>
                                                 <tr class="bg_l">
-                                                    <td class="brd2-top brd2-bt b">Расположение</td>
+                                                    <td class="brd2-top brd2-bt b">{{ __('Расположение') }}</td>
                                                     <td class="brd2-top brd2-bt b redd" align="right">{{ $page->npc->location->name }} [{{ $page->npc->location->id }}]</td>
                                                 </tr>
                                                 </tbody>

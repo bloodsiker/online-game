@@ -6,6 +6,7 @@ use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 class ClanSkillSeeder extends Seeder
@@ -166,7 +167,7 @@ class ClanSkillSeeder extends Seeder
         ];
 
         foreach ($skills as $skillData) {
-            if (ClanSkillDefinition::where('name', $skillData['name'])->exists()) {
+            if (LocalizedContentSeederQuery::forTable('clan_skill_definitions')->where('name', $skillData['name'])->exists()) {
                 continue;
             }
 

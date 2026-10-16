@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Книга заклинаний</title>
+    <title>{{ __('Книга заклинаний') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <script src="{{ asset('js/lib/Sortable.min.js') }}"></script>
@@ -523,25 +523,25 @@
                         <div class="spellbook">
                             <div class="spellbook-hero">
                                 <div class="spellbook-title-plate">
-                                    <h1 class="spellbook-title">Книга заклинаний</h1>
+                                    <h1 class="spellbook-title">{{ __('Книга заклинаний') }}</h1>
                                 </div>
-                                <p class="spellbook-subtitle">Настройте боевые приёмы и управляйте магией в бою.</p>
+                                <p class="spellbook-subtitle">{{ __('Настройте боевые приёмы и управляйте магией в бою.') }}</p>
                                 <div class="spellbook-stats">
-                                    <span class="spellbook-stat">Боевых: {{ $combatSkills->count() }}</span>
-                                    <span class="spellbook-stat">Поддержки: {{ $buffSkills->count() }}</span>
-                                    <span class="spellbook-stat">Пассивных: {{ $page->passiveSkills->count() + $page->runePassives->count() }}</span>
+                                    <span class="spellbook-stat">{{ __('Боевых:') }} {{ $combatSkills->count() }}</span>
+                                    <span class="spellbook-stat">{{ __('Поддержки:') }} {{ $buffSkills->count() }}</span>
+                                    <span class="spellbook-stat">{{ __('Пассивных:') }} {{ $page->passiveSkills->count() + $page->runePassives->count() }}</span>
                                 </div>
                             </div>
 
                         {{-- Combat skills --}}
                         <section class="spell-section">
                         <div class="section-header">
-                            <span>Боевые заклинания</span>
+                            <span>{{ __('Боевые заклинания') }}</span>
                             <span class="section-count">{{ $combatSkills->count() }}</span>
                         </div>
 
                         @if($combatSkills->isEmpty())
-                            <div class="empty-state">Нет боевых заклинаний</div>
+                            <div class="empty-state">{{ __('Нет боевых заклинаний') }}</div>
                         @else
                             <div class="skill-grid" id="combat-grid">
                                 @foreach($combatSkills as $skill)
@@ -554,18 +554,18 @@
                                                     ✦
                                                 @endif
                                             </span>
-                                            <span class="drag-handle" title="Перетащить">⠿</span>
+                                            <span class="drag-handle" title="{{ __('Перетащить') }}">⠿</span>
                                             <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
                                                onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
                                             @if($skill->mana_cost > 0)
                                                 <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
                                             @endif
-                                            <span class="skill-type-badge badge-attack">Атака</span>
+                                            <span class="skill-type-badge badge-attack">{{ __('Атака') }}</span>
                                         </div>
                                         <div class="skill-card-body">
                                             @if($skill->min_damage > 0 || $skill->max_damage > 0)
                                                 <div class="skill-dmg">
-                                                    <span class="skill-dmg-label">Урон:</span>
+                                                    <span class="skill-dmg-label">{{ __('Урон:') }}</span>
                                                     <span class="skill-dmg-value">{{ $skill->min_damage }} – {{ $skill->max_damage }}</span>
                                                 </div>
                                             @endif
@@ -580,7 +580,7 @@
                                                         @if($skill->pivot->is_equipped) checked @endif
                                                     >
                                                     <span class="custom-checkbox"></span>
-                                                    Показывать в бою
+                                                    {{ __('Показывать в бою') }}
                                                 </label>
                                             </div>
                                         </div>
@@ -594,12 +594,12 @@
                         {{-- Buff / Heal skills --}}
                         <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
-                            <span>Баффы и исцеление</span>
+                            <span>{{ __('Баффы и исцеление') }}</span>
                             <span class="section-count">{{ $buffSkills->count() }}</span>
                         </div>
 
                         @if($buffSkills->isEmpty())
-                            <div class="empty-state">Нет баффов</div>
+                            <div class="empty-state">{{ __('Нет баффов') }}</div>
                         @else
                             <div class="skill-grid" id="buff-grid">
                                 @foreach($buffSkills as $skill)
@@ -612,20 +612,20 @@
                                                     {{ $skill->type === 'heal' ? '✚' : '✹' }}
                                                 @endif
                                             </span>
-                                            <span class="drag-handle" title="Перетащить">⠿</span>
+                                            <span class="drag-handle" title="{{ __('Перетащить') }}">⠿</span>
                                             <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
                                                onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
                                             @if($skill->mana_cost > 0)
                                                 <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
                                             @endif
                                             <span class="skill-type-badge {{ $skill->type === 'heal' ? 'badge-heal' : 'badge-buff' }}">
-                                                {{ $skill->type === 'heal' ? 'Лечение' : 'Бафф' }}
+                                                {{ $skill->type === 'heal' ? __('Лечение') : __('Бафф') }}
                                             </span>
                                         </div>
                                         <div class="skill-card-body">
                                             @if($skill->base_healing > 0)
                                                 <div class="skill-dmg">
-                                                    <span class="skill-dmg-label">Лечение:</span>
+                                                    <span class="skill-dmg-label">{{ __('Лечение:') }}</span>
                                                     <span class="skill-dmg-value" style="color:#1a6e1a">+{{ $skill->base_healing }} HP</span>
                                                 </div>
                                             @endif
@@ -643,13 +643,13 @@
                                             @endforeach
                                             @if($skill->cooldown > 0)
                                                 <div class="skill-cooldown-info">
-                                                    ⏱ Кулдаун: {{ format_cooldown($skill->cooldown) }}
+                                                    ⏱ {{ __('Кулдаун:') }} {{ format_cooldown($skill->cooldown) }}
                                                 </div>
                                             @endif
                                             <div class="skill-use-row">
                                                 @if($page->allyTargets->isNotEmpty() && $skill->target_type === 'all')
                                                     <select id="target_{{ $skill->id }}">
-                                                        <option value="">— Себе —</option>
+                                                        <option value="">{{ __('— Себе —') }}</option>
                                                         @foreach($page->allyTargets as $ally)
                                                             <option value="{{ $ally->id }}">{{ $ally->user->name }}</option>
                                                         @endforeach
@@ -663,7 +663,7 @@
                                                 <a id="btn-skill-{{ $skill->id }}"
                                                    class="btn-use"
                                                    data-cooldown-end="{{ $cooldownEnd }}"
-                                                   onclick="useSkill({{ $skill->id }}, '{{ route('magic_skill.use', $skill->id) }}')">Применить</a>
+                                                   onclick="useSkill({{ $skill->id }}, '{{ route('magic_skill.use', $skill->id) }}')">{{ __('Применить') }}</a>
                                             </div>
                                         </div>
                                     </div>
@@ -675,24 +675,24 @@
                         {{-- Passive skills --}}
                         <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
-                            <span>Пассивные навыки</span>
+                            <span>{{ __('Пассивные навыки') }}</span>
                             <span class="section-count">{{ $page->passiveSkills->count() }}</span>
                         </div>
 
                         @if($page->passiveSkills->isEmpty())
-                            <div class="empty-state">Нет пассивных навыков</div>
+                            <div class="empty-state">{{ __('Нет пассивных навыков') }}</div>
                         @else
                             @php
                                 $effectLabels = [
-                                    'strength'     => 'Сила',
-                                    'intuition'    => 'Интуиция',
-                                    'agility'      => 'Ловкость',
-                                    'intelligence' => 'Интеллект',
-                                    'wisdom'       => 'Мудрость',
-                                    'hp_max'       => 'Макс. HP',
-                                    'mp_max'       => 'Макс. MP',
-                                    'attack'       => 'Атака',
-                                    'defense'      => 'Защита',
+                                    'strength'     => __('Сила'),
+                                    'intuition'    => __('Интуиция'),
+                                    'agility'      => __('Ловкость'),
+                                    'intelligence' => __('Интеллект'),
+                                    'wisdom'       => __('Мудрость'),
+                                    'hp_max'       => __('Макс. HP'),
+                                    'mp_max'       => __('Макс. MP'),
+                                    'attack'       => __('Атака'),
+                                    'defense'      => __('Защита'),
                                 ];
                             @endphp
                             <div class="passive-list">
@@ -725,12 +725,12 @@
                         {{-- Пассивки от рун --}}
                         <section class="spell-section">
                         <div class="section-header" style="margin-top: 4px;">
-                            <span>Пассивки от рун</span>
+                            <span>{{ __('Пассивки от рун') }}</span>
                             <span class="section-count">{{ $page->runePassives->count() }}</span>
                         </div>
 
                         @if($page->runePassives->isEmpty())
-                            <div class="empty-state">Нет активных пассивок от рун</div>
+                            <div class="empty-state">{{ __('Нет активных пассивок от рун') }}</div>
                         @else
                             <div class="passive-list">
                                 @foreach($page->runePassives as $runePassive)
@@ -739,7 +739,7 @@
                                         <div>
                                             <div>
                                                 <a href="{{ route('items.info.share', ['id' => $runePassive['runeShareItemId']]) }}" class="passive-name"
-                                                   title="Открыть информацию о руне «{{ $runePassive['runeName'] }}»"
+                                                   title="{{ __('Открыть информацию о руне') }} «{{ $runePassive['runeName'] }}»"
                                                    onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $runePassive['label'] }}</a>
                                                 <span class="passive-desc">{{ $runePassive['description'] }}</span>
                                             </div>
@@ -785,11 +785,11 @@
                 clearInterval(_cdTimers[skillId]);
                 delete _cdTimers[skillId];
                 btn.classList.remove('on-cooldown');
-                btn.textContent = 'Применить';
+                btn.textContent = @json(__('Применить'));
                 return;
             }
             btn.classList.add('on-cooldown');
-            btn.textContent = remaining + 'с';
+            btn.textContent = remaining + @json(__('с'));
         }
 
         tick();
@@ -813,7 +813,7 @@
         })
         .then(r => r.json())
         .then(data => {
-            window.parent.showErrorIframe(data.message || 'Применено');
+            window.parent.showErrorIframe(data.message || @json(__('Применено')));
             if (data.hp && data.mp) {
                 window.parent.sendToFrame('character-frame', { hp: data.hp, mp: data.mp });
             }
@@ -824,7 +824,7 @@
                 window.parent.sendToFrame('character-frame', { appliedEffects: data.blessings });
             }
         })
-        .catch(() => window.parent.showErrorIframe('Ошибка при применении'));
+        .catch(() => window.parent.showErrorIframe(@json(__('Ошибка при применении'))));
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -861,13 +861,13 @@
         .then(async r => {
             const data = await r.json();
 
-            if (!r.ok) throw new Error(data.message || 'Ошибка при сохранении');
+            if (!r.ok) throw new Error(data.message || @json(__('Ошибка при сохранении')));
 
             return data;
         })
         .catch(error => {
             input.checked = previousChecked;
-            window.parent.showErrorIframe(error.message || 'Ошибка при сохранении');
+            window.parent.showErrorIframe(error.message || @json(__('Ошибка при сохранении')));
         })
         .finally(() => {
             inputs.forEach(el => { el.disabled = false; });

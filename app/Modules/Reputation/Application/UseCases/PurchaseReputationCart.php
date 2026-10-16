@@ -38,7 +38,7 @@ class PurchaseReputationCart
             return new ReputationActionResultDTO(false, 'Корзина пуста.');
         }
 
-        $pr = $this->reputationService->getOrCreate($user->player, $reputation);
+        $pr = $this->reputationService->getOrZero($user->player, $reputation);
 
         // Проверки по всей корзине
         if ($cart->getTotalPrice() > 0 && $user->money < $cart->getTotalPrice()) {

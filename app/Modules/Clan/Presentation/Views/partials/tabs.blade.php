@@ -1,13 +1,13 @@
 @php
     $clanTabs = [
-        ['route' => 'clan.member',      'label' => 'Состав клана', 'width' => 100],
-        ['route' => 'clan.role',        'label' => 'Звания',       'width' => 60],
-        ['route' => 'clan.information', 'label' => 'Информация',   'width' => 70],
-        ['route' => 'clan.characteristics', 'label' => 'Характеристики', 'width' => 105],
-        ['route' => 'clan.skills',      'label' => 'Навыки',       'width' => 70],
-        ['route' => 'clan.quests',      'label' => 'Квесты',       'width' => 80],
-        ['route' => null,               'label' => 'Управление',  'width' => 70],
-        ['route' => 'clan.logs',        'label' => 'Логи',         'width' => 50],
+        ['route' => 'clan.member',      'label' => __('Состав клана')],
+        ['route' => 'clan.role',        'label' => __('Звания')],
+        ['route' => 'clan.information', 'label' => __('Информация')],
+        ['route' => 'clan.characteristics', 'label' => __('Характеристики')],
+        ['route' => 'clan.skills',      'label' => __('Навыки')],
+        ['route' => 'clan.quests',      'label' => __('Квесты')],
+        ['route' => 'clan.boss',        'label' => __('Башня')],
+        ['route' => 'clan.logs',        'label' => __('Логи')],
     ];
     $activeTab = $activeTab ?? null;
 @endphp
@@ -25,12 +25,12 @@
                 $href = $tab['route'] ? route($tab['route']) : '';
             @endphp
             <td width="19"><img src="{{ asset($l) }}" width="19" height="21"><br></td>
-            <td width="{{ $tab['width'] }}" align="center" style="background: url({{ asset($c) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ $href }}" class="{{ $cls }}">{{ $tab['label'] }}</a>
+            <td align="center" style="background: url({{ asset($c) }}) center top repeat-x; padding: 0px 6px 6px; white-space: nowrap;">
+                <a href="{{ $href }}" class="{{ $cls }}" style="white-space: nowrap;">{{ $tab['label'] }}</a>
             </td>
             <td width="19"><img src="{{ asset($r) }}" width="19" height="21"><br></td>
         @endforeach
-        <td></td>
+        <td width="100%"></td>
     </tr>
     </tbody>
 </table>

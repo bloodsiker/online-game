@@ -26,7 +26,7 @@ class GetPublicClanPage
 
         $clan->loadMissing('owner.player');
 
-        $onlineThreshold = CarbonImmutable::now()->subMinutes(10);
+        $onlineThreshold = CarbonImmutable::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         $members = $clan->members()
             ->with(['user.player', 'role'])

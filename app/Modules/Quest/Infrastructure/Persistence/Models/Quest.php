@@ -7,6 +7,7 @@ namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Quest extends Model
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public array $translatable = ['title', 'description'];
 
     protected $casts = [
         'type' => QuestType::class,

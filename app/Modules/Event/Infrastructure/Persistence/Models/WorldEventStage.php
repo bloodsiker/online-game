@@ -6,6 +6,7 @@ namespace App\Modules\Event\Infrastructure\Persistence\Models;
 
 use App\Modules\Event\Domain\Enums\WorldEventObjectiveType;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class WorldEventStage extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['title'];
+
     protected $fillable = [
         'world_event_id', 'position', 'title', 'objective_type', 'share_item_id', 'monster_id',
         'global_limit', 'player_limit', 'spawn_limit', 'respawn_seconds',

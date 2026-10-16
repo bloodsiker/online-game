@@ -16,10 +16,7 @@
                             <label class="col-form-label">Alias</label>
                             <input type="text" class="form-control" name="alias" value="{{ $action->alias }}">
                         </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ $action->name }}">
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'action-'.$action->id, 'content' => $action, 'fields' => ['name' => ['label' => 'Название']]])
                         <div class="mt-3">
                             <button class="btn btn-primary">Сохранить</button>
                             <a href="{{ route('admin.action') }}" class="btn btn-success">Назад</a>

@@ -45,7 +45,7 @@ class AttackSkillSeeder extends Seeder
         }
 
         DB::transaction(function () {
-            $spellSkillId = (int) Skill::where('name', self::SPELL_SKILL_NAME)->value('id');
+            $spellSkillId = (int) Skill::where('name->ru', self::SPELL_SKILL_NAME)->value('id');
 
             if ($spellSkillId === 0) {
                 $this->command->warn('AttackSkillSeeder: навык «Колдовство» не найден — прогоните миграцию 2026_08_22_120000.');

@@ -12,6 +12,7 @@ use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Domain\Services\MapMonstersCache;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Media\AdminImageStorage;
@@ -37,11 +38,11 @@ class LocationController extends Controller
         return view('admin.location.list', compact('listLocations'));
     }
 
-    public function create(Request $request): mixed
+    public function create(Request $request, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
             $location = new Location;
-            $this->fillLocation($location, $request);
+            $this->fillLocation($location, $request, $translationEditor);
             $location->save();
 
             return redirect()->route('admin.location.info', $location->id)->with('success', 'Локация создана.');
@@ -50,10 +51,10 @@ class LocationController extends Controller
         return view('admin.location.create');
     }
 
-    public function info(Request $request, Location $location): mixed
+    public function info(Request $request, Location $location, ContentTranslationEditor $translationEditor): mixed
     {
         if ($request->isMethod('POST')) {
-            $this->fillLocation($location, $request);
+            $this->fillLocation($location, $request, $translationEditor);
             $location->save();
 
             return redirect()->back()->with('success', 'Сохранено.');
@@ -150,10 +151,9 @@ class LocationController extends Controller
         return redirect()->back()->with('success', 'Предмет убран с локации.');
     }
 
-    private function fillLocation(Location $location, Request $request): void
+    private function fillLocation(Location $location, Request $request, ContentTranslationEditor $translationEditor): void
     {
-        $location->name = $request->input('name');
-        $location->description = $request->input('description');
+        $translationEditor->fill($location, $request, ['name', 'description'], ['name']);
         $location->map_id = (int) $request->input('map_id');
         $location->is_locked = (bool) $request->input('is_locked', false);
         $location->north = $request->input('north') ?: null;

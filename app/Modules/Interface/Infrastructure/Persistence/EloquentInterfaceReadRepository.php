@@ -9,6 +9,7 @@ use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -34,6 +35,11 @@ class EloquentInterfaceReadRepository implements InterfaceReadRepository
             now()->addSeconds(60),
             fn (): Collection => User::with(['player', 'clanMembership.clan', 'activeChatMute'])
                 ->where('location_id', $locationId)
+                ->whereNotIn('id', PlayerDetention::query()
+                    ->select('user_id')
+                    ->whereNotNull('user_id')
+                    ->whereNull('released_at')
+                    ->where('release_at', '>', now()))
                 ->orderByDesc('last_online_at')
                 ->get(),
         );

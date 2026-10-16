@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <style>
         html {
             height: 100%;
@@ -217,11 +218,11 @@
     <tbody>
     <tr valign="top">
         <td>
-            <p><u><b>Раунд N 1</b></u> - <a href="/info/?mid=491625111" target="_blank">Пещерная тварь</a> 1 (50/50)</p>
+            <p><u><b>{{ __("Раунд N") }} 1</b></u> - <a href="/info/?mid=491625111" target="_blank">Пещерная тварь</a> 1 (50/50)</p>
 
-            <p>Вы бежали на запад...</p>
+            <p>{{ __("Вы бежали на запад...") }}</p>
 
-            <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+            <p><a href="{{ route('location') }}" id="finish-fight">{{ __("Сражение завершено... Далее") }}</a> »</p>
 
         </td>
     </tr>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ $page->dungeon->name }}</title>
@@ -87,72 +87,72 @@
                 <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                     <tbody>
                     <tr class="bg_l">
-                        <td class="b" width="34%" align="right" nowrap>Тир:</td>
+                        <td class="b" width="34%" align="right" nowrap>{{ __('Тир:') }}</td>
                         <td class="b redd">{{ $page->dungeon->tier }}</td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Игроков:</td>
-                        <td class="black">{{ $page->dungeon->maxPlayers === 1 ? 'Соло' : 'до ' . $page->dungeon->maxPlayers }}</td>
+                        <td class="b" align="right" nowrap>{{ __('Игроков:') }}</td>
+                        <td class="black">{{ $page->dungeon->maxPlayers === 1 ? __('Соло') : __('до') . ' ' . $page->dungeon->maxPlayers }}</td>
                     </tr>
                     <tr class="bg_l brd2-top">
-                        <td class="b" align="right" nowrap>Минимальный уровень:</td>
+                        <td class="b" align="right" nowrap>{{ __('Минимальный уровень:') }}</td>
                         <td class="b redd">{{ $page->dungeon->minLevel }}</td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Кулдаун:</td>
+                        <td class="b" align="right" nowrap>{{ __('Кулдаун:') }}</td>
                         <td class="black">
                             @if ($page->dungeon->cooldownSeconds > 0)
-                                <b>{{ round($page->dungeon->cooldownSeconds / 3600, 1) }} ч.</b> ({{ $page->dungeon->cooldownType }})
+                                <b>{{ round($page->dungeon->cooldownSeconds / 3600, 1) }} {{ __('ч.') }}</b> ({{ $page->dungeon->cooldownType }})
                             @else
-                                <span class="dng-muted">нет</span>
+                                <span class="dng-muted">{{ __('нет') }}</span>
                             @endif
                         </td>
                     </tr>
                     <tr class="bg_l brd2-top">
-                        <td class="b" align="right" nowrap>Таймер прохождения:</td>
+                        <td class="b" align="right" nowrap>{{ __('Таймер прохождения:') }}</td>
                         <td class="black">
                             @if ($page->dungeon->timeLimitSeconds)
-                                <b>{{ round($page->dungeon->timeLimitSeconds / 60) }} мин.</b>
+                                <b>{{ round($page->dungeon->timeLimitSeconds / 60) }} {{ __('мин.') }}</b>
                             @else
-                                <span class="dng-muted">без ограничения</span>
+                                <span class="dng-muted">{{ __('без ограничения') }}</span>
                             @endif
                         </td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Ключ:</td>
+                        <td class="b" align="right" nowrap>{{ __('Ключ:') }}</td>
                         <td class="black">
                             @if ($page->dungeon->requiresKey)
                                 <b>{{ $page->dungeon->entryKeyName ?? '-' }}</b>
                             @else
-                                <span class="dng-muted">не требуется</span>
+                                <span class="dng-muted">{{ __('не требуется') }}</span>
                             @endif
                         </td>
                     </tr>
                     <tr class="bg_l brd2-top">
-                        <td class="b" align="right" nowrap>Точка входа:</td>
+                        <td class="b" align="right" nowrap>{{ __('Точка входа:') }}</td>
                         <td class="black">
                             @if ($page->dungeon->entryLocationId)
-                                локация #{{ $page->dungeon->entryLocationId }}
+                                {{ __('локация') }} #{{ $page->dungeon->entryLocationId }}
                             @else
-                                <span class="dng-muted">любая допустимая</span>
+                                <span class="dng-muted">{{ __('любая допустимая') }}</span>
                             @endif
                         </td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Монстры:</td>
-                        <td class="black">{{ $page->dungeon->monsterRespawn ? 'респавнятся' : 'не респавнятся' }}</td>
+                        <td class="b" align="right" nowrap>{{ __('Монстры:') }}</td>
+                        <td class="black">{{ $page->dungeon->monsterRespawn ? __('респавнятся') : __('не респавнятся') }}</td>
                     </tr>
                     <tr class="bg_l brd2-top">
-                        <td class="b" align="right" nowrap>Смерть в данже:</td>
+                        <td class="b" align="right" nowrap>{{ __('Смерть в данже:') }}</td>
                         <td class="black">{{ $page->dungeon->deathBehaviorLabel }}</td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Локация после смерти:</td>
+                        <td class="b" align="right" nowrap>{{ __('Локация после смерти:') }}</td>
                         <td class="black">
                             @if ($page->dungeon->deathReturnLocationId)
-                                локация #{{ $page->dungeon->deathReturnLocationId }}
+                                {{ __('локация') }} #{{ $page->dungeon->deathReturnLocationId }}
                             @else
-                                <span class="dng-muted">по умолчанию для выбранного режима</span>
+                                <span class="dng-muted">{{ __('по умолчанию для выбранного режима') }}</span>
                             @endif
                         </td>
                     </tr>
@@ -164,22 +164,22 @@
                         @if ($page->activeSession->canReenter)
                             <form method="POST" action="{{ route('dungeon.enter', $page->dungeon->id) }}">
                                 @csrf
-                                <b class="butt1 pointer"><b><input value="Вернуться" type="submit" style="width: 100px;" class="redd"></b></b>
+                                <b class="butt1 pointer"><b><input value="{{ __('Вернуться') }}" type="submit" style="width: 100px;" class="redd"></b></b>
                             </form>
                         @else
-                            <b class="butt1 pointer"><b><input value="В данж" type="button" onclick="location.href='{{ route('location') }}'" style="width: 100px;" class="redd"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('В данж') }}" type="button" onclick="location.href='{{ route('location') }}'" style="width: 100px;" class="redd"></b></b>
                         @endif
                         <form method="POST" action="{{ route('dungeon.exit') }}">
                             @csrf
-                            <b class="butt1 pointer"><b><input value="Покинуть" type="submit" style="width: 100px;"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Покинуть') }}" type="submit" style="width: 100px;"></b></b>
                         </form>
                     @elseif (! $page->activeSession)
                         <form method="POST" action="{{ route('dungeon.enter', $page->dungeon->id) }}">
                             @csrf
-                            <b class="butt1 pointer"><b><input value="Войти" type="submit" style="width: 100px;" class="redd"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Войти') }}" type="submit" style="width: 100px;" class="redd"></b></b>
                         </form>
                     @endif
-                    <b class="butt1 pointer"><b><input value="Назад" type="button" onclick="location.href='{{ route('dungeon.index') }}'" style="width: 100px;"></b></b>
+                    <b class="butt1 pointer"><b><input value="{{ __('Назад') }}" type="button" onclick="location.href='{{ route('dungeon.index') }}'" style="width: 100px;"></b></b>
                 </div>
 
             </td>

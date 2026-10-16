@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
@@ -56,7 +57,7 @@ final readonly class PlayerDeathFinalizer
 
         $injury = $this->injuryService->inflictAfterDeath($player);
         if ($injury !== null) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><b class="color-red">Получена травма: %s.</b> Наложен бинт на %d мин.</p>',
                 e($injury->displayName()),
                 max(1, (int) ceil(now()->diffInSeconds($injury->expires_at, false) / 60)),
@@ -76,7 +77,7 @@ final readonly class PlayerDeathFinalizer
         // Штраф упирается в начало уровня, поэтому в начале уровня он меньше
         // расчётных 10% (а на нулевом прогрессе — нулевой). Пишем в лог, что
         // списано на самом деле, иначе строка «-10%» противоречит счётчику.
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p>Вы <font color="red"><b>проиграли</b></font>! %s</p>',
             $this->expPenaltyText($player, $lostExp),
         ));
@@ -130,10 +131,10 @@ final readonly class PlayerDeathFinalizer
         $percent = $band > 0 ? $lostExp * 100 / $band : 0.0;
 
         if ($percent < 0.1) {
-            return sprintf('Опыт -%s.', number_format($lostExp, 0, '.', ' '));
+            return BattleLogTranslator::format('Опыт -%s.', number_format($lostExp, 0, '.', ' '));
         }
 
-        return sprintf(
+        return BattleLogTranslator::format(
             'Опыт -%s (%s%%).',
             number_format($lostExp, 0, '.', ' '),
             rtrim(rtrim(number_format($percent, 1, '.', ''), '0'), '.'),

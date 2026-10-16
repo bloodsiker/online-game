@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -47,13 +48,13 @@ class TitanKnuckleUncommonTierSeeder extends Seeder
 
     public function run(): void
     {
-        $fixed = DB::table('share_items')
+        $fixed = LocalizedItemSeederQuery::items()
             ->whereIn('id', self::EXISTING_TIER_IDS)
             ->where('skill_id', 3)
             ->update(['skill_id' => self::KNUCKLE_SKILL_ID, 'updated_at' => now()]);
         $this->command?->info("skill_id исправлен на {$fixed} существующих тирах кастета «Титан» (3 → 25)");
 
-        if (DB::table('share_items')->where('name', self::NEW_NAME)->exists()) {
+        if (LocalizedItemSeederQuery::items()->where('name', self::NEW_NAME)->exists()) {
             $this->command?->info('TitanKnuckleUncommonTierSeeder: «Кастет «Титан»» уже существует, пропускаю.');
 
             return;
@@ -62,7 +63,7 @@ class TitanKnuckleUncommonTierSeeder extends Seeder
         $upgradeGoldCost = 3049128;
         $breakCrystal = (int) round($upgradeGoldCost * 1.25);
 
-        $newItemId = DB::table('share_items')->insertGetId([
+        $newItemId = LocalizedItemSeederQuery::items()->insertGetId([
             'type' => 'weapon',
             'name' => self::NEW_NAME,
             'description' => '',

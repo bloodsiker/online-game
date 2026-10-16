@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Infrastructure\Persistence\Models;
 
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NpcDialogueNode extends Model
 {
+    use HasLegacyTranslations;
+
+    public array $translatable = ['title', 'description'];
+
     protected $fillable = [
         'npc_id',
         'title',

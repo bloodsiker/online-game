@@ -3,6 +3,7 @@
 namespace App\Modules\Location\Infrastructure\Persistence\Models;
 
 use App\Modules\Influence\Infrastructure\Persistence\Models\MapInfluenceLevel;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Map extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLegacyTranslations;
+
+    public $translatable = ['name'];
 
     protected $fillable = ['parent_id', 'name', 'folder', 'slug', 'resp_location_id', 'has_gathering_field', 'gathering_field_image'];
 

@@ -25,6 +25,6 @@ final class UserProfileController
     {
         $service->save(userId: $request->user()->id, data: $request->validated());
 
-        return redirect()->route('settings.profile')->with('message', 'Анкета сохранена.');
+        return redirect()->route('settings.profile')->with('message', __('ui.profile_saved'));
     }
 }

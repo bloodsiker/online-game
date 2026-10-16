@@ -15,6 +15,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,8 +50,7 @@ class QuestController extends Controller
             ->when($filters['q'] !== '', function ($query) use ($filters): void {
                 $search = '%'.str_replace(['%', '_'], ['\%', '\_'], $filters['q']).'%';
                 $query->where(function ($query) use ($search): void {
-                    $query->where('title', 'like', $search)
-                        ->orWhere('description', 'like', $search);
+                    $query->searchTranslations($search, ['title', 'description']);
                 });
             })
             ->when(QuestType::tryFrom($filters['type']) !== null, fn ($query) => $query->where('type', $filters['type']))
@@ -103,7 +103,7 @@ class QuestController extends Controller
         ]);
         $questTypes = QuestType::cases();
         $rewardTypes = QuestRewardType::cases();
-        $reputations = Reputation::orderBy('name')->get();
+        $reputations = Reputation::orderBy('name->ru')->get();
 
         return view('admin.quest.info', compact('quest', 'questTypes', 'rewardTypes', 'reputations'));
     }
@@ -124,7 +124,9 @@ class QuestController extends Controller
             $targetId = $shareItemId;
         }
 
-        QuestObjective::create([
+        $objective = new QuestObjective;
+        app(ContentTranslationEditor::class)->fill($objective, $request, ['description'], []);
+        $objective->fill([
             'quest_id' => $quest->id,
             'stage_id' => $request->input('stage_id') ?: null,
             'type' => $type,
@@ -136,8 +138,8 @@ class QuestController extends Controller
             'map_id' => $request->input('map_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
             'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
-            'description' => $request->input('description'),
         ]);
+        $objective->save();
 
         return redirect()->back()->with('success', 'Задание добавлено.');
     }
@@ -159,7 +161,8 @@ class QuestController extends Controller
             $targetId = $shareItemId;
         }
 
-        $objective->update([
+        app(ContentTranslationEditor::class)->fill($objective, $request, ['description'], []);
+        $objective->fill([
             'stage_id' => $request->input('stage_id') ?: null,
             'type' => $type,
             'target_type' => $request->input('target_type'),
@@ -170,8 +173,8 @@ class QuestController extends Controller
             'map_id' => $request->input('map_id') ?: null,
             'required_amount' => (int) $request->input('required_amount', 1),
             'drop_chance' => $request->filled('drop_chance') ? (float) $request->input('drop_chance') : null,
-            'description' => $request->input('description'),
         ]);
+        $objective->save();
 
         return redirect()->back()->with('success', 'Задание сохранено.');
     }
@@ -244,25 +247,30 @@ class QuestController extends Controller
 
     public function addDialogue(Request $request, Quest $quest): RedirectResponse
     {
-        QuestDialogue::create([
+        $dialogue = new QuestDialogue;
+        app(ContentTranslationEditor::class)->fill($dialogue, $request, ['description', 'reply_text'], ['description']);
+        $replyText = $this->replyTextTranslations($dialogue);
+        $dialogue->fill([
             'quest_id' => $quest->id,
             'npc_id' => $request->input('npc_id') ?: null,
             'order' => (int) $request->input('order', $quest->dialogues()->max('order') + 1),
-            'description' => $request->input('description'),
-            'reply_text' => $request->input('reply_text') ?: 'Далее',
+            'reply_text' => $replyText,
         ]);
+        $dialogue->save();
 
         return redirect()->back()->with('success', 'Реплика добавлена.');
     }
 
     public function updateDialogue(Request $request, Quest $quest, QuestDialogue $dialogue): RedirectResponse
     {
-        $dialogue->update([
+        app(ContentTranslationEditor::class)->fill($dialogue, $request, ['description', 'reply_text'], ['description']);
+        $replyText = $this->replyTextTranslations($dialogue);
+        $dialogue->fill([
             'npc_id' => $request->input('npc_id') ?: null,
             'order' => (int) $request->input('order', $dialogue->order),
-            'description' => $request->input('description'),
-            'reply_text' => $request->input('reply_text') ?: 'Далее',
+            'reply_text' => $replyText,
         ]);
+        $dialogue->save();
 
         return redirect()->back()->with('success', 'Реплика сохранена.');
     }
@@ -293,8 +301,7 @@ class QuestController extends Controller
             ]);
         }
 
-        $quest->title = $request->input('title');
-        $quest->description = $request->input('description');
+        app(ContentTranslationEditor::class)->fill($quest, $request, ['title', 'description'], ['title']);
         $quest->type = $request->input('type');
         $quest->start_npc_id = $request->input('start_npc_id') ?: null;
         $quest->complete_npc_id = $request->input('complete_npc_id') ?: null;
@@ -321,6 +328,17 @@ class QuestController extends Controller
         return false;
     }
 
+    /** @return array<string, string> */
+    private function replyTextTranslations(QuestDialogue $dialogue): array
+    {
+        $translations = $dialogue->getTranslations('reply_text');
+        if (trim((string) ($translations['ru'] ?? '')) === '') {
+            $translations['ru'] = 'Далее';
+        }
+
+        return $translations;
+    }
+
     /** @return array<string, mixed> */
     private function stageData(Request $request, Quest $quest, ?QuestStage $stage = null): array
     {
@@ -328,19 +346,22 @@ class QuestController extends Controller
             ? $request->input('stage_type')
             : 'action';
 
+        $stage ??= new QuestStage;
+        app(ContentTranslationEditor::class)->fill($stage, $request, ['title', 'description', 'waiting_text', 'ready_text'], []);
+
         return [
             'complete_npc_id' => $request->input('complete_npc_id') ?: null,
             'order' => max(1, (int) $request->input('order', $stage?->order ?? (($quest->stages()->max('order') ?? 0) + 1))),
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
+            'title' => $stage->getTranslations('title'),
+            'description' => $stage->getTranslations('description'),
             'stage_type' => $stageType,
             'wait_duration_seconds' => $stageType === 'wait'
                 ? max(1, (int) $request->input('wait_duration_seconds', 60))
                 : null,
             'waiting_text' => $stageType === 'wait'
-                ? ($request->input('waiting_text') ?: 'Ты пришёл слишком рано. Возвращайся позже.')
+                ? ($stage->getTranslations('waiting_text') ?: ['ru' => 'Ты пришёл слишком рано. Возвращайся позже.'])
                 : null,
-            'ready_text' => $stageType === 'wait' ? $request->input('ready_text') : null,
+            'ready_text' => $stageType === 'wait' ? $stage->getTranslations('ready_text') : null,
             'grant_share_item_id' => $request->input('grant_share_item_id') ?: null,
             'grant_amount' => max(1, (int) $request->input('grant_amount', 1)),
         ];

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <style>
         html {
             height: 100%;
@@ -336,25 +337,25 @@
         @if($battle->status->isActive())
             <div class="battle-col-actions">
                 @if($randomAttackedMonster)
-                    <p><u><b>Раунд N {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
+                    <p><u><b>{{ __("Раунд N") }} {{ $battle->rounds + 1 }}</b></u> - <a href="{{ route('info.monster', ['id' => $randomAttackedMonster->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $randomAttackedMonster->locationMonster->monster->name }}</a> {{ $randomAttackedMonster->locationMonster->monster->lvl }} ({{ $randomAttackedMonster->locationMonster->hp_now }}/{{ $randomAttackedMonster->locationMonster->hp_max }})</p>
 
                     @include('battle::partials.action_panel')
                 @else
-                    <p><a href="{{ route('location') }}">Бой завершён... Далее</a> »</p>
+                    <p><a href="{{ route('location') }}">{{ __("Бой завершён... Далее") }}</a> »</p>
                 @endif
             </div>
         @endif
 
         <div class="{{ $battle->status->isActive() ? 'battle-col-log' : 'battle-col-finished' }}">
-            <p><u><b>Раунд N {{ $round->round_number }}</b></u> - <a href="{{ route('info.monster', ['id' => $round->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
+            <p><u><b>{{ __("Раунд N") }} {{ $round->round_number }}</b></u> - <a href="{{ route('info.monster', ['id' => $round->locationMonster->id]) }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">{{ $round->locationMonster->monster->name }}</a> {{ $round->locationMonster->monster->lvl }}</p>
 
-            {!! $round->action !!}
+            {!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($round->action) !!}
 
             {{-- Разовые уведомления (прогресс квестов и т.п.) — только сейчас, не сохраняются и не всплывают в истории боя --}}
-            {!! $fightDTO->getSideLog() !!}
+            {!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($fightDTO->getSideLog()) !!}
 
             @if($battle->status->isFinish())
-                <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+                <p><a href="{{ route('location') }}" id="finish-fight">{{ __("Сражение завершено... Далее") }}</a> »</p>
             @endif
         </div>
 
@@ -365,7 +366,7 @@
         @endif
     @else
         <div class="battle-col-finished">
-            <p><a href="{{ route('location') }}" id="finish-fight">Сражение завершено... Далее</a> »</p>
+            <p><a href="{{ route('location') }}" id="finish-fight">{{ __("Сражение завершено... Далее") }}</a> »</p>
         </div>
     @endif
 </div>

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Монстры для «Ожившая окраина» (map 4, ранее вообще без монстров) и
@@ -32,7 +32,7 @@ class AshFoothillsMonsterSeeder extends Seeder
 {
     public function run(): void
     {
-        if (DB::table('monsters')->where('name', 'Пепельная Саламандра')->exists()) {
+        if (LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Пепельная Саламандра')->exists()) {
             $this->command?->info('AshFoothillsMonsterSeeder: уже существует, пропускаю.');
 
             return;
@@ -77,7 +77,7 @@ class AshFoothillsMonsterSeeder extends Seeder
         ];
 
         foreach ($rows as $row) {
-            DB::table('monsters')->insert([
+            LocalizedContentSeederQuery::forTable('monsters')->insert([
                 'name' => $row['name'],
                 'description' => $row['description'],
                 'image' => null,

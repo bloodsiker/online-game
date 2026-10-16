@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
-    <title>История сражения #{{ $battle->id }}</title>
+    <title>{{ __("История сражения") }} #{{ $battle->id }}</title>
     <style>
         html, body { height: 100%; margin: 0; }
         body { font-family: Tahoma, Geneva, sans-serif; font-size: 11px; background-image: url({{ asset('main/images/bg2.gif') }}); }
@@ -67,7 +68,7 @@
         .hit-action { color: #201610; }
         .hit-action p { margin: 1px 0; }
 
-        /* цвета из боёвки */
+        /* цвета {{ __("из") }} боёвки */
         .color-red    { color: red; }
         .color-green  { color: green; }
         .color-info   { color: #129df0; }
@@ -100,7 +101,7 @@
 
     <div class="bg-t">
         <div class="common-header__small">
-            <div class="h-inner"><div class="h-txt">История сражения</div></div>
+            <div class="h-inner"><div class="h-txt">{{ __("История сражения") }}</div></div>
         </div>
     </div>
 
@@ -115,7 +116,7 @@
                 <table border="0" cellspacing="0" cellpadding="0"><tbody><tr height="22">
                     <td><img src="{{ asset('data/img/tbl-usi_label-left.gif') }}" width="27" height="22" alt=""></td>
                     <td class="tbl-usi_label-center">
-                        Бой #{{ $battle->id }} &mdash; {{ $battle->location->name ?? '—' }} &mdash; {{ $battle->status->isActive() ? 'В процессе' : 'Завершён' }} &mdash; Раундов: {{ $battle->rounds }}
+                        {{ __("Бой") }} #{{ $battle->id }} &mdash; {{ $battle->location->name ?? '—' }} &mdash; {{ $battle->status->isActive() ? 'В процессе' : 'Завершён' }} &mdash; {{ __("Раундов:") }} {{ $battle->rounds }}
                     </td>
                     <td><img src="{{ asset('data/img/tbl-usi_label-right.gif') }}" width="27" height="22" alt=""></td>
                 </tr></tbody></table>
@@ -129,7 +130,7 @@
 
                 @if($rounds->isEmpty())
                     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-ati_brd-all" style="border-collapse:collapse">
-                        <tbody><tr><td class="tbl-sts_bg-light" style="padding:4px 8px;">История сражения пуста.</td></tr></tbody>
+                        <tbody><tr><td class="tbl-sts_bg-light" style="padding:4px 8px;">{{ __("История сражения пуста.") }}</td></tr></tbody>
                     </table>
                 @else
                     <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-ati_brd-all" style="border-collapse:collapse">
@@ -143,7 +144,7 @@
                         {{-- Заголовок раунда --}}
                         <tr class="round-hdr">
                             <td colspan="2">
-                                Раунд {{ $round->round_number }}
+                                {{ __("Раунд") }} {{ $round->round_number }}
                                 <span class="round-ts">&mdash; {{ $round->created_at->format('d.m.Y H:i:s') }}</span>
                             </td>
                         </tr>
@@ -160,7 +161,7 @@
                                             <span class="hit-hp">({{ $userHit->hp_after }}{{ $playerHpMax ? '/'.$playerHpMax : '' }})</span>
                                         @endif
                                     </td>
-                                    <td class="hit-action">{!! $userHit->action !!}</td>
+                                    <td class="hit-action">{!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($userHit->action) !!}</td>
                                 </tr>
                             @endif
 
@@ -177,7 +178,7 @@
                                             <span class="hit-hp">({{ $monsterHit->hp_after }}/{{ $mHpMax }})</span>
                                         @endif
                                     </td>
-                                    <td class="hit-action">{!! $monsterHit->action !!}</td>
+                                    <td class="hit-action">{!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($monsterHit->action) !!}</td>
                                 </tr>
                             @endif
 
@@ -192,7 +193,7 @@
                                         <br><span class="hit-who-monster">{{ $round->locationMonster->monster->name }}</span>
                                     @endif
                                 </td>
-                                <td class="hit-action">{!! $round->action !!}</td>
+                                <td class="hit-action">{!! \App\Modules\Battle\Application\Services\BattleLogTranslator::render($round->action) !!}</td>
                             </tr>
                         @endif
 

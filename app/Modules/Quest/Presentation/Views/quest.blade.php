@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -137,7 +137,7 @@
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="{{ route('npc', ['id' => $npc->id]) }}" title="Квесты" class="btn_1">Квесты</a>
+            <a id="center_1" href="{{ route('npc', ['id' => $npc->id]) }}" title="{{ __('Квесты') }}" class="btn_1">{{ __('Квесты') }}</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 
@@ -145,7 +145,7 @@
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="140" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_4" href="{{ route('location') }}" title="Вернуться в локацию" class="btn_1">Вернуться в локацию</a></td>
+            <a id="center_4" href="{{ route('location') }}" title="{{ __('Вернуться в локацию') }}" class="btn_1">{{ __('Вернуться в локацию') }}</a></td>
         <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
     </tbody>
@@ -174,7 +174,7 @@
                                             <td width="27">
                                                 <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                             </td>
-                                            <td align="center" class="tbl-usi_label-center">Этап квеста</td>
+                                            <td align="center" class="tbl-usi_label-center">{{ __('Этап квеста') }}</td>
                                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                                         </tr>
                                         </tbody>
@@ -203,7 +203,7 @@
                                                 @endif
                                             </td>
                                             <td class="redd2 b fs-13">
-                                                @if($quest->isClan()) [Клановый] @endif
+                                                @if($quest->isClan()) [{{ __('Клановый') }}] @endif
                                                 {{ $quest->title }}
                                             </td>
                                             <td align="right"></td>
@@ -214,10 +214,10 @@
                                                     <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
                                                 </td>
                                                 <td class="b" colspan="2">
-                                                    <span class="brown">Квест принял:</span>
+                                                    <span class="brown">{{ __('Квест принял:') }}</span>
                                                     <span class="greenn">{{ $clanProgress->user->name }}</span>
                                                     @if(!(isset($isAcceptor) && $isAcceptor))
-                                                        <span style="color:#666; font-weight:normal;">— только он может его сдать</span>
+                                                        <span style="color:#666; font-weight:normal;">— {{ __('только он может его сдать') }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -232,7 +232,7 @@
                                         @if($currentStage)
                                             <tr class="fs-12">
                                                 <td colspan="3" style="padding: 4px 6px 2px; color: #461C0B; font-weight: bold;">
-                                                    Этап {{ $currentStage->order }}{{ $currentStage->title ? ': ' . $currentStage->title : '' }}
+                                                    {{ __('Этап') }} {{ $currentStage->order }}{{ $currentStage->title ? ': ' . $currentStage->title : '' }}
                                                 </td>
                                             </tr>
                                             @if($currentStage->description)
@@ -262,7 +262,7 @@
                                                         <img src="{{ asset('img/icon/qst_goal.png') }}" alt="">
                                                     </td>
                                                     <td class="b" colspan="2">
-                                                        <span class="brown">{{ $loop->first ? 'Ваша цель:' : 'А также:' }}</span>
+                                                        <span class="brown">{{ $loop->first ? __('Ваша цель:') : __('А также:') }}</span>
                                                         <span class="{{ $objComplete ? 'greenn' : 'redd' }}">{{ $objective->description ?? '' }}</span>
                                                         @if($inProgress)
                                                             @if($need > 1)
@@ -274,7 +274,7 @@
                                                             @endif
                                                         @else
                                                             @if($need > 1)
-                                                                <span style="color:#666;">({{ $need }} шт.)</span>
+                                                                <span style="color:#666;">({{ $need }} {{ __('шт.') }})</span>
                                                             @endif
                                                         @endif
                                                         @if($objective->map_id && $objective->map)
@@ -289,7 +289,7 @@
                                             @if($quest->isClan() && !($canAccept ?? true))
                                                 <tr>
                                                     <td colspan="3" align="center">
-                                                        <span style="color:#888; font-style:italic;">У вас уже есть активный клановый квест</span>
+                                                        <span style="color:#888; font-style:italic;">{{ __('У вас уже есть активный клановый квест') }}</span>
                                                     </td>
                                                 </tr>
                                             @elseif($dialoguePage)
@@ -304,7 +304,7 @@
                                                 <tr>
                                                     <td colspan="3" align="center">
                                                         <span class="butt1 pointer">
-                                                            <span><input value="Далее" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                            <span><input value="{{ __('Далее') }}" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -313,12 +313,12 @@
                                             @foreach($quest->rewards as $reward)
                                                 @php
                                                     $rewardText = match($reward->type->value) {
-                                                        'exp'               => '+' . $reward->amount . ' опыта',
-                                                        'money'             => '+' . $reward->amount . ' монет',
-                                                        'item'              => $reward->itemInfo ? '' : 'предмет',
-                                                        'location_access'   => 'доступ к «' . ($reward->location?->name ?? 'локации') . '»',
-                                                        'clan_points'       => '+' . $reward->amount . ' клановых очков',
-                                                        'reputation_points' => '+' . $reward->amount . ' репутации «' . ($reward->reputation?->name ?? 'репутация') . '»',
+                                                        'exp'               => '+' . $reward->amount . ' ' . __('опыта'),
+                                                        'money'             => '+' . $reward->amount . ' ' . __('монет'),
+                                                        'item'              => $reward->itemInfo ? '' : __('предмет'),
+                                                        'location_access'   => __('доступ к') . ' «' . ($reward->location?->name ?? __('локации')) . '»',
+                                                        'clan_points'       => '+' . $reward->amount . ' ' . __('клановых очков'),
+                                                        'reputation_points' => '+' . $reward->amount . ' ' . __('репутации') . ' «' . ($reward->reputation?->name ?? __('репутация')) . '»',
                                                         default             => '',
                                                     };
                                                 @endphp
@@ -327,7 +327,7 @@
                                                         <img src="{{ asset('img/icon/reward_icon_orange.png') }}" alt="">
                                                     </td>
                                                     <td class="b" colspan="2">
-                                                        <span class="brown">Награда:</span>
+                                                        <span class="brown">{{ __('Награда:') }}</span>
                                                         @if($reward->type->value === 'item' && $reward->itemInfo)
                                                             <span class="greenn">{{ $reward->amount > 1 ? $reward->amount . 'x ' : '' }}</span>
                                                             <a href="{{ route('items.info.share', ['id' => $reward->itemInfo->id]) }}"
@@ -345,7 +345,7 @@
                                             <tr>
                                                 <td colspan="3" align="center">
                                                     <span class="butt1 pointer">
-                                                        <span><input value="Сдать" type="submit" onclick="location.href='{{ route('quest.complete', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                        <span><input value="{{ __('Сдать') }}" type="submit" onclick="location.href='{{ route('quest.complete', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -353,7 +353,7 @@
                                             <tr>
                                                 <td colspan="3" align="center">
                                                     <span class="butt1 pointer">
-                                                        <span><input value="Далее" type="submit" onclick="location.href='{{ route('npc', ['id' => $npc->id]) }}'" class="grnn"></span>
+                                                        <span><input value="{{ __('Далее') }}" type="submit" onclick="location.href='{{ route('npc', ['id' => $npc->id]) }}'" class="grnn"></span>
                                                     </span>
                                                 </td>
                                             </tr>

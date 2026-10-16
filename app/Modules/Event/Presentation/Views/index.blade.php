@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>События</title>
+    <title>{{ __('События') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     {!! $itemTooltipScript ?? '' !!}
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
@@ -247,12 +247,12 @@
 
 @php
     $tabs = [
-        'events'        => 'Текущие события',
-        'events_future' => 'Будущие события',
-        'events_my'     => 'Мои события',
-        'influence'     => 'Влияние',
-        'activity'      => 'Активности',
-        'rewards'       => 'Подвиги',
+        'events'        => __('Текущие события'),
+        'events_future' => __('Будущие события'),
+        'events_my'     => __('Мои события'),
+        'influence'     => __('Влияние'),
+        'activity'      => __('Активности'),
+        'rewards'       => __('Подвиги'),
     ];
 
     $btnLeft1   = 'img/bg/btn/btn-left1.gif';
@@ -279,7 +279,7 @@
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td align="center" nowrap style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('location') }}" class="btn_1">Вернуться</a>
+            <a href="{{ route('location') }}" class="btn_1">{{ __('Вернуться') }}</a>
         </td>
         <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
@@ -296,7 +296,7 @@
     @else
         <div style="text-align: center; padding: 40px 20px; color: #49382d;">
             <h2 style="font-size: 16px; margin-bottom: 12px; color: #7a3010;">{{ $tabs[$mode] }}</h2>
-            <p style="font-size: 12px; color: #888;">Раздел находится в разработке.</p>
+            <p style="font-size: 12px; color: #888;">{{ __('Раздел находится в разработке.') }}</p>
         </div>
     @endif
 </div>

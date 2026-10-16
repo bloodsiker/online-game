@@ -15,7 +15,8 @@ class FistAttackStrategy implements AttackStrategyInterface
     public function __construct(
         private HitCalculator $hitCalc,
         private StatSheet $player,
-        private FightHitInterface $monster
+        private FightHitInterface $monster,
+        private int $weaponSkillLevel = 0,
     ) {}
 
     public function getHits(): array
@@ -29,7 +30,8 @@ class FistAttackStrategy implements AttackStrategyInterface
             $this->player,
             $this->monster,
             $this->player->getLeftHandMinDmg(),
-            $this->player->getLeftHandMaxDmg()
+            $this->player->getLeftHandMaxDmg(),
+            $this->weaponSkillLevel,
         );
 
         return [$hit->setWeaponName('кулаком')->setSkill($skill)];

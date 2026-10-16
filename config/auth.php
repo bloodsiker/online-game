@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\User\Infrastructure\Persistence\Models\User;
+
 return [
 
     /*
@@ -62,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Modules\User\Infrastructure\Persistence\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
         ],
 
         // 'users' => [
@@ -97,6 +99,10 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+    ],
+
+    'verification' => [
+        'expire' => (int) env('AUTH_VERIFICATION_EXPIRE', 1440),
     ],
 
     /*

@@ -69,7 +69,7 @@ class HotbarService
     public function setSlot(Player $player, int $slotNumber, string $entityType, int $entityId): ?string
     {
         if ($slotNumber < 1 || $slotNumber > $this->maxSlots($player)) {
-            return 'Слот недоступен.';
+            return __('Слот недоступен.');
         }
 
         $alreadyInSlot = PlayerSlot::where('player_id', $player->id)
@@ -80,8 +80,8 @@ class HotbarService
 
         if ($alreadyInSlot) {
             return $entityType === 'skill'
-                ? 'Это заклинание уже назначено на другой слот.'
-                : 'Этот предмет уже назначен на другой слот.';
+                ? __('Это заклинание уже назначено на другой слот.')
+                : __('Этот предмет уже назначен на другой слот.');
         }
 
         if ($entityType === 'item') {
@@ -90,11 +90,11 @@ class HotbarService
                 ->first();
 
             if (! $backpack) {
-                return 'Предмет не найден в рюкзаке.';
+                return __('Предмет не найден в рюкзаке.');
             }
 
             if (! $backpack->item->itemInfo->is_slot_usable) {
-                return 'Этот предмет нельзя добавить на панель.';
+                return __('Этот предмет нельзя добавить на панель.');
             }
         } elseif ($entityType === 'skill') {
             $hasSkill = $player->magicSkills()
@@ -102,10 +102,10 @@ class HotbarService
                 ->where('is_passive', false)
                 ->exists();
             if (! $hasSkill) {
-                return 'Заклинание не найдено или является пассивным.';
+                return __('Заклинание не найдено или является пассивным.');
             }
         } else {
-            return 'Неизвестный тип.';
+            return __('Неизвестный тип.');
         }
 
         PlayerSlot::updateOrCreate(

@@ -149,6 +149,9 @@ final class DungeonStageManagementTest extends TestCase
             $table->string('spawn_type');
             $table->unsignedInteger('total_monsters');
             $table->unsignedBigInteger('next_stage_id')->nullable();
+            $table->unsignedInteger('max_hits_per_user')->nullable();
+            $table->unsignedInteger('personal_cooldown_seconds')->nullable();
+            $table->unsignedInteger('clan_cooldown_seconds')->nullable();
             $table->timestamps();
         });
         Schema::create('dungeon_stage_locations', function (Blueprint $table): void {

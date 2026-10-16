@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -44,12 +45,12 @@ class SacrificeCatacombsEffectsSeeder extends Seeder
         $this->attachMonsterEffect('Кровавый Оракул', self::FEAR_EFFECT_ID, self::FEAR_CHANCE_PERCENT, self::FEAR_DURATION_SECONDS, null);
         $this->attachMonsterEffect('Кровавый Палач', self::ARMOR_BREAK_EFFECT_ID, self::ARMOR_BREAK_CHANCE_PERCENT, self::ARMOR_BREAK_DURATION_SECONDS, null);
 
-        $vampirismUpdated = DB::table('monsters')
+        $vampirismUpdated = LocalizedContentSeederQuery::forTable('monsters')
             ->where('name', 'Кровопийца-Инквизитор')
             ->update(['passive_type' => 'vampirism', 'passive_value' => self::VAMPIRISM_PERCENT, 'updated_at' => now()]);
         $this->command?->info("Вампиризм: проставлен {$vampirismUpdated} монстрам «Кровопийца-Инквизитор»");
 
-        $reflectUpdated = DB::table('monsters')
+        $reflectUpdated = LocalizedContentSeederQuery::forTable('monsters')
             ->where('name', 'Тень Приговорённого')
             ->update(['passive_type' => 'reflect', 'passive_value' => self::REFLECT_PERCENT, 'updated_at' => now()]);
         $this->command?->info("Отражение: проставлен {$reflectUpdated} монстрам «Тень Приговорённого»");
@@ -57,7 +58,7 @@ class SacrificeCatacombsEffectsSeeder extends Seeder
 
     private function attachMonsterEffect(string $monsterName, int $effectId, int $chance, int $durationSeconds, ?int $powerPercent): void
     {
-        $monsterIds = DB::table('monsters')->where('name', $monsterName)->pluck('id');
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')->where('name', $monsterName)->pluck('id');
 
         $attached = 0;
         foreach ($monsterIds as $monsterId) {

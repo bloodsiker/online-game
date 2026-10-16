@@ -31,7 +31,7 @@ class GetExchangeOrders
         }
 
         if ($filter->name !== null) {
-            $query->whereHas('shareItem', fn ($q) => $q->where('name', 'like', '%'.$filter->name.'%'));
+            $query->whereHas('shareItem', fn ($q) => $q->where(fn ($names) => $names->where('name->'.app()->getLocale(), 'like', '%'.$filter->name.'%')->orWhere('name->ru', 'like', '%'.$filter->name.'%')));
         }
 
         if ($filter->type !== null) {

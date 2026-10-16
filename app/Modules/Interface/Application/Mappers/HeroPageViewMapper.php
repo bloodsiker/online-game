@@ -23,11 +23,13 @@ class HeroPageViewMapper
     }
 
     /** @return list<HeroEffectDTO> */
-    public function mapEffects(Collection $activeEffects, CarbonInterface $now): array
+    public function mapEffects(Collection $activeEffects, CarbonInterface $now, ?string $locale = null): array
     {
-        return $activeEffects->map(function ($activeEffect) use ($now): HeroEffectDTO {
-            $name = $activeEffect->effect?->name
-                ?? ($activeEffect->type?->label() ?? 'Эффект');
+        $locale ??= app()->getLocale();
+
+        return $activeEffects->map(function ($activeEffect) use ($now, $locale): HeroEffectDTO {
+            $name = $activeEffect->effect?->getTranslation('name', $locale)
+                ?? __($activeEffect->type?->label() ?? 'Эффект', [], $locale);
 
             $remainingSeconds = $activeEffect->expires_at
                 ? (int) $now->diffInSeconds($activeEffect->expires_at, false)
@@ -50,7 +52,7 @@ class HeroPageViewMapper
                 totalDuration: max(1, $remainingSeconds, $totalSeconds),
                 isCurse: $isCurse,
                 image: $activeEffect->effect?->image,
-                description: $activeEffect->effect?->description,
+                description: $activeEffect->effect?->getTranslation('description', $locale),
             );
         })->values()->all();
     }

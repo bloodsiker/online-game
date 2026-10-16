@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Infrastructure\Persistence\Models;
 
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceShopSection;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\Exchange\Infrastructure\Persistence\Models\Exchange;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +24,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Structure extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
 
     public const TYPE_SHOP = 'shop';
 
@@ -53,6 +58,10 @@ class Structure extends Model
 
     public const TYPE_CLAN_SKILL_HALL = 'clan_skill_hall';
 
+    public const TYPE_CLAN_BOSS = 'clan_boss';
+
+    public const TYPE_PRISON = 'prison';
+
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
         self::TYPE_BARTER_SHOP => 'Бартерный магазин',
@@ -69,6 +78,8 @@ class Structure extends Model
         self::TYPE_AUCTION_EXCHANGE => 'Биржа',
         self::TYPE_REPUTATION_EXCHANGE => 'Обмен на репутацию',
         self::TYPE_CLAN_SKILL_HALL => 'Зал клановых наставлений',
+        self::TYPE_CLAN_BOSS => 'Логово кланового босса',
+        self::TYPE_PRISON => 'Темница',
     ];
 
     protected $with = ['location'];
@@ -76,6 +87,11 @@ class Structure extends Model
     protected $attributes = [
         'type' => self::TYPE_SHOP,
     ];
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
 
     public function location(): BelongsTo
     {
@@ -128,7 +144,7 @@ class Structure extends Model
 
     public function actions(): BelongsToMany
     {
-        return $this->belongsToMany(ShareAction::class, 'structure_actions', 'structure_id', 'share_action_id');
+        return $this->belongsToMany(ShareAction::class, 'structure_actions', 'structure_id', 'share_action_id')->withPivot('is_active');
     }
 
     public function getTypeName(): string
@@ -208,6 +224,21 @@ class Structure extends Model
     public function isClanSkillHall(): bool
     {
         return $this->type === self::TYPE_CLAN_SKILL_HALL;
+    }
+
+    public function isClanBoss(): bool
+    {
+        return $this->type === self::TYPE_CLAN_BOSS;
+    }
+
+    public function isPrison(): bool
+    {
+        return $this->type === self::TYPE_PRISON;
+    }
+
+    public function clanBossDungeon(): BelongsTo
+    {
+        return $this->belongsTo(Dungeon::class, 'dungeon_id');
     }
 
     public function isReputationExchange(): bool

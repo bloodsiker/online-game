@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Chat\Domain\Events;
 
 use App\Modules\Chat\Domain\Enums\ChatChannel;
+use App\Modules\Chat\Domain\Enums\ChatMessageType;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -102,6 +103,10 @@ final class ChatMessageCreated implements ShouldBroadcast, ShouldDispatchAfterCo
         };
 
         $names = $name === null ? [] : [$name];
+        if ($this->channel === ChatChannel::Clan && $this->type === ChatMessageType::ClanBoss->value) {
+            $names[] = 'chat.main';
+        }
+
         if ($this->type === 'mention' && $this->targetUserId !== null) {
             $names[] = 'App.Models.User.'.$this->targetUserId;
         }

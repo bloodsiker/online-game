@@ -36,10 +36,10 @@ class GetProfessionsPage
     {
         $skills = Skill::query()
             ->where('type', 'peaceful')
-            ->whereIn('name', self::PROFESSION_ORDER)
+            ->whereIn('name->ru', self::PROFESSION_ORDER)
             ->get()
             ->sortBy(function (Skill $skill): string {
-                $position = array_search($skill->name, self::PROFESSION_ORDER, true);
+                $position = array_search($skill->getTranslation('name', 'ru'), self::PROFESSION_ORDER, true);
 
                 return sprintf('%03d-%s', $position === false ? 999 : $position, $skill->name);
             })
@@ -56,7 +56,7 @@ class GetProfessionsPage
             ->where('lvl', 1)
             ->get()
             ->keyBy('skill_id');
-        $gatheringSkillIds = $skills->filter(fn (Skill $skill): bool => in_array($skill->name, self::GATHERING_PROFESSIONS, true))->modelKeys();
+        $gatheringSkillIds = $skills->filter(fn (Skill $skill): bool => in_array($skill->getTranslation('name', 'ru'), self::GATHERING_PROFESSIONS, true))->modelKeys();
         $gatheredResourcesBySkill = ShareItem::query()
             ->whereIn('skill_id', $gatheringSkillIds)
             ->get(['id', 'name', 'image', 'transparent_image', 'skill_id'])
@@ -99,7 +99,7 @@ class GetProfessionsPage
                 ->values()
                 ->all();
 
-            $isGathering = in_array($skill->name, self::GATHERING_PROFESSIONS, true);
+            $isGathering = in_array($skill->getTranslation('name', 'ru'), self::GATHERING_PROFESSIONS, true);
 
             $gatheredResources = [];
             if ($isGathering) {
@@ -121,7 +121,7 @@ class GetProfessionsPage
 
             return [
                 'id' => (int) $skill->id,
-                'name' => $skill->name === 'Ремесленник' ? 'Ремесник' : (string) $skill->name,
+                'name' => app()->getLocale() === 'ru' && $skill->name === 'Ремесленник' ? 'Ремесник' : (string) $skill->name,
                 'description' => (string) ($skill->description ?? ''),
                 'level' => $level,
                 'experiencePercent' => min(100, round($levelExperience * 100 / $experienceToLevel, 1)),

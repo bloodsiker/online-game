@@ -7,10 +7,10 @@
     $btnRight2  = 'img/bg/btn/btn-right2.gif';
 
     $tabs = [
-        'put'      => ['route' => route('clan.warehouse', ['id' => $clanWarehouse->id]), 'label' => 'Положить'],
-        'take'     => ['route' => route('clan.warehouse.take', ['id' => $clanWarehouse->id]), 'label' => 'Забрать'],
-        'logs'     => ['route' => route('clan.warehouse.logs', ['id' => $clanWarehouse->id]), 'label' => 'Журнал'],
-        'clan'     => ['route' => route('clan.member'), 'label' => 'Клан'],
+        'put'      => ['route' => route('clan.warehouse', ['id' => $clanWarehouse->id]), 'label' => __('Положить')],
+        'take'     => ['route' => route('clan.warehouse.take', ['id' => $clanWarehouse->id]), 'label' => __('Забрать')],
+        'logs'     => ['route' => route('clan.warehouse.logs', ['id' => $clanWarehouse->id]), 'label' => __('Журнал')],
+        'clan'     => ['route' => route('clan.member'), 'label' => __('Клан')],
     ];
 @endphp
 <table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">

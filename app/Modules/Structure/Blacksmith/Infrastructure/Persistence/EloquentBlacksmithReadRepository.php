@@ -95,7 +95,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->join('share_items', 'items.share_item_id', '=', 'share_items.id')
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
-            ->where('share_items.name', $name)
+            ->where('share_items.name->ru', $name)
             ->where('share_items.type', ShareItemType::MISC->value)
             ->get();
     }

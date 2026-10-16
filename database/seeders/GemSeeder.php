@@ -6,7 +6,7 @@ namespace Database\Seeders;
 
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemType;
-use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Structure\Blacksmith\Domain\Services\MountRarityConfig;
 use Illuminate\Database\Seeder;
 
@@ -98,7 +98,7 @@ class GemSeeder extends Seeder
         foreach (MountRarityConfig::supportedRarities() as $rarity) {
             [$min, $max] = MountRarityConfig::socketRange($rarity);
 
-            ShareItem::firstOrCreate(
+            LocalizedItemSeederQuery::firstOrCreate(
                 [
                     'type' => ShareItemType::MOUNT->value,
                     'name' => MountRarityConfig::label($rarity).' зазубренная оправа',
@@ -139,7 +139,7 @@ class GemSeeder extends Seeder
                 $imageKey = ($prefix ?? '').'_'.$statDef['suffix'];
                 $image = self::GEMSTONE_IMAGES[$imageKey];
 
-                ShareItem::firstOrCreate(
+                LocalizedItemSeederQuery::firstOrCreate(
                     [
                         'type' => ShareItemType::GEM->value,
                         'name' => $name,

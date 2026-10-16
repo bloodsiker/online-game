@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клан</title>
+    <title>{{ __('Клан') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html {
@@ -59,7 +59,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.member'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.member'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
@@ -76,7 +76,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Состав клана</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Состав клана') }}</td>
                                 <td width="27"
                                 ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -93,15 +93,16 @@
                         @php
                             $memberCount = $rows->where('type', 'member')->count();
                             $canPromote  = $membership->role->hasPermission(\App\Modules\Clan\Domain\Enums\ClanPermission::CHANGE_RANKS);
+                            $clanRequests = $rows->filter(fn ($row) => $row['type'] === 'request');
                         @endphp
 
                         <table class="coll w100 p10h p2v brd2-all">
                             <tbody>
                             <tr class="bg_l">
-                                <td align="left" nowrap=""><b>Игроков в клане:</b>&nbsp;&nbsp;&nbsp;
-                                    <b>всего:&nbsp;<b class="redd">{{ $memberCount }}</b> из <b class="redd">40</b> / </b>
-                                    <b>online:&nbsp;<b class="redd">{{ $onlineCount }}</b> / </b>
-                                    <b>опыт клана:&nbsp;<b class="redd">{{ $clan->experience }}</b></b>
+                                <td align="left" nowrap=""><b>{{ __('Игроков в клане:') }}</b>&nbsp;&nbsp;&nbsp;
+                                    <b>{{ __('всего:') }}&nbsp;<b class="redd">{{ $memberCount }}</b> {{ __('из') }} <b class="redd">40</b> / </b>
+                                    <b>{{ __('online:') }}&nbsp;<b class="redd">{{ $onlineCount }}</b> / </b>
+                                    <b>{{ __('опыт клана:') }}&nbsp;<b class="redd">{{ $clan->experience }}</b></b>
                                 </td>
                             </tr>
                             </tbody>
@@ -117,25 +118,24 @@
                             <table class="coll w100 p10h p4v brd2" style="margin-top:12px;margin-bottom:12px">
                                 <tbody>
                                 <tr>
-                                    <td class="b" align="center" title="Ник члена клана">Ник игрока</td>
-                                    <td class="b" align="center" width="185" title="Звание игрока в вашем клане">Звание в клане</td>
-                                    <td class="b" align="center" title="Местоположение игрока">Местоположение</td>
-                                    <td class="b" align="center" title="Состояние">Состояние</td>
-                                    <td class="b" align="center" title="Дата и время последнего входа в игру">Последний вход</td>
-                                    <td class="b" align="center" title="Статус игрока (Online/Offline)">Статус</td>
-                                    <td class="b" align="center" title="Опыт, внесённый игроком в развитие клана">Вклад опыта</td>
-                                    <td class="b" align="center" title="Бонусные очки, заработанные для клана">Бонусы</td>
-                                    <td class="b" align="center" title="Доступные действия над членом клана">Действия</td>
+                                    <td class="b" align="center" title="{{ __('Ник члена клана') }}">{{ __('Ник игрока') }}</td>
+                                    <td class="b" align="center" width="185" title="{{ __('Звание игрока в вашем клане') }}">{{ __('Звание в клане') }}</td>
+                                    <td class="b" align="center" title="{{ __('Местоположение игрока') }}">{{ __('Местоположение') }}</td>
+                                    <td class="b" align="center" title="{{ __('Состояние') }}">{{ __('Состояние') }}</td>
+                                    <td class="b" align="center" title="{{ __('Дата и время последнего входа в игру') }}">{{ __('Последний вход') }}</td>
+                                    <td class="b" align="center" title="{{ __('Статус игрока (Online/Offline)') }}">{{ __('Статус') }}</td>
+                                    <td class="b" align="center" title="{{ __('Опыт, внесённый игроком в развитие клана') }}">{{ __('Вклад опыта') }}</td>
+                                    <td class="b" align="center" title="{{ __('Бонусные очки, заработанные для клана') }}">{{ __('Бонусы') }}</td>
+                                    <td class="b" align="center" title="{{ __('Доступные действия над членом клана') }}">{{ __('Действия') }}</td>
                                 </tr>
 
-                                @foreach($rows as $row)
-                                    @if($row['type'] === 'member')
+                                @foreach($rows->where('type', 'member') as $row)
                                         <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                                             <td width="10%" nowrap="">
-                                                <a href="#" title="Приватное сообщение">
+                                                <a href="#" title="{{ __('Приватное сообщение') }}">
                                                     <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
                                                 </a>
-                                                @if($clan->icon)<a href="{{ route('clan.public', ['clan' => $clan->id]) }}" title="Открыть публичную информацию о клане" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle"></a>&nbsp;@endif
+                                                @if($clan->icon)<a href="{{ route('clan.public', ['clan' => $clan->id]) }}" title="{{ __('Открыть публичную информацию о клане') }}" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle"></a>&nbsp;@endif
                                                 <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
                                                 &nbsp;
                                             </td>
@@ -153,20 +153,20 @@
                                             <td width="26%" align="center">
                                                 @php($location = $row['user']->currentLocation)
                                                 @if($location?->map?->slug)
-                                                    <a href="{{ route('map.public', ['slug' => $location->map->slug]) }}#{{ $location->id }}" target="_blank" title="Открыть карту и расположение игрока"><b>{{ $location->name }}</b></a>
+                                                    <a href="{{ route('map.public', ['slug' => $location->map->slug]) }}#{{ $location->id }}" target="_blank" title="{{ __('Открыть карту и расположение игрока') }}"><b>{{ $location->name }}</b></a>
                                                 @else
                                                     <b>{{ $location?->name ?? '--' }}</b>
                                                 @endif
                                             </td>
-                                            <td width="26%" align="center"><b>принят в клан</b></td>
+                                            <td width="26%" align="center"><b>{{ __('принят в клан') }}</b></td>
                                             <td width="16%" align="center">
                                                 <b>{{ $row['user']->last_online_at?->format('j M Y H:i') ?? '--' }}</b>
                                             </td>
                                             <td width="18%" align="center">
                                                 @if($row['is_online'])
-                                                    <b><span class="grnn">online</span></b>
+                                                    <b><span class="grnn">{{ __('online') }}</span></b>
                                                 @else
-                                                    <b>offline</b>
+                                                    <b>{{ __('offline') }}</b>
                                                 @endif
                                             </td>
                                             <td align="center" nowrap="">
@@ -178,43 +178,17 @@
                                             <td align="right" nowrap="">
                                                 @if($row['user']->id === auth()->id() && !$row['role']->is_leader)
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Выйти" type="button" style="width:60px"
-                                                               onclick="return top.systemConfirm('Вы действительно хотите покинуть клан?','Действие',false,function(){ document.getElementById('form_leave_clan').submit() });">
+                                                        <input value="{{ __('Выйти') }}" type="button" style="width:60px"
+                                                               onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите покинуть клан?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){ document.getElementById('form_leave_clan').submit() });">
                                                     </b></b>
                                                 @elseif($canKick && !$row['role']->is_leader && $row['user']->id !== auth()->id())
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Исключить" type="button" style="width:60px"
-                                                               onclick="return top.systemConfirm('Вы действительно хотите исключить игрока?','Действие',false,function(){ submitKickMember({{ $row['user']->id }}) });">
+                                                        <input value="{{ __('Исключить') }}" type="button" style="width:60px"
+                                                               onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите исключить игрока?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){ submitKickMember({{ $row['user']->id }}) });">
                                                     </b></b>
                                                 @endif
                                             </td>
                                         </tr>
-                                    @else
-                                        <tr class="bg_l">
-                                            <td width="10%" nowrap="">
-                                                <a href="#" title="Приватное сообщение">
-                                                    <img src="{{ asset('img/icon/users-arrow.gif') }}" border="0" width="12" height="10" align="absmiddle">
-                                                </a>
-                                                <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
-                                                &nbsp;
-                                            </td>
-                                            <td nowrap="" height="27" width="165">
-                                                <b>--</b>
-                                            </td>
-                                            <td width="26%" align="center"><b>--</b></td>
-                                            <td width="26%" align="center"><b>{{ $row['status']->label() }}</b></td>
-                                            <td width="16%" align="center"><b>--</b></td>
-                                            <td width="18%" align="center"><b>--</b></td>
-                                            <td align="center"><b>--</b></td>
-                                            <td align="center"><b>--</b></td>
-                                            <td align="right">
-                                                <b class="butt2 pointer"><b>
-                                                    <input value="Удалить" type="button" style="width:100px"
-                                                           onclick="return top.systemConfirm('Вы действительно хотите отменить запрос на вступление?','Действие',false,function(){location.href='{{ route('clan.request.cancel', $row['id']) }}'});">
-                                                </b></b>
-                                            </td>
-                                        </tr>
-                                    @endif
                                 @endforeach
                                 </tbody>
                             </table>
@@ -239,8 +213,8 @@
                                         if (!hasLeaderTransfer) return true;
 
                                         return top.systemConfirm(
-                                            'Передать руководство',
-                                            '<span>Вы уверены, что хотите передать руководство кланом?</span><br><br>После подтверждения вы потеряете права главы клана.',
+                                            {!! \Illuminate\Support\Js::from(__('Передать руководство')) !!},
+                                            {!! \Illuminate\Support\Js::from('<span>'.__('Вы уверены, что хотите передать руководство кланом?').'</span><br><br>'.__('После подтверждения вы потеряете права главы клана.')) !!},
                                             document.getElementById('form_check_leader_change')
                                         );
                                     }
@@ -248,7 +222,7 @@
                                 <div align="center">
                                     <span class="butt1 pointer">
                                         <span>
-                                            <input value="Сохранить изменения" type="submit"
+                                            <input value="{{ __('Сохранить изменения') }}" type="submit"
                                                    onclick="return check_leader_change();"
                                                    class="grnn"
                                                    style="width:160px;">
@@ -258,15 +232,63 @@
                             @endif
                         </form>
 
+                        @if($clanRequests->isNotEmpty())
+                            <div style="margin-top:16px; text-align:center;">
+                                <table border="0" cellspacing="0" cellpadding="0" align="center">
+                                    <tbody><tr height="22">
+                                        <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt=""></td>
+                                        <td align="center" class="tbl-usi_label-center">{{ __('clan.requests.heading') }} ({{ $clanRequests->count() }})</td>
+                                        <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt=""></td>
+                                    </tr></tbody>
+                                </table>
+                            </div>
+                            <table class="coll w100 p10h p4v brd2" style="margin-top:12px;margin-bottom:12px">
+                                <tbody>
+                                <tr>
+                                    <td class="b" align="center" title="{{ __('Ник игрока') }}">{{ __('Ник игрока') }}</td>
+                                    <td class="b" align="center" title="{{ __('Местоположение игрока') }}">{{ __('Местоположение') }}</td>
+                                    <td class="b" align="center" title="{{ __('Статус') }}">{{ __('Статус') }}</td>
+                                    <td class="b" align="center" title="{{ __('Доступные действия над заявкой') }}">{{ __('Действия') }}</td>
+                                </tr>
+                                @foreach($clanRequests as $row)
+                                    <tr class="{{ $loop->even ? 'bg_l' : '' }}">
+                                        <td><b class="kser0">{{ $row['user']->name }} [{{ $row['user']->player->lvl }}]</b></td>
+                                        <td align="center">{{ $row['user']->currentLocation?->name ?? '--' }}</td>
+                                        <td align="center">{{ $row['status']->label() }}</td>
+                                        <td align="center" nowrap>
+                                            @if($row['status'] === \App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus::REQUEST && $canInvite)
+                                                <form method="post" action="{{ route('clan.application.accept', ['application' => $row['id']]) }}" style="display:inline-block;">
+                                                    @csrf
+                                                    <span class="butt1 pointer"><span><input type="submit" class="grnn" value="{{ __('clan.application.accept') }}"></span></span>
+                                                </form>
+                                                <form method="post" action="{{ route('clan.application.decline', ['application' => $row['id']]) }}" style="display:inline-block;">
+                                                    @csrf
+                                                    <span class="butt1 pointer"><span><input type="submit" class="grnn" value="{{ __('clan.application.decline') }}"></span></span>
+                                                </form>
+                                            @elseif($row['status'] === \App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus::INVITE && $canInvite)
+                                                <b class="butt2 pointer"><b>
+                                                    <input value="{{ __('Удалить') }}" type="button" style="width:100px"
+                                                           onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить запрос на вступление?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){location.href='{{ route('clan.request.cancel', $row['id']) }}'});">
+                                                </b></b>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+
 
                         @if($canInvite)
                             <form method="post" action="{{ route('clan.invite') }}">
                                 @csrf
                                 <table cellspacing="0" cellpadding="5" border="0">
                                     <tbody><tr>
-                                        <td valign="middle">Ник игрока</td>
+                                        <td valign="middle">{{ __('Ник игрока') }}</td>
                                         <td valign="middle" width="100"><input type="text" name="invite_nick" value="{{ old('invite_nick') }}" class="w100 dbgl2 brd b small"></td>
-                                        <td valign="middle"><b class="butt2 pointer"><b><input value="Пригласить в клан" type="submit" style="width:130px"></b></b></td>
+                                        <td valign="middle"><b class="butt2 pointer"><b><input value="{{ __('Пригласить в клан') }}" type="submit" style="width:130px"></b></b></td>
                                     </tr></tbody>
                                 </table>
                             </form>

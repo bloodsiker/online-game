@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Scheduler\Application\Services;
 
 use App\Modules\Clan\Application\UseCases\ProcessExpiredClanTaxes;
+use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
@@ -30,6 +31,8 @@ class ScheduledTaskRegistry
 
     public const PROCESS_DUNGEON_RUNS = 'dungeons.process_expired_runs';
 
+    public const PROCESS_CLAN_BOSS_RUNS = 'dungeons.process_expired_clan_boss_runs';
+
     public const DATABASE_BACKUP = 'system.database_backup';
 
     public function __construct(
@@ -39,6 +42,7 @@ class ScheduledTaskRegistry
         private readonly ProcessDuePlayerStates $processDuePlayerStates,
         private readonly WorldEventLifecycleService $worldEventLifecycleService,
         private readonly ProcessExpiredDungeonRuns $processExpiredDungeonRuns,
+        private readonly ProcessExpiredClanBossRuns $processExpiredClanBossRuns,
         private readonly DatabaseBackupService $databaseBackupService,
     ) {}
 
@@ -108,6 +112,17 @@ class ScheduledTaskRegistry
                 settingsMutable: false,
                 lockSeconds: 60,
             ),
+            self::PROCESS_CLAN_BOSS_RUNS => new ScheduledTaskDefinition(
+                key: self::PROCESS_CLAN_BOSS_RUNS,
+                name: 'Таймеры клан-боссов',
+                description: 'Завершает просроченные походы и пропускает протухших боссов.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [
+                    ScheduledTaskFrequency::EVERY_MINUTE,
+                    ScheduledTaskFrequency::EVERY_FIVE_MINUTES,
+                    ScheduledTaskFrequency::EVERY_FIFTEEN_MINUTES,
+                ],
+            ),
             self::DATABASE_BACKUP => new ScheduledTaskDefinition(
                 key: self::DATABASE_BACKUP,
                 name: 'Резервная копия базы данных',
@@ -146,6 +161,10 @@ class ScheduledTaskRegistry
             self::PROCESS_DUNGEON_RUNS => sprintf(
                 'Завершено просроченных прохождений: %d.',
                 $this->processExpiredDungeonRuns->execute(now()),
+            ),
+            self::PROCESS_CLAN_BOSS_RUNS => sprintf(
+                'Обработано клан-боссов: %d.',
+                $this->processExpiredClanBossRuns->execute(now()),
             ),
             self::DATABASE_BACKUP => $this->createDatabaseBackup(),
             default => throw new InvalidArgumentException('Неизвестная задача планировщика.'),

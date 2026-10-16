@@ -7,7 +7,7 @@
                 <tbody>
                 <tr height="22">
                     <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                    <td align="center" class="tbl-usi-hdr mbg">Ваш ход</td>
+                    <td align="center" class="tbl-usi-hdr mbg">{{ __("Ваш ход") }}</td>
                     <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                 </tr>
                 </tbody>
@@ -21,11 +21,11 @@
             <div class="fight-body">
 
                 <div class="fight-act">
-                    <b class="butt1 pointer"><b><button type="button" class="butt1" id="weapon-attack" data-q-repeat="true" title="Атаковать оружием (Q)" onclick="actionAttack(0); return false;">&#9876; Атаковать оружием</button></b></b>
+                    <b class="butt1 pointer"><b><button type="button" class="butt1" id="weapon-attack" data-q-repeat="true" title="{{ __("Атаковать оружием (Q)") }}" onclick="actionAttack(0); return false;">&#9876; {{ __("Атаковать оружием") }}</button></b></b>
                 </div>
 
                 @if($player->hasEquippedMagicSkill())
-                    <div class="fight-spell-label">Сотворить заклинание:</div>
+                    <div class="fight-spell-label">{{ __("Сотворить заклинание:") }}</div>
                     @foreach($player->activeMagicSkills as $magicSkill)
                         <div class="fight-act">
                             <b class="butt1 pointer"><b><button type="button" class="butt1" id="s{{ $loop->index }}" onclick="actionAttack('{{ $magicSkill->id }}'); return false;">{{ $magicSkill->name }} <span class="fight-mana">{{ $magicSkill->mana_cost }}</span></button></b></b>
@@ -33,9 +33,11 @@
                     @endforeach
                 @endif
 
-                <div class="fight-act fight-act-flee">
-                    <b class="butt1 pointer"><b><button type="button" class="butt1" onclick="location.href='{{ route('fight.run-away', ['id' => $battle->id]) }}'">&larr; Убежать</button></b></b>
-                </div>
+                @unless($randomAttackedMonster?->locationMonster?->isClanBoss())
+                    <div class="fight-act fight-act-flee">
+                        <b class="butt1 pointer"><b><button type="button" class="butt1" onclick="location.href='{{ route('fight.run-away', ['id' => $battle->id]) }}'">&larr; {{ __("Убежать") }}</button></b></b>
+                    </div>
+                @endunless
 
                 @php
                     $hpPct = $playerDecorator->getHpMax() > 0 ? round(($player->hp_now / $playerDecorator->getHpMax()) * 100) : 0;
@@ -43,12 +45,12 @@
                 @endphp
                 <div class="act-stats">
                     <div class="act-stat-row">
-                        <span class="act-stat-label">Здоровье:</span>
+                        <span class="act-stat-label">{{ __("Здоровье:") }}</span>
                         <div class="act-stat-bar"><div class="act-stat-hp" style="width:{{ $hpPct }}%"></div></div>
                         <span class="act-stat-val">{{ $player->hp_now }}/{{ $playerDecorator->getHpMax() }}</span>
                     </div>
                     <div class="act-stat-row">
-                        <span class="act-stat-label">Энергия:</span>
+                        <span class="act-stat-label">{{ __("Энергия:") }}</span>
                         <div class="act-stat-bar"><div class="act-stat-mp" style="width:{{ $mpPct }}%"></div></div>
                         <span class="act-stat-val">{{ $player->mp_now }}/{{ $playerDecorator->getMpMax() }}</span>
                     </div>

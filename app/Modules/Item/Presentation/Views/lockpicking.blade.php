@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Взлом замка</title>
+    <title>{{ __("Взлом замка") }}</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <style>
         body { margin: 0; padding: 12px; color: #955c4a; background: #ead8bc; font: 11px Tahoma, Arial, sans-serif; }
@@ -98,13 +99,13 @@
                     <span class="lock-icon"><img src="{{ $page['item']->itemInfo->image }}" alt=""></span><br>
                 <div class="lock-name">{{ $page['item']->itemInfo->name }}</div>
                 <div class="lock-stats">
-                    Навык: <b>{{ $page['skillLevel'] }}</b>, сложность замка: <b>{{ $page['requiredSkill'] }}</b><br>
-                    Сложность: <span id="lock-difficulty" class="lock-difficulty lock-difficulty--{{ $page['difficulty']['level'] }}">{{ $page['difficulty']['label'] }}</span>
+                    {{ __("Навык:") }} <b>{{ $page['skillLevel'] }}</b>, {{ __("сложность замка:") }} <b>{{ $page['requiredSkill'] }}</b><br>
+                    {{ __("Сложность:") }} <span id="lock-difficulty" class="lock-difficulty lock-difficulty--{{ $page['difficulty']['level'] }}">{{ __($page['difficulty']['label']) }}</span>
                 </div>
                 </div>
                 @if($page['lockpicks'] !== [])
                     <div class="lockpick-choice">
-                        <div class="lockpick-choice__title">Выберите отмычку</div>
+                        <div class="lockpick-choice__title">{{ __("Выберите отмычку") }}</div>
                         <div class="lockpick-grid" id="lockpick-grid">
                             @foreach($page['lockpicks'] as $lockpick)
                                 <button type="button"
@@ -123,16 +124,16 @@
                     </div>
                 @endif
                 @if($page['competitors'] > 0)
-                    <div class="lock-warning" id="competitor-warning">Сундук уже пытается открыть {{ $page['competitors'] }} игрок(а). Вы всё равно можете начать взлом.</div>
+                    <div class="lock-warning" id="competitor-warning">{{ __('Сундук уже пытается открыть :count игрок(а). Вы всё равно можете начать взлом.', ['count' => $page['competitors']]) }}</div>
                 @else
                     <div class="lock-warning" id="competitor-warning" hidden></div>
                 @endif
                 @unless($page['hasLockpick'])
-                    <div class="lock-warning">В рюкзаке нет доступной по уровню отмычки. Она расходуется только при неудаче.</div>
+                    <div class="lock-warning">{{ __("В рюкзаке нет доступной по уровню отмычки. Она расходуется только при неудаче.") }}</div>
                 @endunless
                 <div class="lock-progress" id="lock-progress">
-                    <div class="lock-progress-label">Вскрытие замка</div>
-                    <div class="rep-progress-bar" title="Выполняется взлом">
+                    <div class="lock-progress-label">{{ __("Вскрытие замка") }}</div>
+                    <div class="rep-progress-bar" title="{{ __("Выполняется взлом") }}">
                         <div class="rep-progress-bar__bg"><div class="rep-progress-bar__fill" id="lock-fill"></div></div>
                         <div class="rep-progress-bar__border">
                             <div class="rep-progress-bar__border-left"></div>
@@ -143,13 +144,13 @@
                     </div>
                 </div>
                 <div class="lock-actions">
-                    <span class="butt1 pointer" id="lock-start-action"><span><input value="Начать взлом" id="lock-start" type="button" class="grnn" @disabled(!$page['hasLockpick'])></span></span>
-                    <span class="butt1 pointer" id="lock-cancel-action" style="display:none;"><span><input value="Отменить" id="lock-cancel" type="button" class="grnn"></span></span>
-                    <span class="butt1 pointer" id="lock-close-action" style="display:none;"><span><input value="Закрыть" id="lock-close" type="button" class="grnn"></span></span>
+                    <span class="butt1 pointer" id="lock-start-action"><span><input value="{{ __("Начать взлом") }}" id="lock-start" type="button" class="grnn" @disabled(!$page['hasLockpick'])></span></span>
+                    <span class="butt1 pointer" id="lock-cancel-action" style="display:none;"><span><input value="{{ __("Отменить") }}" id="lock-cancel" type="button" class="grnn"></span></span>
+                    <span class="butt1 pointer" id="lock-close-action" style="display:none;"><span><input value="{{ __("Закрыть") }}" id="lock-close" type="button" class="grnn"></span></span>
                 </div>
                 <div class="lock-result" id="lock-result"></div>
                 <div class="lock-links">
-                    <a href="{{ route('backpack') }}">Рюкзак</a> · <a href="{{ route('location') }}" target="game">Локация</a>
+                    <a href="{{ route('backpack') }}">{{ __("Рюкзак") }}</a> · <a href="{{ route('location') }}" target="game">{{ __("Локация") }}</a>
                 </div>
             </td>
             <td width="8" class="gp-frame-r"><img src="{{ asset('img/bg/blank.gif') }}" width="8" alt=""></td>
@@ -228,7 +229,7 @@
     function renderLockpickDetails() {
         const pick = selectedLockpick();
         if (!pick) return;
-        difficulty.textContent = pick.difficulty.label;
+        difficulty.textContent = gameTranslate(pick.difficulty.label);
         difficulty.className = 'lock-difficulty lock-difficulty--' + pick.difficulty.level;
     }
     function selectLockpick(id) {
@@ -281,8 +282,8 @@
         const title = document.createElement('div');
         title.className = 'lock-result-title';
         title.textContent = Array.isArray(data.loot) && data.loot.length
-            ? 'Сундук успешно открыт. Найдено:'
-            : 'Сундук открыт, но он оказался пуст.';
+            ? gameTranslate("Сундук успешно открыт. Найдено:")
+            : gameTranslate("Сундук открыт, но он оказался пуст.");
         block.appendChild(title);
 
         if (Array.isArray(data.loot) && data.loot.length) {
@@ -316,8 +317,8 @@
         if (data.event_progress) {
             const progress = document.createElement('div');
             progress.className = 'lock-effect-card';
-            progress.textContent = 'Событие: +' + data.event_progress.influence_awarded
-                + ' влияния. Ваш прогресс: ' + data.event_progress.player
+            progress.textContent = gameTranslate("Событие: +") + data.event_progress.influence_awarded
+                + gameTranslate(" влияния. Ваш прогресс: ") + data.event_progress.player
                 + '/' + data.event_progress.limit + '.';
             block.appendChild(progress);
         }
@@ -330,14 +331,14 @@
         const title = document.createElement('div');
         title.className = 'lock-result-title';
         title.textContent = data.lockpick_broken === false
-            ? 'Замок не поддался, но отмычка сохранилась.'
-            : 'Замок не поддался, отмычка сломана.';
+            ? gameTranslate("Замок не поддался, но отмычка сохранилась.")
+            : gameTranslate("Замок не поддался, отмычка сломана.");
         summary.appendChild(title);
 
         if (data.trap_avoided === true) {
             const avoided = document.createElement('div');
             avoided.className = 'lock-effect-card';
-            avoided.textContent = 'Ловушка обезврежена.';
+            avoided.textContent = gameTranslate("Ловушка обезврежена.");
             summary.appendChild(avoided);
         }
 
@@ -351,7 +352,7 @@
                 effect.appendChild(image);
             }
             const text = document.createElement('span');
-            text.append('Получен эффект: ');
+            text.append(gameTranslate("Получен эффект: "));
             const name = document.createElement('b');
             name.textContent = data.trap_effect.name;
             text.appendChild(name);
@@ -362,9 +363,9 @@
             const tooltipName = document.createElement('b');
             tooltipName.textContent = data.trap_effect.name;
             const description = document.createElement('span');
-            description.textContent = data.trap_effect.description || 'Негативный эффект ловушки.';
+            description.textContent = data.trap_effect.description || gameTranslate("Негативный эффект ловушки.");
             const duration = document.createElement('span');
-            duration.textContent = 'Длительность: ' + data.trap_effect.duration_seconds + ' сек.';
+            duration.textContent = gameTranslate("Длительность: ") + data.trap_effect.duration_seconds + ' ' + gameTranslate("сек.") + '';
             tooltip.append(tooltipName, description, duration);
             effect.appendChild(tooltip);
             summary.appendChild(effect);
@@ -372,12 +373,12 @@
 
         if (data.trap_damage > 0) {
             const damage = resultBlock('lock-damage-block');
-            damage.textContent = 'Получено повреждений: ' + data.trap_damage + ' HP';
+            damage.textContent = gameTranslate("Получено повреждений: ") + data.trap_damage + ' HP';
         }
         if (data.has_lockpick !== true) {
             const noLockpick = document.createElement('div');
             noLockpick.className = 'lock-no-lockpick';
-            noLockpick.textContent = 'Отмычек больше нет.';
+            noLockpick.textContent = gameTranslate("Отмычек больше нет.");
             summary.appendChild(noLockpick);
         }
         el.result.classList.add('visible');
@@ -436,7 +437,7 @@
             if (data.status === 'failure') {
                 if (data.lockpick_broken === true) consumeSelectedLockpickInUi();
                 renderFailure(data);
-                el.start.value = 'Повторить попытку';
+                el.start.value = gameTranslate("Повторить попытку");
                 el.start.disabled = data.has_lockpick !== true;
                 el.fill.style.width = '0%';
                 el.percent.textContent = '0%';
@@ -461,7 +462,7 @@
                 setCompleted();
             }
             if (data.status === 'success') el.start.disabled = true;
-        } catch (error) { clearInterval(timer); message(error.message || 'Не удалось завершить взлом.'); }
+        } catch (error) { clearInterval(timer); message(error.message || gameTranslate("Не удалось завершить взлом.")); }
         finally { completing = false; }
     }
     function run() { setRunning(true); tick(); clearInterval(timer); timer = setInterval(tick, 100); }
@@ -471,14 +472,14 @@
         try {
             const data = await request(urls.start, { lockpick_share_item_id: Number(selectedLockpickId || 0) || null });
             attempt = { started_at: new Date().toISOString(), completes_at: data.completes_at };
-            if (data.competitors > 0) { el.competitors.hidden = false; el.competitors.textContent = 'Сундук уже открывают. Победит первый успешный взлом.'; }
+            if (data.competitors > 0) { el.competitors.hidden = false; el.competitors.textContent = gameTranslate("Сундук уже открывают. Победит первый успешный взлом."); }
             run();
-        } catch (error) { message(error.message || 'Не удалось начать взлом.'); el.start.disabled = false; }
+        } catch (error) { message(error.message || gameTranslate("Не удалось начать взлом.")); el.start.disabled = false; }
     });
     el.cancel.addEventListener('click', async function () {
         el.cancel.disabled = true;
         try { const data = await request(urls.cancel); attempt = null; clearInterval(timer); setRunning(false); message(data.message); el.start.disabled = false; }
-        catch (error) { message(error.message || 'Не удалось отменить взлом.'); }
+        catch (error) { message(error.message || gameTranslate("Не удалось отменить взлом.")); }
         finally { el.cancel.disabled = false; }
     });
     el.close.addEventListener('click', function () {

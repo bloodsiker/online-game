@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +36,7 @@ class InstantMoneyRewardSeeder extends Seeder
                 ],
             );
 
-            DB::table('share_items')
+            LocalizedItemSeederQuery::items()
                 ->where('type', 'chest')
                 ->get(['id', 'rarity'])
                 ->each(function (object $container) use ($rewardId): void {
@@ -63,7 +64,7 @@ class InstantMoneyRewardSeeder extends Seeder
 
     private function upsertReward(): int
     {
-        $existing = DB::table('share_items')->where('name', self::NAME)->first();
+        $existing = LocalizedItemSeederQuery::items()->where('name', self::NAME)->first();
         $attributes = [
             'description' => 'Найденные монеты сразу зачисляются на баланс персонажа и не занимают место в рюкзаке.',
             'type' => 'misc',
@@ -84,14 +85,14 @@ class InstantMoneyRewardSeeder extends Seeder
         ];
 
         if ($existing === null) {
-            return (int) DB::table('share_items')->insertGetId([
+            return (int) LocalizedItemSeederQuery::items()->insertGetId([
                 'name' => self::NAME,
                 ...$attributes,
                 'created_at' => now(),
             ]);
         }
 
-        DB::table('share_items')->where('id', $existing->id)->update($attributes);
+        LocalizedItemSeederQuery::items()->where('id', $existing->id)->update($attributes);
 
         return (int) $existing->id;
     }

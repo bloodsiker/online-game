@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Сжимает диапазон уровней монстров «Опустевшей Долины» (map_id=3) с
@@ -60,7 +60,7 @@ class BarrenValleyLevelCompressionSeeder extends Seeder
         $updated = 0;
 
         foreach (self::PLAN as $row) {
-            $monster = DB::table('monsters')->where('id', $row['id'])->first();
+            $monster = LocalizedContentSeederQuery::forTable('monsters')->where('id', $row['id'])->first();
             if ($monster === null) {
                 $this->command?->warn("monster id={$row['id']} не найден, пропускаю");
 
@@ -76,7 +76,7 @@ class BarrenValleyLevelCompressionSeeder extends Seeder
             $exp = MonsterStatFormulas::expReward($newLvl, 1.0);
             [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $newLvl);
 
-            DB::table('monsters')->where('id', $row['id'])->update([
+            LocalizedContentSeederQuery::forTable('monsters')->where('id', $row['id'])->update([
                 'lvl' => $newLvl,
                 'hp' => $hp,
                 'armor' => $armor,

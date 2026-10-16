@@ -34,6 +34,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 Route::post('/game-tools/teleport', [GameToolsController::class, 'teleport'])->name('game_tools.teleport');
 Route::post('/game-tools/mute', [GameToolsController::class, 'mute'])->name('game_tools.mute');
+Route::post('/game-tools/detain', [GameToolsController::class, 'detain'])->name('game_tools.detain');
 
 Route::get('/scheduled-tasks', [ScheduledTaskController::class, 'index'])->name('scheduled_tasks.index');
 Route::post('/scheduled-tasks/{task}', [ScheduledTaskController::class, 'update'])->name('scheduled_tasks.update');
@@ -64,6 +65,7 @@ Route::post('/dungeon/{dungeon}/stages', [DungeonController::class, 'saveStage']
 Route::delete('/dungeon/{dungeon}/stages/{stage}', [DungeonController::class, 'deleteStage'])->name('dungeon.stage.delete');
 
 Route::get('/api/locations', [ApiController::class, 'locations'])->name('api.locations');
+Route::get('/api/dungeons', [ApiController::class, 'dungeons'])->name('api.dungeons');
 Route::get('/api/items', [ApiController::class, 'items'])->name('api.items');
 Route::get('/api/npcs', [ApiController::class, 'npcs'])->name('api.npcs');
 Route::get('/api/monsters', [ApiController::class, 'monsters'])->name('api.monsters');
@@ -141,6 +143,7 @@ Route::post('/structure/{structure}/category', [StructureController::class, 'inf
 Route::delete('/structure/{structure}/category/{category}', [StructureController::class, 'infoCategoryDelete'])->name('structure.info.category.delete');
 Route::get('/structure/{structure}/action/{action}', [StructureController::class, 'infoActionDelete'])->name('structure.info.action_delete');
 Route::post('/structure/{structure}/action', [StructureController::class, 'infoAction'])->name('structure.info.action');
+Route::post('/structure/{structure}/action/{action}/active', [StructureController::class, 'updateAction'])->name('structure.action.active');
 Route::match(['GET', 'POST'], '/structure/create', [StructureController::class, 'create'])->name('structure.create');
 Route::match(['GET', 'POST'], '/structure/{structure}', [StructureController::class, 'info'])->name('structure.info');
 Route::get('/structures', [StructureController::class, 'list'])->name('structures');
@@ -172,6 +175,9 @@ Route::match(['GET', 'POST'], '/action/{action}', [ActionController::class, 'inf
 Route::get('/action', [ActionController::class, 'list'])->name('action');
 
 Route::match(['GET', 'POST'], '/race/create', [RaceController::class, 'create'])->name('race.create');
+Route::post('/race/{race}/avatars', [RaceController::class, 'uploadAvatar'])->name('race.avatar.upload');
+Route::patch('/race/{race}/avatars/{avatar}', [RaceController::class, 'updateAvatar'])->name('race.avatar.update');
+Route::delete('/race/{race}/avatars/{avatar}', [RaceController::class, 'deleteAvatar'])->name('race.avatar.delete');
 Route::match(['GET', 'POST'], '/race/{race}', [RaceController::class, 'info'])->name('race.info');
 Route::get('/races', [RaceController::class, 'list'])->name('race');
 
@@ -255,3 +261,4 @@ Route::post('/player/{player}/backpack/add', [PlayerController::class, 'backpack
 Route::get('/player/{player}/backpack/{backpack}/delete', [PlayerController::class, 'backpackDelete'])->name('player.backpack.delete');
 Route::post('/player/{player}/mute', [PlayerController::class, 'mute'])->name('player.mute');
 Route::post('/player/{player}/mute/{mute}/revoke', [PlayerController::class, 'revokeMute'])->name('player.mute.revoke');
+Route::post('/player/{player}/detain', [PlayerController::class, 'detain'])->name('player.detain');

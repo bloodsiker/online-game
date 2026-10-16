@@ -31,8 +31,8 @@ class ActivityCardViewMapper
         }
 
         return match ($activity->bonus_reward_type) {
-            ActivityBonusRewardType::MONEY => $this->currencyHtml('Монеты', 'm_game.gif', $activity->bonus_reward_amount),
-            ActivityBonusRewardType::DIAMOND => $this->currencyHtml('Диамант', 'm_dmd.gif', $activity->bonus_reward_amount),
+            ActivityBonusRewardType::MONEY => $this->currencyHtml(__('Монеты'), 'm_game.gif', $activity->bonus_reward_amount),
+            ActivityBonusRewardType::DIAMOND => $this->currencyHtml(__('Диамант'), 'm_dmd.gif', $activity->bonus_reward_amount),
             ActivityBonusRewardType::ITEM => $this->bonusItemHtml($activity),
         };
     }

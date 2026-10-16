@@ -7,6 +7,7 @@ namespace App\Modules\Interface\Application\UseCases;
 use App\Modules\Battle\Application\Services\Combat\TimedEffectDeathService;
 use App\Modules\Interface\Application\DTOs\PlayerHeartbeatDTO;
 use App\Modules\Interface\Application\Mappers\HeroPageViewMapper;
+use App\Modules\Interface\Application\Services\PlayerOnlinePresenceService;
 use App\Modules\Interface\Domain\Contracts\InterfaceReadRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Domain\Services\PlayerTimedEffectService;
@@ -22,6 +23,7 @@ final readonly class HeartbeatPlayer
         private TimedEffectDeathService $timedEffectDeathService,
         private InterfaceReadRepository $readRepository,
         private HeroPageViewMapper $heroMapper,
+        private PlayerOnlinePresenceService $onlinePresenceService,
     ) {}
 
     public function execute(User $user, bool $touchOnline = true): PlayerHeartbeatDTO
@@ -34,7 +36,7 @@ final readonly class HeartbeatPlayer
                 ->firstOrFail();
 
             if ($touchOnline) {
-                $user->forceFill(['last_online_at' => $now])->saveQuietly();
+                $this->onlinePresenceService->touch((int) $user->id, $now);
             }
 
             $sheet = $this->statService->resolve($player);

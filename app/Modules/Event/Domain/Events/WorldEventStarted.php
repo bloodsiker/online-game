@@ -16,5 +16,7 @@ final class WorldEventStarted
         public readonly string $title,
         public readonly string $mapName,
         public readonly ?string $mapSlug,
+        public readonly ?array $titleTranslations = null,
+        public readonly ?array $mapNameTranslations = null,
     ) {}
 }

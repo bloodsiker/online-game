@@ -3,6 +3,7 @@
 namespace App\Modules\Battle\Application\Services\Combat\Boss;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 
@@ -94,16 +95,16 @@ class BossPhaseService
         $locationMonster->save();
 
         // Логування переходу фази
-        $result->log(sprintf(
+        $result->log(BattleLogTranslator::format(
             '<p><b class="color-phase">⚠️ %s переходить у фазу %d!</b></p>',
-            $monster->name,
+            BattleLogTranslator::contentName($monster),
             $phase->phase_number
         ));
 
         if ($phase->description) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p><i class="color-info">%s</i></p>',
-                $phase->description
+                BattleLogTranslator::contentText($phase, 'description'),
             ));
         }
 
@@ -124,18 +125,18 @@ class BossPhaseService
 
         // Додаємо нові скіли
         if ($phase->new_skills) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p class="color-warning">⚔️ %s отримує нові здібності: %s</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 implode(', ', $phase->new_skills)
             ));
         }
 
         // Видалені скіли
         if ($phase->removed_skills) {
-            $result->log(sprintf(
+            $result->log(BattleLogTranslator::format(
                 '<p class="color-info">🚫 %s втрачає здібності: %s</p>',
-                $monster->name,
+                BattleLogTranslator::contentName($monster),
                 implode(', ', $phase->removed_skills)
             ));
         }

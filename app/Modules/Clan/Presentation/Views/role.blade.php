@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клан</title>
+    <title>{{ __('Клан') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * {
@@ -61,7 +61,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.role'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.role'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
@@ -78,7 +78,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Звания клана</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Звания клана') }}</td>
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -98,11 +98,11 @@
                                    style="margin-top:12px;margin-bottom:12px">
                                 <tbody>
                                 <tr>
-                                    <td rowspan="2" class="b" align="center">Звание</td>
+                                    <td rowspan="2" class="b" align="center">{{ __('Звание') }}</td>
                                     <td colspan="{{ count($permissions) }}" class="b" align="center">
-                                        Полномочия
+                                        {{ __('Полномочия') }}
                                     </td>
-                                    <td rowspan="2" class="b" align="center" width="100">Действия</td>
+                                    <td rowspan="2" class="b" align="center" width="100">{{ __('Действия') }}</td>
                                 </tr>
                                 <tr>
                                     @foreach($permissions as $perm)
@@ -149,8 +149,8 @@
                                         <td nowrap="" width="60" align="center">
                                             @if(!$role->is_default)
                                                 <b class="butt2 pointer"><b>
-                                                    <input value="Удалить" type="button" style="width:60px"
-                                                           onclick="return top.systemConfirm('Вы действительно хотите удалить роль?','Действие',false,function(){ submitDeleteRole({{ $role->id }}) });">
+                                                    <input value="{{ __('Удалить') }}" type="button" style="width:60px"
+                                                           onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите удалить роль?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){ submitDeleteRole({{ $role->id }}) });">
                                                 </b></b>
                                             @endif
                                         </td>
@@ -164,7 +164,7 @@
                                 <div align="center">
                                     <span class="butt1 pointer">
                                         <span>
-                                            <input value="Сохранить изменения" type="submit"
+                                            <input value="{{ __('Сохранить изменения') }}" type="submit"
                                                    class="grnn"
                                                    style="width:160px;">
                                         </span>
@@ -183,9 +183,9 @@
                                 @csrf
                                 <table cellspacing="0" cellpadding="5" border="0">
                                     <tbody><tr>
-                                        <td valign="middle">Создать звание</td>
+                                        <td valign="middle">{{ __('Создать звание') }}</td>
                                         <td valign="middle" width="100"><input type="text" name="name" value="{{ old('name') }}" class="w100 dbgl2 brd b small" maxlength="16"></td>
-                                        <td valign="middle"><b class="butt2 pointer"><b><input value="Добавить" type="submit" style="width:130px"></b></b></td>
+                                        <td valign="middle"><b class="butt2 pointer"><b><input value="{{ __('Добавить') }}" type="submit" style="width:130px"></b></b></td>
                                     </tr></tbody>
                                 </table>
                             </form>

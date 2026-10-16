@@ -30,10 +30,10 @@
 
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="form-group">
-                                    <label>Название</label>
-                                    <input class="form-control" name="name" maxlength="120" required value="{{ old('name', $injuryType->name) }}">
-                                </div>
+                                @include('admin.partials.content-translations', ['prefix' => 'injury-'.$injuryType->id, 'content' => $injuryType, 'fields' => [
+                                    'name' => ['label' => 'Название'],
+                                    'description' => ['label' => 'Описание', 'multiline' => true],
+                                ]])
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -43,10 +43,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Описание</label>
-                            <textarea class="form-control" name="description" rows="3">{{ old('description', $injuryType->description) }}</textarea>
-                        </div>
 
                         <div class="row">
                             <div class="col-md-4">

@@ -22,7 +22,7 @@ class GetReputationPage
         $reputation = $this->readRepository->findReputationForIndexOrFail($id);
         $player = $user->player;
 
-        $pr = $this->reputationService->getOrCreate($player, $reputation);
+        $pr = $this->reputationService->getOrZero($player, $reputation);
         $currentTier = $this->reputationService->getCurrentTier($reputation, $pr->points);
         $canTake = $this->reputationService->canTakeQuest($player, $reputation);
         $activeQuest = $this->reputationService->getActiveQuest($player, $reputation);

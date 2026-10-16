@@ -23,8 +23,8 @@ final class BestiaryCatalogService
         $boss = (string) ($filters['boss'] ?? 'all');
 
         $monsters = Monster::query()
-            ->with(['locations' => fn ($query) => $query->with('map')->orderBy('name')])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', '%'.$search.'%'))
+            ->with(['locations' => fn ($query) => $query->with('map')->orderBy('name->ru')])
+            ->when($search !== '', fn ($query) => $query->searchTranslations('%'.$search.'%'))
             ->when(isset($filters['level_from']), fn ($query) => $query->where('lvl', '>=', $filters['level_from']))
             ->when(isset($filters['level_to']), fn ($query) => $query->where('lvl', '<=', $filters['level_to']))
             ->when($mapId > 0, fn ($query) => $query->whereHas('locations', fn ($query) => $query->where('map_id', $mapId)))
@@ -32,14 +32,14 @@ final class BestiaryCatalogService
             ->when($boss === '1', fn ($query) => $query->where('is_boss', true))
             ->when($boss === '0', fn ($query) => $query->where('is_boss', false))
             ->orderBy('lvl')
-            ->orderBy('name')
+            ->orderBy('name->'.app()->getLocale())
             ->orderBy('id')
             ->paginate(24)
             ->withQueryString();
 
         $maps = Map::query()
             ->whereHas('locations.monsters')
-            ->orderBy('name')
+            ->orderBy('name->ru')
             ->get(['id', 'name']);
 
         return compact('monsters', 'maps');

@@ -11,6 +11,7 @@ use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationShopItem;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\ReputationExchange\Infrastructure\Persistence\Models\ReputationExchange;
 use App\Modules\Structure\ReputationExchange\Infrastructure\Persistence\Models\ReputationGambleOption;
@@ -62,7 +63,7 @@ class ReputationController extends Controller
             ? Structure::where('npc_id', $reputation->npc_id)->where('type', Structure::TYPE_REPUTATION_EXCHANGE)->first()
             : null;
         $favorTypes = DivineFavorType::cases();
-        $effects = Effect::orderBy('name')->get(['id', 'name']);
+        $effects = Effect::orderBy('name->ru')->get(['id', 'name']);
 
         return view('admin.reputation.info', compact('reputation', 'exchangeStructure', 'favorTypes', 'effects'));
     }
@@ -79,7 +80,8 @@ class ReputationController extends Controller
 
     public function updateTier(Request $request, Reputation $reputation, ReputationTier $tier): RedirectResponse
     {
-        $tier->update($this->tierData($request));
+        abort_unless((int) $tier->reputation_id === (int) $reputation->id, 404);
+        $tier->update($this->tierData($request, $tier));
 
         return redirect()->back()->with('success', 'Уровень обновлён.');
     }
@@ -181,8 +183,10 @@ class ReputationController extends Controller
     // ─────────────────────────────────────────────────────────────────────────
 
     /** @return array<string, mixed> */
-    private function tierData(Request $request): array
+    private function tierData(Request $request, ?ReputationTier $tier = null): array
     {
+        $tier ??= new ReputationTier;
+        app(ContentTranslationEditor::class)->fill(model: $tier, request: $request, fields: $tier->getTranslatableAttributes(), required: []);
         $request->validate([
             'medal_image' => ['nullable', 'image', 'max:4096'],
             'feat_medal_image' => ['nullable', 'image', 'max:4096'],
@@ -192,12 +196,12 @@ class ReputationController extends Controller
             'min_points' => (int) $request->input('min_points', 0),
             // Пустое значение = открытый верхний тир (без потолка)
             'max_points' => $request->filled('max_points') ? (int) $request->input('max_points') : null,
-            'medal_name' => $request->input('medal_name') ?: null,
+            'medal_name' => $tier->getTranslations('medal_name'),
             'medal_icon' => $request->input('medal_icon') ?: null,
             // Подвиг: квест (или финальный квест цепочки), без которого медаль не выдаётся
             'feat_quest_id' => $request->input('feat_quest_id') ?: null,
-            'feat_description' => $request->input('feat_description') ?: null,
-            'feat_medal_name' => $request->input('feat_medal_name') ?: null,
+            'feat_description' => $tier->getTranslations('feat_description'),
+            'feat_medal_name' => $tier->getTranslations('feat_medal_name'),
             'feat_medal_icon' => $request->input('feat_medal_icon') ?: null,
             'favor_percent' => $request->filled('favor_percent') ? (int) $request->input('favor_percent') : null,
             'feat_favor_percent' => $request->filled('feat_favor_percent') ? (int) $request->input('feat_favor_percent') : null,
@@ -223,8 +227,7 @@ class ReputationController extends Controller
 
     private function fillReputation(Reputation $reputation, Request $request): void
     {
-        $reputation->name = $request->input('name');
-        $reputation->description = $request->input('description');
+        app(ContentTranslationEditor::class)->fill(model: $reputation, request: $request);
         $reputation->npc_id = $request->input('npc_id') ?: null;
         $reputation->icon = $request->input('icon');
         $reputation->favor_effect_type = $request->input('favor_effect_type') ?: null;

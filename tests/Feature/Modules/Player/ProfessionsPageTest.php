@@ -6,6 +6,8 @@ namespace Tests\Feature\Modules\Player;
 
 use App\Modules\Player\Application\UseCases\GetProfessionsPage;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -20,6 +22,14 @@ class ProfessionsPageTest extends TestCase
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
+        app()->setLocale('ru');
+
+        Schema::create('player_gathering_stats', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('share_item_id');
+            $table->unsignedInteger('total_gathered');
+        });
 
         Schema::create('skills', function (Blueprint $table): void {
             $table->id();
@@ -74,7 +84,7 @@ class ProfessionsPageTest extends TestCase
 
     public function test_page_groups_learned_recipes_by_peaceful_profession(): void
     {
-        DB::table('skills')->insert([
+        LocalizedContentSeederQuery::forTable('skills')->insert([
             ['id' => 10, 'name' => 'Алхимик', 'type' => 'peaceful', 'description' => 'Создаёт зелья.'],
             ['id' => 11, 'name' => 'Рыбак', 'type' => 'peaceful', 'description' => 'Ловит рыбу.'],
             ['id' => 12, 'name' => 'Мечник', 'type' => 'combat', 'description' => 'Боевой навык.'],
@@ -119,7 +129,7 @@ class ProfessionsPageTest extends TestCase
         $player->id = 1;
         $page = (new GetProfessionsPage)->execute($player);
 
-        $this->assertCount(4, $page['professions']);
+        $this->assertCount(5, $page['professions']);
         $this->assertSame(10, $page['activeProfessionId']);
         $this->assertSame('Алхимик', $page['professions'][0]['name']);
         $this->assertSame('Повар', $page['professions'][1]['name']);
@@ -130,6 +140,15 @@ class ProfessionsPageTest extends TestCase
         $this->assertSame('Рецепт настоя', $page['professions'][0]['recipes'][0]['name']);
         $this->assertSame('Травяной настой', $page['professions'][0]['recipes'][0]['resultName']);
         $this->assertSame([], $page['professions'][3]['recipes']);
+
+        Skill::findOrFail(11)
+            ->setTranslation('name', 'uk', 'Рибалка')->save();
+        app()->setLocale('uk');
+        $translatedPage = (new GetProfessionsPage)->execute($player);
+        $fisher = collect($translatedPage['professions'])->firstWhere('id', 11);
+        $this->assertSame('Рибалка', $fisher['name']);
+        $this->assertTrue($fisher['isGathering']);
+        $this->assertSame(array_column($page['professions'], 'id'), array_column($translatedPage['professions'], 'id'));
     }
 
     public function test_professions_view_and_menu_entry_are_available(): void

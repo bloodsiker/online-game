@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Dungeon\Domain\Enums\DungeonCooldownType;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonGate;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,7 @@ class DungeonSeeder extends Seeder
 {
     public function run(): void
     {
-        if (Dungeon::where('name', 'Тёмное Подземелье')->exists()) {
+        if (LocalizedContentSeederQuery::forTable('dungeons')->where('name', 'Тёмное Подземелье')->exists()) {
             $this->command->info('DungeonSeeder: уже существует, пропускаем.');
 
             return;

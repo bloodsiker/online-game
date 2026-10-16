@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карты мира</title>
+    <title>{{ __('Карты мира') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { min-height: 100%; }
@@ -32,10 +33,10 @@
 <body>
 <main class="map-tree-page">
     <header class="map-tree-header">
-        <h1>Карты мира</h1>
+        <h1>{{ __('Карты мира') }}</h1>
         <div class="map-tree-stats">
-            <span class="map-tree-stat">{{ $page->mapsCount }} карт</span>
-            <span class="map-tree-stat">{{ $page->locationsCount }} локаций</span>
+            <span class="map-tree-stat">{{ $page->mapsCount }} {{ __('карт') }}</span>
+            <span class="map-tree-stat">{{ $page->locationsCount }} {{ __('локаций') }}</span>
         </div>
     </header>
 
@@ -46,7 +47,7 @@
             @endforeach
         </ul>
     @else
-        <div class="map-tree-empty">Карты пока не созданы.</div>
+        <div class="map-tree-empty">{{ __('Карты пока не созданы.') }}</div>
     @endif
 </main>
 
@@ -66,7 +67,7 @@
                 fetch(button.dataset.monstersUrl, {headers: {'Accept': 'application/json'}})
                     .then(function (response) {
                         if (!response.ok) {
-                            throw new Error('Не удалось загрузить список монстров.');
+                            throw new Error(gameTranslate('Не удалось загрузить список монстров.'));
                         }
 
                         return response.json();
@@ -75,7 +76,7 @@
                         modalHost.openMapMonstersModal({map: data.map, monsters: data.monsters || []});
                     })
                     .catch(function () {
-                        modalHost.openMapMonstersModal({map: button.dataset.mapName, error: 'Не удалось загрузить список монстров.'});
+                        modalHost.openMapMonstersModal({map: button.dataset.mapName, error: gameTranslate('Не удалось загрузить список монстров.')});
                     });
             }
 
@@ -90,7 +91,7 @@
                 fetch(resourcesButton.dataset.resourcesUrl, {headers: {'Accept': 'application/json'}})
                     .then(function (response) {
                         if (!response.ok) {
-                            throw new Error('Не удалось загрузить список ресурсов.');
+                            throw new Error(gameTranslate('Не удалось загрузить список ресурсов.'));
                         }
 
                         return response.json();
@@ -99,7 +100,7 @@
                         modalHost.openMapResourcesModal({map: data.map, resources: data.resources || []});
                     })
                     .catch(function () {
-                        modalHost.openMapResourcesModal({map: resourcesButton.dataset.mapName, error: 'Не удалось загрузить список ресурсов.'});
+                        modalHost.openMapResourcesModal({map: resourcesButton.dataset.mapName, error: gameTranslate('Не удалось загрузить список ресурсов.')});
                     });
             }
         });

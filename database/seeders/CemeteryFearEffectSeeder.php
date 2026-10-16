@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -45,10 +46,10 @@ class CemeteryFearEffectSeeder extends Seeder
 
     public function run(): void
     {
-        $effectId = DB::table('effects')->where('slug', 'fear')->value('id');
+        $effectId = LocalizedContentSeederQuery::forTable('effects')->where('slug', 'fear')->value('id');
 
         if ($effectId === null) {
-            $effectId = DB::table('effects')->insertGetId([
+            $effectId = LocalizedContentSeederQuery::forTable('effects')->insertGetId([
                 'name' => 'Страх',
                 'slug' => 'fear',
                 'type' => 'debuff',
@@ -70,7 +71,7 @@ class CemeteryFearEffectSeeder extends Seeder
             $this->command?->info("создан эффект «Страх» (id={$effectId})");
         }
 
-        $monsterIds = DB::table('monsters')->where('name', 'Саван')->pluck('id');
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')->where('name', 'Саван')->pluck('id');
 
         $attached = 0;
         foreach ($monsterIds as $monsterId) {

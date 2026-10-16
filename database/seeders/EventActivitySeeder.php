@@ -21,8 +21,8 @@ class EventActivitySeeder extends Seeder
             return;
         }
 
-        $monsters = Monster::query()->pluck('id', 'name');
-        $items = ShareItem::query()->pluck('id', 'name');
+        $monsters = Monster::query()->get(['id', 'name'])->mapWithKeys(fn (Monster $monster): array => [$monster->getTranslation('name', 'ru') => $monster->id]);
+        $items = ShareItem::query()->get(['id', 'name'])->mapWithKeys(fn (ShareItem $item): array => [$item->getTranslation('name', 'ru') => $item->id]);
 
         $count = fn (int $n): string => '<strong><span style="color:green">'.$n.'</span></strong>';
         $target = fn (string $name): string => '<strong><span style="color:darkred">'.$name.'</span></strong>';

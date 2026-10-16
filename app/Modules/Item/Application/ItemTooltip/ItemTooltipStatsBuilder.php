@@ -28,7 +28,7 @@ final class ItemTooltipStatsBuilder
 
         if ($item->useLimit !== null) {
             $stats[] = [
-                'title' => 'Ограничение использования',
+                'title' => __('Ограничение использования'),
                 'value' => sprintf(
                     '%d %s за %s',
                     $item->useLimit->max_uses,
@@ -42,11 +42,11 @@ final class ItemTooltipStatsBuilder
             $config = $item->lockpickConfig;
             $requiredSkill = $config->tier === 1 ? 1 : ($config->tier - 1) * 50;
             array_push($stats,
-                ['title' => 'Тир отмычки', 'value' => (string) $config->tier],
-                ['title' => 'Требуется Взломщик', 'value' => (string) $requiredSkill],
-                ['title' => 'Ускорение взлома', 'value' => '+'.$config->speed_bonus_percent.'%'],
-                ['title' => 'Сохранение при неудаче', 'value' => $config->failure_preserve_chance_percent.'%'],
-                ['title' => 'Обход ловушки', 'value' => $config->trap_avoid_chance_percent.'%'],
+                ['title' => __('Тир отмычки'), 'value' => (string) $config->tier],
+                ['title' => __('Требуется Взломщик'), 'value' => (string) $requiredSkill],
+                ['title' => __('Ускорение взлома'), 'value' => '+'.$config->speed_bonus_percent.'%'],
+                ['title' => __('Сохранение при неудаче'), 'value' => $config->failure_preserve_chance_percent.'%'],
+                ['title' => __('Обход ловушки'), 'value' => $config->trap_avoid_chance_percent.'%'],
             );
         }
 
@@ -56,10 +56,10 @@ final class ItemTooltipStatsBuilder
     private static function formatDuration(int $seconds): string
     {
         return match (true) {
-            $seconds % 86400 === 0 => self::formatAmount((int) ($seconds / 86400), 'день', 'дня', 'дней'),
-            $seconds % 3600 === 0 => self::formatAmount((int) ($seconds / 3600), 'час', 'часа', 'часов'),
-            $seconds % 60 === 0 => self::formatAmount((int) ($seconds / 60), 'минуту', 'минуты', 'минут'),
-            default => self::formatAmount($seconds, 'секунду', 'секунды', 'секунд'),
+            $seconds % 86400 === 0 => self::formatAmount((int) ($seconds / 86400), __('день'), __('дня'), __('дней')),
+            $seconds % 3600 === 0 => self::formatAmount((int) ($seconds / 3600), __('час'), __('часа'), __('часов')),
+            $seconds % 60 === 0 => self::formatAmount((int) ($seconds / 60), __('минуту'), __('минуты'), __('минут')),
+            default => self::formatAmount($seconds, __('секунду'), __('секунды'), __('секунд')),
         };
     }
 
@@ -84,13 +84,13 @@ final class ItemTooltipStatsBuilder
         $mod10 = $count % 10;
 
         if ($mod100 >= 11 && $mod100 <= 14) {
-            return 'раз';
+            return __('раз');
         }
 
         return match ($mod10) {
-            1 => 'раз',
-            2, 3, 4 => 'раза',
-            default => 'раз',
+            1 => __('раз'),
+            2, 3, 4 => __('раза'),
+            default => __('раз'),
         };
     }
 
@@ -118,12 +118,12 @@ final class ItemTooltipStatsBuilder
 
         // Слот экипировки
         if ($item->slot !== null) {
-            $stats[] = ['title' => 'Слот', 'value' => $item->slot->label()];
+            $stats[] = ['title' => __('Слот'), 'value' => $item->slot->label()];
         }
 
         // Двуручное оружие
         if ($item->is_two_hand) {
-            $stats[] = ['title' => 'Тип', 'value' => 'Двуручное'];
+            $stats[] = ['title' => __('Тип'), 'value' => __('Двуручное')];
         }
 
         // Бонус заточки: +5% за уровень, так же как считает PlayerStatService::fromEquipment()
@@ -171,7 +171,7 @@ final class ItemTooltipStatsBuilder
         // Нулевой диапазон атаки (0 .. 0) не несёт информации — пропускаем строку.
         if (((float) ($attackMin ?? 0)) !== 0.0 || ((float) ($attackMax ?? 0)) !== 0.0) {
             $stats[] = [
-                'title' => 'Атака',
+                'title' => __('Атака'),
                 'value' => '+'.($attackMin ?? 0).' .. +'.($attackMax ?? 0),
             ];
         }
@@ -269,7 +269,7 @@ final class ItemTooltipStatsBuilder
             array_push($rows, ...self::formatStatEntries($rune->stats ?? [], $color));
 
             if ($rune->passive_skill) {
-                $rows[] = ['title' => 'Пассивка', 'value' => $rune->passive_skill['description'], 'color' => $color];
+                $rows[] = ['title' => __('Пассивка'), 'value' => $rune->passive_skill['description'], 'color' => $color];
             }
         }
 
@@ -306,9 +306,9 @@ final class ItemTooltipStatsBuilder
     private static function statLabel(string $key): string
     {
         return ShareItemStatType::tryFrom($key)?->label() ?? match ($key) {
-            'attack' => 'Атака',
-            'strength' => 'Сила',
-            'mp_max' => 'Уровень маны',
+            'attack' => __('Атака'),
+            'strength' => __('Сила'),
+            'mp_max' => __('Уровень маны'),
             default => ucfirst($key),
         };
     }

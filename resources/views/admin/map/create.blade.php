@@ -12,10 +12,7 @@
                 <div class="card-body">
                     <form action="{{ route('admin.map.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'map-new', 'content' => null, 'fields' => ['name' => ['label' => 'Название']]])
                         <div class="form-group">
                             <label class="col-form-label">Slug</label>
                             <input type="text" class="form-control" name="slug" value="{{ old('slug') }}">

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentMigration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -41,6 +42,7 @@ class MonsterListFilterTest extends TestCase
             ['id' => 12, 'name' => 'Вепрь', 'lvl' => 1],
             ['id' => 13, 'name' => 'Альфа', 'lvl' => 5],
         ]);
+        (new LocalizedContentMigration)->convert('monsters');
 
         $this->withoutMiddleware(AdminMiddleware::class);
     }

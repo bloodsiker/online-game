@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 
 interface ReferralRepository
 {
-    public function findUserByName(string $name): ?User;
+    public function findUserByReferralCode(string $code): ?User;
 
     public function findReferralByReferredUserId(int $referredUserId): ?Referral;
 

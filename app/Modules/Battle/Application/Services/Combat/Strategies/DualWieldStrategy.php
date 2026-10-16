@@ -16,6 +16,8 @@ class DualWieldStrategy implements AttackStrategyInterface
         private readonly FightHitInterface $monster,
         private readonly ShareItem $leftWeapon,
         private readonly ShareItem $rightWeapon,
+        private readonly int $leftWeaponSkillLevel = 0,
+        private readonly int $rightWeaponSkillLevel = 0,
     ) {}
 
     public function getHits(): array
@@ -27,7 +29,8 @@ class DualWieldStrategy implements AttackStrategyInterface
             $this->player,
             $this->monster,
             $this->player->getLeftHandMinDmg(),
-            $this->player->getLeftHandMaxDmg()
+            $this->player->getLeftHandMaxDmg(),
+            $this->leftWeaponSkillLevel,
         );
         $hits[] = $leftHit
             ->setWeaponName($this->leftWeapon->name)
@@ -40,7 +43,8 @@ class DualWieldStrategy implements AttackStrategyInterface
             $this->player,
             $this->monster,
             $this->player->getRightHandMinDmg(),
-            $this->player->getRightHandMaxDmg()
+            $this->player->getRightHandMaxDmg(),
+            $this->rightWeaponSkillLevel,
         );
         $hits[] = $rightHit
             ->setWeaponName($this->rightWeapon->name)

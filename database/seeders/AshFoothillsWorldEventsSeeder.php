@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +33,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
 {
     public function run(): void
     {
-        if (DB::table('world_events')->where('title', 'Остывшие Угли Пожарища')->exists()) {
+        if (LocalizedContentSeederQuery::forTable('world_events')->where('title', 'Остывшие Угли Пожарища')->exists()) {
             $this->command?->info('AshFoothillsWorldEventsSeeder: уже существует, пропускаю.');
 
             return;
@@ -42,7 +44,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
 
         // --- "Остывшие Угли Пожарища" (collect) ---
 
-        $emberItemId = DB::table('share_items')->insertGetId([
+        $emberItemId = LocalizedItemSeederQuery::items()->insertGetId([
             'type' => 'resource',
             'name' => 'Остывший Уголёк Пожарища',
             'description' => 'Плотный, почти каменный уголь, который до сих пор хранит слабое тепло — след давнего низового пожара, выжегшего Пепельные Предгорья.',
@@ -70,7 +72,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
 
         $emberEventDescription = '<p>По всей ширине Пепельных Предгорий лежит пепел давнего низового пожара, выжегшего эти склоны до самого камня — но после особенно сильных порывов ветра среди серой пыли то здесь, то там обнажаются странные тёмные комья, всё ещё тёплые на ощупь, будто огонь внутри них так и не погас. Старатели зовут их Остывшими Углями Пожарища и уверяют, что ветер специально выдувает их на поверхность.</p><p>Уголь этот не похож на обычную золу: он плотный, почти каменный, и хранит жар даже спустя годы — ремесленники охотно платят за такую находку. Но стоит замешкаться: следующий же порыв ветра снова заносит угли пеплом, и тогда их уже не найти. Соберите Остывшие Угли Пожарища, пока ветер не спрятал их снова.</p>';
 
-        $emberEventId = DB::table('world_events')->insertGetId([
+        $emberEventId = LocalizedContentSeederQuery::forTable('world_events')->insertGetId([
             'title' => 'Остывшие Угли Пожарища',
             'description' => $emberEventDescription,
             'objective_type' => 'collect',
@@ -94,7 +96,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
             'updated_at' => $now,
         ]);
 
-        $emberStageId = DB::table('world_event_stages')->insertGetId([
+        $emberStageId = LocalizedContentSeederQuery::forTable('world_event_stages')->insertGetId([
             'world_event_id' => $emberEventId,
             'position' => 1,
             'title' => 'Остывший Уголёк Пожарища',
@@ -126,7 +128,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
 
         // --- "Тлеющий Страж Глубин" (kill) ---
 
-        $guardianMonsterId = DB::table('monsters')->insertGetId([
+        $guardianMonsterId = LocalizedContentSeederQuery::forTable('monsters')->insertGetId([
             'name' => 'Тлеющий Страж Глубин',
             'description' => 'Древний страж, сложенный из оплавленного камня и обугленной кости, — жар давнего пожара так и не угас внутри него, тлея столетиями в самом сердце Пепельных Глубин. Он не сходит с места, пока кто-то не потревожит тишину туннеля.',
             'image' => null,
@@ -154,7 +156,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
 
         $guardianEventDescription = '<p>В самом сердце Пепельных Глубин, там, где туннель сужается перед очередным разломом, стоит нечто, что путники издалека принимают за обвалившуюся колонну. Это Тлеющий Страж Глубин — древняя фигура из оплавленного камня и обугленной кости, в пустых глазницах которой до сих пор рдеет тусклый жар давнего пожара. Он не шевелится веками, пока кто-то неосторожный не подойдёт слишком близко.</p><p>Тогда камень трогается с места — медленно, но неотвратимо, а воздух вокруг начинает дрожать от нестерпимого жара. Те немногие, кто возвращался назад, рассказывали об ожогах там, где страж даже не коснулся их. Остановите Тлеющего Стража Глубин, пока он не разбудил что-то ещё в самой глубине пещер.</p>';
 
-        $guardianEventId = DB::table('world_events')->insertGetId([
+        $guardianEventId = LocalizedContentSeederQuery::forTable('world_events')->insertGetId([
             'title' => 'Тлеющий Страж Глубин',
             'description' => $guardianEventDescription,
             'objective_type' => 'kill',
@@ -178,7 +180,7 @@ class AshFoothillsWorldEventsSeeder extends Seeder
             'updated_at' => $now,
         ]);
 
-        $guardianStageId = DB::table('world_event_stages')->insertGetId([
+        $guardianStageId = LocalizedContentSeederQuery::forTable('world_event_stages')->insertGetId([
             'world_event_id' => $guardianEventId,
             'position' => 1,
             'title' => 'Тлеющий Страж Глубин',

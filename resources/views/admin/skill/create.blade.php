@@ -12,9 +12,8 @@
                 <div class="card-body">
                     <form action="{{ route('admin.skill.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => null, 'active' => true])
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Тип навыка</label>
@@ -23,10 +22,6 @@
                                 <option value="magic"   @selected(old('type') === 'magic')>Магический</option>
                                 <option value="peaceful" @selected(old('type') === 'peaceful')>Мирный</option>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ old('description') }}</textarea>
                         </div>
                         <div class="mt-3">
                             <button class="btn btn-primary">Создать</button>

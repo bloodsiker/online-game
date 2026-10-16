@@ -40,7 +40,7 @@ class ShareItemRequirement extends Model
     public function label(): string
     {
         return match ($this->type) {
-            ShareItemRequirementType::LEVEL => 'Уровень персонажа',
+            ShareItemRequirementType::LEVEL => __('Уровень персонажа'),
             ShareItemRequirementType::STAT => $this->statLabel(),
             ShareItemRequirementType::SKILL => $this->skill?->name ?? 'Навык #'.$this->skill_id,
         };

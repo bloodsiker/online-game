@@ -9,6 +9,7 @@ use App\Modules\Dungeon\Domain\Enums\DungeonDeathBehavior;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,11 +17,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dungeon extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
+
     protected $fillable = [
         'name', 'description', 'tier', 'type',
         'entry_share_item_id', 'max_players',
         'cooldown_type', 'cooldown_seconds',
         'time_limit_seconds', 'min_level', 'is_active',
+        'is_clan_boss',
+        'clan_boss_hit_batch_size', 'clan_boss_hit_batch_cooldown_seconds',
         'map_id', 'entry_location_id', 'first_location_id',
         'exit_location_id', 'return_location_id',
         'death_behavior', 'death_return_location_id',
@@ -34,6 +41,7 @@ class Dungeon extends Model
         'cooldown_type' => DungeonCooldownType::class,
         'death_behavior' => DungeonDeathBehavior::class,
         'is_active' => 'boolean',
+        'is_clan_boss' => 'boolean',
         'monster_respawn' => 'boolean',
     ];
 
@@ -130,5 +138,15 @@ class Dungeon extends Model
     public function isTower(): bool
     {
         return $this->type === DungeonType::TOWER;
+    }
+
+    public function isClanBoss(): bool
+    {
+        return (bool) $this->is_clan_boss;
+    }
+
+    public function clanBossRuns(): HasMany
+    {
+        return $this->hasMany(ClanBossRun::class);
     }
 }

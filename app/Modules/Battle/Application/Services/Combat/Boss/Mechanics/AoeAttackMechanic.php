@@ -2,6 +2,7 @@
 
 namespace App\Modules\Battle\Application\Services\Combat\Boss\Mechanics;
 
+use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossFightContext;
 
 /**
@@ -21,9 +22,9 @@ class AoeAttackMechanic extends BaseBossMechanic
 
         $context->dealDamageToPlayer($actualDamage);
 
-        $context->addLog(sprintf(
+        $context->addLog(BattleLogTranslator::format(
             '<p><b class="color-aoe">💥 %s использует массовую атаку! Получено %d урона!</b></p>',
-            $monster->name,
+            BattleLogTranslator::contentName($monster),
             $actualDamage
         ));
 

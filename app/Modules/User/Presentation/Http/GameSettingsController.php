@@ -25,10 +25,12 @@ final class GameSettingsController
     public function update(UpdateGameSettingsRequest $request, GameSettingsService $service): JsonResponse|RedirectResponse
     {
         $settings = $service->update(userId: $request->user()->id, values: $request->validated());
+        $request->session()->put('language', $settings['language']);
+        $message = __('ui.settings_saved', [], $settings['language']);
         if ($request->expectsJson()) {
-            return response()->json(['ok' => true, 'settings' => $settings, 'message' => 'Настройки сохранены.']);
+            return response()->json(['ok' => true, 'settings' => $settings, 'message' => $message]);
         }
 
-        return redirect()->route('settings')->with('message', 'Настройки сохранены.')->with('reload_game_after_settings', true);
+        return redirect()->route('settings')->with('message', $message)->with('reload_game_after_settings', true);
     }
 }

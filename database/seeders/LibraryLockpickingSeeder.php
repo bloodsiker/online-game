@@ -44,17 +44,17 @@ class LibraryLockpickingSeeder extends Seeder
         DB::transaction(function (): void {
             $category = LibraryCategory::query()->where('slug', 'professii')->firstOrFail();
             $lockpicks = ShareItem::query()
-                ->whereIn('name', self::LOCKPICK_NAMES)
+                ->whereIn('name->ru', self::LOCKPICK_NAMES)
                 ->with('lockpickConfig')
                 ->get()
                 ->keyBy('name');
             $chests = ShareItem::query()
-                ->whereIn('name', self::CHEST_NAMES)
+                ->whereIn('name->ru', self::CHEST_NAMES)
                 ->with('lockConfig.trapEffect')
                 ->get()
                 ->keyBy('name');
             $caskets = ShareItem::query()
-                ->whereIn('name', array_keys(self::CASKETS))
+                ->whereIn('name->ru', array_keys(self::CASKETS))
                 ->with('lockConfig.trapEffect')
                 ->get()
                 ->keyBy('name');

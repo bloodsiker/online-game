@@ -7,7 +7,7 @@
                 <tbody>
                 <tr height="22">
                     <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                    <td align="center" class="tbl-usi-hdr mbg">Участники боя</td>
+                    <td align="center" class="tbl-usi-hdr mbg">{{ __("Участники боя") }}</td>
                     <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                 </tr>
                 </tbody>
@@ -27,7 +27,7 @@
                         fn ($details) => $details->locationMonster?->id === $activeMonsterId
                     );
                 @endphp
-                <div class="bp-sec bp-sec-enemy">Противники ({{ $monsterDetails->count() }})</div>
+                <div class="bp-sec bp-sec-enemy">{{ __("Противники") }} ({{ $monsterDetails->count() }})</div>
                 @foreach($monsterDetails as $details)
                     @if($details->status->isLife() && $details->locationMonster)
                         @php
@@ -57,7 +57,7 @@
                 @endforeach
 
                 {{-- Союзники --}}
-                <div class="bp-sec bp-sec-ally">Союзники ({{ $battle->detailsWithUsers->count() }})</div>
+                <div class="bp-sec bp-sec-ally">{{ __("Союзники") }} ({{ $battle->detailsWithUsers->count() }})</div>
                 @foreach($battle->detailsWithUsers as $details)
                     @if($details->user)
                         @php
@@ -89,7 +89,24 @@
                 @endforeach
 
                 <div class="bp-footer">
-                    <a href="#" onclick="window.open('{{ route('fight.log', ['id' => $battle->id]) }}', '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">История сражения &raquo;</a>
+                    <a href="#" onclick="window.open('{{ route('fight.log', ['id' => $battle->id]) }}', '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ __("История сражения") }} &raquo;</a>
+
+                    @if($randomAttackedMonster?->locationMonster?->isClanBoss())
+                        @isset($hitsLeft)
+                            @php
+                                $hitsState = $hitsLeft <= 0 ? 'empty' : ($hitsLeft <= 2 ? 'low' : 'ok');
+                            @endphp
+                            <div class="bp-hits-card bp-hits-{{ $hitsState }}">
+                                <span class="bp-hits-icon">⚔</span>
+                                <span class="bp-hits-label">{{ __('Ударов осталось') }}</span>
+                                <span class="bp-hits-value">{{ $hitsLeft }}</span>
+                            </div>
+                        @endisset
+                        <form method="POST" action="{{ route('fight.leave-clan-boss', ['id' => $battle->id]) }}" style="margin-top:6px;">
+                            @csrf
+                            <b class="butt1 pointer"><b><button type="submit" class="butt1">{{ __('Выйти из боя') }}</button></b></b>
+                        </form>
+                    @endif
                 </div>
 
             </div>

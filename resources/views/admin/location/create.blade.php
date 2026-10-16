@@ -12,14 +12,7 @@
                 <div class="card-body">
                     <form action="{{ route('admin.location.create') }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input type="text" class="form-control" name="name" value="{{ old('name') }}">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="4">{{ old('description') }}</textarea>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'location-new', 'content' => null])
                         <div class="form-group">
                             <label class="col-form-label">Карта</label>
                             <select id="sel-map" name="map_id" class="form-control"></select>

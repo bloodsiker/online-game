@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Журнал хранилища клана</title>
+    <title>{{ __('Журнал хранилища клана') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 12px; }
@@ -50,8 +50,8 @@
             <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
                 <tbody>
                 <tr class="bg_l">
-                    <td align="left" nowrap=""><b>Клан:</b> {{ $clan->name }}</td>
-                    <td align="right" nowrap=""><b>Хранилище:</b> {{ $clanWarehouse->name }}</td>
+                    <td align="left" nowrap=""><b>{{ __('Клан:') }}</b> {{ $clan->name }}</td>
+                    <td align="right" nowrap=""><b>{{ __('Хранилище:') }}</b> {{ $clanWarehouse->name }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -68,11 +68,11 @@
                 </colgroup>
                 <tbody>
                 <tr height="17" class="bg_l">
-                    <td class="brd2 p6h" align="center"><b>Дата</b></td>
-                    <td class="brd2 p6h" align="center"><b>Игрок</b></td>
-                    <td class="brd2 p6h" align="center"><b>Предмет</b></td>
-                    <td class="brd2 p6h" align="center"><b>К-во</b></td>
-                    <td class="brd2 p6h" align="center"><b>Действие</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Дата') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Игрок') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Предмет') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('К-во') }}</b></td>
+                    <td class="brd2 p6h" align="center"><b>{{ __('Действие') }}</b></td>
                 </tr>
                 @forelse($logs as $log)
                     <tr height="17" class="brd2-top">
@@ -101,7 +101,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" align="center" style="padding: 10px;">Журнал пуст</td>
+                        <td colspan="5" align="center" style="padding: 10px;">{{ __('Журнал пуст') }}</td>
                     </tr>
                 @endforelse
                 </tbody>
@@ -118,7 +118,7 @@
                 <table border="0" cellpadding="0" cellspacing="0" class="pg w100" style="margin-top: 6px;">
                     <tbody>
                     <tr>
-                        <td class="b" width="10"><nobr>Страницы:&nbsp;</nobr></td>
+                        <td class="b" width="10"><nobr>{{ __('Страницы:') }}&nbsp;</nobr></td>
 
                         @if($pgFrom > 1)
                             <td class="pg-inact"><a href="{{ $logs->url(1) }}" class="pg-inact_lnk">1</a></td>
@@ -138,19 +138,19 @@
 
                         <td width="1%" style="text-align:right" nowrap="">
                             @if($logs->onFirstPage())
-                                <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                <img src="{{ asset('img/bg/p-left-gray.gif') }}" border="0" width="29" height="17" title="{{ __('Предыдущая') }}">
                             @else
                                 <a href="{{ $logs->previousPageUrl() }}">
-                                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="Предыдущая">
+                                    <img src="{{ asset('img/bg/p-left-red.gif') }}" border="0" width="29" height="17" title="{{ __('Предыдущая') }}">
                                 </a>
                             @endif
                             <img src="{{ asset('img/bg/pg-act.gif') }}" border="0" width="17" height="17">
                             @if($logs->hasMorePages())
                                 <a href="{{ $logs->nextPageUrl() }}">
-                                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                    <img src="{{ asset('img/bg/p-right-red.gif') }}" border="0" width="29" height="17" title="{{ __('Следующая') }}">
                                 </a>
                             @else
-                                <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="Следующая">
+                                <img src="{{ asset('img/bg/p-right-gray.gif') }}" border="0" width="29" height="17" title="{{ __('Следующая') }}">
                             @endif
                         </td>
                     </tr>

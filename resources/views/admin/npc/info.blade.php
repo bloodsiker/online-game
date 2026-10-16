@@ -12,13 +12,12 @@
                 <div class="card-body">
                     <form action="{{ route('admin.npc.info', $npc->id) }}" method="post" enctype="multipart/form-data">
                         {{ csrf_field() }}
+                        <div class="tab-content">
+                            @include('admin.item.partials.translations', ['item' => $npc, 'active' => true])
+                        </div>
                         <div class="form-group">
                             <label class="col-form-label">UUID</label>
                             <input type="text" class="form-control" value="{{ $npc->uuid }}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Имя</label>
-                            <input type="text" class="form-control" name="name" value="{{ $npc->name }}">
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Локация</label>
@@ -35,10 +34,6 @@
                         <div class="checkbox-custom checkbox-default mt-2">
                             <input type="checkbox" id="is-active" name="is_active" value="1" @checked($npc->is_active)>
                             <label for="is-active">Активен и отображается на локации</label>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ $npc->description }}</textarea>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Изображение</label>
@@ -77,14 +72,9 @@
                 <div class="card-body">
                     <form action="{{ route('admin.npc.dialogue.node.add', $npc->id) }}" method="post">
                         {{ csrf_field() }}
-                        <div class="form-group">
-                            <label class="col-form-label">Заголовок</label>
-                            <input type="text" class="form-control" name="title" value="{{ old('title') }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="6" required>{{ old('description') }}</textarea>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'npc-node-new', 'content' => null, 'fields' => [
+                            'title' => ['label' => 'Заголовок'], 'description' => ['label' => 'Описание', 'multiline' => true],
+                        ]])
                         <div class="form-group">
                             <label class="col-form-label">Порядок</label>
                             <input type="number" min="0" max="65535" class="form-control" name="sort_order" value="{{ old('sort_order', 0) }}">
@@ -189,10 +179,7 @@
                                     {{ csrf_field() }}
                                     <div class="row">
                                         <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label class="col-form-label">Заголовок</label>
-                                                <input type="text" class="form-control" name="title" value="{{ $node->title }}" required>
-                                            </div>
+                                            <label class="col-form-label">Порядок ветки #{{ $node->id }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <div class="form-group">
@@ -212,10 +199,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-form-label">Описание</label>
-                                        <textarea class="form-control" name="description" rows="5" required>{{ $node->description }}</textarea>
-                                    </div>
+                                    @include('admin.partials.content-translations', ['prefix' => 'npc-node-'.$node->id, 'content' => $node, 'fields' => [
+                                        'title' => ['label' => 'Заголовок'], 'description' => ['label' => 'Описание', 'multiline' => true],
+                                    ]])
                                     <button class="btn btn-primary btn-sm">Сохранить ветку</button>
                                     <a href="{{ route('admin.npc.dialogue.node.delete', [$npc->id, $node->id]) }}"
                                        class="btn btn-danger btn-sm"
@@ -247,7 +233,7 @@
                                         @forelse($node->options as $option)
                                             <tr>
                                                 <td>
-                                                    <input form="option-update-{{ $option->id }}" type="text" class="form-control" name="button_text" value="{{ $option->button_text }}" required>
+                                                    @include('admin.partials.content-translations', ['prefix' => 'npc-option-'.$option->id, 'formId' => 'option-update-'.$option->id, 'content' => $option, 'fields' => ['button_text' => ['label' => 'Текст кнопки']]])
                                                 </td>
                                                 <td>
                                                     <select form="option-update-{{ $option->id }}" name="to_node_id" class="form-control" required>
@@ -276,7 +262,7 @@
                                         @endforelse
                                         <tr>
                                             <td>
-                                                <input form="option-add-{{ $node->id }}" type="text" class="form-control" name="button_text" placeholder="Например: Расскажи о городе" required>
+                                                @include('admin.partials.content-translations', ['prefix' => 'npc-option-new-'.$node->id, 'formId' => 'option-add-'.$node->id, 'content' => null, 'fields' => ['button_text' => ['label' => 'Текст кнопки']]])
                                             </td>
                                             <td>
                                                 <select form="option-add-{{ $node->id }}" name="to_node_id" class="form-control" required>

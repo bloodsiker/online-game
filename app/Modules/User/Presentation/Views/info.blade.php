@@ -66,6 +66,44 @@
         .hero-itm.equipped { background: linear-gradient(0deg, rgb(206, 187, 170), rgb(233, 225, 217)); cursor: pointer; }
         td.item-hero { position: relative; line-height: 0; }
         .equip-grid { border-collapse: separate; border-spacing: 2px; }
+        .profile-avatar-cell { padding: 4px 7px; vertical-align: middle; }
+        .profile-avatar-frame {
+            position: relative;
+            box-sizing: border-box;
+            width: 170px;
+            height: 238px;
+            margin: 0 auto;
+            padding: 5px;
+            border: 1px solid #d6b16d;
+            background: linear-gradient(135deg, #eed59a 0%, #825526 18%, #3b2415 48%, #9c6a31 78%, #f0d18c 100%);
+            box-shadow: 0 2px 7px rgba(45, 24, 10, .55), inset 0 0 0 1px #3b2415;
+        }
+        .profile-avatar-frame::before {
+            position: absolute;
+            z-index: 1;
+            inset: 3px;
+            border: 1px solid rgba(245, 220, 163, .72);
+            content: '';
+            pointer-events: none;
+        }
+        .profile-avatar-frame::after {
+            position: absolute;
+            right: 7px;
+            bottom: 7px;
+            left: 7px;
+            height: 24px;
+            background: linear-gradient(180deg, transparent, rgba(29, 17, 10, .82));
+            content: '';
+            pointer-events: none;
+        }
+        .profile-avatar-frame__image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #302216 url({{ asset('img/bg/bgg2.gif') }}) repeat;
+            object-fit: cover;
+            object-position: center 20%;
+        }
         .medal_bg td { text-align: center; vertical-align: middle; background-repeat: no-repeat; height: 53px; }
         .medal_bg_c { background: url({{ asset('img/medal/medal_c.gif') }}) top center; width: 45px; }
         .medal_bg_c img { width: 35px; height: 35px; border: 0; vertical-align: middle; }
@@ -210,8 +248,10 @@
                                                             <img src="{{ $slotImage($equip?->shoulderSlot) }}" class="hero-itm @if($equip?->shoulderSlot) equipped @endif" id="i4n1">
                                                         @endif
                                                     </td>
-                                                    <td align="center" rowspan="4" colspan="3" bgcolor="#FAF0E4">
-                                                        <img src="{{ asset('img/avatar/dark_elf.jpg') }}" width="130" height="170" border="0" hspace="0" vspace="0">
+                                                    <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
+                                                        <div class="profile-avatar-frame">
+                                                            <img class="profile-avatar-frame__image" src="{{ asset($user->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ $user->name }}">
+                                                        </div>
                                                     </td>
                                                     <td {!! $slotAttrs($injuriesBySlot->has('forearm') ? null : $equip?->forearmSlot) !!}>
                                                         @if($injury = $injuriesBySlot->get('forearm'))
@@ -295,6 +335,7 @@
                                                     <td {!! $slotAttrs($equip?->bagSecondSlot) !!} align="center">
                                                         <img src="{{ $slotImage($equip?->bagSecondSlot) }}" class="hero-itm @if($equip?->bagSecondSlot) equipped @endif">
                                                     </td>
+                                                    <td align="center" width="30"></td>
                                                 </tr>
                                                 </tbody>
                                             </table>
@@ -564,9 +605,11 @@
                                     </tbody>
                                 </table>
 
+                                @php($equippedArtifacts = $playerArtifacts->filter(fn ($playerArtifact) => $playerArtifact->item !== null))
+                                @if($equippedArtifacts->isNotEmpty())
                                 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-                                {{-- Артефакты: одетые артефакты (заглушка) --}}
+                                {{-- Надетые артефакты --}}
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                     <tbody>
                                     <tr height="22">
@@ -587,14 +630,11 @@
                                     <tr>
                                         <td class="tbl-shp-sides ls">&nbsp;</td>
                                         <td class="tbl-usi_bg" valign="top" align="left" style="padding:3px 0 8px 0;">
-                                            @forelse($playerArtifacts as $playerArtifact)
-                                                @continue($playerArtifact->item === null)
+                                            @foreach($equippedArtifacts as $playerArtifact)
                                                 <img src="{{ $playerArtifact->item->itemInfo->image }}" width="60" height="60" border="0" style="margin:1px;"
                                                      data-id="{{ $playerArtifact->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                                      onclick="window.open('{{ route('items.info', ['id' => $playerArtifact->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
-                                            @empty
-                                                <div style="text-align:center;width:100%;color:#8a7666;">Артефакты не надеты</div>
-                                            @endforelse
+                                            @endforeach
                                         </td>
                                         <td class="tbl-shp-sides rs">&nbsp;</td>
                                     </tr>
@@ -607,6 +647,7 @@
                                 </table>
 
                                 <div style="height:10px;font-size:1px;">&nbsp;</div>
+                                @endif
 
                                 {{-- Личная информация --}}
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">

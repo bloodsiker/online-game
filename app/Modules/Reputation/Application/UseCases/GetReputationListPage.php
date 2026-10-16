@@ -27,7 +27,7 @@ class GetReputationListPage
             ->all();
 
         $playerReputations = $reputations->map(function ($reputation) use ($player, $earnedTierIds) {
-            $pr = $this->reputationService->getOrCreate($player, $reputation);
+            $pr = $this->reputationService->getOrZero($player, $reputation);
             $currentTier = $this->reputationService->getCurrentTier($reputation, $pr->points);
             $nextTier = $reputation->tiers->where('min_points', '>', $pr->points)->sortBy('min_points')->first();
             $earnedMedalTier = $reputation->tiers

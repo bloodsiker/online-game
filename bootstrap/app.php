@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Modules\Auth\Presentation\Http\Middleware\EnsureEmailIsVerified;
+use App\Modules\Structure\Prison\Presentation\Http\Middleware\EnsurePrisonContext;
+use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -26,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'clan-boss/*/attack',
+        ]);
+
         $middleware->group('web', [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
@@ -33,11 +40,14 @@ return Application::configure(basePath: dirname(__DIR__))
             ShareErrorsFromSession::class,
             ValidateCsrfToken::class,
             SubstituteBindings::class,
+            EnsureEmailIsVerified::class,
+            ApplyGameLocale::class,
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
         ]);
 
         $middleware->alias([
             'isAdmin' => AdminMiddleware::class,
+            'prison.context' => EnsurePrisonContext::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

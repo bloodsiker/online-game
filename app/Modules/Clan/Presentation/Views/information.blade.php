@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клан</title>
+    <title>{{ __('Клан') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html {
@@ -64,7 +64,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.information'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.information'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top: 20px;">
     <tbody>
@@ -83,7 +83,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Описание клана</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Описание клана') }}</td>
                                 <td width="27"
                                 ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -110,7 +110,7 @@
                         @if($canChangeNews)
                             <div align="center" style="padding: 8px 0 4px;">
                                 <b class="butt1 pointer"><b>
-                                    <input value="Сохранить изменения" type="submit" class="grnn" style="width:160px;"
+                                    <input value="{{ __('Сохранить изменения') }}" type="submit" class="grnn" style="width:160px;"
                                            onclick="if(document._submit_desc)return false;document._submit_desc=true;">
                                 </b></b>
                             </div>
@@ -140,7 +140,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">Новости</td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('Новости') }}</td>
                                 <td width="27"
                                 ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -159,17 +159,17 @@
                             @csrf
                         @endif
 
-                        Новость 1:<br>
+                        {{ __('Новость 1:') }}<br>
                         <textarea name="news_1" rows="6" class="info-textarea dbgl2 brd b small lscroll"
                                   @if(!$canChangeNews) readonly @endif
                         >{{ old('news_1', $clan->news_1) }}</textarea>
 
-                        Новость 2:<br>
+                        {{ __('Новость 2:') }}<br>
                         <textarea name="news_2" rows="6" class="info-textarea dbgl2 brd b small lscroll"
                                   @if(!$canChangeNews) readonly @endif
                         >{{ old('news_2', $clan->news_2) }}</textarea>
 
-                        Новость 3:<br>
+                        {{ __('Новость 3:') }}<br>
                         <textarea name="news_3" rows="6"
                                   class="info-textarea dbgl2 brd b small lscroll"
                                   @if(!$canChangeNews) readonly @endif
@@ -178,7 +178,7 @@
                         @if($canChangeNews)
                             <div align="center" style="padding: 8px 0 4px;">
                                 <b class="butt1 pointer"><b>
-                                    <input value="Сохранить изменения" type="submit" class="grnn" style="width:160px;"
+                                    <input value="{{ __('Сохранить изменения') }}" type="submit" class="grnn" style="width:160px;"
                                            onclick="if(document._submit_news)return false;document._submit_news=true;">
                                 </b></b>
                             </div>

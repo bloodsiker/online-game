@@ -19,8 +19,10 @@ class DeclineReputationQuest
     {
         $player = $user->player;
         $reputation = $this->readRepository->findReputationForIndexOrFail($id);
-        $pr = $this->reputationService->getOrCreate($player, $reputation);
-        $pr->update(['last_completed_at' => now()]);
+        $pr = $this->reputationService->getOrZero($player, $reputation);
+        if ($pr->exists) {
+            $pr->update(['last_completed_at' => now()]);
+        }
 
         session()->forget('rep_offer_'.$player->id.'_'.$id);
 

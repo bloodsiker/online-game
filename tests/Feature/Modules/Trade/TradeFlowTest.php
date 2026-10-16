@@ -8,9 +8,11 @@ use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Trade\Application\Services\TradeAdminService;
 use App\Modules\Trade\Application\Services\TradeService;
 use App\Modules\Trade\Domain\Services\TradeBalance;
+use App\Modules\Trade\Infrastructure\Persistence\Models\TradePost;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +35,7 @@ class TradeFlowTest extends TestCase
         DB::table('players')->insert(['id' => 1, 'hp_now' => 100]);
         DB::table('users')->insert(['id' => 1, 'player_id' => 1, 'location_id' => 2, 'money' => 10000]);
         DB::table('npcs')->insert([['id' => 1, 'location_id' => 2, 'is_active' => 1], ['id' => 2, 'location_id' => 102, 'is_active' => 1]]);
-        DB::table('skills')->insert(['id' => 1, 'name' => TradeBalance::SKILL_NAME, 'type' => 'peaceful']);
+        LocalizedContentSeederQuery::forTable('skills')->insert(['id' => 1, 'name' => TradeBalance::SKILL_NAME, 'type' => 'peaceful']);
         for ($level = 1; $level <= 300; $level++) {
             DB::table('skill_level_requirements')->insert(['skill_id' => 1, 'lvl' => $level, 'exp_required' => TradeBalance::levelThreshold($level), 'exp_diff' => 100 + 5 * ($level - 1)]);
         }
@@ -152,6 +154,24 @@ class TradeFlowTest extends TestCase
         $this->assertSame(30, TradeBalance::capacity(300));
         $this->assertSame(42, TradeBalance::salePrice(40, 42, 1));
         $this->assertSame(46, TradeBalance::salePrice(40, 42, 300));
+    }
+
+    public function test_trade_post_names_can_be_translated_without_changing_trade_logic(): void
+    {
+        app(TradeAdminService::class)->save('posts', [
+            'id' => 1,
+            'npc_id' => 1,
+            'name' => ['ru' => 'Город', 'uk' => 'Місто'],
+            'license_price' => 100,
+            'is_active' => 1,
+        ]);
+
+        app()->setLocale('uk');
+        $page = app(TradeService::class)->page(User::query()->findOrFail(1), 1);
+        $this->assertSame('Місто', $page['post']->name);
+
+        app()->setLocale('ru');
+        $this->assertSame('Город', TradePost::query()->findOrFail(1)->name);
     }
 
     public function test_admin_cannot_reprice_existing_cargo(): void

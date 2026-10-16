@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клановые квесты</title>
+    <title>{{ __('Клановые квесты') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html { height: 100%; }
@@ -153,7 +153,7 @@
 </head>
 <body class="regblk">
 
-@include('clan.partials.tabs', ['activeTab' => 'clan.quests'])
+@include('clan::partials.tabs', ['activeTab' => 'clan.quests'])
 
 <table class="coll" width="100%" height="100%" border="0" style="margin-top:20px;">
     <tbody>
@@ -167,7 +167,7 @@
                         <table border="0" cellspacing="0" cellpadding="0"><tbody>
                         <tr height="22">
                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                            <td align="center" class="tbl-usi_label-center">Клановые квесты — {{ $clan->name }}</td>
+                            <td align="center" class="tbl-usi_label-center">{{ __('Клановые квесты') }} — {{ $clan->name }}</td>
                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                         </tr>
                         </tbody></table>
@@ -179,7 +179,7 @@
                     <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px;">
 
                         {{-- ===== ACTIVE QUESTS ===== --}}
-                        <span class="section-title">Активные квесты</span>
+                        <span class="section-title">{{ __('Активные квесты') }}</span>
 
                         @forelse($activeQuests as $activeQuest)
                             <div class="active-quest">
@@ -187,14 +187,14 @@
                                     {{ $activeQuest->quest->title }}
                                 </div>
                                 <div class="quest-acceptor">
-                                    Выполняет: <b>{{ $activeQuest->user->name }}</b>
-                                    <span style="color:#aaa;">— принят {{ $activeQuest->created_at->locale('ru')->diffForHumans() }}</span>
+                                    {{ __('Выполняет:') }} <b>{{ $activeQuest->user->name }}</b>
+                                    <span style="color:#aaa;">— {{ __('принят') }} {{ $activeQuest->created_at->locale(app()->getLocale())->diffForHumans() }}</span>
                                 </div>
 
                                 @php $stageObjectives = $activeQuest->currentStageObjectives(); @endphp
 
                                 @if($stageObjectives->isNotEmpty())
-                                    <div style="margin-bottom:4px; color:#777; font-style:italic;">Прогресс по целям:</div>
+                                    <div style="margin-bottom:4px; color:#777; font-style:italic;">{{ __('Прогресс по целям:') }}</div>
                                     @foreach($stageObjectives as $obj)
                                         @php
                                             $done = $obj->questObjective->type === 'deliver'
@@ -227,15 +227,15 @@
 
                                 @if($activeQuest->quest->rewards->isNotEmpty())
                                     <div style="margin-top:6px; color:#777;">
-                                        Награда:
+                                        {{ __('Награда:') }}
                                         @foreach($activeQuest->quest->rewards as $reward)
                                             <span class="q-reward">
                                                 @php
                                                     echo match($reward->type) {
                                                         \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' exp',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' кл. очков',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' ' . __('монет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' ' . __('кл. очков'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? __('предмет')),
                                                         default => '',
                                                     };
                                                 @endphp
@@ -250,7 +250,7 @@
                                         <form id="clan-cancel-{{ $activeQuest->id }}" method="POST" action="{{ route('quest.clan.cancel', $activeQuest->id) }}" style="display:inline;">
                                             @csrf
                                             <b class="butt2 pointer">
-                                                <b><input value="Отменить квест" type="button" onclick="return top.systemConfirm('Вы действительно хотите отменить клановый квест?','Действие',false,function(){document.getElementById('clan-cancel-{{ $activeQuest->id }}').submit();})"></b>
+                                                <b><input value="{{ __('Отменить квест') }}" type="button" onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить клановый квест?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){document.getElementById('clan-cancel-{{ $activeQuest->id }}').submit();})"></b>
                                             </b>
                                         </form>
                                     </div>
@@ -258,14 +258,14 @@
                             </div>
                         @empty
                             <div class="empty-state">
-                                Нет активных клановых квестов. Любой член клана может взять квест у NPC.
+                            {{ __('Нет активных клановых квестов. Любой член клана может взять квест у NPC.') }}
                             </div>
                         @endforelse
 
                         <hr class="separator">
 
                         {{-- ===== AVAILABLE QUESTS ===== --}}
-                        <span class="section-title">Доступные квесты</span>
+                        <span class="section-title">{{ __('Доступные квесты') }}</span>
 
                         @php
                             // Find last completed record per quest for cooldown display
@@ -282,24 +282,24 @@
                                 $lastRecord        = $lastCompleted->get($quest->id);
                                 $onCooldown        = $lastRecord && $lastRecord->reset_at && now()->lt($lastRecord->reset_at);
                                 $cooldownStr       = $onCooldown
-                                    ? $lastRecord->reset_at->locale('ru')->diffForHumans(now(), true, false, 2)
+                                    ? $lastRecord->reset_at->locale(app()->getLocale())->diffForHumans(now(), true, false, 2)
                                     : null;
                                 $resetLabel = match(true) {
-                                    $quest->reset_period === 86400   => 'раз в сутки',
-                                    $quest->reset_period === 172800  => 'раз в 2 дня',
-                                    $quest->reset_period === 259200  => 'раз в 3 дня',
-                                    $quest->reset_period === 604800  => 'раз в неделю',
-                                    default                          => 'повторяемый',
+                                    $quest->reset_period === 86400   => __('раз в сутки'),
+                                    $quest->reset_period === 172800  => __('раз в 2 дня'),
+                                    $quest->reset_period === 259200  => __('раз в 3 дня'),
+                                    $quest->reset_period === 604800  => __('раз в неделю'),
+                                    default                          => __('повторяемый'),
                                 };
                             @endphp
                             <div class="quest-card">
                                 <div class="q-title">
-                                    <span class="badge-clan">КЛАН</span>
+                                    <span class="badge-clan">{{ __('КЛАН') }}</span>
                                     {{ $quest->title }}
                                     @if($isCurrentlyActive)
-                                        <span class="badge-active">в процессе</span>
+                                        <span class="badge-active">{{ __('в процессе') }}</span>
                                     @elseif($onCooldown)
-                                        <span class="badge-cooldown">доступен через {{ $cooldownStr }}</span>
+                                        <span class="badge-cooldown">{{ __('доступен через') }} {{ $cooldownStr }}</span>
                                     @endif
                                     <span style="color:#aaa; font-weight:normal; font-size:10px; margin-left:6px;">{{ $resetLabel }}</span>
                                 </div>
@@ -316,15 +316,15 @@
                                 {{-- Rewards --}}
                                 @if($quest->rewards->isNotEmpty())
                                     <div style="margin-top:4px;">
-                                        <span style="color:#777;">Награда: </span>
+                                        <span style="color:#777;">{{ __('Награда:') }} </span>
                                         @foreach($quest->rewards as $reward)
                                             <span class="q-reward">
                                                 @php
                                                     echo match($reward->type) {
                                                         \App\Modules\Quest\Domain\Enums\QuestRewardType::EXP         => '+' . $reward->amount . ' опыта',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' монет',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' клановых очков',
-                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? 'предмет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::MONEY        => '+' . $reward->amount . ' ' . __('монет'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::CLAN_POINTS  => '+' . $reward->amount . ' ' . __('клановых очков'),
+                                                        \App\Modules\Quest\Domain\Enums\QuestRewardType::ITEM         => ($reward->amount > 1 ? $reward->amount . 'x ' : '') . ($reward->itemInfo?->name ?? __('предмет')),
                                                         default => '',
                                                     };
                                                 @endphp
@@ -335,22 +335,22 @@
                                 @endif
                             </div>
                         @empty
-                            <div class="empty-state">Нет доступных клановых квестов.</div>
+                            <div class="empty-state">{{ __('Нет доступных клановых квестов.') }}</div>
                         @endforelse
 
                         <hr class="separator">
 
                         {{-- ===== HISTORY ===== --}}
-                        <span class="section-title">История выполнения</span>
+                        <span class="section-title">{{ __('История выполнения') }}</span>
 
                         @if($history->isNotEmpty())
                             <table class="history-tbl">
                                 <thead>
                                 <tr>
-                                    <th>Квест</th>
-                                    <th>Выполнил</th>
-                                    <th>Завершён</th>
-                                    <th>Следующий запуск</th>
+                                    <th>{{ __('Квест') }}</th>
+                                    <th>{{ __('Выполнил') }}</th>
+                                    <th>{{ __('Завершён') }}</th>
+                                    <th>{{ __('Следующий запуск') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -362,9 +362,9 @@
                                         <td nowrap>
                                             @if($record->reset_at)
                                                 @if(now()->lt($record->reset_at))
-                                                    <span style="color:#c8990a;">через {{ $record->reset_at->locale('ru')->diffForHumans(now(), true, false, 2) }}</span>
+                                                    <span style="color:#c8990a;">{{ __('через') }} {{ $record->reset_at->locale(app()->getLocale())->diffForHumans(now(), true, false, 2) }}</span>
                                                 @else
-                                                    <span style="color:#2a7a2a;">доступен</span>
+                                                    <span style="color:#2a7a2a;">{{ __('доступен') }}</span>
                                                 @endif
                                             @else
                                                 —
@@ -375,7 +375,7 @@
                                 </tbody>
                             </table>
                         @else
-                            <div class="empty-state">История пуста.</div>
+                            <div class="empty-state">{{ __('История пуста.') }}</div>
                         @endif
 
                     </td>

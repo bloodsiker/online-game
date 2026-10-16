@@ -6,11 +6,16 @@ namespace App\Modules\Clan\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Clan\Application\Requests\CreateClanRequest;
+use App\Modules\Clan\Application\Services\ClanApplicationService;
+use App\Modules\Clan\Application\UseCases\AcceptClanInvite;
 use App\Modules\Clan\Application\UseCases\AddClanRole;
 use App\Modules\Clan\Application\UseCases\CancelClanRequest;
 use App\Modules\Clan\Application\UseCases\CreateClan;
+use App\Modules\Clan\Application\UseCases\DeclineClanInvite;
 use App\Modules\Clan\Application\UseCases\DeleteClanRole;
+use App\Modules\Clan\Application\UseCases\GetClanBossPage;
 use App\Modules\Clan\Application\UseCases\GetClanCharacteristicsPage;
+use App\Modules\Clan\Application\UseCases\GetClanDirectoryPage;
 use App\Modules\Clan\Application\UseCases\GetClanIndexPage;
 use App\Modules\Clan\Application\UseCases\GetClanInformationPage;
 use App\Modules\Clan\Application\UseCases\GetClanLogsPage;
@@ -30,6 +35,7 @@ use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
 use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,11 +47,15 @@ class ClanController extends Controller
     public function __construct(
         private readonly GetClanMembersFrame $getClanMembersFrame,
         private readonly GetClanIndexPage $getClanIndexPage,
+        private readonly GetClanDirectoryPage $getClanDirectoryPage,
+        private readonly ClanApplicationService $clanApplicationService,
         private readonly GetClanMemberPage $getClanMemberPage,
         private readonly GetClanRolePage $getClanRolePage,
         private readonly CreateClan $createClan,
         private readonly CancelClanRequest $cancelClanRequest,
         private readonly InviteToClan $inviteToClan,
+        private readonly AcceptClanInvite $acceptClanInvite,
+        private readonly DeclineClanInvite $declineClanInvite,
         private readonly LeaveClan $leaveClan,
         private readonly KickClanMember $kickClanMember,
         private readonly SaveClanMemberRoles $saveClanMemberRoles,
@@ -57,6 +67,7 @@ class ClanController extends Controller
         private readonly SaveClanDescription $saveClanDescription,
         private readonly SaveClanNews $saveClanNews,
         private readonly GetClanQuestsPage $getClanQuestsPage,
+        private readonly GetClanBossPage $getClanBossPage,
         private readonly GetClanLogsPage $getClanLogsPage,
         private readonly GetPublicClanPage $getPublicClanPage,
     ) {}
@@ -88,9 +99,16 @@ class ClanController extends Controller
         ]);
     }
 
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
-        $page = $this->getClanIndexPage->execute(Auth::user());
+        $user = Auth::user();
+        if ($user->clanMembership === null && (int) $user->location_id !== 29) {
+            session()->flash('message', __('clan.directory.location_required'));
+
+            return redirect()->route('clan.rating');
+        }
+
+        $page = $this->getClanIndexPage->execute($user);
 
         return view('clan::index', [
             'inClan' => $page->inClan,
@@ -98,6 +116,69 @@ class ClanController extends Controller
             'isLeader' => $page->isLeader,
             'registrarNpc' => $page->registrarNpc,
         ]);
+    }
+
+    public function rating(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        if ($user->clanMembership !== null) {
+            return redirect()->route('clan.member');
+        }
+
+        $page = $this->getClanDirectoryPage->execute($user);
+
+        return view('clan::rating', [
+            'clans' => $page->clans,
+            'applications' => $page->applications,
+        ]);
+    }
+
+    public function apply(Clan $clan): RedirectResponse
+    {
+        try {
+            $this->clanApplicationService->apply(Auth::user(), $clan);
+            session()->flash('message', __('clan.application.submitted'));
+        } catch (RuntimeException $exception) {
+            session()->flash('message', $exception->getMessage());
+        }
+
+        return redirect()->route('clan.rating');
+    }
+
+    public function acceptApplication(ClanJoinRequest $application): RedirectResponse
+    {
+        try {
+            $this->clanApplicationService->accept(Auth::user(), $application);
+            session()->flash('message', __('clan.application.accepted'));
+        } catch (RuntimeException $exception) {
+            session()->flash('message', $exception->getMessage());
+        }
+
+        return redirect()->route('clan.member');
+    }
+
+    public function declineApplication(ClanJoinRequest $application): RedirectResponse
+    {
+        try {
+            $this->clanApplicationService->decline(Auth::user(), $application);
+            session()->flash('message', __('clan.application.declined'));
+        } catch (RuntimeException $exception) {
+            session()->flash('message', $exception->getMessage());
+        }
+
+        return redirect()->route('clan.member');
+    }
+
+    public function withdrawApplication(ClanJoinRequest $application): RedirectResponse
+    {
+        try {
+            $this->clanApplicationService->withdraw(Auth::user(), $application);
+            session()->flash('message', __('clan.application.withdrawn'));
+        } catch (RuntimeException $exception) {
+            session()->flash('message', $exception->getMessage());
+        }
+
+        return redirect()->route('clan.rating');
     }
 
     public function member(): View|RedirectResponse
@@ -145,6 +226,12 @@ class ClanController extends Controller
     {
         $user = Auth::user();
 
+        if ((int) $user->location_id !== 29) {
+            session()->flash('message', __('clan.directory.location_required'));
+
+            return redirect()->route('clan.rating');
+        }
+
         if ($user->clanMembership !== null) {
             session()->flash('message', 'Вы уже состоите в клане.');
 
@@ -180,6 +267,52 @@ class ClanController extends Controller
         }
 
         return redirect()->route('clan.member');
+    }
+
+    /** Принятие приглашения из чата (переход по ссылке из iframe чата). */
+    public function acceptInvite(Request $request, string $inviteUuid): JsonResponse|RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        try {
+            $this->acceptClanInvite->execute($user, $inviteUuid);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Вы вступили в клан.']);
+            }
+
+            return redirect()->route('game')->with('clan_success', 'Вы вступили в клан.');
+        } catch (RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
+            return redirect()->route('game')->with('clan_error', $e->getMessage());
+        }
+    }
+
+    /** Отклонение приглашения из чата. */
+    public function declineInvite(Request $request, string $inviteUuid): JsonResponse|RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        try {
+            $this->declineClanInvite->execute($user, $inviteUuid);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Приглашение отклонено.']);
+            }
+
+            return redirect()->route('game')->with('clan_success', 'Приглашение отклонено.');
+        } catch (RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
+            return redirect()->route('game')->with('clan_error', $e->getMessage());
+        }
     }
 
     public function leaveClan(): RedirectResponse
@@ -337,6 +470,37 @@ class ClanController extends Controller
             'availableQuests' => $page->availableQuests,
             'history' => $page->history,
             'membership' => $page->membership,
+        ]);
+    }
+
+    public function boss(Request $request): View|RedirectResponse
+    {
+        try {
+            $archiveRunId = $request->integer('run') ?: null;
+            $page = $this->getClanBossPage->execute(Auth::user(), $archiveRunId);
+        } catch (RuntimeException $e) {
+            session()->flash('message', $e->getMessage());
+
+            return redirect()->route('clan');
+        }
+
+        return view('clan::boss', [
+            'clan' => $page->clan,
+            'membership' => $page->membership,
+            'run' => $page->run,
+            'currentState' => $page->currentState,
+            'previousBosses' => $page->previousBosses,
+            'nextBoss' => $page->nextBoss,
+            'upcomingBosses' => $page->upcomingBosses,
+            'damageRows' => $page->damageRows,
+            'myContribution' => $page->myContribution,
+            'hitsLeft' => $page->hitsLeft,
+            'personalAvailableAt' => $page->personalAvailableAt,
+            'archiveRuns' => $page->archiveRuns,
+            'archivedRun' => $page->archivedRun,
+            'archivedStages' => $page->archivedStages,
+            'archivedDamageRows' => $page->archivedDamageRows,
+            'archivedStageDamage' => $page->archivedStageDamage,
         ]);
     }
 

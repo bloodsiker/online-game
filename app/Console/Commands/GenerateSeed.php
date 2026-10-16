@@ -26,6 +26,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
@@ -1197,10 +1198,10 @@ class GenerateSeed extends Command
 
         $this->shopCategory3 = $category3;
 
-        $categoryFood = ShareStructureCategory::firstOrCreate(['name' => 'Еда']);
+        $categoryFood = LocalizedContentSeederQuery::firstOrCreateFor(ShareStructureCategory::class, ['name' => 'Еда']);
         $this->shopCategoryFood = $categoryFood;
 
-        $categoryElixirs = ShareStructureCategory::firstOrCreate(['name' => 'Эликсиры']);
+        $categoryElixirs = LocalizedContentSeederQuery::firstOrCreateFor(ShareStructureCategory::class, ['name' => 'Эликсиры']);
         $this->shopCategoryElixirs = $categoryElixirs;
     }
 

@@ -1,3 +1,7 @@
+function commonTranslate(text) {
+    return typeof window.gameTranslate === 'function' ? window.gameTranslate(text) : text;
+}
+
 function systemConfirm(ms, title, obj, func) {
     if (title) {
         gebi('systemConfirm_title').innerHTML = title;
@@ -62,7 +66,7 @@ function systemInfo(message, title) {
                 '<div class="popup-top-left">' +
                     '<div class="popup-top-right">' +
                         '<div class="popup-top-center">' +
-                            '<div class="popup_global_title" id="systemInfo_title">Сообщение</div>' +
+                            '<div class="popup_global_title" id="systemInfo_title">' + commonTranslate('Сообщение') + '</div>' +
                         '</div>' +
                     '</div>' +
                     '<div class="popup_global_close_btn" onclick="hideSystemInfo();"></div>' +
@@ -74,7 +78,7 @@ function systemInfo(message, title) {
                                 '<b id="systemInfo_message"></b><br>' +
                             '</div>' +
                             '<div style="margin-top:25px;text-align:center;">' +
-                                '<b class="butt1 pointer"><b><input value="Закрыть" type="button" onclick="hideSystemInfo();" class="redd" style="width:100px;"></b></b>' +
+                                '<b class="butt1 pointer"><b><input value="' + commonTranslate('Закрыть') + '" type="button" onclick="hideSystemInfo();" class="redd" style="width:100px;"></b></b>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +

@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Trade\Domain\Services\TradeBalance;
 use Illuminate\Database\Seeder;
@@ -24,8 +25,8 @@ class VolnyyTorgSeeder extends Seeder
             }
         }
         DB::transaction(function (): void {
-            $skill = DB::table('skills')->where('name', TradeBalance::SKILL_NAME)->first();
-            $skillId = $skill?->id ?? DB::table('skills')->insertGetId([
+            $skill = LocalizedContentSeederQuery::forTable('skills')->where('name', TradeBalance::SKILL_NAME)->first();
+            $skillId = $skill?->id ?? LocalizedContentSeederQuery::forTable('skills')->insertGetId([
                 'name' => TradeBalance::SKILL_NAME, 'type' => 'peaceful',
                 'description' => 'Перевозка товаров между торговцами: опыт за продажу, больше груза и прибыли с ростом навыка.',
                 'created_at' => now(), 'updated_at' => now(),
@@ -45,14 +46,14 @@ class VolnyyTorgSeeder extends Seeder
             $prices = [40, 150, 500, 1500, 3000, 5000];
             $levels = [1, 50, 100, 150, 200, 250];
             foreach ($definitions as [$name, $city, $location, $license, $names]) {
-                $npc = Npc::query()->firstOrCreate(['name' => $name], [
+                $npc = LocalizedContentSeederQuery::firstOrCreateFor(Npc::class, ['name' => $name], [
                     'location_id' => $location, 'is_active' => true, 'hide_location' => false,
                     'description' => 'Торговец Вольного торга. Покупает привезённый груз и продаёт местные товары.',
                 ]);
                 $postId = $this->create('trade_posts', ['npc_id' => $npc->id], ['name' => $city, 'license_price' => $license]);
                 $goods = [];
                 foreach ($names as $index => $itemName) {
-                    $item = ShareItem::query()->where('type', ShareItemType::TRADE_GOODS->value)->where('name', $itemName)->first();
+                    $item = ShareItem::query()->where('type', ShareItemType::TRADE_GOODS->value)->where('name->ru', $itemName)->first();
                     if (! $item) {
                         $item = new ShareItem;
                         $item->name = $itemName;
@@ -86,8 +87,11 @@ class VolnyyTorgSeeder extends Seeder
 
     private function create(string $table, array $key, array $values): int
     {
-        $existing = DB::table($table)->where($key)->value('id');
+        $query = $table === 'trade_posts'
+            ? LocalizedContentSeederQuery::forTable($table)
+            : DB::table($table);
+        $existing = $query->where($key)->value('id');
 
-        return $existing ? (int) $existing : DB::table($table)->insertGetId($key + $values + ['created_at' => now(), 'updated_at' => now()]);
+        return $existing ? (int) $existing : $query->insertGetId($key + $values + ['created_at' => now(), 'updated_at' => now()]);
     }
 }

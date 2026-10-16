@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +43,7 @@ class CemeteryMonsterEffectsSeeder extends Seeder
 
     private function applyLifestealToBloodServant(): void
     {
-        $updated = DB::table('monsters')
+        $updated = LocalizedContentSeederQuery::forTable('monsters')
             ->where('name', 'Кровавый Слуга')
             ->update([
                 'passive_type' => 'vampirism',
@@ -56,10 +57,10 @@ class CemeteryMonsterEffectsSeeder extends Seeder
 
     private function applyGraveRotEffect(): void
     {
-        $effectId = DB::table('effects')->where('slug', 'grave_rot')->value('id');
+        $effectId = LocalizedContentSeederQuery::forTable('effects')->where('slug', 'grave_rot')->value('id');
 
         if ($effectId === null) {
-            $effectId = DB::table('effects')->insertGetId([
+            $effectId = LocalizedContentSeederQuery::forTable('effects')->insertGetId([
                 'name' => 'Могильная Гниль',
                 'slug' => 'grave_rot',
                 'type' => 'debuff',
@@ -81,7 +82,7 @@ class CemeteryMonsterEffectsSeeder extends Seeder
             $this->command?->info("создан эффект «Могильная Гниль» (id={$effectId})");
         }
 
-        $monsterIds = DB::table('monsters')
+        $monsterIds = LocalizedContentSeederQuery::forTable('monsters')
             ->whereIn('name', ['Зомби', 'Мертвец', 'Могильный Упырь'])
             ->pluck('id');
 

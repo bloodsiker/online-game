@@ -12,6 +12,7 @@ use App\Modules\Event\Infrastructure\Persistence\Models\WorldEventStage;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
@@ -60,7 +61,7 @@ final class WorldEventController extends Controller
                 }))
                 ->latest()
                 ->get(),
-            'maps' => Map::query()->orderBy('name')->get(['id', 'name']),
+            'maps' => Map::query()->orderBy('name->ru')->get(['id', 'name']),
             'filterItem' => $shareItemId !== null
                 ? ShareItem::query()->find($shareItemId, ['id', 'name'])
                 : null,
@@ -77,14 +78,15 @@ final class WorldEventController extends Controller
         return view('event::admin.world-events.create', ['event' => null] + $this->formData());
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         $data = $this->validated($request);
         $locations = $data['location_ids'] ?? [];
         $stages = $data['stages'];
-        unset($data['location_ids'], $data['stages']);
+        unset($data['location_ids'], $data['stages'], $data['title'], $data['description'], $data['influence_name']);
 
         $event = new WorldEvent;
+        $translationEditor->fill($event, $request, ['title', 'description', 'influence_name'], ['title']);
         $event->fill($data);
         $this->fillImage($event, $request);
         $event->save();
@@ -101,7 +103,7 @@ final class WorldEventController extends Controller
         return view('event::admin.world-events.edit', ['event' => $event] + $this->formData());
     }
 
-    public function update(Request $request, WorldEvent $event): RedirectResponse
+    public function update(Request $request, WorldEvent $event, ContentTranslationEditor $translationEditor): RedirectResponse
     {
         if ($event->activeRun()->exists()) {
             return redirect()->back()->with('error', 'Перед изменением этапов завершите текущий запуск события.');
@@ -110,8 +112,9 @@ final class WorldEventController extends Controller
         $data = $this->validated($request);
         $locations = $data['location_ids'] ?? [];
         $stages = $data['stages'];
-        unset($data['location_ids'], $data['stages']);
+        unset($data['location_ids'], $data['stages'], $data['title'], $data['description'], $data['influence_name']);
 
+        $translationEditor->fill($event, $request, ['title', 'description', 'influence_name'], ['title']);
         $event->fill($data);
         $this->fillImage($event, $request);
         $event->save();
@@ -171,13 +174,10 @@ final class WorldEventController extends Controller
     {
         $mapId = (int) $request->input('map_id');
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:4096'],
             'delete_image' => ['nullable', 'boolean'],
             'map_id' => ['required', 'integer', 'exists:maps,id'],
             'influence_map_id' => ['required', 'integer', 'exists:maps,id'],
-            'influence_name' => ['nullable', 'string', 'max:255'],
             'location_ids' => ['nullable', 'array'],
             'location_ids.*' => [
                 'integer',
@@ -189,6 +189,9 @@ final class WorldEventController extends Controller
             'stages' => ['required', 'array', 'min:1', 'max:20'],
             'stages.*.id' => ['nullable', 'integer'],
             'stages.*.title' => ['required', 'string', 'max:150'],
+            'stages.*.translations' => ['sometimes', 'array:uk'],
+            'stages.*.translations.uk' => ['sometimes', 'array:title'],
+            'stages.*.translations.uk.title' => ['nullable', 'string', 'max:150'],
             'stages.*.objective_type' => ['required', Rule::enum(WorldEventObjectiveType::class)],
             'stages.*.global_limit' => ['required', 'integer', 'min:1'],
             'stages.*.player_limit' => ['required', 'integer', 'min:1'],
@@ -205,6 +208,13 @@ final class WorldEventController extends Controller
         ]);
 
         foreach ($data['stages'] as $index => &$stage) {
+            $stageTitleRu = $stage['title'];
+            $stageTitleUk = trim((string) ($stage['translations']['uk']['title'] ?? ''));
+            $stage['title'] = ['ru' => $stageTitleRu];
+            if ($stageTitleUk !== '') {
+                $stage['title']['uk'] = $stageTitleUk;
+            }
+            unset($stage['translations']);
             $objectiveType = WorldEventObjectiveType::from($stage['objective_type']);
             $stage['objective_type'] = $objectiveType;
 
@@ -330,10 +340,10 @@ final class WorldEventController extends Controller
     private function formData(): array
     {
         return [
-            'maps' => Map::query()->orderBy('name')->get(['id', 'parent_id', 'name']),
+            'maps' => Map::query()->orderBy('name->ru')->get(['id', 'parent_id', 'name']),
             'locations' => Location::query()->with('map:id,name')->orderBy('map_id')->orderBy('id')->get(['id', 'map_id', 'name']),
-            'items' => ShareItem::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
-            'monsters' => Monster::query()->orderBy('name')->get(['id', 'name', 'lvl']),
+            'items' => ShareItem::query()->where('is_active', true)->orderBy('name->ru')->get(['id', 'name']),
+            'monsters' => Monster::query()->orderBy('name->ru')->get(['id', 'name', 'lvl']),
             'objectiveTypes' => WorldEventObjectiveType::cases(),
         ];
     }

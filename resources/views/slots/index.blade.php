@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>{{ __('Персонаж') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
@@ -472,7 +472,7 @@
                                                                @if($slot['image']) background="{{ asset($slot['image']) }}" @endif>
                                                             <tbody><tr><td style="position:relative;" valign="bottom">&nbsp;</td></tr></tbody>
                                                         </table>
-                                                        <span class="hotbar-slot-remove" data-slot="{{ $slot['slot'] }}" title="Убрать из панели"
+                                                        <span class="hotbar-slot-remove" data-slot="{{ $slot['slot'] }}" title="{{ __('Убрать из панели') }}"
                                                               style="position:absolute;top:0;right:0;background:#8b0000;color:#fff;font-size:10px;cursor:pointer;padding:1px 3px;line-height:1;z-index:10;">×</span>
                                                         <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.5);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">{{ $slot['slot'] }}</div>
                                                     </li>
@@ -489,7 +489,7 @@
                                             <div class="popup-top-right">
                                                 <div class="popup-top-center">
 
-                                                    <div class="popup_global_title" id="popup_styled_title">Добавление</div>
+                                                    <div class="popup_global_title" id="popup_styled_title">{{ __('Добавление') }}</div>
 
                                                 </div>
                                             </div>
@@ -506,8 +506,8 @@
                                                             <!-- filter control -->
                                                             <div class="b-filter">
                                                                 <!-- buttons -->
-                                                                <span class="b-filter__icon" title="Поиск по названию">&nbsp;</span>
-                                                                <span class="b-filter__reset" title="сбросить фильтр">&nbsp;</span>
+                                                                <span class="b-filter__icon" title="{{ __('Поиск по названию') }}">&nbsp;</span>
+                                                                <span class="b-filter__reset" title="{{ __('Сбросить фильтр') }}">&nbsp;</span>
                                                                 <!-- /buttons -->
 
                                                                 <!-- text input -->
@@ -515,7 +515,7 @@
                                                                     <div class="ff__input-wrap-inner">
                                                                         <div class="ff__input-wrap-input">
                                                                             <input type="text" id="filterField" name="filterField" value="">
-                                                                            <label for="filterField">Введите название</label>
+                                                                            <label for="filterField">{{ __('Введите название') }}</label>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -547,7 +547,7 @@
 
                                                     <div class="hotbar-picker-columns">
                                                         <section class="hotbar-picker-panel">
-                                                            <div class="hotbar-picker-title">Предметы</div>
+                                                            <div class="hotbar-picker-title">{{ __('Предметы') }}</div>
                                                             <ul id="item_list" data-caller="0" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
                                                                 @forelse($usableItems as $backpack)
                                                                 <li data-id="{{ $backpack->item_id }}"
@@ -573,20 +573,20 @@
                                                                 </li>
                                                                 @empty
                                                                 <li style="padding:10px; color:#666; list-style:none; float:none; width:auto; height:auto;">
-                                                                    Нет подходящих предметов
+                                                                    {{ __('Нет подходящих предметов') }}
                                                                 </li>
                                                                 @endforelse
                                                             </ul>
                                                         </section>
 
                                                         <section class="hotbar-picker-panel">
-                                                            <div class="hotbar-picker-title">Заклинания</div>
+                                                            <div class="hotbar-picker-title">{{ __('Заклинания') }}</div>
                                                             <ul id="skill_list" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
                                                                 @forelse($activeSkills as $skill)
                                                                     <li data-id="{{ $skill->id }}"
                                                                         data-entity-type="skill"
                                                                         data-title="{{ $skill->name }}"
-                                                                        data-kind="{{ match($skill->type) { 'attack' => 'Боевое заклинание', 'buff' => 'Усиление', 'heal' => 'Лечение', 'debuff' => 'Ослабление', default => 'Заклинание' } }}"
+                                                                        data-kind="{{ match($skill->type) { 'attack' => __('Боевое заклинание'), 'buff' => __('Усиление'), 'heal' => __('Лечение'), 'debuff' => __('Ослабление'), default => __('Заклинание') } }}"
                                                                         data-description="{{ $skill->description }}"
                                                                         data-mana="{{ $skill->mana_cost }}"
                                                                         data-cooldown="{{ $skill->cooldown }}"
@@ -603,7 +603,7 @@
                                                                             <tbody><tr>
                                                                                 <td style="position:relative;" valign="bottom">
                                                                                     @if($skill->mana_cost > 0)
-                                                                                        <span class="hotbar-spell-mana" title="Расход маны">{{ $skill->mana_cost }}</span>
+                                                                                        <span class="hotbar-spell-mana" title="{{ __('Расход маны') }}">{{ $skill->mana_cost }}</span>
                                                                                     @endif
                                                                                     &nbsp;
                                                                                 </td>
@@ -612,7 +612,7 @@
                                                                     </li>
                                                                 @empty
                                                                     <li style="padding:10px;color:#666;list-style:none;float:none;width:auto;height:auto;">
-                                                                        Нет изученных активных заклинаний
+                                                                        {{ __('Нет изученных активных заклинаний') }}
                                                                     </li>
                                                                 @endforelse
                                                             </ul>
@@ -731,15 +731,15 @@
         }
 
         const rows = [];
-        if (Number(element.dataset.mana) > 0) rows.push(`<div>Расход маны: <b>${element.dataset.mana}</b></div>`);
-        if (Number(element.dataset.cooldown) > 0) rows.push(`<div>Перезарядка: <b>${element.dataset.cooldown} сек.</b></div>`);
-        if (element.dataset.damage) rows.push(`<div>Урон: <b>${element.dataset.damage}</b></div>`);
-        if (Number(element.dataset.healing) > 0) rows.push(`<div>Лечение: <b>${element.dataset.healing}</b></div>`);
+        if (Number(element.dataset.mana) > 0) rows.push(`<div>${@json(__('Расход маны:'))} <b>${element.dataset.mana}</b></div>`);
+        if (Number(element.dataset.cooldown) > 0) rows.push(`<div>${@json(__('Перезарядка:'))} <b>${element.dataset.cooldown} ${@json(__('сек.'))}</b></div>`);
+        if (element.dataset.damage) rows.push(`<div>${@json(__('Урон:'))} <b>${element.dataset.damage}</b></div>`);
+        if (Number(element.dataset.healing) > 0) rows.push(`<div>${@json(__('Лечение:'))} <b>${element.dataset.healing}</b></div>`);
 
         tooltip.innerHTML = `
             <div class="hotbar-skill-tooltip__name">${escapeHotbarTooltipText(element.dataset.title)}</div>
             <div class="hotbar-skill-tooltip__kind">${escapeHotbarTooltipText(element.dataset.kind)}</div>
-            <div>${escapeHotbarTooltipText(element.dataset.description || 'Описание отсутствует.')}</div>
+            <div>${escapeHotbarTooltipText(element.dataset.description || @json(__('Описание отсутствует.')))}</div>
             ${rows.length ? `<div class="hotbar-skill-tooltip__stats">${rows.join('')}</div>` : ''}
         `;
         tooltip.style.display = 'block';
@@ -806,7 +806,7 @@
         .then(r => r.json())
         .then(data => {
             if (data.status !== 'success') {
-                window.parent?.showErrorIframe(data.message || 'Ошибка');
+                window.parent?.showErrorIframe(data.message || @json(__('Ошибка')));
                 return;
             }
             // Обновляем слот в DOM
@@ -823,7 +823,7 @@
                        style="float:left;margin:1px;" ${bg ? `background="${bg}"` : ''}>
                     <tbody><tr><td style="position:relative;" valign="bottom">&nbsp;</td></tr></tbody>
                 </table>
-                <span class="hotbar-slot-remove" data-slot="${slotNumber}" title="Убрать из панели"
+                <span class="hotbar-slot-remove" data-slot="${slotNumber}" title="${@json(__('Убрать из панели'))}"
                       style="position:absolute;top:0;right:0;background:#8b0000;color:#fff;font-size:10px;cursor:pointer;padding:1px 3px;line-height:1;z-index:10;">×</span>
                 <div style="position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.5);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${slotNumber}</div>
             `;

@@ -14,6 +14,9 @@ use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Prison\Application\Services\DetentionService;
+use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -62,7 +65,7 @@ class PlayerController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $player->load(['user', 'race', 'skills.skill', 'reputations.reputation.tiers']);
+        $player->load(['user.currentLocation.map', 'race', 'skills.skill', 'reputations.reputation.tiers']);
         $maxPlayerLevel = $levelUpService->maxLevel();
 
         $playerReputations = $player->reputations
@@ -94,6 +97,18 @@ class PlayerController extends Controller
             ->active()
             ->get()
             ->keyBy(fn (UserCommunicationMute $mute): string => $mute->scope->value);
+        $prisons = Structure::query()
+            ->where('type', Structure::TYPE_PRISON)
+            ->whereNotNull('location_id')
+            ->orderBy('name->ru')
+            ->get();
+        $detentionHistory = PlayerDetention::query()
+            ->with(['prison', 'imposedBy'])
+            ->where('user_id', $player->user_id)
+            ->latest('starts_at')
+            ->limit(50)
+            ->get();
+        $activeDetention = $detentionHistory->first(fn (PlayerDetention $record): bool => $record->isActive());
 
         return view('admin.player.info', compact(
             'player',
@@ -102,6 +117,9 @@ class PlayerController extends Controller
             'maxPlayerLevel',
             'communicationMutes',
             'activeCommunicationMutes',
+            'prisons',
+            'detentionHistory',
+            'activeDetention',
         ));
     }
 
@@ -180,5 +198,32 @@ class PlayerController extends Controller
         $communicationMuteService->revoke($mute, $request->user());
 
         return redirect()->back()->with('success', 'Молчание снято досрочно.');
+    }
+
+    public function detain(
+        Request $request,
+        Player $player,
+        DetentionService $detentionService,
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'prison_structure_id' => ['required', 'integer', Rule::exists('structures', 'id')->where('type', Structure::TYPE_PRISON)->whereNotNull('location_id')],
+            'duration_minutes' => ['required', 'integer', 'min:1', 'max:525600'],
+            'reason' => ['required', 'string', 'max:1000'],
+            'fine_money' => ['nullable', 'integer', 'min:0', 'max:1000000000000'],
+            'fine_diamond' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:1000000000'],
+        ]);
+
+        $prison = Structure::query()->findOrFail((int) $validated['prison_structure_id']);
+        $record = $detentionService->impose(
+            $player->user,
+            $prison,
+            $request->user(),
+            (int) $validated['duration_minutes'],
+            $validated['reason'],
+            (int) ($validated['fine_money'] ?? 0),
+            (float) ($validated['fine_diamond'] ?? 0),
+        );
+
+        return redirect()->back()->with('success', 'Игрок помещён в Темницу до '.$record->release_at->format('d.m.Y H:i').'.');
     }
 }

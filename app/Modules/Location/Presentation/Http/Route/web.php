@@ -4,7 +4,7 @@ use App\Modules\Location\Presentation\Http\LocationController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'prison.context'])->group(function () {
     Route::get('/maps', [LocationController::class, 'maps'])->name('maps');
     Route::get('/location/move/{direction}', [LocationController::class, 'moveTo'])
         ->middleware('throttle:120,1')
@@ -25,6 +25,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/gathering/cancel', [LocationController::class, 'cancelGathering'])
         ->withoutMiddleware(ValidateCsrfToken::class)
         ->name('gathering.cancel');
+    Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');
 });
-
-Route::get('/take_items', [LocationController::class, 'takeItems'])->name('take_items');

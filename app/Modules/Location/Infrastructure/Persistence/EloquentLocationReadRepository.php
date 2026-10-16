@@ -10,6 +10,7 @@ use App\Modules\Location\Domain\Contracts\LocationReadRepository;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\LocationGate;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Structure\Prison\Infrastructure\Persistence\Models\PlayerDetention;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -29,7 +30,8 @@ class EloquentLocationReadRepository implements LocationReadRepository
     {
         $query = MonsterOnLocation::with('monster')
             ->where('location_id', $locationId)
-            ->where('active', 1);
+            ->where('active', 1)
+            ->shownOnLocation();
 
         $session = $user !== null ? DungeonSession::query()->where('user_id', $user->id)->first() : null;
         if ($session !== null) {
@@ -56,7 +58,12 @@ class EloquentLocationReadRepository implements LocationReadRepository
             now()->addSeconds(60),
             function () use ($locationId, $user, $session, $runId): Collection {
                 $query = User::with(['player', 'clanMembership.clan', 'activeChatMute'])
-                    ->where('location_id', $locationId);
+                    ->where('location_id', $locationId)
+                    ->whereNotIn('id', PlayerDetention::query()
+                        ->select('user_id')
+                        ->whereNotNull('user_id')
+                        ->whereNull('released_at')
+                        ->where('release_at', '>', now()));
 
                 if ($runId !== null) {
                     $query->whereIn('id', DungeonSession::query()->where('dungeon_run_id', $runId)->select('user_id'));

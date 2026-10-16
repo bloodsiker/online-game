@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Влияние</title>
+    <title>{{ __('Влияние') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { min-height: 100%; }
@@ -225,12 +225,12 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0;">
                         <div class="influence-intro">
-                            Влияние отражает ваши заслуги на территориях и открывает местные награды и возможности.
+                            {{ __('Влияние отражает ваши заслуги на территориях и открывает местные награды и возможности.') }}
                         </div>
 
                         @if($mapInfluences->isEmpty())
                             <div class="influence-empty">
-                                Вы ещё не получали влияние. Участвуйте в событиях на картах, чтобы заработать первые очки.
+                                {{ __('Вы ещё не получали влияние. Участвуйте в событиях на картах, чтобы заработать первые очки.') }}
                             </div>
                         @else
                             <div class="influence-list">
@@ -252,17 +252,17 @@
                                             @if($mapInfluence->map)
                                                 <a href="{{ route('character.influence.show', $mapInfluence->map) }}">{{ $mapInfluence->map->name }}</a>
                                             @else
-                                                Карта удалена
+                                                {{ __('Карта удалена') }}
                                             @endif
                                         </div>
                                         <div class="influence-card__body">
-                                            <div class="influence-medal" title="{{ $currentLevel?->medal?->description ?? $currentLevel?->name ?? 'Медаль ещё не получена' }}">
+                                            <div class="influence-medal" title="{{ $currentLevel?->medal?->description ?? $currentLevel?->name ?? __('Медаль ещё не получена') }}">
                                                 <img src="{{ $medalUrl ?: asset('img/bg/empty_slot.gif') }}" width="60" height="60" alt="">
                                             </div>
-                                            <div class="influence-level">{{ $currentLevel?->name ?? 'Без уровня' }}</div>
-                                            <div class="influence-points">Влияние: <b>{{ number_format($mapInfluence->influence, 0, '', ' ') }}</b></div>
+                                            <div class="influence-level">{{ $currentLevel?->name ?? __('Без уровня') }}</div>
+                                            <div class="influence-points">{{ __('Влияние:') }} <b>{{ number_format($mapInfluence->influence, 0, '', ' ') }}</b></div>
 
-                                            <div class="rep-progress-bar" title="{{ $mapInfluence->influence }} из {{ $nextLevel?->required_influence ?? $mapInfluence->influence }}">
+                                            <div class="rep-progress-bar" title="{{ $mapInfluence->influence }} {{ __('из') }} {{ $nextLevel?->required_influence ?? $mapInfluence->influence }}">
                                                 <div class="rep-progress-bar__bg">
                                                     <div class="rep-progress-bar__fill" style="width: {{ $percent }}%;"></div>
                                                 </div>
@@ -276,15 +276,15 @@
 
                                             <div class="influence-next">
                                                 @if($nextLevel)
-                                                    Следующий уровень: <b>{{ $nextLevel->name }}</b><br>
-                                                    Нужно влияния: {{ number_format($nextLevel->required_influence, 0, '', ' ') }}
+                                                    {{ __('Следующий уровень:') }} <b>{{ $nextLevel->name }}</b><br>
+                                                    {{ __('Нужно влияния:') }} {{ number_format($nextLevel->required_influence, 0, '', ' ') }}
                                                 @else
-                                                    Достигнут максимальный уровень влияния
+                                                    {{ __('Достигнут максимальный уровень влияния') }}
                                                 @endif
                                             </div>
                                             @if($mapInfluence->map)
                                                 <div class="influence-actions">
-                                                    <a href="{{ route('character.influence.show', $mapInfluence->map) }}">Подробнее об уровнях и бонусах »</a>
+                                                    <a href="{{ route('character.influence.show', $mapInfluence->map) }}">{{ __('Подробнее об уровнях и бонусах »') }}</a>
                                                 </div>
                                             @endif
                                         </div>

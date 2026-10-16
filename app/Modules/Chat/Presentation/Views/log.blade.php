@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __('Игра') }}</title>
+    @include('interface::partials.game-translations')
     <style>
         html {
             height: 100%;
@@ -118,7 +119,7 @@
         tr.className = cls;
         tr.innerHTML = '<td nowrap="" class="action battle-entry">'
             + datetime + ' &mdash; '
-            + '<a href="' + entry.battleUrl + '" target="_blank">Сражение #' + entry.battleId + '</a>'
+            + '<a href="' + entry.battleUrl + '" target="_blank">' + gameTranslate('Сражение') + ' #' + entry.battleId + '</a>'
             + '</td>'
             + '<td class="separator"></td>'
             + '<td nowrap="" class="result battle-entry">' + (entry.monsterName || '') + '</td>';

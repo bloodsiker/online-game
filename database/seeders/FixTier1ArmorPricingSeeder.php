@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Чинит ту же рассинхронизацию цен, что нашлась и была исправлена в Тир2/Тир3
@@ -56,10 +56,10 @@ class FixTier1ArmorPricingSeeder extends Seeder
     public function run(): void
     {
         // Чиним пропавшую ссылку в цепочке щита ДО того, как applyChain пойдёт по ней.
-        $shieldBase = DB::table('share_items')->where('name', 'Кожаный щит')->first();
-        $shieldRare1 = DB::table('share_items')->where('name', 'Усиленный кожаный щит')->first();
+        $shieldBase = LocalizedItemSeederQuery::items()->where('name', 'Кожаный щит')->first();
+        $shieldRare1 = LocalizedItemSeederQuery::items()->where('name', 'Усиленный кожаный щит')->first();
         if ($shieldBase !== null && $shieldRare1 !== null && $shieldBase->upgrade_to_share_item_id === null) {
-            DB::table('share_items')->where('id', $shieldBase->id)->update([
+            LocalizedItemSeederQuery::items()->where('id', $shieldBase->id)->update([
                 'upgrade_to_share_item_id' => $shieldRare1->id,
                 'updated_at' => now(),
             ]);
@@ -70,13 +70,13 @@ class FixTier1ArmorPricingSeeder extends Seeder
         $shopRowsTouched = 0;
 
         foreach (self::LEVEL_1_ITEMS as $name => $price) {
-            $row = DB::table('share_items')->where('name', $name)->first();
+            $row = LocalizedItemSeederQuery::items()->where('name', $name)->first();
             if ($row === null) {
                 $this->command?->warn("не найден предмет: «{$name}»");
 
                 continue;
             }
-            DB::table('share_items')->where('id', $row->id)->update(['price' => $price, 'updated_at' => now()]);
+            LocalizedItemSeederQuery::items()->where('id', $row->id)->update(['price' => $price, 'updated_at' => now()]);
             $shopItem = ShopItem::query()->where('share_item_id', $row->id)->first();
             if ($shopItem !== null) {
                 $shopItem->price = $price;
@@ -96,7 +96,7 @@ class FixTier1ArmorPricingSeeder extends Seeder
 
     private function applyChain(string $baseName, int $basePrice, int &$shopRowsTouched): int
     {
-        $item = DB::table('share_items')->where('name', $baseName)->first();
+        $item = LocalizedItemSeederQuery::items()->where('name', $baseName)->first();
         if ($item === null) {
             $this->command?->warn("не найден предмет: «{$baseName}»");
 
@@ -106,7 +106,7 @@ class FixTier1ArmorPricingSeeder extends Seeder
         $chain = [$item];
         $current = $item;
         while ($current->upgrade_to_share_item_id !== null) {
-            $next = DB::table('share_items')->where('id', $current->upgrade_to_share_item_id)->first();
+            $next = LocalizedItemSeederQuery::items()->where('id', $current->upgrade_to_share_item_id)->first();
             if ($next === null) {
                 break;
             }
@@ -128,7 +128,7 @@ class FixTier1ArmorPricingSeeder extends Seeder
             $isTerminal = $index === $chainLength - 1;
             $upgradeGoldCost = $isTerminal ? 0 : (int) round($price * self::UPGRADE_GOLD_COST_RATE);
 
-            DB::table('share_items')->where('id', $row->id)->update([
+            LocalizedItemSeederQuery::items()->where('id', $row->id)->update([
                 'price' => $price,
                 'upgrade_gold_cost' => $upgradeGoldCost,
                 'updated_at' => now(),

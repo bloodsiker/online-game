@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Quest\Infrastructure\Persistence\Models;
 
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuestStage extends Model
 {
+    use HasLegacyTranslations;
+
+    public array $translatable = ['title', 'description', 'waiting_text', 'ready_text'];
+
     protected $fillable = [
         'quest_id', 'complete_npc_id', 'order', 'title', 'description',
         'stage_type', 'wait_duration_seconds', 'waiting_text', 'ready_text',

@@ -87,12 +87,12 @@ final class GetFightList
 
         $monsterNames = collect($monsters)->pluck('name')->unique()->values();
         $title = match (true) {
-            $monsterNames->isEmpty() => 'Бой #'.$battle->id,
-            $monsterNames->count() === 1 => 'Бой с '.$monsterNames->first(),
-            default => 'Бой с '.$monsterNames->first().' и др.',
+            $monsterNames->isEmpty() => __('Бой #').$battle->id,
+            $monsterNames->count() === 1 => __('Бой с ').$monsterNames->first(),
+            default => __('Бой с ').$monsterNames->first().__(' и др.'),
         };
 
-        $typeLabel = (count($monsters) > 1 || count($players) > 1) ? 'групповой бой' : 'бой 1x1';
+        $typeLabel = (count($monsters) > 1 || count($players) > 1) ? __('групповой бой') : __('бой 1x1');
 
         $endedAt = $battle->status === BattleStatus::FINISH ? $battle->updated_at : Carbon::now();
         $seconds = max(0, (int) $battle->created_at->diffInSeconds($endedAt));
@@ -104,8 +104,8 @@ final class GetFightList
             $playersAllDead = count($players) > 0 && collect($players)->every(fn ($p) => ! $p['alive']);
 
             $winnerLabel = match (true) {
-                $monstersAllDead => 'Победила команда №1',
-                $playersAllDead => 'Победила команда №2',
+                $monstersAllDead => __('Победила команда №1'),
+                $playersAllDead => __('Победила команда №2'),
                 default => null,
             };
         }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Listeners\SendMapInfluenceAwardedMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
@@ -22,7 +24,8 @@ final class MapInfluenceAwardedNotificationTest extends TestCase
         $chatService = Mockery::mock(ChatService::class);
         $chatService->shouldReceive('sendQuestToUser')
             ->once()
-            ->with($user, 'Ваше влияние на карте <b>«Дартронг»</b> увеличено на <b>+5</b>.')
+            ->with($user, Mockery::on(fn ($message): bool => $message instanceof LocalizedChatMessage
+                && app(ChatMessageTranslator::class)->render($message, 'ru') === 'Ваше влияние на карте <b>«Дартронг»</b> увеличено на <b>+5</b>.'))
             ->andReturn(new ChatMessage);
 
         (new SendMapInfluenceAwardedMessage($chatService))->handle(

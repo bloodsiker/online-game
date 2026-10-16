@@ -22,8 +22,8 @@ enum ClanWarehouseAction: string
     public function label(): string
     {
         return match ($this) {
-            self::PUT => 'Положил',
-            self::TAKE => 'Забрал',
+            self::PUT => __('Положил'),
+            self::TAKE => __('Забрал'),
         };
     }
 }

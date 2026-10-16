@@ -15,17 +15,13 @@
 
                 <div class="row">
                     <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="col-form-label">Название</label>
-                            <input class="form-control" name="name" value="{{ old('name', $category?->name) }}" required>
-                        </div>
+                        @include('admin.partials.content-translations', ['prefix' => 'library-category', 'content' => $category, 'fields' => [
+                            'name' => ['label' => 'Название'],
+                            'description' => ['label' => 'Описание', 'multiline' => true],
+                        ]])
                         <div class="form-group">
                             <label class="col-form-label">Адрес (slug)</label>
                             <input class="form-control" name="slug" value="{{ old('slug', $category?->slug) }}" placeholder="Создастся автоматически">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Описание</label>
-                            <textarea class="form-control" name="description" rows="5">{{ old('description', $category?->description) }}</textarea>
                         </div>
                         <div class="form-group">
                             <label class="col-form-label">Тип содержимого</label>

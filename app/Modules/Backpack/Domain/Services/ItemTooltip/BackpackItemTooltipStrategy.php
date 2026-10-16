@@ -42,7 +42,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 kind: $itemInfo->getTypeName(),
                 price: ItemTooltipPriceFormatter::money((int) $itemInfo->price),
                 diamond: '',
-                lev: ['title' => ' Уровень ', 'value' => '1'],
+                lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
                 desc: $itemInfo->description ?? '',
                 store: false,

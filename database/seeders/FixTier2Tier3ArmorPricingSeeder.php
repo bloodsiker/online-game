@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Чинит рассинхронизацию цен брони Тир2 (Мамонт/Сумеречный/Палач) и Тир3
@@ -139,7 +139,7 @@ class FixTier2Tier3ArmorPricingSeeder extends Seeder
     /** @param array<int, float> $rarityMultiplier */
     private function applyChain(string $baseName, int $basePrice, array $rarityMultiplier, int &$shopRowsTouched, bool $isTier3 = false): int
     {
-        $item = DB::table('share_items')->where('name', $baseName)->first();
+        $item = LocalizedItemSeederQuery::items()->where('name', $baseName)->first();
         if ($item === null) {
             $this->command?->warn("не найден предмет: «{$baseName}»");
 
@@ -149,7 +149,7 @@ class FixTier2Tier3ArmorPricingSeeder extends Seeder
         $chain = [$item];
         $current = $item;
         while ($current->upgrade_to_share_item_id !== null) {
-            $next = DB::table('share_items')->where('id', $current->upgrade_to_share_item_id)->first();
+            $next = LocalizedItemSeederQuery::items()->where('id', $current->upgrade_to_share_item_id)->first();
             if ($next === null) {
                 break;
             }
@@ -171,7 +171,7 @@ class FixTier2Tier3ArmorPricingSeeder extends Seeder
             $isTerminal = $index === $chainLength - 1;
             $upgradeGoldCost = $isTerminal ? 0 : (int) round($price * self::UPGRADE_GOLD_COST_RATE);
 
-            DB::table('share_items')->where('id', $row->id)->update([
+            LocalizedItemSeederQuery::items()->where('id', $row->id)->update([
                 'price' => $price,
                 'upgrade_gold_cost' => $upgradeGoldCost,
                 'updated_at' => now(),

@@ -8,7 +8,8 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.11",
-        "laravel/tinker": "^2.10"
+        "laravel/tinker": "^2.10",
+        "spatie/laravel-translatable": "^6.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

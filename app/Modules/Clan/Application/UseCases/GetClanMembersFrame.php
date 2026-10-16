@@ -23,7 +23,7 @@ class GetClanMembersFrame
             return new ClanFramePageDTO(collect(), null, null);
         }
 
-        $tenMinutesAgo = Carbon::now()->subMinutes(10);
+        $tenMinutesAgo = Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         $members = ClanMember::where('clan_id', $context->membership->clan_id)
             ->with(['user.player', 'role'])

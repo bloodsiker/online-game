@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Npc\Infrastructure\Persistence\Models;
 
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NpcDialogueOption extends Model
 {
+    use HasLegacyTranslations;
+
+    public array $translatable = ['button_text'];
+
     protected $fillable = [
         'npc_dialogue_node_id',
         'to_node_id',

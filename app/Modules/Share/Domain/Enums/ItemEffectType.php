@@ -19,15 +19,15 @@ enum ItemEffectType: string
     public function label(): string
     {
         return match ($this) {
-            self::HEAL_HP => 'Восстановление HP',
-            self::HEAL_MP => 'Восстановление MP',
-            self::BUFF_ATTACK => 'Бафф атаки',
-            self::BUFF_DEFENSE => 'Бафф защиты',
-            self::DAMAGE_HP => 'Урон',
-            self::RESTORE_LOST_EXP => 'Возврат потерянного при смерти опыта',
-            self::RESPEC_STATS => 'Сброс вложенных очков характеристик',
-            self::RENAME_NAME => 'Смена игрового имени',
-            self::CHANGE_RACE => 'Смена расы',
+            self::HEAL_HP => __('Восстановление HP'),
+            self::HEAL_MP => __('Восстановление MP'),
+            self::BUFF_ATTACK => __('Бафф атаки'),
+            self::BUFF_DEFENSE => __('Бафф защиты'),
+            self::DAMAGE_HP => __('Урон'),
+            self::RESTORE_LOST_EXP => __('Возврат потерянного при смерти опыта'),
+            self::RESPEC_STATS => __('Сброс вложенных очков характеристик'),
+            self::RENAME_NAME => __('Смена игрового имени'),
+            self::CHANGE_RACE => __('Смена расы'),
         };
     }
 

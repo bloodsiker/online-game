@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Database;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Database\Seeders\PeacefulProfessionDemoSeeder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -42,17 +43,17 @@ class PeacefulProfessionDemoSeederTest extends TestCase
             'max_active' => 1,
         ]);
         $this->assertDatabaseHas('share_items', [
-            'name' => 'Лечебная трава',
+            'name->ru' => 'Лечебная трава',
             'skill_id' => 6,
             'gathering_time_seconds' => 5,
             'gathering_respawn_seconds' => 30,
         ]);
         $this->assertDatabaseHas('share_items', [
-            'name' => 'Речной окунь',
+            'name->ru' => 'Речной окунь',
             'skill_id' => 7,
         ]);
         $this->assertDatabaseHas('share_items', [
-            'name' => 'Медная руда',
+            'name->ru' => 'Медная руда',
             'skill_id' => 8,
         ]);
     }
@@ -61,7 +62,7 @@ class PeacefulProfessionDemoSeederTest extends TestCase
     {
         DB::table('maps')->insert(['id' => 2, 'name' => 'Шепчущий Лес']);
         DB::table('players')->insert(['id' => 1, 'user_id' => 1]);
-        DB::table('skills')->insert([
+        LocalizedContentSeederQuery::forTable('skills')->insert([
             ['id' => 6, 'name' => 'Травник', 'type' => 'peaceful'],
             ['id' => 7, 'name' => 'Рыбак', 'type' => 'peaceful'],
             ['id' => 8, 'name' => 'Геолог', 'type' => 'peaceful'],

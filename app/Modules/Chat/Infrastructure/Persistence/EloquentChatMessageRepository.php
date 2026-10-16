@@ -36,6 +36,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
     private function scheduleExpirationBroadcast(ChatMessage $message): void
     {
         $expiresAt = match (true) {
+            $message->channel === ChatChannel::Clan && $message->type === ChatMessageType::ClanBoss => $message->created_at->copy()->addMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES),
             $message->channel === ChatChannel::System => $message->created_at->copy()->addMinutes(ChatMessageLifetime::SYSTEM_MINUTES),
             $message->channel === ChatChannel::Private => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
             $message->channel === ChatChannel::Main && $message->target_user_id !== null => $message->created_at->copy()->addMinutes(ChatMessageLifetime::PERSONAL_MINUTES),
@@ -119,6 +120,10 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
         $systemClause = fn ($q) => $q->where('channel', ChatChannel::System->value)
             ->where('created_at', '>=', $thirtyMinutesAgo);
+        $clanNoticeClause = fn ($q) => $q
+            ->where('channel', ChatChannel::Clan->value)
+            ->where('type', ChatMessageType::ClanBoss->value)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES));
 
         match ($channel) {
             ChatChannel::Main => $query->where(fn ($q) => $q
@@ -135,12 +140,14 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                         ChatMessageType::Information->value,
                         ChatMessageType::PartyInvite->value,
                         ChatMessageType::PartyNotice->value,
+                        ChatMessageType::ClanInvite->value,
                         ChatMessageType::Quest->value,
                         ChatMessageType::QuestItem->value,
                         ChatMessageType::Loot->value,
                     ])
                     ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::PERSONAL_MINUTES))
                 )
+                ->orWhere($clanNoticeClause)
                 ->orWhere($privateClause)
                 ->orWhere($systemClause)
             ),
@@ -172,12 +179,18 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                 ->where(function ($q2) use ($ignoredIds, $user) {
                     $clanId = $user->clanMembership?->clan_id;
                     $q2->where('channel', ChatChannel::Clan->value)->where('clan_id', $clanId);
+                    $q2->where(fn ($q3) => $q3
+                        ->where('type', '!=', ChatMessageType::ClanBoss->value)
+                        ->orWhere('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES)));
                     if ($ignoredIds) {
                         $q2->whereNotIn('user_id', $ignoredIds);
                     }
                 })
                 ->orWhere($privateClause)
-                ->orWhere($systemClause)
+                ->orWhere(function ($q2) use ($systemClause) {
+                    $systemClause($q2);
+                    $q2->where('type', '!=', ChatMessageType::ClanBoss->value);
+                })
             ),
 
             ChatChannel::Party => $this->applyPartyChannelFilter($query, $user),

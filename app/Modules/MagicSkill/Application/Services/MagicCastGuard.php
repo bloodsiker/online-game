@@ -27,19 +27,19 @@ class MagicCastGuard
                 ->first();
 
             if ($pivot === null) {
-                return CastAttemptResult::failure('Заклинание не изучено');
+                return CastAttemptResult::failure(__('Заклинание не изучено'));
             }
 
             if ($pivot->cooldown_end_at !== null && now()->lt($pivot->cooldown_end_at)) {
                 $remaining = (int) now()->diffInSeconds($pivot->cooldown_end_at, false);
 
-                return CastAttemptResult::failure(sprintf('Перезарядка ещё %d сек.', $remaining));
+                return CastAttemptResult::failure(sprintf(__('Перезарядка ещё %d сек.'), $remaining));
             }
 
             $freshPlayer = Player::whereKey($player->id)->lockForUpdate()->first();
 
             if ($freshPlayer === null || $freshPlayer->mp_now < $skill->mana_cost) {
-                return CastAttemptResult::failure(sprintf('Недостаточно маны, требуется %s', $skill->mana_cost));
+                return CastAttemptResult::failure(sprintf(__('Недостаточно маны, требуется %s'), $skill->mana_cost));
             }
 
             $freshPlayer->mp_now -= $skill->mana_cost;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -76,7 +77,7 @@ class WatchHillsMonsterPlacementSeeder extends Seeder
 
             $monsterIds = [];
             foreach ($band['monsters'] as [$name, $lvl]) {
-                $monster = DB::table('monsters')->where('name', $name)->where('lvl', $lvl)->first();
+                $monster = LocalizedContentSeederQuery::forTable('monsters')->where('name', $name)->where('lvl', $lvl)->first();
                 if ($monster === null) {
                     $this->command?->warn("не найден монстр «{$name}» lvl {$lvl}");
 

@@ -6,6 +6,7 @@ namespace App\Modules\Npc\Infrastructure\Persistence\Models;
 
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,9 @@ use Illuminate\Support\Str;
 class Npc extends Model
 {
     use HasFactory;
+    use HasLegacyTranslations;
+
+    public array $translatable = ['name', 'description'];
 
     protected $fillable = ['name', 'description', 'image', 'location_id', 'hide_location', 'is_active'];
 

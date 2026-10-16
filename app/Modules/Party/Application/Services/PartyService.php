@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Party\Application\Services;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Party\Domain\Contracts\PartyRepositoryInterface;
 use App\Modules\Party\Infrastructure\Persistence\Models\Party;
@@ -83,12 +84,9 @@ class PartyService
 
         $message = $this->chatService->sendPartyInviteToUser(
             $target,
-            sprintf(
-                '%s приглашает вас в группу. <a href="%s" target="_top" class="party-invite-action" style="color:#2e7d32;" onclick="return handlePartyInviteAction(this);">[Принять]</a> <a href="%s" target="_top" class="party-invite-action" style="color:#a33;" onclick="return handlePartyInviteAction(this);">[Отклонить]</a>',
-                $this->partyMemberLabel($leader),
-                $acceptUrl,
-                $declineUrl,
-            ),
+            new LocalizedChatMessage('chat.party_invite', [
+                'member' => $this->partyMemberLabel($leader), 'accept_url' => $acceptUrl, 'decline_url' => $declineUrl,
+            ]),
         );
         $invite->update(['chat_message_id' => $message->id]);
 
@@ -146,10 +144,7 @@ class PartyService
 
         $this->chatService->sendSystemToParty(
             (int) $invite->party_id,
-            sprintf(
-                'Игрок %s вступил в вашу группу.',
-                $this->partyMemberLabel($user),
-            ),
+            new LocalizedChatMessage('chat.party_joined', ['member' => $this->partyMemberLabel($user)]),
         );
     }
 
@@ -165,7 +160,7 @@ class PartyService
         $this->removeInviteChatMessage($user, $invite);
         $this->chatService->sendSystemToParty(
             (int) $invite->party_id,
-            sprintf('Игрок %s отклонил приглашение в группу.', $this->partyMemberLabel($user)),
+            new LocalizedChatMessage('chat.party_declined', ['member' => $this->partyMemberLabel($user)]),
         );
     }
 
@@ -197,11 +192,11 @@ class PartyService
 
         $this->chatService->sendSystemToParty(
             $partyId,
-            sprintf('Игрок %s исключён из группы.', $kicked ? $this->partyMemberLabel($kicked) : e($kickedName)),
+            new LocalizedChatMessage('chat.party_kicked', ['member' => $kicked ? $this->partyMemberLabel($kicked) : $kickedName]),
         );
 
         if ($kickedName !== null) {
-            $kicked?->id && $this->chatService->sendPartyNoticeToUser($kicked, 'Вы были исключены из группы.');
+            $kicked?->id && $this->chatService->sendPartyNoticeToUser($kicked, new LocalizedChatMessage('chat.party_you_kicked'));
         }
     }
 
@@ -217,7 +212,7 @@ class PartyService
 
         if ($party->isLeader($userId)) {
             $leftName = $this->memberName($partyId, $userId);
-            $this->broadcastToMembers($partyId, 'Группа распущена лидером.');
+            $this->broadcastToMembers($partyId, new LocalizedChatMessage('chat.party_disbanded'));
             $this->partyRepository->disband($party);
 
             return;
@@ -227,7 +222,7 @@ class PartyService
         $this->partyRepository->removeMember($partyId, $userId);
 
         if ($leftName !== null) {
-            $this->broadcastToMembers($partyId, sprintf('%s покинул группу.', $this->partyMemberLabel(Auth::user())));
+            $this->broadcastToMembers($partyId, new LocalizedChatMessage('chat.party_left', ['member' => $this->partyMemberLabel(Auth::user())]));
         }
     }
 
@@ -239,7 +234,7 @@ class PartyService
             throw new RuntimeException('Только лидер может распустить группу.');
         }
 
-        $this->broadcastToMembers($partyId, 'Группа распущена лидером.');
+        $this->broadcastToMembers($partyId, new LocalizedChatMessage('chat.party_disbanded'));
         $this->partyRepository->disband($party);
     }
 
@@ -267,22 +262,19 @@ class PartyService
         $invite->save();
     }
 
-    private function partyMemberLabel(User $user): string
+    private function partyMemberLabel(User $user): LocalizedChatMessage
     {
-        return sprintf(
-            '<b>%s</b> [%d] <a href="#" onclick="chatOpenUserInfo(%d); return false;" title="Информация о персонаже"><img src="%s" width="10" height="10" align="absmiddle" alt=""></a>',
-            e($user->name),
-            (int) ($user->player?->lvl ?? 0),
-            $user->id,
-            asset('main/images/player_info.gif'),
-        );
+        return new LocalizedChatMessage('chat.party_member', [
+            'name' => $user->name, 'level' => (int) ($user->player?->lvl ?? 0),
+            'user_id' => $user->id, 'icon' => asset('main/images/player_info.gif'),
+        ]);
     }
 
     /**
      * Служебное сообщение о событии группы — персональная копия каждому
      * участнику (канал Main с target_user_id видно только адресату).
      */
-    private function broadcastToMembers(int $partyId, string $message, ?int $exceptUserId = null): void
+    private function broadcastToMembers(int $partyId, string|LocalizedChatMessage $message, ?int $exceptUserId = null): void
     {
         foreach ($this->partyRepository->getMemberUsers($partyId) as $member) {
             if ($exceptUserId !== null && (int) $member->id === $exceptUserId) {

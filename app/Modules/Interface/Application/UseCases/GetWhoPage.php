@@ -19,7 +19,7 @@ class GetWhoPage
 
     public function execute(User $user): WhoPageDTO
     {
-        $threshold = Carbon::now()->subMinutes(10);
+        $threshold = Carbon::now()->subMinutes((int) config('game.online_timeout_minutes', 30));
 
         return $this->mapper->map(
             $this->readRepository->getUsersOnLocation($user->location_id),

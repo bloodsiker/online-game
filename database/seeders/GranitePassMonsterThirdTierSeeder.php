@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Modules\Monster\Domain\Services\MonsterStatFormulas;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 /**
@@ -74,14 +75,14 @@ class GranitePassMonsterThirdTierSeeder extends Seeder
             [$minMoney, $maxMoney] = MonsterStatFormulas::moneyRange($exp, $m['newLvl']);
 
             if ($m['isNew']) {
-                $monster = Monster::firstOrNew(['name' => $m['name'], 'lvl' => $m['newLvl']]);
+                $monster = LocalizedContentSeederQuery::firstOrNewFor(Monster::class, ['name' => $m['name'], 'lvl' => $m['newLvl']]);
                 if ($monster->exists) {
                     continue;
                 }
                 $monster->description = $m['description'];
                 $monster->is_boss = false;
             } else {
-                $monster = Monster::query()->where('name', $m['name'])->where('lvl', $m['currentLvl'])->first();
+                $monster = Monster::query()->where('name->ru', $m['name'])->where('lvl', $m['currentLvl'])->first();
                 if ($monster === null) {
                     $this->command?->warn(sprintf('не найден: «%s» lvl %d', $m['name'], $m['currentLvl']));
 

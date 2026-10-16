@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <title>Реферальная программа</title>
+    <title>{{ __('Реферальная программа') }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     {!! $itemTooltipScript !!}
     <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
@@ -107,7 +107,7 @@
                     <tbody>
                     <tr height="22">
                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                        <td align="center" class="tbl-usi-hdr mbg">Статистика</td>
+                        <td align="center" class="tbl-usi-hdr mbg">{{ __('Статистика') }}</td>
                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
                     </tbody>
@@ -121,24 +121,24 @@
                 <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                     <tbody>
                     <tr class="bg_l">
-                        <td class="b" width="30%" align="right" nowrap>Приглашено игроков:</td>
+                        <td class="b" width="30%" align="right" nowrap>{{ __('Приглашено игроков:') }}</td>
                         <td class="b redd">{{ $referralsCount }}</td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Сейчас в игре:</td>
+                        <td class="b" align="right" nowrap>{{ __('Сейчас в игре:') }}</td>
                         <td class="b redd">{{ $onlineCount }}</td>
                     </tr>
                     <tr class="bg_l brd2-top">
-                        <td class="b" align="right" nowrap>Этапов наград:</td>
+                        <td class="b" align="right" nowrap>{{ __('Этапов наград:') }}</td>
                         <td class="b redd">{{ count($page->stages) }}</td>
                     </tr>
                     <tr class="brd2-top">
-                        <td class="b" align="right" nowrap>Наград получено:</td>
+                        <td class="b" align="right" nowrap>{{ __('Наград получено:') }}</td>
                         <td class="b redd">{{ $claimedCount }}</td>
                     </tr>
                     @if($page->invitedByName !== null)
                         <tr class="bg_l brd2-top">
-                            <td class="b" align="right" nowrap>Вас пригласил:</td>
+                            <td class="b" align="right" nowrap>{{ __('Вас пригласил:') }}</td>
                             <td class="b black">{{ $page->invitedByName }}</td>
                         </tr>
                     @endif
@@ -165,7 +165,7 @@
                     <tbody>
                     <tr height="22">
                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                        <td align="center" class="tbl-usi-hdr mbg">Информация</td>
+                        <td align="center" class="tbl-usi-hdr mbg">{{ __('Информация') }}</td>
                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
                     </tbody>
@@ -179,47 +179,44 @@
                 <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                     <tbody>
                     <tr class="bg_l">
-                        <td class="b" width="30%" align="right" nowrap>Ваша реферальная ссылка:</td>
+                        <td class="b" width="30%" align="right" nowrap>{{ __('Ваша реферальная ссылка:') }}</td>
                         <td>
                             <input class="ref-link-input" type="text" readonly value="{{ $page->referralLink }}" onclick="this.select()" id="ref-link">
                         </td>
                         <td width="120" align="center">
-                            <b class="butt1 pointer"><b><input value="Копировать" type="button" onclick="copyReferralLink()" style="width: 100px;" class="redd"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('Копировать') }}" type="button" onclick="copyReferralLink()" style="width: 100px;" class="redd"></b></b>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
                 <div class="ref-note">
-                    <b>Реферал</b> — игрок, привлечённый вами в игру при помощи вашей реферальной ссылки.
-                    Друг должен зарегистрироваться по ней, чтобы попасть в список приглашённых.
-                    Когда ваш реферал достигает очередного уровня из таблицы ниже, вы получаете награду —
-                    она начисляется автоматически и отображается в разделе «Статистика».
+                    <b>{{ __('Реферал') }}</b> {{ __('— игрок, привлечённый вами в игру при помощи вашей реферальной ссылки. Друг должен зарегистрироваться по ней, чтобы попасть в список приглашённых. Когда ваш реферал достигает очередного уровня из таблицы ниже, вы получаете награду — она начисляется автоматически и отображается в разделе «Статистика».') }}
                 </div>
 
                 <br>
 
                 @if($page->stages === [])
-                    <div class="ref-empty">Этапы наград не настроены.</div>
+                    <div class="ref-empty">{{ __('Этапы наград не настроены.') }}</div>
                 @else
                     <div class="step_info_awards">
                     <table class="coll brd2 w100 p6v p6h" cellspacing="0" cellpadding="0" border="0">
                         <tr style="background: #ff000021;">
                             <td width="1%" align="center"><b style="color: #284310 !important;">#</b></td>
-                            <td align="center"><b style="color: #284310 !important;">Уровень реферала</b></td>
-                            <td width="100%" align="center"><b style="color: #284310 !important;">Награда</b></td>
+                            <td align="center"><b style="color: #284310 !important;">{{ __('Уровень реферала') }}</b></td>
+                            <td width="100%" align="center"><b style="color: #284310 !important;">{{ __('Награда') }}</b></td>
                         </tr>
                         @foreach($page->stages as $i => $stage)
                             <tr>
                                 <td width="1%" align="center"><b class="redd">{{ $i + 1 }}</b></td>
                                 <td align="center" nowrap>
-                                    <b>{{ $stage->levelThreshold }}</b> уровень
+                                    <b>{{ $stage->levelThreshold }}</b> {{ __('уровень') }}
                                 </td>
                                 <td width="100%">
                                     @if($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::GOLD->value)
-                                        <span title="Золото"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
+                                        <span title="{{ __('Золото') }}"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
                                     @elseif($stage->rewardType === \App\Modules\Referral\Domain\Enums\ReferralRewardType::DIAMOND->value)
-                                        <span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
+                                        <span title="{{ __('Бриллианты') }}"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;<b class="redd">{{ $stage->rewardValue }}</b>
                                     @else
                                         @if($stage->rewardItemId && $stage->rewardItemImage)
                                             <table width="59" height="59" cellpadding="0" cellspacing="0" border="0" class="artifact-table"
@@ -265,7 +262,7 @@
                     <tbody>
                     <tr height="22">
                         <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                        <td align="center" class="tbl-usi-hdr mbg">Количество рефералов</td>
+                        <td align="center" class="tbl-usi-hdr mbg">{{ __('Количество рефералов') }}</td>
                         <td width="27" class="tbl-usi-hdr rc"><b></b></td>
                     </tr>
                     </tbody>
@@ -277,7 +274,7 @@
             <td class="tbl-shp-sides ls">&nbsp;</td>
             <td class="tbl-usi_bg" valign="top" style="padding: 10px 10px 12px;">
                 @if($page->referred === [])
-                    <div class="ref-empty">Вы ещё никого не пригласили.</div>
+                    <div class="ref-empty">{{ __('Вы ещё никого не пригласили.') }}</div>
                 @else
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                         <tbody>
@@ -286,8 +283,8 @@
                                 <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                                     <tbody>
                                     <tr>
-                                        <td class="b" width="30%">Уровень</td>
-                                        <td class="b">Количество</td>
+                                        <td class="b" width="30%">{{ __('Уровень') }}</td>
+                                        <td class="b">{{ __('Количество') }}</td>
                                     </tr>
                                     @foreach($byLevel as $lvl => $count)
                                         <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
@@ -303,11 +300,11 @@
                                 <table class="coll w100 p10h p4v brd2-all" cellspacing="0" cellpadding="0" border="0">
                                     <tbody>
                                     <tr>
-                                        <td class="b">Игрок</td>
-                                        <td class="b" width="58" align="center">Уровень</td>
-                                        <td class="b" width="68" align="center">Статус</td>
-                                        <td class="b" width="104" align="center">Был онлайн</td>
-                                        <td class="b" width="86" align="center">Награды</td>
+                                        <td class="b">{{ __('Игрок') }}</td>
+                                        <td class="b" width="58" align="center">{{ __('Уровень') }}</td>
+                                        <td class="b" width="68" align="center">{{ __('Статус') }}</td>
+                                        <td class="b" width="104" align="center">{{ __('Был онлайн') }}</td>
+                                        <td class="b" width="86" align="center">{{ __('Награды') }}</td>
                                     </tr>
                                     @foreach($page->referred as $referral)
                                         <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
@@ -324,9 +321,9 @@
                                             <td class="brd2-top brd2-bt b" align="center">{{ $referral->level ?? '-' }}</td>
                                             <td class="brd2-top brd2-bt" align="center">
                                                 @if($referral->isOnline)
-                                                    <span class="online-dot"></span>Да
+                                                    <span class="online-dot"></span>{{ __('Да') }}
                                                 @else
-                                                    <span class="offline-dot"></span>Нет
+                                                    <span class="offline-dot"></span>{{ __('Нет') }}
                                                 @endif
                                             </td>
                                             <td class="brd2-top brd2-bt user_offline" align="center">{{ $referral->lastOnlineLabel ?? '-' }}</td>

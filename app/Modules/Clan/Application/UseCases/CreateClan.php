@@ -19,6 +19,10 @@ class CreateClan
 
     public function execute(User $user, string $name, UploadedFile $logo): void
     {
+        if ((int) $user->location_id !== 29) {
+            throw new RuntimeException(__('clan.directory.location_required'));
+        }
+
         if ($user->clanMembership !== null) {
             throw new RuntimeException('Вы уже состоите в клане.');
         }

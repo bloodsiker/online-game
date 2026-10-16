@@ -41,12 +41,20 @@ readonly class HitCalculator
     /** Контра «Крит > Танк»: максимальное пробитие брони на крите (при чистом крите) */
     private const ARMOR_PIERCE = 0.92;
 
+    /** Знаменатель мягкого роста физического урона от уровня владения оружием. */
+    private const WEAPON_SKILL_SOFTCAP = 300.0;
+
     public function __construct(
         private RandomizerInterface $random,
     ) {}
 
-    public function hit(FightHitInterface $attacker, FightHitInterface $defender, int $min, int $max): FightHitDTO
-    {
+    public function hit(
+        FightHitInterface $attacker,
+        FightHitInterface $defender,
+        int $min,
+        int $max,
+        int $weaponSkillLevel = 0,
+    ): FightHitDTO {
         $dto = new FightHitDTO;
 
         if ($this->isDodge($attacker, $defender)) {
@@ -54,6 +62,7 @@ readonly class HitCalculator
         }
 
         $damage = $this->random->between(min($min, $max), max($min, $max));
+        $damage = (int) round($damage * self::weaponSkillMultiplier($weaponSkillLevel));
         $isCrit = $this->isCritical($attacker, $defender);
 
         if ($isCrit) {
@@ -68,6 +77,14 @@ readonly class HitCalculator
         [$final, $reflected, $blocked] = $this->applyShieldBlock($defender, $final);
 
         return $dto->setDamage($final)->setReflectedDamage($reflected)->setBlocked($blocked);
+    }
+
+    /** H=0 → ×1, H=300 → ×1.5, H=1000 → ×1.77. */
+    public static function weaponSkillMultiplier(int $level): float
+    {
+        $level = max(0, $level);
+
+        return 1 + ($level / ($level + self::WEAPON_SKILL_SOFTCAP));
     }
 
     /**

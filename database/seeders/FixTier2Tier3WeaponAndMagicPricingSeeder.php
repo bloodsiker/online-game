@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Share\Infrastructure\Localization\LocalizedItemSeederQuery;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Дополняет FixTier2Tier3ArmorPricingSeeder (который чинил только броню):
@@ -117,13 +117,13 @@ class FixTier2Tier3WeaponAndMagicPricingSeeder extends Seeder
 
     private function setPriceOnly(string $name, int $price, int &$shopRowsTouched): int
     {
-        $row = DB::table('share_items')->where('name', $name)->first();
+        $row = LocalizedItemSeederQuery::items()->where('name', $name)->first();
         if ($row === null) {
             $this->command?->warn("не найден предмет: «{$name}»");
 
             return 0;
         }
-        DB::table('share_items')->where('id', $row->id)->update(['price' => $price, 'updated_at' => now()]);
+        LocalizedItemSeederQuery::items()->where('id', $row->id)->update(['price' => $price, 'updated_at' => now()]);
         $shopItem = ShopItem::query()->where('share_item_id', $row->id)->first();
         if ($shopItem !== null) {
             $shopItem->price = $price;
@@ -138,7 +138,7 @@ class FixTier2Tier3WeaponAndMagicPricingSeeder extends Seeder
     /** @param  array<int, float>  $rarityMultiplier */
     private function applyChain(string $baseName, int $basePrice, array $rarityMultiplier, int &$shopRowsTouched): int
     {
-        $item = DB::table('share_items')->where('name', $baseName)->first();
+        $item = LocalizedItemSeederQuery::items()->where('name', $baseName)->first();
         if ($item === null) {
             $this->command?->warn("не найден предмет: «{$baseName}»");
 
@@ -148,7 +148,7 @@ class FixTier2Tier3WeaponAndMagicPricingSeeder extends Seeder
         $chain = [$item];
         $current = $item;
         while ($current->upgrade_to_share_item_id !== null) {
-            $next = DB::table('share_items')->where('id', $current->upgrade_to_share_item_id)->first();
+            $next = LocalizedItemSeederQuery::items()->where('id', $current->upgrade_to_share_item_id)->first();
             if ($next === null) {
                 break;
             }
@@ -170,7 +170,7 @@ class FixTier2Tier3WeaponAndMagicPricingSeeder extends Seeder
             $isTerminal = $index === $chainLength - 1;
             $upgradeGoldCost = $isTerminal ? 0 : (int) round($price * self::UPGRADE_GOLD_COST_RATE);
 
-            DB::table('share_items')->where('id', $row->id)->update([
+            LocalizedItemSeederQuery::items()->where('id', $row->id)->update([
                 'price' => $price,
                 'upgrade_gold_cost' => $upgradeGoldCost,
                 'updated_at' => now(),

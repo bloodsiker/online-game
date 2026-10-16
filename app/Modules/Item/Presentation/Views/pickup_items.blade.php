@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Предметы на локации</title>
+    <title>{{ __("Предметы на локации") }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { min-height: 100%; }
@@ -24,7 +25,7 @@
         :message="$page->message"
         :location-url="$page->locationUrl"
         :backpack-url="$page->backpackUrl"
-        empty-message="На земле больше ничего нет."
+        empty-message="{{ __('На земле больше ничего нет.') }}"
     />
     <script>
         try {

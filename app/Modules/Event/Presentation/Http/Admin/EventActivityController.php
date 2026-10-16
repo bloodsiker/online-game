@@ -8,6 +8,7 @@ use App\Modules\Event\Domain\Enums\ActivityBonusRewardType;
 use App\Modules\Event\Domain\Enums\ActivityPeriod;
 use App\Modules\Event\Infrastructure\Persistence\Models\EventActivity;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
+use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,9 +33,12 @@ final class EventActivityController
         ] + $this->formData(null));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ContentTranslationEditor $translationEditor): RedirectResponse
     {
-        EventActivity::create($this->validated($request));
+        $activity = new EventActivity;
+        $translationEditor->fill($activity, $request, ['title', 'description'], ['title', 'description']);
+        $activity->fill($this->validated($request));
+        $activity->save();
 
         return redirect()->route('admin.event.activities')->with('success', 'Активность создана.');
     }
@@ -46,8 +50,9 @@ final class EventActivityController
         ] + $this->formData($activity));
     }
 
-    public function update(Request $request, EventActivity $activity): RedirectResponse
+    public function update(Request $request, EventActivity $activity, ContentTranslationEditor $translationEditor): RedirectResponse
     {
+        $translationEditor->fill($activity, $request, ['title', 'description'], ['title', 'description']);
         $activity->update($this->validated($request));
 
         return redirect()->route('admin.event.activities')->with('success', 'Активность обновлена.');
@@ -72,8 +77,6 @@ final class EventActivityController
     {
         $data = $request->validate([
             'period' => ['required', 'string'],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
             'monster_id' => ['nullable', 'integer', 'exists:monsters,id'],
             'required_count' => ['required', 'integer', 'min:1'],
             'reward_share_item_id' => ['required', 'integer', 'exists:share_items,id'],
@@ -114,7 +117,7 @@ final class EventActivityController
         return [
             'periods' => ActivityPeriod::cases(),
             'bonusTypes' => ActivityBonusRewardType::cases(),
-            'monsters' => Monster::orderBy('name')->get(['id', 'name']),
+            'monsters' => Monster::orderBy('name->ru')->get(['id', 'name']),
             'rewardItemSelected' => $rewardItemId > 0 ? ShareItem::find($rewardItemId, ['id', 'name']) : null,
             'bonusItemSelected' => $bonusItemId > 0 ? ShareItem::find($bonusItemId, ['id', 'name']) : null,
         ];

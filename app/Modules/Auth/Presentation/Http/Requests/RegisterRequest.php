@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Presentation\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -21,6 +23,19 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'race' => ['required', 'exists:races,id'],
             'sex' => ['required', 'in:male,female'],
+            'avatar' => Schema::hasTable('race_avatars')
+                ? [
+                    'required',
+                    'integer',
+                    Rule::exists('race_avatars', 'id')
+                        ->where('race_id', (int) $this->input('race'))
+                        ->where('sex', (string) $this->input('sex')),
+                ]
+                : [
+                    'required',
+                    'string',
+                    Rule::in(array_keys(config('registration_avatars.'.(string) $this->input('sex'), []))),
+                ],
             'license' => ['accepted'],
         ];
     }
@@ -40,6 +55,9 @@ class RegisterRequest extends FormRequest
             'race.in' => 'Выберите допустимую расу.',
             'sex.required' => 'Выберите пол.',
             'sex.in' => 'Выберите корректный пол.',
+            'avatar.required' => 'Выберите аватар персонажа.',
+            'avatar.exists' => 'Выберите аватар для выбранной расы и пола.',
+            'avatar.in' => 'Выберите допустимый аватар.',
             'license.accepted' => 'Вы должны принять лицензионное соглашение.',
         ];
     }

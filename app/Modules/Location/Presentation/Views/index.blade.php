@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра</title>
+    <title>{{ __("Игра") }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         body { height: 100%; margin: 0; color: #000; font-family: Tahoma; font-size: 14px; }
@@ -81,6 +82,95 @@
             content: '';
             transform: translateX(-50%) rotate(45deg);
         }
+
+        /* --- Компас перемещения --- */
+        .compass-wrap { width: 215px; display: flex; flex-direction: column; align-items: center; }
+        .compass {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            background-image: url({{ asset('img/compass-rose.png') }});
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .compass-dir {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Tahoma;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #4a2e12;
+            text-shadow: 0 1px 0 rgba(255,235,190,.75), 0 -1px 1px rgba(0,0,0,.35);
+            background: transparent;
+            border: 1px solid transparent;
+            transition: background .15s ease, box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+        }
+        .compass-dir.compass-disabled {
+            color: #baae99;
+            text-shadow: none;
+            cursor: default;
+            pointer-events: none;
+        }
+        .compass-dir-north { top: -32px; left: 50%; transform: translateX(-50%); }
+        .compass-dir-south { bottom: -32px; left: 50%; transform: translateX(-50%); }
+        .compass-dir-west { left: -46px; top: 49%; transform: translateY(-50%); }
+        .compass-dir-east { top: 49%; transform: translateY(-50%); }
+        html[lang="ru"] .compass-dir-east { right: -49px; }
+        html[lang="uk"] .compass-dir-east { right: -43px; }
+        /* Вверх/вниз — по диагонали справа: между севером и востоком, между востоком и югом. */
+        .compass-dir-up, .compass-dir-down {
+            width: 38px;
+            height: 38px;
+            font-size: 0;
+            color: #caa15c;
+            border: 1px solid rgba(173,122,42,.45);
+            text-shadow: none;
+            background-repeat: no-repeat, no-repeat;
+            background-position: center, center;
+            background-size: 22px 22px, 100% 100%;
+        }
+        .compass-dir-up.compass-disabled, .compass-dir-down.compass-disabled {
+            color: #b5aa92;
+            border-color: rgba(173,122,42,.2);
+            opacity: .45;
+        }
+        .compass-dir-up {
+            top: -6px;
+            right: -30px;
+            background-image: url({{ asset('img/up.png') }}), radial-gradient(circle, rgba(74,46,18,.25), rgba(74,46,18,.08) 70%);
+        }
+        .compass-dir-down {
+            bottom: -6px;
+            right: -30px;
+            background-image: url({{ asset('img/down.png') }}), radial-gradient(circle, rgba(74,46,18,.25), rgba(74,46,18,.08) 70%);
+        }
+        .compass-search {
+            display: inline-block;
+            align-self: flex-start;
+            margin-top: 34px;
+            padding: 6px 16px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,223,150,.18), rgba(74,46,18,.1));
+            border: 1px solid rgba(173,122,42,.5);
+            color: #4a2e12 !important;
+            text-decoration: none !important;
+            font-size: 12px;
+            font-weight: 700;
+            transition: background .15s ease, box-shadow .15s ease;
+        }
+        .compass-search:hover {
+            background: linear-gradient(180deg, rgba(255,223,150,.4), rgba(74,46,18,.15));
+            box-shadow: 0 0 10px 2px rgba(255,214,130,.5);
+            text-decoration: none !important;
+        }
     </style>
 </head>
 <body data-sound-context="location" data-sound-battle="{{ $page->hasBattle ? basename($page->battleUrl ?? '') : '' }}" data-sound-dungeon="{{ $page->dungeonSession?->sessionId ?? '' }}">
@@ -122,23 +212,23 @@
 
             @if($page->dungeonSession !== null)
                 <div style="background:#ffe8b0; border:1px solid #c90; padding:4px 6px; margin-bottom:6px; font-size:11px;">
-                    <b>Данж:</b> {{ $page->dungeonSession->name }}
+                    <b>{{ __("Данж:") }}</b> {{ $page->dungeonSession->name }}
                     @if($page->dungeonSession->isSurvival && $page->dungeonSession->waveCount)
                         &nbsp;|&nbsp;
                         @if($page->dungeonSession->allCleared)
-                            <b style="color:#2a8a2a;">Все волны пройдены! ✓</b>
+                            <b style="color:#2a8a2a;">{{ __("Все волны пройдены! ✓") }}</b>
                         @else
-                            Волна <b>{{ $page->dungeonSession->currentWave }}</b> / {{ $page->dungeonSession->waveCount }}
+                            {{ __("Волна") }} <b>{{ $page->dungeonSession->currentWave }}</b> / {{ $page->dungeonSession->waveCount }}
                         @endif
                     @endif
                     @if($page->dungeonSession->isTower && $page->dungeonSession->currentStageNumber)
-                        &nbsp;|&nbsp; Этаж <b>{{ $page->dungeonSession->currentStageNumber }}</b>
+                        &nbsp;|&nbsp; {{ __("Этаж") }} <b>{{ $page->dungeonSession->currentStageNumber }}</b>
                         @if($page->dungeonSession->currentStageName)
                             — {{ $page->dungeonSession->currentStageName }}
                         @endif
                     @endif
                     @if($page->dungeonSession->expiresAtTimestamp !== null)
-                        — осталось <b id="dungeon-timer-loc"></b>
+                        — {{ __("осталось") }} <b id="dungeon-timer-loc"></b>
                         <script>
                             (function() {
                                 const exp = {{ $page->dungeonSession->expiresAtTimestamp }};
@@ -160,7 +250,7 @@
                         &nbsp;
                         <form method="POST" action="{{ $page->dungeonSession->exitUrl }}" style="display:inline;">
                             @csrf
-                            <button type="submit" style="background:#a33; color:#fff; border:none; padding:2px 8px; cursor:pointer; font-size:11px;">Выйти из данжа</button>
+                            <button type="submit" style="background:#a33; color:#fff; border:none; padding:2px 8px; cursor:pointer; font-size:11px;">{{ __("Выйти из данжа") }}</button>
                         </form>
                     @endif
                 </div>
@@ -168,8 +258,8 @@
 
             @if($page->hasBattle)
                 <div class="battle-description">
-                    <p><span class="color-red"><b>ВНИМАНИЕ!</b></span> <b>Вы атакованы!</b></p>
-                    <p><a href="{{ $page->battleUrl }}" id="attack">Продолжить</a> »</p>
+                    <p><span class="color-red"><b>{{ __("ВНИМАНИЕ!") }}</b></span> <b>{{ __("Вы атакованы!") }}</b></p>
+                    <p><a href="{{ $page->battleUrl }}" id="attack">{{ __("Продолжить") }}</a> »</p>
                 </div>
             @else
                 @if($page->monsters !== [])
@@ -184,8 +274,8 @@
                                     <a href="{{ $monster->infoUrl }}" onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;" class="color-red">{{ $monster->name }}</a>
                                 @endif
                                 [<a href="{{ $monster->attackUrl }}"
-                                    @if($loop->first) id="weapon-attack" title="Атаковать первого монстра (Q)" @endif
-                                    onclick="return parent.navigateGameAction?.(this.href) ?? true;">атаковать</a>]
+                                    @if($loop->first) id="weapon-attack" title="{{ __("Атаковать первого монстра (Q)") }}" @endif
+                                    onclick="return parent.navigateGameAction?.(this.href) ?? true;">{{ __("атаковать") }}</a>]
                             </div>
                         @endforeach
                     </div>
@@ -198,7 +288,7 @@
                         @else
                             <span class="color-red">{{ $npc->name }}</span>
                         @endif
-                        [<a href="{{ $npc->talkUrl }}">говорить</a>]
+                        [<a href="{{ $npc->talkUrl }}">{{ __("говорить") }}</a>]
                     </div>
                 @endforeach
 
@@ -206,71 +296,51 @@
                     <table cellspacing="0" cellpadding="0" align="left" border="0">
                         <tbody>
                         <tr>
-                            <td width="250px" style="vertical-align: top">
-                                <table cellspacing="0" cellpadding="0" align="left" border="0" style="background:url({{ asset('img/dimension.gif') }}) no-repeat 39px 22px">
-                                    <tbody>
-                                    <tr>
-                                        <td></td>
-                                        <td align="center" valign="top" height="37">
-                                            @if($moves['up']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'up')" target="game">{{ $moves['up']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['up']->label }}</font>
-                                            @endif
-                                        </td>
-                                        <td valign="bottom">
-                                            @if($moves['north']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'north')" id="{{ $moves['north']->elementId }}" target="game">{{ $moves['north']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['north']->label }}</font>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="left" width="57">
-                                            @if($moves['west']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'west')" id="{{ $moves['west']->elementId }}" target="game">{{ $moves['west']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['west']->label }}</font>
-                                            @endif
-                                        </td>
-                                        <td align="center" valign="middle" width="59" height="54"></td>
-                                        <td width="68" align="right" style="padding:0px 10px 0px 0px">
-                                            @if($moves['east']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'east')" id="{{ $moves['east']->elementId }}" target="game">{{ $moves['east']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['east']->label }}</font>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right" valign="top" height="29">
-                                            @if($moves['south']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'south')" id="{{ $moves['south']->elementId }}" target="game">{{ $moves['south']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['south']->label }}</font>
-                                            @endif
-                                        </td>
-                                        <td align="center" valign="bottom">
-                                            @if($moves['down']->available)
-                                                <a href="#" onclick="actionGoTo(this, 'down')" target="game">{{ $moves['down']->label }}</a>
-                                            @else
-                                                <font color="#B09A8B">{{ $moves['down']->label }}</font>
-                                            @endif
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="3" style="padding:7px 0px 4px 0px">
-                                            <a href="{{ $page->takeItemsUrl }}" id="take-item" target="game">
-                                                Искать здесь @if($page->itemsOnLocationCount)({{ $page->itemsOnLocationCount }}) @endif
-                                            </a> »
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                            <td width="215px" style="vertical-align: top">
+                                <div class="compass-wrap">
+                                    <div class="compass">
+                                        @if($moves['north']->available)
+                                            <a href="#" class="compass-dir compass-dir-north" onclick="actionGoTo(this, 'north')" id="{{ $moves['north']->elementId }}" target="game" title="{{ __($moves['north']->label) }}">{{ __($moves['north']->label) }}</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-north compass-disabled">{{ __($moves['north']->label) }}</span>
+                                        @endif
+
+                                        @if($moves['south']->available)
+                                            <a href="#" class="compass-dir compass-dir-south" onclick="actionGoTo(this, 'south')" id="{{ $moves['south']->elementId }}" target="game" title="{{ __($moves['south']->label) }}">{{ __($moves['south']->label) }}</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-south compass-disabled">{{ __($moves['south']->label) }}</span>
+                                        @endif
+
+                                        @if($moves['west']->available)
+                                            <a href="#" class="compass-dir compass-dir-west" onclick="actionGoTo(this, 'west')" id="{{ $moves['west']->elementId }}" target="game" title="{{ __($moves['west']->label) }}">{{ __($moves['west']->label) }}</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-west compass-disabled">{{ __($moves['west']->label) }}</span>
+                                        @endif
+
+                                        @if($moves['east']->available)
+                                            <a href="#" class="compass-dir compass-dir-east" onclick="actionGoTo(this, 'east')" id="{{ $moves['east']->elementId }}" target="game" title="{{ __($moves['east']->label) }}">{{ __($moves['east']->label) }}</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-east compass-disabled">{{ __($moves['east']->label) }}</span>
+                                        @endif
+
+                                        @if($moves['up']->available)
+                                            <a href="#" class="compass-dir compass-dir-up" onclick="actionGoTo(this, 'up')" id="move-up" target="game" title="{{ __($moves['up']->label) }}">▲</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-up compass-disabled" title="{{ __($moves['up']->label) }}">▲</span>
+                                        @endif
+                                        @if($moves['down']->available)
+                                            <a href="#" class="compass-dir compass-dir-down" onclick="actionGoTo(this, 'down')" id="move-down" target="game" title="{{ __($moves['down']->label) }}">▼</a>
+                                        @else
+                                            <span class="compass-dir compass-dir-down compass-disabled" title="{{ __($moves['down']->label) }}">▼</span>
+                                        @endif
+                                    </div>
+
+                                    <a href="{{ $page->takeItemsUrl }}" id="take-item" target="game" class="compass-search">
+                                        {{ __('Искать здесь') }} @if($page->itemsOnLocationCount)({{ $page->itemsOnLocationCount }}) @endif »
+                                    </a>
+                                </div>
                             </td>
-                            <td style="vertical-align: top">
+                            <td style="vertical-align: top; padding-left: 15px">
                                 @if($page->structures !== [] || $page->gateActions !== [])
                                     <table border="0" cellspacing="0" cellpadding="0">
                                         <tbody>
@@ -412,15 +482,15 @@
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Не удалось восстановить здоровье.');
+                throw new Error(data.message || gameTranslate("Не удалось восстановить здоровье."));
             }
 
             hp = data.hp;
             mp = data.mp;
             parent.sendToFrame('character-frame', { hp, mp, experience, lvl });
-            parent.openGameMessageModal({ title: 'Целительный фонтан', message: data.message });
+            parent.openGameMessageModal({ title: gameTranslate("Целительный фонтан"), message: data.message });
         } catch (error) {
-            parent.showErrorIframe(error.message || 'Не удалось восстановить здоровье.');
+            parent.showErrorIframe(error.message || gameTranslate("Не удалось восстановить здоровье."));
         } finally {
             delete trigger.dataset.healing;
             trigger.removeAttribute('aria-disabled');
@@ -458,6 +528,12 @@
 
     @if(session('message'))
         try { window.parent.showErrorIframe('{{ session('message') }}'); } catch (e) {}
+    @endif
+    @if(session()->has('wallet_money') || session()->has('wallet_diamond'))
+        parent.sendToFrame('character-frame', {
+            @if(session()->has('wallet_money'))money: {{ (int) session('wallet_money') }},@endif
+            @if(session()->has('wallet_diamond'))diamond: {{ (float) session('wallet_diamond') }},@endif
+        });
     @endif
 </script>
 </body>

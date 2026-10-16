@@ -11,6 +11,8 @@ use App\Modules\Dungeon\Application\Services\DungeonCoordinator;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Interface\Application\Jobs\UpdatePlayerOnlinePresence;
 use App\Modules\Interface\Application\Listeners\UpdatePlayerPresenceFromSocket;
+use App\Modules\Interface\Application\Services\PlayerOnlinePresenceService;
+use App\Modules\Interface\Domain\Events\PlayerCameOnline;
 use App\Modules\Interface\Domain\Events\PlayerStateUpdated;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
@@ -125,6 +127,40 @@ class PlayerHeartbeatTest extends TestCase
 
         $this->assertSame(93, $player->fresh()->hp_now);
         $this->assertTrue($user->fresh()->last_online_at->equalTo($now));
+    }
+
+    public function test_clan_online_notice_is_sent_once_until_player_was_offline_for_thirty_minutes(): void
+    {
+        $now = Carbon::parse('2026-10-15 12:00:00');
+        Carbon::setTestNow($now);
+        config()->set('game.online_timeout_minutes', 30);
+
+        $user = (new User)->forceFill([
+            'name' => 'Clan Member',
+            'email' => 'clan-member@example.test',
+            'password' => Hash::make('secret'),
+            'last_online_at' => $now->copy()->subMinutes(31),
+        ]);
+        $user->save();
+        DB::table('clan_members')->insert([
+            'clan_id' => 7,
+            'user_id' => $user->id,
+            'role_id' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        Event::fake([PlayerCameOnline::class]);
+        $presence = app(PlayerOnlinePresenceService::class);
+        $presence->touch((int) $user->id, $now);
+
+        Carbon::setTestNow($now->copy()->addMinutes(5));
+        $presence->touch((int) $user->id, Carbon::now());
+        Event::assertDispatchedTimes(PlayerCameOnline::class, 1);
+
+        Carbon::setTestNow($now->copy()->addMinutes(36));
+        $presence->touch((int) $user->id, Carbon::now());
+        Event::assertDispatchedTimes(PlayerCameOnline::class, 2);
     }
 
     public function test_heartbeat_requires_authentication(): void
@@ -621,6 +657,13 @@ class PlayerHeartbeatTest extends TestCase
             $table->unsignedBigInteger('prev_location_id')->nullable();
             $table->timestamp('last_online_at')->nullable();
             $table->rememberToken();
+            $table->timestamps();
+        });
+        Schema::connection('sqlite')->create('clan_members', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('clan_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('role_id')->default(1);
             $table->timestamps();
         });
         Schema::connection('sqlite')->create('post_letters', function (Blueprint $table): void {

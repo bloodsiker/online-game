@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\Reputation\Infrastructure\Persistence\Models;
 
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReputationTier extends Model
 {
+    use HasLegacyTranslations;
+
+    public $translatable = ['medal_name', 'feat_description', 'feat_medal_name'];
+
     public const REGULAR_MEDAL_RATING = [
         500 => 10,
         1000 => 20,
@@ -67,7 +72,17 @@ class ReputationTier extends Model
 
     public function featMedalRating(): int
     {
-        return $this->feat_medal_name ? self::FEAT_MEDAL_RATING : 0;
+        return $this->hasFeatMedal() ? self::FEAT_MEDAL_RATING : 0;
+    }
+
+    public function hasRegularMedal(): bool
+    {
+        return trim((string) $this->getTranslation('medal_name', 'ru', false)) !== '';
+    }
+
+    public function hasFeatMedal(): bool
+    {
+        return trim((string) $this->getTranslation('feat_medal_name', 'ru', false)) !== '';
     }
 
     public function medalIconUrl(): ?string

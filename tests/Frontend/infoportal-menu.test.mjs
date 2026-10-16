@@ -8,11 +8,50 @@ const xml = read('public/data/locale/ru/topMenu.xml');
 const view = read('app/Modules/Interface/Presentation/Views/menu.blade.php');
 const engine = read('public/main/js/canvas/canvas.all.js');
 
+test('both languages use the original bitmap font and Ukrainian labels have every glyph', () => {
+    const fontXml = read('public/data/canvas/fonts/tahoma_11_bold_stroke.fnt');
+    const font = { lineHeight: 13, chars: {} };
+    for (const match of fontXml.matchAll(/<char\s+([^>]+)\/>/g)) {
+        const attrs = Object.fromEntries([...match[1].matchAll(/(\w+)="([^"]+)"/g)].map(m => [m[1], Number(m[2])]));
+        font.chars[attrs.id] = {
+            xOffset: attrs.xoffset, yOffset: attrs.yoffset, xAdvance: attrs.xadvance, kerning: {},
+            texture: { frame: { x: attrs.x, y: attrs.y, width: attrs.width, height: attrs.height }, baseTexture: { source: {} } },
+        };
+    }
+    const originalI = font.chars[105];
+    const context = {
+        window: {},
+        document: { createElement: () => ({ getContext: () => ({ drawImage() {}, translate() {}, scale() {} }) }) },
+    };
+    vm.runInNewContext(read('public/js/menu-bitmap-font.js'), context);
+    let textures = 0;
+    const px = { Texture: { fromCanvas: surface => {
+        textures++;
+        return { frame: { width: surface.width, height: surface.height } };
+    } } };
+    context.window.extendMenuBitmapFont(px, font);
+    assert.equal(font.lineHeight, 13);
+    assert.equal(font.chars[1110].texture, originalI.texture);
+    const labels = read('lang/uk/ui.php').match(/'menu_labels' => '([^']+)'/)[1];
+    for (const char of labels.replaceAll('|', '')) {
+        assert.ok(font.chars[char.codePointAt(0)], `Missing bitmap glyph: ${char}`);
+    }
+    for (const id of [1110, 1111, 1108, 1030, 1031, 1028]) {
+        const glyph = font.chars[id];
+        assert.ok(glyph.yOffset + glyph.texture.frame.height <= font.lineHeight);
+    }
+    context.window.extendMenuBitmapFont(px, font);
+    assert.equal(textures, 4, 'Repeated initialization must reuse textures');
+    assert.ok(!view.includes('new canvas.px.Text('));
+    assert.match(view, /window\.extendMenuBitmapFont\([^;]+;\s+topMenuReady\.call\(this\)/);
+});
+
 test('infoportal contains three submenu commands with matching labels', () => {
     const portal = xml.match(/<item id="13"[^>]*>([\s\S]*?)<\/item>/);
     assert.ok(portal);
     assert.equal((portal[1].match(/<item /g) || []).length, 3);
-    const labels = view.match(/labels: '([^']+)'/)[1].split('|');
+    assert.ok(view.includes("labels: @json(__('ui.menu_labels'))"));
+    const labels = read('lang/ru/ui.php').match(/'menu_labels' => '([^']+)'/)[1].split('|');
     for (const [label, command, title] of [
         [19, 'm_forum', 'форум'], [20, 'm_library', 'библиотека'], [21, 'm_telegram', 'Telegram'],
     ]) {

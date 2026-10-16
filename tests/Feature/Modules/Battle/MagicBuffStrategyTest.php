@@ -39,6 +39,7 @@ class MagicBuffStrategyTest extends TestCase
 
         Schema::create('players', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('reputation_rating')->default(0);
             $table->integer('mp_now')->default(100);
             $table->integer('hp_now')->default(10);
             $table->integer('hp_max')->default(100);

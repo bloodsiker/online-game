@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Console\Seeders;
 
-use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -17,6 +16,7 @@ use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemEffect;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -660,8 +660,8 @@ class ItemsSeeder
         $item3->share_item_id = $sItem3->id;
         $item3->save();
 
-        $details1 = ShareItem::where('name', 'Коготь медведя')->first();
-        $details2 = ShareItem::where('name', 'Слиток')->first();
+        $details1 = ShareItem::where('name->ru', 'Коготь медведя')->first();
+        $details2 = ShareItem::where('name->ru', 'Слиток')->first();
         $shareRecipe->items()->attach($details1->id, ['count' => 2]);
         $shareRecipe->items()->attach($details2->id, ['count' => 1]);
         $shareRecipe->items()->attach($sItem3->id, ['count' => 100]);

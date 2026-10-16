@@ -32,14 +32,14 @@ class MagicBookStarterSeeder extends Seeder
 
     public function run(): void
     {
-        if (ShareItem::where('name', 'Книга: Огненная искра')->exists()) {
+        if (ShareItem::where('name->ru', 'Книга: Огненная искра')->exists()) {
             $this->command->info('MagicBookStarterSeeder: уже существует, пропускаем.');
 
             return;
         }
 
         DB::transaction(function () {
-            $spellSkillId = (int) Skill::where('name', self::SPELL_SKILL_NAME)->value('id');
+            $spellSkillId = (int) Skill::where('name->ru', self::SPELL_SKILL_NAME)->value('id');
 
             if ($spellSkillId === 0) {
                 $this->command->warn('MagicBookStarterSeeder: навык «Колдовство» не найден — прогоните миграцию 2026_08_22_120000 и AttackSkillSeeder сначала.');
@@ -272,7 +272,7 @@ class MagicBookStarterSeeder extends Seeder
         $book = new ShareItem;
         $book->name = $name;
         $book->type = ShareItemType::BOOK;
-        $book->description = sprintf('Обучает заклинанию «%s». Расходуется при изучении.', $skill->name);
+        $book->description = sprintf('Обучает заклинанию «%s». Расходуется при изучении.', $skill->getTranslation('name', 'ru'));
         $book->is_sell = true;
         $book->is_give = true;
         $book->price = $priceMultiplier * max(1, $skill->level);

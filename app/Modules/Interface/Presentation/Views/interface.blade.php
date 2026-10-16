@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Онлайн Игра</title>
+    <title>{{ __('Онлайн Игра') }}</title>
     <style>
         html {
             height: 100%;
@@ -453,7 +453,7 @@
 
                 </div>
                 <div style="text-align: center;">
-                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="ОТМЕНА" type="button" style="width:60px"></b></b>
+                    <b class="butt1 pointer " ><b><input value="OK" type="submit" onClick="if(document._submit)return false;document._submit=true;" style="width:50px" ID="btnOk"></b></b> <b class="butt1 btn_sys_confirm_close pointer " ><b><input value="{{ __('ОТМЕНА') }}" type="button" style="width:60px"></b></b>
                 </div>
             </div>
         </div>
@@ -562,11 +562,19 @@
     }
 
     function attackMonster(id, monsterId, action) {
-        let routeTemplate = "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
-        document.getElementById('game-frame').contentWindow.location.href = routeTemplate
-            .replace(':id', id)
-            .replace(':monsterId', monsterId)
-            .replace(':action', action);
+        let target = null;
+        try {
+            target = document.getElementById('game-frame')?.contentWindow?.battleTarget ?? null;
+        } catch (e) {}
+
+        let routeTemplate = target?.attackUrlTemplate || "{{ route('fight.attack', ['id' => ':id', 'monsterId' => ':monsterId', 'action' => ':action']) }}";
+        if (target?.attackUrlTemplate) {
+            routeTemplate = routeTemplate.replace('__MONSTER__', monsterId).replace('__ACTION__', action);
+        } else {
+            routeTemplate = routeTemplate.replace(':id', id).replace(':monsterId', monsterId).replace(':action', action);
+        }
+
+        document.getElementById('game-frame').contentWindow.location.href = routeTemplate;
     }
 
     // Глобальні змінні в головному вікні (parent)

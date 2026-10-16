@@ -61,19 +61,19 @@ class ItemService
             if (! $slot) {
                 $name = Item::find($itemId)?->itemInfo->name ?? 'предмет';
 
-                return sprintf('Кто-то уже поднял предмет <b>"%s"</b>...', $name);
+                return sprintf(__('Кто-то уже поднял предмет <b>"%s"</b>...'), $name);
             }
 
             $item = $slot->item;
 
             if ($item->itemInfo->type === ShareItemType::CHEST
                 && $slot->interaction_type !== LocationItemInteractionType::PICKUP) {
-                return 'Этот сундук нужно открыть прямо на локации.';
+                return __('Этот сундук нужно открыть прямо на локации.');
             }
 
             $eventCollection = ($this->worldEventCollectionService ?? app(WorldEventCollectionService::class))->collect($user, $slot);
             if ($eventCollection !== null && ! $eventCollection->allowed) {
-                return $eventCollection->error ?? 'Этот предмет события больше нельзя собрать.';
+                return $eventCollection->error ?? __('Этот предмет события больше нельзя собрать.');
             }
 
             $count = $slot->count;
@@ -83,15 +83,15 @@ class ItemService
 
             if ($instantReward !== null) {
                 return sprintf(
-                    'Вы получили <b>%s</b> монет.',
+                    __('Вы получили <b>%s</b> монет.'),
                     number_format($instantReward->amount, 0, '', ' '),
                 );
             }
 
-            $message = sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+            $message = sprintf(__('Вы подняли предмет <b>"%s"</b>...'), $item->itemInfo->name);
             if ($eventCollection !== null) {
                 $message .= sprintf(
-                    ' Влияние: <b>+%d</b>. Ваш прогресс: <b>%d/%d</b>. Текущее влияние на карте: <b>%d</b>.',
+                    __(' Влияние: <b>+%d</b>. Ваш прогресс: <b>%d/%d</b>. Текущее влияние на карте: <b>%d</b>.'),
                     $eventCollection->influenceAwarded,
                     $eventCollection->playerProgress,
                     $eventCollection->playerLimit,
@@ -99,7 +99,7 @@ class ItemService
                 );
                 if ($eventCollection->stageAdvanced) {
                     $message .= sprintf(
-                        ' Начался следующий этап: <b>«%s»</b>.',
+                        __(' Начался следующий этап: <b>«%s»</b>.'),
                         e($eventCollection->nextStageTitle ?? ''),
                     );
                 }
@@ -122,7 +122,7 @@ class ItemService
 
         $item = $backpackItem->item;
         if (! $item->itemInfo->is_droppable) {
-            return 'Этот предмет нельзя выбросить.';
+            return __('Этот предмет нельзя выбросить.');
         }
 
         $qty = max(1, min($qty, $backpackItem->count));
@@ -165,11 +165,11 @@ class ItemService
     public function handOver(User $user, Item $item, User $toUser): ?string
     {
         if (! $item->itemInfo->is_give) {
-            return 'Этот предмет нельзя передать другому игроку.';
+            return __('Этот предмет нельзя передать другому игроку.');
         }
 
         if ($user->location_id !== $toUser->location_id) {
-            return sprintf('Персонаж %s не находиться рядом возле вас', $toUser->name);
+            return sprintf(__('Персонаж %s не находиться рядом возле вас'), $toUser->name);
         }
 
         $backpackItem = Backpack::where('user_id', $user->id)
@@ -181,7 +181,7 @@ class ItemService
         }
 
         if ($backpackItem->isEquipped()) {
-            return 'Не возможно передать, предмет надет на персонажа';
+            return __('Не возможно передать, предмет надет на персонажа');
         }
 
         $backpackItem->delete();
@@ -269,7 +269,7 @@ class ItemService
         return DB::transaction(function () use ($user, $chestId, $itemId): string {
             $chest = Item::query()->whereKey($chestId)->lockForUpdate()->first();
             if ($chest === null || $this->accessibleChest($user, $chestId, $chest) === null || ! $chest->is_open) {
-                return 'Сундук больше недоступен.';
+                return __('Сундук больше недоступен.');
             }
 
             $slot = ItemInChest::query()
@@ -281,7 +281,7 @@ class ItemService
             $item = $slot?->item;
 
             if ($slot === null || $item === null) {
-                return 'Кто-то уже поднял этот предмет...';
+                return __('Кто-то уже поднял этот предмет...');
             }
 
             $count = $slot->count;
@@ -295,12 +295,12 @@ class ItemService
 
             if ($instantReward !== null) {
                 return sprintf(
-                    'Вы получили <b>%s</b> монет.',
+                    __('Вы получили <b>%s</b> монет.'),
                     number_format($instantReward->amount, 0, '', ' '),
                 );
             }
 
-            return sprintf('Вы подняли предмет <b>"%s"</b>...', $item->itemInfo->name);
+            return sprintf(__('Вы подняли предмет <b>"%s"</b>...'), $item->itemInfo->name);
         });
     }
 
@@ -412,7 +412,7 @@ class ItemService
                 ->where('share_item_id', $shareItem->id)
                 ->exists();
             if ($alreadyEquipped) {
-                return 'У вас уже надет артефакт этого типа.';
+                return __('У вас уже надет артефакт этого типа.');
             }
 
             PlayerArtifact::create([
@@ -437,11 +437,11 @@ class ItemService
             if ($typeItem === ShareItemType::TOOL
                 && ($playerEquip->handLeft?->itemInfo?->type === ShareItemType::TOOL
                     || $playerEquip->handRight?->itemInfo?->type === ShareItemType::TOOL)) {
-                return 'В руках уже находится инструмент.';
+                return __('В руках уже находится инструмент.');
             }
 
             if ($playerEquip->handLeft?->itemInfo?->is_two_hand) {
-                return 'Слот занят двуручным оружием';
+                return __('Слот занят двуручным оружием');
             }
 
             if ($shareItem->is_two_hand) {
@@ -450,7 +450,7 @@ class ItemService
                 }
 
                 if ($playerEquip->hand_left || $playerEquip->hand_right) {
-                    return 'Нужны обе свободные руки';
+                    return __('Нужны обе свободные руки');
                 }
 
                 $playerEquip->hand_left = $itemId;
@@ -468,13 +468,13 @@ class ItemService
                     return $this->injuryEquipError($leftInjury ?? $rightInjury);
                 }
 
-                return 'Слот занят';
+                return __('Слот занят');
             }
             if ($typeItem === ShareItemType::SHIELD && $rightInjury !== null) {
                 return $this->injuryEquipError($rightInjury);
             }
             if ($typeItem === ShareItemType::SHIELD && $playerEquip->hand_right) {
-                return 'Слот занят';
+                return __('Слот занят');
             }
 
             if ($typeItem === ShareItemType::TOOL && ! $playerEquip->hand_left && $leftInjury === null) {
@@ -503,7 +503,7 @@ class ItemService
                 return $this->injuryEquipError($injury);
             }
             if ($playerEquip->$slotName) {
-                return 'Слот занят';
+                return __('Слот занят');
             }
             $playerEquip->$slotName = $itemId;
             $playerEquip->save();
@@ -519,7 +519,7 @@ class ItemService
             } elseif (! $playerEquip->belt_second) {
                 $playerEquip->belt_second = $itemId;
             } else {
-                return 'Слоты для пояса заняты';
+                return __('Слоты для пояса заняты');
             }
             $playerEquip->save();
             $backpackItem->equipped = 1;
@@ -534,7 +534,7 @@ class ItemService
             } elseif (! $playerEquip->bag_second) {
                 $playerEquip->bag_second = $itemId;
             } else {
-                return 'Слоты для сумки заняты';
+                return __('Слоты для сумки заняты');
             }
             $playerEquip->save();
             $backpackItem->equipped = 1;
@@ -549,11 +549,11 @@ class ItemService
     private function injuryEquipError(?PlayerInjury $injury): string
     {
         if ($injury === null) {
-            return 'Нет свободного слота для этого предмета.';
+            return __('Нет свободного слота для этого предмета.');
         }
 
         return sprintf(
-            'Нельзя надеть предмет: травмирована часть тела «%s», бинт ещё действует.',
+            __('Нельзя надеть предмет: травмирована часть тела «%s», бинт ещё действует.'),
             mb_strtolower($injury->body_part->label()),
         );
     }

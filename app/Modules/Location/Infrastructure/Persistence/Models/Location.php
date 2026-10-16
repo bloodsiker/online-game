@@ -8,6 +8,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -19,7 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Location extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLegacyTranslations;
+
+    public $translatable = ['name', 'description'];
 
     protected function casts(): array
     {

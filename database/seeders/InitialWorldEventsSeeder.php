@@ -134,13 +134,13 @@ final class InitialWorldEventsSeeder extends Seeder
 
     private function itemId(string $name): int
     {
-        return (int) (ShareItem::query()->where('name', $name)->value('id')
+        return (int) (ShareItem::query()->where('name->ru', $name)->value('id')
             ?? throw new RuntimeException("Предмет «{$name}» не найден."));
     }
 
     private function monsterId(string $name): int
     {
-        return (int) (Monster::query()->where('name', $name)->value('id')
+        return (int) (Monster::query()->where('name->ru', $name)->value('id')
             ?? throw new RuntimeException("Монстр «{$name}» не найден."));
     }
 }

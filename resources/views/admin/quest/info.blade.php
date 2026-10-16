@@ -47,14 +47,10 @@
 
                                         <div class="col-lg-6">
                                             <h6 class="text-muted mb-3">Основное</h6>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Название</label>
-                                                <input type="text" class="form-control" name="title" value="{{ $quest->title }}">
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="col-form-label">Описание</label>
-                                                <textarea class="form-control" name="description" rows="5">{{ $quest->description }}</textarea>
-                                            </div>
+                                            @include('admin.partials.content-translations', [
+                                                'prefix' => 'quest-'.$quest->id, 'content' => $quest,
+                                                'fields' => ['title' => ['label' => 'Название'], 'description' => ['label' => 'Описание', 'multiline' => true]],
+                                            ])
                                             <div class="form-group">
                                                 <label class="col-form-label">Тип</label>
                                                 <select class="form-control" name="type" data-plugin-selectTwo>
@@ -171,8 +167,7 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="col-form-label">Название</label>
-                                                    <input type="text" class="form-control" name="title" value="{{ $stage->title }}">
+                                                    <label class="col-form-label">Этап #{{ $stage->order }}</label>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <label class="col-form-label">NPC завершения (ID)</label>
@@ -187,20 +182,12 @@
                                                     <a href="{{ route('admin.quest.stage.delete', [$quest->id, $stage->id]) }}" class="btn btn-danger btn-sm" onclick="return confirm('Удалить этап? Цели этапа будут отвязаны.')">Удалить</a>
                                                 </div>
                                             </div>
-                                            <div class="row mt-2">
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Описание этапа</label>
-                                                    <textarea class="form-control" name="description" rows="2">{{ $stage->description }}</textarea>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Реплика, если ещё рано</label>
-                                                    <textarea class="form-control" name="waiting_text" rows="2">{{ $stage->waiting_text }}</textarea>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Реплика после ожидания</label>
-                                                    <textarea class="form-control" name="ready_text" rows="2">{{ $stage->ready_text }}</textarea>
-                                                </div>
-                                            </div>
+                                            @include('admin.partials.content-translations', ['prefix' => 'quest-stage-'.$stage->id, 'content' => $stage, 'fields' => [
+                                                'title' => ['label' => 'Название этапа'],
+                                                'description' => ['label' => 'Описание этапа', 'multiline' => true],
+                                                'waiting_text' => ['label' => 'Реплика, если ещё рано', 'multiline' => true],
+                                                'ready_text' => ['label' => 'Реплика после ожидания', 'multiline' => true],
+                                            ]])
                                             <div class="row mt-2">
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">NPC выдаёт предмет в рюкзак (по завершении этапа)</label>
@@ -310,9 +297,8 @@
                                                         <option value="0" @selected(!$obj->consume_item)>Нет</option>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Описание для игрока</label>
-                                                    <textarea class="form-control" name="description" rows="3">{{ $obj->description }}</textarea>
+                                                <div class="col-md-12">
+                                                    @include('admin.partials.content-translations', ['prefix' => 'quest-objective-'.$obj->id, 'content' => $obj, 'fields' => ['description' => ['label' => 'Описание для игрока', 'multiline' => true]]])
                                                 </div>
                                                 <div class="col-md-3 d-flex align-items-end" style="gap:6px;">
                                                     <button class="btn btn-primary btn-sm">Сохранить</button>
@@ -419,13 +405,11 @@
                                                         @endif
                                                     </select>
                                                 </div>
-                                                <div class="col-md-5">
-                                                    <label class="col-form-label">Текст реплики</label>
-                                                    <textarea class="form-control" name="description" rows="3">{{ $dialogue->description }}</textarea>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="col-form-label">Текст ответа (кнопка)</label>
-                                                    <input type="text" class="form-control" name="reply_text" value="{{ $dialogue->reply_text }}">
+                                                <div class="col-md-10">
+                                                    @include('admin.partials.content-translations', ['prefix' => 'quest-dialogue-'.$dialogue->id, 'content' => $dialogue, 'fields' => [
+                                                        'description' => ['label' => 'Текст реплики', 'multiline' => true],
+                                                        'reply_text' => ['label' => 'Текст ответа (кнопка)'],
+                                                    ]])
                                                 </div>
                                                 <div class="col-md-2 d-flex align-items-end" style="gap:6px;">
                                                     <button class="btn btn-primary btn-sm">Сохранить</button>
@@ -465,14 +449,10 @@
                             <option value="">— любой —</option>
                         </select>
                     </div>
-                    <div class="form-group mb-2">
-                        <label class="col-form-label">Текст реплики</label>
-                        <textarea class="form-control" name="description" rows="4" required></textarea>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label class="col-form-label">Текст ответа (кнопка)</label>
-                        <input type="text" class="form-control" name="reply_text" value="Далее">
-                    </div>
+                    @include('admin.partials.content-translations', ['prefix' => 'quest-dialogue-new', 'content' => null, 'fields' => [
+                        'description' => ['label' => 'Текст реплики', 'multiline' => true],
+                        'reply_text' => ['label' => 'Текст ответа (кнопка)'],
+                    ]])
                 </div>
                 <footer class="card-footer">
                     <div class="text-end">
@@ -508,27 +488,16 @@
                             <input type="number" class="form-control" name="complete_npc_id">
                         </div>
                     </div>
-                    <div class="form-group mb-2">
-                        <label>Название</label>
-                        <input type="text" class="form-control" name="title">
-                    </div>
-                    <div class="form-group mb-2">
-                        <label>Описание</label>
-                        <textarea class="form-control" name="description" rows="2"></textarea>
-                    </div>
+                    @include('admin.partials.content-translations', ['prefix' => 'quest-stage-new', 'content' => null, 'fields' => [
+                        'title' => ['label' => 'Название'], 'description' => ['label' => 'Описание', 'multiline' => true],
+                        'waiting_text' => ['label' => 'Реплика, если игрок пришёл слишком рано', 'multiline' => true],
+                        'ready_text' => ['label' => 'Реплика после завершения ожидания', 'multiline' => true],
+                    ]])
                     <div id="stage-wait-fields" style="display:none;">
                         <div class="form-group mb-2">
                             <label>Продолжительность ожидания, секунд</label>
                             <input type="number" min="1" class="form-control" name="wait_duration_seconds" value="3600">
                             <small class="text-muted">Значение сохраняется на сервере и игроку не показывается.</small>
-                        </div>
-                        <div class="form-group mb-2">
-                            <label>Реплика, если игрок пришёл слишком рано</label>
-                            <textarea class="form-control" name="waiting_text" rows="2">Ты пришёл слишком рано. Возвращайся позже.</textarea>
-                        </div>
-                        <div class="form-group mb-2">
-                            <label>Реплика после завершения ожидания</label>
-                            <textarea class="form-control" name="ready_text" rows="2"></textarea>
                         </div>
                     </div>
                     <div class="row">
@@ -634,10 +603,7 @@
                             <option value="0">Нет</option>
                         </select>
                     </div>
-                    <div class="form-group mb-2">
-                        <label>Описание для игрока</label>
-                        <textarea class="form-control" name="description" rows="3"></textarea>
-                    </div>
+                    @include('admin.partials.content-translations', ['prefix' => 'quest-objective-new', 'content' => null, 'fields' => ['description' => ['label' => 'Описание для игрока', 'multiline' => true]]])
                 </div>
                 <footer class="card-footer">
                     <div class="col-md-12 text-end">

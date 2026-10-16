@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонаж</title>
+    <title>{{ __('Персонаж') }}</title>
     <style>
         html {
             height: 100%;
@@ -296,15 +296,15 @@
                                 <div class="char-card">
                                     <div class="char-card-body" style="text-align:center;">
                                         <div class="char-name">{{ $character->playerName }}</div>
-                                        <img src="{{ asset('img/avatar/dark_elf.jpg') }}"
-                                             class="char-portrait" alt="Портрет">
+                                        <img src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}"
+                                             class="char-portrait" alt="{{ __('Портрет') }}">
                                         <div style="font-size:11px; color:#59483d;">
-                                            Ур. <b>{{ $character->level }}</b>
+                                            {{ __('Ур.') }} <b>{{ $character->level }}</b>
                                             &nbsp;·&nbsp;
                                             <b>{{ $character->raceName }}</b>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            <span style="font-size:11px; color:#75665b;">Класс: </span>
+                                            <span style="font-size:11px; color:#75665b;">{{ __('Класс:') }} </span>
                                             <span class="char-class-badge" style="--class-accent:{{ $character->stats->getDisplayCombatClassColor() }};">
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
@@ -314,7 +314,7 @@
 
                                 {{-- Опыт --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Опыт</div>
+                                    <div class="char-card-title">{{ __('Опыт') }}</div>
                                     <div class="char-card-body">
                                         <div style="display:flex;justify-content:space-between;font-size:11px;">
                                             <span class="char-stat-label">{{ $character->exp }}</span>
@@ -325,46 +325,46 @@
                                                  style="width:{{ $character->expPercent }}%"></div>
                                         </div>
                                         <div style="font-size:10px; color:#8a7a70;">
-                                            след. уровень: <b style="color:#59483d">{{ $character->expUp }}</b>
+                                            {{ __('след. уровень:') }} <b style="color:#59483d">{{ $character->expUp }}</b>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Деньги --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Финансы</div>
+                                    <div class="char-card-title">{{ __('Финансы') }}</div>
                                     <div class="char-card-body">
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">
                                                 <img src="{{ asset('img/icon/m_game.gif') }}" width="14" height="14" style="vertical-align:middle; margin-right:3px;" alt="">
-                                                Монеты
+                                                {{ __('Монеты') }}
                                             </span>
                                             <span class="char-stat-val">{{ number_format($character->money, 0, '', ' ') }}</span>
                                         </div>
                                         <div class="char-stat-row">
                                             <span class="char-stat-label">
                                                 <img src="{{ asset('img/icon/m_dmd.gif') }}" width="14" height="14" style="vertical-align:middle; margin-right:3px;" alt="">
-                                                Бриллианты
+                                                {{ __('Бриллианты') }}
                                             </span>
                                             <span class="char-stat-val">{{ number_format($character->diamond, 0, '', ' ') }}</span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label" style="color:#8a7a70;">В банке</span>
+                                            <span class="char-stat-label" style="color:#8a7a70;">{{ __('В банке') }}</span>
                                             <span class="char-stat-val">{{ number_format($character->bankBalance, 0, '', ' ') }}</span>
                                         </div>
                                         @if($character->bankAccount)
-                                            <div style="font-size:10px; color:#8a7a70; padding-top:3px;">Счёт: <b style="color:#665247">{{ $character->bankAccount }}</b></div>
+                                            <div style="font-size:10px; color:#8a7a70; padding-top:3px;">{{ __('Счёт:') }} <b style="color:#665247">{{ $character->bankAccount }}</b></div>
                                         @endif
                                     </div>
                                 </div>
 
                                 {{-- Статистика --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Статистика</div>
+                                    <div class="char-card-title">{{ __('Статистика') }}</div>
                                     <div class="char-card-body">
                                         <div class="char-battle-row">
-                                            <span>⚔ Побед: <b>{{ $character->victory }}</b></span>
-                                            <span>💀 Поражений: <b>{{ $character->death }}</b></span>
+                                            <span>⚔ {{ __('Побед:') }} <b>{{ $character->victory }}</b></span>
+                                            <span>💀 {{ __('Поражений:') }} <b>{{ $character->death }}</b></span>
                                         </div>
                                     </div>
                                 </div>
@@ -377,16 +377,16 @@
                                 {{-- Основные характеристики --}}
                                 <div class="char-card">
                                     <div class="char-card-title">
-                                        <a href="/b/use.php?bid=14" style="color:#563e2f;text-decoration:none;">Основные характеристики</a>
+                                        <a href="/b/use.php?bid=14" style="color:#563e2f;text-decoration:none;">{{ __('Основные характеристики') }}</a>
                                     </div>
                                     <div class="char-card-body">
                                         @foreach([
-                                            ['Сила',       $character->baseStrength,       $character->stats->getStrength()],
-                                            ['Интуиция',   $character->baseIntuition,      $character->stats->getInt()],
-                                            ['Ловкость',   $character->baseAgility,        $character->stats->getAgility()],
-                                            ['Интеллект',  $character->baseIntelligence,   $character->stats->getIntelligence()],
-                                            ['Мудрость',   $character->baseWisdom,         $character->stats->getMud()],
-                                            ['Выносливость', $character->baseEndurance,    $character->stats->getEndurance()],
+                                            [__('Сила'),       $character->baseStrength,       $character->stats->getStrength()],
+                                            [__('Интуиция'),   $character->baseIntuition,      $character->stats->getInt()],
+                                            [__('Ловкость'),   $character->baseAgility,        $character->stats->getAgility()],
+                                            [__('Интеллект'),  $character->baseIntelligence,   $character->stats->getIntelligence()],
+                                            [__('Мудрость'),   $character->baseWisdom,         $character->stats->getMud()],
+                                            [__('Выносливость'), $character->baseEndurance,    $character->stats->getEndurance()],
                                         ] as [$label, $base, $total])
                                             @php $bonus = $total - $base; @endphp
                                             <div class="char-stat-row">
@@ -403,8 +403,8 @@
                                         @endforeach
                                         @if($character->freeStats)
                                             <div class="char-freepoints">
-                                                Свободных очков: <b id="pts-free-count">{{ $character->freeStats }}</b>
-                                                &nbsp;<a href="#" id="pts-open-modal" onclick="openPtsModal();return false;">Распределить »</a>
+                                                {{ __('Свободных очков:') }} <b id="pts-free-count">{{ $character->freeStats }}</b>
+                                                &nbsp;<a href="#" id="pts-open-modal" onclick="openPtsModal();return false;">{{ __('Распределить »') }}</a>
                                             </div>
                                         @endif
                                     </div>
@@ -412,10 +412,10 @@
 
                                 {{-- Физические характеристики --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Физические характеристики</div>
+                                    <div class="char-card-title">{{ __('Физические характеристики') }}</div>
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
-                                            Здоровье:
+                                            {{ __('Здоровье:') }}
                                             <b style="color:#8d4f49">{{ $character->hpNow }}</b>
                                             / <b style="color:#59483d">{{ $character->stats->getHpMax() }}</b>
                                         </div>
@@ -424,62 +424,62 @@
                                             <div class="char-bar-fill char-bar-hp" style="width:{{ $hpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Класс</span>
+                                            <span class="char-stat-label">{{ __('Класс') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getDisplayCombatClassLabel() }}
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="Урон оружия за раунд — по логике боя: одно оружие (включая дворучное) бьёт одной рукой, два оружия — суммарно">
-                                            <span class="char-stat-label">Урон</span>
+                                        <div class="char-stat-row" title="{{ __('Урон оружия за раунд — по логике боя: одно оружие (включая дворучное) бьёт одной рукой, два оружия — суммарно') }}">
+                                            <span class="char-stat-label">{{ __('Урон') }}</span>
                                             <span class="char-stat-val">
                                                 {{ format_money($character->weaponDamage['min']) }} – {{ format_money($character->weaponDamage['max']) }}
                                                 @php $dmgDebuffAvg = (int) round(($character->weaponDamageDebuff['min'] + $character->weaponDamageDebuff['max']) / 2); @endphp
                                                 @if($dmgDebuffAvg > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $dmgDebuffAvg }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $dmgDebuffAvg }})</span>
                                                 @endif
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Броня</span>
+                                            <span class="char-stat-label">{{ __('Броня') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getArmor() }}
                                                 @if($character->stats->getDebuffReduction('armor') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('armor') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('armor') }})</span>
                                                 @endif
                                             </span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Крит</span>
+                                            <span class="char-stat-label">{{ __('Крит') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getCritical() }}
                                                 @if($character->stats->getDebuffReduction('critical') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('critical') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('critical') }})</span>
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="Множитель урона при физическом или магическом критическом ударе">
-                                            <span class="char-stat-label">Сила крит. удара</span>
+                                        <div class="char-stat-row" title="{{ __('Множитель урона при физическом или магическом критическом ударе') }}">
+                                            <span class="char-stat-label">{{ __('Сила крит. удара') }}</span>
                                             <span class="char-stat-val">{{ $character->stats->getCritDamage() }}%</span>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Уворот</span>
+                                            <span class="char-stat-label">{{ __('Уворот') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getDodge() }}
                                                 @if($character->stats->getDebuffReduction('dodge') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('dodge') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('dodge') }})</span>
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="Вероятность срабатывания блока при экипированном щите">
-                                            <span class="char-stat-label">Шанс блока щитом</span>
+                                        <div class="char-stat-row" title="{{ __('Вероятность срабатывания блока при экипированном щите') }}">
+                                            <span class="char-stat-label">{{ __('Шанс блока щитом') }}</span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockChance() }}%</span>
                                         </div>
-                                        <div class="char-stat-row" title="Фиксированная часть урона, которую блок поглощает и отражает атакующему">
-                                            <span class="char-stat-label">Блок щитом (фикс.)</span>
+                                        <div class="char-stat-row" title="{{ __('Фиксированная часть урона, которую блок поглощает и отражает атакующему') }}">
+                                            <span class="char-stat-label">{{ __('Блок щитом (фикс.)') }}</span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockFlat() }}</span>
                                         </div>
-                                        <div class="char-stat-row" title="Процент урона, который блок поглощает и отражает атакующему">
-                                            <span class="char-stat-label">Блок щитом</span>
+                                        <div class="char-stat-row" title="{{ __('Процент урона, который блок поглощает и отражает атакующему') }}">
+                                            <span class="char-stat-label">{{ __('Блок щитом') }}</span>
                                             <span class="char-stat-val">{{ $character->stats->getBlockPercent() }}%</span>
                                         </div>
                                     </div>
@@ -487,10 +487,10 @@
 
                                 {{-- Магические характеристики --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Магические характеристики</div>
+                                    <div class="char-card-title">{{ __('Магические характеристики') }}</div>
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
-                                            Мана:
+                                            {{ __('Мана:') }}
                                             <b style="color:#526f8d">{{ $character->mpNow }}</b>
                                             / <b style="color:#59483d">{{ $character->stats->getMpMax() }}</b>
                                         </div>
@@ -499,29 +499,29 @@
                                             <div class="char-bar-fill char-bar-mp" style="width:{{ $mpPct }}%"></div>
                                         </div>
                                         <div class="char-stat-row">
-                                            <span class="char-stat-label">Магическая атака</span>
+                                            <span class="char-stat-label">{{ __('Магическая атака') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicAttack() }}
                                                 @if($character->stats->getDebuffReduction('magic_attack') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_attack') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('magic_attack') }})</span>
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="Снижает получаемый магический урон">
-                                            <span class="char-stat-label">Магическое сопротивление</span>
+                                        <div class="char-stat-row" title="{{ __('Снижает получаемый магический урон') }}">
+                                            <span class="char-stat-label">{{ __('Магическое сопротивление') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicResistance() }}
                                                 @if($character->stats->getDebuffReduction('magic_resistance') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_resistance') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('magic_resistance') }})</span>
                                                 @endif
                                             </span>
                                         </div>
-                                        <div class="char-stat-row" title="Вероятность критического срабатывания атакующего заклинания">
-                                            <span class="char-stat-label">Магический крит</span>
+                                        <div class="char-stat-row" title="{{ __('Вероятность критического срабатывания атакующего заклинания') }}">
+                                            <span class="char-stat-label">{{ __('Магический крит') }}</span>
                                             <span class="char-stat-val">
                                                 {{ $character->stats->getMagicCriticalChance() }}%
                                                 @if($character->stats->getDebuffReduction('magic_critical') > 0)
-                                                    <span style="color:#c0392b;font-size:11px" title="Снижено активным дебаффом">(-{{ $character->stats->getDebuffReduction('magic_critical') }})</span>
+                                                    <span style="color:#c0392b;font-size:11px" title="{{ __('Снижено активным дебаффом') }}">(-{{ $character->stats->getDebuffReduction('magic_critical') }})</span>
                                                 @endif
                                             </span>
                                         </div>
@@ -535,7 +535,7 @@
 
                                 {{-- Боевые навыки --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Боевые навыки</div>
+                                    <div class="char-card-title">{{ __('Боевые навыки') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('combat', collect()) as $skill)
                                             @php $pct = $skill->expPercent(); @endphp
@@ -549,14 +549,14 @@
                                                 </div>
                                             </div>
                                         @empty
-                                            <div class="char-skill-pct">Боевые навыки пока не освоены.</div>
+                                            <div class="char-skill-pct">{{ __('Боевые навыки пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
                                 </div>
 
                                 {{-- Волшебные навыки --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Волшебные навыки</div>
+                                    <div class="char-card-title">{{ __('Волшебные навыки') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('magic', collect()) as $skill)
                                             @php $pct = $skill->expPercent(); @endphp
@@ -570,14 +570,14 @@
                                                 </div>
                                             </div>
                                         @empty
-                                            <div class="char-skill-pct">Волшебные навыки пока не освоены.</div>
+                                            <div class="char-skill-pct">{{ __('Волшебные навыки пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
                                 </div>
 
                                 {{-- Мирные умения --}}
                                 <div class="char-card">
-                                    <div class="char-card-title">Мирные умения</div>
+                                    <div class="char-card-title">{{ __('Мирные умения') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('peaceful', collect()) as $skill)
                                             @php $pct = $skill->expPercent(); @endphp
@@ -591,7 +591,7 @@
                                                 </div>
                                             </div>
                                         @empty
-                                            <div class="char-skill-pct">Мирные умения пока не освоены.</div>
+                                            <div class="char-skill-pct">{{ __('Мирные умения пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
                                 </div>

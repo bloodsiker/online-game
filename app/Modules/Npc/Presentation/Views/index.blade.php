@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,12 @@
             color: #000;
             font-family: Tahoma;
             font-size: 12px;
+        }
+        .npc-top-tabs td.npc-top-tab-center {
+            white-space: nowrap;
+        }
+        .npc-top-tabs td.npc-top-tab-center a {
+            white-space: nowrap;
         }
         a {
             color: #000000;
@@ -125,7 +131,7 @@
 </head>
 <body>
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+<table class="npc-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
     @php
         $group = 'main';
@@ -139,16 +145,16 @@
     @endphp
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft2) }}" width="19" height="21"><br></td>
-        <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="" title="Взятые" class="btn_2">Квесты</a>
+        <td class="npc-top-tab-center" id="tab_1" align="center" style="background: url({{ asset($btnCenter2) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_1" href="" title="{{ __('Взятые') }}" class="btn_2">{{ __('Квесты') }}</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
-        <td></td>
+        <td width="100%"></td>
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="140" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_4" href="{{ route('location') }}" title="Вернуться" class="btn_1">Вернуться в локацию</a></td>
+        <td class="npc-top-tab-center" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+            <a id="center_4" href="{{ route('location') }}" title="{{ __('Вернуться') }}" class="btn_1">{{ __('Вернуться в локацию') }}</a></td>
         <td width="19"><img id="right_4" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
     </tr>
     </tbody>
@@ -176,7 +182,7 @@
                                             <td width="27">
                                                 <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                             </td>
-                                            <td align="center" class="tbl-usi_label-center">Квесты</td>
+                                            <td align="center" class="tbl-usi_label-center">{{ __('Квесты') }}</td>
                                             <td width="27"
                                             ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                             </td>
@@ -204,7 +210,7 @@
                                                 <td class="brd2-top brd2-bt">{{ $dialogueStartNode->title }}</td>
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Поговорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}';" style="width:90px">
+                                                        <input value="{{ __('Поговорить') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('npc.dialogue', ['id' => $npc->id]) }}';" style="width:90px">
                                                     </b></b>
                                                 </td>
                                             </tr>
@@ -222,7 +228,7 @@
                                                         <td class="brd2-top brd2-bt" align="right">
                                                             <b class="butt2 pointer">
                                                                 <b>
-                                                                    <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('shop', ['id' => $structure->id]) }}';" style="width:60px">
+                                                                    <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('shop', ['id' => $structure->id]) }}';" style="width:60px">
                                                                 </b>
                                                             </b>
                                                         </td>
@@ -238,7 +244,7 @@
                                                         <td class="brd2-top brd2-bt">{{ $structure->name }}</td>
                                                         <td class="brd2-top brd2-bt" align="right">
                                                             <b class="butt2 pointer"><b>
-                                                                <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('barter_shop', ['id' => $structure->id]) }}';" style="width:60px">
+                                                                <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('barter_shop', ['id' => $structure->id]) }}';" style="width:60px">
                                                             </b></b>
                                                         </td>
                                                     </tr>
@@ -254,7 +260,7 @@
                                                         <td class="brd2-top brd2-bt" align="right">
                                                             <b class="butt2 pointer">
                                                                 <b>
-                                                                    <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('exchange', ['id' => $structure->id]) }}';" style="width:60px">
+                                                                    <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('exchange', ['id' => $structure->id]) }}';" style="width:60px">
                                                                 </b>
                                                             </b>
                                                         </td>
@@ -270,7 +276,7 @@
                                                         <td class="brd2-top brd2-bt">{{ $structure->name }}</td>
                                                         <td class="brd2-top brd2-bt" align="right">
                                                             <b class="butt2 pointer"><b>
-                                                                <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('clan_skill_hall', ['id' => $structure->id]) }}';" style="width:60px">
+                                                                <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('clan_skill_hall', ['id' => $structure->id]) }}';" style="width:60px">
                                                             </b></b>
                                                         </td>
                                                     </tr>
@@ -286,7 +292,7 @@
                                                         <td class="brd2-top brd2-bt" align="right">
                                                             <b class="butt2 pointer">
                                                                 <b>
-                                                                    <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('reputation_exchange', ['id' => $structure->id]) }}';" style="width:60px">
+                                                                    <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('reputation_exchange', ['id' => $structure->id]) }}';" style="width:60px">
                                                                 </b>
                                                             </b>
                                                         </td>
@@ -302,10 +308,10 @@
                                                 <td class="brd2-top brd2-bt" width="1%">
                                                     <img src="{{ asset('img/icon/qst_dlg_m.gif') }}" width="46" height="28">
                                                 </td>
-                                                <td class="brd2-top brd2-bt">Регистрация клана</td>
+                                                <td class="brd2-top brd2-bt">{{ __('Регистрация клана') }}</td>
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Говорить" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('clan') }}';" style="width:90px">
+                                                        <input value="{{ __('Говорить') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('clan') }}';" style="width:90px">
                                                     </b></b>
                                                 </td>
                                             </tr>
@@ -318,10 +324,10 @@
                                                 <td class="brd2-top brd2-bt" width="1%">
                                                     <img src="{{ asset('img/icon/qst_store.gif') }}" width="46" height="28">
                                                 </td>
-                                                <td class="brd2-top brd2-bt">Магазин репутации «{{ $reputationShop->name }}»</td>
+                                                <td class="brd2-top brd2-bt">{{ __('Магазин репутации') }} «{{ $reputationShop->name }}»</td>
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Далее" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('reputation.shop', ['id' => $reputationShop->id]) }}';" style="width:60px">
+                                                        <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('reputation.shop', ['id' => $reputationShop->id]) }}';" style="width:60px">
                                                     </b></b>
                                                 </td>
                                             </tr>
@@ -334,17 +340,17 @@
                                                 <td class="brd2-top brd2-bt" width="1%">
                                                     <img src="{{ asset($quest->type->isMain() ? 'img/icon/qst_main_start.gif' : 'img/icon/qst_start.gif') }}" width="46" height="28">
                                                 </td>
-                                                <td class="brd2-top brd2-bt">@if($quest->isClan())[Клан] @endif @if($quest->is_feat ?? false)<b style="color:#7a4e00;">⚔ Подвиг:</b> @endif{{ $quest->title }}</td>
+                                                <td class="brd2-top brd2-bt">@if($quest->isClan())[{{ __('Клан') }}] @endif @if($quest->is_feat ?? false)<b style="color:#7a4e00;">⚔ {{ __('Подвиг:') }}</b> @endif{{ $quest->title }}</td>
                                                 <td class="brd2-top brd2-bt" align="right" onclick="event.stopPropagation()">
                                                     <b class="butt2 pointer"><b>
-                                                        <input value="Взять" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
+                                                        <input value="{{ __('Взять') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('quest', ['id' => $quest->id, 'npc' => $npc->id]) }}';" style="width:60px">
                                                     </b></b>
                                                     @if($quest->type->isReputation() && isset($quest->reputation_id))
                                                         <form method="POST" action="{{ route('reputation.decline', $quest->reputation_id) }}" style="display:inline">
                                                             @csrf
                                                             <input type="hidden" name="npc" value="{{ $npc->id }}">
                                                             <b class="butt2 pointer"><b>
-                                                                <input value="Отказ" type="submit" style="width:60px">
+                                                                <input value="{{ __('Отказ') }}" type="submit" style="width:60px">
                                                             </b></b>
                                                         </form>
                                                     @endif
@@ -358,11 +364,11 @@
                                                     <img src="{{ asset('img/icon/qst_start.gif') }}" width="46" height="28" style="opacity:0.45;">
                                                 </td>
                                                 <td class="brd2-top brd2-bt" style="color:#888;">
-                                                    {{ $cooldown->label ?? ($cooldown->quest->isClan() ? '[Клан] ' : '') . $cooldown->quest->title }}
-                                                    <br><small style="color:#999;">Повторный проход через: {{ $cooldown->diff }}</small>
+                                                    {{ $cooldown->label ?? ($cooldown->quest->isClan() ? '[' . __('Клан') . '] ' : '') . $cooldown->quest->title }}
+                                                    <br><small style="color:#999;">{{ __('Повторный проход через:') }} {{ $cooldown->diff }}</small>
                                                 </td>
                                                 <td class="brd2-top brd2-bt" align="right">
-                                                    <span style="color:#aaa; font-size:10px;">Недоступен</span>
+                                                    <span style="color:#aaa; font-size:10px;">{{ __('Недоступен') }}</span>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -375,7 +381,7 @@
                                                     <img src="{{ asset($questInProgress->canComplete ? 'img/icon/qst_start_m.gif' : 'img/icon/qst_start_ro.gif') }}" width="46" height="28">
                                                 </td>
                                                 <td class="brd2-top brd2-bt">
-                                                    @if($questInProgress->isClan())[Клан] @endif{{ $questInProgress->title }}
+                                                    @if($questInProgress->isClan())[{{ __('Клан') }}] @endif{{ $questInProgress->title }}
                                                     @php
                                                         $stage      = $questInProgress->currentStage;
                                                         $objectives = $stage
@@ -383,7 +389,7 @@
                                                             : $questInProgress->objectives;
                                                     @endphp
                                                     @if($stage)
-                                                        <br><small style="color:#461C0B; font-weight:bold;">Этап {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}</small>
+                                                        <br><small style="color:#461C0B; font-weight:bold;">{{ __('Этап') }} {{ $stage->order }}{{ $stage->title ? ': ' . $stage->title : '' }}</small>
                                                     @endif
                                                     @foreach($objectives as $obj)
                                                         @php
@@ -396,12 +402,12 @@
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     @if($questInProgress->canComplete)
                                                         <b class="butt2 pointer"><b>
-                                                            <input value="Сдать" type="button"
+                                                            <input value="{{ __('Сдать') }}" type="button"
                                                                    onclick="event.stopPropagation();location.href='{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';"
                                                                    style="width:60px">
                                                         </b></b>
                                                     @else
-                                                        <span style="color:#888; font-size:10px;">В процессе</span>
+                                                        <span style="color:#888; font-size:10px;">{{ __('В процессе') }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -420,7 +426,7 @@
                                         @unless($hasAnything)
                                             <tr class="bg_l">
                                                 <td class="brd2-top brd2-bt" colspan="3" align="center" style="padding: 10px; color:#7a1c00; font-weight: bold;">
-                                                    Квестов нет
+                                                    {{ __('Квестов нет') }}
                                                 </td>
                                             </tr>
                                         @endunless

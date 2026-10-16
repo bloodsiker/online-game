@@ -288,9 +288,10 @@ class LibraryEquipmentSeeder extends Seeder
     private function itemShortcodes(array $names): string
     {
         $idsByName = ShareItem::query()
-            ->whereIn('name', $names)
+            ->whereIn('name->ru', $names)
             ->where('is_active', true)
-            ->pluck('id', 'name');
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (ShareItem $item): array => [$item->getTranslation('name', 'ru') => $item->id]);
 
         $shortcodes = collect($names)
             ->filter(fn (string $name): bool => $idsByName->has($name))

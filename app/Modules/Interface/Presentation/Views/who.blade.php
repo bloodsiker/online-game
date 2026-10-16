@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
+    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Игра</title>
+    <title>{{ __('Игра') }}</title>
     <style>
         html {
             height: 100%;
@@ -27,6 +28,32 @@
         .info {
             margin-bottom: 2px;
             color: #554848 !important;
+        }
+        .rep-divider {
+            position: relative;
+            width: 88%;
+            height: 11px;
+            margin: 7px auto 5px;
+        }
+        .rep-divider::before {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            left: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #9a704f 18%, #9a704f 82%, transparent);
+            content: '';
+        }
+        .rep-divider::after {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 7px;
+            height: 7px;
+            border: 1px solid #895936;
+            background: #d4aa70;
+            content: '';
+            transform: translateX(-50%) rotate(45deg);
         }
         .pnick {
             font-family: Tahoma;
@@ -104,7 +131,7 @@
     <tr class="lgb" width="100%" height="100%" style="vertical-align: top">
         <td width="1%" class="lgb-left" style="background-position-y: -5px;"><img src="{{ asset('img/icon/d.gif') }}" width="15" height="1"><br></td>
         <td>
-            <center><b style="color:green">На локации: <span id="location-count">{{ $page->countOnlineLocation }}</span></b></center>
+            <center><b style="color:green">{{ __('На локации:') }} <span id="location-count">{{ $page->countOnlineLocation }}</span></b></center>
             <br>
 
             <div id="location-users">
@@ -112,11 +139,11 @@
                 <div class="info">
                     <span class="{{ $user->isOnline ? '' : 'user_offline' }}">
                         <span class="time">{{ $user->time }}</span>
-                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
-                             onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                        <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="{{ __('Написать в приват') }}"
+                             onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="{{ __('Приватное сообщение') }}">
                         @if($user->clanName)
                             @if($user->clanIcon && $user->clanId)
-                                <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}"
+                                <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}"
                                      title="{{ $user->clanName }}" alt="{{ $user->clanName }}"
                                      style="{{ $user->isOnline ? '' : 'opacity:.6' }}"></a>
                             @else
@@ -126,10 +153,10 @@
                         <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                            class="pnick {{ $user->isOnline ? '' : 'user_offline' }}"
                            data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
-                           title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
-                        <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                           title="{{ __('Информация о персонаже') }}"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
+                        <a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                         @if($user->chatMuteTitle)
-                            <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="Молчание" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                            <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
                         @endif
                     </span>
                 </div>
@@ -137,28 +164,28 @@
             </div>
 
             <br>
-            <hr>
-            <center><b style="color:green">Онлайн: <span id="global-online-count">{{ $page->countOnlineInGame }}</span></b></center>
+            <div class="rep-divider" aria-hidden="true"></div>
+            <center><b style="color:green">{{ __('Онлайн:') }} <span id="global-online-count">{{ $page->countOnlineInGame }}</span></b></center>
 
             <div id="online-users">
                 @foreach($page->onlineInGame as $user)
                     <div class="info">
                     <span class="time">{{ $user->time }}</span>
-                    <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="Написать в приват"
-                         onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="Приватное сообщение">
+                    <img src="{{ asset('img/icon/users-arrow.gif') }}" class="prv-btn" title="{{ __('Написать в приват') }}"
+                         onclick="sendPrivate('{{ addslashes($user->name) }}')" alt="{{ __('Приватное сообщение') }}">
                     @if($user->clanName)
                         @if($user->clanIcon && $user->clanId)
-                            <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}"></a>
+                            <a href="{{ route('clan.public', ['clan' => $user->clanId]) }}" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;"><img class="clan-icon" src="{{ $user->clanIcon }}" title="{{ $user->clanName }}" alt="{{ $user->clanName }}"></a>
                         @else
                             <span class="clan-tag">[{{ $user->clanName }}]</span>
                         @endif
                     @endif
                     <a href="{{ route('info.user', ['id' => $user->id]) }}" target="_blank"
                        class="pnick" data-uid="{{ $user->id }}" data-name="{{ $user->name }}"
-                       title="Информация о персонаже"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
-                    <a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
+                       title="{{ __('Информация о персонаже') }}"><b>{{ $user->name }} [{{ $user->lvl }}]</b></a>
+                    <a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo({{ $user->id }}); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" align="absmiddle"></a>
                     @if($user->chatMuteTitle)
-                        <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="Молчание" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
+                        <img class="chat-mute-icon" src="{{ asset('main/images/gag.gif') }}" title="{{ $user->chatMuteTitle }}" alt="{{ __('Молчание') }}" data-mute-expires-at="{{ $user->chatMuteExpiresAt }}">
                     @endif
                     </div>
                 @endforeach
@@ -171,7 +198,7 @@
             <img src="{{ asset('img/bg/separator_v.gif') }}" width="3" height="1">
         </td>
         <td id="td_user_count" width="100%" height="18" style="background: url({{ asset('img/bg/tbl-main_users-bottom.gif') }}) repeat-x; padding-left: 14px; color: rgb(66, 42, 23);">
-            <b>Онлайн:</b> <b style="color:#FF0000;" id="chat_user_count">{{ $page->countOnlineInGame }}</b>
+            <b>{{ __('Онлайн:') }}</b> <b style="color:#FF0000;" id="chat_user_count">{{ $page->countOnlineInGame }}</b>
         </td>
     </tr>
     </tbody>
@@ -229,13 +256,13 @@
         var restMinutes = minutes % 60;
         var parts = [];
 
-        if (days > 0) parts.push(days + ' д.');
-        if (hours > 0) parts.push(hours + ' ч.');
-        if (restMinutes > 0 && days === 0) parts.push(restMinutes + ' мин.');
+        if (days > 0) parts.push(days + ' ' + gameTranslate('д.'));
+        if (hours > 0) parts.push(hours + ' ' + gameTranslate('ч.'));
+        if (restMinutes > 0 && days === 0) parts.push(restMinutes + ' ' + gameTranslate('мин.'));
 
-        var title = 'Проклятие молчания. Осталось: ' + parts.slice(0, 2).join(' ');
+        var title = gameTranslate('Проклятие молчания. Осталось:') + ' ' + parts.slice(0, 2).join(' ');
 
-        return '<img class="chat-mute-icon" src="' + chatMuteIconSrc + '" title="' + escapeHtml(title) + '" alt="Молчание" data-mute-expires-at="' + escapeHtml(user.chat_mute_expires_at) + '">';
+        return '<img class="chat-mute-icon" src="' + chatMuteIconSrc + '" title="' + escapeHtml(title) + '" alt="{{ __('Молчание') }}" data-mute-expires-at="' + escapeHtml(user.chat_mute_expires_at) + '">';
     }
 
     function buildUsersHtml(users) {
@@ -253,7 +280,7 @@
 
             var clan = '';
             if (u.clan_icon && u.clan_id) {
-                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="Информация о клане" onclick="whoOpenClanInfo(this.href); return false;">'
+                clan = '<a href="{{ url('/clan-info') }}/' + parseInt(u.clan_id, 10) + '" title="{{ __('Информация о клане') }}" onclick="whoOpenClanInfo(this.href); return false;">'
                     + '<img class="clan-icon" src="' + escapeHtml(u.clan_icon) + '" title="' + safeClanName + '" alt="' + safeClanName + '" style="' + opacity + '"></a>';
             } else if (u.clan_name) {
                 clan = '<span class="clan-tag">[' + safeClanName + ']</span>';
@@ -262,10 +289,10 @@
             html += '<div class="info">'
                 +   '<span class="' + offCls.trim() + '">'
                 +     '<span class="time">' + safeTime + '</span> '
-                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="Написать в приват" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
+                +     '<img src="' + prvArrowSrc + '" class="prv-btn" title="{{ __('Написать в приват') }}" onclick="sendPrivate(' + privateArgument + ')" alt="Приват"> '
                 +     clan
-                +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="Информация о персонаже"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
-                +     '<a href="#" class="info-icon-link" title="Информация о персонаже" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
+                +     '<a href="' + safeInfoUrl + '" target="_blank" class="pnick' + offCls + '" data-uid="' + Number(u.id) + '" data-name="' + safeName + '" title="{{ __('Информация о персонаже') }}"><b>' + safeName + ' [' + Number(u.lvl || 0) + ']</b></a>'
+                +     '<a href="#" class="info-icon-link" title="{{ __('Информация о персонаже') }}" onclick="whoOpenUserInfo(' + Number(u.id) + '); return false;"><img src="' + playerInfoIconSrc + '" width="10" height="10" align="absmiddle"></a>'
                 +     chatMuteIcon(u)
                 +   '</span>'
                 + '</div>';
@@ -301,9 +328,7 @@
             renderLocationUsers(e.data.users);
         } else if (e.data && e.data.type === 'onlinePresenceSnapshot') {
             var users = Array.isArray(e.data.users) ? e.data.users : [];
-            var currentLocationId = Number(e.data.viewerLocationId || {{ (int) auth()->user()->location_id }});
             renderOnlineUsers(users, Number(e.data.count ?? users.length));
-            renderLocationUsers(users.filter(function (u) { return Number(u.location_id) === currentLocationId; }));
         }
     });
 

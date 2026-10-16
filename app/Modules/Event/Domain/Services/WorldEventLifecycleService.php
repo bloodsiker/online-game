@@ -104,6 +104,8 @@ final class WorldEventLifecycleService
                 title: $run->event->title,
                 mapName: $run->event->map?->name ?? 'неизвестная карта',
                 mapSlug: $run->event->map?->slug,
+                titleTranslations: $run->event->getTranslations('title'),
+                mapNameTranslations: $run->event->map?->getTranslations('name') ?? ['ru' => 'неизвестная карта'],
             );
         }
 

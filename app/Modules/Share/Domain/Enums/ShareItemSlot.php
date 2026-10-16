@@ -22,18 +22,18 @@ enum ShareItemSlot: string
     public function label(): string
     {
         return match ($this) {
-            self::HAND => 'Рука',
-            self::HELMET => 'Шлем',
-            self::SHOULDER => 'Плечи',
-            self::FOREARM => 'Предплечье',
-            self::ARMOR => 'Доспех',
-            self::LEGGING => 'Поножи',
-            self::CHAIN_ARMOR => 'Кольчуга',
-            self::CLOAK => 'Плащ',
-            self::SHOES => 'Обувь',
-            self::GLOVES => 'Перчатки',
-            self::BELT => 'Пояс',
-            self::BAG => 'Сумка',
+            self::HAND => __('Рука'),
+            self::HELMET => __('Шлем'),
+            self::SHOULDER => __('Плечи'),
+            self::FOREARM => __('Предплечье'),
+            self::ARMOR => __('Доспех'),
+            self::LEGGING => __('Поножи'),
+            self::CHAIN_ARMOR => __('Кольчуга'),
+            self::CLOAK => __('Плащ'),
+            self::SHOES => __('Обувь'),
+            self::GLOVES => __('Перчатки'),
+            self::BELT => __('Пояс'),
+            self::BAG => __('Сумка'),
         };
     }
 

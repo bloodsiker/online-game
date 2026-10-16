@@ -8,6 +8,7 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
+use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use Illuminate\Database\Seeder;
 
 /**
@@ -50,7 +51,7 @@ class QuestSeeder extends Seeder
         $npc1 = Npc::find(1); // Глава города
 
         // Create second NPC "Вестник" at location_id=4 if not exists
-        $npc2 = Npc::firstOrCreate(
+        $npc2 = LocalizedContentSeederQuery::firstOrCreateFor(Npc::class,
             ['name' => 'Воевода Гидвер'],
             ['location_id' => 4, 'description' => 'Дока военного искусства, тактик и стратег, он посвятил свою жизнь развитию военного дела и обучению молодых солдат его премудростям.', 'image' => '/img/npc/voevoda.jpg']
         );
@@ -61,7 +62,7 @@ class QuestSeeder extends Seeder
         // -------------------------------------------------------
         // Quest 1: "Познание мира" — may already exist
         // -------------------------------------------------------
-        $quest1 = Quest::firstOrCreate(
+        $quest1 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Познание мира'],
             [
                 'description' => 'Добро пожаловать! Чтобы освоиться в этом мире, тебе нужно победить нескольких мышей.',
@@ -94,7 +95,7 @@ class QuestSeeder extends Seeder
         // -------------------------------------------------------
         // Quest 2: "Первая вылазка" — after quest1, kill bats on map 2
         // -------------------------------------------------------
-        $quest2 = Quest::firstOrCreate(
+        $quest2 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Первая вылазка'],
             [
                 'description' => 'Ты показал себя неплохим бойцом. Теперь иди в Шепчущий лес и разберись с летучими мышами.',
@@ -126,7 +127,7 @@ class QuestSeeder extends Seeder
         // -------------------------------------------------------
         // Quest 3: "Испытание воли" — multi-objective, after quest2
         // -------------------------------------------------------
-        $quest3 = Quest::firstOrCreate(
+        $quest3 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Испытание воли'],
             [
                 'description' => 'Настоящий воин сражается на нескольких фронтах одновременно. Уничтожь мышей и летучих мышей.',
@@ -167,7 +168,7 @@ class QuestSeeder extends Seeder
         // Quest 4: "Путь к катакомбам" — deliver quest, after quest3
         // Start at NPC1 (Глава города), complete at NPC2 (Вестник)
         // -------------------------------------------------------
-        $quest4 = Quest::firstOrCreate(
+        $quest4 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Путь к катакомбам'],
             [
                 'description' => 'Мне нужно, чтобы ты передал Кристалл моему посланнику Вестнику у восточных ворот. Он откроет тебе путь к Тропе Заблудших.',
@@ -204,7 +205,7 @@ class QuestSeeder extends Seeder
         // -------------------------------------------------------
         // Quest 5: "Дозор у ворот" (repeatable, cooldown 1 day, after quest1)
         // -------------------------------------------------------
-        $quest5 = Quest::firstOrCreate(
+        $quest5 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Дозор у ворот'],
             [
                 'description' => 'Мышиные стаи снова атакуют ворота! Убей 20 мышей. Это задание можно выполнять каждый день.',
@@ -236,7 +237,7 @@ class QuestSeeder extends Seeder
         // -------------------------------------------------------
         // Quest 6: "Три испытания" — staged quest (3 stages), after quest3
         // -------------------------------------------------------
-        $quest6 = Quest::firstOrCreate(
+        $quest6 = LocalizedContentSeederQuery::firstOrCreateFor(Quest::class,
             ['title' => 'Три испытания'],
             [
                 'description' => 'Докажи свою доблесть, пройдя три испытания. Тебе предстоит сражаться, охотиться и выполнить особое поручение.',
