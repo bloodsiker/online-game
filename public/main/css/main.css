@@ -1815,7 +1815,7 @@ div.popup {
     position: fixed;
     top: 50%;
 }
- 
+
 
 .special-popup {color: #461c0b; display: none; height: 235px; left: 50%; margin: -117px 0 0 -245px; position: absolute; top: 50%; width: 489px; z-index: 10000;}
 .special-popup .popup-bg {background: url("/images/special-popup.png") no-repeat; height: 235px; width: 489px;}
@@ -2147,18 +2147,18 @@ ul.ability-list li span {display: block; overflow: hidden;}
 
 
 .dialogWindow th {cursor: move;}
-.dialogWindow iframe {border: 0;	margin:0;background-color: #f9e4af;}	
+.dialogWindow iframe {border: 0;	margin:0;background-color: #f9e4af;}
 .dialogWindow-close-img {position: absolute; margin: 2px 0 0 -15px; cursor: pointer; width: 20px; height: 20px; }
 
 .wind-left-repeat{ background: url('/images/wind-left-repeat.png') repeat-y; width: 16px; }
 .wind-right-repeat{ background: url('/images/wind-right-repeat.png') repeat-y; width: 16px; }
 
-.wind-bottom-repeat{ background: url('/images/wind-bottom-repeat.png') repeat-x; height: 30px;} 
-.wind-right-bottom{ background: url('/images/wind-right-bottom.png') repeat-x; width: 16px; height: 30px; } 
-.wind-left-bottom{ background: url('/images/wind-left-bottom.png') repeat-x; width: 16px; height: 30px; } 
+.wind-bottom-repeat{ background: url('/images/wind-bottom-repeat.png') repeat-x; height: 30px;}
+.wind-right-bottom{ background: url('/images/wind-right-bottom.png') repeat-x; width: 16px; height: 30px; }
+.wind-left-bottom{ background: url('/images/wind-left-bottom.png') repeat-x; width: 16px; height: 30px; }
 
 .wind-left-top { background: url('/images/wind-left-top.png') repeat-y; width: 16px; height: 37px; }
-.wind-top-repeat{ background: url('/images/wind-top-repeat.png') repeat-x; height: 30px;  text-align: center; padding: 7px 0 0 10px; font-family: Tahoma;	font-size: 15px; font-weight: normal; color: #f5f3c1; text-shadow: 2px 1px  #4b0000; margin: 0 18px 0 0 ;} 
+.wind-top-repeat{ background: url('/images/wind-top-repeat.png') repeat-x; height: 30px;  text-align: center; padding: 7px 0 0 10px; font-family: Tahoma;	font-size: 15px; font-weight: normal; color: #f5f3c1; text-shadow: 2px 1px  #4b0000; margin: 0 18px 0 0 ;}
 .wind-right-top {background: url('/images/wind-right-top.png') repeat-y; width: 34px; height: 37px; position: absolute;  margin:  0px 0 0 -18px;}
 
 .levelup-top-left {position: absolute; margin: 0 0 0 -15px;}
@@ -2272,7 +2272,7 @@ table#systemConfirm_div td#confirm_ms b{color: #ba0000 !important;}
 table.artifact-table {
 	display: inline-block;
 	margin: 1px;
-	
+
 	//display: inline;
 	//zoom: 1;
 }
@@ -2685,8 +2685,7 @@ b.premium-grade-price {font-size: 14px;}
 .user-effects-set {
 	clear: both;
 	margin-bottom: 5px;
-	padding: 7px;
-	border: 1px solid #e3b360;
+	padding: 10px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 4px;

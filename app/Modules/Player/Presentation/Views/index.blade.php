@@ -88,6 +88,15 @@
             background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
             background-repeat: repeat;
         }
+        .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .common-inset-bg { background: #ffffd6; }
         .regcolor, .regcolor * {
             color: #955c4a;
         }
@@ -136,37 +145,30 @@
                             }
                             /* ── колонки ── */
                             .char-col { display: flex; flex-direction: column; gap: 10px; }
-                            .char-col-left  { width: 200px; flex-shrink: 0; }
+                            .char-col-left  { width: 220px; flex-shrink: 0; }
                             .char-col-mid   { flex: 1; min-width: 170px; }
                             .char-col-right { flex: 1; min-width: 170px; }
 
                             /* ── карточка ── */
                             .char-card {
-                                border: 1px solid #bca68e;
-                                border-radius: 3px;
-                                overflow: hidden;
+                                width: 100%;
+                                border: 0;
+                                border-spacing: 0;
                                 font-size: 11px;
                                 font-family: Tahoma, sans-serif;
-                                background: #f4ecdf;
-                                box-shadow: 0 1px 2px rgba(66, 45, 30, .10);
                             }
                             .char-card-title {
-                                background-color: #ddcbb3;
-                                background-image: linear-gradient(rgba(238, 224, 204, .88), rgba(216, 195, 168, .88)), url({{ asset('img/bg/table-header2.jpg') }});
-                                background-repeat: repeat-x;
+                                background: transparent;
                                 color: #563e2f;
                                 font-weight: bold;
                                 padding: 6px 9px;
                                 font-size: 11px;
                                 letter-spacing: .15px;
-                                border-bottom: 1px solid #c5b096;
-                                text-shadow: 0 1px rgba(255, 250, 239, .75);
+                                border-bottom: 1px solid rgba(104, 80, 62, .2);
                             }
                             .char-card-title a { color: inherit !important; }
                             .char-card-body {
-                                background-color: #f5eddf;
-                                background-image: url({{ asset('img/bg/common-bg.png') }});
-                                background-repeat: repeat;
+                                background: transparent;
                                 padding: 9px 10px;
                             }
 
@@ -293,7 +295,7 @@
                             <div class="char-col char-col-left">
 
                                 {{-- Портрет --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-body" style="text-align:center;">
                                         <div class="char-name">{{ $character->playerName }}</div>
                                         <img src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}"
@@ -310,10 +312,10 @@
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Опыт --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Опыт') }}</div>
                                     <div class="char-card-body">
                                         <div style="display:flex;justify-content:space-between;font-size:11px;">
@@ -328,10 +330,10 @@
                                             {{ __('след. уровень:') }} <b style="color:#59483d">{{ $character->expUp }}</b>
                                         </div>
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Деньги --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Финансы') }}</div>
                                     <div class="char-card-body">
                                         <div class="char-stat-row">
@@ -356,10 +358,10 @@
                                             <div style="font-size:10px; color:#8a7a70; padding-top:3px;">{{ __('Счёт:') }} <b style="color:#665247">{{ $character->bankAccount }}</b></div>
                                         @endif
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Статистика --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Статистика') }}</div>
                                     <div class="char-card-body">
                                         <div class="char-battle-row">
@@ -367,7 +369,7 @@
                                             <span>💀 {{ __('Поражений:') }} <b>{{ $character->death }}</b></span>
                                         </div>
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                             </div>
 
@@ -375,7 +377,7 @@
                             <div class="char-col char-col-mid">
 
                                 {{-- Основные характеристики --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">
                                         <a href="/b/use.php?bid=14" style="color:#563e2f;text-decoration:none;">{{ __('Основные характеристики') }}</a>
                                     </div>
@@ -408,10 +410,10 @@
                                             </div>
                                         @endif
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Физические характеристики --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Физические характеристики') }}</div>
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
@@ -483,10 +485,10 @@
                                             <span class="char-stat-val">{{ $character->stats->getBlockPercent() }}%</span>
                                         </div>
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Магические характеристики --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Магические характеристики') }}</div>
                                     <div class="char-card-body">
                                         <div style="font-size:11px; margin-bottom:2px;">
@@ -526,7 +528,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                             </div>
 
@@ -534,7 +536,7 @@
                             <div class="char-col char-col-right">
 
                                 {{-- Боевые навыки --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Боевые навыки') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('combat', collect()) as $skill)
@@ -552,10 +554,10 @@
                                             <div class="char-skill-pct">{{ __('Боевые навыки пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Волшебные навыки --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Волшебные навыки') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('magic', collect()) as $skill)
@@ -573,10 +575,10 @@
                                             <div class="char-skill-pct">{{ __('Волшебные навыки пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                                 {{-- Мирные умения --}}
-                                <div class="char-card">
+                                <x-game.inset-frame class="char-card">
                                     <div class="char-card-title">{{ __('Мирные умения') }}</div>
                                     <div class="char-card-body">
                                         @forelse($skillsByType->get('peaceful', collect()) as $skill)
@@ -594,7 +596,7 @@
                                             <div class="char-skill-pct">{{ __('Мирные умения пока не освоены.') }}</div>
                                         @endforelse
                                     </div>
-                                </div>
+                                </x-game.inset-frame>
 
                             </div>
                         </div>

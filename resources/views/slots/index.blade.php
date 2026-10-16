@@ -82,6 +82,19 @@
             background: url({{ asset('img/bg/tbl-shp-sides.png') }}) no-repeat;
             font-size: 0;
         }
+        .slots-inset-frame {
+            width: 100%;
+            border-spacing: 0;
+        }
+        .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .common-inset-bg { background: #ffffd6; }
         .tbl-usi_bg {
             background-image: url({{ asset('img/bg/tbl-usi_bg.gif') }});
             background-repeat: repeat;
@@ -461,6 +474,7 @@
                             <tr>
                                 <td valign="top" id="user-effects-sets" class="instapockets-set">
                                     <div class="user-effects-set" data-id="hotbar">
+                                        <x-game.inset-frame class="slots-inset-frame">
                                         <ul class="lscroll backpack_list connected-sortable clearfix" id="hotbar-slot-list">
                                             @foreach($hotbarData['slots'] as $slot)
                                                 @if($slot['empty'])
@@ -479,6 +493,7 @@
                                                 @endif
                                             @endforeach
                                         </ul>
+                                        </x-game.inset-frame>
                                     </div>
                                 </td>
                             </tr>
@@ -548,6 +563,7 @@
                                                     <div class="hotbar-picker-columns">
                                                         <section class="hotbar-picker-panel">
                                                             <div class="hotbar-picker-title">{{ __('Предметы') }}</div>
+                                                            <x-game.inset-frame class="slots-inset-frame">
                                                             <ul id="item_list" data-caller="0" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
                                                                 @forelse($usableItems as $backpack)
                                                                 <li data-id="{{ $backpack->item_id }}"
@@ -577,10 +593,12 @@
                                                                 </li>
                                                                 @endforelse
                                                             </ul>
+                                                            </x-game.inset-frame>
                                                         </section>
 
                                                         <section class="hotbar-picker-panel">
                                                             <div class="hotbar-picker-title">{{ __('Заклинания') }}</div>
+                                                            <x-game.inset-frame class="slots-inset-frame">
                                                             <ul id="skill_list" class="lscroll backpack_list connected-sortable clearfix user-effects-set__items">
                                                                 @forelse($activeSkills as $skill)
                                                                     <li data-id="{{ $skill->id }}"
@@ -616,6 +634,7 @@
                                                                     </li>
                                                                 @endforelse
                                                             </ul>
+                                                            </x-game.inset-frame>
                                                         </section>
                                                     </div>
 

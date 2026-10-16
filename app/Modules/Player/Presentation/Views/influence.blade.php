@@ -30,6 +30,15 @@
             background: url({{ asset('img/bg/tbl-shp-sides.png') }}) no-repeat;
             font-size: 0;
         }
+        .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .common-inset-bg { background: #ffffd6; }
         .tbl-usi_bg {
             background: #e8dac7 url({{ asset('img/bg/tbl-usi_bg.gif') }}) repeat;
         }
@@ -41,10 +50,13 @@
         .btn_1 { color: #461c0b !important; }
         .btn_2 { color: #ffe9ba !important; }
         .influence-intro {
+            width: calc(100% - 24px);
             margin: 8px 12px 0;
+            border: 0;
+            border-spacing: 0;
+        }
+        .influence-intro__content {
             padding: 7px 10px;
-            border: 1px solid #c9a16d;
-            background: rgba(255, 237, 188, .72);
             color: #5d3b28;
             text-align: center;
         }
@@ -224,9 +236,11 @@
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 4px 0;">
-                        <div class="influence-intro">
-                            {{ __('Влияние отражает ваши заслуги на территориях и открывает местные награды и возможности.') }}
-                        </div>
+                        <x-game.inset-frame class="influence-intro">
+                            <div class="influence-intro__content">
+                                {{ __('Влияние отражает ваши заслуги на территориях и открывает местные награды и возможности.') }}
+                            </div>
+                        </x-game.inset-frame>
 
                         @if($mapInfluences->isEmpty())
                             <div class="influence-empty">

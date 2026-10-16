@@ -20,13 +20,25 @@
         .tbl-shp-sml { background: url({{ asset('img/bg/tbl-shp-sml.png') }}) no-repeat; font-size: 0; }
         .tbl-shp-sides { background: url({{ asset('img/bg/tbl-shp-sides.png') }}) no-repeat; font-size: 0; }
         .tbl-usi_bg { background: #e8dac7 url({{ asset('img/bg/tbl-usi_bg.gif') }}) repeat; }
+        .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .common-inset-bg { background: #ffffd6; }
         .influence-detail { max-width: 900px; margin: 0 auto; padding: 10px 14px 18px; }
         .influence-detail__back { margin-bottom: 8px; }
         .influence-summary {
+            width: 100%;
+            margin-bottom: 10px;
+            border: 0;
+            border-spacing: 0;
+        }
+        .influence-summary__content {
             padding: 12px 16px;
-            border: 1px solid #b98c5e;
-            background: rgba(255, 239, 199, .72);
-            box-shadow: inset 0 1px rgba(255, 255, 255, .8);
             text-align: center;
         }
         .influence-summary h1 { margin: 0 0 5px; color: #7d2415; font-size: 17px; }
@@ -43,6 +55,7 @@
         .rep-progress-bar__border-center { margin: 0 20px; background-position: 0 -62px; background-repeat: repeat-x; }
         .rep-progress-bar__text { position: absolute; inset: 0; color: #fff; font-weight: bold; line-height: 31px; text-align: center; text-shadow: 0 1px 2px #333; }
         .influence-summary__next { margin-top: 5px; color: #684936; }
+        .influence-level-frame { width: 100%; margin-bottom: 9px; border-spacing: 0; }
         .influence-scale-title {
             margin: 15px 0 8px;
             color: #762719;
@@ -53,13 +66,10 @@
             display: grid;
             grid-template-columns: 88px minmax(160px, .8fr) minmax(260px, 1.7fr);
             gap: 12px;
-            margin-bottom: 9px;
+            margin-bottom: 0;
             padding: 10px;
-            border: 1px solid #bca080;
-            background: rgba(246, 229, 196, .67);
-            box-shadow: inset 0 1px #fff;
         }
-        .influence-level-card.is-current { border-color: #9b4d24; background: rgba(255, 225, 154, .82); box-shadow: 0 0 5px rgba(145, 71, 26, .35), inset 0 1px #fff; }
+        .influence-level-card.is-current { background: rgba(255, 225, 154, .82); }
         .influence-level-card.is-locked { opacity: .72; }
         .influence-level-card__medal { text-align: center; }
         .influence-medal-frame { display: flex; width: 71px; height: 72px; margin: 0 auto 4px; align-items: center; justify-content: center; background: url({{ asset('main/images/user-reward-frame.png') }}) center/71px 72px no-repeat; }
@@ -105,7 +115,8 @@
                 <td class="tbl-usi_bg" valign="top">
                     <main class="influence-detail">
                         <div class="influence-detail__back">← <a href="{{ route('character.influence') }}">{{ __('Все территории') }}</a></div>
-                        <section class="influence-summary">
+                        <x-game.inset-frame class="influence-summary">
+                            <div class="influence-summary__content">
                             <h1>{{ __('Влияние в') }} {{ $page['map']->name }}</h1>
                             <div class="influence-summary__points">{{ __('Ваше влияние:') }} <b>{{ number_format($page['influence'], 0, '', ' ') }}</b></div>
                             <div class="rep-progress-bar" title="{{ $page['influence'] }} {{ __('из') }} {{ $page['nextLevel']?->required_influence ?? $page['influence'] }}">
@@ -122,7 +133,8 @@
                                     {{ __('Достигнут максимальный уровень влияния') }}
                                 @endif
                             </div>
-                        </section>
+                            </div>
+                        </x-game.inset-frame>
 
                         <h2 class="influence-scale-title">{{ __('Шкала уровней влияния') }}</h2>
                         @forelse($page['levels'] as $level)
@@ -131,6 +143,7 @@
                                 $current = $page['currentLevel']?->id === $level->id;
                                 $medal = $level->medal;
                             @endphp
+                            <x-game.inset-frame class="influence-level-frame">
                             <article class="influence-level-card {{ $current ? 'is-current' : ($reached ? 'is-reached' : 'is-locked') }}">
                                 <div class="influence-level-card__medal">
                                     <div class="influence-medal-frame" title="{{ $medal?->description ?? __('Медаль не предусмотрена') }}">
@@ -183,6 +196,7 @@
                                     </section>
                                 </div>
                             </article>
+                            </x-game.inset-frame>
                         @empty
                             <div class="influence-empty">{{ __('Для этой территории пока не настроена шкала влияния.') }}</div>
                         @endforelse
