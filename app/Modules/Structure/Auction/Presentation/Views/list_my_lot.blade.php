@@ -138,6 +138,9 @@
             font-size: 10px;
         }
     </style>
+    {!! $playerStatsScript !!}
+    {!! $itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
@@ -202,10 +205,11 @@
                                 <tbody>
                                 <tr>
                                     <td
-                                        onmouseover="artifactAlt(this,event,2)"
-                                        onmouseout="artifactAlt(this,event,0)"
+                                        data-id="{{ $slot->item->id }}"
+                                        onmouseover="showItemInfo(this,event,2)"
+                                        onmouseout="showItemInfo(this,event,0)"
                                         valign="bottom"
-                                        style="background-image: url({{ asset('img/icon.d.gif') }}); cursor: pointer;">
+                                        style="background-image: url({{ asset('img/icon/d.gif') }}); cursor: pointer;">
                                         @if($slot->count > 1)
                                             <div class="bpdig">{{ $slot->count }}</div>
                                         @endif
@@ -213,9 +217,11 @@
                                 </tr>
                                 </tbody>
                             </table>
+                        </td>
                         <td align="left">
                             <a href="{{ route('items.info', ['id' => $slot->item->id]) }}"
-                               onclick="showArtifactInfo(22195638,false);return false;"
+                               data-id="{{ $slot->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                               onclick="window.open(this.href, '', 'width=730,height=700,resizable=yes,scrollbars=yes'); return false;"
                                style="color:#666666" class="b">{{ $slot->item->itemInfo->name }}</a><br>
                             <span title="Тип предмета">
                                 <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $slot->item->itemInfo->getTypeName() }}

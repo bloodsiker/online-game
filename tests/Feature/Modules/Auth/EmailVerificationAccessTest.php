@@ -16,9 +16,11 @@ final class EmailVerificationAccessTest extends TestCase
             'name' => 'Unverified Player',
             'email' => 'unverified@example.test',
             'email_verified_at' => null,
+            'active_login_token' => 'test-login-token',
         ]);
 
         $this->actingAs($user)
+            ->withSession(['active_login_token' => 'test-login-token'])
             ->get(route('game'))
             ->assertRedirect(route('verification.notice'));
     }

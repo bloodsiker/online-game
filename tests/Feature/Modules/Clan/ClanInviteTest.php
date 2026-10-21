@@ -93,7 +93,7 @@ class ClanInviteTest extends TestCase
         $this->assertStringContainsString('<a href="'.route('clan.public', ['clan' => $this->clanId]).'" class="clan-invite-clan"', $rendered);
         $this->assertStringContainsString('class="chat-clan-icon"', $rendered);
         $this->assertStringContainsString('<b>Клан</b>', $rendered);
-        $this->assertStringContainsString('<b>Лидер</b> [10]', $rendered);
+        $this->assertStringContainsString('<b>Лидер</b></a> [10]', $rendered);
         $this->assertSame(2, substr_count($rendered, 'clan-invite-action'));
         $this->assertStringContainsString($joinRequest->uuid, $rendered);
         $this->assertSame($messages[0]->id, (int) $joinRequest->chat_message_id);
@@ -118,7 +118,7 @@ class ClanInviteTest extends TestCase
         $this->assertSame('clan', $joinMessage->channel->value);
         $rendered = $this->render($joinMessage);
         $this->assertStringContainsString('вступил в клан', $rendered);
-        $this->assertStringContainsString('<b>Кандидат</b> [4]', $rendered);
+        $this->assertStringContainsString('<b>Кандидат</b></a> [4]', $rendered);
 
         // Чужой пользователь не может принять чужое приглашение
         $third = User::query()->create(['name' => 'Третий']);
@@ -145,7 +145,7 @@ class ClanInviteTest extends TestCase
         $declineMessage = ChatMessage::query()->where('clan_id', $this->clanId)->sole();
         $rendered = $this->render($declineMessage);
         $this->assertStringContainsString('отклонил приглашение в клан', $rendered);
-        $this->assertStringContainsString('<b>Кандидат</b> [4]', $rendered);
+        $this->assertStringContainsString('<b>Кандидат</b></a> [4]', $rendered);
     }
 
     private function render(ChatMessage $message): string
@@ -186,7 +186,7 @@ class ClanInviteTest extends TestCase
         $this->assertSame('clan', $chatMessage->channel->value);
         $rendered = $this->render($chatMessage);
         $this->assertStringContainsString('подал заявку на вступление в клан', $rendered);
-        $this->assertStringContainsString('<b>Кандидат</b> [4]', $rendered);
+        $this->assertStringContainsString('<b>Кандидат</b></a> [4]', $rendered);
 
         $channels = array_map(
             static fn ($channel) => $channel->name,
@@ -225,6 +225,32 @@ class ClanInviteTest extends TestCase
         $this->assertSame(1, $page->clans->count());
         $this->assertSame(1, (int) $page->clans->first()->members_count);
         $this->assertFalse($page->applications->has($this->clanId));
+    }
+
+    public function test_accepting_application_rechecks_current_clan_and_does_not_move_player(): void
+    {
+        $application = ClanJoinRequest::query()->create([
+            'clan_id' => $this->clanId, 'user_id' => $this->candidate->id,
+            'status' => ClanJoinRequestStatus::REQUEST,
+        ]);
+        $otherClan = Clan::query()->create(['name' => 'Другой клан', 'owner_id' => $this->candidate->id]);
+        $roleId = DB::table('clan_roles')->insertGetId(['clan_id' => $otherClan->id, 'name' => 'Участник']);
+        DB::table('clan_members')->insert([
+            'clan_id' => $otherClan->id, 'user_id' => $this->candidate->id, 'role_id' => $roleId,
+        ]);
+
+        foreach (['ru', 'uk'] as $locale) {
+            app()->setLocale($locale);
+            try {
+                app(ClanApplicationService::class)->accept($this->leader, $application);
+                $this->fail('Нельзя принять игрока, состоящего в другом клане.');
+            } catch (RuntimeException $exception) {
+                $this->assertSame(__('clan.application.already_in_another_clan'), $exception->getMessage());
+            }
+        }
+        $this->assertDatabaseHas('clan_members', ['user_id' => $this->candidate->id, 'clan_id' => $otherClan->id]);
+        $this->assertDatabaseMissing('clan_members', ['user_id' => $this->candidate->id, 'clan_id' => $this->clanId]);
+        $this->assertSame(ClanJoinRequestStatus::REQUEST, $application->fresh()->status);
     }
 
     private function createTables(): void

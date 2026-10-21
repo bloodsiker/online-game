@@ -63,6 +63,7 @@
                     </form>
                 </div>
             </section>
+            @include('admin.npc.partials.movement')
         </div>
         <div class="col-md-6">
             <section class="card">

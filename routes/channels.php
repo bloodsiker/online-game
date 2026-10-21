@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Party\Infrastructure\Persistence\Models\PartyMember;
+use App\Modules\PlayerTrade\Infrastructure\Persistence\Models\PlayerTradeSession;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Storage;
 
@@ -10,6 +11,13 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 Broadcast::channel('player.{playerId}', function ($user, $playerId) {
     return (int) $user->player_id === (int) $playerId;
+});
+
+Broadcast::channel('player-trade.{uuid}', function ($user, $uuid) {
+    return PlayerTradeSession::query()
+        ->where('uuid', $uuid)
+        ->where(fn ($query) => $query->where('initiator_user_id', $user->id)->orWhere('target_user_id', $user->id))
+        ->exists();
 });
 
 Broadcast::channel('online', function ($user) {

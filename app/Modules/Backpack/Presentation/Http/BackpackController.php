@@ -53,7 +53,7 @@ class BackpackController extends Controller
             $playerEquip->bagSecondSlot,
         ])->filter();
         $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
-        $playerArtifacts = $user->player->artifacts;
+        $playerArtifacts = $user->player->artifactsByRarity();
 
         $tooltipCollector
             ->collectFrom(new ItemModelTooltipStrategy($equippedItems->merge($playerArtifacts->pluck('item')->filter())))

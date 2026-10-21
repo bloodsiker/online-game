@@ -86,6 +86,7 @@ final class DungeonStageManagementTest extends TestCase
 
         $stage = DB::table('dungeon_stages')->first();
         $this->assertSame(12, $stage->total_monsters);
+        $this->assertSame(180, $stage->time_limit_seconds);
         $this->assertDatabaseHas('dungeon_stage_monsters', [
             'dungeon_stage_id' => $stage->id,
             'monster_id' => 20,
@@ -119,12 +120,38 @@ final class DungeonStageManagementTest extends TestCase
         $this->assertDatabaseCount('dungeon_stages', 0);
     }
 
+    public function test_clan_boss_stage_cannot_save_its_own_time_limit(): void
+    {
+        DB::table('dungeons')->where('id', 1)->update(['is_clan_boss' => true]);
+        $payload = [
+            'number' => 1,
+            'name' => 'Клановый босс',
+            'time_limit_seconds' => 180,
+            'spawn_type' => 'fixed',
+            'total_monsters' => 1,
+            'location_ids' => [10],
+            'entry_location_id' => 10,
+            'monsters' => [['monster_id' => 20, 'quantity' => 1, 'weight' => 1, 'location_id' => 10]],
+        ];
+        $this->post(route('admin.dungeon.stage.save', 1), $payload)->assertSessionHasNoErrors();
+        $stageId = DB::table('dungeon_stages')->value('id');
+        $this->assertNull(DB::table('dungeon_stages')->where('id', $stageId)->value('time_limit_seconds'));
+
+        // Старое значение при редактировании также очищается, даже при подмене запроса.
+        DB::table('dungeon_stages')->where('id', $stageId)->update(['time_limit_seconds' => 600]);
+        $payload['stage_id'] = $stageId;
+        $payload['time_limit_seconds'] = 'ignored';
+        $this->post(route('admin.dungeon.stage.save', 1), $payload)->assertSessionHasNoErrors();
+        $this->assertNull(DB::table('dungeon_stages')->where('id', $stageId)->value('time_limit_seconds'));
+    }
+
     private function createSchema(): void
     {
         Schema::create('dungeons', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('type');
+            $table->boolean('is_clan_boss')->default(false);
             $table->timestamps();
         });
         Schema::create('locations', function (Blueprint $table): void {
@@ -152,6 +179,7 @@ final class DungeonStageManagementTest extends TestCase
             $table->unsignedInteger('max_hits_per_user')->nullable();
             $table->unsignedInteger('personal_cooldown_seconds')->nullable();
             $table->unsignedInteger('clan_cooldown_seconds')->nullable();
+            $table->unsignedInteger('gold_budget')->nullable();
             $table->timestamps();
         });
         Schema::create('dungeon_stage_locations', function (Blueprint $table): void {

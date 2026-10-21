@@ -54,6 +54,7 @@
         .grnn {
             color: #114d01 !important;
         }
+        .clan-requests-actions { width: 1%; white-space: nowrap; }
 
     </style>
 </head>
@@ -65,7 +66,7 @@
     <tbody>
     <tr>
         <td valign="top" width="100%">
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" height="100%">
+            <table id="clan-member-roster" width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
                 <tr height="22">
                     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
@@ -137,7 +138,7 @@
                                                 </a>
                                                 @if($clan->icon)<a href="{{ route('clan.public', ['clan' => $clan->id]) }}" title="{{ __('Открыть публичную информацию о клане') }}" onclick="window.open(this.href, '', 'width=730,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ Storage::disk('public')->url($clan->icon) }}" alt="logo" border="0" width="13" height="13" align="absmiddle"></a>&nbsp;@endif
                                                 <b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player->lvl }}]</b>
-                                                &nbsp;
+                                                &nbsp;<a href="{{ route('info.user', ['id' => $row['user']->id]) }}" title="{{ __('Информация о персонаже') }}" onclick="window.open(this.href, '', 'width=730,height=800,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ asset('main/images/player_info.gif') }}" border="0" width="10" height="10" align="absmiddle"></a>
                                             </td>
                                             <td nowrap="" height="27" width="165">
                                                 @if($canPromote)
@@ -232,55 +233,6 @@
                             @endif
                         </form>
 
-                        @if($clanRequests->isNotEmpty())
-                            <div style="margin-top:16px; text-align:center;">
-                                <table border="0" cellspacing="0" cellpadding="0" align="center">
-                                    <tbody><tr height="22">
-                                        <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22" alt=""></td>
-                                        <td align="center" class="tbl-usi_label-center">{{ __('clan.requests.heading') }} ({{ $clanRequests->count() }})</td>
-                                        <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22" alt=""></td>
-                                    </tr></tbody>
-                                </table>
-                            </div>
-                            <table class="coll w100 p10h p4v brd2" style="margin-top:12px;margin-bottom:12px">
-                                <tbody>
-                                <tr>
-                                    <td class="b" align="center" title="{{ __('Ник игрока') }}">{{ __('Ник игрока') }}</td>
-                                    <td class="b" align="center" title="{{ __('Местоположение игрока') }}">{{ __('Местоположение') }}</td>
-                                    <td class="b" align="center" title="{{ __('Статус') }}">{{ __('Статус') }}</td>
-                                    <td class="b" align="center" title="{{ __('Доступные действия над заявкой') }}">{{ __('Действия') }}</td>
-                                </tr>
-                                @foreach($clanRequests as $row)
-                                    <tr class="{{ $loop->even ? 'bg_l' : '' }}">
-                                        <td><b class="kser0">{{ $row['user']->name }} [{{ $row['user']->player->lvl }}]</b></td>
-                                        <td align="center">{{ $row['user']->currentLocation?->name ?? '--' }}</td>
-                                        <td align="center">{{ $row['status']->label() }}</td>
-                                        <td align="center" nowrap>
-                                            @if($row['status'] === \App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus::REQUEST && $canInvite)
-                                                <form method="post" action="{{ route('clan.application.accept', ['application' => $row['id']]) }}" style="display:inline-block;">
-                                                    @csrf
-                                                    <span class="butt1 pointer"><span><input type="submit" class="grnn" value="{{ __('clan.application.accept') }}"></span></span>
-                                                </form>
-                                                <form method="post" action="{{ route('clan.application.decline', ['application' => $row['id']]) }}" style="display:inline-block;">
-                                                    @csrf
-                                                    <span class="butt1 pointer"><span><input type="submit" class="grnn" value="{{ __('clan.application.decline') }}"></span></span>
-                                                </form>
-                                            @elseif($row['status'] === \App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus::INVITE && $canInvite)
-                                                <b class="butt2 pointer"><b>
-                                                    <input value="{{ __('Удалить') }}" type="button" style="width:100px"
-                                                           onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить запрос на вступление?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){location.href='{{ route('clan.request.cancel', $row['id']) }}'});">
-                                                </b></b>
-                                            @else
-                                                —
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        @endif
-
-
                         @if($canInvite)
                             <form method="post" action="{{ route('clan.invite') }}">
                                 @csrf
@@ -310,6 +262,7 @@
                 </tr>
                 </tbody>
             </table>
+            @include('clan::partials.member-requests')
         </td>
 
     </tr>
@@ -317,6 +270,15 @@
 </table>
 
 <script>
+    function clanMemberSendPrivate(name) {
+        try {
+            var chatFrame = window.top.document.getElementById('chat-frame');
+            var bottomFrame = chatFrame?.contentDocument?.getElementById('bottom-frame');
+            bottomFrame?.contentWindow.postMessage({ type: 'insertPrivate', name: name }, window.location.origin);
+        } catch (error) {}
+        return false;
+    }
+
     function submitKickMember(userId) {
         var form = document.getElementById('form_kick_member');
         form.action = '{{ url('clan/member') }}/' + userId;
@@ -325,7 +287,7 @@
 
 
     @if (session()->has('message'))
-        window.parent.showErrorIframe('{{ session('message') }}')
+        window.parent.showErrorIframe(@js(session('message')))
     @endif
 </script>
 

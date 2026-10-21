@@ -2468,6 +2468,188 @@
     }
 </script>
 
+{{-- Модальное окно смены аватара (сертификат «Смена аватара», открывается из backpack-frame) --}}
+<style>
+    .avatar-slider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 4px 0;
+    }
+    .avatar-slider__arrow {
+        flex: 0 0 auto;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #a66b2f;
+        border-radius: 50%;
+        background: rgba(255, 248, 225, .8);
+        color: #593a24;
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .avatar-slider__arrow:hover {
+        background: #fff0c9;
+    }
+    .avatar-slider__arrow:disabled {
+        opacity: .4;
+        cursor: default;
+    }
+    .avatar-slider__frame {
+        flex: 0 0 auto;
+        width: 200px;
+        text-align: center;
+    }
+    .avatar-slider__frame img {
+        display: block;
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border: 2px solid #a66b2f;
+        background: rgba(255, 248, 225, .6);
+    }
+    .avatar-slider__counter {
+        margin-top: 2px;
+        text-align: center;
+        color: #955c4a;
+        font-size: 10px;
+    }
+    .avatar-change-empty {
+        padding: 10px;
+        text-align: center;
+        color: #955c4a;
+        font-style: italic;
+    }
+</style>
+<div id="avatar-change-overlay" class="error_div" style="display:none;z-index:1028;" onclick="closeAvatarChangeModal()"></div>
+<div id="avatar-change-modal" style="display:none;position:fixed;z-index:1029;left:50%;top:50%;transform:translate(-50%,-50%);">
+    <div class="popup_global_container" style="width:460px;max-width:calc(100vw - 24px);">
+        <div class="popup-top-left">
+            <div class="popup-top-right">
+                <div class="popup-top-center">
+                    <div class="popup_global_title">{{ __('Новый аватар') }}</div>
+                </div>
+            </div>
+            <div class="popup_global_close_btn" onclick="closeAvatarChangeModal()"></div>
+        </div>
+        <div class="popup-left-center">
+            <div class="popup-right-center">
+                <div class="popup_global_content" style="padding:10px 18px 5px;">
+                    <form id="avatar-change-form" class="rename-form" onsubmit="submitAvatarChangeModal(event)">
+                        @if(($myAvatars ?? collect())->isNotEmpty())
+                            <div class="avatar-slider">
+                                <button type="button" class="avatar-slider__arrow" onclick="avatarSliderStep(-1)">‹</button>
+                                <div class="avatar-slider__frame">
+                                    <img id="avatar-slider-image" src="" alt="">
+                                </div>
+                                <button type="button" class="avatar-slider__arrow" onclick="avatarSliderStep(1)">›</button>
+                            </div>
+                            <div id="avatar-slider-counter" class="avatar-slider__counter"></div>
+                        @else
+                            <div class="avatar-change-empty">{{ __('Для вашей расы и пола пока нет доступных аватаров.') }}</div>
+                        @endif
+                        <div class="rename-actions">
+                            <b class="butt1 pointer"><b><input value="{{ __('Применить') }}" type="submit"></b></b>
+                            <b class="butt1 pointer"><b><input value="{{ __('ui.cancel') }}" type="button" onclick="closeAvatarChangeModal()"></b></b>
+                        </div>
+                    </form>
+                    <div id="avatar-change-message" class="rename-message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-left-bottom">
+            <div class="popup-right-bottom">
+                <div class="popup-bottom-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var _avatarChangeItemId = null;
+    var _avatarChangeList = @json($myAvatars->map(fn ($avatar) => ['id' => $avatar->id, 'url' => $avatar->image_url, 'name' => $avatar->name])->values());
+    var _avatarChangeIndex = 0;
+
+    function renderAvatarSlider() {
+        var list = _avatarChangeList;
+        if (!list.length) return;
+        var item = list[_avatarChangeIndex];
+        document.getElementById('avatar-slider-image').src = item.url;
+        document.getElementById('avatar-slider-image').alt = item.name;
+        document.getElementById('avatar-slider-counter').textContent = (_avatarChangeIndex + 1) + ' / ' + list.length;
+    }
+
+    function avatarSliderStep(delta) {
+        var list = _avatarChangeList;
+        if (!list.length) return;
+        _avatarChangeIndex = (_avatarChangeIndex + delta + list.length) % list.length;
+        renderAvatarSlider();
+    }
+
+    function openAvatarChangeModal(itemId) {
+        _avatarChangeItemId = itemId;
+        _avatarChangeIndex = 0;
+        renderAvatarSlider();
+        var message = document.getElementById('avatar-change-message');
+        message.style.display = 'none';
+        message.classList.remove('is-error');
+        document.getElementById('avatar-change-overlay').style.display = 'block';
+        document.getElementById('avatar-change-modal').style.display = 'block';
+    }
+
+    function closeAvatarChangeModal() {
+        document.getElementById('avatar-change-overlay').style.display = 'none';
+        document.getElementById('avatar-change-modal').style.display = 'none';
+    }
+
+    async function submitAvatarChangeModal(event) {
+        event.preventDefault();
+        var itemId = _avatarChangeItemId;
+        var message = document.getElementById('avatar-change-message');
+
+        if (!_avatarChangeList.length) {
+            message.textContent = gameTranslate('Для вашей расы и пола пока нет доступных аватаров.');
+            message.classList.add('is-error');
+            message.style.display = 'block';
+            return;
+        }
+
+        var submit = event.currentTarget.querySelector('input[type="submit"]');
+        submit.disabled = true;
+
+        try {
+            var response = await fetch('/items/use/' + itemId, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ new_avatar_id: _avatarChangeList[_avatarChangeIndex].id }),
+            });
+            var data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || gameTranslate('Не удалось выполнить действие.'));
+            }
+
+            closeAvatarChangeModal();
+            openGameMessageModal({
+                title: @json(__('Новый аватар')),
+                message: data.message || @json(__('Аватар изменён.')),
+                actions: [{ label: @json(__('Ок')), onClick: function () { closeGameMessageModal(); location.reload(); } }],
+            });
+        } catch (error) {
+            message.textContent = error.message || gameTranslate('Не удалось выполнить действие.');
+            message.classList.add('is-error');
+            message.style.display = 'block';
+        } finally {
+            submit.disabled = false;
+        }
+    }
+</script>
+
 {{-- Модальное окно распределения очков (открывается из character-frame) --}}
 <div id="pts-overlay" class="error_div" style="display:none;z-index:1002;"></div>
 <div id="pts-modal" style="display:none;position:fixed;z-index:1003;left:50%;top:50%;transform:translate(-50%,-50%);">

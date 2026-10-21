@@ -66,7 +66,17 @@
 @endphp
 
 {{-- Табы категорий + кнопка возврата в одной строке (кнопка прилипает к правому краю) --}}
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+<style>
+    .reputation-top-tabs > tbody { display: block; }
+    .reputation-top-tabs > tbody > tr { display: flex; align-items: flex-start; }
+    .reputation-top-tabs > tbody > tr > td { display: block; flex: 0 0 auto; width: auto; white-space: nowrap; }
+    .reputation-top-tabs > tbody > tr > td.reputation-top-tabs__spacer { flex: 1 1 auto; }
+    .reputation-top-tabs img { display: block; }
+    .reputation-top-tabs > tbody > tr > td:has(> a) { box-sizing: border-box; height: 21px; padding: 3px 2px 4px !important; line-height: 14px; }
+    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; }
+    .reputation-top-tabs br { display: none; }
+</style>
+<table class="reputation-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
     <tr height="21">
         @foreach($page->categories as $category)
@@ -79,7 +89,7 @@
         @endforeach
 
         {{-- пустая ячейка забирает свободное место, толкая кнопку вправо --}}
-        <td></td>
+        <td class="reputation-top-tabs__spacer"></td>
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"></td>
         <td width="140" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0 2px 6px;">

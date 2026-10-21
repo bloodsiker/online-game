@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Modules\Auth\Presentation\Http\Middleware\EnsureEmailIsVerified;
+use App\Modules\Auth\Presentation\Http\Middleware\EnsureSingleLoginSession;
 use App\Modules\Structure\Prison\Presentation\Http\Middleware\EnsurePrisonContext;
 use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,
+            EnsureSingleLoginSession::class,
             ShareErrorsFromSession::class,
             ValidateCsrfToken::class,
             SubstituteBindings::class,

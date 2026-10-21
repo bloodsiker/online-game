@@ -43,7 +43,8 @@ class GetWorkshopPage
             ->whereHas('itemInfo.skill', function ($query) use ($skillNames): void {
                 $query->where('type', 'peaceful');
                 if ($skillNames !== []) {
-                    $query->whereIn('name', $skillNames);
+                    // Tabs use stable Russian names, regardless of the player's locale.
+                    $query->whereIn('name->ru', $skillNames);
                 }
             })
             ->whereNotNull('kraft_item_id')

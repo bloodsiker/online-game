@@ -103,7 +103,6 @@
     $tabs = [
         'information' => 'Информация',
         'members' => 'Состав',
-        'history' => 'История',
     ];
     $publicUrl = route('clan.public', ['clan' => $clan->id]);
     $iconUrl = $clan->icon ? Storage::disk('public')->url($clan->icon) : null;
@@ -180,11 +179,19 @@
                                         @endif
                                     @elseif($mode === 'members')
                                         <table class="section-title"><tbody><tr valign="top"><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-left.gif') }}" width="47" height="18" alt=""></td><td class="section-title__center" align="center">{{ __('Состав клана') }}</td><td width="47"><img src="{{ asset('main/images/tbl-aft_label-c-right.gif') }}" width="47" height="18" alt=""></td></tr></tbody></table>
-                                        <table class="clan-members"><thead><tr><th>{{ __('Игрок') }}</th><th>{{ __('Звание') }}</th><th>{{ __('Уровень') }}</th><th>{{ __('Статус') }}</th></tr></thead><tbody>
+                                        <table class="clan-members"><thead><tr><th>{{ __('Игрок') }}</th><th>{{ __('Звание') }}</th><th>{{ __('Статус') }}</th></tr></thead><tbody>
                                         @forelse($members as $member)
-                                            <tr class="{{ $loop->odd ? 'bg_l' : '' }}"><td>@if($iconUrl)<img src="{{ $iconUrl }}" width="13" height="13" alt="">&nbsp;@endif<a href="{{ route('info.user', ['id' => $member['user']->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=700,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $member['user']->name }}</a></td><td align="center">{{ $member['role']?->name ?? '—' }}</td><td align="center">{{ $member['user']->player?->lvl ?? '—' }}</td><td align="center">@if($member['is_online'])<b class="clan-member-online">online</b>@else<b>offline</b>@endif</td></tr>
+                                            <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
+                                                <td>
+                                                    @if($iconUrl)<img src="{{ $iconUrl }}" width="13" height="13" alt="">&nbsp;@endif
+                                                    <a href="{{ route('info.user', ['id' => $member['user']->id]) }}" class="clan-user-link" onclick="window.open(this.href, '', 'width=930,height=800,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $member['user']->name }}&nbsp;[{{ $member['user']->player?->lvl ?? '—' }}]</a>
+                                                    &nbsp;<a href="{{ route('info.user', ['id' => $member['user']->id]) }}" title="{{ __('Информация о персонаже') }}" onclick="window.open(this.href, '', 'width=930,height=800,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" border="0" alt=""></a>
+                                                </td>
+                                                <td align="center">{{ $member['role']?->name ?? '—' }}</td>
+                                                <td align="center">@if($member['is_online'])<b class="clan-member-online">online</b>@else<b>offline</b>@endif</td>
+                                            </tr>
                                         @empty
-                                            <tr><td colspan="4" class="clan-empty">{{ __('В клане пока нет участников.') }}</td></tr>
+                                            <tr><td colspan="3" class="clan-empty">{{ __('В клане пока нет участников.') }}</td></tr>
                                         @endforelse
                                         </tbody></table>
                                     @else

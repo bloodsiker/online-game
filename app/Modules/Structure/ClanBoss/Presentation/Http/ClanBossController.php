@@ -7,8 +7,8 @@ namespace App\Modules\Structure\ClanBoss\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
+use App\Modules\Dungeon\Application\Services\ClanBossRewardRecorder;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
-use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossCooldown;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonStage;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
@@ -23,6 +23,7 @@ class ClanBossController extends Controller
     public function __construct(
         private readonly ClanBossService $clanBossService,
         private readonly BattleOrchestrator $battleOrchestrator,
+        private readonly ClanBossRewardRecorder $rewardRecorder,
     ) {}
 
     public function index(int $id): View|RedirectResponse
@@ -41,18 +42,23 @@ class ClanBossController extends Controller
             : null;
 
         $currentState = null;
+        $stageStates = collect();
         $bossMonster = null;
         $myContribution = null;
+        $myRunContribution = null;
         $rating = [];
         $hitsLeft = null;
         $personalAvailableAt = null;
 
         if ($run !== null) {
-            $currentState = ClanBossRunStage::query()
+            $rating = $this->clanBossService->ratingForRun($run->id);
+            $myRunContribution = collect($rating)->first(fn (array $row): bool => (int) $row['user']?->id === (int) $user->id);
+            $stageStates = ClanBossRunStage::query()
                 ->with(['stage', 'bossInstance.monster'])
                 ->where('clan_boss_run_id', $run->id)
-                ->where('dungeon_stage_id', $run->current_stage_id)
-                ->first();
+                ->get()
+                ->keyBy('dungeon_stage_id');
+            $currentState = $stageStates->get($run->current_stage_id);
 
             if ($currentState !== null) {
                 $bossMonster = $currentState->bossInstance?->monster;
@@ -61,7 +67,6 @@ class ClanBossController extends Controller
                     (int) $currentState->dungeon_stage_id,
                     $user->id,
                 );
-                $rating = $this->clanBossService->ratingForStage($run->id, (int) $currentState->dungeon_stage_id);
 
                 $batchStatus = $this->clanBossService->playerAttackBatchStatus($run, $user);
                 $hitsLeft = $batchStatus['hits_left'];
@@ -75,14 +80,6 @@ class ClanBossController extends Controller
                 ->with('monsters.monster')
                 ->orderBy('number')
                 ->get()
-            : collect();
-
-        $cooldowns = $clan !== null
-            ? ClanBossCooldown::query()
-                ->where('clan_id', $clan->id)
-                ->whereIn('dungeon_stage_id', $stages->modelKeys())
-                ->get()
-                ->keyBy('dungeon_stage_id')
             : collect();
 
         $canStartClanBossBattle = $membership !== null
@@ -100,13 +97,15 @@ class ClanBossController extends Controller
             'clan' => $clan,
             'run' => $run,
             'currentState' => $currentState,
+            'stageStates' => $stageStates,
             'bossMonster' => $bossMonster,
             'myContribution' => $myContribution,
+            'myRunContribution' => $myRunContribution,
             'rating' => $rating,
+            'rewardReceipts' => $run !== null ? $this->rewardRecorder->history($run->id) : collect(),
             'hitsLeft' => $hitsLeft,
             'personalAvailableAt' => $personalAvailableAt,
             'stages' => $stages,
-            'cooldowns' => $cooldowns,
             'canOpen' => $canOpen,
             'canLeadOpen' => $canLeadOpen,
             'canAttack' => $canAttack,

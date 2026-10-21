@@ -303,7 +303,7 @@
                                     @include('monster::info-partials.abilities', ['title' => 'Пассивные способности', 'abilities' => $monsterPassives, 'kind' => 'passive'])
                                 @endif
                                 @if($monsterSkills->isNotEmpty())
-                                    @include('monster::info-partials.abilities', ['title' => 'Умения', 'abilities' => $monsterSkills, 'kind' => 'skill'])
+                                    @include('monster::info-partials.abilities', ['title' => 'Фазы боя', 'abilities' => $monsterSkills, 'kind' => 'skill'])
                                 @endif
 
                                 @if(false && ($monsterEffects->isNotEmpty() || $monsterSkills->isNotEmpty()))

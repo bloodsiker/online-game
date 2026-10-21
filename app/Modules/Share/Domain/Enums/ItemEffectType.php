@@ -15,6 +15,8 @@ enum ItemEffectType: string
     case RESPEC_STATS = 'respec_stats';
     case RENAME_NAME = 'rename_name';
     case CHANGE_RACE = 'change_race';
+    case CHANGE_AVATAR = 'change_avatar';
+    case GRANT_DIAMONDS = 'grant_diamonds';
 
     public function label(): string
     {
@@ -28,13 +30,15 @@ enum ItemEffectType: string
             self::RESPEC_STATS => __('Сброс вложенных очков характеристик'),
             self::RENAME_NAME => __('Смена игрового имени'),
             self::CHANGE_RACE => __('Смена расы'),
+            self::CHANGE_AVATAR => __('Смена аватара'),
+            self::GRANT_DIAMONDS => __('Начисление бриллиантов'),
         };
     }
 
     public function isInstant(): bool
     {
         return match ($this) {
-            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS => true,
+            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS, self::GRANT_DIAMONDS => true,
             default => false,
         };
     }

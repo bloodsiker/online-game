@@ -6,8 +6,13 @@ namespace App\Modules\Structure\Auction\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ItemModelTooltipStrategy;
+use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Auction\Application\DTOs\ExchangeFilterDTO;
+use App\Modules\Structure\Auction\Application\Services\AuctionItemSelectionFilter;
 use App\Modules\Structure\Auction\Application\UseCases\BuyLot;
 use App\Modules\Structure\Auction\Application\UseCases\CancelLot;
 use App\Modules\Structure\Auction\Application\UseCases\CancelOrder;
@@ -28,6 +33,7 @@ use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AuctionController extends Controller
 {
@@ -48,6 +54,8 @@ class AuctionController extends Controller
         private readonly GetSaleProceeds $getSaleProceeds,
         private readonly TakeSaleProceeds $takeSaleProceeds,
         private readonly GetSellableItems $getSellableItems,
+        private readonly ItemTooltipCollector $tooltipCollector,
+        private readonly AuctionItemSelectionFilter $itemSelectionFilter,
     ) {}
 
     public function index(int $id): mixed
@@ -61,8 +69,10 @@ class AuctionController extends Controller
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $auctionSlots = $this->getAuctionLots->execute($auction->id);
+        $this->tooltipCollector->collectFrom(new ItemModelTooltipStrategy($auctionSlots->pluck('item')->filter()));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
 
-        return view('auction::list', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange'));
+        return view('auction::list', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange', 'itemTooltipScript'));
     }
 
     public function myLot(int $id): mixed
@@ -76,8 +86,10 @@ class AuctionController extends Controller
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $auctionSlots = $this->getAuctionLots->execute($auction->id, $user->id);
+        $this->tooltipCollector->collectFrom(new ItemModelTooltipStrategy($auctionSlots->pluck('item')->filter()));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
 
-        return view('auction::list_my_lot', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange'));
+        return view('auction::list_my_lot', compact('auction', 'user', 'auctionSlots', 'commissionShop', 'exchange', 'itemTooltipScript'));
     }
 
     public function myLotEdit(int $id, int $slotId): mixed
@@ -128,9 +140,12 @@ class AuctionController extends Controller
         }
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
-        $itemsToSell = $this->getSellableItems->execute($user->id);
+        $filter = $this->selectionFilter($request);
+        $itemsToSell = $this->getSellableItems->execute(userId: $user->id, filter: $filter);
+        $this->tooltipCollector->collectFrom(new ItemModelTooltipStrategy($itemsToSell->pluck('item')->filter()));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
 
-        return view('auction::new_lot', compact('auction', 'user', 'itemsToSell', 'selectedItem', 'commissionShop', 'exchange'));
+        return view('auction::new_lot', compact('auction', 'user', 'itemsToSell', 'selectedItem', 'commissionShop', 'exchange', 'filter', 'itemTooltipScript'));
     }
 
     public function newLotSave(Request $request, int $id): RedirectResponse
@@ -204,6 +219,8 @@ class AuctionController extends Controller
 
         [$commissionShop, $exchangeStructure] = $this->resolveSiblingStructures($auction);
         $orders = $this->getExchangeOrders->execute($auction->id, $user->id, $filter);
+        $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($orders->pluck('shareItem')->filter()->unique('id')));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
         $filterRaw = $request->input('filter', []);
 
         return view('auction::exchange', [
@@ -213,6 +230,7 @@ class AuctionController extends Controller
             'filter' => $filterRaw,
             'commissionShop' => $commissionShop,
             'exchange' => $exchangeStructure,
+            'itemTooltipScript' => $itemTooltipScript,
         ]);
     }
 
@@ -223,8 +241,10 @@ class AuctionController extends Controller
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
         $orders = $this->getMyOrders->execute($auction->id, $user->id);
+        $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($orders->pluck('shareItem')->filter()->unique('id')));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
 
-        return view('auction::my_orders', compact('auction', 'user', 'orders', 'commissionShop', 'exchange'));
+        return view('auction::my_orders', compact('auction', 'user', 'orders', 'commissionShop', 'exchange', 'itemTooltipScript'));
     }
 
     public function newOrder(Request $request, int $id): mixed
@@ -240,9 +260,31 @@ class AuctionController extends Controller
         }
 
         [$commissionShop, $exchange] = $this->resolveSiblingStructures($auction);
-        $shareItems = ShareItem::where('is_auction_sellable', 1)->orderBy('name->ru')->get();
+        $filter = $this->selectionFilter($request);
+        $shareItems = $this->itemSelectionFilter->apply(ShareItem::where('is_auction_sellable', 1), $filter)
+            ->orderBy('name->ru')->orderBy('id')->paginate(20)->withQueryString();
+        $tooltipItems = $shareItems->getCollection();
+        if ($selectedItem !== null) {
+            $tooltipItems = $tooltipItems->concat([$selectedItem])->unique('id');
+        }
+        $this->tooltipCollector->collectFrom(new ShareItemTooltipStrategy($tooltipItems));
+        $itemTooltipScript = $this->tooltipCollector->renderScript();
 
-        return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem', 'commissionShop', 'exchange'));
+        return view('auction::new_order', compact('auction', 'user', 'shareItems', 'selectedItem', 'commissionShop', 'exchange', 'itemTooltipScript', 'filter'));
+    }
+
+    private function selectionFilter(Request $request): array
+    {
+        $data = $request->validate([
+            'filter' => ['sometimes', 'array'],
+            'filter.name' => ['nullable', 'string', 'max:100'],
+            'filter.type' => ['nullable', Rule::enum(ShareItemType::class)],
+        ]);
+
+        return [
+            'name' => trim($data['filter']['name'] ?? ''),
+            'type' => $data['filter']['type'] ?? '',
+        ];
     }
 
     public function newOrderSave(Request $request, int $id): RedirectResponse

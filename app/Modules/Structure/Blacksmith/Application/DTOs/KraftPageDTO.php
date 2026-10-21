@@ -11,11 +11,13 @@ final readonly class KraftPageDTO
     /**
      * @param  array<int, array<string, mixed>>  $recipes
      * @param  array<int, array{id:int, count:int}>  $resources
+     * @param  array<int, array<string, mixed>>  $assemblies
      */
     public function __construct(
         public Structure $blacksmith,
         public array $recipes,
         public array $resources,
         public string $itemTooltipScript,
+        public array $assemblies = [],
     ) {}
 }

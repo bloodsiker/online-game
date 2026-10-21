@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Item\Application\UseCases;
 
+use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Item\Application\DTOs\ItemActionResultDTO;
 use App\Modules\Item\Domain\Services\ItemService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -12,6 +13,7 @@ class DropItem
 {
     public function __construct(
         private readonly ItemService $itemService,
+        private readonly BackpackService $backpackService,
     ) {}
 
     public function execute(User $user, int $itemId, int $confirmation, int $qty): ItemActionResultDTO
@@ -25,6 +27,13 @@ class DropItem
             return new ItemActionResultDTO(false, $error);
         }
 
-        return new ItemActionResultDTO(true);
+        $remaining = (int) ($this->backpackService->getItemById($user, $itemId)?->count ?? 0);
+
+        return new ItemActionResultDTO(true, backpackUpdate: [
+            'item_id' => $itemId,
+            'count' => $remaining,
+            'removed' => $remaining === 0,
+            'capacity_used' => $this->backpackService->getCountableItemsCount($user),
+        ]);
     }
 }

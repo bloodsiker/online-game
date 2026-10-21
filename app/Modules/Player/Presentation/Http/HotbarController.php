@@ -10,6 +10,7 @@ use App\Modules\Item\Application\ItemEffect\ItemEffectStrategyFactory;
 use App\Modules\Player\Application\Services\HotbarService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
+use App\Modules\Share\Domain\Enums\ItemEffectType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,11 @@ class HotbarController extends Controller
             $this->hotbarService->clearSlot($player, $playerSlot->slot_number);
 
             return response()->json(['status' => 'error', 'message' => __('Предмет закончился.'), 'slot_cleared' => true], 422);
+        }
+
+        // Currency certificates must use the transactional inventory endpoint, not the legacy hotbar path.
+        if ($backpack->item->itemInfo->effects->contains(fn ($effect) => $effect->effect_type === ItemEffectType::GRANT_DIAMONDS)) {
+            return response()->json(['status' => 'error', 'message' => __('Используйте этот предмет из рюкзака.')], 422);
         }
 
         $stats = $this->statService->resolve($player);

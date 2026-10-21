@@ -27,11 +27,15 @@
                             $isPassive => $ability->type->label(),
                             default => $ability->getLabel(),
                         };
-                        $image = $isPassive ? $ability->type->iconUrl() : ($ability->image ?: $fallbackImage);
+                        $image = match (true) {
+                            $isPassive => $ability->type->iconUrl(),
+                            $kind === 'skill' => $ability->image ?: $ability->mechanic_type->iconUrl(),
+                            default => $ability->image ?: $fallbackImage,
+                        };
                         $description = match (true) {
                             $isEffect => strip_tags((string) $ability->description),
                             $isPassive => $ability->type->monsterDescription($ability->value),
-                            default => strip_tags((string) ($ability->config['description'] ?? '')),
+                            default => strip_tags($ability->getInstance()->getDescription()),
                         };
                         $meta = match (true) {
                             $isEffect => array_values(array_filter([
@@ -46,8 +50,21 @@
                             ],
                             default => array_values(array_filter([
                                 ['label' => 'Тип', 'value' => $ability->getLabel()],
-                                $ability->trigger_hp_percent !== null ? ['label' => 'Условие', 'value' => 'HP ≤ '.$ability->trigger_hp_percent.'%'] : null,
-                                $ability->trigger_turn !== null ? ['label' => 'Условие', 'value' => 'Ход '.$ability->trigger_turn] : null,
+                                [
+                                    'label' => 'Условие',
+                                    'value' => match (true) {
+                                        $ability->mechanic_type === \App\Modules\Battle\Domain\Enums\BossMechanicType::DEATH_EXPLOSION => 'При смерти босса',
+                                        $ability->trigger_hp_percent !== null => 'HP ≤ '.$ability->trigger_hp_percent.'%',
+                                        $ability->trigger_turn !== null => 'Ход ≥ '.$ability->trigger_turn,
+                                        default => 'С начала боя',
+                                    },
+                                ],
+                                [
+                                    'label' => 'Повтор',
+                                    'value' => isset($ability->config['cooldown_turns'])
+                                        ? 'каждые '.$ability->config['cooldown_turns'].' х.'
+                                        : 'один раз за бой',
+                                ],
                             ])),
                         };
                     @endphp

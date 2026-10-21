@@ -22,12 +22,20 @@
         .brd2, .brd2 td { border: 1px solid #DB9F73; }
         .bg_l { background-image: url(/img/bg/info/bg_l.gif); }
         .skill-card {
-            border: 1px solid #DB9F73;
-            border-radius: 4px;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-bottom: 6px;
-            padding: 6px 8px;
-            background-image: url(/img/bg/info/bg_l.gif);
         }
+        .skill-card .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .skill-card .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .skill-card .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .skill-card .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .skill-card .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .skill-card .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .skill-card .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .skill-card .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .skill-card .common-inset-bg { background: #ffffd6; }
+        .skill-card__edge { font-size: 0; line-height: 0; }
         .skill-name { font-weight: bold; font-size: 12px; color: #461c0b; }
         .skill-level { color: #8D2616; font-weight: bold; }
         .skill-desc { color: #555; margin: 2px 0 4px; }
@@ -38,7 +46,7 @@
         .skill-kind.passive { color: #1a4d8a; background: #dceafb; border: 1px solid #92afd0; }
         .skill-kind.active { color: #8D2616; background: #f7e0d2; border: 1px solid #d5a17e; }
         .w100 { width: 100%; }
-        .skill-spell-icon { width:36px; height:36px; object-fit:contain; cursor:pointer; border:1px solid #db9f73; background:#fbd4a4; }
+        .skill-spell-icon { width:50px; height:50px; object-fit:contain; cursor:pointer; border:1px solid #db9f73; background:#fbd4a4; }
         #skill_effect_alt .aa-table { border-radius: 30px 30px 0 0; box-shadow: 3px 3px 3px -1px rgba(0, 0, 0, .2); font-size: 11px; }
         #skill_effect_alt .aa-tl { background: url(/img/bg/item_info/tbl-pop_corner-top-left.gif) no-repeat; width: 14px; height: 24px; }
         #skill_effect_alt .aa-t { background: url(/img/bg/item_info/tbl-pop_top.gif); height: 24px; }
@@ -118,12 +126,21 @@
                                 ], $displayMagicSkill->effects ?? [])) : [];
                             @endphp
 
-                            <div class="skill-card">
+                            <table class="w100 skill-card" border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                <tr class="skill-card__edge">
+                                    <td width="12" height="12" class="common-inset-tl"></td>
+                                    <td height="12" class="common-inset-t"></td>
+                                    <td width="12" height="12" class="common-inset-tr"></td>
+                                </tr>
+                                <tr>
+                                    <td width="12" class="common-inset-l"><img src="{{ asset('main/images/blank.gif') }}" width="12" alt=""></td>
+                                    <td class="common-inset-bg" valign="top" style="padding: 0;">
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                     <tbody>
                                     <tr>
                                         {{-- Icon --}}
-                                        <td width="40" valign="top" style="padding-right: 8px;">
+                                        <td width="50" valign="top" style="padding-right: 8px;">
                                             <img src="{{ $skillIcon }}" class="skill-spell-icon" alt="{{ $skillIconAlt }}"
                                                  @if($displayMagicSkill)
                                                      data-tooltip-container="skill_effect_alt"
@@ -170,7 +187,16 @@
                                     </tr>
                                     </tbody>
                                 </table>
-                            </div>
+                                    </td>
+                                    <td width="12" class="common-inset-r"><img src="{{ asset('main/images/blank.gif') }}" width="12" alt=""></td>
+                                </tr>
+                                <tr class="skill-card__edge">
+                                    <td width="12" height="12" class="common-inset-bl"></td>
+                                    <td height="12" class="common-inset-b"></td>
+                                    <td width="12" height="12" class="common-inset-br"></td>
+                                </tr>
+                                </tbody>
+                            </table>
                         @empty
                             <div align="center" style="padding: 20px; color: #49382d;">
                                 <b>{{ __('Навыки клана пока не добавлены.') }}</b>

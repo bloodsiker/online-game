@@ -17,6 +17,7 @@ class ShareRecipe extends Model
 
     protected $casts = [
         'unlock_type' => RecipeUnlockType::class,
+        'is_random_result' => 'boolean',
     ];
 
     public function isLearnable(): bool
@@ -38,6 +39,13 @@ class ShareRecipe extends Model
     {
         return $this->belongsToMany(ShareItem::class, 'share_recipe_has_items', 'share_recipe_id', 'share_item_id')
             ->withPivot('count');
+    }
+
+    /** Пул случайного результата (используется, когда is_random_result=true, вместо kraftItem). */
+    public function resultPool(): BelongsToMany
+    {
+        return $this->belongsToMany(ShareItem::class, 'share_recipe_results', 'share_recipe_id', 'share_item_id')
+            ->withPivot('chance');
     }
 
     public function players(): BelongsToMany

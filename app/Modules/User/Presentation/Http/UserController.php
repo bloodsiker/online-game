@@ -45,7 +45,7 @@ final class UserController
         ])->findOrFail($id);
         $stats = $this->statService->resolve($user->player);
         $injuriesBySlot = $this->injuryService->activeByEquipmentColumn($user->player);
-        $playerArtifacts = $user->player->artifacts;
+        $playerArtifacts = $user->player->artifactsByRarity();
         $this->tooltipCollector
             ->collectFrom(new ItemModelTooltipStrategy([
                 ...$this->equippedItems($user),

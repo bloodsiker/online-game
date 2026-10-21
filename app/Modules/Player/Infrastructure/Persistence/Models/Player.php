@@ -10,6 +10,7 @@ use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\PlayerReputation;
+use App\Modules\Share\Domain\Enums\ItemRarity;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
@@ -93,6 +94,17 @@ class Player extends Model
     public function artifacts(): HasMany
     {
         return $this->hasMany(PlayerArtifact::class, 'player_id')->with('item.itemInfo.stats');
+    }
+
+    /** @return Collection<int, PlayerArtifact> */
+    public function artifactsByRarity(): Collection
+    {
+        $rarityOrder = array_flip(array_map(static fn (ItemRarity $rarity): string => $rarity->value, ItemRarity::cases()));
+
+        return $this->artifacts->sortBy(static fn (PlayerArtifact $artifact): array => [
+            $rarityOrder[$artifact->item?->itemInfo?->rarity?->value ?? ''] ?? PHP_INT_MAX,
+            (int) $artifact->id,
+        ])->values();
     }
 
     public function skills(): HasMany

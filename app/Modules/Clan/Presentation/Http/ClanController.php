@@ -501,6 +501,8 @@ class ClanController extends Controller
             'archivedStages' => $page->archivedStages,
             'archivedDamageRows' => $page->archivedDamageRows,
             'archivedStageDamage' => $page->archivedStageDamage,
+            'rewardReceipts' => $page->rewardReceipts,
+            'archivedRewardReceipts' => $page->archivedRewardReceipts,
         ]);
     }
 

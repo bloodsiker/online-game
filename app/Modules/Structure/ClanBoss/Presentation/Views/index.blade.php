@@ -233,14 +233,6 @@
                             <div class="hpbar"><div style="width: {{ $pct }}%"></div></div>
                             <div class="boss-sub-info">
                                 <span><span class="lbl">Фаза:</span>&nbsp;<b>{{ $currentState->bossInstance->current_phase ?? 1 }}</b></span>
-                                <span>
-                                    <span class="lbl">Босс исчезнет:</span>&nbsp;
-                                    @if($currentState->expires_at !== null)
-                                        <b class="redd">через {{ format_game_duration((int) max(0, now()->diffInSeconds($currentState->expires_at, false))) }}</b>
-                                    @else
-                                        <b>по общему таймеру похода</b>
-                                    @endif
-                                </span>
                                 @if($hitsLeft !== null)
                                     <span><span class="lbl">Ударов в пакете осталось:</span>&nbsp;<b class="redd">{{ $hitsLeft }}/{{ $run->dungeon->clan_boss_hit_batch_size }}</b></span>
                                     <span>
@@ -252,8 +244,9 @@
                                         @endif
                                     </span>
                                 @endif
-                                @if($myContribution !== null)
-                                    <span><span class="lbl">Ваш урон:</span>&nbsp;<b class="redd">{{ number_format($myContribution->damage, 0, '', ' ') }}</b>&nbsp;(ударов: <b>{{ $myContribution->hits }}</b>)</span>
+                                @if($myContribution !== null || $myRunContribution !== null)
+                                    <span><span class="lbl">{{ __('Ваш урон по текущему боссу:') }}</span>&nbsp;<b class="redd">{{ number_format($myContribution?->damage ?? 0, 0, '', ' ') }}</b>&nbsp;({{ __('Ударов') }}: <b>{{ $myContribution?->hits ?? 0 }}</b>)</span>
+                                    <span><span class="lbl">{{ __('Ваш урон за весь поход:') }}</span>&nbsp;<b class="redd">{{ number_format($myRunContribution['damage'] ?? 0, 0, '', ' ') }}</b>&nbsp;({{ __('Ударов') }}: <b>{{ $myRunContribution['hits'] ?? 0 }}</b>)</span>
                                 @endif
                             </div>
                         </div>
@@ -271,16 +264,16 @@
                         <div class="empty-state"><b>Босс сейчас недоступен.</b></div>
                     @endif
 
-                    <span class="section-title">Рейтинг урона</span>
+                    <span class="section-title">{{ __('Рейтинг урона за весь поход') }}</span>
                     @if(count($rating) > 0)
                         <table class="history-tbl" cellspacing="0" cellpadding="0">
                             <thead>
                             <tr>
                                 <th>#</th>
                                 <th title="Ник члена клана">Ник игрока</th>
-                                <th title="Суммарный урон по текущему боссу">Урон</th>
-                                <th title="Суммарное число ударов">Удары</th>
-                                <th title="Выдана ли награда за этап">Награда</th>
+                                <th title="{{ __('Суммарный урон по всем боссам этого похода') }}">{{ __('Урон за поход') }}</th>
+                                <th title="{{ __('Суммарное число ударов по всем боссам этого похода') }}">{{ __('Ударов') }}</th>
+                                <th title="{{ __('Получена награда хотя бы за один этап') }}">{{ __('Награда за этапы') }}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -294,6 +287,7 @@
                                         @if($row['user'] !== null)
                                             <span class="player-row">
                                                 <a href="#" class="icon-link" title="Приватное сообщение" onclick="clanBossInsertPrivate({{ \Illuminate\Support\Js::from($row['user']->name) }}); return false;"><img src="{{ asset('img/icon/users-arrow.gif') }}" width="12" height="10" border="0"></a>
+                                                @include('clan::partials.player-clan-icon', ['playerUser' => $row['user']])
                                                 <a href="{{ route('info.user', $row['user']->id) }}" class="player-name" onclick="clanBossOpenWindow(this.href, 930, 700); return false;"><b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player?->lvl ?? '?' }}]</b></a>
                                                 <a href="{{ route('info.user', $row['user']->id) }}" class="icon-link" title="Информация о персонаже" onclick="clanBossOpenWindow(this.href, 930, 700); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" border="0"></a>
                                                 @if($isMe)<b class="grnn me-badge">(вы)</b>@endif
@@ -312,7 +306,7 @@
                             </tbody>
                         </table>
                     @else
-                        <div class="empty-state">Пока никто не бил босса.</div>
+                        <div class="empty-state">{{ __('В этом походе пока нет участников, наносивших удары.') }}</div>
                     @endif
                 @endif
             @endif
@@ -325,17 +319,16 @@
                         <th>№</th>
                         <th>Этап</th>
                         <th>Ур.</th>
-                        <th title="Время, за которое клан должен победить босса этапа">Окно босса</th>
-                        <th title="Когда клан снова сможет сразиться с этим этапом">КД клана</th>
+                        <th>{{ __('Состояние') }}</th>
+                        <th title="{{ __('От появления босса до его убийства, включая паузы') }}">{{ __('Время на убийство') }}</th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach($stages as $stage)
                         @php
-                            $cooldown = $cooldowns->get($stage->id);
-                            $cooldownAt = $cooldown?->available_at;
-                            $isOnCooldown = $cooldownAt !== null && now()->lt($cooldownAt);
                             $stageMonster = $stage->monsters->first()?->monster;
+                            $stageState = $stageStates->get($stage->id);
+                            $killSeconds = $stageState?->killDurationSeconds();
                         @endphp
                         <tr class="{{ $loop->odd ? 'bg_l' : '' }}">
                             <td align="center">{{ $stage->number }}</td>
@@ -347,13 +340,28 @@
                                 @endif
                             </td>
                             <td align="center">{{ $stageMonster?->lvl ?? '—' }}</td>
-                            <td align="center">{{ $stage->time_limit_seconds !== null ? format_game_duration((int) $stage->time_limit_seconds) : '—' }}</td>
-                            <td align="center">
-                                @if($isOnCooldown)
-                                    <span class="cd-waiting" data-countdown-cooldown-until="{{ $cooldownAt->timestamp }}" data-countdown-fallback="доступен">через {{ format_game_duration((int) max(0, now()->diffInSeconds($cooldownAt, false))) }}</span>
-                                @else
-                                    <span class="cd-available">доступен</span>
-                                @endif
+                            <td align="center" data-stage-status="{{ $stage->id }}">
+                                @switch($stageState?->status)
+                                    @case(\App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage::STATUS_KILLED)
+                                        <b class="grnn">{{ __('Повержен') }}</b>
+                                        @break
+                                    @case(\App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage::STATUS_ACTIVE)
+                                        <b class="redd">{{ __('Текущий') }}</b>
+                                        @break
+                                    @case(\App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage::STATUS_SKIPPED)
+                                    @case(\App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage::STATUS_EXPIRED)
+                                        <span class="redd">{{ __('Время вышло') }}</span>
+                                        @break
+                                    @default
+                                        @if($run !== null)
+                                            <span class="lbl">{{ __('Не открыт') }}</span>
+                                        @else
+                                            <span class="lbl" title="{{ __('Нет активного похода') }}">—</span>
+                                        @endif
+                                @endswitch
+                            </td>
+                            <td align="center" data-stage-duration="{{ $stage->id }}">
+                                {{ $killSeconds !== null ? \Carbon\CarbonInterval::seconds($killSeconds)->cascade()->locale(app()->getLocale())->forHumans(['parts' => 3]) : '—' }}
                             </td>
                         </tr>
                     @endforeach
@@ -361,6 +369,9 @@
                 </table>
             @endif
 
+            @if($run !== null)
+                @include('clan::partials.boss-reward-receipts')
+            @endif
             </div>
 
             @if($structure->image)

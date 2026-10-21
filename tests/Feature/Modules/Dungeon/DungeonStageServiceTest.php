@@ -20,9 +20,11 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\ExperienceService;
+use App\Modules\User\Domain\Events\UserLocationChanged;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Mockery;
 use Tests\TestCase;
@@ -36,6 +38,7 @@ class DungeonStageServiceTest extends TestCase
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
         $this->createSchema();
+        Event::fake([UserLocationChanged::class]);
     }
 
     public function test_it_spawns_floor_and_advances_after_last_monster_dies(): void

@@ -33,7 +33,9 @@ final class ChangePasswordTest extends TestCase
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('password');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
+            $table->string('active_login_token')->nullable();
             $table->timestamps();
         });
     }
@@ -43,8 +45,12 @@ final class ChangePasswordTest extends TestCase
         DB::table('users')->insert([
             'id' => 1,
             'password' => Hash::make('old-password-123'),
+            'email_verified_at' => now(),
             'remember_token' => 'old-token',
+            'active_login_token' => 'test-login-token',
         ]);
+
+        $this->withSession(['active_login_token' => 'test-login-token']);
 
         return User::query()->without('player')->findOrFail(1);
     }
@@ -94,6 +100,7 @@ final class ChangePasswordTest extends TestCase
     public function test_request_without_csrf_cannot_change_password(): void
     {
         $user = $this->user();
+        $this->app['env'] = 'local';
         $this->actingAs($user)->postJson(route('settings.password.update'), [
             'current_password' => 'old-password-123',
             'password' => 'new-password-456',

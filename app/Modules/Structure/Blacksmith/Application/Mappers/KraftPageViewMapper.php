@@ -20,13 +20,27 @@ class KraftPageViewMapper
     /**
      * @param  Collection<int, mixed>  $recipes
      * @param  array<int, array{id:int, count:int}>  $resources
+     * @param  array<int, array<string, mixed>>  $assemblies
      */
-    public function map(Structure $blacksmith, Collection $recipes, array $resources): KraftPageDTO
-    {
+    public function map(
+        Structure $blacksmith,
+        Collection $recipes,
+        array $resources,
+        array $assemblies = [],
+        Collection $assemblyItems = new Collection,
+    ): KraftPageDTO {
         $ingredientItems = $recipes->flatMap(fn ($recipe) => $recipe->item->itemInfo->recipe?->items ?? collect());
-        $resultItems = $recipes
-            ->map(fn ($recipe) => $recipe->item->itemInfo->recipe?->kraftItem)
-            ->filter();
+        $resultItems = $recipes->flatMap(function ($recipe) {
+            $recipeModel = $recipe->item->itemInfo->recipe;
+
+            if ($recipeModel === null) {
+                return collect();
+            }
+
+            return $recipeModel->is_random_result
+                ? $recipeModel->resultPool
+                : collect([$recipeModel->kraftItem])->filter();
+        });
         $shareItems = $ingredientItems
             ->concat($resultItems)
             ->unique('id')
@@ -34,11 +48,13 @@ class KraftPageViewMapper
 
         $itemTooltipScript = $this->collector
             ->collectFrom(new BackpackItemTooltipStrategy($recipes))
-            ->collectFrom(new ShareItemTooltipStrategy($shareItems))
+            ->collectFrom(new ShareItemTooltipStrategy($shareItems->concat($assemblyItems)->unique('id')->values()))
             ->renderScript();
 
         $recipeViews = $recipes->map(function ($recipe) use ($resources) {
-            $ingredients = collect($recipe->item->itemInfo->recipe->items)->map(function ($item) use ($resources) {
+            $recipeModel = $recipe->item->itemInfo->recipe;
+
+            $ingredients = collect($recipeModel->items)->map(function ($item) use ($resources) {
                 $itemsHas = $item->getCountItemPerRecipe($resources);
 
                 return [
@@ -51,17 +67,28 @@ class KraftPageViewMapper
                 ];
             })->values()->all();
 
+            $isRandomResult = $recipeModel->is_random_result;
+            $totalChance = $isRandomResult ? max(1, $recipeModel->resultPool->sum('pivot.chance')) : 0;
+
             return [
                 'recipeItemId' => $recipe->item->id,
                 'recipeName' => $recipe->item->itemInfo->name,
                 'recipeImage' => $recipe->item->itemInfo->image,
                 'recipeRarityColor' => $recipe->item->itemInfo->rarity->color(),
-                'chancePercent' => $recipe->item->itemInfo->recipe->percent,
+                'chancePercent' => $recipeModel->percent,
                 'ingredients' => $ingredients,
-                'resultId' => $recipe->item->itemInfo->recipe->kraftItem->id,
-                'resultName' => $recipe->item->itemInfo->recipe->kraftItem->name,
-                'resultImage' => $recipe->item->itemInfo->recipe->kraftItem->image,
-                'resultRarityColor' => $recipe->item->itemInfo->recipe->kraftItem->rarity->color(),
+                'isRandomResult' => $isRandomResult,
+                'resultId' => $isRandomResult ? null : $recipeModel->kraftItem->id,
+                'resultName' => $isRandomResult ? null : $recipeModel->kraftItem->name,
+                'resultImage' => $isRandomResult ? null : $recipeModel->kraftItem->image,
+                'resultRarityColor' => $isRandomResult ? null : $recipeModel->kraftItem->rarity->color(),
+                'resultPool' => $isRandomResult ? $recipeModel->resultPool->map(fn ($poolItem) => [
+                    'id' => $poolItem->id,
+                    'name' => $poolItem->name,
+                    'image' => $poolItem->image,
+                    'rarityColor' => $poolItem->rarity->color(),
+                    'chancePercent' => round($poolItem->pivot->chance / $totalChance * 100, 1),
+                ])->values()->all() : [],
                 'canCraft' => collect($ingredients)->every(fn ($ingredient) => $ingredient['active']),
             ];
         })->values()->all();
@@ -71,6 +98,7 @@ class KraftPageViewMapper
             recipes: $recipeViews,
             resources: $resources,
             itemTooltipScript: $itemTooltipScript,
+            assemblies: $assemblies,
         );
     }
 }

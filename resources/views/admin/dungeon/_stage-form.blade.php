@@ -34,12 +34,14 @@
     @unless($isExisting)<h4>Добавить этаж</h4>@endunless
     <div class="row">
         <div class="col-md-1"><label>№</label><input class="form-control" type="number" name="number" value="{{ $useOld ? old('number') : ($isExisting ? $stage->number : $dungeon->stages->max('number') + 1) }}" min="1" required></div>
-        <div class="col-md-2"><label>Время босса, сек.</label><input class="form-control" type="number" name="time_limit_seconds" value="{{ $useOld ? old('time_limit_seconds') : ($stage?->time_limit_seconds ?? ($dungeon->is_clan_boss ? '' : 180)) }}" min="10" placeholder="по общему таймеру"></div>
+        @unless($dungeon->is_clan_boss)
+            <div class="col-md-2"><label>Время босса, сек.</label><input class="form-control" type="number" name="time_limit_seconds" value="{{ $useOld ? old('time_limit_seconds') : ($stage?->time_limit_seconds ?? 180) }}" min="10" placeholder="по общему таймеру"></div>
+        @endunless
         <div class="col-md-3"><label>Размещение</label><select class="form-control stage-spawn-type" name="spawn_type">@foreach(\App\Modules\Dungeon\Domain\Enums\DungeonStageSpawnType::cases() as $type)<option value="{{ $type->value }}" @selected($spawnType === $type->value)>{{ $type->label() }}</option>@endforeach</select></div>
         <div class="col-md-2 stage-total-monsters"><label>Всего монстров</label><input class="form-control" type="number" name="total_monsters" value="{{ $useOld ? old('total_monsters') : ($stage?->total_monsters ?? 30) }}" min="1" max="1000" required></div>
     </div>
     @if($dungeon->is_clan_boss)
-        <p class="text-muted mt-2 mb-0">Пакет ударов и личное восстановление настраиваются в общих параметрах данжа.</p>
+        <p class="text-muted mt-2 mb-0">Для всех боссов действует только общий срок похода, отдельного лимита на босса нет. Пакет ударов и личное восстановление настраиваются в общих параметрах данжа.</p>
     @endif
     <div class="row mt-2">
         <div class="col-md-4"><label>КД клана до нового похода, сек.</label><input class="form-control" type="number" name="clan_cooldown_seconds" value="{{ $useOld ? old('clan_cooldown_seconds') : $stage?->clan_cooldown_seconds }}" min="0" placeholder="нет"></div>

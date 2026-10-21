@@ -455,11 +455,15 @@ class ItemController extends Controller
     {
         $data = $request->validate([
             'kraft_item_id' => ['nullable', 'integer', 'exists:share_items,id'],
+            'is_random_result' => ['nullable', 'boolean'],
             'percent' => ['required', 'integer', 'min:0', 'max:100'],
             'unlock_type' => ['required', 'string', 'in:'.implode(',', array_column(RecipeUnlockType::cases(), 'value'))],
         ]);
 
-        $recipe->kraft_item_id = $data['kraft_item_id'] ?? null;
+        $recipe->is_random_result = (bool) ($data['is_random_result'] ?? false);
+        // kraft_item_id осмыслен только для детерминированного рецепта - для
+        // пула результат берётся из share_recipe_results (resultPool()).
+        $recipe->kraft_item_id = $recipe->is_random_result ? null : ($data['kraft_item_id'] ?? null);
         $recipe->percent = $data['percent'];
         $recipe->unlock_type = RecipeUnlockType::from($data['unlock_type']);
         $recipe->save();
@@ -482,6 +486,38 @@ class ItemController extends Controller
         $recipe->items()->detach($item->id);
 
         return redirect()->back()->with('success', 'Ресурс удалён.');
+    }
+
+    public function addResultToRecipe(Request $request, ShareRecipe $recipe): RedirectResponse
+    {
+        $data = $request->validate([
+            'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
+            'chance' => ['required', 'integer', 'min:1', 'max:1000000'],
+        ]);
+
+        $recipe->resultPool()->syncWithoutDetaching([
+            (int) $data['share_item_id'] => ['chance' => (int) $data['chance']],
+        ]);
+
+        return redirect()->back()->with('success', 'Предмет добавлен в пул результата.');
+    }
+
+    public function updateResultInRecipe(Request $request, ShareRecipe $recipe, ShareItem $item): RedirectResponse
+    {
+        abort_unless($recipe->resultPool()->whereKey($item->id)->exists(), 404);
+        $data = $request->validate([
+            'chance' => ['required', 'integer', 'min:1', 'max:1000000'],
+        ]);
+        $recipe->resultPool()->updateExistingPivot($item->id, ['chance' => (int) $data['chance']]);
+
+        return redirect()->back()->with('success', 'Вес предмета в пуле обновлён.');
+    }
+
+    public function deleteResultInRecipe(Request $request, ShareRecipe $recipe, ShareItem $item): RedirectResponse
+    {
+        $recipe->resultPool()->detach($item->id);
+
+        return redirect()->back()->with('success', 'Предмет удалён из пула результата.');
     }
 
     public function addRarityUpgradeMaterial(Request $request, ShareItem $item): RedirectResponse
@@ -582,6 +618,7 @@ class ItemController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'diamond_price' => ['sometimes', 'required', 'numeric', 'decimal:0,2', 'min:0', 'max:9999999999.99'],
             'translations' => ['sometimes', 'array:uk'],
             'translations.uk' => ['sometimes', 'array:name,description'],
             'translations.uk.name' => ['nullable', 'string', 'max:255'],
@@ -651,6 +688,9 @@ class ItemController extends Controller
             ? ShareItemSlot::HAND
             : ($request->filled('slot') ? ShareItemSlot::from($request->input('slot')) : null);
         $item->price = (int) $request->input('price', 0);
+        if ($request->has('diamond_price')) {
+            $item->diamond_price = $request->input('diamond_price');
+        }
         $item->upgrade_to_share_item_id = $request->filled('upgrade_to_share_item_id')
             ? (int) $request->input('upgrade_to_share_item_id')
             : null;

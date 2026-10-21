@@ -91,6 +91,11 @@
                             <span>Предметы</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.item_assemblies.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.item_assemblies.index') }}">
+                            <i class="bx bx-layer" aria-hidden="true"></i><span>Сборки предметов</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.item_logs', 'admin.purchase_logs.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
                         <a class="nav-link" href="#">
                             <i class="bx bx-history" aria-hidden="true"></i>

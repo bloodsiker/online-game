@@ -37,7 +37,7 @@ class GetClanMemberPage
 
         $requestRows = ClanJoinRequest::where('clan_id', $clan->id)
             ->whereIn('status', [ClanJoinRequestStatus::INVITE, ClanJoinRequestStatus::REQUEST])
-            ->with(['user.player', 'user.currentLocation.map'])
+            ->with(['user.player', 'user.currentLocation.map', 'user.clanMembership.clan'])
             ->get()
             ->map(fn ($request) => [
                 'type' => 'request',

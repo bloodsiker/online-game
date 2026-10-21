@@ -31,6 +31,7 @@ use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Race\Infrastructure\Persistence\Models\RaceAvatar;
 use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -75,7 +76,7 @@ class ItemController extends Controller
         ]);
     }
 
-    public function dropItem(Request $request, int $id): RedirectResponse
+    public function dropItem(Request $request, int $id): RedirectResponse|JsonResponse
     {
         /** @var User $user */
         $user = Auth::user();
@@ -85,6 +86,13 @@ class ItemController extends Controller
             $request->integer('c'),
             $request->integer('qty', 0),
         );
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => $result->ok,
+                'message' => $result->message,
+                'backpack_update' => $result->backpackUpdate,
+            ], $result->ok ? 200 : 422);
+        }
         if ($result->message !== '') {
             session()->flash('message', $result->message);
         }
@@ -307,7 +315,10 @@ class ItemController extends Controller
         $isChangeRaceCert = $backpack->item->itemInfo->effects->contains(
             fn ($e) => $e->effect_type === ItemEffectType::CHANGE_RACE
         );
-        $hasRegularEffect = $instantEffects->isNotEmpty() || $itemBuffs->isNotEmpty() || $itemDebuffs->isNotEmpty() || $isRenameCert || $isChangeRaceCert;
+        $isChangeAvatarCert = $backpack->item->itemInfo->effects->contains(
+            fn ($e) => $e->effect_type === ItemEffectType::CHANGE_AVATAR
+        );
+        $hasRegularEffect = $instantEffects->isNotEmpty() || $itemBuffs->isNotEmpty() || $itemDebuffs->isNotEmpty() || $isRenameCert || $isChangeRaceCert || $isChangeAvatarCert;
         $questUsePlan = $this->questProgressService->prepareItemUse(
             $player,
             (int) $backpack->item->share_item_id,
@@ -401,6 +412,29 @@ class ItemController extends Controller
             }
         }
 
+        $newAvatar = null;
+        if ($isChangeAvatarCert) {
+            $newAvatarId = $request->integer('new_avatar_id');
+            $newAvatar = RaceAvatar::query()
+                ->where('race_id', $player->race_id)
+                ->where('sex', (string) $user->profile?->sex)
+                ->find($newAvatarId);
+
+            if ($newAvatar === null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => __('Выберите аватар вашей расы и пола.'),
+                ], 422);
+            }
+
+            if ($user->profile?->avatar === $newAvatar->image_url) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => __('Это уже ваш текущий аватар.'),
+                ], 422);
+            }
+        }
+
         $this->itemUsagePolicyService->reserveUse($player, $backpack->item->itemInfo);
 
         $questUse = $this->questProgressService->progressPreparedItemUse($questUsePlan);
@@ -469,6 +503,12 @@ class ItemController extends Controller
             event(new PlayerChangeStat($player));
         }
 
+        if ($newAvatar !== null) {
+            $profile = $user->profile ?? $user->profile()->create([]);
+            $profile->avatar = $newAvatar->image_url;
+            $profile->save();
+        }
+
         if ($hasRegularEffect || $questUse['consume']) {
             ['removed' => $removed, 'count' => $newCount] = $this->consumeBackpackItem($backpack);
         } else {
@@ -480,6 +520,12 @@ class ItemController extends Controller
         $stats = $this->statService->resolve($player);
         $expRestored = $restoresLostExp ? max(0, (int) $player->exp - $expBefore) : 0;
         $freeStatsRefunded = $respecsStats ? max(0, (int) $player->free_stats - $freeStatsBefore) : 0;
+        $diamondsCredited = (int) $instantEffects->filter(
+            fn ($effect) => $effect->effect_type === ItemEffectType::GRANT_DIAMONDS,
+        )->sum('value');
+        if ($diamondsCredited > 0) {
+            $user->refresh();
+        }
 
         return response()->json([
             'status' => 'success',
@@ -493,15 +539,19 @@ class ItemController extends Controller
             'experience' => $player->getPercentExp(),
             'exp_restored' => $expRestored,
             'free_stats_refunded' => $freeStatsRefunded,
+            ...($diamondsCredited > 0 ? ['diamond' => (float) $user->diamond, 'diamonds_credited' => $diamondsCredited] : []),
             'new_name' => $newName,
             'new_race' => $newRace?->name,
+            'new_avatar_url' => $newAvatar?->image_url,
             'message' => match (true) {
+                $diamondsCredited > 0 => __('На ваш счёт начислено :amount бриллиантов.', ['amount' => $diamondsCredited]),
                 $newName !== null => sprintf(__('Имя изменено на «%s».'), $newName),
                 $newRace !== null => sprintf(
                     __('Раса изменена на «%s»! Возвращено свободных очков для распределения: %d.'),
                     $newRace->name,
                     $raceChangeRefund,
                 ),
+                $newAvatar !== null => __('Аватар изменён.'),
                 $expRestored > 0 => sprintf(__('Возвращено потерянного опыта: %s.'), number_format($expRestored, 0, '.', ' ')),
                 $freeStatsRefunded > 0 => sprintf(
                     __('Характеристики сброшены! Возвращено свободных очков для распределения: %d. Расовый прирост не затронут.'),

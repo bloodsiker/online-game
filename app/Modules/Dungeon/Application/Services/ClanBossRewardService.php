@@ -38,6 +38,7 @@ final class ClanBossRewardService
         private readonly ExperienceService $experienceService,
         private readonly ClanExperienceService $clanExperienceService,
         private readonly ClanLogService $clanLogService,
+        private readonly ClanBossRewardRecorder $rewardRecorder,
     ) {}
 
     /**
@@ -49,7 +50,9 @@ final class ClanBossRewardService
         $dungeon = $run->dungeon;
 
         $eligible = $this->eligibleContributions($run, $stageState);
-        $goldGranted = $this->grantGold($stageState, $eligible);
+        $goldByUser = $this->grantGold($stageState, $eligible);
+        $goldGranted = array_sum($goldByUser);
+        $clanRewards = [];
 
         $qualified = 0;
         $clanExperience = 0.0;
@@ -57,7 +60,13 @@ final class ClanBossRewardService
         foreach ($eligible as $contribution) {
             $user = $contribution->user;
 
-            $grantedExp = $this->grantDungeonRewards($run, $dungeon, $user);
+            $rewards = $this->grantDungeonRewards($run, $dungeon, $user);
+            $personalRewards = $rewards['personal'];
+            if (($goldByUser[$user->id] ?? 0) > 0) {
+                $personalRewards[] = $this->rewardEntry('gold', $goldByUser[$user->id]);
+            }
+            array_push($clanRewards, ...$rewards['clan']);
+            $grantedExp = $rewards['experience'];
             $clanExperience += $this->clanExperienceService->awardForMonsterExperience(
                 $user->player,
                 $monster,
@@ -65,10 +74,17 @@ final class ClanBossRewardService
             );
 
             $contribution->update(['rewarded' => true]);
+            $this->rewardRecorder->record($run, $stageState, $user, $personalRewards);
             $qualified++;
         }
 
-        $warehouseDrops = $this->grantBossDrops($run, $monster, $killer);
+        $bossDrops = $this->grantBossDrops($run, $monster, $killer);
+        $warehouseDrops = $bossDrops['names'];
+        array_push($clanRewards, ...$bossDrops['rewards']);
+        if ($clanExperience > 0) {
+            $clanRewards[] = $this->rewardEntry('clan_experience', round($clanExperience, 2));
+        }
+        $this->rewardRecorder->record($run, $stageState, null, $clanRewards);
 
         $this->clanLogService->write(
             $run->clan_id,
@@ -86,7 +102,7 @@ final class ClanBossRewardService
     }
 
     /**
-     * Босса не добили (поход/этап истёк) — только монеты пропорционально
+     * Босса не добили (поход истёк) — только монеты пропорционально
      * нанесённому урону, без опыта/предметов/дропа. Та же формула, что и
      * при килле, просто с меньшей итоговой суммой (меньше % снятого HP).
      */
@@ -94,11 +110,16 @@ final class ClanBossRewardService
     {
         $eligible = $this->eligibleContributions($run, $stageState);
 
-        $goldGranted = $this->grantGold($stageState, $eligible);
+        $goldByUser = $this->grantGold($stageState, $eligible);
+        $goldGranted = array_sum($goldByUser);
 
         foreach ($eligible as $contribution) {
             $contribution->update(['rewarded' => true]);
+            $amount = $goldByUser[$contribution->user_id] ?? 0;
+            $this->rewardRecorder->record($run, $stageState, $contribution->user, $amount > 0 ? [$this->rewardEntry('gold', $amount)] : [], reason: 'run_expired');
         }
+
+        $this->rewardRecorder->record($run, $stageState, null, [], reason: 'run_expired');
 
         return $goldGranted;
     }
@@ -139,19 +160,20 @@ final class ClanBossRewardService
      * при недобитом боссе сумма сама получается меньше — без отдельной ветки.
      *
      * @param  Collection<int, ClanBossContribution>  $eligible
+     * @return array<int, int> начисленные монеты по ID игрока
      */
-    private function grantGold(ClanBossRunStage $stageState, Collection $eligible): int
+    private function grantGold(ClanBossRunStage $stageState, Collection $eligible): array
     {
         $goldBudget = (int) ($stageState->stage->gold_budget ?? 0);
         $totalDamage = (int) $eligible->sum('damage');
         if ($goldBudget <= 0 || $totalDamage <= 0) {
-            return 0;
+            return [];
         }
 
         $hpMax = max(1, (int) $stageState->hp_max);
         $pool = (int) floor($goldBudget * min(1.0, $totalDamage / $hpMax));
 
-        $granted = 0;
+        $granted = [];
         foreach ($eligible as $contribution) {
             $share = (int) floor($pool * $contribution->damage / $totalDamage);
             if ($share <= 0) {
@@ -159,7 +181,7 @@ final class ClanBossRewardService
             }
 
             $contribution->user->increment('money', $share);
-            $granted += $share;
+            $granted[$contribution->user_id] = $share;
         }
 
         return $granted;
@@ -169,9 +191,11 @@ final class ClanBossRewardService
      * Золото/опыт/диаманты — каждому квалифицированному.
      * Предметы из dungeon_rewards — в клановый склад.
      */
-    private function grantDungeonRewards(ClanBossRun $run, Dungeon $dungeon, User $user): int
+    private function grantDungeonRewards(ClanBossRun $run, Dungeon $dungeon, User $user): array
     {
         $grantedExp = 0;
+        $personal = [];
+        $clan = [];
 
         foreach ($dungeon->rewards()->with('shareItem')->get() as $reward) {
             if ((mt_rand(0, 100000) / 1000) > $reward->drop_chance) {
@@ -180,15 +204,32 @@ final class ClanBossRewardService
 
             $amount = $reward->randomAmount();
 
-            match ($reward->type) {
-                DungeonRewardType::GOLD => $user->increment('money', $amount),
-                DungeonRewardType::DIAMOND => $user->player->increment('diamond', $amount),
-                DungeonRewardType::EXPERIENCE => $grantedExp += $this->grantExperience($user, $amount),
-                DungeonRewardType::ITEM => $this->putItemToClanWarehouse($run, $reward->shareItem, $amount, $user->id, $user),
-            };
+            switch ($reward->type) {
+                case DungeonRewardType::GOLD:
+                    $user->increment('money', $amount);
+                    $personal[] = $this->rewardEntry('gold', $amount);
+                    break;
+                case DungeonRewardType::DIAMOND:
+                    $user->increment('diamond', $amount);
+                    $personal[] = $this->rewardEntry('diamond', $amount);
+                    break;
+                case DungeonRewardType::EXPERIENCE:
+                    $gain = $this->grantExperience($user, $amount);
+                    $grantedExp += $gain;
+                    $personal[] = $this->rewardEntry('experience', $gain);
+                    break;
+                case DungeonRewardType::ITEM:
+                    $destination = $this->putItemToClanWarehouse($run, $reward->shareItem, $amount, $user->id, $user);
+                    if ($destination === 'player') {
+                        $personal[] = $this->rewardEntry('item', $amount, $reward->shareItem);
+                    } elseif ($destination === 'clan') {
+                        $clan[] = $this->rewardEntry('item', $amount, $reward->shareItem);
+                    }
+                    break;
+            }
         }
 
-        return $grantedExp;
+        return ['experience' => $grantedExp, 'personal' => $personal, 'clan' => $clan];
     }
 
     private function grantExperience(User $user, int $amount): int
@@ -202,11 +243,12 @@ final class ClanBossRewardService
     /**
      * Ролл редкого дропа из monster_has_items сразу в клановый склад.
      *
-     * @return list<string> названия упавших предметов
+     * @return array{names: list<string>, rewards: list<array>}
      */
     private function grantBossDrops(ClanBossRun $run, Monster $monster, User $killer): array
     {
         $dropped = [];
+        $rewards = [];
         $monster->loadMissing('items');
 
         foreach ($monster->items as $shareItem) {
@@ -220,20 +262,21 @@ final class ClanBossRewardService
             // player's backpack if the item is forbidden or the warehouse is full.
             if ($this->putItemToClanWarehouse($run, $shareItem, $count, $killer->id)) {
                 $dropped[] = (string) $shareItem->name;
+                $rewards[] = $this->rewardEntry('item', $count, $shareItem);
             }
         }
 
-        return $dropped;
+        return ['names' => $dropped, 'rewards' => $rewards];
     }
 
     /**
      * Кладет предмет в клановый склад. Если склад недоступен (нет структуры,
      * переполнен, предмет запрещен) — отдает в рюкзак, чтобы дроп не сгорел.
      */
-    private function putItemToClanWarehouse(ClanBossRun $run, ?ShareItem $shareItem, int $amount, int $depositorId, ?User $fallbackUser = null): bool
+    private function putItemToClanWarehouse(ClanBossRun $run, ?ShareItem $shareItem, int $amount, int $depositorId, ?User $fallbackUser = null): ?string
     {
         if ($shareItem === null) {
-            return false;
+            return null;
         }
 
         $target = $this->resolveWarehouseStructure();
@@ -241,9 +284,11 @@ final class ClanBossRewardService
         if ($target === null || ! $shareItem->is_clan_warehouse_allowed || $this->isWarehouseFull((int) $run->clan_id, $target->id)) {
             if ($fallbackUser !== null) {
                 $this->backpackService->addItemByShareItem($fallbackUser, $shareItem, $amount);
+
+                return 'player';
             }
 
-            return false;
+            return null;
         }
 
         $item = new Item;
@@ -267,7 +312,15 @@ final class ClanBossRewardService
             'count' => $amount,
         ]);
 
-        return true;
+        return 'clan';
+    }
+
+    private function rewardEntry(string $type, int|float $amount, ?ShareItem $item = null): array
+    {
+        return [
+            'type' => $type, 'amount' => $amount, 'item_id' => $item?->id,
+            'item_name' => $item?->getTranslations('name'), 'rarity' => $item?->rarity?->value,
+        ];
     }
 
     private function resolveWarehouseStructure(): ?Structure

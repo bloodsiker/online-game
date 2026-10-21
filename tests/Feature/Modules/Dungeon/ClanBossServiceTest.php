@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Dungeon;
 
+use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\UseCases\LeaveClanBossBattle;
 use App\Modules\Battle\Domain\Enums\BattleStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Chat\Application\Listeners\SendClanBossRewardMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
+use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLog;
@@ -18,16 +23,19 @@ use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Clan\Domain\Services\ClanLevelService;
 use App\Modules\Clan\Domain\Services\ClanLogService;
+use App\Modules\Dungeon\Application\Services\ClanBossRewardRecorder;
 use App\Modules\Dungeon\Application\Services\ClanBossRewardService;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Dungeon\Domain\Enums\DungeonRewardType;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
 use App\Modules\Dungeon\Domain\Events\ClanBossDefeated;
+use App\Modules\Dungeon\Domain\Events\ClanBossRewardGranted;
 use App\Modules\Dungeon\Domain\Events\ClanBossRunExpired;
 use App\Modules\Dungeon\Domain\Events\ClanBossRunStarted;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossContribution;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossCooldown;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossPlayerAttackState;
+use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRewardReceipt;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRun;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
@@ -37,14 +45,18 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Monster\Infrastructure\Persistence\Models\BossDefeatLog;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\Notification\Application\Services\PlayerNotificationService;
+use App\Modules\Notification\Domain\Events\PlayerNotificationAvailable;
+use App\Modules\Notification\Infrastructure\Persistence\Models\PlayerNotification;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\ClanBoss\Presentation\Http\ClanBossController;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\User\Domain\Events\UserLocationChanged;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -61,7 +73,8 @@ class ClanBossServiceTest extends TestCase
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
         $this->createSchema();
-        Event::fake([ClanBossRunStarted::class, ClanBossDefeated::class, ClanBossRunExpired::class]);
+        (require database_path('migrations/2026_10_17_000008_create_clan_boss_reward_receipts.php'))->up();
+        Event::fake([ClanBossRunStarted::class, ClanBossDefeated::class, ClanBossRunExpired::class, UserLocationChanged::class, ClanBossRewardGranted::class]);
     }
 
     public function test_open_run_spawns_shared_instance_and_second_open_fails(): void
@@ -77,6 +90,7 @@ class ClanBossServiceTest extends TestCase
 
         $state = ClanBossRunStage::query()->where('clan_boss_run_id', $run->id)->firstOrFail();
         $this->assertSame(1000, (int) $state->hp_max);
+        $this->assertNull($state->expires_at);
 
         $instance = MonsterOnLocation::query()->findOrFail($state->monster_on_location_id);
         $this->assertSame(1, (int) $instance->active);
@@ -188,7 +202,7 @@ class ClanBossServiceTest extends TestCase
         $method = new \ReflectionMethod(ClanBossRewardService::class, 'grantBossDrops');
         $dropped = $method->invoke($fixtures['rewardService'], $run, $fixtures['boss1'], $fixtures['leader']);
 
-        $this->assertSame([], $dropped);
+        $this->assertSame(['names' => [], 'rewards' => []], $dropped);
     }
 
     public function test_attack_batch_is_available_until_spent_then_recovers_after_cooldown(): void
@@ -241,8 +255,7 @@ class ClanBossServiceTest extends TestCase
             'hits_in_batch' => 10,
             'cooldown_until' => $now->copy()->addHours(5)->addMinutes(34),
         ]);
-        $this->withoutMiddleware(ValidateCsrfToken::class);
-        $this->withoutMiddleware(ApplyGameLocale::class);
+        $this->withoutMiddleware();
         $response = $this->actingAs($fixtures['leader'])
             ->post(route('clan_boss.attack', ['id' => $fixtures['structure']->id]));
 
@@ -352,6 +365,7 @@ class ClanBossServiceTest extends TestCase
         // Второй босс: убийство завершает поход.
         $boss2 = $this->currentBoss($run);
         $state2 = $service->assertCanHit($fixtures['leader'], $boss2);
+        $this->assertNull($state2->expires_at);
         $service->recordHit($fixtures['leader'], $state2, 2000);
         $boss2->hp_now = 0;
         $boss2->save();
@@ -371,6 +385,181 @@ class ClanBossServiceTest extends TestCase
         $this->assertSame(1, $processed);
         $this->assertSame(ClanBossRun::STATUS_EXPIRED, $run->fresh()->status);
         Event::assertDispatched(ClanBossRunExpired::class, fn (ClanBossRunExpired $event): bool => $event->clanId === $fixtures['clan']->id);
+    }
+
+    public function test_clan_boss_ignores_legacy_stage_timer_until_the_whole_run_expires(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $boss = $this->currentBoss($run);
+        $state = ClanBossRunStage::query()->where('clan_boss_run_id', $run->id)->firstOrFail();
+        $this->assertNull($state->expires_at);
+
+        // Эмулируем уже открытый поход со старым отдельным таймером босса.
+        $state->update(['expires_at' => now()->subMinute()]);
+        $this->assertSame($state->id, $service->assertCanHit($fixtures['leader'], $boss)->id);
+        $this->assertSame(0, $service->expireOverdue(now()));
+        $this->assertSame(ClanBossRunStage::STATUS_ACTIVE, $state->fresh()->status);
+        $this->assertSame(1, (int) $boss->fresh()->active);
+        $this->assertSame($fixtures['stage1']->id, $run->fresh()->current_stage_id);
+
+        $this->travel(31)->minutes();
+        $this->assertSame(0, $service->expireOverdue(now()));
+        $this->assertSame($state->id, $service->assertCanHit($fixtures['leader'], $boss)->id);
+
+        $run->update(['expires_at' => now()->subSecond()]);
+        $this->assertSame(1, $service->expireOverdue(now()));
+        $this->assertSame(ClanBossRun::STATUS_EXPIRED, $run->fresh()->status);
+        $this->assertSame(ClanBossRunStage::STATUS_EXPIRED, $state->fresh()->status);
+        $this->assertSame(0, (int) $boss->fresh()->active);
+        $this->assertSame(1, ClanBossRunStage::query()->where('clan_boss_run_id', $run->id)->count());
+    }
+
+    public function test_run_rating_sums_all_bosses_but_not_other_runs(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $otherRun = $run->replicate();
+        $otherRun->status = ClanBossRun::STATUS_EXPIRED;
+        $otherRun->save();
+
+        foreach ([
+            [$run->id, $fixtures['stage1']->id, $fixtures['leader']->id, 100, 2, true],
+            [$run->id, $fixtures['stage2']->id, $fixtures['leader']->id, 200, 3, false],
+            [$run->id, $fixtures['stage1']->id, $fixtures['member']->id, 400, 4, false],
+            [$otherRun->id, $fixtures['stage1']->id, $fixtures['leader']->id, 9999, 99, true],
+        ] as [$runId, $stageId, $userId, $damage, $hits, $rewarded]) {
+            ClanBossContribution::query()->create([
+                'clan_boss_run_id' => $runId, 'dungeon_stage_id' => $stageId, 'user_id' => $userId,
+                'damage' => $damage, 'hits' => $hits, 'rewarded' => $rewarded,
+            ]);
+        }
+
+        $rating = $service->ratingForRun($run->id);
+        $this->assertCount(2, $rating);
+        $this->assertSame($fixtures['member']->id, $rating[0]['user']->id);
+        $this->assertSame(400, $rating[0]['damage']);
+        $this->assertSame($fixtures['leader']->id, $rating[1]['user']->id);
+        $this->assertSame(300, $rating[1]['damage']);
+        $this->assertSame(5, $rating[1]['hits']);
+        $this->assertTrue($rating[1]['rewarded']);
+        $this->assertTrue($rating[1]['user']->relationLoaded('player'));
+        $this->assertSame(100, (int) $service->myContribution($run->id, $fixtures['stage1']->id, $fixtures['leader']->id)->damage);
+
+        $this->actingAs($fixtures['leader']);
+        $this->app->instance(ClanBossService::class, $service);
+        $data = $this->app->make(ClanBossController::class)->index($fixtures['structure']->id)->getData();
+        $this->assertSame(100, (int) $data['myContribution']->damage);
+        $this->assertSame(300, $data['myRunContribution']['damage']);
+        $this->assertSame(5, $data['myRunContribution']['hits']);
+        $this->assertCount(2, $data['rating']);
+
+        // На новом боссе ещё нет ударов: общий вклад не исчезает.
+        $run->update(['current_stage_id' => $fixtures['stage2']->id]);
+        ClanBossContribution::query()->where('clan_boss_run_id', $run->id)->where('dungeon_stage_id', $fixtures['stage2']->id)->delete();
+        $data = $this->app->make(ClanBossController::class)->index($fixtures['structure']->id)->getData();
+        $this->assertNull($data['myContribution']);
+        $this->assertSame(100, $data['myRunContribution']['damage']);
+        $this->assertSame(2, $data['myRunContribution']['hits']);
+    }
+
+    public function test_run_rating_includes_every_participant_not_only_top_twenty(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+
+        for ($i = 1; $i <= 25; $i++) {
+            $user = User::query()->create(['name' => 'Участник '.$i, 'location_id' => $fixtures['structure']->location_id]);
+            ClanBossContribution::query()->create([
+                'clan_boss_run_id' => $run->id,
+                'dungeon_stage_id' => $fixtures['stage1']->id,
+                'user_id' => $user->id,
+                'damage' => $i,
+                'hits' => 1,
+            ]);
+        }
+
+        $rating = $service->ratingForRun($run->id);
+        $this->assertCount(25, $rating);
+        $this->assertSame(25, $rating[0]['damage']);
+        $this->assertSame(1, $rating[24]['damage']);
+    }
+
+    public function test_lair_stage_table_marks_killed_and_current_bosses_for_this_run(): void
+    {
+        $this->travelTo(now()->startOfSecond());
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $fixtures['leader']->player->setRelation('skills', new Collection);
+        $this->actingAs($fixtures['leader']);
+        $this->app->instance(ClanBossService::class, $service);
+        $controller = $this->app->make(ClanBossController::class);
+
+        $html = $controller->index($fixtures['structure']->id)->render();
+        $this->assertStringNotContainsString('КД клана', $html);
+        $this->assertStringNotContainsString('Окно босса', $html);
+        $this->assertStringNotContainsString('Босс исчезнет:', $html);
+        $this->assertSame('Текущий', $this->stageStatusText($html, $fixtures['stage1']->id));
+        $this->assertSame('Не открыт', $this->stageStatusText($html, $fixtures['stage2']->id));
+        $this->assertSame(1, preg_match('/data-stage-duration="'.$fixtures['stage1']->id.'"[^>]*>\s*—\s*<\/td>/', $html));
+
+        $this->travel(12)->minutes();
+        $boss = $this->currentBoss($run);
+        $state = $service->assertCanHit($fixtures['leader'], $boss);
+        $service->recordHit($fixtures['leader'], $state, 1000);
+        $boss->update(['hp_now' => 0]);
+        $service->handleStageKill($boss, $fixtures['leaderPlayer'], null, new AttackResultDTO);
+
+        // Состояние другого похода не должно подменять текущий результат.
+        $oldRun = $run->replicate();
+        $oldRun->status = ClanBossRun::STATUS_EXPIRED;
+        $oldRun->save();
+        ClanBossRunStage::query()->create([
+            'clan_boss_run_id' => $oldRun->id,
+            'dungeon_stage_id' => $fixtures['stage1']->id,
+            'hp_max' => 1000,
+            'status' => ClanBossRunStage::STATUS_EXPIRED,
+        ]);
+
+        $view = $controller->index($fixtures['structure']->id);
+        $this->assertCount(2, $view->getData()['stageStates']);
+        $html = $view->render();
+        $this->assertSame('Повержен', $this->stageStatusText($html, $fixtures['stage1']->id));
+        $this->assertSame('Текущий', $this->stageStatusText($html, $fixtures['stage2']->id));
+        $this->assertSame(1, preg_match('/data-stage-duration="'.$fixtures['stage1']->id.'"[^>]*>\s*12 минут\s*<\/td>/', $html));
+        $this->assertSame(1, preg_match('/data-stage-duration="'.$fixtures['stage2']->id.'"[^>]*>\s*—\s*<\/td>/', $html));
+        $this->assertSame($fixtures['stage2']->id, $view->getData()['currentState']->dungeon_stage_id);
+    }
+
+    public function test_lair_stage_table_shows_timeout_and_no_active_run_states(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $state = ClanBossRunStage::query()->where('clan_boss_run_id', $run->id)->firstOrFail();
+        $fixtures['leader']->player->setRelation('skills', new Collection);
+        $this->actingAs($fixtures['leader']);
+        $this->app->instance(ClanBossService::class, $service);
+        $controller = $this->app->make(ClanBossController::class);
+
+        foreach ([ClanBossRunStage::STATUS_SKIPPED, ClanBossRunStage::STATUS_EXPIRED] as $status) {
+            $state->update(['status' => $status]);
+            $html = $controller->index($fixtures['structure']->id)->render();
+            $this->assertSame('Время вышло', $this->stageStatusText($html, $fixtures['stage1']->id));
+        }
+
+        $run->update(['status' => ClanBossRun::STATUS_EXPIRED]);
+        $view = $controller->index($fixtures['structure']->id);
+        $this->assertTrue($view->getData()['stageStates']->isEmpty());
+        $html = $view->render();
+        $this->assertSame('—', $this->stageStatusText($html, $fixtures['stage1']->id));
+        $this->assertSame('—', $this->stageStatusText($html, $fixtures['stage2']->id));
+    }
+
+    private function stageStatusText(string $html, int $stageId): string
+    {
+        $this->assertSame(1, preg_match('/<td[^>]*data-stage-status="'.$stageId.'"[^>]*>(.*?)<\/td>/s', $html, $matches));
+
+        return trim(strip_tags($matches[1]));
     }
 
     public function test_kill_distributes_full_gold_budget_proportionally_to_eligible_damage(): void
@@ -401,6 +590,44 @@ class ClanBossServiceTest extends TestCase
         $this->assertSame(650, (int) $fixtures['leader']->fresh()->money);
         $this->assertSame(450, (int) $fixtures['member']->fresh()->money);
         $this->assertSame(1000, $summary['gold_granted']);
+        $receipt = ClanBossRewardReceipt::where('user_id', $fixtures['leader']->id)->firstOrFail();
+        $this->assertSame(650, $receipt->rewards[0]['amount']);
+        $this->assertSame('boss_killed', $receipt->reason);
+        $this->assertSame('Лидер', $receipt->recipient_name);
+        $this->assertSame('Босс 1', $receipt->bossName());
+        $this->assertCount(3, (new ClanBossRewardRecorder)->history($run->id));
+
+        $chat = Mockery::mock(ChatService::class);
+        $chat->shouldReceive('sendSystemToUser')->once()->withArgs(function ($user, $message) use ($fixtures): bool {
+            $html = app(ChatMessageTranslator::class)->render($message, 'ru');
+            $uk = app(ChatMessageTranslator::class)->render($message, 'uk');
+
+            return $user->id === $fixtures['leader']->id && str_contains($html, '+650 монет') && str_contains($uk, 'Нагорода за шкоду босу');
+        })->andReturn(new ChatMessage);
+        (new SendClanBossRewardMessage($chat, app(PlayerNotificationService::class)))->handle(new ClanBossRewardGranted($receipt->id));
+        $this->assertNotNull($receipt->fresh()->notified_at);
+        (new SendClanBossRewardMessage($chat, app(PlayerNotificationService::class)))->handle(new ClanBossRewardGranted($receipt->id));
+
+        // With the notification migration applied, offline recipients get a durable receipt instead of an expiring chat row.
+        Schema::create('chat_messages', function (Blueprint $table): void {
+            $table->id();
+        });
+        (require database_path('migrations/2026_10_17_000009_create_player_notifications_table.php'))->up();
+        Event::fake([PlayerNotificationAvailable::class]);
+        $receipt->refresh()->update(['notified_at' => null]);
+        $listener = new SendClanBossRewardMessage($chat, app(PlayerNotificationService::class));
+        $listener->handle(new ClanBossRewardGranted($receipt->id));
+        $listener->handle(new ClanBossRewardGranted($receipt->id));
+        $notification = PlayerNotification::query()->sole();
+        $this->assertSame((int) $fixtures['leader']->id, (int) $notification->user_id);
+        $this->assertSame('clan_boss_reward:'.$receipt->id, $notification->deduplication_key);
+        $this->assertNull($notification->read_at);
+        $this->assertNull($notification->chat_message_id);
+        $this->assertSame(650, (int) $fixtures['leader']->fresh()->money);
+        Event::assertDispatchedTimes(PlayerNotificationAvailable::class, 1);
+
+        DB::table('users')->where('id', $fixtures['leader']->id)->update(['name' => 'Другой ник']);
+        $this->assertSame('Лидер', $receipt->fresh()->recipient_name);
     }
 
     public function test_unfinished_stage_pays_proportional_gold_to_every_damage_contributor(): void
@@ -432,6 +659,123 @@ class ClanBossServiceTest extends TestCase
         $this->assertSame(5, (int) $fixtures['member']->fresh()->money);
         $this->assertTrue((bool) $leaderContribution->fresh()->rewarded);
         $this->assertTrue((bool) $memberContribution->fresh()->rewarded);
+        $receipt = ClanBossRewardReceipt::where('user_id', $fixtures['member']->id)->firstOrFail();
+        $this->assertSame(5, $receipt->rewards[0]['amount']);
+        $this->assertSame('run_expired', $receipt->reason);
+        $this->assertSame(0, $fixtures['rewardService']->grantGoldForUnfinishedStage($run, $stageState));
+        $this->assertSame(3, ClanBossRewardReceipt::count());
+    }
+
+    public function test_reward_receipts_capture_diamonds_experience_and_actual_item_destination(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $item = ShareItem::query()->forceCreate(['name' => 'Клановый кристалл', 'rarity' => 'rare']);
+        foreach ([
+            ['type' => DungeonRewardType::DIAMOND, 'amount' => 7, 'item' => null],
+            ['type' => DungeonRewardType::EXPERIENCE, 'amount' => 100, 'item' => null],
+            ['type' => DungeonRewardType::ITEM, 'amount' => 2, 'item' => $item->id],
+        ] as $reward) {
+            DungeonReward::create([
+                'dungeon_id' => $fixtures['dungeon']->id, 'type' => $reward['type'],
+                'share_item_id' => $reward['item'], 'amount_min' => $reward['amount'], 'amount_max' => $reward['amount'], 'drop_chance' => 100,
+            ]);
+        }
+        $fixtures['experienceService']->shouldReceive('calculateGain')->once()->andReturn(150);
+        // Нет кланового хранилища: награда данжа фактически уходит в рюкзак.
+        $fixtures['rewardBackpack']->shouldReceive('addItemByShareItem')->once()->andReturn(new Backpack);
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $boss = $this->currentBoss($run);
+        $state = $service->assertCanHit($fixtures['leader'], $boss);
+        $service->recordHit($fixtures['leader'], $state, 1000);
+        $boss->update(['hp_now' => 0]);
+        $service->handleStageKill($boss, $fixtures['leaderPlayer'], null, new AttackResultDTO);
+
+        $receipt = ClanBossRewardReceipt::where('user_id', $fixtures['leader']->id)->firstOrFail();
+        $rewards = collect($receipt->rewards)->keyBy('type');
+        $this->assertSame(7, $rewards['diamond']['amount']);
+        $this->assertSame(7, (int) $fixtures['leader']->fresh()->diamond);
+        $this->assertSame(150, $rewards['experience']['amount']);
+        $this->assertSame(150, (int) $fixtures['leaderPlayer']->fresh()->exp);
+        $this->assertSame(2, $rewards['item']['amount']);
+        $this->assertSame('Клановый кристалл', $rewards['item']['item_name']['ru']);
+        $this->assertSame('rare', $rewards['item']['rarity']);
+        $html = view('clan::partials.boss-reward-receipts', ['rewardReceipts' => (new ClanBossRewardRecorder)->history($run->id)])->render();
+        $this->assertStringContainsString('150 опыта', $html);
+        $this->assertStringContainsString('Клановый кристалл', $html);
+    }
+
+    public function test_rolled_back_rewards_do_not_leave_receipts_or_send_notifications(): void
+    {
+        [$service, $fixtures] = $this->makeService();
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $state = ClanBossRunStage::where('clan_boss_run_id', $run->id)->firstOrFail();
+        ClanBossContribution::create([
+            'clan_boss_run_id' => $run->id, 'dungeon_stage_id' => $state->dungeon_stage_id,
+            'user_id' => $fixtures['leader']->id, 'damage' => 1000, 'hits' => 1,
+        ]);
+        DB::beginTransaction();
+        $fixtures['rewardService']->grantForStage($run, $state, $fixtures['boss1'], $fixtures['leader']);
+        $this->assertSame(2, ClanBossRewardReceipt::count());
+        Event::assertNotDispatched(ClanBossRewardGranted::class);
+        DB::rollBack();
+        $this->assertSame(0, ClanBossRewardReceipt::count());
+        $this->assertSame(0, (int) $fixtures['leader']->fresh()->money);
+        Event::assertNotDispatched(ClanBossRewardGranted::class);
+    }
+
+    public function test_boss_drop_receipt_and_clan_notice_describe_the_actual_warehouse_reward(): void
+    {
+        Schema::create('items', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('share_item_id');
+            foreach (['upgrade_lvl', 'upgrade_pity', 'upgrade_fail_streak', 'socket_count', 'rune_slot_count', 'additional_attack', 'count_use', 'is_open'] as $column) {
+                $table->integer($column)->default(0);
+            }
+            $table->timestamps();
+        });
+        Schema::create('clan_warehouses', function (Blueprint $table): void {
+            $table->id();
+            foreach (['clan_id', 'structure_id', 'depositor_user_id', 'item_id', 'count'] as $column) {
+                $table->unsignedBigInteger($column);
+            }
+            $table->timestamps();
+        });
+        Schema::create('clan_warehouse_logs', function (Blueprint $table): void {
+            $table->id();
+            foreach (['clan_id', 'user_id', 'structure_id', 'item_id', 'count'] as $column) {
+                $table->unsignedBigInteger($column);
+            }
+            $table->string('action');
+            $table->timestamps();
+        });
+        [$service, $fixtures] = $this->makeService();
+        Structure::forceCreate(['type' => Structure::TYPE_CLAN_WAREHOUSE, 'name' => 'Хранилище']);
+        $item = ShareItem::forceCreate(['name' => 'Редкий трофей', 'rarity' => 'epic']);
+        DB::table('monster_has_items')->insert([
+            'monster_id' => $fixtures['boss1']->id, 'share_item_id' => $item->id,
+            'drop_chance' => 100, 'min_count' => 2, 'max_count' => 2,
+        ]);
+        $run = $service->openRun($fixtures['structure'], $fixtures['leader']);
+        $boss = $this->currentBoss($run);
+        $service->recordHit($fixtures['leader'], $service->assertCanHit($fixtures['leader'], $boss), 1000);
+        $boss->update(['hp_now' => 0]);
+        $service->handleStageKill($boss, $fixtures['leaderPlayer'], null, new AttackResultDTO);
+        $receipt = ClanBossRewardReceipt::where('recipient_type', 'clan')->firstOrFail();
+        $this->assertSame(2, $receipt->rewards[0]['amount']);
+        $this->assertSame('Редкий трофей', $receipt->rewards[0]['item_name']['ru']);
+        $this->assertSame('epic', $receipt->rewards[0]['rarity']);
+        $this->assertSame(2, (int) DB::table('clan_warehouses')->sum('count'));
+
+        $chat = Mockery::mock(ChatService::class);
+        $chat->shouldReceive('sendClanNotice')->once()->withArgs(function ($clanId, $message) use ($fixtures, $item): bool {
+            $text = app(ChatMessageTranslator::class)->render($message, 'ru');
+
+            return $clanId === $fixtures['clan']->id && str_contains($text, '[[share_item_'.$item->id.']] ×2 (в клановое хранилище)');
+        })->andReturn(new ChatMessage);
+        (new SendClanBossRewardMessage($chat, app(PlayerNotificationService::class)))->handle(new ClanBossRewardGranted($receipt->id));
+
+        DB::table('share_items')->where('id', $item->id)->update(['name' => '{"ru":"Изменённое имя"}']);
+        $this->assertSame('Редкий трофей', $receipt->fresh()->rewards[0]['item_name']['ru']);
     }
 
     private function currentBoss(ClanBossRun $run): MonsterOnLocation
@@ -522,11 +866,13 @@ class ClanBossServiceTest extends TestCase
         ]);
 
         $rewardBackpack = Mockery::mock(BackpackService::class);
+        $experienceService = Mockery::mock(ExperienceService::class);
         $rewardService = new ClanBossRewardService(
             $rewardBackpack,
-            Mockery::mock(ExperienceService::class),
+            $experienceService,
             new ClanExperienceService(new ClanLevelService),
             new ClanLogService,
+            new ClanBossRewardRecorder,
         );
         $service = new ClanBossService(Mockery::mock(BackpackService::class), $rewardService);
 
@@ -542,6 +888,7 @@ class ClanBossServiceTest extends TestCase
             'boss1' => $boss1,
             'rewardBackpack' => $rewardBackpack,
             'rewardService' => $rewardService,
+            'experienceService' => $experienceService,
             'battleId' => null,
         ]];
     }
@@ -578,6 +925,7 @@ class ClanBossServiceTest extends TestCase
             $table->unsignedBigInteger('location_id')->nullable();
             $table->unsignedBigInteger('prev_location_id')->nullable();
             $table->integer('money')->default(0);
+            $table->integer('diamond')->default(0);
             $table->boolean('is_admin')->default(false);
             $table->integer('warehouse_count')->default(50);
             $table->integer('bag_count')->default(25);
@@ -603,6 +951,11 @@ class ClanBossServiceTest extends TestCase
             $table->unsignedBigInteger('owner_id');
             $table->timestamps();
         });
+        Schema::create('clan_levels', function (Blueprint $table): void {
+            $table->unsignedInteger('level')->primary();
+            $table->unsignedBigInteger('experience_required');
+        });
+        DB::table('clan_levels')->insert(['level' => 1, 'experience_required' => 0]);
         Schema::create('clan_roles', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('clan_id');
@@ -700,6 +1053,7 @@ class ClanBossServiceTest extends TestCase
         Schema::create('share_items', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
+            $table->string('rarity')->nullable();
             $table->unsignedInteger('count_use')->default(0);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sell')->default(true);

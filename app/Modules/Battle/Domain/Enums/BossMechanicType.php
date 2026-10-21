@@ -109,6 +109,26 @@ enum BossMechanicType: string
     }
 
     /**
+     * Путь к иконке механики (под public/), один файл на тип - по образцу
+     * CombatPassiveType::iconPath(). boss_mechanics.image - необязательный
+     * override на конкретном экземпляре, это дефолт на весь тип.
+     */
+    public function iconPath(): string
+    {
+        return 'img/boss-mechanics/'.$this->value.'.png';
+    }
+
+    /** Абсолютный URL иконки — настоящий файл, если он уже загружен, иначе общая заглушка. */
+    public function iconUrl(): string
+    {
+        $relative = $this->iconPath();
+
+        return file_exists(public_path($relative))
+            ? asset($relative)
+            : asset('main/images/effects-unavailable.png');
+    }
+
+    /**
      * Перевірка чи існує алиас
      */
     public static function tryFromValue(string $value): ?self

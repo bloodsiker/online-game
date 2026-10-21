@@ -52,6 +52,11 @@ class ChatService
         return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::ClanInvite);
     }
 
+    public function sendPlayerTradeInviteToUser(User $user, string|LocalizedChatMessage $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toUser($user, $message, ChatMessageType::PlayerTradeInvite);
+    }
+
     /** Удаляет персональное системное сообщение, не затрагивая чужой чат. */
     public function removeSystemMessageForUser(User $user, ?int $messageId): void
     {
@@ -101,6 +106,12 @@ class ChatService
     public function sendClanNotice(int $clanId, string|LocalizedChatMessage $message): ChatMessage
     {
         return $this->sendSystemMessage->toClan($clanId, $message);
+    }
+
+    /** Общий чат (все каналы 30 минут) - оповещение об убийстве открытого (не-клан) мирового босса. */
+    public function sendWorldBossDefeated(string|LocalizedChatMessage $message): ChatMessage
+    {
+        return $this->sendSystemMessage->toChannel($message, null, null, ChatMessageType::BossDefeat);
     }
 
     public function getMessages(User $user, ChatChannel $channel, ?int $afterId = null, int $limit = 60): Collection

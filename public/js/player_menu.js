@@ -1,7 +1,7 @@
 /**
  * Контекстное меню персонажа (ПКМ по нику) — как на проде.
  * Использование: initPlayerMenu({ myUserId, csrfToken, ignoredIds, friendsAddUrl,
- *   ignoreAddUrl, ignoreRemoveBase, infoUrlBase, sendPrivate, selector })
+ *   ignoreAddUrl, ignoreRemoveBase, infoUrlBase, tradeInviteUrl, sendPrivate, selector })
  */
 (function () {
     var cfg = null;
@@ -66,6 +66,27 @@
             .catch(function () { showInfo(t('Не удалось отправить запрос.'), t('Ошибка')); });
     }
 
+    function inviteTrade(uid) {
+        var url = cfg.tradeInviteUrl.replace(':user_id', encodeURIComponent(uid));
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': cfg.csrfToken, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        }).then(function (response) {
+            return response.json().then(function (data) {
+                if (!response.ok) throw new Error(data.message || t('Не удалось предложить торговлю.'));
+                return data;
+            });
+        }).then(function (data) {
+            if (data.url && window.top.toLocation) {
+                window.top.toggleMap(false);
+                window.top.toLocation(data.url, true);
+            }
+        }).catch(function (error) {
+            showInfo(error.message, t('Ошибка'));
+        });
+    }
+
     function toggleIgnore(uid, name) {
         var ignored = ignoredIds.has(uid);
         var req = ignored
@@ -104,6 +125,7 @@
             { txt: t('Скопировать'), click: function () { copyNick(name); } },
         ];
         if (uid !== cfg.myUserId) {
+            items.push({ txt: t('Предложить торговлю'), click: function () { inviteTrade(uid); } });
             items.push({ txt: t('Добавить в друзья'), click: function () { addFriend(name); } });
             items.push({
                 txt: ignoredIds.has(uid) ? t('Не игнорировать') : t('Игнорировать'),

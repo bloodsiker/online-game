@@ -58,6 +58,10 @@
             width: 100%;
             box-sizing: border-box;
             resize: vertical;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.5;
         }
 
     </style>

@@ -96,7 +96,8 @@
                 <div class="message {{ session('rarity_upgrade_success', false) ? 'success' : 'error' }}">{{ session('message') }}</div>
             @endif
 
-            <p class="upgrade-hint">{{ $upgradeHint ?? 'Выберите вещь для повышения редкости. Заточка, камни и руны сохраняются.' }}</p>
+            @include('blacksmith::_craft-hint-styles')
+            @include('blacksmith::_craft-hint', ['hint' => $upgradeHint ?? 'Выберите вещь для повышения редкости. Заточка, камни и руны сохраняются.'])
 
             <div class="upgrade-grid">
                 @forelse($items as $item)

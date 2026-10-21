@@ -16,6 +16,17 @@
         a {
             text-decoration: none;
         }
+        [data-cart-quantity-form] .premium-cart-quantity {
+            width: 1%;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .premium-cart-quantity .cart-amount-sell-price {
+            display: inline-block;
+            vertical-align: middle;
+        }
         /*img {*/
         /*    vertical-align: middle;*/
         /*}*/
@@ -415,19 +426,21 @@
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" align="center" style="padding: 6px 4px">
-                        <form method="post" action="{{ route('premium.buy') }}" id="action_form">
+                        <form method="post" action="{{ route('premium.buy') }}" id="action_form" data-cart-quantity-form
+                              data-update-url="{{ route('premium.update_cart') }}"
+                              data-save-error="{{ __('Не удалось сохранить количество товара. Попробуйте ещё раз.') }}">
                             @csrf
                             @if($cart->getItems()->count())
                                 <table class="coll w100 p10h p4v brd2">
                                     <colgroup>
                                         <col>
                                         <col>
-                                        <col>
+                                        <col width="1%">
                                         <col width="1%">
                                     </colgroup>
                                     <tbody>
                                     @foreach($cart->getItems() as $cartItem)
-                                        <tr class="bg_l">
+                                        <tr class="bg_l" data-cart-row="{{ $cartItem->shop_item_id }}">
                                             <td><a href="{{ route('items.info.share', ['id' => $cartItem->shopItem->item->id]) }}"
                                                    data-id="{{ $cartItem->shopItem->item->id }}"
                                                    onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
@@ -444,17 +457,31 @@
                                                 @if($cartItem->shopItem->diamond)
                                                     <span title="Бриллиант">
                                                         <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
-                                                    </span>&nbsp;{{ format_money($cartItem->shopItem->diamond * $cartItem->quantity) }}
+                                                    </span>&nbsp;<span data-cart-line-diamond>{{ format_money($cartItem->shopItem->diamond * $cartItem->quantity) }}</span>
                                                     <br>
                                                 @endif
                                                 @if($cartItem->shopItem->price)
                                                     <span title="Монет">
                                                         <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
-                                                    </span>&nbsp;{{ format_money($cartItem->shopItem->price * $cartItem->quantity) }}
+                                                    </span>&nbsp;<span data-cart-line-price>{{ format_money($cartItem->shopItem->price * $cartItem->quantity) }}</span>
                                                     <br>
                                                 @endif
                                             </td>
-                                            <td>{{ $cartItem->quantity }} шт</td>
+                                            <td class="premium-cart-quantity" align="center">
+                                                <div class="cart-amount-sell-price">
+                                                    <span class="cart-amount-input-cont">
+                                                        <span class="b-input">
+                                                            <span class="b-input__inner">
+                                                                <span class="arrow left @if($cartItem->quantity <= 1) left-disabled @endif" onclick="shopItemCounter(this);" title="{{ __('Уменьшить кол-во') }}"></span>
+                                                                <span class="arrow right @if($cartItem->quantity >= 10000) right-disabled @endif" onclick="shopItemCounter(this);" title="{{ __('Увеличить кол-во') }}"></span>
+                                                                <input type="text" name="cart_quantities[{{ $cartItem->shop_item_id }}]" value="{{ $cartItem->quantity }}"
+                                                                       data-cart-quantity="{{ $cartItem->shop_item_id }}" inputmode="numeric" aria-label="{{ __('Количество') }}"
+                                                                       class="cart_amount_sell_input" autocomplete="off">
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </td>
                                             <td>
                                                 <a href="{{ route('premium.delete_cart', ['id' => $cartItem->id]) }}" title="Удалить">
                                                     <img src="{{ asset('img/icon/tbl-shp_x.gif') }}" alt="delete" width="11" height="13" border="0">
@@ -483,12 +510,12 @@
                                             @if($cart->getTotalDiamond())
                                                 <span title="Бриллиант">
                                                     <img src="{{ asset('img/icon/m_dmd.gif') }}" alt="diamond" border="0" width="11" height="11" align="absmiddle">
-                                                </span>&nbsp;{{ format_money($cart->getTotalDiamond()) }}<br>
+                                                </span>&nbsp;<span data-cart-total-diamond>{{ format_money($cart->getTotalDiamond()) }}</span><br>
                                             @endif
                                             @if($cart->getTotalPrice())
                                                 <span title="Монет">
                                                     <img src="{{ asset('img/icon/m_game.gif') }}" alt="money" border="0" width="11" height="11" align="absmiddle">
-                                                </span>&nbsp;{{ format_money($cart->getTotalPrice()) }}<br>
+                                                </span>&nbsp;<span data-cart-total-price>{{ format_money($cart->getTotalPrice()) }}</span><br>
                                             @endif
                                         </td>
                                     </tr>
@@ -512,7 +539,7 @@
                             <br>
                             <span class="butt1 pointer ">
                                 <span>
-                                    <input value="Оплатить товар" type="submit" onclick="if(document._submit)return false;document._submit=true;" class="grnn">
+                                    <input value="Оплатить товар" type="submit" class="grnn">
                                 </span>
                             </span>
                             <br>
@@ -551,7 +578,7 @@
     function shopItemCounter(el) {
         const current = el;
 
-        if (current.classList.contains('left-disabled')) {
+        if (current.classList.contains('left-disabled') || current.classList.contains('right-disabled')) {
             return false;
         }
 
@@ -565,6 +592,7 @@
         }
 
         const input = current.parentElement.querySelector('input');
+        if (input.disabled) return false;
 
         if (current === left) {
             const value = shopCounterValue(input);
@@ -580,7 +608,8 @@
     }
 
     function shopCounterValue(el) {
-        return Math.max(1, parseInt(el.value) || 1);
+        const value = Math.max(1, parseInt(el.value, 10) || 1);
+        return el.hasAttribute('data-cart-quantity') ? Math.min(10000, value) : value;
     }
 
     function shopChangeCounter(el) {
@@ -594,6 +623,10 @@
         }
 
         el.value = value;
+        if (el.hasAttribute('data-cart-quantity')) {
+            el.closest('.b-input__inner').querySelector('.right').classList.toggle('right-disabled', value >= 10000);
+            el.dispatchEvent(new CustomEvent('shop-cart-quantity-change', { bubbles: true }));
+        }
     }
 
     function shopCounterKeypress(e, el) {
@@ -645,6 +678,8 @@
         window.parent.showErrorIframe('{{ session('message') }}')
     @endif
 </script>
+
+<script src="{{ asset('js/shop-cart-quantity.js') }}?v={{ filemtime(public_path('js/shop-cart-quantity.js')) }}"></script>
 
 </body>
 </html>

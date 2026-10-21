@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\Item;
 
 use App\Modules\Quest\Domain\Services\QuestDefinitionsCache;
+use App\Modules\Quest\Domain\Services\QuestProgressService;
+use App\Modules\User\Domain\Events\UserLocationChanged;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -24,6 +26,21 @@ class UseItemTest extends TestCase
         DB::purge('sqlite');
 
         $this->createTables();
+        Event::fake([UserLocationChanged::class]);
+        Schema::create('player_influence_medals', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+        });
+        Schema::create('player_detentions', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->timestamp('released_at')->nullable();
+            $table->timestamp('release_at');
+        });
+        Schema::create('location_gate_influence_requirements', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('location_gate_id');
+        });
         QuestDefinitionsCache::flush();
 
         DB::table('races')->insert(['id' => 1, 'name' => 'Человек']);
@@ -57,7 +74,8 @@ class UseItemTest extends TestCase
         ]);
 
         $this->actingAs(User::findOrFail(1));
-        $this->withoutMiddleware(ValidateCsrfToken::class);
+        // These tests exercise item-use rules, not account verification or locale middleware.
+        $this->withoutMiddleware();
     }
 
     protected function tearDown(): void
@@ -83,8 +101,98 @@ class UseItemTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => 1, 'location_id' => 10]);
     }
 
+    public function test_diamond_certificates_credit_their_configured_value_and_cannot_be_reused(): void
+    {
+        $this->withoutExceptionHandling();
+        $this->withoutMiddleware();
+        foreach ([10, 50, 100, 250, 500] as $amount) {
+            $itemId = 1000 + $amount;
+            $this->giveKey(2000 + $amount, $itemId);
+            DB::table('share_item_effects')->insert([
+                'share_item_id' => 2000 + $amount, 'effect_type' => 'grant_diamonds', 'value_type' => 'flat', 'value' => $amount,
+            ]);
+            $balanceBefore = (float) DB::table('users')->where('id', 1)->value('diamond');
+            $this->postJson(route('items.use', $itemId))->assertOk()
+                ->assertJsonPath('diamonds_credited', $amount)
+                ->assertJsonPath('diamond', fn ($value): bool => (float) $value === $balanceBefore + $amount)
+                ->assertJsonPath('removed', true);
+            $this->assertDatabaseMissing('backpacks', ['item_id' => $itemId]);
+            $this->postJson(route('items.use', $itemId))->assertUnprocessable();
+            $this->assertSame($balanceBefore + $amount, (float) DB::table('users')->where('id', 1)->value('diamond'));
+        }
+    }
+
+    public function test_using_a_stacked_certificate_consumes_one_and_rejects_other_owners(): void
+    {
+        $this->withoutMiddleware();
+        $this->giveKey(288, 100);
+        DB::table('share_item_effects')->insert(['share_item_id' => 288, 'effect_type' => 'grant_diamonds', 'value_type' => 'flat', 'value' => 50]);
+        DB::table('backpacks')->where('item_id', 100)->update(['count' => 2, 'user_id' => 2]);
+        $this->postJson(route('items.use', 100))->assertUnprocessable();
+        $this->assertSame(0.0, (float) DB::table('users')->where('id', 1)->value('diamond'));
+        DB::table('backpacks')->where('item_id', 100)->update(['user_id' => 1]);
+        $this->postJson(route('items.use', 100))->assertOk()->assertJsonPath('count', 1)->assertJsonPath('removed', false);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 100, 'count' => 1]);
+        $this->assertSame(50.0, (float) DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_invalid_certificate_configuration_rolls_back_and_keeps_the_item(): void
+    {
+        $this->withoutMiddleware();
+        $this->giveKey(288, 100);
+        foreach ([['flat', -50], ['flat', 0], ['percent', 50]] as [$valueType, $amount]) {
+            DB::table('share_item_effects')->delete();
+            // A valid effect before the invalid one must also be rolled back.
+            DB::table('share_item_effects')->insert([
+                ['share_item_id' => 288, 'effect_type' => 'grant_diamonds', 'value_type' => 'flat', 'value' => 10],
+                ['share_item_id' => 288, 'effect_type' => 'grant_diamonds', 'value_type' => $valueType, 'value' => $amount],
+            ]);
+            $this->postJson(route('items.use', 100))->assertUnprocessable()->assertJsonPath('code', 'invalid_certificate_value');
+            $this->assertDatabaseHas('backpacks', ['item_id' => 100, 'count' => 1]);
+            $this->assertSame(0.0, (float) DB::table('users')->where('id', 1)->value('diamond'));
+        }
+    }
+
+    public function test_certificate_migration_configures_only_known_items_and_is_idempotent(): void
+    {
+        foreach ([287 => 10, 288 => 50, 289 => 100, 290 => 250, 291 => 500] as $id => $amount) {
+            DB::table('share_items')->insert([
+                'id' => $id, 'type' => 'scroll',
+                'name' => json_encode(['ru' => 'Сертификат «'.$amount.' Бриллиантов»'], JSON_UNESCAPED_UNICODE),
+            ]);
+        }
+        $migration = require database_path('migrations/2026_10_18_000001_enable_diamond_certificates.php');
+        $migration->up();
+        $migration->up();
+        $this->assertSame(5, DB::table('share_item_effects')->count());
+        foreach ([287 => 10, 288 => 50, 289 => 100, 290 => 250, 291 => 500] as $id => $amount) {
+            $this->assertDatabaseHas('share_items', ['id' => $id, 'is_use' => true, 'count_use' => 0, 'is_slot_usable' => false]);
+            $this->assertDatabaseHas('share_item_effects', ['share_item_id' => $id, 'effect_type' => 'grant_diamonds', 'value' => $amount, 'value_type' => 'flat']);
+        }
+        $this->assertSame(0.0, (float) DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
+    public function test_currency_certificate_cannot_bypass_transactional_use_through_a_stale_hotbar_slot(): void
+    {
+        $this->withoutMiddleware();
+        $this->giveKey(288, 100);
+        DB::table('share_item_effects')->insert(['share_item_id' => 288, 'effect_type' => 'grant_diamonds', 'value_type' => 'flat', 'value' => 50]);
+        Schema::create('player_slots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedInteger('slot_number');
+            $table->string('entity_type');
+            $table->unsignedBigInteger('entity_id');
+        });
+        DB::table('player_slots')->insert(['player_id' => 1, 'slot_number' => 1, 'entity_type' => 'item', 'entity_id' => 100]);
+        $this->postJson(route('hotbar.use'), ['slot' => 1])->assertUnprocessable();
+        $this->assertDatabaseHas('backpacks', ['item_id' => 100, 'count' => 1]);
+        $this->assertSame(0.0, (float) DB::table('users')->where('id', 1)->value('diamond'));
+    }
+
     public function test_teleport_use_key_moves_player_without_consuming_when_disabled(): void
     {
+        $this->withoutExceptionHandling();
         $this->giveKey(400, 101);
         $this->createGate(400, 'teleport_use', false, 10, 11);
 
@@ -397,6 +505,48 @@ class UseItemTest extends TestCase
         ]);
     }
 
+    public function test_ajax_drop_updates_stack_without_redirect_and_keeps_owner_inventory(): void
+    {
+        $this->giveInventoryItem(501, 105, isDroppable: true);
+        DB::table('backpacks')->where('item_id', 105)->update(['count' => 3]);
+
+        $this->postJson(route('items.drop', 105), ['c' => 1, 'qty' => 2])
+            ->assertOk()->assertJsonPath('ok', true)
+            ->assertJsonPath('backpack_update.count', 1)
+            ->assertJsonPath('backpack_update.removed', false)
+            ->assertJsonPath('backpack_update.capacity_used', 1);
+        $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 105, 'count' => 1]);
+
+        $this->postJson(route('items.drop', 105), ['c' => 1, 'qty' => 1])
+            ->assertOk()->assertJsonPath('backpack_update.count', 0)
+            ->assertJsonPath('backpack_update.removed', true)
+            ->assertJsonPath('backpack_update.capacity_used', 0);
+        $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 105]);
+    }
+
+    public function test_ajax_drop_rejects_forbidden_item_without_redirect(): void
+    {
+        $this->giveInventoryItem(500, 104, isDroppable: false);
+        $this->postJson(route('items.drop', 104), ['c' => 1, 'qty' => 1])
+            ->assertUnprocessable()->assertJsonPath('ok', false);
+        $this->assertDatabaseHas('backpacks', ['user_id' => 1, 'item_id' => 104, 'count' => 1]);
+    }
+
+    public function test_ajax_quest_drop_destroys_item_and_updates_quest_progress(): void
+    {
+        $this->giveInventoryItem(501, 105, isDroppable: true);
+        DB::table('share_items')->where('id', 501)->update(['type' => 'quest']);
+        $progress = \Mockery::mock(QuestProgressService::class);
+        $progress->shouldReceive('decreaseCollectProgress')->once()->withArgs(fn ($player, $shareId, $quantity) => $player->id === 1 && $shareId === 501 && $quantity === 1);
+        $this->app->instance(QuestProgressService::class, $progress);
+
+        $this->postJson(route('items.drop', 105), ['c' => 1, 'qty' => 1])
+            ->assertOk()->assertJsonPath('backpack_update.removed', true);
+        $this->assertDatabaseMissing('backpacks', ['item_id' => 105]);
+        $this->assertDatabaseMissing('items', ['id' => 105]);
+        $this->assertDatabaseMissing('item_on_locations', ['item_id' => 105]);
+    }
+
     private function giveKey(
         int $shareItemId,
         int $itemId,
@@ -487,6 +637,7 @@ class UseItemTest extends TestCase
 
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
+            $table->decimal('diamond', 12, 2)->default(0);
             $table->unsignedBigInteger('player_id')->nullable();
             $table->string('name');
             $table->string('email');
@@ -553,7 +704,10 @@ class UseItemTest extends TestCase
         });
 
         Schema::create('share_items', function (Blueprint $table): void {
+            $table->boolean('is_weight')->default(true);
             $table->id();
+            $table->boolean('is_use')->default(false);
+            $table->boolean('is_slot_usable')->default(false);
             $table->string('type');
             $table->string('name');
             $table->integer('count_use')->default(0);

@@ -4,6 +4,7 @@
     @include('interface::partials.game-translations')
     <meta charset="UTF-8">
     <title>{{ __('Чат') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         html {
             scrollbar-width: none;
@@ -31,7 +32,9 @@
             line-height: 1.4;
             word-break: break-word;
         }
-        .message.msg-message { white-space: nowrap; }
+        .message.msg-message,
+        .message.msg-player_trade_invite { white-space: nowrap; }
+        .msg-player_trade_invite img { vertical-align: middle; }
         .chat-smile { vertical-align: middle; }
         small { font-size: 11px; color: #666; }
         a { color: navy; text-decoration: none; }
@@ -39,7 +42,8 @@
         a.n { text-decoration: none; }
 
         /* Message type styles */
-        .msg-message   { border-left: 2px solid transparent; padding-left: 3px; }
+        .msg-message,
+        .msg-player_trade_invite { border-left: 2px solid transparent; padding-left: 3px; }
         .msg-private   { border-left: 2px solid #cc6600; padding-left: 3px; }
         .msg-system    { border-left: 2px solid #006600; padding-left: 3px; }
         .msg-mention   { border-left: 2px solid #cc9900; padding-left: 3px; }
@@ -231,7 +235,10 @@
                         @elseif ($msg->type === 'clan_boss')
                             {!! $msg->content !!}
 
-                        @elseif (in_array($msg->type, ['party_invite', 'party_notice', 'clan_invite'], true))
+                        @elseif ($msg->type === 'boss_defeat')
+                            {!! $msg->content !!}
+
+                        @elseif (in_array($msg->type, ['party_invite', 'party_notice', 'clan_invite', 'player_trade_invite'], true))
                             {!! $msg->content !!}
 
                         @elseif ($msg->type === 'quest')
@@ -274,6 +281,7 @@
     </tbody>
 </table>
 
+<script src="{{ asset('js/player-notifications.js') }}?v={{ filemtime(public_path('js/player-notifications.js')) }}"></script>
 <script>
     var channel   = '{{ $channel->value }}';
     var pollUrl   = '{{ route('chat.messages') }}';
@@ -494,7 +502,9 @@
             html += msg.content;
         } else if (msg.type === 'clan_boss') {
             html += msg.content;
-        } else if (msg.type === 'party_invite' || msg.type === 'party_notice' || msg.type === 'clan_invite') {
+        } else if (msg.type === 'boss_defeat') {
+            html += msg.content;
+        } else if (msg.type === 'party_invite' || msg.type === 'party_notice' || msg.type === 'clan_invite' || msg.type === 'player_trade_invite') {
             html += msg.content;
         } else if (msg.type === 'quest') {
             html += msg.content;
@@ -568,6 +578,37 @@
         return handleInviteAction(link, gameTranslate('Клан'));
     }
 
+    function handlePlayerTradeInviteAction(link) {
+        if (!link || link.dataset.pending === '1') return false;
+        link.dataset.pending = '1';
+        fetch(link.href, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+        }).then(function (response) {
+            return response.json().then(function (data) {
+                if (!response.ok) throw new Error(data.message || gameTranslate('Не удалось обработать приглашение.'));
+                return data;
+            });
+        }).then(function (data) {
+            if (window.top.refreshChatChannels) window.top.refreshChatChannels();
+            if (data.url && window.top.toLocation) {
+                window.top.toggleMap(false);
+                window.top.toLocation(data.url, true);
+            } else if (window.top.openGameMessageModal) {
+                window.top.openGameMessageModal({ title: gameTranslate('Торговля'), message: data.message });
+            }
+        }).catch(function (error) {
+            link.dataset.pending = '0';
+            if (window.top.openGameMessageModal) window.top.openGameMessageModal({ title: gameTranslate('Торговля'), message: error.message });
+        });
+        return false;
+    }
+
     function replyToUser(name) {
         try {
             var actionFrame = parent.document.getElementById('bottom-frame');
@@ -578,6 +619,7 @@
     }
 
     var chClass = { clan: ' msg-ch-clan', trade: ' msg-ch-trade', location: ' msg-ch-location', party: ' msg-ch-party' };
+    var notificationMessages = {};
 
     function insertSorted(content, div, id) {
         var nodes = content.querySelectorAll('[data-id]');
@@ -634,6 +676,19 @@
     function syncMessages(serverMessages) {
         var content = document.getElementById('content');
         var atBottom = (window.innerHeight + window.pageYOffset) >= document.body.scrollHeight - 80;
+
+        // A personal notification stays visible across channel switches/full syncs until its normal expiry.
+        serverMessages = serverMessages.slice();
+        var serverIds = {};
+        serverMessages.forEach(function (msg) { serverIds[msg.id] = true; });
+        Object.keys(notificationMessages).forEach(function (id) {
+            var msg = notificationMessages[id];
+            if (msg.expires_at && Date.parse(msg.expires_at) <= Date.now()) {
+                delete notificationMessages[id];
+            } else if (!serverIds[msg.id]) {
+                serverMessages.push(msg);
+            }
+        });
 
         // Build lookup of server IDs
         var serverMap = {};
@@ -715,6 +770,22 @@
     }
 
     function fullSync() { fetchMessages(null, false); }
+
+    var notificationDelivery = window.createPlayerNotificationDelivery({
+        pendingUrl: @json(route('player.notifications')),
+        acknowledgeUrl: @json(route('player.notifications.acknowledge')),
+        csrfToken: csrfToken,
+        show: function (messages) {
+            messages.forEach(function (msg) { notificationMessages[msg.id] = msg; });
+            var previousLastMessageId = lastMessageId;
+            appendMessages(messages);
+            // Delivery may overtake a regular chat fetch; do not skip messages between the two IDs.
+            lastMessageId = previousLastMessageId;
+        },
+        isDisplayed: function (id) { return !!document.querySelector('#content [data-id="' + Number(id) + '"]'); }
+    });
+    notificationDelivery.sync();
+    var notificationDeliveryTimer = window.setInterval(notificationDelivery.sync, 30000);
 
     function realtimeEcho() {
         try {
@@ -808,6 +879,7 @@
         realtimeInitialized = true;
         try { window.top.GameAudio?.watchChat(echo, realtime, @json(array_map('intval', $ignoredUserIds))); } catch (error) {}
         realtimePersonalChannel = echo.private('App.Models.User.' + realtime.userId)
+            .listen('.player.notification.available', notificationDelivery.sync)
             .listen('.chat.message.created', handleRealtimeMessage)
             .listen('.chat.message.expired', handleRealtimeExpiration)
             .listen('.chat.messages.invalidated', handleRealtimeInvalidation);
@@ -827,6 +899,7 @@
         }
 
         connection.bind('connected', function () {
+            notificationDelivery.sync();
             stopFallbackPolling();
             scheduleRealtimeSync(realtimeReconnectRequired);
             scheduleWorldEventSync();
@@ -840,6 +913,7 @@
         });
 
         if (connection.state === 'connected') {
+            notificationDelivery.sync();
             stopFallbackPolling();
             scheduleRealtimeSync(false);
             scheduleWorldEventSync();
@@ -870,6 +944,8 @@
     });
 
     window.addEventListener('beforeunload', function () {
+        notificationDelivery.stop();
+        window.clearInterval(notificationDeliveryTimer);
         var echo = realtimeEcho();
         stopFallbackPolling();
         if (realtimeSyncTimer) window.clearTimeout(realtimeSyncTimer);
@@ -878,6 +954,7 @@
         if (worldEventCountdownTimer) window.clearInterval(worldEventCountdownTimer);
 
         if (realtimePersonalChannel) {
+            realtimePersonalChannel.stopListening('.player.notification.available', notificationDelivery.sync);
             realtimePersonalChannel.stopListening('.chat.message.created', handleRealtimeMessage);
             realtimePersonalChannel.stopListening('.chat.message.expired', handleRealtimeExpiration);
             realtimePersonalChannel.stopListening('.chat.messages.invalidated', handleRealtimeInvalidation);
@@ -915,6 +992,7 @@
         ignoreAddUrl: '{{ route('chat.ignore.add') }}',
         ignoreRemoveBase: '{{ url('/chat/ignore') }}/',
         infoUrlBase: '{{ url('/info/u') }}/',
+        tradeInviteUrl: '{{ route('player-trade.invite', ['user' => ':user_id']) }}',
         sendPrivate: replyToUser,
         selector: 'a.player-link[data-uid]',
     });

@@ -355,6 +355,7 @@
         ignoreAddUrl: '{{ route('chat.ignore.add') }}',
         ignoreRemoveBase: '{{ url('/chat/ignore') }}/',
         infoUrlBase: '{{ url('/info/u') }}/',
+        tradeInviteUrl: '{{ route('player-trade.invite', ['user' => ':user_id']) }}',
         sendPrivate: sendPrivate,
         selector: 'a.pnick[data-uid]',
     });

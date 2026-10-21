@@ -48,6 +48,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_use Показывать пункт «Использовать» независимо от типа предмета — фолбэк для типов вроде misc, не входящих в белый список usable-типов на клиенте.
  * @property bool $is_weight
  * @property int $price
+ * @property string $diamond_price
  * @property int $break_crystal
  * @property UpgradeScrollType|null $upgrade_scroll_type
  * @property array|null $gem_stats
@@ -138,6 +139,7 @@ class ShareItem extends Model
     ];
 
     protected $casts = [
+        'diamond_price' => 'decimal:2',
         'is_slot_usable' => 'boolean',
         'is_use' => 'boolean',
         'is_weight' => 'boolean',

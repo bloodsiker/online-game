@@ -88,7 +88,8 @@
                 </tr>
             </table>
 
-            <p style="text-align:center;">Выберите Трансгрессор подходящей редкости. При неудаче исходная заточка будет полностью потеряна.</p>
+            @include('blacksmith::_craft-hint-styles')
+            @include('blacksmith::_craft-hint', ['hint' => 'Выберите Трансгрессор подходящей редкости. При неудаче исходная заточка будет полностью потеряна.'])
 
             <form action="{{ route('blacksmith.upgrade_transfer.process', ['id' => $blacksmith->id]) }}" method="post" id="transfer-form">
                 @csrf

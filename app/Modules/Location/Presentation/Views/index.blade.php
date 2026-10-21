@@ -183,6 +183,21 @@
                 <b><a href="" class="location-name">{{ $page->name }}</a></b> <span>({{ $page->locationId }})</span>
             </div>
 
+            @if($resumableTrade !== null)
+                <div id="location-trade-return" class="center" style="margin:8px 0;" data-expires-at="{{ $resumableTrade->expires_at->toIso8601String() }}">
+                    <span class="butt1 pointer"><span>
+                        <button class="butt1 shop" type="button" style="width:171px;" onclick="window.location.href = @js(route('player-trade.show', $resumableTrade->uuid))">{{ __('Вернуться к торговле') }}</button>
+                    </span></span>
+                </div>
+                <script>
+                    (() => {
+                        const button = document.getElementById('location-trade-return');
+                        const remaining = Date.parse(button.dataset.expiresAt) - Date.now();
+                        setTimeout(() => button.remove(), Math.max(0, remaining));
+                    })();
+                </script>
+            @endif
+
             <div style="overflow:hidden;">
                 @if($page->image)
                     <table width="420" border="0" cellspacing="0" cellpadding="0" style="float:right; margin:0 0 8px 10px;">

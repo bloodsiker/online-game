@@ -23,75 +23,63 @@
             display: block;
             box-sizing: border-box;
             width: 100%;
-            margin: 0 0 5px;
-            padding: 4px 8px;
-            border: 1px solid #c49485;
-            background: #f3d6b7 url(/img/bg/info/bg_l.gif) repeat;
-            color: #955c4a;
+            margin: 0 0 10px;
+            padding: 6px 2px;
+            border-bottom: 1px solid #c49485;
+            color: #6c2f1f;
             font-weight: bold;
-            font-size: 11px;
-            line-height: 14px;
+            font-size: 12px;
+            line-height: 18px;
             text-align: left;
         }
 
-        .active-quest {
-            margin-bottom: 7px;
-            padding: 6px 8px;
-            border: 1px solid #c49485;
-            border-left: 3px solid #a36a35;
-            background: #fffbd6 url(/img/bg/info/bg_l.gif) repeat;
-        }
+        .quest-frame { margin-bottom: 12px; border-collapse: separate; border-spacing: 0; }
+        .quest-frame > tbody > tr:first-child,
+        .quest-frame > tbody > tr:last-child { font-size: 0; line-height: 0; }
+        .common-inset-tl { background: url({{ asset('main/images/common-inset-tl.png') }}) no-repeat; }
+        .common-inset-tr { background: url({{ asset('main/images/common-inset-tr.png') }}) no-repeat; }
+        .common-inset-bl { background: url({{ asset('main/images/common-inset-bl.png') }}) no-repeat; }
+        .common-inset-br { background: url({{ asset('main/images/common-inset-br.png') }}) no-repeat; }
+        .common-inset-t { background: url({{ asset('main/images/common-inset-t.png') }}) repeat-x; }
+        .common-inset-b { background: url({{ asset('main/images/common-inset-b.png') }}) repeat-x; }
+        .common-inset-l { background: url({{ asset('main/images/common-inset-l.png') }}) repeat-y; }
+        .common-inset-r { background: url({{ asset('main/images/common-inset-r.png') }}) repeat-y; }
+        .common-inset-bg { background: #ffffd6; }
+        .active-quest, .quest-card { padding: 2px 4px; line-height: 1.5; }
         .active-quest .quest-title {
-            margin: -6px -8px 5px;
-            padding: 4px 8px;
+            margin: 0 0 8px;
+            padding: 0 0 7px;
             border-bottom: 1px solid #db9f73;
-            background: rgba(219, 159, 115, .18);
             font-weight: bold;
-            font-size: 11px;
+            font-size: 13px;
             color: #461c0b;
         }
         .active-quest .quest-acceptor {
             color: #955c4a;
             margin-bottom: 6px;
         }
-        .progress-row { margin: 0 0 6px; }
+        .progress-row { margin: 0 0 10px; }
         .progress-label { color: #461c0b; margin-bottom: 2px; }
-        .progress-bar { position: relative; width: 100%; height: 17px; }
-        .progress-bar__bg { position: absolute; right: 3px; left: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -51px repeat-x; }
-        .progress-bar__red { position: absolute; right: 3px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 -68px repeat-x; }
-        .progress-bar__cover { position: absolute; left: 20px; right: 20px; top: 0; height: 17px; background: url(/img/bg/progress-bar.png) 0 0 repeat-x; }
-        .progress-bar__left { position: absolute; left: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -17px no-repeat; }
-        .progress-bar__right { position: absolute; right: 0; top: 0; width: 20px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -34px no-repeat; }
-        .progress-bar__marker { position: absolute; top: 0; width: 5px; height: 17px; background: url(/img/bg/progress-bar.png) 0 -85px no-repeat; }
-        .progress-bar__txt {
-            position: absolute;
-            left: 3px;
-            right: 3px;
-            top: 3px;
-            color: #fff;
-            font-size: 10px;
-            line-height: 11px;
-            text-align: center;
-            text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444,
-                         -1px 0 1px #640303, 0 1px 1px #640303, 1px 0 1px #640303, 0 -1px 1px #640303;
-        }
+        .rep-progress-bar { position: relative; width: 100%; max-width: 600px; height: 31px; overflow: hidden; }
+        .rep-progress-bar__bg { height: 27px; margin: 2px 5px 0; overflow: hidden; border-radius: 5px; background: url({{ asset('img/progressbar/progress-bar-1-bg.png') }}) 0 -54px repeat-x; }
+        .rep-progress-bar__fill { height: 27px; background: url({{ asset('img/progressbar/progress-bar-1-bg.png') }}) 0 -27px repeat-x; }
+        .rep-progress-bar__border { position: absolute; top: 0; left: 0; width: 100%; height: 31px; }
+        .rep-progress-bar__border-left,
+        .rep-progress-bar__border-right,
+        .rep-progress-bar__border-center { height: 31px; background: url({{ asset('img/progressbar/progress-bar-1-border.png') }}) no-repeat; }
+        .rep-progress-bar__border-left,
+        .rep-progress-bar__border-right { position: absolute; top: 0; width: 20px; }
+        .rep-progress-bar__border-left { left: 0; }
+        .rep-progress-bar__border-right { right: 0; background-position: 0 -31px; }
+        .rep-progress-bar__border-center { margin: 0 20px; background-position: 0 -62px; background-repeat: repeat-x; }
+        .rep-progress-bar__text { position: absolute; top: 0; left: 0; width: 100%; color: #fff; font-size: 11px; font-weight: bold; line-height: 31px; text-align: center; text-shadow: -1px 0 2px #444, 0 1px 2px #444, 1px 0 2px #444, 0 -1px 2px #444; }
 
-        .quest-card {
-            margin-bottom: 6px;
-            padding: 6px 8px;
-            border: 1px solid #DB9F73;
-            background-color: #fff8ec;
-        }
-        .quest-card:hover {
-            border-color: #c49485;
-        }
         .quest-card .q-title {
-            margin: -6px -8px 5px;
-            padding: 4px 8px;
+            margin: 0 0 8px;
+            padding: 0 0 7px;
             border-bottom: 1px solid #DB9F73;
-            background: rgba(219, 159, 115, .14);
             color: #461c0b;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: bold;
         }
         .quest-card .q-desc,
@@ -99,7 +87,6 @@
         .quest-card .q-obj { color: #8b0000; margin-bottom: 2px; }
         .q-reward { color: #114d01; font-weight: bold; }
         .quest-card .q-cooldown { color: #666; font-style: italic; }
-        .badge-clan,
         .badge-active,
         .badge-cooldown {
             display: inline-block;
@@ -123,12 +110,9 @@
             border-color: #aaa08e;
             color: #666;
         }
-        .separator { border: 0; height: 5px; margin: 0; }
+        .separator { border: 0; height: 10px; margin: 0; }
         .empty-state {
-            margin-bottom: 7px;
-            padding: 7px 9px;
-            border: 1px solid #DB9F73;
-            background: #fff8ec url(/img/bg/info/bg_l.gif) repeat;
+            padding: 4px;
             color: #955c4a;
             font-style: italic;
         }
@@ -159,7 +143,7 @@
     <tbody>
     <tr>
         <td valign="top" width="100%">
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" height="100%">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tbody>
                 <tr height="22">
                     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
@@ -167,7 +151,7 @@
                         <table border="0" cellspacing="0" cellpadding="0"><tbody>
                         <tr height="22">
                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
-                            <td align="center" class="tbl-usi_label-center">{{ __('Клановые квесты') }} — {{ $clan->name }}</td>
+                            <td align="center" class="tbl-usi_label-center">{{ __('Клановые квесты') }}</td>
                             <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
                         </tr>
                         </tbody></table>
@@ -176,12 +160,13 @@
                 </tr>
                 <tr>
                     <td class="tbl-shp-sides ls">&nbsp;</td>
-                    <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px;">
+                    <td class="tbl-usi_bg" valign="top" style="padding: 8px 10px;">
 
                         {{-- ===== ACTIVE QUESTS ===== --}}
-                        <span class="section-title">{{ __('Активные квесты') }}</span>
+                        <span class="section-title">{{ __('Активные квесты') }} ({{ $activeQuests->count() }})</span>
 
                         @forelse($activeQuests as $activeQuest)
+                            <x-game.inset-frame class="quest-frame">
                             <div class="active-quest">
                                 <div class="quest-title">
                                     {{ $activeQuest->quest->title }}
@@ -212,14 +197,14 @@
                                                 @endif
                                                 {{ $obj->questObjective->description }}
                                             </div>
-                                            <div class="progress-bar">
-                                                <div class="progress-bar__bg"></div>
-                                                <div class="progress-bar__red" style="width: {{ 100 - $pct }}%;"></div>
-                                                <div class="progress-bar__cover"></div>
-                                                <div class="progress-bar__left"></div>
-                                                <div class="progress-bar__right"></div>
-                                                <div class="progress-bar__marker" style="right: {{ 100 - $pct }}%;"></div>
-                                                <div class="progress-bar__txt">{{ $done }} / {{ $need }} ({{ $pct }}%)</div>
+                                            <div class="rep-progress-bar">
+                                                <div class="rep-progress-bar__bg"><div class="rep-progress-bar__fill" style="width: {{ $pct }}%;"></div></div>
+                                                <div class="rep-progress-bar__border">
+                                                    <div class="rep-progress-bar__border-left"></div>
+                                                    <div class="rep-progress-bar__border-right"></div>
+                                                    <div class="rep-progress-bar__border-center"></div>
+                                                </div>
+                                                <div class="rep-progress-bar__text">{{ $done }} / {{ $need }} ({{ $pct }}%)</div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -249,23 +234,26 @@
                                     <div style="margin-top:8px;">
                                         <form id="clan-cancel-{{ $activeQuest->id }}" method="POST" action="{{ route('quest.clan.cancel', $activeQuest->id) }}" style="display:inline;">
                                             @csrf
-                                            <b class="butt2 pointer">
-                                                <b><input value="{{ __('Отменить квест') }}" type="button" onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить клановый квест?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){document.getElementById('clan-cancel-{{ $activeQuest->id }}').submit();})"></b>
-                                            </b>
+                                            <span class="butt1 pointer">
+                                                <span><input value="{{ __('Отменить квест') }}" type="button" onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить клановый квест?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){document.getElementById('clan-cancel-{{ $activeQuest->id }}').submit();})"></span>
+                                            </span>
                                         </form>
                                     </div>
                                 @endif
                             </div>
+                            </x-game.inset-frame>
                         @empty
+                            <x-game.inset-frame class="quest-frame">
                             <div class="empty-state">
                             {{ __('Нет активных клановых квестов. Любой член клана может взять квест у NPC.') }}
                             </div>
+                            </x-game.inset-frame>
                         @endforelse
 
                         <hr class="separator">
 
                         {{-- ===== AVAILABLE QUESTS ===== --}}
-                        <span class="section-title">{{ __('Доступные квесты') }}</span>
+                        <span class="section-title">{{ __('Доступные квесты') }} ({{ $availableQuests->count() }})</span>
 
                         @php
                             // Find last completed record per quest for cooldown display
@@ -292,9 +280,9 @@
                                     default                          => __('повторяемый'),
                                 };
                             @endphp
+                            <x-game.inset-frame class="quest-frame">
                             <div class="quest-card">
                                 <div class="q-title">
-                                    <span class="badge-clan">{{ __('КЛАН') }}</span>
                                     {{ $quest->title }}
                                     @if($isCurrentlyActive)
                                         <span class="badge-active">{{ __('в процессе') }}</span>
@@ -334,8 +322,11 @@
                                     </div>
                                 @endif
                             </div>
+                            </x-game.inset-frame>
                         @empty
+                            <x-game.inset-frame class="quest-frame">
                             <div class="empty-state">{{ __('Нет доступных клановых квестов.') }}</div>
+                            </x-game.inset-frame>
                         @endforelse
 
                         <hr class="separator">
@@ -343,8 +334,9 @@
                         {{-- ===== HISTORY ===== --}}
                         <span class="section-title">{{ __('История выполнения') }}</span>
 
+                        <x-game.inset-frame class="quest-frame">
                         @if($history->isNotEmpty())
-                            <table class="history-tbl">
+                            <table class="history-tbl" cellspacing="0" cellpadding="0">
                                 <thead>
                                 <tr>
                                     <th>{{ __('Квест') }}</th>
@@ -377,6 +369,7 @@
                         @else
                             <div class="empty-state">{{ __('История пуста.') }}</div>
                         @endif
+                        </x-game.inset-frame>
 
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>

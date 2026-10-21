@@ -14,6 +14,7 @@ use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,7 @@ class PremiumShopController extends Controller
             $user,
             $request->integer('shop_item_id'),
             $request->integer('quantity'),
+            self::SHOP_ID,
         );
 
         return redirect()->back();
@@ -83,9 +85,33 @@ class PremiumShopController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $this->shopCartService->removeItem($user, $id);
+        $this->shopCartService->removeItem($user, $id, self::SHOP_ID);
 
         return redirect()->back();
+    }
+
+    public function updateCart(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'shop_item_id' => ['required', 'integer', 'min:1'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:10000'],
+        ]);
+        $user = $request->user();
+        $item = $this->shopCartService->updateQuantity(
+            user: $user,
+            shopItemId: (int) $data['shop_item_id'],
+            quantity: (int) $data['quantity'],
+            structureId: self::SHOP_ID,
+        );
+        $cart = $this->shopCartService->getCart($user, self::SHOP_ID);
+
+        return response()->json([
+            'quantity' => (int) $item->quantity,
+            'line_price' => format_money($item->quantity * $item->shopItem->price),
+            'line_diamond' => format_money($item->quantity * $item->shopItem->diamond),
+            'total_price' => format_money($cart->getTotalPrice()),
+            'total_diamond' => format_money($cart->getTotalDiamond()),
+        ]);
     }
 
     public function clearCart(): RedirectResponse

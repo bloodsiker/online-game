@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Clan\Application\UseCases;
 
 use App\Modules\Clan\Application\DTOs\ClanBossPageDTO;
+use App\Modules\Dungeon\Application\Services\ClanBossRewardRecorder;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossContribution;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRun;
@@ -18,6 +19,7 @@ class GetClanBossPage
     public function __construct(
         private readonly ResolveClanContext $resolveClanContext,
         private readonly ClanBossService $clanBossService,
+        private readonly ClanBossRewardRecorder $rewardRecorder,
     ) {}
 
     public function execute(User $user, ?int $archiveRunId = null): ClanBossPageDTO
@@ -158,24 +160,14 @@ class GetClanBossPage
             archivedStages: $archivedStages,
             archivedDamageRows: $archivedDamageRows,
             archivedStageDamage: $archivedStageDamage,
+            rewardReceipts: $run !== null ? $this->rewardRecorder->history($run->id) : collect(),
+            archivedRewardReceipts: $archivedRun !== null ? $this->rewardRecorder->history($archivedRun->id) : collect(),
         );
     }
 
     /** @return Collection<int, array{user: ?User, damage: int, hits: int, rewarded: bool}> */
     private function damageRows(int $runId): Collection
     {
-        return ClanBossContribution::query()
-            ->with('user')
-            ->selectRaw('user_id, SUM(damage) AS total_damage, SUM(hits) AS total_hits, MAX(rewarded) AS received_reward')
-            ->where('clan_boss_run_id', $runId)
-            ->groupBy('user_id')
-            ->orderByDesc('total_damage')
-            ->get()
-            ->map(fn (ClanBossContribution $row): array => [
-                'user' => $row->user,
-                'damage' => (int) $row->total_damage,
-                'hits' => (int) $row->total_hits,
-                'rewarded' => (bool) $row->received_reward,
-            ]);
+        return collect($this->clanBossService->ratingForRun($runId));
     }
 }

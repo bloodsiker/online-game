@@ -9,6 +9,7 @@ use App\Modules\Dungeon\Application\UseCases\ProcessExpiredClanBossRuns;
 use App\Modules\Dungeon\Application\UseCases\ProcessExpiredDungeonRuns;
 use App\Modules\Event\Domain\Services\WorldEventLifecycleService;
 use App\Modules\Interface\Application\UseCases\ProcessDuePlayerStates;
+use App\Modules\Npc\Application\Services\NpcMovementService;
 use App\Modules\Player\Application\UseCases\PruneExpiredPlayerInjuries;
 use App\Modules\Scheduler\Domain\DTOs\ScheduledTaskDefinition;
 use App\Modules\Scheduler\Domain\Enums\ScheduledTaskFrequency;
@@ -35,6 +36,8 @@ class ScheduledTaskRegistry
 
     public const DATABASE_BACKUP = 'system.database_backup';
 
+    public const MOVE_NPCS = 'npcs.move';
+
     public function __construct(
         private readonly ConsoleKernel $console,
         private readonly PruneExpiredPlayerInjuries $pruneExpiredPlayerInjuries,
@@ -44,12 +47,20 @@ class ScheduledTaskRegistry
         private readonly ProcessExpiredDungeonRuns $processExpiredDungeonRuns,
         private readonly ProcessExpiredClanBossRuns $processExpiredClanBossRuns,
         private readonly DatabaseBackupService $databaseBackupService,
+        private readonly NpcMovementService $npcMovementService,
     ) {}
 
     /** @return array<string, ScheduledTaskDefinition> */
     public function all(): array
     {
         return [
+            self::MOVE_NPCS => new ScheduledTaskDefinition(
+                key: self::MOVE_NPCS,
+                name: 'Автоматическое перемещение NPC',
+                description: 'Перемещает активных NPC по выбранной карте или списку локаций с индивидуальным интервалом.',
+                defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
+                allowedFrequencies: [ScheduledTaskFrequency::EVERY_MINUTE],
+            ),
             self::DELETE_EXPIRED_LOCATION_ITEMS => new ScheduledTaskDefinition(
                 key: self::DELETE_EXPIRED_LOCATION_ITEMS,
                 name: 'Очистка предметов на локациях',
@@ -115,7 +126,7 @@ class ScheduledTaskRegistry
             self::PROCESS_CLAN_BOSS_RUNS => new ScheduledTaskDefinition(
                 key: self::PROCESS_CLAN_BOSS_RUNS,
                 name: 'Таймеры клан-боссов',
-                description: 'Завершает просроченные походы и пропускает протухших боссов.',
+                description: 'Завершает клановые походы по общему таймеру. Отдельного ограничения времени на босса нет.',
                 defaultFrequency: ScheduledTaskFrequency::EVERY_MINUTE,
                 allowedFrequencies: [
                     ScheduledTaskFrequency::EVERY_MINUTE,
@@ -144,6 +155,7 @@ class ScheduledTaskRegistry
     public function execute(string $key): string
     {
         return match ($key) {
+            self::MOVE_NPCS => sprintf('Перемещено NPC: %d.', $this->npcMovementService->moveDue(now())),
             self::DELETE_EXPIRED_LOCATION_ITEMS => $this->deleteExpiredLocationItems(),
             self::PRUNE_EXPIRED_INJURIES => sprintf(
                 'Удалено истёкших травм: %d.',

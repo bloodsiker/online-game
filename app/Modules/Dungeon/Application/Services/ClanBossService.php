@@ -188,10 +188,6 @@ final class ClanBossService
             throw new RuntimeException('Поход завершён.');
         }
 
-        if ($stageState->isExpired()) {
-            throw new RuntimeException('Время жизни босса истекло.');
-        }
-
         $membership = $user->clanMembership;
         if ($membership === null || (int) $membership->clan_id !== (int) $run->clan_id) {
             throw new RuntimeException('Бить босса может только свой клан.');
@@ -417,6 +413,26 @@ final class ClanBossService
             ->all();
     }
 
+    /** @return list<array{user: ?User, damage: int, hits: int, rewarded: bool}> */
+    public function ratingForRun(int $runId): array
+    {
+        return ClanBossContribution::query()
+            ->with(['user.player', 'user.clanMembership.clan'])
+            ->selectRaw('user_id, SUM(damage) AS total_damage, SUM(hits) AS total_hits, MAX(rewarded) AS received_reward')
+            ->where('clan_boss_run_id', $runId)
+            ->groupBy('user_id')
+            ->orderByDesc('total_damage')
+            ->orderBy('user_id')
+            ->get()
+            ->map(fn (ClanBossContribution $row): array => [
+                'user' => $row->user,
+                'damage' => (int) $row->total_damage,
+                'hits' => (int) $row->total_hits,
+                'rewarded' => (bool) $row->received_reward,
+            ])
+            ->all();
+    }
+
     public function myContribution(int $runId, int $stageId, int $userId): ?ClanBossContribution
     {
         return ClanBossContribution::query()
@@ -439,34 +455,6 @@ final class ClanBossService
             ->each(function (ClanBossRun $run) use (&$processed): void {
                 DB::transaction(function () use ($run): void {
                     $this->expireRun($run);
-                });
-                $processed++;
-            });
-
-        ClanBossRunStage::query()
-            ->where('status', ClanBossRunStage::STATUS_ACTIVE)
-            ->where('expires_at', '<=', $now)
-            ->orderBy('id')
-            ->limit(100)
-            ->get()
-            ->each(function (ClanBossRunStage $stageState) use (&$processed): void {
-                DB::transaction(function () use ($stageState): void {
-                    $locked = ClanBossRunStage::query()->whereKey($stageState->id)->lockForUpdate()->firstOrFail();
-                    if (! $locked->isActive()) {
-                        return;
-                    }
-
-                    $run = ClanBossRun::query()->whereKey($locked->clan_boss_run_id)->lockForUpdate()->firstOrFail();
-                    if (! $run->isActive()) {
-                        return;
-                    }
-
-                    $locked->update(['status' => ClanBossRunStage::STATUS_SKIPPED]);
-                    $this->deactivateInstance($locked);
-                    $this->rewardService->grantGoldForUnfinishedStage($run, $locked);
-
-                    $log = new AttackResultDTO;
-                    $this->advanceToNextStage($run, $locked, $log);
                 });
                 $processed++;
             });
@@ -569,9 +557,8 @@ final class ClanBossService
             'hp_max' => $monster->hp,
             'status' => ClanBossRunStage::STATUS_ACTIVE,
             'started_at' => now(),
-            'expires_at' => $stage->time_limit_seconds !== null
-                ? now()->addSeconds($stage->time_limit_seconds)
-                : null,
+            // Клановые боссы живут до убийства или завершения всего похода.
+            'expires_at' => null,
         ]);
 
         $instance = MonsterOnLocation::query()->create([

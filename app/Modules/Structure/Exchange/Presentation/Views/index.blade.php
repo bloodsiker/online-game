@@ -201,7 +201,17 @@
 </head>
 <body leftmargin="0" rightmargin="0">
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+<style>
+    .exchange-top-tabs > tbody { display: block; }
+    .exchange-top-tabs > tbody > tr { display: flex; align-items: flex-start; }
+    .exchange-top-tabs > tbody > tr > td { display: block; flex: 0 0 auto; width: auto; white-space: nowrap; }
+    .exchange-top-tabs > tbody > tr > td.exchange-top-tabs__spacer { flex: 1 1 auto; }
+    .exchange-top-tabs img { display: block; }
+    .exchange-top-tabs > tbody > tr > td:has(> a) { box-sizing: border-box; height: 21px; padding: 3px 2px 4px !important; line-height: 14px; }
+    .exchange-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; }
+    .exchange-top-tabs br { display: none; }
+</style>
+<table class="exchange-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
     @php
         $btnLeft1 = 'img/bg/btn/btn-left1.gif';
@@ -219,7 +229,7 @@
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
-        <td></td>
+        <td class="exchange-top-tabs__spacer"></td>
 
         <td width="19"><img id="left_4" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="2%" id="tab_4" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">

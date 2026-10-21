@@ -46,7 +46,7 @@ class GetMessages
         return $this->repository->filterValidIds($user, $channel, $ids);
     }
 
-    private function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel, string $locale): ChatMessageDTO
+    public function mapToDTO(ChatMessage $msg, User $user, ChatChannel $viewChannel, string $locale): ChatMessageDTO
     {
         $senderName = $msg->sender?->name ?? 'Система';
         $targetName = $msg->target?->name;
@@ -64,6 +64,8 @@ class GetMessages
             ChatMessageType::WorldEvent,
             ChatMessageType::ClanBoss,
             ChatMessageType::ClanInvite,
+            ChatMessageType::PlayerTradeInvite,
+            ChatMessageType::BossDefeat,
         ]);
         $text = $msg->message;
         if ($trusted && $msg->translation_key !== null) {

@@ -114,7 +114,7 @@ class DungeonController extends Controller
                     ->where('dungeon_id', $dungeon->id)
                     ->ignore($request->integer('stage_id')),
             ],
-            'time_limit_seconds' => ['nullable', 'integer', 'min:10', 'max:86400'],
+            'time_limit_seconds' => [Rule::excludeIf((bool) $dungeon->is_clan_boss), 'nullable', 'integer', 'min:10', 'max:86400'],
             'clan_cooldown_seconds' => ['nullable', 'integer', 'min:0', 'max:2592000'],
             'gold_budget' => ['nullable', 'integer', 'min:0', 'max:1000000000'],
             'spawn_type' => ['required', Rule::enum(DungeonStageSpawnType::class)],
@@ -160,7 +160,7 @@ class DungeonController extends Controller
                 [
                     'number' => $validated['number'],
                     'name' => $stageContent->getTranslations('name'),
-                    'time_limit_seconds' => $validated['time_limit_seconds'] ?? null,
+                    'time_limit_seconds' => $dungeon->is_clan_boss ? null : ($validated['time_limit_seconds'] ?? null),
                     'clan_cooldown_seconds' => $validated['clan_cooldown_seconds'] ?? null,
                     'gold_budget' => $validated['gold_budget'] ?? null,
                     'completion_type' => DungeonStageCompletionType::KILL_ALL,

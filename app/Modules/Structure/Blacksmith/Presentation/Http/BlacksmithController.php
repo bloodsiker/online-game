@@ -21,6 +21,7 @@ use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItemRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,7 @@ class BlacksmithController extends Controller
 
     public function index(Request $request, mixed $id): mixed
     {
+        $request->validate(['section' => ['sometimes', 'in:craft,artifacts']]);
         /** @var User $user */
         $user = Auth::user();
         $page = $this->getKraftPage->execute($user, (int) $id);
@@ -52,19 +54,30 @@ class BlacksmithController extends Controller
             'recipes' => $page->recipes,
             'resources' => $page->resources,
             'itemTooltipScript' => $page->itemTooltipScript,
+            'assemblies' => $page->assemblies,
+            'craftSection' => $request->query('section', 'craft'),
         ]);
     }
 
-    public function kraftItem(Request $request, mixed $id): RedirectResponse
+    public function kraftItem(Request $request, mixed $id): RedirectResponse|JsonResponse
     {
         /** @var User $user */
         $user = Auth::user();
         $result = $this->craftItem->execute(new CraftItemDTO($user, (int) $id));
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => $result->ok,
+                'success' => $result->success,
+                'message' => $result->message,
+                'crafted_share_item_id' => $result->craftedShareItemId,
+            ], $result->ok ? 200 : 422);
+        }
         session()->flash('message', $result->message);
 
         return redirect()->back();
     }
 
+    /** Сборка рецепта со случайным результатом (осколки -> случайный арт), см. _artifact-assemblies.blade.php. */
     public function breakItem(mixed $id, Request $request): mixed
     {
         /** @var User $user */

@@ -12,6 +12,7 @@ use App\Modules\Interface\Application\UseCases\GetWhoPage;
 use App\Modules\Interface\Application\UseCases\HeartbeatPlayer;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Race\Infrastructure\Persistence\Models\Race;
+use App\Modules\Race\Infrastructure\Persistence\Models\RaceAvatar;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
 use App\Modules\User\Application\Services\GameSettingsService;
@@ -20,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class InterfaceController extends Controller
@@ -145,11 +147,21 @@ class InterfaceController extends Controller
 
         $races = Race::query()->select(['id', 'name'])->orderBy('name')->get();
 
+        $myAvatars = Schema::hasTable('race_avatars') && $user->player !== null
+            ? RaceAvatar::query()
+                ->where('race_id', $user->player->race_id)
+                ->where('sex', (string) $user->profile?->sex)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+            : collect();
+
         return view('interface::index', [
             'hasUnreadMail' => $this->mailbox->hasUnread($user),
             'adminToolUsers' => $adminToolUsers,
             'adminToolPrisons' => $adminToolPrisons,
             'races' => $races,
+            'myAvatars' => $myAvatars,
             'gameSettings' => $this->gameSettings->get($user->id),
         ]);
     }

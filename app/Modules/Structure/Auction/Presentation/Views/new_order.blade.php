@@ -13,6 +13,75 @@
         .b {
             font-weight: 700;
         }
+        .auction-order-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .auction-order-items li {
+            position: relative;
+            flex: 0 0 68px;
+            height: 71px;
+        }
+        .auction-order-items .select-item {
+            position: relative;
+            display: block;
+            width: 68px;
+            height: 71px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .auction-order-items .select-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 72px;
+            height: 71px;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) no-repeat;
+            pointer-events: none;
+        }
+        .auction-order-items img {
+            position: absolute;
+            top: 5px;
+            left: 6px;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .auction-order-items .bpdig {
+            position: absolute;
+            right: 3px;
+            bottom: 6px;
+            z-index: 3;
+            display: block;
+            min-width: 34px;
+            height: 12px;
+            padding: 0 2px;
+            border: 1px solid #6f4a24;
+            background-color: #6e534c;
+            color: #f6d9a6;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 12px;
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .auction-order-items .select-item:focus-visible {
+            outline: 2px solid #b98631;
+            outline-offset: 1px;
+        }
+        .auction-item-pagination { margin: 10px 0; }
+        .auction-page-list { width: auto; }
+        .auction-item-pagination .pg-inact { padding: 0; text-align: center; vertical-align: middle; background: url({{ asset('img/bg/pg-inact.gif') }}) no-repeat center center; height: 19px; width: 19px; }
+        .auction-item-pagination .pg-act { padding: 0; text-align: center; vertical-align: middle; background: url({{ asset('img/bg/pg-act.gif') }}) no-repeat center center; height: 19px; width: 19px; }
+        .auction-item-pagination .pg-inact_lnk, .auction-item-pagination .pg-act_lnk { display: block; min-width: 19px; height: 19px; line-height: 19px; }
+        .auction-item-pagination .pg-inact_lnk { color: #C50000 !important; font-size: 9px; font-weight: bold; text-decoration: none; }
+        .auction-item-pagination .pg-act_lnk { color: #FFF3D2 !important; font-size: 9px; font-weight: bold; text-decoration: none; }
         .bg {
             background-color: #000;
             background-image: url({{ asset('img/bg/bg.gif') }});
@@ -97,6 +166,9 @@
             background: url({{ asset('img/bg/table/c-bottom-n-s.gif') }}) left top repeat-x;
         }
     </style>
+    {!! $playerStatsScript !!}
+    {!! $itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
@@ -175,16 +247,8 @@
                                         <input type="hidden" name="form[share_item_id]" value="{{ $selectedItem ? $selectedItem->id : '' }}">
                                         <table class="coll w100" border="0" style="margin-top:6px">
                                             <tbody><tr>
-                                                <td class="p6h" width="60" valign="top">
-                                                    @if($selectedItem)
-                                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url({{ asset($selectedItem->image) }}); background-size: 60px 60px;">
-                                                            <tbody><tr><td valign="bottom">&nbsp;</td></tr></tbody>
-                                                        </table>
-                                                    @else
-                                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url({{ asset('img/bg/empty_slot.gif') }}); background-size: 60px 60px;">
-                                                            <tbody><tr><td valign="bottom">&nbsp;</td></tr></tbody>
-                                                        </table>
-                                                    @endif
+                                                <td class="p6h" width="72" valign="top">
+                                                    @include('auction::_selected-item-icon', ['iconItem' => $selectedItem, 'iconImage' => $selectedItem?->image, 'iconName' => $selectedItem?->name ?? ''])
                                                 </td>
                                                 <td valign="top" class="b" height="60" width="100%">
                                                     <table height="60" class="coll w100 p6h brd2-all" border="0">
@@ -192,7 +256,11 @@
                                                         <tbody>
                                                         <tr>
                                                             <td height="20" class="brd2-top brd2 b" colspan="2">
-                                                                {{ $selectedItem ? $selectedItem->name : 'Выберите предмет из списка справа' }}
+                                                                @if($selectedItem)
+                                                                    <span data-id="{{ $selectedItem->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">{{ $selectedItem->name }}</span>
+                                                                @else
+                                                                    Выберите предмет из списка справа
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -291,40 +359,25 @@
                                                     <tbody>
                                                     <tr>
                                                         <td>
+                                                            @include('auction::_item-selection-filter', ['filterRoute' => 'auction.new_order', 'selectionKey' => 'siid', 'selectionId' => $selectedItem?->id])
                                                             <div id="item_list" class="backpack_overflow lscroll">
-                                                                <table class="coll w100 brd2-all" border="0">
-                                                                    <colgroup>
-                                                                        <col width="50">
-                                                                        <col class="p6h">
-                                                                        <col class="p6h" align="center" width="70">
-                                                                    </colgroup>
-                                                                    <tbody>
-                                                                    <tr height="17" class="bg_l">
-                                                                        <td class="brd2-top brd2" align="center"></td>
-                                                                        <td class="brd2-top brd2" align="center">Название</td>
-                                                                        <td class="brd2-top brd2" align="center"></td>
-                                                                    </tr>
-                                                                    @foreach($shareItems as $item)
-                                                                        <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
-                                                                            <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
+                                                                <ul class="backpack_list auction-order-items">
+                                                                    @forelse($shareItems as $item)
+                                                                        <li class="item">
+                                                                            <a class="select-item" href="{{ route('auction.new_order', ['id' => $auction->id, 'siid' => $item->id, 'page' => $shareItems->currentPage(), 'filter' => $filter]) }}"
+                                                                               aria-label="{{ $item->name }}" @if($selectedItem?->id === $item->id) aria-current="true" @endif
+                                                                               data-id="{{ $item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">
                                                                                 @if($item->image)
-                                                                                    <img src="{{ asset($item->image) }}" style="width: 100%" alt="">
+                                                                                    <img src="{{ asset($item->image) }}" width="60" height="60" alt="{{ $item->name }}">
                                                                                 @endif
-                                                                            </td>
-                                                                            <td align="left">
-                                                                                <b class="b">{{ $item->name }}</b><br>
-                                                                                <span title="Тип предмета">
-                                                                                    <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $item->getTypeName() }}
-                                                                                </span>
-                                                                            </td>
-                                                                            <td nowrap="">
-                                                                                <b class="butt2 pointer"><b><input value="выбрать" type="submit" class="select-item" data-href="{{ route('auction.new_order', ['id' => $auction->id, 'siid' => $item->id]) }}"></b></b>
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                    </tbody>
-                                                                </table>
+                                                                            </a>
+                                                                        </li>
+                                                                    @empty
+                                                                        <li style="flex-basis:100%;height:auto;text-align:center;padding:12px;box-sizing:border-box">{{ __('Предметы не найдены.') }}</li>
+                                                                    @endforelse
+                                                                </ul>
                                                             </div>
+                                                            @include('auction::_pagination', ['paginator' => $shareItems])
                                                         </td>
                                                     </tr>
                                                     </tbody>
@@ -366,13 +419,6 @@
     function sendDataToGame(url) {
         window.parent.postMessage({ url: url }, '*');
     }
-
-    document.querySelectorAll('.select-item').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const href = this.getAttribute('data-href');
-            if (href) window.location.href = href;
-        });
-    });
 
     @if (session()->has('message'))
         window.parent.showErrorIframe('{{ session('message') }}')

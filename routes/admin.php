@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\ShopPurchaseLogController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\UserController;
+use App\Modules\ItemAssembly\Presentation\Http\Admin\ItemAssemblyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -84,6 +85,11 @@ Route::post('/injury/{injuryType}', [InjuryTypeController::class, 'update'])->na
 Route::delete('/injury/{injuryType}', [InjuryTypeController::class, 'destroy'])->name('injury_type.destroy');
 
 Route::get('/items', [ItemController::class, 'list'])->name('items');
+Route::get('/item-assemblies', [ItemAssemblyController::class, 'index'])->name('item_assemblies.index');
+Route::get('/item-assemblies/create', [ItemAssemblyController::class, 'create'])->name('item_assemblies.create');
+Route::post('/item-assemblies', [ItemAssemblyController::class, 'store'])->name('item_assemblies.store');
+Route::get('/item-assemblies/{assembly}/edit', [ItemAssemblyController::class, 'edit'])->name('item_assemblies.edit');
+Route::post('/item-assemblies/{assembly}', [ItemAssemblyController::class, 'update'])->name('item_assemblies.update');
 Route::get('/item/create', [ItemController::class, 'create'])->name('item.create');
 Route::post('/item/create', [ItemController::class, 'store'])->name('item.store');
 Route::get('/item/{item}/drop', [ItemController::class, 'drop'])->name('item.drop');
@@ -94,6 +100,9 @@ Route::post('/item/{item}/duplicate', [ItemController::class, 'duplicate'])->nam
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');
 Route::post('/item/recipe/{recipe}', [ItemController::class, 'addItemToRecipe'])->name('item.recipe.add_item');
 Route::get('/item/recipe/{recipe}/delete/{item}', [ItemController::class, 'deleteItemInRecipe'])->name('item.recipe.delete_item');
+Route::post('/item/recipe/{recipe}/result', [ItemController::class, 'addResultToRecipe'])->name('item.recipe.add_result');
+Route::post('/item/recipe/{recipe}/result/{item}', [ItemController::class, 'updateResultInRecipe'])->name('item.recipe.update_result');
+Route::get('/item/recipe/{recipe}/result/delete/{item}', [ItemController::class, 'deleteResultInRecipe'])->name('item.recipe.delete_result');
 Route::post('/item/{item}/stat', [ItemController::class, 'addStat'])->name('item.stat.add');
 Route::get('/item/{item}/stat/{stat}/delete', [ItemController::class, 'deleteStat'])->name('item.stat.delete');
 Route::post('/item/{item}/effect', [ItemController::class, 'addEffect'])->name('item.effect.add');
@@ -184,6 +193,7 @@ Route::get('/races', [RaceController::class, 'list'])->name('race');
 Route::match(['GET', 'POST'], '/npc/create', [NpcController::class, 'create'])->name('npc.create');
 Route::get('/npc/list', [NpcController::class, 'list'])->name('npc');
 Route::get('/npc/dialogues', [NpcController::class, 'dialogues'])->name('npc.dialogues');
+Route::post('/npc/{npc}/movement', [NpcController::class, 'saveMovement'])->name('npc.movement');
 Route::post('/npc/{npc}/dialogue/node', [NpcController::class, 'addDialogueNode'])->name('npc.dialogue.node.add');
 Route::post('/npc/{npc}/dialogue/node/{node}', [NpcController::class, 'updateDialogueNode'])->name('npc.dialogue.node.update');
 Route::get('/npc/{npc}/dialogue/node/{node}/delete', [NpcController::class, 'deleteDialogueNode'])->name('npc.dialogue.node.delete');

@@ -6,6 +6,7 @@ namespace App\Modules\Chat;
 
 use App\Modules\Chat\Application\Listeners\SendChatMuteSystemMessage;
 use App\Modules\Chat\Application\Listeners\SendClanBossDefeatedMessage;
+use App\Modules\Chat\Application\Listeners\SendClanBossRewardMessage;
 use App\Modules\Chat\Application\Listeners\SendClanBossRunExpiredMessage;
 use App\Modules\Chat\Application\Listeners\SendClanBossRunStartedMessage;
 use App\Modules\Chat\Application\Listeners\SendClanMemberOnlineMessage;
@@ -19,6 +20,7 @@ use App\Modules\Chat\Application\Listeners\SendWorldEventStartedMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
 use App\Modules\Dungeon\Domain\Events\ClanBossDefeated;
+use App\Modules\Dungeon\Domain\Events\ClanBossRewardGranted;
 use App\Modules\Dungeon\Domain\Events\ClanBossRunExpired;
 use App\Modules\Dungeon\Domain\Events\ClanBossRunStarted;
 use App\Modules\Event\Domain\Events\WorldEventFinished;
@@ -56,6 +58,7 @@ class ChatServiceProvider extends ServiceProvider
         Event::listen(WorldEventFinished::class, SendWorldEventFinishedMessage::class);
         Event::listen(ClanBossRunStarted::class, SendClanBossRunStartedMessage::class);
         Event::listen(ClanBossDefeated::class, SendClanBossDefeatedMessage::class);
+        Event::listen(ClanBossRewardGranted::class, SendClanBossRewardMessage::class);
         Event::listen(ClanBossRunExpired::class, SendClanBossRunExpiredMessage::class);
         Event::listen(PlayerCameOnline::class, SendClanMemberOnlineMessage::class);
 

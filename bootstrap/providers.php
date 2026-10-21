@@ -18,9 +18,11 @@ use App\Modules\Location\LocationServiceProvider;
 use App\Modules\MagicSkill\MagicSkillServiceProvider;
 use App\Modules\Monster\MonsterServiceProvider;
 use App\Modules\News\NewsServiceProvider;
+use App\Modules\Notification\NotificationServiceProvider;
 use App\Modules\Npc\NpcServiceProvider;
 use App\Modules\Party\PartyServiceProvider;
 use App\Modules\Player\PlayerServiceProvider;
+use App\Modules\PlayerTrade\PlayerTradeServiceProvider;
 use App\Modules\Post\PostServiceProvider;
 use App\Modules\Quest\QuestServiceProvider;
 use App\Modules\Race\RaceServiceProvider;
@@ -50,9 +52,11 @@ return [
     MagicSkillServiceProvider::class,
     MonsterServiceProvider::class,
     NewsServiceProvider::class,
+    NotificationServiceProvider::class,
     NpcServiceProvider::class,
     PartyServiceProvider::class,
     PlayerServiceProvider::class,
+    PlayerTradeServiceProvider::class,
     QuestServiceProvider::class,
     RaceServiceProvider::class,
     RatingServiceProvider::class,

@@ -74,6 +74,9 @@
             font-size: 10px;
         }
     </style>
+    {!! $playerStatsScript !!}
+    {!! $itemTooltipScript !!}
+    <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 </head>
 <body leftmargin="0" rightmargin="0">
 
@@ -133,7 +136,7 @@
                 </tr>
                 @forelse($orders as $order)
                     <tr height="17" class="brd2-top brd2 {{ $loop->iteration % 2 == 0 ? 'bg_l' : '' }}" align="center">
-                        <td class="brd2-top brd2" style="padding: 0" width="60" height="60">
+                        <td class="brd2-top brd2" data-id="{{ $order->shareItem->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" style="padding: 0" width="60" height="60">
                             @if($order->shareItem->image)
                                 <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="margin: 1px; background: url({{ asset($order->shareItem->image) }}); background-size: 60px 60px;">
                                     <tbody><tr><td valign="bottom">&nbsp;</td></tr></tbody>
@@ -141,7 +144,7 @@
                             @endif
                         </td>
                         <td align="left">
-                            <b class="b">{{ $order->shareItem->name }}</b><br>
+                            <b class="b" data-id="{{ $order->shareItem->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)">{{ $order->shareItem->name }}</b><br>
                             <span title="Тип предмета">
                                 <img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}" width="11" height="10" align="absmiddle"> {{ $order->shareItem->getTypeName() }}
                             </span>

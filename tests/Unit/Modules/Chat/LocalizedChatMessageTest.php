@@ -27,6 +27,30 @@ use Tests\TestCase;
 
 final class LocalizedChatMessageTest extends TestCase
 {
+    public function test_clan_online_notice_shows_level_and_info_icon_without_smiley(): void
+    {
+        $message = new LocalizedChatMessage('chat.clan_member_online', [
+            'member' => new LocalizedChatMessage('chat.party_member', [
+                'name' => 'BlooDSikeR',
+                'level' => 6,
+                'user_id' => 2,
+                'icon' => '/main/images/player_info.gif',
+            ]),
+        ]);
+
+        foreach (['ru' => 'вошёл в игру.', 'uk' => 'увійшов у гру.'] as $locale => $ending) {
+            $html = app(ChatMessageTranslator::class)->render($message, $locale);
+
+            $this->assertStringNotContainsString(':speak:', $html);
+            $this->assertStringContainsString('<b>BlooDSikeR</b></a> [6]', $html);
+            $this->assertStringContainsString('class="player-link n" data-uid="2" data-name="BlooDSikeR"', $html);
+            $this->assertStringContainsString('chatPlayerClick(Number(this.dataset.uid), this.dataset.name); return false;', $html);
+            $this->assertStringContainsString('chatOpenUserInfo(2)', $html);
+            $this->assertStringContainsString('src="/main/images/player_info.gif"', $html);
+            $this->assertStringEndsWith($ending, $html);
+        }
+    }
+
     public function test_templates_translate_nested_rewards_and_escape_parameters(): void
     {
         $translator = app(ChatMessageTranslator::class);

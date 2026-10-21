@@ -40,13 +40,18 @@ class ShopCartService
         });
     }
 
-    public function updateQuantity(User $user, int $shopItemId, int $quantity): ?ShopCart
+    public function updateQuantity(User $user, int $shopItemId, int $quantity, ?int $structureId = null): ?ShopCart
     {
-        $cartItem = ShopCart::where('user_id', $user->id)
-            ->where('shop_item_id', $shopItemId)
-            ->firstOrFail();
+        return DB::transaction(function () use ($user, $shopItemId, $quantity, $structureId) {
+            $cartItem = ShopCart::where('user_id', $user->id)
+                ->where('shop_item_id', $shopItemId)
+                ->when($structureId !== null, fn ($query) => $query->whereHas(
+                    'shopItem',
+                    fn ($shopItemQuery) => $shopItemQuery->where('structure_id', $structureId),
+                ))
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return DB::transaction(function () use ($cartItem, $quantity) {
             if ($quantity <= 0) {
                 $cartItem->delete();
 
@@ -56,7 +61,7 @@ class ShopCartService
             $cartItem->update(['quantity' => $quantity]);
 
             return $cartItem->refresh()->load('shopItem');
-        });
+        }, attempts: 3);
     }
 
     public function removeItem(User $user, int $cartId, ?int $structureId = null): bool

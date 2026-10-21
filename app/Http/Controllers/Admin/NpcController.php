@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Location\Infrastructure\Persistence\Models\Location;
+use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\Npc\Application\Services\NpcMovementService;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueNode;
 use App\Modules\Npc\Infrastructure\Persistence\Models\NpcDialogueOption;
@@ -64,9 +67,21 @@ class NpcController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $npc->load(['dialogueNodes.options.toNode', 'startQuests', 'completeQuests']);
+        $npc->load(['dialogueNodes.options.toNode', 'startQuests', 'completeQuests', 'movement.map']);
+        $locationIds = old('location_ids', $npc->movement?->location_ids ?? []);
+        $movementLocations = Location::query()
+            ->whereIn('id', is_array($locationIds) ? $locationIds : [])
+            ->get(['id', 'name']);
+        $movementMap = Map::query()->find((int) old('map_id', $npc->movement?->map_id));
 
-        return view('admin.npc.info', compact('npc'));
+        return view('admin.npc.info', compact('npc', 'movementLocations', 'movementMap'));
+    }
+
+    public function saveMovement(Request $request, Npc $npc, NpcMovementService $movement): mixed
+    {
+        $movement->configure($npc, $request->only(['enabled', 'mode', 'map_id', 'location_ids', 'interval_minutes']));
+
+        return redirect()->route('admin.npc.info', $npc->id)->with('success', 'Настройки перемещения сохранены.');
     }
 
     public function addDialogueNode(Request $request, Npc $npc): mixed

@@ -10,5 +10,6 @@ final readonly class ItemActionResultDTO
         public bool $ok,
         public string $message = '',
         public bool $hotbarRefresh = false,
+        public ?array $backpackUpdate = null,
     ) {}
 }

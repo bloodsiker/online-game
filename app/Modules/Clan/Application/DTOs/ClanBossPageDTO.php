@@ -36,5 +36,7 @@ final readonly class ClanBossPageDTO
         public Collection $archivedStages,
         public Collection $archivedDamageRows,
         public Collection $archivedStageDamage,
+        public Collection $rewardReceipts,
+        public Collection $archivedRewardReceipts,
     ) {}
 }

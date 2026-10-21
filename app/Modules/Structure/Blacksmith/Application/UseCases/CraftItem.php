@@ -10,6 +10,7 @@ use App\Modules\Structure\Blacksmith\Application\DTOs\CraftItemDTO;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithInventoryRepository;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\BlacksmithReadRepository;
 use App\Modules\Structure\Blacksmith\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Blacksmith\Domain\Results\CraftResult;
 use App\Modules\Structure\Blacksmith\Domain\Services\CraftService;
 
 class CraftItem
@@ -34,14 +35,22 @@ class CraftItem
             );
         }
 
-        $resources = $this->readRepository->getResourceCounts($data->user);
-        $craftResult = $this->craftService->craft($recipe, $resources);
-
-        if (! $craftResult->resourcesConsumed) {
-            return BlacksmithActionResultDTO::fromCraftResult($craftResult);
-        }
-
-        return $this->transactionManager->run(function () use ($data, $recipeItem, $recipe, $craftResult) {
+        return $this->transactionManager->run(function () use ($data, $recipe) {
+            $recipeItem = $this->inventoryRepository->findOwnedSlotsForUpdate($data->user, [$data->recipeItemId])->first();
+            abort_unless($recipeItem !== null, 404);
+            $ingredientSlots = [];
+            foreach ($recipe->items->sortBy('id') as $ingredient) {
+                $slot = $this->inventoryRepository->findOwnedSlotByShareItemIdForUpdate($data->user, $ingredient->id);
+                if ($slot === null || $slot->count < $ingredient->pivot->count) {
+                    return BlacksmithActionResultDTO::fromCraftResult(CraftResult::notEnoughResources());
+                }
+                $ingredientSlots[$ingredient->id] = $slot;
+            }
+            $resources = $this->readRepository->getResourceCounts($data->user);
+            $craftResult = $this->craftService->craft($recipe, $resources);
+            if (! $craftResult->resourcesConsumed) {
+                return BlacksmithActionResultDTO::fromCraftResult($craftResult);
+            }
             if ($craftResult->craftedShareItemId !== null) {
                 $successKraftItem = new Item;
                 $successKraftItem->share_item_id = $craftResult->craftedShareItemId;
@@ -50,15 +59,15 @@ class CraftItem
                 $data->user->backpack()->attach($successKraftItem->id, ['equipped' => 0, 'count' => 1]);
             }
 
-            $recipeItem->item->delete();
-            $recipeItem->delete();
+            if ($recipeItem->count > 1) {
+                $recipeItem->decrement('count');
+            } else {
+                $recipeItem->delete();
+                $recipeItem->item->delete();
+            }
 
             foreach ($recipe->items as $itemDelete) {
-                $itemBackpack = $this->inventoryRepository->findOwnedSlotByShareItemId($data->user, $itemDelete->id);
-
-                if ($itemBackpack === null) {
-                    continue;
-                }
+                $itemBackpack = $ingredientSlots[$itemDelete->id];
 
                 if ($itemBackpack->count > $itemDelete->pivot->count) {
                     $itemBackpack->count -= $itemDelete->pivot->count;

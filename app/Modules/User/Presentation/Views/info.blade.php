@@ -5,6 +5,30 @@
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 11px; }
         .b { font-weight: 700; }
+        .profile-artifact {
+            position: relative;
+            display: inline-block;
+            width: 72px;
+            height: 71px;
+            vertical-align: middle;
+            text-decoration: none;
+        }
+        .profile-artifact img {
+            position: absolute;
+            top: 5px;
+            left: 6px;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 0;
+        }
+        .profile-artifact::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url({{ asset('main/images/user-reward-frame.png') }}) center / 72px 71px no-repeat;
+            pointer-events: none;
+        }
         .bg2 { background-color: #000; background-image: url({{ asset('img/bg/bg2.gif') }}); }
         .regcolor, .regcolor * { color: #955c4a; }
         .common-block { position: relative; }
@@ -631,9 +655,11 @@
                                         <td class="tbl-shp-sides ls">&nbsp;</td>
                                         <td class="tbl-usi_bg" valign="top" align="left" style="padding:3px 0 8px 0;">
                                             @foreach($equippedArtifacts as $playerArtifact)
-                                                <img src="{{ $playerArtifact->item->itemInfo->image }}" width="60" height="60" border="0" style="margin:1px;"
-                                                     data-id="{{ $playerArtifact->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
-                                                     onclick="window.open('{{ route('items.info', ['id' => $playerArtifact->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                                <a class="profile-artifact" href="{{ route('items.info', ['id' => $playerArtifact->item->id]) }}"
+                                                   data-id="{{ $playerArtifact->item->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
+                                                   onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                                    <img src="{{ $playerArtifact->item->itemInfo->image }}" width="60" height="60" alt="{{ $playerArtifact->item->itemInfo->name }}">
+                                                </a>
                                             @endforeach
                                         </td>
                                         <td class="tbl-shp-sides rs">&nbsp;</td>

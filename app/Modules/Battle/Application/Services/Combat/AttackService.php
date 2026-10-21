@@ -13,6 +13,8 @@ use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Dungeon\Application\Services\DungeonStageService;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
@@ -33,6 +35,7 @@ use App\Modules\Reputation\Domain\Enums\DivineFavorType;
 use App\Modules\Reputation\Domain\Services\DivineFavorService;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
+use Illuminate\Support\Facades\Storage;
 
 readonly class AttackService
 {
@@ -52,6 +55,7 @@ readonly class AttackService
         private RandomizerInterface $random,
         private DivineFavorService $divineFavorService,
         private DungeonStageService $dungeonStageService,
+        private ChatService $chatService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -112,8 +116,19 @@ readonly class AttackService
 
             if ($isBoss && $battle) {
 
+                // Телепортація - удар не долетає взагалі, ще до розрахунку імунітету/щита
+                if ($this->checkTeleportDodge($battle, $locMonster, $result)) {
+                    continue;
+                }
+
                 // Перевірка імунітету
                 $damage = $this->checkImmunity($battle, $damage, $hit, $result);
+                if ($damage <= 0) {
+                    continue;
+                }
+
+                // Тимчасове підвищення захисту (BuffSelfMechanic)
+                $damage = $this->applyDefenseBuff($battle, $damage, $result);
                 if ($damage <= 0) {
                     continue;
                 }
@@ -611,6 +626,75 @@ readonly class AttackService
     }
 
     /**
+     * Перевірка телепортації боса (TeleportMechanic) - поки діє, будь-який
+     * удар гравця проходить мимо, ще до розрахунку урону/імунітету/щита.
+     */
+    private function checkTeleportDodge(
+        Battle $battle,
+        MonsterOnLocation $locMonster,
+        AttackResultDTO $result
+    ): bool {
+        $metadata = $battle->boss_metadata ?? [];
+        $teleport = $metadata['teleport_dodge'] ?? null;
+
+        if (! $teleport) {
+            return false;
+        }
+
+        if ($teleport['expires_at_turn'] < $battle->rounds) {
+            unset($metadata['teleport_dodge']);
+            $battle->boss_metadata = $metadata;
+            $battle->save();
+
+            return false;
+        }
+
+        $result->log(BattleLogTranslator::format(
+            '<p>Вы атакуете, но %s уже исчез в вихре — удар проходит мимо!</p>',
+            BattleLogTranslator::contentName($locMonster->monster)
+        ));
+
+        return true;
+    }
+
+    /**
+     * Тимчасовий захист боса (BuffSelfMechanic) - гасить % вхідного урону,
+     * доки не закінчиться duration_turns.
+     */
+    private function applyDefenseBuff(
+        Battle $battle,
+        int $damage,
+        AttackResultDTO $result
+    ): int {
+        $metadata = $battle->boss_metadata ?? [];
+        $buff = $metadata['defense_buff'] ?? null;
+
+        if (! $buff) {
+            return $damage;
+        }
+
+        if ($buff['expires_at_turn'] < $battle->rounds) {
+            unset($metadata['defense_buff']);
+            $battle->boss_metadata = $metadata;
+            $battle->save();
+
+            return $damage;
+        }
+
+        $reduced = (int) round($damage * (1 - $buff['percent'] / 100));
+        $blocked = $damage - $reduced;
+
+        if ($blocked > 0) {
+            $result->log(BattleLogTranslator::format(
+                '<p><b class="color-buff">⬆️ Усиленная защита блокирует %d урона!</b></p>',
+                $blocked
+            ));
+        }
+
+        return max(0, $reduced);
+    }
+
+    /**
      * Відбиття урону назад гравцю
      */
     private function reflectDamage(
@@ -655,7 +739,7 @@ readonly class AttackService
     {
         // Юзер потрібен свіжим (нагороди пишуть гроші), але без глобального
         // каскаду player+race — ці сутності в бою вже завантажені.
-        $player->loadMissing(['user' => static fn ($query) => $query->without('player')]);
+        $player->loadMissing(['user' => static fn ($query) => $query->without('player')->with('clanMembership.clan')]);
 
         $locationMonster->active = 0;
         $locationMonster->save();
@@ -665,6 +749,11 @@ readonly class AttackService
 
         if ($locationMonster->monster->isBoss()) {
             $locationMonster->monster->scheduleRespawn();
+
+            $this->chatService->sendWorldBossDefeated(new LocalizedChatMessage('chat.world_boss_defeated', [
+                'member' => $this->bossDefeatMemberLabel($player),
+                'boss' => LocalizedChatMessage::contentName($locationMonster->monster),
+            ]));
         }
 
         MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
@@ -692,6 +781,23 @@ readonly class AttackService
         if ($stageMessage !== null) {
             $result->logSide(sprintf('<p><b>%s</b></p>', e($stageMessage)));
         }
+    }
+
+    /** Ник + уровень + значок клана + иконка инфо - как в PlayerTradeService::memberLabel() */
+    private function bossDefeatMemberLabel(Player $player): LocalizedChatMessage
+    {
+        $user = $player->user;
+        $clan = $user->clanMembership?->clan;
+
+        return new LocalizedChatMessage('chat.boss_defeat_member', [
+            'name' => $user->name,
+            'level' => $player->lvl,
+            'user_id' => (int) $user->id,
+            'icon' => asset('main/images/player_info.gif'),
+            'clan_icon' => $clan?->icon
+                ? new LocalizedChatMessage('chat.clan_icon', ['url' => Storage::disk('public')->url($clan->icon)])
+                : '',
+        ]);
     }
 
     public function checkLevelUp(Player $player, AttackResultDTO $result)

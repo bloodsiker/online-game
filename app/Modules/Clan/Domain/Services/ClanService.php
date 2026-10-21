@@ -227,8 +227,11 @@ readonly class ClanService
 
             $clan = Clan::query()->lockForUpdate()->findOrFail($lockedApplication->clan_id);
             $target = User::query()->whereKey($lockedApplication->user_id)->lockForUpdate()->firstOrFail();
-            if (ClanMember::query()->where('user_id', $target->id)->exists()) {
-                throw new \RuntimeException('Игрок уже состоит в клане.');
+            $targetMembership = ClanMember::query()->where('user_id', $target->id)->first();
+            if ($targetMembership !== null) {
+                throw new \RuntimeException((int) $targetMembership->clan_id !== (int) $clan->id
+                    ? __('clan.application.already_in_another_clan')
+                    : __('Игрок уже состоит в клане.'));
             }
             if ($clan->members()->count() >= 40) {
                 throw new \RuntimeException('В клане нет свободных мест.');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\ItemAssembly\Presentation\Http\ItemAssemblyController;
 use App\Modules\Structure\Blacksmith\Presentation\Http\BlacksmithController;
 use App\Modules\Structure\Blacksmith\Presentation\Http\GemController;
 use App\Modules\Structure\Blacksmith\Presentation\Http\RuneController;
@@ -16,7 +17,8 @@ Route::post('/blacksmith/{id}/runes/remove', [RuneController::class, 'removeRune
 Route::post('/blacksmith/{id}/runes/reroll', [RuneController::class, 'reroll'])->name('blacksmith.runes.reroll');
 Route::post('/blacksmith/{id}/runes/open-slot', [RuneController::class, 'openSlot'])->name('blacksmith.runes.open_slot');
 
-Route::get('/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])->name('blacksmith.kraft');
+Route::match(['get', 'post'], '/blacksmith/kraft/{id}', [BlacksmithController::class, 'kraftItem'])->name('blacksmith.kraft');
+Route::post('/blacksmith/{id}/assemblies/{assembly}', [ItemAssemblyController::class, 'store'])->middleware('auth')->name('blacksmith.assemble');
 Route::get('/blacksmith/{id}/break', [BlacksmithController::class, 'breakItem'])->name('blacksmith.break');
 Route::get('/blacksmith/{id}/upgrade', [BlacksmithController::class, 'upgrade'])->name('blacksmith.upgrade');
 Route::post('/blacksmith/{id}/upgrade', [BlacksmithController::class, 'upgradeProcess'])->name('blacksmith.upgrade.process');

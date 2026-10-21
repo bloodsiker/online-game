@@ -10,6 +10,7 @@
         request()->routeIs('admin.npc', 'admin.npc.create', 'admin.npc.info') => ['label' => 'НПС', 'route' => 'admin.npc'],
         request()->routeIs('admin.skills', 'admin.skill.*') => ['label' => 'Навыки', 'route' => 'admin.skills'],
         request()->routeIs('admin.items', 'admin.item.*') => ['label' => 'Предметы', 'route' => 'admin.items'],
+        request()->routeIs('admin.item_assemblies.*') => ['label' => 'Сборки предметов', 'route' => 'admin.item_assemblies.index'],
         request()->routeIs('admin.players', 'admin.player.*') => ['label' => 'Игроки', 'route' => 'admin.players'],
         request()->routeIs('admin.clans', 'admin.clan.*') => ['label' => 'Кланы', 'route' => 'admin.clans'],
         request()->routeIs('admin.reputations', 'admin.reputation.*') => ['label' => 'Репутации', 'route' => 'admin.reputations'],

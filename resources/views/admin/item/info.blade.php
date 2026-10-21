@@ -24,7 +24,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-requirements" href="#tab-requirements" data-bs-toggle="tab">Требования</a>
                             </li>
-                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
+                            @if($item->recipe)
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-target="#tab-recipe" href="#tab-recipe" data-bs-toggle="tab">Рецепт</a>
                                 </li>
@@ -150,6 +150,10 @@
                                             <div class="form-group">
                                                 <label class="col-form-label">Цена</label>
                                                 <input type="number" class="form-control" name="price" value="{{ $item->price }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="diamond_price">Стоимость в бриллиантах</label>
+                                                <input type="number" class="form-control" id="diamond_price" name="diamond_price" min="0" step="0.01" value="{{ old('diamond_price', $item->diamond_price ?? 0) }}">
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Количество кристаллов</label>
@@ -574,10 +578,16 @@
                                 </div>
 
                                 <div id="tab-recipe" class="tab-pane">
-                                    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
+                                    @if($item->recipe)
                                         <div class="row pt-3 pb-3">
                                             <div class="col-md-4">
-                                                <div class="form-group">
+                                                <div class="form-group form-check">
+                                                    <input type="checkbox" class="form-check-input" id="chk-random-result" name="is_random_result" value="1"
+                                                           form="recipe-update-form" @checked($item->recipe->is_random_result)>
+                                                    <label class="form-check-label" for="chk-random-result">Случайный результат (пул из осколков)</label>
+                                                    <small class="form-text text-muted d-block">Если включено - крафт выдаёт случайный предмет из пула справа (с учётом весов), поле «Крафт предмета» ниже игнорируется.</small>
+                                                </div>
+                                                <div class="form-group" id="block-kraft-item">
                                                     <label class="col-form-label">Крафт предмета</label>
                                                     <select id="sel-kraft-item" name="kraft_item_id" form="recipe-update-form" class="form-control">
                                                         @if($item->recipe->kraft_item_id && $item->recipe->kraftItem)
@@ -643,6 +653,59 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="row pt-2 pb-3" id="block-result-pool">
+                                            <div class="col-md-12">
+                                                <h4 class="h6">Пул случайного результата</h4>
+                                                <div class="mb-3">
+                                                    <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddResult">Добавить предмет в пул</a>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-bordered mb-none">
+                                                        <thead>
+                                                        <tr>
+                                                            <th width="45"></th>
+                                                            <th>Название</th>
+                                                            <th width="180">Вес (шанс)</th>
+                                                            <th width="100">% в пуле</th>
+                                                            <th width="70"></th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        @php
+                                                            $totalChance = $item->recipe->resultPool->sum(fn ($i) => $i->pivot->chance);
+                                                        @endphp
+                                                        @forelse($item->recipe->resultPool as $resultItem)
+                                                            <tr style="vertical-align: middle">
+                                                                <td>
+                                                                    @if($resultItem->image)
+                                                                        <img src="{{ $resultItem->image }}" width="36" alt="">
+                                                                    @endif
+                                                                </td>
+                                                                <td><a href="{{ route('admin.item.info', $resultItem->id) }}">{{ $resultItem->name }}</a></td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center gap-2">
+                                                                        <input type="number" class="form-control form-control-sm" name="chance" min="1" max="1000000" step="1"
+                                                                               value="{{ $resultItem->pivot->chance }}" required aria-label="Вес: {{ $resultItem->name }}"
+                                                                               form="recipe-result-weight-{{ $resultItem->id }}" style="width:90px">
+                                                                        <button type="submit" class="btn btn-sm btn-primary" form="recipe-result-weight-{{ $resultItem->id }}">Сохранить</button>
+                                                                    </div>
+                                                                </td>
+                                                                <td>{{ $totalChance > 0 ? round($resultItem->pivot->chance / $totalChance * 100, 1) : 0 }}%</td>
+                                                                <td>
+                                                                    <a href="{{ route('admin.item.recipe.delete_result', ['recipe' => $item->recipe->id, 'item' => $resultItem->id]) }}"
+                                                                       class="btn btn-xs btn-danger"
+                                                                       onclick="return confirm('Удалить?')">Удалить</a>
+                                                                </td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr><td colspan="5" class="text-center text-muted">Пул пуст</td></tr>
+                                                        @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
 
@@ -689,6 +752,32 @@
                         </section>
                     </div>
 
+                    {{-- Модалка: добавить предмет в пул случайного результата (поза головною формою) --}}
+                    <div id="modalAddResult" class="modal-block zoom-anim-dialog modal-block-primary mfp-hide">
+                        <section class="card">
+                            <form action="{{ $item->recipe ? route('admin.item.recipe.add_result', $item->recipe->id) : '#' }}" method="post">
+                                <header class="card-header"><h2 class="card-title">Добавить предмет в пул результата</h2></header>
+                                <div class="card-body">
+                                    {{ csrf_field() }}
+                                    <div class="form-group mb-2">
+                                        <label>Предмет</label>
+                                        <select id="sel-recipe-result-item" name="share_item_id" class="form-control"></select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label>Вес (шанс)</label>
+                                        <input type="number" class="form-control" name="chance" value="1" min="1">
+                                        <small class="form-text text-muted">Шанс предмета = его вес / сумма весов всех предметов пула.</small>
+                                    </div>
+                                </div>
+                                <footer class="card-footer">
+                                    <div class="col-md-12 text-end">
+                                        <button class="btn btn-primary">Добавить</button>
+                                        <button type="button" class="btn btn-default modal-dismiss">Отмена</button>
+                                    </div>
+                                </footer>
+                            </form>
+                        </section>
+                    </div>
 
 
 
@@ -1015,6 +1104,11 @@
     </div>
 
     {{-- Формы вынесены из основной формы предмета; элементы внутри таба ссылаются на них через form="...". --}}
+    @foreach($item->recipe?->resultPool ?? [] as $resultItem)
+        <form id="recipe-result-weight-{{ $resultItem->id }}" action="{{ route('admin.item.recipe.update_result', ['recipe' => $item->recipe->id, 'item' => $resultItem->id]) }}" method="post" class="d-none">
+            @csrf
+        </form>
+    @endforeach
     <form id="req-form" action="{{ route('admin.item.requirement.add', $item->id) }}" method="post" class="d-none">
         @csrf
     </form>
@@ -1214,7 +1308,7 @@
     loadGemFromJson();
     @endif
 
-    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::RECIPE && $item->recipe)
+    @if($item->recipe)
     $('#sel-kraft-item').select2({
         theme: 'bootstrap',
         placeholder: 'Выберите предмет',
@@ -1251,6 +1345,33 @@
         },
         minimumInputLength: 0
     });
+
+    $('#sel-recipe-result-item').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalAddResult'),
+        placeholder: 'Выберите предмет',
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.api.items') }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (p) { return { q: p.term, page: p.page || 1 }; },
+            processResults: function (data, p) {
+                p.page = p.page || 1;
+                return { results: data.results, pagination: { more: data.pagination.more } };
+            },
+            cache: true
+        },
+        minimumInputLength: 0
+    });
+
+    function toggleRecipeResultMode() {
+        var isRandom = $('#chk-random-result').is(':checked');
+        $('#block-kraft-item').toggle(!isRandom);
+        $('#block-result-pool').toggle(isRandom);
+    }
+    $('#chk-random-result').on('change', toggleRecipeResultMode);
+    toggleRecipeResultMode();
     @endif
 
     @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::CHEST)

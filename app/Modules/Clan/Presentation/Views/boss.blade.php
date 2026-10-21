@@ -352,12 +352,16 @@
         .player-row .player-name { display: inline-flex; align-items: center; flex: 0 0 auto; }
         .player-row .me-badge { flex: 0 0 auto; margin-left: 1px; }
 
-        .archive-link { color: #8b2f20 !important; font-weight: bold; }
-        .archive-link:hover { text-decoration: underline; }
         .archive-status { font-weight: bold; white-space: nowrap; }
         .archive-status--completed { color: #267019; }
         .archive-status--expired { color: #a02020; }
         .archive-meta { color: #777; white-space: nowrap; }
+        #clan-boss-history .history-tbl th:nth-child(2),
+        #clan-boss-history .history-tbl th:nth-child(3),
+        #clan-boss-history .history-tbl th:nth-child(4),
+        #clan-boss-history .history-tbl td:nth-child(2),
+        #clan-boss-history .history-tbl td:nth-child(3),
+        #clan-boss-history .history-tbl td:nth-child(4) { text-align: center; }
     </style>
 </head>
 <body class="regblk">
@@ -368,7 +372,7 @@
     <tbody>
     <tr>
         <td valign="top" width="100%">
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" height="100%">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" id="clan-boss-current">
                 <tbody>
                 <tr height="22">
                     <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
@@ -379,7 +383,7 @@
                                 <td width="27">
                                     <img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22">
                                 </td>
-                                <td align="center" class="tbl-usi_label-center">{{ __('Башня Восхождения') }}</td>
+                                <td align="center" class="tbl-usi_label-center">{{ $archivedRun !== null ? __('Результаты похода') : __('Башня Восхождения') }}</td>
                                 <td width="27"
                                 ><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22">
                                 </td>
@@ -393,6 +397,7 @@
                     <td class="tbl-shp-sides ls">&nbsp;</td>
                     <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px;">
 
+                        @if($archivedRun === null)
                         @if($run === null)
                             <div class="empty-state">
                                 <b>{{ __('Поход не открыт.') }}</b> {{ __('Лидер клана может открыть поход в логове кланового босса.') }}
@@ -433,9 +438,6 @@
 
                                 $runExpiresTs = $run->expires_at?->timestamp;
                                 $runRemainingSeconds = $runExpiresTs !== null ? max(0, $runExpiresTs - time()) : null;
-
-                                $stageExpiresTs = $currentState?->expires_at?->timestamp;
-                                $stageRemainingSeconds = $stageExpiresTs !== null ? max(0, $stageExpiresTs - time()) : null;
 
                                 $batchAvailableTs = $personalAvailableAt?->timestamp;
                             @endphp
@@ -481,6 +483,9 @@
                                                         @endif
                                                         <div class="boss-history__stage">{{ __('Этап') }} {{ $previousBoss->stage?->number ?? '—' }}</div>
                                                         <div class="boss-history__defeated">✓ Повержен</div>
+                                                        @if(($killSeconds = $previousBoss->killDurationSeconds()) !== null)
+                                                            <div class="boss-history__stage" title="{{ __('От появления босса до его убийства, включая паузы') }}">{{ __('Время на убийство') }}: {{ \Carbon\CarbonInterval::seconds($killSeconds)->cascade()->locale(app()->getLocale())->forHumans(['parts' => 3]) }}</div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             @endforeach
@@ -541,14 +546,6 @@
                                                         <b class="redd" data-countdown-until="{{ $runExpiresTs }}" data-countdown-fallback="{{ __('истекло') }}">{{ clanBossFormatRemaining($runRemainingSeconds) }}</b>
                                                     @else
                                                         <b class="redd">{{ __('без ограничения') }}</b>
-                                                    @endif
-                                                </div>
-                                                <div class="boss-card__detail">
-                                                    <span class="lbl">{{ __('До конца жизни босса:') }}</span>&nbsp;
-                                                    @if($stageRemainingSeconds !== null)
-                                                        <b class="redd" data-countdown-until="{{ $stageExpiresTs }}" data-countdown-fallback="{{ __('истекло') }}">{{ clanBossFormatRemaining($stageRemainingSeconds) }}</b>
-                                                    @else
-                                                        <b class="redd">{{ __('по общему таймеру похода') }}</b>
                                                     @endif
                                                 </div>
                                                 <div class="boss-card__detail"><span class="lbl">{{ __('Ударов в пакете осталось:') }}</span>&nbsp;<b class="redd">{{ $hitsLeft ?? '—' }}/{{ $run->dungeon->clan_boss_hit_batch_size }}</b></div>
@@ -616,6 +613,12 @@
                             </table>
                         @endif
 
+                        @if($run !== null)
+                            @include('clan::partials.boss-reward-receipts')
+                        @endif
+
+                        @endif
+
                         @if($archivedRun !== null)
                             @php
                                 $archiveStatusLabel = $archivedRun->status === \App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRun::STATUS_COMPLETED
@@ -643,6 +646,7 @@
                                         <th>{{ __('Результат') }}</th>
                                         <th>{{ __('Урон клана') }}</th>
                                         <th>{{ __('Убит') }}</th>
+                                        <th title="{{ __('От появления босса до его убийства, включая паузы') }}">{{ __('Время на убийство') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -654,16 +658,24 @@
                                                 default => __('Время похода вышло'),
                                             };
                                             $stageDamage = (int) $archivedStageDamage->get($state->dungeon_stage_id, 0);
+                                            $killSeconds = $state->killDurationSeconds();
                                         @endphp
                                         <tr class="{{ $loop->even ? 'bg_l' : '' }}">
                                             <td align="center"><b>{{ $state->stage?->number ?? '—' }}. {{ $state->stage?->name ?? __('Этап удалён') }}</b></td>
-                                            <td>{{ $state->bossInstance?->monster?->name ?? $state->stage?->name ?? '—' }}</td>
+                                            <td>
+                                                @if($state->bossInstance?->monster !== null)
+                                                    <a href="{{ route('info.monster.catalog', ['id' => $state->bossInstance->monster->id]) }}" onclick="return clanBossOpenWindow(this.href, 730, 850)">{{ $state->bossInstance->monster->name }}</a>
+                                                @else
+                                                    {{ $state->stage?->name ?? '—' }}
+                                                @endif
+                                            </td>
                                             <td><b class="{{ $state->status === \App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRunStage::STATUS_KILLED ? 'grnn' : 'redd' }}">{{ $stageResult }}</b></td>
                                             <td align="center"><b>{{ number_format($stageDamage, 0, '', ' ') }}</b></td>
                                             <td align="center">{{ $state->killed_at?->format('d.m.Y H:i') ?? '—' }}</td>
+                                            <td align="center">{{ $killSeconds !== null ? \Carbon\CarbonInterval::seconds($killSeconds)->cascade()->locale(app()->getLocale())->forHumans(['parts' => 3]) : '—' }}</td>
                                         </tr>
                                     @empty
-                                        <tr class="bg_l"><td colspan="5" align="center">{{ __('В походе не было завершённых этапов.') }}</td></tr>
+                                        <tr class="bg_l"><td colspan="6" align="center">{{ __('В походе не было завершённых этапов.') }}</td></tr>
                                     @endforelse
                                     </tbody>
                                 </table>
@@ -677,7 +689,12 @@
                                             <td class="rank-cell">{{ $loop->iteration }}</td>
                                             <td class="player-cell">
                                                 @if($row['user'] !== null)
-                                                    <a href="{{ route('info.user', $row['user']->id) }}" onclick="clanBossOpenWindow(this.href, 930, 700); return false;"><b class="kser0">{{ $row['user']->name }}</b></a>
+                                                    <span class="player-row">
+                                                        <a href="#" class="icon-link" title="{{ __('Приватное сообщение') }}" onclick="clanBossInsertPrivate({{ \Illuminate\Support\Js::from($row['user']->name) }}); return false;"><img src="{{ asset('img/icon/users-arrow.gif') }}" width="12" height="10" border="0"></a>
+                                                        <a href="{{ route('info.user', $row['user']->id) }}" class="player-name" onclick="clanBossOpenWindow(this.href, 930, 700); return false;"><b class="kser0">{{ $row['user']->name }}&nbsp;[{{ $row['user']->player?->lvl ?? '?' }}]</b></a>
+                                                        <a href="{{ route('info.user', $row['user']->id) }}" class="icon-link" title="{{ __('Информация о персонаже') }}" onclick="clanBossOpenWindow(this.href, 930, 700); return false;"><img src="{{ asset('main/images/player_info.gif') }}" width="10" height="10" border="0"></a>
+                                                        @if(auth()->id() === $row['user']->id)<b class="grnn me-badge">(вы)</b>@endif
+                                                    </span>
                                                 @else
                                                     Игрок удалён
                                                 @endif
@@ -691,11 +708,41 @@
                                     @endforelse
                                     </tbody>
                                 </table>
+                                @include('clan::partials.boss-reward-receipts', ['rewardReceipts' => $archivedRewardReceipts, 'rewardsFinal' => true])
                             </div>
                         @endif
 
-                        <div style="margin-top: 14px;">
-                                <span class="section-title">{{ __('История походов') }}</span>
+                    </td>
+                    <td class="tbl-shp-sides rs">&nbsp;</td>
+                </tr>
+                <tr height="18">
+                    <td width="20" align="right" valign="top" class="tbl-shp-sml lb"><b></b></td>
+                    <td class="tbl-shp-sml bb" valign="top" align="center">&nbsp;</td>
+                    <td width="20" align="left" valign="top" class="tbl-shp-sml rb"><b></b></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" id="clan-boss-history" style="margin-top: 14px;">
+                <tbody>
+                <tr height="22">
+                    <td width="20" align="right" valign="bottom" class="tbl-shp-sml lt"><b></b></td>
+                    <td class="tbl-shp-sml tt" valign="top" align="center">
+                        <table border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                            <tr height="22">
+                                <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-left.gif') }}" width="27" height="22"></td>
+                                <td align="center" class="tbl-usi_label-center">{{ __('История походов') }}</td>
+                                <td width="27"><img src="{{ asset('img/bg/info/tbl-usi_label-right.gif') }}" width="27" height="22"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td width="20" align="left" valign="bottom" class="tbl-shp-sml rt"><b></b></td>
+                </tr>
+                <tr>
+                    <td class="tbl-shp-sides ls">&nbsp;</td>
+                    <td class="tbl-usi_bg" valign="top" style="padding: 6px 4px;">
                             <table class="history-tbl" cellspacing="0" cellpadding="0">
                                 <thead><tr><th>{{ __('Данж') }}</th><th>{{ __('Начат') }}</th><th>{{ __('Завершён') }}</th><th>{{ __('Итог') }}</th><th>{{ __('Результаты') }}</th></tr></thead>
                                 <tbody>
@@ -705,7 +752,11 @@
                                         <td class="archive-meta">{{ $pastRun->started_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                         <td class="archive-meta">{{ $pastRun->finished_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                         <td><b class="archive-status {{ $pastRun->status === \App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRun::STATUS_COMPLETED ? 'archive-status--completed' : 'archive-status--expired' }}">{{ $pastRun->status === \App\Modules\Dungeon\Infrastructure\Persistence\Models\ClanBossRun::STATUS_COMPLETED ? 'Победа' : 'Время вышло' }}</b></td>
-                                        <td align="center"><a class="archive-link" href="{{ route('clan.boss', ['run' => $pastRun->id]) }}">{{ __('Посмотреть') }}</a></td>
+                                        <td align="center">
+                                            <span class="butt1 pointer"><span>
+                                                <input type="button" value="{{ __('Посмотреть') }}" onclick="window.location.href = @js(route('clan.boss', ['run' => $pastRun->id]))">
+                                            </span></span>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr class="bg_l"><td colspan="5" align="center">{{ __('Завершённых походов пока нет.') }}</td></tr>
@@ -715,8 +766,6 @@
                             @if($archiveRuns->hasPages())
                                 <div style="margin-top: 7px;">{{ $archiveRuns->links() }}</div>
                             @endif
-                        </div>
-
                     </td>
                     <td class="tbl-shp-sides rs">&nbsp;</td>
                 </tr>

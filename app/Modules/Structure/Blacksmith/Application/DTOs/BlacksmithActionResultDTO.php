@@ -15,6 +15,7 @@ final readonly class BlacksmithActionResultDTO
         public string $message,
         public bool $success = false,
         public bool $destroyed = false,
+        public ?int $craftedShareItemId = null,
     ) {}
 
     public static function fromCraftResult(CraftResult $result): self
@@ -23,6 +24,7 @@ final readonly class BlacksmithActionResultDTO
             ok: $result->resourcesConsumed,
             message: $result->message,
             success: $result->success,
+            craftedShareItemId: $result->craftedShareItemId,
         );
     }
 

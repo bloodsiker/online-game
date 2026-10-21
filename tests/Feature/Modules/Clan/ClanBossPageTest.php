@@ -13,6 +13,7 @@ use App\Modules\Clan\Domain\Models\ClanRole;
 use App\Modules\Clan\Domain\Services\ClanExperienceService;
 use App\Modules\Clan\Domain\Services\ClanLevelService;
 use App\Modules\Clan\Domain\Services\ClanLogService;
+use App\Modules\Dungeon\Application\Services\ClanBossRewardRecorder;
 use App\Modules\Dungeon\Application\Services\ClanBossRewardService;
 use App\Modules\Dungeon\Application\Services\ClanBossService;
 use App\Modules\Dungeon\Domain\Enums\DungeonType;
@@ -26,7 +27,6 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -42,6 +42,7 @@ class ClanBossPageTest extends TestCase
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
         $this->createSchema();
+        (require database_path('migrations/2026_10_17_000008_create_clan_boss_reward_receipts.php'))->up();
     }
 
     public function test_clan_boss_instance_is_visible_only_to_members_of_its_active_clan_run(): void
@@ -213,10 +214,17 @@ class ClanBossPageTest extends TestCase
         $this->assertTrue($page->archiveRuns->isEmpty());
         $this->assertNull($page->archivedRun);
 
-        $this->actingAs($user)
-            ->withoutMiddleware(ApplyGameLocale::class)
+        $response = $this->actingAs($user)
+            ->withoutMiddleware()
             ->get(route('clan.boss'))
             ->assertOk();
+
+        $document = new \DOMDocument;
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $this->assertSame(1, $xpath->query('//table[@id="clan-boss-history"]/preceding-sibling::table[1][@id="clan-boss-current"]')->length);
+        $this->assertSame(1, $xpath->query('//table[@id="clan-boss-history"]//td[@class="tbl-usi_label-center"]')->length);
+        $this->assertSame(0, $xpath->query('//table[@id="clan-boss-current"]//table[@id="clan-boss-history"]')->length);
     }
 
     public function test_page_lists_and_displays_results_for_a_previous_clan_boss_run(): void
@@ -267,9 +275,39 @@ class ClanBossPageTest extends TestCase
         $this->assertSame(1000, (int) $page->archivedStageDamage->get($stage->id));
         $this->assertSame('Боец', $page->archivedDamageRows->first()['user']->name);
         $this->assertTrue($page->archivedDamageRows->first()['rewarded']);
+        $this->assertTrue($page->archivedRewardReceipts->isEmpty());
+
+        DB::table('clan_boss_reward_receipts')->insert([
+            'clan_boss_run_id' => $run->id, 'clan_boss_run_stage_id' => $state->id,
+            'recipient_type' => 'player', 'recipient_id' => $fighter->id, 'user_id' => $fighter->id,
+            'recipient_name' => 'Боец', 'boss_name' => '{"ru":"Каменный Страж"}', 'reason' => 'boss_killed',
+            'rewards' => json_encode([['type' => 'gold', 'amount' => 1234, 'item_id' => null, 'item_name' => null, 'rarity' => null]]),
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
 
         $selectedPage = $this->useCase()->execute($fighter, $run->id);
         $this->assertSame($run->id, $selectedPage->archivedRun->id);
+        $this->assertSame(1234, $selectedPage->archivedRewardReceipts->first()->rewards[0]['amount']);
+        $html = view('clan::partials.boss-reward-receipts', ['rewardReceipts' => $selectedPage->archivedRewardReceipts, 'rewardsFinal' => true])->render();
+        $this->assertStringContainsString('1 234 монет', $html);
+        $this->assertStringContainsString('Боец', $html);
+        $this->assertStringContainsString('Каменный Страж', $html);
+
+        ClanBossRun::query()->create([
+            'dungeon_id' => $dungeon->id, 'clan_id' => $clan->id,
+            'opened_by_user_id' => $leader->id, 'current_stage_id' => $stage->id,
+            'status' => ClanBossRun::STATUS_ACTIVE,
+            'started_at' => now(), 'expires_at' => now()->addDays(3),
+        ]);
+        $this->actingAs($fighter)->withoutMiddleware()
+            ->get(route('clan.boss', ['run' => $run->id]))
+            ->assertOk()
+            ->assertSee(__('Результаты похода').' #'.$run->id)
+            ->assertSee('1 234 монет')
+            ->assertSee(route('info.monster.catalog', ['id' => $monster->id]))
+            ->assertDontSee(__('Босс сейчас недоступен.'))
+            ->assertDontSee(__('Урон по боссу за данж'))
+            ->assertDontSee(__('Поход не открыт.'));
     }
 
     private function useCase(): GetClanBossPage
@@ -283,8 +321,10 @@ class ClanBossPageTest extends TestCase
                     Mockery::mock(ExperienceService::class),
                     new ClanExperienceService(new ClanLevelService),
                     new ClanLogService,
+                    new ClanBossRewardRecorder,
                 ),
             ),
+            new ClanBossRewardRecorder,
         );
     }
 

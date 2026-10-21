@@ -207,13 +207,13 @@
 
                             /* ── прогресс-бар ── */
                             .char-bar-wrap {
-                                background: #d2c4b4;
-                                border: 1px solid rgba(104, 80, 62, .25);
+                                background: linear-gradient(#f4ead9, #d8c5a9);
+                                border: 1px solid #b9a184;
                                 border-radius: 5px;
                                 height: 7px;
                                 overflow: hidden;
                                 margin: 4px 0 6px;
-                                box-shadow: inset 0 1px 2px rgba(68, 45, 30, .12);
+                                box-shadow: inset 0 1px 2px rgba(87, 61, 35, .16), 0 1px rgba(255, 255, 255, .75);
                             }
                             .char-bar-fill {
                                 height: 100%;
@@ -221,9 +221,14 @@
                                 transition: width 0.3s;
                                 box-shadow: none;
                             }
-                            .char-bar-exp  { background: linear-gradient(90deg, #c07820, #f0b030, #e89020); }
-                            .char-bar-hp   { background: linear-gradient(90deg, #aa1010, #ee3030, #cc2020); }
-                            .char-bar-mp   { background: linear-gradient(90deg, #1030c0, #3060f0, #2050d8); }
+                            .char-bar-exp,
+                            .char-bar-skill,
+                            .char-skill-row .char-bar-fill {
+                                background: linear-gradient(90deg, #d38a28, #ffd45e, #efaa36) !important;
+                                box-shadow: inset 0 1px rgba(255, 246, 195, .75);
+                            }
+                            .char-bar-hp { background: linear-gradient(90deg, #aa1010, #ee3030, #cc2020) !important; }
+                            .char-bar-mp { background: linear-gradient(90deg, #1030c0, #3060f0, #2050d8) !important; }
 
                             /* ── строки параметров ── */
                             .char-stat-row {
@@ -256,9 +261,6 @@
                             }
                             .char-skill-head b { color: #594032; }
                             .char-skill-pct { color: #8a7a70; font-size: 10px; }
-                            .char-bar-skill,
-                            .char-skill-row .char-bar-fill { background: #8e7055 !important; }
-
                             /* ── деньги ── */
 
                             /* ── победы/поражения ── */
@@ -273,16 +275,38 @@
 
                             /* ── очки ── */
                             .char-freepoints {
-                                margin-top: 5px;
-                                background: #eee2d1;
-                                border: 1px solid #c5b096;
-                                border-radius: 3px;
-                                padding: 6px 8px;
+                                display: flex;
+                                min-height: 30px;
+                                margin-top: 7px;
+                                padding: 5px 9px;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 5px;
+                                border: 1px solid #9b7043;
+                                border-radius: 4px;
+                                background: linear-gradient(#f6e6c7, #dfc397);
+                                box-shadow: inset 0 1px rgba(255, 250, 229, .9), 0 1px 2px rgba(75, 46, 23, .2);
+                                color: #583a24;
                                 font-size: 11px;
-                                color: #594437;
+                                text-shadow: 0 1px rgba(255, 255, 255, .55);
                             }
-                            .char-freepoints a { color: #765039; font-weight: bold; text-decoration: none; }
-                            .char-freepoints a:hover { color: #4e3425; text-decoration: underline; }
+                            .char-freepoints b { color: #8b2c19; font-size: 12px; }
+                            .char-freepoints a {
+                                display: inline-block;
+                                margin-left: 3px;
+                                padding: 3px 7px;
+                                border: 1px solid #a77a48;
+                                border-radius: 3px;
+                                background: linear-gradient(#fff1d3, #e8ca97);
+                                color: #70401f;
+                                font-weight: bold;
+                                text-decoration: none;
+                            }
+                            .char-freepoints a:hover {
+                                border-color: #875b31;
+                                background: linear-gradient(#fff7e7, #f0d9ae);
+                                color: #4e2b17;
+                            }
                         </style>
 
                         @php

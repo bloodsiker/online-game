@@ -11,6 +11,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonSession;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonStage;
 use App\Modules\Dungeon\Infrastructure\Persistence\Models\DungeonStageMonster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
+use App\Modules\User\Domain\Events\UserLocationChanged;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -119,6 +120,9 @@ final readonly class DungeonStageService
             'prev_location_id' => DB::raw('location_id'),
             'location_id' => $entry->id,
         ]);
+        foreach ($userIds as $userId) {
+            UserLocationChanged::dispatch((int) $userId);
+        }
         foreach ($oldLocationIds->push($entry->id)->unique() as $locationId) {
             Cache::forget('who:users_on_location:'.$locationId);
             Cache::forget('who:users_on_location:'.$locationId.':run:'.$run->id);

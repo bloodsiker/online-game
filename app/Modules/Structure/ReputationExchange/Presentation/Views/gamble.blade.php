@@ -146,7 +146,17 @@
 <body leftmargin="0" rightmargin="0">
 <div id="artifact_alt" style="width: 300px; display: none; position: fixed; z-index: 10000001; left: 0;top: 0"></div>
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+<style>
+    .reputation-top-tabs > tbody { display: block; }
+    .reputation-top-tabs > tbody > tr { display: flex; align-items: flex-start; }
+    .reputation-top-tabs > tbody > tr > td { display: block; flex: 0 0 auto; width: auto; white-space: nowrap; }
+    .reputation-top-tabs > tbody > tr > td.reputation-top-tabs__spacer { flex: 1 1 auto; }
+    .reputation-top-tabs img { display: block; }
+    .reputation-top-tabs > tbody > tr > td:has(> a) { box-sizing: border-box; height: 21px; padding: 3px 2px 4px !important; line-height: 14px; }
+    .reputation-top-tabs > tbody > tr > td > a { display: block; line-height: 14px; }
+    .reputation-top-tabs br { display: none; }
+</style>
+<table class="reputation-top-tabs" border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
     <tbody>
     @php
         $btnLeft1 = 'img/bg/btn/btn-left1.gif';
@@ -163,7 +173,7 @@
         </td>
         <td width="19"><img src="{{ asset($btnRight2) }}" width="19" height="21"><br></td>
 
-        <td></td>
+        <td class="reputation-top-tabs__spacer"></td>
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">

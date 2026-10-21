@@ -474,7 +474,7 @@
                                         }
                                     </script>
                                     <form id="cart_amount_form">
-                                        <div id="cart_amount_div" style="display: none; position: fixed; z-index: 9999;">
+                                        <div id="cart_amount_div" class="backpack-drop-dialog" style="display: none; position: fixed; z-index: 9999;">
                                             <div class="popup_global_container">
                                                 <div class="popup-top-left">
                                                     <div class="popup-top-right">
@@ -501,15 +501,8 @@
                                                                           class="popup-artifact__img"></span>
                                                                     <div id="ask_confirm_title_amount"
                                                                          class="popup-artifact__title popup-artifact__left"></div>
-                                                                    <div><img src="{{ asset('img/icon/tbl-shp_item-icon.gif') }}"
-                                                                              width="11" height="10"
-                                                                              class="tbl-shp_item-ico" alt=""> <span
-                                                                            id="ask_confirm_type_amount"></span></div>
-                                                                    <div><img src="{{ asset('img/icon/tbl-shp_level-icon.gif') }}"
-                                                                              width="11" height="10"
-                                                                              class="tbl-shp_item-ico" alt=""> {{ __("Уровень") }}
-                                                                        <span id="ask_confirm_level_amount"></span>
-                                                                    </div>
+                                                                    <span id="ask_confirm_type_amount" hidden></span>
+                                                                    <span id="ask_confirm_level_amount" hidden></span>
                                                                     <div id="price_container_amount"
                                                                          style="display: none">{{ __("Цена:") }} <span
                                                                             id="price_amount"></span></div>
@@ -537,7 +530,7 @@
 												</span>
 											</span>
 										</span>
-                                                                        {{ __("из") }} <span id="cart_amount_cnt"></span>
+                                                                        <span class="backpack-drop-dialog__total">{{ __("из") }} <span id="cart_amount_cnt"></span></span>
                                                                         <b class="butt1 pointer"><b><input value="{{ __("Все") }}"
                                                                                                            type="button"
                                                                                                            style="width: 100px;"
@@ -546,7 +539,7 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div style="clear: both; margin-top: 10px; text-align: center; padding: 0 11px;">
+                                                            <div class="backpack-drop-dialog__actions">
                                                                 <span id="ask_confirm_ok_container"></span>
                                                                 <b class="butt1 pointer"><b><input value="{{ __("Отмена") }}"
                                                                                                    type="button"
@@ -2046,6 +2039,25 @@
     <div style="text-align:right"><button type="button" onclick="closeDebuffTargetDialog()">{{ __("Отмена") }}</button> <button type="button" onclick="confirmDebuffTarget()">{{ __("Применить") }}</button></div>
 </div>
 <style>
+    #cart_amount_div.backpack-drop-dialog { width: 380px; max-width: calc(100vw - 20px); }
+    .backpack-drop-dialog .popup_global_content { padding: 16px 20px !important; }
+    .backpack-drop-dialog #ask_amount_title { margin: 0 0 16px; line-height: 1.5; }
+    .backpack-drop-dialog .popup-artifact { margin: 0 0 16px; }
+    .backpack-drop-dialog .popup-artifact__dsc { display: flex; align-items: center; justify-content: center; gap: 14px; }
+    .backpack-drop-dialog #art_amount { position: static; float: none; display: block; flex: 0 0 60px; width: 60px; height: 60px; margin: 0; }
+    .backpack-drop-dialog #art_amount img { display: block; width: 60px; height: 60px; object-fit: contain; }
+    .backpack-drop-dialog #ask_confirm_title_amount { position: static; float: none; width: auto; min-width: 0; margin: 0; padding: 0; font-weight: bold; line-height: 1.5; overflow-wrap: anywhere; text-align: left; }
+    .backpack-drop-dialog #drop-qty-row { padding: 0 !important; margin: 0 0 16px; }
+    .backpack-drop-dialog #drop-qty-row .cart-amount-sell-price > div { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 8px; white-space: nowrap; }
+    .backpack-drop-dialog #drop-qty-row .cart-amount-sell-price > div > * { flex: 0 0 auto; }
+    .backpack-drop-dialog #drop-qty-row .cart-amount-input-cont { float: none; margin: 0 10px; height: 23px; line-height: 23px; vertical-align: middle; }
+    .backpack-drop-dialog #drop-qty-row .b-input, .backpack-drop-dialog #drop-qty-row .b-input__inner { vertical-align: top; }
+    .backpack-drop-dialog #cart_amount { box-sizing: content-box; width: 34px; margin: 0; }
+    .backpack-drop-dialog__total { display: inline-block; white-space: nowrap; }
+    .backpack-drop-dialog #cart_amount_all { width: 60px !important; }
+    .backpack-drop-dialog__actions { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 12px; clear: both; }
+    .backpack-drop-dialog__actions > span { display: inline-flex; width: auto; flex: 0 0 auto; }
+    .backpack-drop-dialog__actions > .butt1 { flex: 0 0 auto; }
     .ctx-item { padding: 6px 14px; cursor: pointer; color: #461c0b; border-bottom: 1px solid #e0ccb0; }
     .ctx-item:last-child { border-bottom: none; }
     .ctx-item:hover { background: #e8c06a; }
@@ -2053,6 +2065,10 @@
     .ctx-danger:hover { background: #f5c0b0; }
 </style>
 <script>
+    function gebi(id) {
+        return document.getElementById(id);
+    }
+
     var frame_content_hider = {
         show: function() { gebi('drop-overlay').style.display = 'block'; },
         hide: function() { gebi('drop-overlay').style.display = 'none'; }
@@ -2075,6 +2091,7 @@
     var _debuffTargetItemIds = @json($debuffTargetItemIds ?? []);
     var _renameItemIds = @json($renameItemIds ?? []);
     var _changeRaceItemIds = @json($changeRaceItemIds ?? []);
+    var _changeAvatarItemIds = @json($changeAvatarItemIds ?? []);
     var _learnableRecipeItemIds = @json($learnableRecipeItemIds ?? []);
     var _lockedChestItemIds = @json($lockedChestItemIds ?? []);
     var _debuffTargets = @json($debuffTargets ?? []);
@@ -2156,6 +2173,8 @@
                     window.top.openRenameModal?.(id);
                 } else if (_changeRaceItemIds.indexOf(parseInt(id, 10)) !== -1) {
                     window.top.openRaceChangeModal?.(id);
+                } else if (_changeAvatarItemIds.indexOf(parseInt(id, 10)) !== -1) {
+                    window.top.openAvatarChangeModal?.(id);
                 } else {
                     useItemAjax(id);
                 }
@@ -2277,6 +2296,7 @@
             };
             if (data.experience !== undefined) hpMp.experience = data.experience;
             if (data.lvl !== undefined) hpMp.lvl = data.lvl;
+            if (data.diamond !== undefined) hpMp.diamond = data.diamond;
             try { window.top.sendToFrame('character-frame', hpMp); } catch(e) {}
             if (data.blessings && data.blessings.length) {
                 try { window.top.sendToFrame('character-frame', { appliedEffects: data.blessings }); } catch(e) {}
@@ -2358,7 +2378,7 @@
         } else {
             qtyRow.style.display = 'none';
             gebi('ask_confirm_ok_container').innerHTML =
-                '<b class="butt1 pointer"><b><input value="' + gameTranslate("Выбросить") + '" type="button" onclick="location.href=\'' + base + '/drop/' + itemId + '?c=1\'" style="width: 100px;" class="redd"></b></b>';
+                '<b class="butt1 pointer"><b><input value="' + gameTranslate("Выбросить") + '" type="button" onclick="doDropItem(' + itemId + ', \'' + base + '\', 1)" style="width: 100px;" class="redd"></b></b>';
         }
 
         var div = gebi('cart_amount_div');
@@ -2368,17 +2388,18 @@
         frame_content_hider.show();
     }
 
-    function doDropItem(itemId, base) {
-        var qty = parseInt(gebi('cart_amount').value) || 1;
-        gebi('cart_amount_div').style.display = 'none';
-        try { frame_content_hider.hide(); } catch(e) {}
-        location.href = base + '/drop/' + itemId + '?c=1&qty=' + qty;
+    function doDropItem(itemId, base, quantity) {
+        var qty = quantity || parseInt(gebi('cart_amount').value, 10) || 1;
+        return dropBackpackItem(itemId, base + '/drop/' + itemId, qty,
+            document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
     }
 
     document.addEventListener('click', function () {
         document.getElementById('item-ctx-menu').style.display = 'none';
     });
 </script>
+
+<script src="{{ asset('js/backpack-drop.js') }}?v={{ filemtime(public_path('js/backpack-drop.js')) }}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

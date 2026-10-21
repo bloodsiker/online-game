@@ -141,6 +141,7 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
                         ChatMessageType::PartyInvite->value,
                         ChatMessageType::PartyNotice->value,
                         ChatMessageType::ClanInvite->value,
+                        ChatMessageType::PlayerTradeInvite->value,
                         ChatMessageType::Quest->value,
                         ChatMessageType::QuestItem->value,
                         ChatMessageType::Loot->value,

@@ -20,6 +20,7 @@ use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Party\Infrastructure\Persistence\Models\Party;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
+use App\Modules\User\Domain\Events\UserLocationChanged;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -190,6 +191,9 @@ class DungeonCoordinator
                     'prev_location_id' => DB::raw('location_id'),
                     'location_id' => $returnLocationId,
                 ]);
+                foreach ($participantIds as $participantId) {
+                    UserLocationChanged::dispatch((int) $participantId);
+                }
                 DungeonSession::query()->where('dungeon_run_id', $session->dungeon_run_id)->delete();
                 $user->location_id = $returnLocationId;
 

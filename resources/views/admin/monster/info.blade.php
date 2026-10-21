@@ -659,8 +659,8 @@
                 <div class="card-body">
                     {{ csrf_field() }}
                     <div class="form-group mb-2">
-                        <label>Моб</label>
-                        <select name="minion_monster_id" class="form-control" required>
+                        <label for="summon-pool-monster-select">Моб</label>
+                        <select id="summon-pool-monster-select" name="minion_monster_id" class="form-control" required>
                             @foreach($allMonsters ?? [] as $m)
                                 <option value="{{ $m->id }}">{{ $m->name }} (ур. {{ $m->lvl }})</option>
                             @endforeach
@@ -986,6 +986,13 @@
             : '<span style="display:inline-block;width:24px;height:24px;margin-right:6px;"></span>';
         return $('<span>' + img + item.text + '</span>');
     }
+
+    $('#summon-pool-monster-select').select2({
+        theme: 'bootstrap',
+        dropdownParent: $('#modalSummonPool'),
+        minimumResultsForSearch: 0,
+        width: '100%'
+    });
 
     $('#item-ajax-select').select2({
         theme: 'bootstrap',

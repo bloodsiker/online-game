@@ -10,6 +10,7 @@ use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Domain\Services\InstantItemRewardService;
 use App\Modules\Item\Domain\Services\ItemActionLogger;
 use App\Modules\Item\Domain\Services\ItemRequirementService;
@@ -23,6 +24,7 @@ use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Structure\Workshop\Application\UseCases\CraftProfessionItem;
+use App\Modules\Structure\Workshop\Application\UseCases\GetWorkshopPage;
 use App\Modules\Structure\Workshop\Application\UseCases\LearnRecipe;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
@@ -432,6 +434,37 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertTrue($crafted->ok);
         $this->assertDatabaseMissing('backpacks', ['item_id' => 401]);
         $this->assertDatabaseHas('player_skills', ['player_id' => 1, 'skill_id' => 10, 'exp' => 7]);
+    }
+
+    public function test_workshop_profession_tabs_find_translated_recipes_in_both_locales(): void
+    {
+        $this->seedRecipe();
+        $collector = Mockery::mock(ItemTooltipCollector::class);
+        $collector->shouldReceive('collectFrom')->andReturnSelf();
+        $collector->shouldReceive('renderScript')->andReturn('');
+        $page = new GetWorkshopPage($collector);
+        $user = User::query()->findOrFail(1);
+
+        foreach (['ru', 'uk'] as $locale) {
+            app()->setLocale($locale);
+            foreach (['Алхимик' => 'Алхімік', 'Ремесленник' => 'Ремісник', 'Колдун' => 'Чаклун', 'Ювелир' => 'Ювелір', 'Кулинар' => 'Кулінар'] as $ru => $uk) {
+                DB::table('skills')->where('id', 10)->update(['name' => json_encode(['ru' => $ru, 'uk' => $uk])]);
+                $all = $page->execute(user: $user, structureId: 1, skillNames: [$ru], learnedOnly: false);
+                $this->assertCount(1, $all['recipes']);
+                $this->assertSame($locale === 'uk' ? $uk : $ru, $all['recipes'][0]['professionName']);
+                $this->assertFalse($all['recipes'][0]['learned']);
+
+                $wrongTab = $page->execute(user: $user, structureId: 1, skillNames: ['Другая профессия'], learnedOnly: false);
+                $this->assertSame([], $wrongTab['recipes']);
+            }
+        }
+
+        $notLearned = $page->execute(user: $user, structureId: 1, skillNames: ['Кулинар'], learnedOnly: true);
+        $this->assertSame([], $notLearned['recipes']);
+        DB::table('player_recipes')->insert(['player_id' => 1, 'share_recipe_id' => 1]);
+        $learned = $page->execute(user: $user, structureId: 1, skillNames: ['Кулинар'], learnedOnly: true);
+        $this->assertCount(1, $learned['recipes']);
+        $this->assertTrue($learned['recipes'][0]['learned']);
     }
 
     public function test_single_use_recipe_cannot_be_learned_or_consumed(): void
