@@ -82,6 +82,9 @@
         'attack' => 'Атакующее заклинание', 'buff' => 'Усиление', 'debuff' => 'Ослабление',
         'heal' => 'Исцеление', 'defense' => 'Защитное заклинание', default => 'Вспомогательное заклинание',
     };
+    if ($runePassiveInfo ?? false) {
+        $typeLabel = __('Пассивный навык');
+    }
     $targetLabel = match ($skill->target_type) {
         'self' => 'На себя', 'all' => 'На союзников', 'enemy' => 'На противника', default => $skill->target_type,
     };
@@ -208,6 +211,7 @@
                                                                         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tbl-ati_brd-all coll">
                                                                             <tbody>
 
+                                                                            @unless($runePassiveInfo ?? false)
                                                                             <tr>
                                                                                 <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b>Цель</b></td>
                                                                                 <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px"><b class="tbl_red">{{ $targetLabel }}</b></td>
@@ -220,6 +224,7 @@
                                                                             </tr>
                                                                             @php $light = ! $light; @endphp
 
+                                                                            @endunless
                                                                             @if(!$skill->is_passive)
                                                                                 <tr>
                                                                                     <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom"><b>Расход маны</b></td>
@@ -279,7 +284,7 @@
                                                                                 @php $light = ! $light; @endphp
                                                                                 @foreach($skill->effects as $effect)
                                                                                     <tr>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? 'Бонус') }}</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? 'Бонус') }}</b></td>
                                                                                         <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">+{{ $effect['value'] ?? 0 }}{{ !empty($effect['is_percent']) ? '%' : '' }}</b></td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp
@@ -291,7 +296,13 @@
                                                                                 @php $light = ! $light; @endphp
                                                                                 @foreach($skill->skillEffects as $effect)
                                                                                     <tr>
-                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;"><b>{{ $effect->name }}</b></td>
+                                                                                        <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" style="padding-left: 15px;">
+                                                                                            <b>{{ $effect->name }}</b>
+                                                                                            @if($effect->description && empty($effect->stat_modifiers))
+                                                                                                <div>{{ $effect->description }}</div>
+                                                                                            @endif
+                                                                                            @include('magic-skill::partials.effect-bonuses', ['effect' => $effect])
+                                                                                        </td>
                                                                                         <td class="{{ $light ? 'tbl-sts_bg-light' : '' }} tbl-usi_brd-bottom" align="right" style="padding-right: 3px;"><b class="tbl_red">{{ $effect->pivot->chance }}% · {{ $effect->pivot->duration_seconds }} сек.</b></td>
                                                                                     </tr>
                                                                                     @php $light = ! $light; @endphp

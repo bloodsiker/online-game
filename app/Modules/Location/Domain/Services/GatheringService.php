@@ -22,10 +22,13 @@ use App\Modules\Location\Infrastructure\Persistence\Models\MapGatheringResource;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerEquipment;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Premium\Application\Services\PremiumBonusService;
+use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
+use App\Modules\TreasureHunt\Infrastructure\Persistence\Models\TreasureHunt;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -166,6 +169,8 @@ class GatheringService
 
                 $bonusPercent = ($this->equippedToolBonusPercent($lockedPlayer, (string) $resource->gathering_tool_family) ?? 0)
                     + ($this->influenceBonusService?->for($lockedUser->id, (int) $location->map_id)->gatheringSpeedPercent ?? 0);
+                $bonusPercent += app(PremiumBonusService::class)
+                    ->value($lockedUser->id, PremiumBonus::GATHERING_SPEED);
                 $seconds = $this->effectiveGatheringSeconds($resource, $bonusPercent);
                 $completesAt = now()->addSeconds($seconds);
                 $attempt = GatheringAttempt::create([
@@ -407,6 +412,8 @@ class GatheringService
         $bonusPercent += ($this->influenceBonusService
             ?->for($user->id, (int) $node->mapResource->map_id)
             ->gatheringSpeedPercent ?? 0);
+        $bonusPercent += app(PremiumBonusService::class)
+            ->value($user->id, PremiumBonus::GATHERING_SPEED);
 
         return [
             'id' => (int) $node->id,
@@ -446,6 +453,8 @@ class GatheringService
     {
         $bonuses = [];
         $influenceChance = $this->influenceBonusService?->for($user->id, $mapId)->bonusResourceChancePercent ?? 0;
+        $influenceChance += app(PremiumBonusService::class)
+            ->value($user->id, PremiumBonus::BONUS_RESOURCE);
 
         foreach ($resource->itemHasItems as $bonusItem) {
             $chance = min(100, max(0, (float) $bonusItem->pivot->drop_chance + $influenceChance));
@@ -512,6 +521,10 @@ class GatheringService
 
         if ($this->hasActiveBattle((int) $user->id, (int) $location->id)) {
             return __('Во время боя добыча ресурсов недоступна.');
+        }
+
+        if (TreasureHunt::isSearching((int) $user->id)) {
+            return __('treasure.busy_search');
         }
 
         if (LockpickingAttempt::query()

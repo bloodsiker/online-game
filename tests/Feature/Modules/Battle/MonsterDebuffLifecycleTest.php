@@ -76,6 +76,7 @@ class MonsterDebuffLifecycleTest extends TestCase
             $table->timestamps();
         });
         Schema::create('monster_active_effects', function (Blueprint $table): void {
+            $table->unsignedBigInteger('source_user_id')->nullable();
             $table->id();
             $table->unsignedBigInteger('location_monster_id');
             $table->unsignedBigInteger('effect_id')->nullable();
@@ -104,6 +105,30 @@ class MonsterDebuffLifecycleTest extends TestCase
             'type' => 'debuff',
             'stat_modifiers' => [['type' => 'armor', 'value' => -15, 'is_percent' => false]],
         ]);
+    }
+
+    public function test_dot_damage_is_credited_to_its_caster_instead_of_the_player_triggering_the_tick(): void
+    {
+        Schema::create('battle_monster_damage', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('battle_id');
+            $table->unsignedBigInteger('location_monster_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedInteger('damage');
+        });
+        $monster = $this->spawn();
+        $battle = Battle::create();
+        $effect = Effect::create(['slug' => 'burn', 'type' => 'debuff', 'value_per_tick' => 7]);
+        $service = app(BattleEffectService::class);
+        $service->applyEffectToMonster($effect, $monster, $battle, new AttackResultDTO, durationSeconds: 10, sourceUserId: 2);
+        DB::table('monster_active_effects')->update(['last_tick_at' => now()->subSeconds(2)]);
+
+        $service->processMonsterEffects($monster, $battle, new AttackResultDTO);
+
+        $this->assertSame(186, $monster->hp_now);
+        $this->assertDatabaseHas('battle_monster_damage', ['battle_id' => $battle->id, 'location_monster_id' => $monster->id, 'user_id' => 2, 'damage' => 14]);
+        $service->applyEffectToMonster($effect, $monster, $battle, new AttackResultDTO, durationSeconds: 10, sourceUserId: 3);
+        $this->assertDatabaseHas('monster_active_effects', ['source_user_id' => 3]);
     }
 
     private function spawn(bool $isBoss = false, int $armor = 50): MonsterOnLocation

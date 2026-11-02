@@ -156,6 +156,11 @@ class Monster extends Model implements FightHitInterface
         return max(0, (int) $this->magic_attack);
     }
 
+    public function getMagicDamagePercent(): int
+    {
+        return 0;
+    }
+
     public function getMagicCriticalChance(): int
     {
         return 0;

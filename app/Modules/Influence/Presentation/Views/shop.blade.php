@@ -38,6 +38,7 @@
                         <div class="influence-shop-item__image"><img src="{{ $entry->item?->image }}" alt=""></div>
                         <div class="influence-shop-item__body">
                             <div class="influence-shop-item__name">{{ $entry->item?->name }}</div>
+                            <x-game.purchase-limit :availability="app(\App\Modules\Commerce\Application\Services\ShopPurchaseLimitService::class)->availability($user, $entry)" />
                             <div>Нужно влияния: {{ number_format(max($section->required_influence, $entry->required_influence), 0, '', ' ') }}</div>
                             <div>Цена: {{ number_format($entry->price, 0, '', ' ') }} монет @if($entry->diamond) + {{ $entry->diamond }} алм.@endif</div>
                             @if($unlocked)

@@ -28,7 +28,6 @@ class UpgradeItem
             ShareItemType::WEAPON->value,
             ShareItemType::SHIELD->value,
             ShareItemType::ARMOR->value,
-            ShareItemType::BELT->value,
         ]);
 
         if ($itemSlot === null) {

@@ -8,6 +8,7 @@ use App\Modules\Dungeon\Infrastructure\Persistence\Models\Dungeon;
 use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceShopSection;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -62,6 +63,10 @@ class Structure extends Model
 
     public const TYPE_PRISON = 'prison';
 
+    public const TYPE_MAGE_TOWER = 'mage_tower';
+
+    public const TYPE_MAGE_TRAINER = 'mage_trainer';
+
     public const TYPES = [
         self::TYPE_SHOP => 'Магазин',
         self::TYPE_BARTER_SHOP => 'Бартерный магазин',
@@ -80,6 +85,8 @@ class Structure extends Model
         self::TYPE_CLAN_SKILL_HALL => 'Зал клановых наставлений',
         self::TYPE_CLAN_BOSS => 'Логово кланового босса',
         self::TYPE_PRISON => 'Темница',
+        self::TYPE_MAGE_TOWER => 'Башня магов',
+        self::TYPE_MAGE_TRAINER => 'Наставник магии',
     ];
 
     protected $with = ['location'];
@@ -91,6 +98,11 @@ class Structure extends Model
     protected function image(): Attribute
     {
         return Attribute::make(get: fn (?string $value) => resolve_storage_image_url($value));
+    }
+
+    public function reputation(): BelongsTo
+    {
+        return $this->belongsTo(Reputation::class);
     }
 
     public function location(): BelongsTo
@@ -244,5 +256,15 @@ class Structure extends Model
     public function isReputationExchange(): bool
     {
         return $this->type === self::TYPE_REPUTATION_EXCHANGE;
+    }
+
+    public function isMageTower(): bool
+    {
+        return $this->type === self::TYPE_MAGE_TOWER;
+    }
+
+    public function isMageTrainer(): bool
+    {
+        return $this->type === self::TYPE_MAGE_TRAINER;
     }
 }

@@ -47,6 +47,8 @@
                         return;
                     }
 
+                    var $editor = $(this);
+
                     var formData = new FormData();
                     formData.append('file', files[0]);
                     formData.append('_token', @json(csrf_token()));
@@ -59,8 +61,13 @@
                         contentType: false,
                         success: function (response) {
                             if (response && response.url) {
-                                $('{{ $selector }}').summernote('insertImage', response.url);
+                                $editor.summernote('insertImage', response.url);
                             }
+                        },
+                        error: function (xhr) {
+                            var response = xhr.responseJSON || {};
+                            var errors = response.errors || {};
+                            alert(errors.file ? errors.file.join('\n') : (response.message || 'Не удалось загрузить изображение. Попробуйте ещё раз.'));
                         }
                     });
                 }

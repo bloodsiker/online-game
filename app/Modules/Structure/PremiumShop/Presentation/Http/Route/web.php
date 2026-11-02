@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Premium\Presentation\Http\PremiumController;
 use App\Modules\Structure\PremiumShop\Presentation\Http\PremiumShopController;
 use Illuminate\Support\Facades\Route;
 
@@ -11,3 +12,5 @@ Route::get('/premium/delete-cart/{id}', [PremiumShopController::class, 'deleteCa
 Route::get('/premium/clear-cart', [PremiumShopController::class, 'clearCart'])->name('premium.clear_cart');
 Route::get('/premium/topup', [PremiumShopController::class, 'topup'])->name('premium.topup');
 Route::get('/premium/stock', [PremiumShopController::class, 'stock'])->name('premium.stock');
+Route::get('/premium/status', [PremiumController::class, 'index'])->middleware('auth')->name('premium.status');
+Route::post('/premium/exchange', [PremiumController::class, 'exchange'])->middleware(['auth', 'throttle:20,1'])->name('premium.exchange');

@@ -23,6 +23,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
+use App\Modules\TreasureHunt\Infrastructure\Persistence\Models\TreasureHunt;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -560,6 +561,9 @@ class LockpickingService
 
     private function actionBlockReason(User $user, bool $checkGathering = true): ?string
     {
+        if (TreasureHunt::isSearching((int) $user->id)) {
+            return __('treasure.busy_search');
+        }
         if ((int) $user->player->hp_now <= 0) {
             return __('Мёртвый персонаж не может взламывать сундуки.');
         }

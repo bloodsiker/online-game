@@ -6,7 +6,9 @@ namespace App\Modules\Reputation\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
+use App\Modules\Commerce\Domain\Exceptions\PurchaseLimitExceeded;
 use App\Modules\Reputation\Application\DTOs\ReputationActionResultDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Application\Services\ReputationShopCartService;
@@ -23,9 +25,23 @@ class PurchaseReputationCart
         private readonly ReputationShopCartService $cartService,
         private readonly BackpackService $backpackService,
         private readonly PurchaseLogger $purchaseLogger,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
     ) {}
 
     public function execute(User $user, int $reputationId): ReputationActionResultDTO
+    {
+        try {
+            return DB::transaction(function () use ($user, $reputationId): ReputationActionResultDTO {
+                $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+                return $this->purchase($user, $reputationId);
+            });
+        } catch (PurchaseLimitExceeded $exception) {
+            return new ReputationActionResultDTO(false, $exception->getMessage());
+        }
+    }
+
+    private function purchase(User $user, int $reputationId): ReputationActionResultDTO
     {
         $reputation = $this->readRepository->findReputationForShopOrFail($reputationId);
 
@@ -64,6 +80,10 @@ class PurchaseReputationCart
         }
 
         DB::transaction(function () use ($user, $cart, $reputation) {
+            foreach ($cart->getItems() as $line) {
+                $this->purchaseLimits->reserve($user, $line->shopItem, (int) $line->quantity);
+            }
+
             if ($cart->getTotalPrice() > 0) {
                 $user->decrement('money', $cart->getTotalPrice());
             }

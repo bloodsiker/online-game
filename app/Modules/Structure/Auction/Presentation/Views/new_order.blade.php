@@ -303,7 +303,7 @@
                                                             <td height="28" class="brd2-top brd2 b">Анонимно:</td>
                                                             <td height="28" class="brd2-top brd2 b" align="left" nowrap="">
                                                                 <input type="hidden" name="form[is_anonymous]" value="">
-                                                                <input type="checkbox" name="form[is_anonymous]" value="1" id="_chk_anon">&nbsp;<label for="_chk_anon"></label>
+                                                                <input type="checkbox" name="form[is_anonymous]" value="1" @disabled(app(\App\Modules\Premium\Application\Services\PremiumBonusService::class)->value((int) ($user->id ?? 0), \App\Modules\Premium\Domain\Enums\PremiumBonus::ANONYMOUS_EXCHANGE) <= 0) title="{{ __('premium.bonus.anonymous_exchange') }}" id="_chk_anon">&nbsp;<label for="_chk_anon"></label>
                                                             </td>
                                                         </tr>
                                                         </tbody>

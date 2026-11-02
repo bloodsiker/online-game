@@ -63,6 +63,11 @@
                                                 </select>
                                             </div>
                                             <div class="form-group">
+                                                <label class="col-form-label">Репутация магазина (ID, необязательно)</label>
+                                                <input type="number" min="1" name="reputation_id" value="{{ $structure->reputation_id }}" class="form-control">
+                                                @if($structure->reputation)<small><a href="{{ route('admin.reputation.info', $structure->reputation_id) }}">{{ $structure->reputation->name }}</a></small>@endif
+                                            </div>
+                                            <div class="form-group">
                                                 <label class="col-form-label">Данж (для логова клан-босса)</label>
                                                 <select id="sel-dungeon" name="dungeon_id" class="form-control">
                                                     @if($structure->clanBossDungeon)
@@ -287,6 +292,8 @@
                             </div>
                         </div>
                     </div>
+                @include('admin.partials.shop-purchase-limit', ['offer' => null, 'formId' => null])
+                    <label>Мин. очков репутации</label><input class="form-control" type="number" min="0" name="min_reputation_points" value="0">
                 </div>
                 <footer class="card-footer">
                     <div class="col-md-12 text-end">

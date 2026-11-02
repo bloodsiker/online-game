@@ -53,6 +53,27 @@ final class PlayerStatFormulas
     /** Софткап множителя крита: рост выше CRIT_DAMAGE_BASE асимптотически ограничен этим значением */
     public const CRIT_DAMAGE_CAP = 300.0;
 
+    /** Шанс маг-крита растёт 1:1 до этого значения (% = сырая стата) */
+    public const MAGIC_CRIT_CHANCE_BASE = 30.0;
+
+    /**
+     * Софткап шанса маг-крита: выше MAGIC_CRIT_CHANCE_BASE рост асимптотически
+     * ограничен этим значением — тот же потолок 75%, что у физического крита
+     * (HitCalculator::statChance(), BASE_CHANCE+MAX_STAT_BONUS), для паритета
+     * между классами.
+     */
+    public const MAGIC_CRIT_CHANCE_CAP = 75.0;
+
+    /**
+     * Мягкий потолок вклада интеллекта в силу магии (эталон на level/12=1),
+     * та же роль, что у DMG_PCT_CAP для силы: без него чистый стат-стак в
+     * интеллект давал бы неограниченный урон, никак не завязанный на
+     * magic-снаряжение (у физики аналог — урон оружия, целиком от предмета).
+     * magic_attack с предметов в этот кап НЕ входит — растёт отдельно и без
+     * ограничения, как и раньше (см. MagicHitCalculator::magicPower()).
+     */
+    public const INTELLIGENCE_MAGIC_POWER_CAP = 200.0;
+
     /**
      * Бонус урона от силы, нормированный по уровню: «типичный танк» любого
      * уровня получает одинаковый процент (иначе линейный рост стат к 500 lvl
@@ -64,6 +85,22 @@ final class PlayerStatFormulas
         $raw = max(0, ($strength - 1) * self::DMG_PCT_PER_STR) / $levelScale;
 
         return self::DMG_PCT_CAP * $raw / ($raw + self::DMG_PCT_CAP);
+    }
+
+    /**
+     * Мягкий потолок вклада интеллекта в magicPower — та же схема, что у
+     * strengthDamagePercent (нормировка по уровню, затем асимптотический
+     * кап), только тут кап применяется к самому интеллекту, а не к готовому
+     * проценту: magicPower — аддитивная величина (intelligence + magic_attack),
+     * не множитель на урон оружия, поэтому капать нужно вход, а не выход.
+     */
+    public static function cappedIntelligence(float $intelligence, int $level): float
+    {
+        $levelScale = max(1.0, $level / 12);
+        $raw = max(0, $intelligence - 1) / $levelScale;
+        $cappedPercent = self::INTELLIGENCE_MAGIC_POWER_CAP * $raw / ($raw + self::INTELLIGENCE_MAGIC_POWER_CAP);
+
+        return $cappedPercent * $levelScale;
     }
 
     /**
@@ -97,5 +134,26 @@ final class PlayerStatFormulas
         $span = self::CRIT_DAMAGE_CAP - self::CRIT_DAMAGE_BASE;
 
         return self::CRIT_DAMAGE_BASE + $span * $growth / ($growth + $span);
+    }
+
+    /**
+     * Шанс маг-крита с мягким потолком — та же асимптотическая форма, что у
+     * effectiveCritDamage(), только для процента шанса (0-100), а не
+     * множителя урона. У магического крита нет встречной статы защитника
+     * (в отличие от физического HitCalculator::statChance()), поэтому кап
+     * применяется прямо к сырому значению атакующего, без противостояния.
+     */
+    public static function effectiveMagicCriticalChance(int $rawChance): float
+    {
+        $raw = (float) $rawChance;
+
+        if ($raw <= self::MAGIC_CRIT_CHANCE_BASE) {
+            return max(0.0, $raw);
+        }
+
+        $growth = $raw - self::MAGIC_CRIT_CHANCE_BASE;
+        $span = self::MAGIC_CRIT_CHANCE_CAP - self::MAGIC_CRIT_CHANCE_BASE;
+
+        return self::MAGIC_CRIT_CHANCE_BASE + $span * $growth / ($growth + $span);
     }
 }

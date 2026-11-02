@@ -6,9 +6,11 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
+use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -26,6 +28,7 @@ class BattleEffectService
     public function __construct(
         private readonly PlayerStatService $statService,
         private readonly PlayerTimedEffectService $timedEffectService,
+        private readonly MonsterLootService $monsterLootService = new MonsterLootService,
     ) {}
 
     /**
@@ -38,6 +41,7 @@ class BattleEffectService
         AttackResultDTO $result,
         int $durationSeconds,
         int|float|null $tickValueOverride = null,
+        ?int $sourceUserId = null,
     ): void {
         $type = $effect->resolvedActiveType();
 
@@ -71,6 +75,7 @@ class BattleEffectService
             ->first();
 
         if ($existing) {
+            $existing->source_user_id = $sourceUserId;
             $existing->stacks = $effectiveDuration;
             $existing->expires_at = $effectiveDuration > 0 ? now()->addSeconds($effectiveDuration) : null;
             $existing->last_tick_at = now();
@@ -85,6 +90,7 @@ class BattleEffectService
         MonsterActiveEffect::create([
             'location_monster_id' => $locMonster->id,
             'effect_id' => $effect->id,
+            'source_user_id' => $sourceUserId,
             'battle_id' => null,
             'type' => $type,
             'applied_at' => now(),
@@ -127,18 +133,25 @@ class BattleEffectService
         $effectiveDuration = $type?->isControl()
             ? max(1, $durationSeconds)
             : max(0, $durationSeconds);
+
+        if ($effect->type === 'debuff') {
+            $effectiveDuration = $this->shortenByDebuffResistPassive($player, $effectiveDuration);
+        }
+
         $expiresAt = match (true) {
             $effectiveDuration > 0 => now()->addSeconds($effectiveDuration),
             default => null,
         };
 
-        // HoT тикает раз за боевой раунд в processPlayerEffects() через
-        // stacks-- (не по реальному времени, в отличие от DoT/heartbeat) —
-        // stacks должен быть бюджетом тиков на весь durationSeconds, иначе
-        // (0 по умолчанию) эффект удаляется после первого же лечения.
-        $stacks = $type?->isHoT()
-            ? max(1, intdiv($effectiveDuration, max(1, (int) $effect->tick_interval)))
-            : 0;
+        // Percentage healing is a total budget over the real-time duration.
+        // Snapshot max HP at cast time, keeping fractional HP between ticks.
+        if ($type?->isHoT() && $tickValueOverride === null
+            && $effect->resolvedDamageScalingType() === EffectDamageScalingType::TARGET_MAX_HP) {
+            $ticks = max(1, intdiv($effectiveDuration, max(1, (int) $effect->tick_interval)));
+            $tickValueOverride = $this->statService->resolve($player)->getHpMax()
+                * max(0, (float) $effect->value_per_tick) / 100 / $ticks;
+        }
+        $stacks = 0;
 
         if ($existing) {
             $existing->effect_id = $effect->id;
@@ -185,6 +198,11 @@ class BattleEffectService
         $isTimedControl = $type->isControl();
         $isPersistentTimedEffect = $isTimedDoT || $isTimedControl;
         $tickSeconds = max(1, (int) config('game.player_heartbeat_seconds', 10));
+
+        // Механики боссов на игрока — всегда враждебные, тот же софткап от
+        // «Стойкости духа», что и у обычных дебаффов заклинаний/атак.
+        $durationOrTicks = $this->shortenByDebuffResistPassive($player, $durationOrTicks);
+
         $expiresAt = match (true) {
             $isTimedControl => now()->addSeconds(max(1, $durationOrTicks)),
             $isTimedDoT => now()->addSeconds(max(1, $durationOrTicks) * $tickSeconds),
@@ -330,8 +348,17 @@ class BattleEffectService
     public function processPlayerEffects(Player $player, Battle $battle, AttackResultDTO $result): bool
     {
         $now = now();
-        $tickResult = $this->timedEffectService->process($player, $now);
+        $tickResult = $this->timedEffectService->process($player, $now, hpMax: $this->statService->resolve($player)->getHpMax());
         foreach ($tickResult->effects as $processedEffect) {
+            if (($processedEffect['healing'] ?? 0) > 0) {
+                $result->log(BattleLogTranslator::format(
+                    '<p class="color-buff">%s <b>Регенерация</b> восстанавливает %d HP!</p>',
+                    $processedEffect['emoji'],
+                    $processedEffect['healing'],
+                ));
+
+                continue;
+            }
             $result->log(BattleLogTranslator::format(
                 '<p class="color-debuff">%s <b>%s</b> наносит вам %d урона!</p>',
                 $processedEffect['emoji'],
@@ -379,28 +406,6 @@ class BattleEffectService
                 continue;
             }
 
-            if ($effect->isDoT()) {
-                continue;
-            }
-
-            if ($effect->type?->isHoT()) {
-                $heal = (int) $effect->current_value;
-                $player->hp_now = min($player->hp_max, $player->hp_now + $heal);
-
-                $result->log(BattleLogTranslator::format(
-                    '<p class="color-buff">%s <b>Регенерация</b> восстанавливает %d HP!</p>',
-                    $effect->type->emoji(),
-                    $heal
-                ));
-
-                $effect->stacks--;
-                if ($effect->stacks <= 0) {
-                    $statsChanged = $statsChanged || $effect->effect_id !== null;
-                    $effect->delete();
-                } else {
-                    $effect->save();
-                }
-            }
         }
 
         if ($statsChanged) {
@@ -480,7 +485,7 @@ class BattleEffectService
                 if ($dueTicks > 0) {
                     $damage = (int) $effect->current_value * $dueTicks;
                     // DoT доводит монстра до 1 HP — добивание всегда за игроком.
-                    $locMonster->hp_now = max(1, $locMonster->hp_now - $damage);
+                    $this->monsterLootService->damage($locMonster, $damage, $effect->source_user_id, $battle->id, minimumHp: 1);
                     $effect->last_tick_at = $lastTickAt->copy()->addSeconds($dueTicks * $tickSeconds);
                     $effect->stacks = max(0, (int) $effect->stacks - $dueTicks);
 
@@ -545,5 +550,68 @@ class BattleEffectService
         foreach ($playerIds as $playerId) {
             $this->statService->invalidate((int) $playerId);
         }
+    }
+
+    /**
+     * Максимум среди выученных+экипированных пассивок по synthetic-ключу
+     * (напр. "debuff_duration_reduction", "lethal_survive_chance") — это не
+     * статы StatSheet, а боевые хуки-события, поэтому читаются напрямую
+     * здесь, а не через общий пайплайн PlayerStatService::fromPassiveSkills().
+     * Смотрит оба источника «Пассивных бонусов»: Source 1 (magic_skills.effects,
+     * прямой JSON) и Source 2 (magic_skill_effects → effects.stat_modifiers).
+     */
+    private function maxPassiveBonusValue(Player $player, string $type): float
+    {
+        $max = 0.0;
+        foreach ($player->magicSkills as $skill) {
+            if (! $skill->is_passive || ! $skill->pivot->is_equipped) {
+                continue;
+            }
+
+            foreach ($skill->effects ?? [] as $entry) {
+                if (($entry['type'] ?? null) === $type) {
+                    $max = max($max, (float) ($entry['value'] ?? 0));
+                }
+            }
+
+            foreach ($skill->skillEffects as $effect) {
+                foreach ($effect->stat_modifiers ?? [] as $entry) {
+                    if (($entry['type'] ?? null) === $type) {
+                        $max = max($max, (float) ($entry['value'] ?? 0));
+                    }
+                }
+            }
+        }
+
+        return $max;
+    }
+
+    /**
+     * Сокращает длительность/число тиков входящего дебаффа на % от пассивки
+     * «Стойкость духа». Кап 90% — полный иммунитет к дебаффам не даём ни
+     * одному рангу.
+     */
+    private function shortenByDebuffResistPassive(Player $player, int $value): int
+    {
+        if ($value <= 0) {
+            return $value;
+        }
+
+        $reductionPercent = min(90.0, $this->maxPassiveBonusValue($player, 'debuff_duration_reduction'));
+
+        return $reductionPercent > 0
+            ? max(1, (int) round($value * (1 - $reductionPercent / 100)))
+            : $value;
+    }
+
+    /**
+     * «Инстинкт выживания» — чистый шанс на КАЖДЫЙ летальный удар, не «раз
+     * за бой»: раскатывается заново каждый раз, когда hp_now уходит в ноль.
+     */
+    public function rollLethalSurvival(Player $player): bool
+    {
+        $chancePercent = $this->maxPassiveBonusValue($player, 'lethal_survive_chance');
+
+        return $chancePercent > 0 && random_int(1, 100) <= $chancePercent;
     }
 }

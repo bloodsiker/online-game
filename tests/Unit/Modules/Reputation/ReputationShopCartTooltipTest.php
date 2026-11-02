@@ -42,7 +42,7 @@ class ReputationShopCartTooltipTest extends TestCase
         $cartService = Mockery::mock(ReputationShopCartService::class);
         $cartService->shouldReceive('getCart')->once()->with($user, 2)->andReturn($cart);
         $reputationService = Mockery::mock(ReputationService::class);
-        $reputationService->shouldReceive('getOrCreate')->once()->with($user->player, $reputation)->andReturn(new PlayerReputation);
+        $reputationService->shouldReceive('getOrZero')->once()->with($user->player, $reputation)->andReturn(new PlayerReputation);
         $collector = Mockery::mock(ItemTooltipCollector::class);
         $collectedIds = [];
         $collector->shouldReceive('collectFrom')->twice()->andReturnUsing(function ($strategy) use (&$collectedIds, $collector) {

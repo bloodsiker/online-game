@@ -202,10 +202,8 @@ class BackpackService
         $item->count_use = $shareItem->count_use;
         $item->save();
 
-        $user->backpack()->attach($item->id, [
-            'equipped' => 0,
-            'count' => $count,
-        ]);
+        $item->setRelation('itemInfo', $shareItem);
+        Backpack::createForItem(userId: (int) $user->id, item: $item, count: $count);
 
         return $this->getItemById($user, $item->id);
     }

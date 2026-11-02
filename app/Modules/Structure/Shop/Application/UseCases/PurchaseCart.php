@@ -6,11 +6,14 @@ namespace App\Modules\Structure\Shop\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
+use App\Modules\Commerce\Domain\Exceptions\PurchaseLimitExceeded;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
+use App\Modules\Structure\Shop\Application\Services\StructureShopAccessService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +22,8 @@ class PurchaseCart
     public function __construct(
         private readonly ShopCartService $shopCartService,
         private readonly PurchaseLogger $purchaseLogger,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
+        private readonly StructureShopAccessService $access = new StructureShopAccessService,
     ) {}
 
     public function execute(User $user, int $shopId, ?string $expectedType = null): ShopResultDTO
@@ -30,152 +35,165 @@ class PurchaseCart
                 ->firstOrFail();
         }
 
-        return DB::transaction(function () use ($user, $shopId): ShopResultDTO {
-            /** @var User $lockedUser */
-            $lockedUser = User::query()->lockForUpdate()->findOrFail($user->id);
-            $cart = $this->shopCartService->getCart($lockedUser, $shopId);
+        try {
+            return DB::transaction(function () use ($user, $shopId): ShopResultDTO {
+                /** @var User $lockedUser */
+                $lockedUser = User::query()->lockForUpdate()->findOrFail($user->id);
+                $cart = $this->shopCartService->getCart($lockedUser, $shopId);
 
-            if ($cart->getItems()->isEmpty()) {
-                return new ShopResultDTO(false, 'Корзина пуста.');
-            }
+                if ($cart->getItems()->isEmpty()) {
+                    return new ShopResultDTO(false, 'Корзина пуста.');
+                }
 
-            if ($cart->getTotalDiamond() > 0 && $lockedUser->diamond < $cart->getTotalDiamond()) {
-                return new ShopResultDTO(false, 'Недостаточно алмазов для оплаты заказа.');
-            }
+                if ($cart->getTotalDiamond() > 0 && $lockedUser->diamond < $cart->getTotalDiamond()) {
+                    return new ShopResultDTO(false, 'Недостаточно алмазов для оплаты заказа.');
+                }
 
-            if ($cart->getTotalPrice() > 0 && $lockedUser->money < $cart->getTotalPrice()) {
-                return new ShopResultDTO(false, 'Недостаточно монет для оплаты заказа.');
-            }
+                if ($cart->getTotalPrice() > 0 && $lockedUser->money < $cart->getTotalPrice()) {
+                    return new ShopResultDTO(false, 'Недостаточно монет для оплаты заказа.');
+                }
 
-            $requirementTotals = collect($cart->getRequirementTotals())
-                ->keyBy(fn (array $requirement): int => (int) $requirement['item']->id);
-            $requirementBackpackItems = collect();
+                $shop = Structure::query()->findOrFail($shopId);
+                if ($error = $this->access->purchaseError($lockedUser, $shop, $cart->getItems())) {
+                    return new ShopResultDTO(false, $error);
+                }
 
-            if ($requirementTotals->isNotEmpty()) {
-                $requirementBackpackItems = Backpack::query()
-                    ->select('backpacks.*')
-                    ->addSelect('items.share_item_id as payment_share_item_id')
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('backpacks.user_id', $lockedUser->id)
-                    ->where('backpacks.equipped', 0)
-                    ->whereIn('items.share_item_id', $requirementTotals->keys())
-                    ->orderBy('backpacks.id')
-                    ->lockForUpdate()
-                    ->get();
+                $requirementTotals = collect($cart->getRequirementTotals())
+                    ->keyBy(fn (array $requirement): int => (int) $requirement['item']->id);
+                $requirementBackpackItems = collect();
 
-                $availableCounts = $requirementBackpackItems
-                    ->groupBy(fn (Backpack $item): int => (int) $item->payment_share_item_id)
-                    ->map(fn ($items): int => (int) $items->sum('count'));
+                if ($requirementTotals->isNotEmpty()) {
+                    $requirementBackpackItems = Backpack::query()
+                        ->select('backpacks.*')
+                        ->addSelect('items.share_item_id as payment_share_item_id')
+                        ->join('items', 'backpacks.item_id', '=', 'items.id')
+                        ->where('backpacks.user_id', $lockedUser->id)
+                        ->where('backpacks.equipped', 0)
+                        ->whereIn('items.share_item_id', $requirementTotals->keys())
+                        ->orderBy('backpacks.id')
+                        ->lockForUpdate()
+                        ->get();
 
-                foreach ($requirementTotals as $shareItemId => $requirement) {
-                    if (($availableCounts[$shareItemId] ?? 0) < $requirement['quantity']) {
-                        return new ShopResultDTO(
-                            false,
-                            sprintf(
-                                'Недостаточно предметов «%s»: нужно %d.',
-                                $requirement['item']->name,
-                                $requirement['quantity'],
-                            ),
-                        );
+                    $availableCounts = $requirementBackpackItems
+                        ->groupBy(fn (Backpack $item): int => (int) $item->payment_share_item_id)
+                        ->map(fn ($items): int => (int) $items->sum('count'));
+
+                    foreach ($requirementTotals as $shareItemId => $requirement) {
+                        if (($availableCounts[$shareItemId] ?? 0) < $requirement['quantity']) {
+                            return new ShopResultDTO(
+                                false,
+                                sprintf(
+                                    'Недостаточно предметов «%s»: нужно %d.',
+                                    $requirement['item']->name,
+                                    $requirement['quantity'],
+                                ),
+                            );
+                        }
                     }
                 }
-            }
 
-            $this->consumeRequirements($requirementBackpackItems, $requirementTotals);
+                $this->consumeRequirements($requirementBackpackItems, $requirementTotals);
 
-            $stackableShareItemIds = $cart->getItems()
-                ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
-                ->filter(static fn ($shareItem): bool => $shareItem->is_stackable)
-                ->pluck('id')
-                ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
-                ->unique()
-                ->values()
-                ->all();
-            $existingStacks = $stackableShareItemIds === []
-                ? collect()
-                : Backpack::query()
-                    ->select('backpacks.*')
-                    ->addSelect('items.share_item_id as stack_share_item_id')
-                    ->join('items', 'backpacks.item_id', '=', 'items.id')
-                    ->where('backpacks.user_id', $lockedUser->id)
-                    ->whereIn('items.share_item_id', $stackableShareItemIds)
-                    ->get()
-                    ->keyBy('stack_share_item_id');
+                foreach ($cart->getItems() as $line) {
+                    $this->purchaseLimits->reserve($lockedUser, $line->shopItem, (int) $line->quantity);
+                }
 
-            foreach ($cart->getItems() as $itemInCart) {
-                $shareItem = $itemInCart->shopItem->item;
+                $stackableShareItemIds = $cart->getItems()
+                    ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
+                    ->filter(static fn ($shareItem): bool => $shareItem->is_stackable)
+                    ->pluck('id')
+                    ->map(static fn (mixed $shareItemId): int => (int) $shareItemId)
+                    ->unique()
+                    ->values()
+                    ->all();
+                $existingStacks = $stackableShareItemIds === []
+                    ? collect()
+                    : Backpack::query()
+                        ->select('backpacks.*')
+                        ->addSelect('items.share_item_id as stack_share_item_id')
+                        ->join('items', 'backpacks.item_id', '=', 'items.id')
+                        ->where('backpacks.user_id', $lockedUser->id)
+                        ->whereIn('items.share_item_id', $stackableShareItemIds)
+                        ->get()
+                        ->keyBy('stack_share_item_id');
 
-                if (! $shareItem->is_stackable) {
-                    for ($i = 1; $i <= $itemInCart->quantity; $i++) {
+                foreach ($cart->getItems() as $itemInCart) {
+                    $shareItem = $itemInCart->shopItem->item;
+
+                    if (! $shareItem->is_stackable) {
+                        for ($i = 1; $i <= $itemInCart->quantity; $i++) {
+                            $item = new Item;
+                            $item->share_item_id = $shareItem->id;
+                            $item->count_use = $shareItem->count_use;
+                            $item->save();
+
+                            $lockedUser->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
+                        }
+
+                        continue;
+                    }
+
+                    $shareItemId = (int) $shareItem->id;
+                    $existing = $existingStacks->get($shareItemId);
+
+                    if ($existing instanceof Backpack) {
+                        $existing->count += $itemInCart->quantity;
+                        $existing->save();
+                    } else {
                         $item = new Item;
                         $item->share_item_id = $shareItem->id;
                         $item->count_use = $shareItem->count_use;
                         $item->save();
 
-                        $lockedUser->backpack()->attach($item->id, ['equipped' => 0, 'count' => 1]);
+                        $createdBackpackItem = Backpack::create([
+                            'user_id' => $lockedUser->id,
+                            'item_id' => $item->id,
+                            'count' => $itemInCart->quantity,
+                        ]);
+                        $existingStacks->put($shareItemId, $createdBackpackItem);
                     }
-
-                    continue;
                 }
 
-                $shareItemId = (int) $shareItem->id;
-                $existing = $existingStacks->get($shareItemId);
+                $lockedUser->money -= $cart->getTotalPrice();
+                $lockedUser->diamond -= $cart->getTotalDiamond();
+                $lockedUser->save();
 
-                if ($existing instanceof Backpack) {
-                    $existing->count += $itemInCart->quantity;
-                    $existing->save();
-                } else {
-                    $item = new Item;
-                    $item->share_item_id = $shareItem->id;
-                    $item->count_use = $shareItem->count_use;
-                    $item->save();
+                $structure = Structure::query()->findOrFail($shopId);
+                $sourceType = $structure->type === Structure::TYPE_BARTER_SHOP
+                    ? PurchaseSourceType::BarterShop
+                    : PurchaseSourceType::Shop;
 
-                    $createdBackpackItem = Backpack::create([
-                        'user_id' => $lockedUser->id,
-                        'item_id' => $item->id,
-                        'count' => $itemInCart->quantity,
-                    ]);
-                    $existingStacks->put($shareItemId, $createdBackpackItem);
-                }
-            }
+                $this->purchaseLogger->record(
+                    user: $lockedUser,
+                    sourceType: $sourceType,
+                    lines: $cart->getItems()->map(static function ($cartItem): array {
+                        $requirements = $cartItem->shopItem->relationLoaded('requirements')
+                            ? $cartItem->shopItem->requirements->map(static fn ($requirement): array => [
+                                'share_item_id' => (int) $requirement->share_item_id,
+                                'item_name' => $requirement->item?->name,
+                                'quantity' => (int) $requirement->quantity * (int) $cartItem->quantity,
+                            ])->values()->all()
+                            : [];
 
-            $lockedUser->money -= $cart->getTotalPrice();
-            $lockedUser->diamond -= $cart->getTotalDiamond();
-            $lockedUser->save();
+                        return [
+                            'item' => $cartItem->shopItem->item,
+                            'quantity' => (int) $cartItem->quantity,
+                            'unit_price' => (int) $cartItem->shopItem->price,
+                            'unit_diamond' => (int) $cartItem->shopItem->diamond,
+                            'requirements' => $requirements,
+                        ];
+                    }),
+                    structure: $structure,
+                    sourceId: $structure->id,
+                );
 
-            $structure = Structure::query()->findOrFail($shopId);
-            $sourceType = $structure->type === Structure::TYPE_BARTER_SHOP
-                ? PurchaseSourceType::BarterShop
-                : PurchaseSourceType::Shop;
+                $this->shopCartService->clearCart($lockedUser, $shopId);
 
-            $this->purchaseLogger->record(
-                user: $lockedUser,
-                sourceType: $sourceType,
-                lines: $cart->getItems()->map(static function ($cartItem): array {
-                    $requirements = $cartItem->shopItem->relationLoaded('requirements')
-                        ? $cartItem->shopItem->requirements->map(static fn ($requirement): array => [
-                            'share_item_id' => (int) $requirement->share_item_id,
-                            'item_name' => $requirement->item?->name,
-                            'quantity' => (int) $requirement->quantity * (int) $cartItem->quantity,
-                        ])->values()->all()
-                        : [];
-
-                    return [
-                        'item' => $cartItem->shopItem->item,
-                        'quantity' => (int) $cartItem->quantity,
-                        'unit_price' => (int) $cartItem->shopItem->price,
-                        'unit_diamond' => (int) $cartItem->shopItem->diamond,
-                        'requirements' => $requirements,
-                    ];
-                }),
-                structure: $structure,
-                sourceId: $structure->id,
-            );
-
-            $this->shopCartService->clearCart($lockedUser, $shopId);
-
-            return new ShopResultDTO(true, 'Товары куплены.');
-        });
+                return new ShopResultDTO(true, 'Товары куплены.');
+            });
+        } catch (PurchaseLimitExceeded $exception) {
+            return new ShopResultDTO(false, $exception->getMessage());
+        }
     }
 
     private function consumeRequirements($backpackItems, $requirements): void

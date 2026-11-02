@@ -246,6 +246,34 @@ class ChestSecurityTest extends TestCase
         return $user;
     }
 
+    public function test_monster_loot_is_reserved_for_one_minute_but_owner_can_pick_it_up(): void
+    {
+        $this->seedChest(100, 10, true);
+        DB::table('backpacks')->delete();
+        DB::table('item_on_locations')->insert([
+            'item_id' => 100, 'location_id' => 6, 'interaction_type' => 'pickup',
+            'loot_owner_id' => 1, 'loot_reserved_until' => now()->addMinute(),
+        ]);
+        $service = $this->service();
+        $this->assertSame(__('Эта добыча временно закреплена за другим игроком.'), $service->pickUpFromLocation($this->userOnLocation(2, 6), 100));
+        $this->assertDatabaseHas('item_on_locations', ['item_id' => 100]);
+        $service->pickUpFromLocation($this->userOnLocation(1, 6), 100);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 100, 'user_id' => 1]);
+    }
+
+    public function test_reservation_expires_at_exactly_one_minute_and_discarded_loot_is_not_reserved(): void
+    {
+        $this->seedChest(100, 10, true);
+        DB::table('share_items')->where('id', 10)->update(['is_droppable' => true]);
+        $service = $this->service();
+        $service->drop($this->userOnLocation(1, 6), 100, 1);
+        $this->assertDatabaseHas('item_on_locations', ['item_id' => 100, 'loot_owner_id' => null, 'loot_reserved_until' => null]);
+        DB::table('item_on_locations')->where('item_id', 100)->update(['loot_owner_id' => 1, 'loot_reserved_until' => now()->addMinute()]);
+        $this->travel(60)->seconds();
+        $service->pickUpFromLocation($this->userOnLocation(2, 6), 100);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 100, 'user_id' => 2]);
+    }
+
     private function userOnLocation(int $id, int $locationId): User
     {
         $user = $this->user($id);
@@ -279,6 +307,7 @@ class ChestSecurityTest extends TestCase
             $table->string('type');
             $table->string('image')->nullable();
             $table->boolean('is_stackable')->default(false);
+            $table->boolean('is_droppable')->default(false);
             $table->timestamps();
         });
         Schema::create('share_item_instant_rewards', function (Blueprint $table): void {
@@ -350,6 +379,8 @@ class ChestSecurityTest extends TestCase
             $table->timestamps();
         });
         Schema::create('item_on_locations', function (Blueprint $table): void {
+            $table->unsignedBigInteger('loot_owner_id')->nullable();
+            $table->timestamp('loot_reserved_until')->nullable();
             $table->id();
             $table->unsignedBigInteger('item_id');
             $table->unsignedBigInteger('location_id');

@@ -51,6 +51,10 @@ class PurchaseCartBatchQueryTest extends TestCase
             'type' => 'shop',
             'name' => 'Тестовый магазин',
         ]);
+        Schema::create('share_items', function (Blueprint $table): void {
+            $table->id();
+            $table->string('type');
+        });
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
@@ -186,6 +190,7 @@ class PurchaseCartBatchQueryTest extends TestCase
 
     private function shareItem(int $id, string $name = 'Предмет'): ShareItem
     {
+        DB::table('share_items')->insertOrIgnore(['id' => $id, 'type' => ShareItemType::RESOURCE->value]);
         $shareItem = (new ShareItem)->forceFill([
             'id' => $id,
             'name' => $name,

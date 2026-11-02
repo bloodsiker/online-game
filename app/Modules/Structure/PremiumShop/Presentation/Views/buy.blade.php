@@ -259,6 +259,7 @@
                                                                onclick="window.open('{{ route('items.info.share', ['id' => $item->item->id]) }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
                                                                style="color: {{ $item->item->rarity->color() }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;"
                                                                class="b">{{ $item->item->name }}</a>
+                                                            <x-game.purchase-limit :availability="app(\App\Modules\Commerce\Application\Services\ShopPurchaseLimitService::class)->availability(auth()->user(), $item)" />
                                                         </td>
                                                     </tr>
                                                     <tr>

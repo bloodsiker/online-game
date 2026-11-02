@@ -58,6 +58,8 @@
         .game-settings-checkbox { flex: 0 0 24px; width: 24px; height: 23px; margin: 0; border: 0; background: url({{ asset('main/images/gui/gui-checkbox.png') }}) no-repeat 0 -23px; appearance: none; cursor: pointer; }
         .game-settings-checkbox:checked { background-position: 0 0; }
         .game-settings-checkbox:focus-visible { outline: 1px solid #9c6c3b; border-radius: 4px; }
+        .game-settings-checkbox:disabled { opacity: .45; cursor: not-allowed; }
+        .game-settings-control--disabled label { opacity: .55; }
         .game-settings-volume { --volume-fill: 50%; width: 220px; max-width: 65%; height: 24px; margin: 0; padding: 0; appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer; }
         .game-settings-volume::-webkit-slider-runnable-track { height: 11px; box-sizing: border-box; border: 1px solid #c5c5c5; border-radius: 3px; background: linear-gradient(to right, #ffe88f 0 var(--volume-fill), #fff var(--volume-fill) 100%); }
         .game-settings-volume::-webkit-slider-thumb { width: 15px; height: 15px; margin-top: -3px; appearance: none; -webkit-appearance: none; border: 1px solid #db9f73; border-radius: 3px; background: #fff1c5; }

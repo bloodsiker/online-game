@@ -6,8 +6,14 @@ use App\Modules\Auth\Presentation\Http\ChangePasswordController;
 use App\Modules\Auth\Presentation\Http\EmailVerificationController;
 use App\Modules\Auth\Presentation\Http\LoginController;
 use App\Modules\Auth\Presentation\Http\RegisterController;
+use App\Modules\Auth\Presentation\Http\SessionStatusController;
+use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/session/status', SessionStatusController::class)
+    ->withoutMiddleware(ApplyGameLocale::class)
+    ->name('auth.session.status');
 
 Route::post('/login', [LoginController::class, 'login'])
     ->name('login')

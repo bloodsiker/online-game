@@ -126,7 +126,11 @@
 
             @if($page->items->count())
                 @foreach($page->items as $item)
-                    @php $locked = $page->pr->points < $item->min_points; @endphp
+                    @php
+                        $purchaseAvailability = app(\App\Modules\Commerce\Application\Services\ShopPurchaseLimitService::class)->availability($page->player->user, $item);
+                        $purchaseLocked = $purchaseAvailability !== null && $purchaseAvailability['remaining'] === 0;
+                        $locked = $page->pr->points < $item->min_points || $purchaseLocked;
+                    @endphp
                     <form method="post" action="{{ route('reputation.add_cart', ['id' => $page->reputation->id]) }}" style="margin: 3px; display: inline-block;">
                         @csrf
                         <input type="hidden" name="shop_item_id" value="{{ $item->id }}">
@@ -159,6 +163,7 @@
                                                    onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                                    onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;"
                                                    class="b" style="color: {{ $item->item->rarity?->color() ?? '#333333' }}; text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px;">{{ $item->item->name }}</a>
+                                                <x-game.purchase-limit :availability="$purchaseAvailability" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -202,7 +207,7 @@
                                             </td>
                                             <td align="center" valign="top" style="padding-top: 16px; width: 80px;">
                                                 @if($locked)
-                                                    <span style="color:#8a0108; font-size:10px;">Нужно {{ $item->min_points }} реп.</span>
+                                                    <span style="color:#8a0108; font-size:10px;">@if($purchaseLocked){{ __('commerce.purchase_blocked', ['item' => $item->item->name]) }}@else Нужно {{ $item->min_points }} реп.@endif</span>
                                                 @else
                                                     <b class="butt2 pointer"><b>
                                                         <input value="В корзину" type="submit" onclick="if(document._submit)return false;document._submit=true;" style="width:63px">

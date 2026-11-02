@@ -298,6 +298,21 @@
                                                         </td>
                                                     </tr>
                                                 @endif
+
+                                                @if($structure->isMageTrainer())
+                                                    <tr class="bg_l" title=""
+                                                        onclick="location.href='{{ route('mage_trainer', ['id' => $structure->id]) }}'" onmouseover="this.className='bg_l2'" onmouseout="this.className='bg_l'">
+                                                        <td class="brd2-top brd2-bt" width="1%">
+                                                            <img src="{{ asset('img/icon/qst_store.gif') }}" width="46" height="28">
+                                                        </td>
+                                                        <td class="brd2-top brd2-bt">{{ $structure->name }}</td>
+                                                        <td class="brd2-top brd2-bt" align="right">
+                                                            <b class="butt2 pointer"><b>
+                                                                <input value="{{ __('Далее') }}" type="button" onclick="if(document._submit)return false;document._submit=true;location.href='{{ route('mage_trainer', ['id' => $structure->id]) }}';" style="width:60px">
+                                                            </b></b>
+                                                        </td>
+                                                    </tr>
+                                                @endif
                                             @endforeach
                                         @endif
 

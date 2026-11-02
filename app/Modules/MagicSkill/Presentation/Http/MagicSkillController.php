@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\MagicSkill\Presentation\Http;
 
 use App\Http\Controllers\Controller;
+use App\Modules\MagicSkill\Application\UseCases\GetMageTrainerPage;
 use App\Modules\MagicSkill\Application\UseCases\GetMagicSkillPage;
 use App\Modules\MagicSkill\Application\UseCases\LearnMagicSkillFromBook;
 use App\Modules\MagicSkill\Application\UseCases\UpdateEquippedMagicSkills;
@@ -23,6 +24,7 @@ class MagicSkillController extends Controller
         private readonly UpdateMagicSkillOrder $updateMagicSkillOrder,
         private readonly UseMagicSkill $useMagicSkill,
         private readonly LearnMagicSkillFromBook $learnMagicSkillFromBook,
+        private readonly GetMageTrainerPage $getMageTrainerPage,
     ) {}
 
     public function index(Request $request)
@@ -78,5 +80,10 @@ class MagicSkillController extends Controller
         $result = $this->learnMagicSkillFromBook->execute(Auth::user(), $item);
 
         return response()->json($result->toArray(), $result->httpCode);
+    }
+
+    public function trainer(int $id): mixed
+    {
+        return view('magic-skill::trainer', $this->getMageTrainerPage->execute(Auth::user(), $id));
     }
 }

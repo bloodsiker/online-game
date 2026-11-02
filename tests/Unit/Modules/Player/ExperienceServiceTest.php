@@ -6,10 +6,29 @@ namespace Tests\Unit\Modules\Player;
 
 use App\Modules\Player\Domain\Services\ExperienceService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ExperienceServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        if (DB::connection()->getDriverName() !== 'sqlite'
+            || DB::connection()->getDatabaseName() !== ':memory:') {
+            $this->markTestSkipped('Только SQLite :memory:.');
+        }
+        Schema::create('player_active_effects', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->string('type');
+            $table->timestamp('expires_at')->nullable();
+            $table->integer('current_value');
+        });
+    }
+
     public function test_player_has_neutral_experience_multiplier_by_default(): void
     {
         $player = new Player;

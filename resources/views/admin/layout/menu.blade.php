@@ -14,6 +14,7 @@
             <nav id="menu" class="nav-main" role="navigation">
 
                 <ul class="nav nav-main">
+                    <li class="{{ request()->routeIs('admin.treasure_maps.*') ? 'nav-active' : '' }}"><a class="nav-link" href="{{ route('admin.treasure_maps.index') }}"><i class="bx bx-map"></i><span>Карты сокровищ</span></a></li>
                     <li class="{{ request()->routeIs('admin.trade.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.trade.index') }}"><i class="bx bx-transfer"></i><span>Вольный торг</span></a>
                     </li>
@@ -176,6 +177,12 @@
                             <span>Построение</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.payment_orders.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.payment_orders.index') }}"><i class="bx bx-receipt" aria-hidden="true"></i><span>Платежи и ордера</span></a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.premium.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.premium.index') }}"><i class="bx bx-crown" aria-hidden="true"></i><span>Премиум</span></a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.bank.stocks', 'admin.bank.stock.*') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.bank.stocks') }}">
                             <i class="bx bx-trending-up" aria-hidden="true"></i>
@@ -267,10 +274,16 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="{{ request()->routeIs('admin.post.*') ? 'nav-active' : '' }}">
+                    <li class="{{ request()->routeIs('admin.post.send', 'admin.post.send.store') ? 'nav-active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.post.send') }}">
                             <i class="bx bx-envelope" aria-hidden="true"></i>
                             <span>Почта</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.post.administration.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.post.administration.index') }}">
+                            <i class="bx bx-support" aria-hidden="true"></i>
+                            <span>Обращения к администрации</span>
                         </a>
                     </li>
                     {{-- Временное скрытие пунктов демо-шаблона Porto ниже «Почта». --}}

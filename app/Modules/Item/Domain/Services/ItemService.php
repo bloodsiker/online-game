@@ -64,6 +64,10 @@ class ItemService
                 return sprintf(__('Кто-то уже поднял предмет <b>"%s"</b>...'), $name);
             }
 
+            if ($slot->isReservedForAnotherUser((int) $user->id)) {
+                return __('Эта добыча временно закреплена за другим игроком.');
+            }
+
             $item = $slot->item;
 
             if ($item->itemInfo->type === ShareItemType::CHEST
@@ -672,11 +676,7 @@ class ItemService
             }
         }
 
-        Backpack::create([
-            'user_id' => $user->id,
-            'item_id' => $item->id,
-            'count' => $count,
-        ]);
+        Backpack::createForItem(userId: (int) $user->id, item: $item, count: $count);
 
         return null;
     }

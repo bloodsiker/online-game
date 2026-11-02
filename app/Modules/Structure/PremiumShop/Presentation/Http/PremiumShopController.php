@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Payments\Infrastructure\Persistence\Models\PaymentOrder;
 use App\Modules\Structure\Bank\Infrastructure\Persistence\Models\BankStock;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
@@ -18,6 +19,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PremiumShopController extends Controller
@@ -128,7 +132,16 @@ class PremiumShopController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        return view('premium_shop::topup', compact('user'));
+        $paymentSettings = Schema::hasTable('payment_settings')
+            ? DB::table('payment_settings')->find(1) : null;
+        $paymentOrders = $paymentSettings
+            ? PaymentOrder::query()->where('user_id', $user->id)
+                ->orderByDesc('id')->paginate(20, ['*'], 'orders_page') : null;
+        $paymentRequestId = (string) Str::uuid();
+        $paymentRate = ($paymentSettings?->diamond_price_minor ?? 650) / 100;
+        $paymentDefaultDiamonds = max(1, (int) ceil(($paymentSettings?->minimum_amount_minor ?? 50000) / ($paymentSettings?->diamond_price_minor ?: 650)));
+
+        return view('premium_shop::topup', compact('user', 'paymentSettings', 'paymentOrders', 'paymentRequestId', 'paymentRate', 'paymentDefaultDiamonds'));
     }
 
     public function stock(ItemTooltipCollector $tooltipCollector): mixed

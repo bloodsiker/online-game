@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Modules\Post\Presentation\Http\AdministrationMailController;
 use App\Modules\Post\Presentation\Http\PostController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/post', [PostController::class, 'index'])->name('post');
+Route::post('/post/administration', [AdministrationMailController::class, 'send'])->middleware(['auth', 'throttle:3,1'])->name('post.administration.send');
 Route::get('/post/letter/{id}', [PostController::class, 'letter'])->name('post.letter');
 Route::post('/post/send', [PostController::class, 'send'])->name('post.send');
 Route::post('/post/bulk', [PostController::class, 'bulk'])->name('post.bulk');

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Item;
 
+use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Quest\Domain\Services\QuestDefinitionsCache;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\User\Domain\Events\UserLocationChanged;
@@ -83,6 +85,61 @@ class UseItemTest extends TestCase
         Carbon::setTestNow();
 
         parent::tearDown();
+    }
+
+    public function test_hotbar_healing_potion_respects_item_limit_and_restores_only_once_until_expiry(): void
+    {
+        $this->assertHotbarPotionLimit('heal_hp', 'hp_now');
+    }
+
+    public function test_hotbar_mana_potion_respects_item_limit_and_restores_only_once_until_expiry(): void
+    {
+        $this->assertHotbarPotionLimit('heal_mp', 'mp_now');
+    }
+
+    private function assertHotbarPotionLimit(string $effectType, string $stat): void
+    {
+        Carbon::setTestNow('2026-11-02 12:00:00');
+        Schema::table('players', fn (Blueprint $table) => $table->timestamps());
+        Schema::create('player_slots', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->integer('slot_number');
+            $table->string('entity_type');
+            $table->unsignedBigInteger('entity_id');
+            $table->timestamps();
+        });
+        $sheet = new StatSheet;
+        $sheet->hpMax = 100;
+        $sheet->mpMax = 100;
+        $stats = $this->createMock(PlayerStatService::class);
+        $stats->method('resolve')->willReturn($sheet);
+        $this->app->instance(PlayerStatService::class, $stats);
+        $this->giveInventoryItem(500, 500, true);
+        DB::table('share_items')->where('id', 500)->update(['type' => 'potion', 'is_slot_usable' => true]);
+        DB::table('backpacks')->where('item_id', 500)->update(['count' => 3]);
+        DB::table('players')->where('id', 1)->update(['hp_now' => 0, 'mp_now' => 0]);
+        DB::table('share_item_effects')->insert(['share_item_id' => 500, 'effect_type' => $effectType, 'value' => 7, 'value_type' => 'flat']);
+        DB::table('share_item_use_limits')->insert(['id' => 1, 'share_item_id' => 500, 'max_uses' => 1, 'period_seconds' => 60]);
+        DB::table('player_slots')->insert(['player_id' => 1, 'slot_number' => 1, 'entity_type' => 'item', 'entity_id' => 500]);
+        DB::table('items')->insert(['id' => 501, 'share_item_id' => 500]);
+        DB::table('backpacks')->insert(['user_id' => 1, 'item_id' => 501, 'count' => 3, 'equipped' => false]);
+        DB::table('player_slots')->insert(['player_id' => 1, 'slot_number' => 2, 'entity_type' => 'item', 'entity_id' => 501]);
+
+        $this->postJson(route('hotbar.use'), ['slot' => 1])->assertOk()->assertJson(['status' => 'success', 'count' => 2, 'cooldown_until' => now()->addMinute()->timestamp]);
+        $this->postJson(route('hotbar.use'), ['slot' => 1])->assertUnprocessable()->assertJson(['code' => 'ITEM_USE_LIMIT_REACHED']);
+        $this->postJson(route('hotbar.use'), ['slot' => 2])->assertUnprocessable()->assertJson(['code' => 'ITEM_USE_LIMIT_REACHED']);
+        $this->assertDatabaseHas('players', ['id' => 1, $stat => 7]);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 500, 'count' => 2]);
+        $this->assertDatabaseHas('backpacks', ['item_id' => 501, 'count' => 3]);
+        $this->assertDatabaseHas('player_item_use_limit_states', ['player_id' => 1, 'uses_count' => 1]);
+        // Один лимит сохраняется после обновления панели и для использования из рюкзака.
+        $this->getJson(route('hotbar.index'))->assertOk()->assertJsonPath('slots.0.cooldown', 60)->assertJsonPath('slots.0.cooldown_until', now()->addMinute()->timestamp);
+        $this->postJson(route('items.use', 500))->assertUnprocessable()->assertJson(['code' => 'ITEM_USE_LIMIT_REACHED']);
+
+        Carbon::setTestNow(now()->addMinute());
+        $this->postJson(route('hotbar.use'), ['slot' => 1])->assertOk()->assertJson(['count' => 1]);
+        $this->assertDatabaseHas('players', ['id' => 1, $stat => 14]);
     }
 
     public function test_presence_pass_key_cannot_be_used_or_consumed_from_backpack(): void

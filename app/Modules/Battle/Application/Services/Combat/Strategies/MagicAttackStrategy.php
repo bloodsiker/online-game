@@ -21,6 +21,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
         private Player $playerModel, // Player model для чтения/записи mp_now
         private FightHitInterface $monster,
         private ?MagicSkill $magicSkill,
+        private int $magicSkillLevel = 0,
     ) {}
 
     public function getHits(): array
@@ -41,7 +42,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             ];
         }
 
-        $castAttempt = $this->castGuard->tryConsume($this->playerModel, $this->magicSkill);
+        $castAttempt = $this->castGuard->tryConsume($this->playerModel, $this->magicSkill, $this->magicSkillLevel);
 
         if (! $castAttempt->ok) {
             return [
@@ -58,6 +59,7 @@ class MagicAttackStrategy implements AttackStrategyInterface
             $this->magicSkill->min_damage,
             $this->magicSkill->max_damage,
             $this->magicSkill->power_coefficient,
+            $this->magicSkillLevel,
         );
 
         foreach ($this->magicSkill->skillEffects as $effectData) {

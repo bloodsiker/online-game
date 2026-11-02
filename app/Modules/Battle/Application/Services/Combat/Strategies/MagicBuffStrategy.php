@@ -20,6 +20,7 @@ class MagicBuffStrategy implements AttackStrategyInterface
         private StatSheet $casterSheet, // рассчитанные статы кастера: интеллект для хила + эффективный hp_max
         private Player $playerModel,    // Player model для чтения/записи hp_now/mp_now
         private MagicSkill $magicSkill,
+        private int $magicSkillLevel = 0,
     ) {}
 
     public function getHits(): array
@@ -29,7 +30,7 @@ class MagicBuffStrategy implements AttackStrategyInterface
         // бесплатно по кулдауну, а ману могли списать дважды параллельные
         // запросы. Теперь оба боевых пути каста идут через один и тот же
         // MagicCastGuard (транзакция + lockForUpdate), как MagicAttackStrategy.
-        $castAttempt = $this->castGuard->tryConsume($this->playerModel, $this->magicSkill);
+        $castAttempt = $this->castGuard->tryConsume($this->playerModel, $this->magicSkill, $this->magicSkillLevel);
 
         if (! $castAttempt->ok) {
             return [
@@ -54,6 +55,7 @@ class MagicBuffStrategy implements AttackStrategyInterface
                 minHeal: $this->magicSkill->base_healing,
                 maxHeal: $this->magicSkill->base_healing,
                 powerCoefficient: $this->magicSkill->power_coefficient,
+                magicSkillLevel: $this->magicSkillLevel,
             );
             $this->playerModel->hp_now = min(
                 $this->casterSheet->getHpMax(),

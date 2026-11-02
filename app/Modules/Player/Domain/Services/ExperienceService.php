@@ -7,6 +7,8 @@ namespace App\Modules\Player\Domain\Services;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerActiveEffect;
+use App\Modules\Premium\Application\Services\PremiumBonusService;
+use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Structure\Prison\Application\Services\DetentionService;
 
 class ExperienceService
@@ -30,6 +32,8 @@ class ExperienceService
     {
         $multiplier = max(0.0, (float) $player->experience_multiplier);
         $multiplier *= 1 + $this->activeExpBoostPercent($player) / 100;
+        $multiplier *= 1 + app(PremiumBonusService::class)
+            ->value((int) $player->user_id, PremiumBonus::EXPERIENCE) / 100;
 
         return (int) round(max(0, $baseExperience) * $multiplier);
     }

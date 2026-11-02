@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Influence\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Commerce\Presentation\Http\Requests\ShopPurchaseLimitInput;
 use App\Modules\Influence\Domain\Enums\InfluenceBonusType;
 use App\Modules\Influence\Domain\Enums\InfluenceRewardType;
 use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceMedal;
@@ -321,7 +322,7 @@ final class InfluenceController extends Controller
             'purchase_limit' => ['nullable', 'integer', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
-        $section->items()->create([...$data, 'is_active' => true]);
+        $section->items()->create([...$data, ...ShopPurchaseLimitInput::from($request), 'is_active' => true]);
 
         return back()->with('success', 'Товар добавлен.');
     }

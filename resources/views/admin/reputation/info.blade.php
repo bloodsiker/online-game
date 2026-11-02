@@ -287,6 +287,11 @@
                             {{-- МАГАЗИН --}}
                             <div id="tab-shop" class="tab-pane">
                                 <div class="pt-3">
+                                    @if($structureShop)
+                                        <a class="btn btn-primary" href="{{ route('admin.structure.info', $structureShop->id) }}">Управление магазином: {{ $structureShop->name }}</a>
+                                        <p class="text-muted mt-2">Товары, цены и персональные лимиты настраиваются в структуре.</p>
+                                    @else
+
                                     <div class="mb-3">
                                         <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalShop">Добавить предмет</a>
                                     </div>
@@ -300,6 +305,7 @@
                                                 <th width="100">Цена (монет)</th>
                                                 <th width="100">Цена (алмазы)</th>
                                                 <th width="110">Мин. очков</th>
+                                                <th width="220">Лимит покупки</th>
                                                 <th width="80">Сортировка</th>
                                                 <th width="70"></th>
                                             </tr>
@@ -314,10 +320,17 @@
                                                         @endif
                                                     </td>
                                                     <td>{{ $shopItem->item?->name ?? '—' }}</td>
-                                                    <td>{{ number_format($shopItem->price, 0, '', ' ') }}</td>
-                                                    <td>{{ number_format($shopItem->diamond, 0, '', ' ') }}</td>
-                                                    <td>{{ number_format($shopItem->min_points, 0, '', ' ') }}</td>
-                                                    <td>{{ $shopItem->sort_order }}</td>
+                                                    <td><input type="number" min="0" class="form-control form-control-sm" name="price" form="reputation-shop-form-{{ $shopItem->id }}" value="{{ $shopItem->price }}"></td>
+                                                    <td><input type="number" min="0" class="form-control form-control-sm" name="diamond" form="reputation-shop-form-{{ $shopItem->id }}" value="{{ $shopItem->diamond }}"></td>
+                                                    <td><input type="number" min="0" class="form-control form-control-sm" name="min_points" form="reputation-shop-form-{{ $shopItem->id }}" value="{{ $shopItem->min_points }}"></td>
+                                                    <td>
+                                                        <form id="reputation-shop-form-{{ $shopItem->id }}" method="post" action="{{ route('admin.reputation.shop.update', [$reputation->id, $shopItem->id]) }}">
+                                                            @csrf
+                                                            @include('admin.partials.shop-purchase-limit', ['offer' => $shopItem, 'formId' => null])
+                                                            <button class="btn btn-sm btn-primary mt-2">Сохранить</button>
+                                                        </form>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" name="sort_order" form="reputation-shop-form-{{ $shopItem->id }}" value="{{ $shopItem->sort_order }}"></td>
                                                     <td>
                                                         <a href="{{ route('admin.reputation.shop.delete', [$reputation->id, $shopItem->id]) }}"
                                                            class="btn btn-xs btn-danger"
@@ -325,11 +338,12 @@
                                                     </td>
                                                 </tr>
                                             @empty
-                                                <tr><td colspan="8" class="text-center text-muted">Нет предметов</td></tr>
+                                                <tr><td colspan="9" class="text-center text-muted">Нет предметов</td></tr>
                                             @endforelse
                                             </tbody>
                                         </table>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -524,6 +538,16 @@
                         <label>Предмет</label>
                         <select id="shop-item-select" name="share_item_id" class="form-control"></select>
                     </div>
+                    <div class="form-group mb-2">
+                        <label>Раздел магазина</label>
+                        <select name="share_structure_category_id" class="form-control">
+                            <option value="">Без раздела</option>
+                            @foreach($reputation->categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @include('admin.partials.shop-purchase-limit', ['offer' => null, 'formId' => null])
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group mb-2">

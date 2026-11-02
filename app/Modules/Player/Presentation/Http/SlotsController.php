@@ -29,6 +29,8 @@ class SlotsController extends Controller
         $player = $user->player;
         $group = $request->get('group', 'slots');
 
+        $player->loadMissing('magicSkills.skillEffects');
+
         [$passiveSkills, $activeSkills] = $player->magicSkills->partition(
             fn ($skill) => $skill->is_passive,
         );

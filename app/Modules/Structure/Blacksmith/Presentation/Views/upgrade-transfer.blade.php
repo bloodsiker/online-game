@@ -81,15 +81,10 @@
                 <div class="{{ session('upgrade_transfer_success', false) ? 'flash-success' : 'flash-fail' }}">{{ session('message') }}</div>
             @endif
 
-            <table class="coll w100 p10h p2v brd2-all">
-                <tr class="bg_l">
-                    <td align="left"><b>Кузня:</b> Перенос заточки</td>
-                    <td align="right"><b>Правило:</b> одинаковый тип и слот экипировки</td>
-                </tr>
-            </table>
+            @include('blacksmith::_summary', ['sectionTitle' => __('Перенос заточки')])
 
             @include('blacksmith::_craft-hint-styles')
-            @include('blacksmith::_craft-hint', ['hint' => 'Выберите Трансгрессор подходящей редкости. При неудаче исходная заточка будет полностью потеряна.'])
+            @include('blacksmith::_craft-hint', ['hint' => 'Правило: одинаковый тип и слот экипировки. Выберите Трансгрессор подходящей редкости. При неудаче исходная заточка будет полностью потеряна.'])
 
             <form action="{{ route('blacksmith.upgrade_transfer.process', ['id' => $blacksmith->id]) }}" method="post" id="transfer-form">
                 @csrf

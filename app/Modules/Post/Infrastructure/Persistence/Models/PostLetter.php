@@ -26,9 +26,16 @@ class PostLetter extends Model
         'read_at',
         'sender_deleted_at',
         'recipient_deleted_at',
+        'is_to_administration',
+        'administration_sender_id',
+        'administration_thread_id',
+        'administration_status',
+        'administration_last_message_at',
     ];
 
     protected $casts = [
+        'is_to_administration' => 'boolean',
+        'administration_last_message_at' => 'datetime',
         'money_claimed_at' => 'datetime',
         'item_claimed_at' => 'datetime',
         'read_at' => 'datetime',
@@ -44,6 +51,11 @@ class PostLetter extends Model
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recipient_user_id');
+    }
+
+    public function administrationSender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'administration_sender_id');
     }
 
     public function shareItem(): BelongsTo
@@ -65,6 +77,11 @@ class PostLetter extends Model
     public function isSystem(): bool
     {
         return $this->sender_user_id === null;
+    }
+
+    public function isAdministrationReply(): bool
+    {
+        return $this->administration_thread_id !== null && ! $this->is_to_administration;
     }
 
     /**

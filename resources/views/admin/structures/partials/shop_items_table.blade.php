@@ -9,6 +9,7 @@
             @if($structure->isBarterShop())
                 <th width="340">Цена предметами</th>
             @endif
+            <th width="220">Лимит покупки</th>
             <th width="120">Сортировка</th>
             <th width="150"></th>
         </tr>
@@ -100,6 +101,11 @@
                     </td>
                 @endif
                 <td>
+                    @include('admin.partials.shop-purchase-limit', ['offer' => $shopItem, 'formId' => 'shop-item-form-'.$shopItem->id])
+                    <label class="mt-2">Мин. очков репутации</label>
+                    <input type="number" min="0" name="min_reputation_points" value="{{ $shopItem->min_reputation_points ?? 0 }}" form="shop-item-form-{{ $shopItem->id }}" class="form-control form-control-sm">
+                </td>
+                <td>
                     <input type="number"
                            class="form-control form-control-sm"
                            name="sort_order"
@@ -115,7 +121,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="{{ $structure->isBarterShop() ? 7 : 6 }}" class="text-center text-muted">Нет предметов</td></tr>
+            <tr><td colspan="{{ $structure->isBarterShop() ? 8 : 7 }}" class="text-center text-muted">Нет предметов</td></tr>
         @endforelse
         </tbody>
     </table>

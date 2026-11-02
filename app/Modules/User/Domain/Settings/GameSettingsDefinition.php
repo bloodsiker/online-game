@@ -13,6 +13,7 @@ final class GameSettingsDefinition
         'map_side' => ['default' => 'right', 'type' => 'map_side', 'rules' => ['sometimes', 'required', 'string', 'in:left,right']],
         'show_hotbar' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
         'show_item_tooltips' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
+        'auto_loot_enabled' => ['default' => true, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
         'chat_sound_enabled' => ['default' => false, 'type' => 'bool', 'rules' => ['sometimes', 'required', 'boolean']],
         'volume' => ['default' => 50, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,100']],
         'sound_mention' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],

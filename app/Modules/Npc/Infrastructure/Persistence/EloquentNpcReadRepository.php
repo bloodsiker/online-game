@@ -119,7 +119,7 @@ class EloquentNpcReadRepository implements NpcReadRepository
 
     public function getNpcReputations(int $npcId): Collection
     {
-        return Reputation::with('tiers.quests.quest', 'shopItems')
+        return Reputation::with('tiers.quests.quest', 'shopItems', 'categories')
             ->where('npc_id', $npcId)
             ->get();
     }

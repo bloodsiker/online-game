@@ -13,6 +13,7 @@ use App\Modules\Reputation\Application\UseCases\GetReputationPage;
 use App\Modules\Reputation\Application\UseCases\GetReputationShopPage;
 use App\Modules\Reputation\Application\UseCases\PurchaseReputationCart;
 use App\Modules\Reputation\Application\UseCases\TakeReputationQuest;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -71,8 +72,13 @@ class ReputationController extends Controller
         return redirect()->route('npc', $npcId);
     }
 
-    public function shop(int $id, Request $request): View
+    public function shop(int $id, Request $request): View|RedirectResponse
     {
+        $structure = Structure::where('reputation_id', $id)->where('type', Structure::TYPE_SHOP)->first();
+        if ($structure !== null) {
+            return redirect()->route('shop', ['id' => $structure->id, 'category_id' => $request->integer('category_id') ?: null]);
+        }
+
         /** @var User $user */
         $user = Auth::user();
         $categoryId = $request->has('category_id') ? $request->integer('category_id') : null;
@@ -84,6 +90,11 @@ class ReputationController extends Controller
 
     public function addCart(int $id, Request $request): RedirectResponse
     {
+        $structure = Structure::where('reputation_id', $id)->where('type', Structure::TYPE_SHOP)->first();
+        if ($structure !== null) {
+            return redirect()->route('shop', ['id' => $structure->id, 'category_id' => $request->integer('category_id') ?: null]);
+        }
+
         /** @var User $user */
         $user = Auth::user();
         $result = $this->addReputationCartItem->execute(
@@ -121,6 +132,11 @@ class ReputationController extends Controller
 
     public function buy(int $id): RedirectResponse
     {
+        $structure = Structure::where('reputation_id', $id)->where('type', Structure::TYPE_SHOP)->first();
+        if ($structure !== null) {
+            return redirect()->route('shop', ['id' => $structure->id, 'category_id' => request()->integer('category_id') ?: null]);
+        }
+
         /** @var User $user */
         $user = Auth::user();
         $result = $this->purchaseReputationCart->execute($user, $id);

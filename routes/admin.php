@@ -29,7 +29,24 @@ use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\StructureController;
 use App\Http\Controllers\Admin\UserController;
 use App\Modules\ItemAssembly\Presentation\Http\Admin\ItemAssemblyController;
+use App\Modules\Payments\Presentation\Http\Admin\PaymentOrderController;
+use App\Modules\Premium\Presentation\Http\Admin\PremiumController;
+use App\Modules\TreasureHunt\Presentation\Http\Admin\TreasureMapController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/premium', [PremiumController::class, 'index'])->name('premium.index');
+Route::get('/treasure-maps', [TreasureMapController::class, 'index'])->name('treasure_maps.index');
+Route::get('/treasure-maps/create', [TreasureMapController::class, 'form'])->name('treasure_maps.create');
+Route::post('/treasure-maps', [TreasureMapController::class, 'save'])->name('treasure_maps.store');
+Route::post('/treasure-maps/bonuses', [TreasureMapController::class, 'bonuses'])->name('treasure_maps.bonuses');
+Route::get('/treasure-maps/{config}/edit', [TreasureMapController::class, 'form'])->name('treasure_maps.edit');
+Route::post('/treasure-maps/{config}', [TreasureMapController::class, 'save'])->name('treasure_maps.update');
+Route::get('/payment-orders', [PaymentOrderController::class, 'index'])->name('payment_orders.index');
+Route::get('/payment-orders/{publicId}', [PaymentOrderController::class, 'show'])->name('payment_orders.show');
+Route::post('/payment-orders/{publicId}/confirm', [PaymentOrderController::class, 'confirm'])->name('payment_orders.confirm');
+Route::post('/payment-orders/{publicId}/reject', [PaymentOrderController::class, 'reject'])->name('payment_orders.reject');
+Route::post('/payment-settings', [PaymentOrderController::class, 'settings'])->name('payment_orders.settings');
+Route::post('/premium', [PremiumController::class, 'save'])->name('premium.save');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -115,6 +132,9 @@ Route::get('/item/{item}/debuff/{debuff}/delete', [ItemController::class, 'delet
 Route::post('/item/{item}/requirement', [ItemController::class, 'addRequirement'])->name('item.requirement.add');
 Route::get('/item/{item}/requirement/{requirement}/delete', [ItemController::class, 'deleteRequirement'])->name('item.requirement.delete');
 Route::post('/item/{item}/rarity-upgrade/material', [ItemController::class, 'addRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.add');
+Route::post('/item/{item}/artifact-upgrade', [ItemController::class, 'saveArtifactUpgrade'])->name('item.artifact_upgrade.save');
+Route::post('/item/{item}/artifact-upgrade/material', [ItemController::class, 'addArtifactUpgradeMaterial'])->name('item.artifact_upgrade.material.add');
+Route::delete('/item/{item}/artifact-upgrade/material/{material}', [ItemController::class, 'deleteArtifactUpgradeMaterial'])->name('item.artifact_upgrade.material.delete');
 Route::delete('/item/{item}/rarity-upgrade/material/{material}', [ItemController::class, 'deleteRarityUpgradeMaterial'])->name('item.rarity_upgrade.material.delete');
 Route::post('/item/{item}/chest-content', [ItemController::class, 'addChestContent'])->name('item.chest_content.add');
 Route::patch('/item/{item}/chest-content/{containedItem}', [ItemController::class, 'updateChestContent'])->name('item.chest_content.update');
@@ -244,6 +264,7 @@ Route::post('/reputation/{reputation}/tier/{tier}/update', [ReputationController
 Route::get('/reputation/{reputation}/tier/{tier}/delete', [ReputationController::class, 'deleteTier'])->name('reputation.tier.delete');
 Route::post('/reputation/{reputation}/tier/{tier}/quest', [ReputationController::class, 'addTierQuest'])->name('reputation.tier.quest.add');
 Route::get('/reputation/{reputation}/tier/{tier}/quest/{tierQuest}/delete', [ReputationController::class, 'deleteTierQuest'])->name('reputation.tier.quest.delete');
+Route::post('/reputation/{reputation}/shop/{shopItem}/update', [ReputationController::class, 'updateShopItem'])->name('reputation.shop.update');
 Route::post('/reputation/{reputation}/shop', [ReputationController::class, 'addShopItem'])->name('reputation.shop.add');
 Route::get('/reputation/{reputation}/shop/{shopItem}/delete', [ReputationController::class, 'deleteShopItem'])->name('reputation.shop.delete');
 Route::post('/reputation/{reputation}/gamble', [ReputationController::class, 'addGambleOption'])->name('reputation.gamble.add');

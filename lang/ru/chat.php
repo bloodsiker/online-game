@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'treasure_found' => 'Вы обнаружили [[share_item_:item_id]]! Шкатулка помещена в рюкзак. Репутация <b>«:reputation»</b>: +:amount.',
     'reward_exp' => '+:amount опыта',
     'reward_money' => '+:amount монет',
     'reward_item' => 'предмет',
@@ -40,6 +41,8 @@ return [
     'reputation_offering' => 'Вы поднесли :count×«:item» и получили <b>+:points</b> репутации <b>«:reputation»</b>.:reward',
     'received_item' => ' Получен [[share_item_:item_id]] ×:count.',
     'gathering' => 'Вы получили вещь :resource:bonus',
+    'monster_auto_loot' => 'Автосбор: вы получили [[share_item_:item_id]] ×:count.',
+    'monster_auto_loot_money' => 'Автосбор: вы получили :amount монет.',
     'gathering_resource' => '<b>:name</b> :count шт. (в рюкзаке :backpack_count шт.)',
     'gathering_bonus' => ' Дополнительно: :resources',
     'quest_started' => 'Для Вас начался квест <b>«:title»</b>. Желаем удачи!',

@@ -10,13 +10,17 @@ use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 
 final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
 {
     /**
      * @param  iterable<int, Item>  $items
      */
-    public function __construct(private readonly iterable $items) {}
+    public function __construct(
+        private readonly iterable $items,
+        private readonly string $idPrefix = '',
+    ) {}
 
     public function collect(ItemTooltipCollector $collector): void
     {
@@ -36,9 +40,12 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
                 : $itemInfo->name;
+            if ($itemInfo->type === ShareItemType::TREASURE_MAP) {
+                $title = $item->getName();
+            }
 
             $collector->add(new ItemTooltipDto(
-                id: $item->id,
+                id: $this->idPrefix === '' ? $item->id : $this->idPrefix.$item->id,
                 title: $title,
                 color: $itemInfo->rarity->color(),
                 image: $itemInfo->image,
@@ -47,7 +54,7 @@ final class ItemModelTooltipStrategy implements ItemTooltipStrategyInterface
                 diamond: '',
                 lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description ?? '',
+                desc: $item->getDescription(),
                 store: false,
                 nogive: ! $itemInfo->is_give,
                 noweight: ! $itemInfo->is_weight,

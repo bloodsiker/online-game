@@ -118,17 +118,8 @@
             <div class="{{ $flashClass }}">{{ session('message') }}</div>
         @endif
 
-        <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
-        <tbody><tr class="bg_l">
-            <td align="left"><b>Кузня:</b> Руны</td>
-            <td align="right" nowrap="" style="color:#955c4a;">
-                <b>Монеты:</b> <b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }}</b>
-                &nbsp;&nbsp;<b>Бриллианты:</b> <b class="redd"><span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }}</b>
-            </td>
-        </tr></tbody>
-        </table>
+        @include('blacksmith::_summary', ['sectionTitle' => __('Руны')])
 
-        <br>
 
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr valign="top">

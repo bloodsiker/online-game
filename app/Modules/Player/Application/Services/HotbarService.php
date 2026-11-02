@@ -3,6 +3,7 @@
 namespace App\Modules\Player\Application\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Item\Domain\Services\ItemUsagePolicyService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSlot;
@@ -11,6 +12,8 @@ use Carbon\Carbon;
 
 class HotbarService
 {
+    public function __construct(private readonly ItemUsagePolicyService $usagePolicy = new ItemUsagePolicyService) {}
+
     const BASE_SLOTS = 3;
 
     /**
@@ -164,11 +167,13 @@ class HotbarService
         $count = null;
 
         if ($slot->entity_type === 'item') {
-            $item = Item::with('itemInfo')->find($slot->entity_id);
+            $item = Item::with('itemInfo.useLimit')->find($slot->entity_id);
             if ($item) {
                 $name = $item->itemInfo->name;
                 $image = $item->itemInfo->image;
-                $cooldown = 1; // TODO: получать из атрибутов предмета
+                $limit = $item->itemInfo->useLimit;
+                $cooldown = $limit?->max_uses === 1 ? $limit->period_seconds : 0;
+                $cooldownUntil = $this->usagePolicy->cooldownUntil($player, $item->itemInfo)?->getTimestamp();
 
                 $backpack = Backpack::where('user_id', $player->user_id)
                     ->where('item_id', $slot->entity_id)

@@ -224,6 +224,9 @@
                 @endif
 
                 <div class="location-description">{{ $page->description }}</div>
+                @if(!empty($treasureHunt))
+                    @include('treasure::search', ['hunt' => $treasureHunt])
+                @endif
 
             @if($page->dungeonSession !== null)
                 <div style="background:#ffe8b0; border:1px solid #c90; padding:4px 6px; margin-bottom:6px; font-size:11px;">

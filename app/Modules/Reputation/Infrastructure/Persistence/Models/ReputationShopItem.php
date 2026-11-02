@@ -14,9 +14,10 @@ class ReputationShopItem extends Model
 {
     protected $table = 'reputation_shop_items';
 
-    protected $fillable = ['reputation_id', 'share_structure_category_id', 'share_item_id', 'price', 'diamond', 'min_points', 'sort_order'];
+    protected $fillable = ['purchase_limit_quantity', 'purchase_limit_period_seconds', 'reputation_id', 'share_structure_category_id', 'share_item_id', 'price', 'diamond', 'min_points', 'sort_order'];
 
     protected $casts = [
+        'purchase_limit_quantity' => 'integer', 'purchase_limit_period_seconds' => 'integer',
         'price' => 'integer',
         'diamond' => 'integer',
         'min_points' => 'integer',

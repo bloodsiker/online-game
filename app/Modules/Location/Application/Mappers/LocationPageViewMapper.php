@@ -245,6 +245,8 @@ class LocationPageViewMapper
             $structure->isWorkshop() => route('workshop', ['id' => $structure->id]),
             $structure->isToolWorkshop() => route('tool_workshop', ['id' => $structure->id]),
             $structure->isHeal() => route('heal', ['id' => $structure->id]),
+            $structure->isMageTower() => route('mage_tower', ['id' => $structure->id]),
+            $structure->isMageTrainer() => route('mage_trainer', ['id' => $structure->id]),
             default => null,
         };
     }

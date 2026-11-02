@@ -35,9 +35,10 @@ class MagicSkillRequirementService
 
         foreach ($skill->requirements as $req) {
             $met = match ($req->type) {
-                // Старые записи будут переведены миграцией в требование навыка.
-                // До её запуска они не должны ни блокировать изучение, ни вызывать 500.
-                MagicSkillRequirementType::LEVEL => true,
+                // Реальный гейт по уровню персонажа — нужен классонейтральным
+                // пассивкам (Стойкость духа и т.п.), которые не завязаны на
+                // «Колдовство» и должны быть доступны и магу, и воину.
+                MagicSkillRequirementType::LEVEL => (int) $player->lvl >= $req->min_value,
                 MagicSkillRequirementType::STAT => $this->checkStat($player, (string) $req->stat_key, $req->min_value),
                 MagicSkillRequirementType::SKILL => (int) $skillLevels->get($req->skill_id, 0) >= $req->min_value,
             };

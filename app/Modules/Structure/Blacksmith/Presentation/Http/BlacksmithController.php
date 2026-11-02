@@ -11,11 +11,13 @@ use App\Modules\Structure\Blacksmith\Application\DTOs\TransferUpgradeDTO;
 use App\Modules\Structure\Blacksmith\Application\DTOs\UpgradeItemDTO;
 use App\Modules\Structure\Blacksmith\Application\UseCases\BreakItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\CraftItem;
+use App\Modules\Structure\Blacksmith\Application\UseCases\GetArtifactUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetBreakPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetKraftPage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetRarityUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradePage;
 use App\Modules\Structure\Blacksmith\Application\UseCases\GetUpgradeTransferPage;
+use App\Modules\Structure\Blacksmith\Application\UseCases\SharpenArtifact;
 use App\Modules\Structure\Blacksmith\Application\UseCases\TransferUpgrade;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItem;
 use App\Modules\Structure\Blacksmith\Application\UseCases\UpgradeItemRarity;
@@ -39,13 +41,20 @@ class BlacksmithController extends Controller
         private readonly UpgradeItemRarity $upgradeItemRarity,
         private readonly GetUpgradeTransferPage $getUpgradeTransferPage,
         private readonly TransferUpgrade $transferUpgrade,
+        private readonly GetArtifactUpgradePage $getArtifactUpgradePage,
     ) {}
 
     public function index(Request $request, mixed $id): mixed
     {
-        $request->validate(['section' => ['sometimes', 'in:craft,artifacts']]);
+        $request->validate(['section' => ['sometimes', 'in:craft,artifacts,artifact-upgrade']]);
         /** @var User $user */
         $user = Auth::user();
+        if ($request->query('section') === 'artifact-upgrade') {
+            return view('blacksmith::kraft', [
+                ...$this->getArtifactUpgradePage->execute($user, (int) $id),
+                'recipes' => [], 'resources' => [], 'assemblies' => [], 'craftSection' => 'artifact-upgrade',
+            ]);
+        }
         $page = $this->getKraftPage->execute($user, (int) $id);
 
         return view('blacksmith::kraft', [
@@ -57,6 +66,25 @@ class BlacksmithController extends Controller
             'assemblies' => $page->assemblies,
             'craftSection' => $request->query('section', 'craft'),
         ]);
+    }
+
+    public function sharpenArtifact(
+        Request $request,
+        int $id,
+        SharpenArtifact $sharpen,
+    ): RedirectResponse {
+        $data = $request->validate([
+            'item_id' => ['required', 'integer', 'min:1'],
+            'expected_level' => ['required', 'integer', 'min:0'],
+        ]);
+        $sharpen->execute(
+            user: $request->user(),
+            structureId: $id,
+            itemId: (int) $data['item_id'],
+            expectedLevel: (int) $data['expected_level'],
+        );
+
+        return redirect()->route('blacksmith', ['id' => $id, 'section' => 'artifact-upgrade']);
     }
 
     public function kraftItem(Request $request, mixed $id): RedirectResponse|JsonResponse

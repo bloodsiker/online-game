@@ -216,6 +216,7 @@
                                                     <option value="1" @selected(old('is_active', '1') === '1')>Да</option>
                                                     <option value="0" @selected(old('is_active') === '0')>Нет</option>
                                                 </select>
+                                                <small class="text-muted">Карту сокровищ сначала сохраните неактивной, настройте поиск в разделе <a href="{{ route('admin.treasure_maps.create') }}">«Карты сокровищ»</a>, затем активируйте.</small>
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="is_sell">Можно продать магазину</label>

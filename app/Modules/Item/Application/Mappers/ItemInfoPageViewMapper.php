@@ -37,6 +37,7 @@ class ItemInfoPageViewMapper
             gems: ItemTooltipStatsBuilder::buildGems($item),
             runes: ItemTooltipStatsBuilder::buildRunes($item),
             upgradeLvl: $item->upgrade_lvl,
+            description: $item->getDescription(),
         );
     }
 
@@ -68,6 +69,7 @@ class ItemInfoPageViewMapper
         array $gems = [],
         array $runes = [],
         int $upgradeLvl = 0,
+        ?string $description = null,
     ): ItemInfoPageDTO {
         $shareItem->loadMissing('stats', 'effects', 'requirements.skill', 'skill');
 
@@ -96,7 +98,7 @@ class ItemInfoPageViewMapper
             image: $shareItem->image ? asset($shareItem->image) : null,
             typeName: (string) $shareItem->getTypeName(),
             price: (int) $shareItem->price,
-            description: $shareItem->description,
+            description: $description ?? $shareItem->description,
             noGive: ! $shareItem->is_give,
             noWeight: ! $shareItem->is_weight,
             noSell: ! $shareItem->is_sell,

@@ -212,7 +212,7 @@ class ItemDuplicateTest extends TestCase
 
         (new ItemController)->duplicate($item);
 
-        $copy = ShareItem::where('name', 'Сундук мастера (копия)')->firstOrFail();
+        $copy = ShareItem::where('name->ru', 'Сундук мастера (копия)')->firstOrFail();
         $copy->load(['stats', 'effects', 'buffs', 'debuffs', 'requirements', 'recipe.items', 'itemHasItems', 'useLimit', 'lockConfig']);
 
         $this->assertNotSame($item->id, $copy->id);
@@ -243,6 +243,16 @@ class ItemDuplicateTest extends TestCase
         $this->assertSame(2, $copy->itemHasItems->sole()->pivot->min_count);
         $this->assertSame(5, $copy->itemHasItems->sole()->pivot->max_count);
         $this->assertSame(35, $copy->itemHasItems->sole()->pivot->drop_chance);
+    }
+
+    public function test_treasure_map_copy_is_a_draft_until_its_configuration_is_created(): void
+    {
+        $item = ShareItem::create(['name' => 'Карта сокровищ', 'type' => ShareItemType::TREASURE_MAP, 'is_active' => true]);
+        (new ItemController)->duplicate($item);
+        $copy = ShareItem::where('id', '!=', $item->id)->sole();
+        $this->assertSame(ShareItemType::TREASURE_MAP, $copy->type);
+        $this->assertFalse((bool) $copy->is_active);
+        $this->assertTrue((bool) $item->fresh()->is_active);
     }
 
     public function test_admin_lock_fields_are_saved_to_the_chest_config(): void

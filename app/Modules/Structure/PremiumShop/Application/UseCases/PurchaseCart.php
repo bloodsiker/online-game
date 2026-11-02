@@ -6,7 +6,9 @@ namespace App\Modules\Structure\PremiumShop\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
+use App\Modules\Commerce\Domain\Exceptions\PurchaseLimitExceeded;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\DTOs\PremiumShopResultDTO;
@@ -19,9 +21,23 @@ class PurchaseCart
     public function __construct(
         private readonly ShopCartService $shopCartService,
         private readonly PurchaseLogger $purchaseLogger,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
     ) {}
 
     public function execute(User $user, int $shopId): PremiumShopResultDTO
+    {
+        try {
+            return DB::transaction(function () use ($user, $shopId): PremiumShopResultDTO {
+                $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+                return $this->purchase($user, $shopId);
+            });
+        } catch (PurchaseLimitExceeded $exception) {
+            return new PremiumShopResultDTO(false, $exception->getMessage());
+        }
+    }
+
+    private function purchase(User $user, int $shopId): PremiumShopResultDTO
     {
         $cart = $this->shopCartService->getCart($user, $shopId);
 
@@ -34,6 +50,10 @@ class PurchaseCart
         }
 
         DB::transaction(function () use ($user, $cart, $shopId) {
+            foreach ($cart->getItems() as $line) {
+                $this->purchaseLimits->reserve($user, $line->shopItem, (int) $line->quantity);
+            }
+
             $stackableShareItemIds = $cart->getItems()
                 ->map(static fn ($itemInCart) => $itemInCart->shopItem->item)
                 ->filter(static fn ($shareItem): bool => $shareItem->is_stackable)

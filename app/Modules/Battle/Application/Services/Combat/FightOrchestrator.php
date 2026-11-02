@@ -184,6 +184,17 @@ readonly class FightOrchestrator
             $player->save();
             $playerHpAfterRound = $player->hp_now;
 
+            // «Инстинкт выживания» — классонейтральная пассивка, шанс спастись
+            // от смертельного удара с 1 HP вместо смерти. Проверяем здесь —
+            // единственная общая точка после применения и своего урона, и
+            // ответного удара монстра, где hp_now уже сохранён.
+            if ($player->hp_now <= 0 && $this->effectService->rollLethalSurvival($player)) {
+                $player->hp_now = 1;
+                $player->save();
+                $playerHpAfterRound = 1;
+                $playerLog->log('<p class="color-buff">Инстинкт выживания спас вас от смерти!</p>');
+            }
+
             $fullLog = (new AttackResultDTO)->merge($playerLog)->merge($monsterLog);
 
             if ($player->hp_now <= 0) {

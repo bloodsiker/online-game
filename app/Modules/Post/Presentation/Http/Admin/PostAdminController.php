@@ -21,6 +21,7 @@ final class PostAdminController
         $letters = PostLetter::query()
             ->with(['recipient', 'shareItem'])
             ->whereNull('sender_user_id')
+            ->whereNull('administration_thread_id')
             ->orderByDesc('id')
             ->limit(50)
             ->get();

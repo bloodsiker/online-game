@@ -9,6 +9,7 @@ use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
 use App\Modules\Battle\Application\Services\DropService;
+use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
@@ -56,6 +57,7 @@ readonly class AttackService
         private DivineFavorService $divineFavorService,
         private DungeonStageService $dungeonStageService,
         private ChatService $chatService,
+        private MonsterLootService $monsterLootService = new MonsterLootService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locMonster, int $action, Battle $battle, float $xpMultiplier = 1.0): AttackResultDTO
@@ -161,7 +163,7 @@ readonly class AttackService
 
             $exp = $this->calculateExperience($player, $locMonster->monster, min($locMonster->hp_now, $damage), $locMonster->hp_max, $xpMultiplier);
 
-            $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
+            $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
             $this->awardMonsterExperience($player, $locMonster->monster, $exp);
             $this->applyMonsterReflectPassive($locMonster->monster, $player, $damage, $result);
 
@@ -193,6 +195,7 @@ readonly class AttackService
                         $result,
                         (int) $applied['effect']->pivot->duration_seconds,
                         $applied['tickValue'],
+                        sourceUserId: $player->user_id,
                     );
 
                     $result->log(BattleLogTranslator::format(
@@ -236,7 +239,7 @@ readonly class AttackService
 
             match ($favor['type']) {
                 DivineFavorType::HEAL => $this->applyDivineHeal($player, $battle, $favor, $effectiveHpMax, $result),
-                DivineFavorType::POISON => $this->applyDivinePoison($locMonster, $battle, $favor, $result),
+                DivineFavorType::POISON => $this->applyDivinePoison($player, $locMonster, $battle, $favor, $result),
                 DivineFavorType::ATTACK_BUFF => $this->applyDivineAttackBuff($player, $battle, $favor, $result),
             };
         }
@@ -271,7 +274,7 @@ readonly class AttackService
     }
 
     /** @param  array{reputation: Reputation, type: DivineFavorType, chance: int, percent: int, durationSeconds: int, permanent: bool}  $favor */
-    private function applyDivinePoison(MonsterOnLocation $locMonster, Battle $battle, array $favor, AttackResultDTO $result): void
+    private function applyDivinePoison(Player $player, MonsterOnLocation $locMonster, Battle $battle, array $favor, AttackResultDTO $result): void
     {
         if ($locMonster->hp_now <= 0) {
             return;
@@ -300,6 +303,7 @@ readonly class AttackService
             $result,
             $durationSeconds,
             $tickValue,
+            sourceUserId: $player->user_id,
         );
     }
 
@@ -379,7 +383,7 @@ readonly class AttackService
             $extraDamage = min($locMonster->hp_now, $damage);
             $extraExp = $this->calculateExperience($player, $locMonster->monster, $extraDamage, $locMonster->hp_max, $xpMultiplier);
 
-            $locMonster->hp_now = max(0, $locMonster->hp_now - $damage);
+            $this->monsterLootService->damage($locMonster, $damage, $player->user_id, $battle->id);
             $this->awardMonsterExperience($player, $locMonster->monster, $extraExp);
 
             $result->log(BattleLogTranslator::format(
@@ -463,7 +467,7 @@ readonly class AttackService
         $chainDamage = min($secondMonster->hp_now, $chainDamage);
         $exp = $this->calculateExperience($player, $secondMonster->monster, $chainDamage, $secondMonster->hp_max, $xpMultiplier);
 
-        $secondMonster->hp_now = max(0, $secondMonster->hp_now - $chainDamage);
+        $this->monsterLootService->damage($secondMonster, $chainDamage, $player->user_id, $battle->id);
         $secondMonster->save();
         $this->awardMonsterExperience($player, $secondMonster->monster, $exp);
 
@@ -758,7 +762,8 @@ readonly class AttackService
 
         MonsterActiveEffect::where('location_monster_id', $locationMonster->id)->delete();
 
-        $this->dropService->dropMoney($player->user, $locationMonster, $result);
+        $recipient = $this->monsterLootService->recipient($attackedMonster->battle_id, $locationMonster->id, $player->user);
+        $this->dropService->dropMoney($recipient, $locationMonster, $result);
         foreach ($this->questService->progressKillAndCollect($player, $locationMonster) as $message) {
             $result->logSide($message);
         }

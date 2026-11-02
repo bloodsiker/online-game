@@ -129,10 +129,11 @@ final class MonsterNpcTranslationsTest extends TestCase
         $npc = new Npc(['name' => 'Торговец']);
         $npc->id = 55;
         $npc->setRelation('location', null);
+        $npc->setRelation('movement', null);
         foreach (['dialogueNodes', 'startQuests', 'completeQuests'] as $relation) {
             $npc->setRelation($relation, new Collection);
         }
-        $data = ['monster' => $monster, 'npc' => $npc, 'errors' => new ViewErrorBag];
+        $data = ['monster' => $monster, 'npc' => $npc, 'errors' => new ViewErrorBag, 'movementMap' => null, 'movementLocations' => collect()];
         foreach (['allMonsters', 'availableEffects', 'mechanicTypes', 'statTypes', 'effectTypes'] as $key) {
             $data[$key] = collect();
         }

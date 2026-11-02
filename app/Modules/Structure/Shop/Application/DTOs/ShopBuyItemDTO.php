@@ -21,5 +21,7 @@ final readonly class ShopBuyItemDTO
         public int $diamond,
         public array $requirements,
         public string $infoUrl,
+        public ?array $purchaseAvailability = null,
+        public int $minReputationPoints = 0,
     ) {}
 }

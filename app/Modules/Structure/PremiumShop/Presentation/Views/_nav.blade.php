@@ -30,6 +30,13 @@
         </td>
         <td width="19"><img src="{{ asset($stockActive ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
 
+        @php $premiumActive = ($activeMenu ?? '') === 'premium'; @endphp
+        <td width="19"><img src="{{ asset($premiumActive ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
+        <td align="center" style="white-space: nowrap; background: url({{ asset($premiumActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0 2px 6px;">
+            <a href="{{ route('premium.status') }}" class="{{ $premiumActive ? 'btn_2' : 'btn_1' }}">{{ __('premium.title') }}</a>
+        </td>
+        <td width="19"><img src="{{ asset($premiumActive ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
+
         <td width="100%"></td>
 
         <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>

@@ -21,9 +21,11 @@ use App\Modules\News\NewsServiceProvider;
 use App\Modules\Notification\NotificationServiceProvider;
 use App\Modules\Npc\NpcServiceProvider;
 use App\Modules\Party\PartyServiceProvider;
+use App\Modules\Payments\PaymentsServiceProvider;
 use App\Modules\Player\PlayerServiceProvider;
 use App\Modules\PlayerTrade\PlayerTradeServiceProvider;
 use App\Modules\Post\PostServiceProvider;
+use App\Modules\Premium\PremiumServiceProvider;
 use App\Modules\Quest\QuestServiceProvider;
 use App\Modules\Race\RaceServiceProvider;
 use App\Modules\Rating\RatingServiceProvider;
@@ -32,10 +34,13 @@ use App\Modules\Reputation\ReputationServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
 use App\Modules\Trade\TradeServiceProvider;
+use App\Modules\TreasureHunt\TreasureHuntServiceProvider;
 use App\Modules\User\UserServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
+    PaymentsServiceProvider::class,
+    PremiumServiceProvider::class,
     AppServiceProvider::class,
     AuthServiceProvider::class,
     BattleServiceProvider::class,
@@ -66,6 +71,7 @@ return [
     ReferralServiceProvider::class,
     StructureServiceProvider::class,
     TradeServiceProvider::class,
+    TreasureHuntServiceProvider::class,
     ClanServiceProvider::class,
     BackpackServiceProvider::class,
     EventServiceProvider::class,

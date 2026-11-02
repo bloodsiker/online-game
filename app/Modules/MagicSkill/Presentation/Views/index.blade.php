@@ -433,6 +433,10 @@
             box-shadow: 0 5px 12px rgba(72, 31, 10, .28), inset 0 0 0 2px rgba(255, 251, 221, .5);
         }
         .skill-card-header {
+            display: grid;
+            grid-template-columns: 40px minmax(0, 1fr) auto;
+            column-gap: 6px;
+            row-gap: 4px;
             min-height: 45px;
             padding: 5px 7px 5px 5px;
             color: #ffe6b3;
@@ -440,6 +444,8 @@
             background: #ff000021;
         }
         .skill-icon {
+            grid-column: 1;
+            grid-row: 1 / span 2;
             display: flex;
             width: 38px;
             height: 38px;
@@ -459,12 +465,14 @@
         .skill-icon--attack { color: #ffd09c; background: #742111; }
         .skill-icon--buff { color: #d9f4b0; background: #2d6122; }
         .skill-icon--heal { color: #c6f5ff; background: #17616d; }
-        .skill-card-name { margin-left: 5px; color: #5a260f; font-size: 12px; }
+        .skill-card-name { grid-column: 2; grid-row: 1; margin-left: 0; color: #5a260f; font-size: 12px; white-space: normal; overflow-wrap: anywhere; }
+        .skill-card-meta { grid-column: 2; grid-row: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+        .skill-card-meta .mana-badge, .skill-card-meta .skill-type-badge { margin-left: 0; }
         a.skill-card-name { text-decoration: none; }
         a.skill-card-name:hover { color: #9a3014; text-decoration: underline; }
         .mana-badge { padding: 2px 5px; border: 1px solid #7ea8d6; background: #315e94; box-shadow: inset 0 1px rgba(255,255,255,.22); }
         .skill-type-badge { padding: 2px 5px; border: 1px solid rgba(255,255,255,.26); border-radius: 8px; }
-        .drag-handle { order: 4; margin-left: 3px; color: #5b1a0d; }
+        .drag-handle { grid-column: 3; grid-row: 1 / span 2; margin-left: 3px; color: #5b1a0d; }
         .skill-card-body { padding: 7px 8px; }
         .skill-dmg { margin-bottom: 5px; padding: 3px 5px; border-left: 3px solid #a83c22; background: rgba(145, 56, 23, .08); }
         .skill-dmg-value { color: #8d2616; font-size: 12px; }
@@ -480,6 +488,7 @@
         .passive-list { gap: 7px; padding: 10px; }
         .passive-card { padding: 7px 9px; border-color: #b47a4c; border-radius: 3px; background: rgba(255, 248, 214, .65); box-shadow: inset 0 0 0 1px rgba(255,255,255,.55); }
         .passive-icon { width: 11px; height: 11px; margin-top: 2px; border: 1px solid #9f5a27; background: radial-gradient(circle at 35% 35%, #fff3af, #cf752f); box-shadow: 0 0 3px rgba(173,82,26,.65); }
+        .passive-skill-icon { flex: 0 0 38px; align-self: flex-start; text-decoration: none; }
         .passive-name { color: #5a260f; }
         a.passive-name { text-decoration: none; }
         a.passive-name:hover { color: #9a3014; text-decoration: underline; }
@@ -557,10 +566,12 @@
                                             <span class="drag-handle" title="{{ __('Перетащить') }}">⠿</span>
                                             <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
                                                onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
-                                            @if($skill->mana_cost > 0)
-                                                <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
-                                            @endif
-                                            <span class="skill-type-badge badge-attack">{{ __('Атака') }}</span>
+                                            <div class="skill-card-meta">
+                                                @if($skill->mana_cost > 0)
+                                                    <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
+                                                @endif
+                                                <span class="skill-type-badge badge-attack">{{ __('Атака') }}</span>
+                                            </div>
                                         </div>
                                         <div class="skill-card-body">
                                             @if($skill->min_damage > 0 || $skill->max_damage > 0)
@@ -570,6 +581,7 @@
                                                 </div>
                                             @endif
                                             <div class="skill-desc">{{ $skill->description ?: '—' }}</div>
+                                            @include('magic-skill::partials.skill-effects', ['skill' => $skill])
                                             <div class="skill-equip-row">
                                                 <label class="equip-label" for="chk_skill_{{ $skill->id }}">
                                                     <input
@@ -615,12 +627,14 @@
                                             <span class="drag-handle" title="{{ __('Перетащить') }}">⠿</span>
                                             <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-card-name" title="{{ $skill->name }}"
                                                onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $skill->name }}</a>
-                                            @if($skill->mana_cost > 0)
-                                                <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
-                                            @endif
-                                            <span class="skill-type-badge {{ $skill->type === 'heal' ? 'badge-heal' : 'badge-buff' }}">
-                                                {{ $skill->type === 'heal' ? __('Лечение') : __('Бафф') }}
-                                            </span>
+                                            <div class="skill-card-meta">
+                                                @if($skill->mana_cost > 0)
+                                                    <span class="mana-badge">{{ $skill->mana_cost }} MP</span>
+                                                @endif
+                                                <span class="skill-type-badge {{ $skill->type === 'heal' ? 'badge-heal' : 'badge-buff' }}">
+                                                    {{ $skill->type === 'heal' ? __('Лечение') : __('Бафф') }}
+                                                </span>
+                                            </div>
                                         </div>
                                         <div class="skill-card-body">
                                             @if($skill->base_healing > 0)
@@ -630,17 +644,7 @@
                                                 </div>
                                             @endif
                                             <div class="skill-desc">{{ $skill->description ?: '—' }}</div>
-                                            @foreach($skill->skillEffects as $effect)
-                                                <div class="skill-effect-row">
-                                                    <span class="skill-effect-name">{{ $effect->name }}</span>
-                                                    @if($effect->pivot->duration_seconds > 0)
-                                                        <span class="skill-effect-duration">{{ format_cooldown($effect->pivot->duration_seconds) }}</span>
-                                                    @endif
-                                                    @if($effect->pivot->chance < 100)
-                                                        <span class="skill-effect-chance">{{ $effect->pivot->chance }}%</span>
-                                                    @endif
-                                                </div>
-                                            @endforeach
+                                            @include('magic-skill::partials.skill-effects', ['skill' => $skill])
                                             @if($skill->cooldown > 0)
                                                 <div class="skill-cooldown-info">
                                                     ⏱ {{ __('Кулдаун:') }} {{ format_cooldown($skill->cooldown) }}
@@ -698,7 +702,14 @@
                             <div class="passive-list">
                                 @foreach($page->passiveSkills as $skill)
                                     <div class="passive-card">
-                                        <div class="passive-icon"></div>
+                                        <a href="{{ route('magic_skill.info', $skill->id) }}" class="skill-icon skill-icon--buff passive-skill-icon" title="{{ $skill->name }}"
+                                           onclick="window.open(this.href, '', 'width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                            @if($skill->image)
+                                                <img src="{{ $skill->image }}" alt="{{ $skill->name }}">
+                                            @else
+                                                ✹
+                                            @endif
+                                        </a>
                                         <div>
                                             <div>
                                                 <a href="{{ route('magic_skill.info', $skill->id) }}" class="passive-name"
@@ -735,11 +746,19 @@
                             <div class="passive-list">
                                 @foreach($page->runePassives as $runePassive)
                                     <div class="passive-card">
-                                        <div class="passive-icon"></div>
+                                        <a href="{{ $runePassive['passiveInfoUrl'] }}" class="skill-icon skill-icon--buff passive-skill-icon"
+                                           title="{{ $runePassive['label'] }}"
+                                           onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">
+                                            @if(!empty($runePassive['passiveImage']))
+                                                <img src="{{ $runePassive['passiveImage'] }}" alt="{{ $runePassive['label'] }}">
+                                            @else
+                                                ✹
+                                            @endif
+                                        </a>
                                         <div>
                                             <div>
-                                                <a href="{{ route('items.info.share', ['id' => $runePassive['runeShareItemId']]) }}" class="passive-name"
-                                                   title="{{ __('Открыть информацию о руне') }} «{{ $runePassive['runeName'] }}»"
+                                                <a href="{{ $runePassive['passiveInfoUrl'] }}" class="passive-name"
+                                                   title="{{ $runePassive['label'] }}"
                                                    onclick="window.open(this.href, '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;">{{ $runePassive['label'] }}</a>
                                                 <span class="passive-desc">{{ $runePassive['description'] }}</span>
                                             </div>

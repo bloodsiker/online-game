@@ -1,10 +1,17 @@
+@php
+    $craftSectionTitle = match ($craftSection) {
+        'artifacts' => __('Артефакты'),
+        'artifact-upgrade' => __('Заточка артефактов'),
+        default => __('Крафт'),
+    };
+@endphp
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Крафт</title>
+    <title>{{ $craftSectionTitle }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">
     <style>
         html, body { min-height: 100%; margin: 0; font-family: Tahoma, Arial, sans-serif; font-size: 11px; color: #000; }
@@ -48,11 +55,11 @@
         .butt1.pointer.disabled input { cursor: default; }
         .message { display: inline-block; margin: 0 0 8px; padding: 4px 8px; border: 1px solid #8d2616; color: #8d2616; font-weight: bold; }
         .empty-list { padding: 25px; color: #49382d; font-size: 12px; text-align: center; }
-        .craft-layout { display: flex; align-items: flex-start; gap: 0; }
+        .craft-layout { display: flex; align-items: stretch; gap: 0; }
         .craft-menu { flex: 0 0 92px; width: 92px; margin-right: -6px; text-align: center; }
         .craft-menu a { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; box-sizing: content-box; width: 88px; height: 58px; padding: 10px 2px; color: #49382d; font-weight: bold; text-decoration: none; background: url('/main/images/set-tabs.png') 0 100% no-repeat; }
         .craft-menu a[aria-current="page"] { z-index: 3; color: #8d2616; background-position: 0 0; }
-        .craft-content { position: relative; z-index: 2; flex: 1; min-width: 0; }
+        .craft-content { position: relative; z-index: 2; display: flex; flex: 1; min-width: 0; }
         .craft-container { width: 100%; table-layout: fixed; border-spacing: 0; }
         .craft-container .common-inner-block-tl { background: url('/main/images/common-inner-block-tl.png') no-repeat; }
         .craft-container .common-inner-block-tr { background: url('/main/images/common-inner-block-tr.png') no-repeat; }
@@ -92,6 +99,20 @@
         .artifact-assembly__pool-item.is-highlighted { background: #ffe7a0; border-color: #c39237; box-shadow: 0 0 10px rgba(219, 170, 64, .75); }
         .artifact-assembly__pool-item.is-winner { background: #fff0b6; border-color: #a57413; box-shadow: 0 0 14px rgba(230, 176, 44, .9); }
         .artifact-assembly.is-assembling .artifact-assemble-button { cursor: wait; }
+        .artifact-upgrade__title { margin: 0 0 14px; font-size: 13px; font-weight: bold; text-align: center; }
+        .artifact-upgrade__equation { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+        .artifact-upgrade__operand { flex: 0 0 92px; width: 92px; min-height: 92px; text-align: center; }
+        .artifact-upgrade__symbol { flex: 0 0 auto; align-self: flex-start; display: flex; align-items: center; height: 71px; color: #8d2616; font-size: 25px; font-weight: bold; }
+        .artifact-upgrade__note { color: #78573e; font-weight: normal; }
+        .artifact-upgrade__action { flex: 0 0 auto; min-width: 130px; max-width: 200px; text-align: center; }
+        .artifact-upgrade__action form { margin: 0; }
+        .artifact-upgrade__price { margin-top: 8px; white-space: nowrap; }
+        .artifact-upgrade__price img { vertical-align: middle; }
+        .artifact-upgrade__result-icon { cursor: default; }
+        .artifact-upgrade__stats { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 4px; }
+        .artifact-upgrade__stat { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; color: #553e20; line-height: 18px; }
+        .artifact-upgrade__stat-values { white-space: nowrap; }
+        .artifact-upgrade__stat-arrow { margin: 0 5px; color: #8d2616; }
     </style>
 </head>
 <body>
@@ -110,11 +131,11 @@
         <td class="tbl-usi_bg" valign="top" style="padding:8px 10px; text-align:center;">
             <table class="coll brd2-all bg_l p10h p2v craft-summary" width="100%">
                 <tbody><tr>
-                    <td align="left"><b>Кузня:</b> Крафтить</td>
+                    <td align="left"><b>{{ __('Кузня:') }}</b> {{ $craftSectionTitle }}</td>
                     <td align="right" style="color:#955c4a;">
-                        <b>Монеты:</b>
+                        <b>{{ __('Монеты:') }}</b>
                         <b class="redd"><img src="{{ asset('img/icon/m_game.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->money) }}</b>
-                        &nbsp;&nbsp;<b>Бриллианты:</b>
+                        &nbsp;&nbsp;<b>{{ __('Бриллианты:') }}</b>
                         <b class="redd"><img src="{{ asset('img/icon/m_dmd.gif') }}" width="11" height="11" align="absmiddle" alt=""> {{ format_money($user->diamond) }}</b>
                     </td>
                 </tr></tbody>
@@ -128,6 +149,7 @@
                 <nav class="craft-menu" aria-label="{{ __('Крафт') }}">
                     <a href="{{ route('blacksmith', ['id' => $blacksmith->id]) }}" @if($craftSection === 'craft') aria-current="page" @endif>{{ __('Крафт') }}</a>
                     <a href="{{ route('blacksmith', ['id' => $blacksmith->id, 'section' => 'artifacts']) }}" @if($craftSection === 'artifacts') aria-current="page" @endif>{{ __('Артефакты') }}</a>
+                    <a href="{{ route('blacksmith', ['id' => $blacksmith->id, 'section' => 'artifact-upgrade']) }}" @if($craftSection === 'artifact-upgrade') aria-current="page" @endif>{{ __('Заточка артефактов') }}</a>
                 </nav>
                 <div class="craft-content">
                     <table class="craft-container" border="0" cellspacing="0" cellpadding="0">
@@ -235,6 +257,8 @@
                 @endforelse
             </div>
 
+                @elseif($craftSection === 'artifact-upgrade')
+                    @include('blacksmith::_artifact-upgrade')
                 @else
                     @include('blacksmith::_artifact-assemblies')
                 @endif

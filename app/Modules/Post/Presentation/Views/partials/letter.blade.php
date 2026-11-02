@@ -38,13 +38,15 @@
         <td class="brd2-top"><b class="rdd">{{ $isRecipient ? 'От кого:' : 'Кому:' }}</b></td>
         <td class="brd2-top black">
             @if($isRecipient)
-                @if($letter->isSystem())
+                @if($letter->isAdministrationReply())
+                    {{ __('post.administration') }}
+                @elseif($letter->isSystem())
                     Системное сообщение
                 @else
                     {{ $letter->sender?->name ?? '—' }}
                 @endif
             @else
-                {{ $letter->recipient?->name ?? '—' }}
+                {{ $letter->is_to_administration ? __('post.administration') : ($letter->recipient?->name ?? '—') }}
             @endif
         </td>
     </tr>
@@ -78,7 +80,10 @@
 @endif
 
 <div align="center" style="padding-top: 10px;">
-    @if($isRecipient && ! $letter->isSystem())
+    @if($letter->isAdministrationReply() || $letter->is_to_administration)
+        <b class="butt1 pointer"><b><input value="{{ __('post.reply') }}" type="button" style="width:100px"
+            onclick="location.href='{{ route('post', ['mode' => 'administration', 'reply_to' => $letter->administration_thread_id ?? $letter->id]) }}'"></b></b>
+    @elseif($isRecipient && ! $letter->isSystem())
         <b class="butt1 pointer"><b><input value="Ответить" type="button" style="width: 100px;"
             onclick="location.href='{{ route('post', ['mode' => 'outbox', 'to' => $letter->sender?->name]) }}'"></b></b>
     @endif

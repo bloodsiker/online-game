@@ -38,6 +38,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareRecipe;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\TreasureHunt\Application\Services\TreasureMapPublicationGuard;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -155,10 +156,14 @@ class ItemController extends Controller
             'magicSkillBook',
             'rarityUpgradeTarget',
             'rarityUpgradeMaterials',
+            'artifactUpgradeConfig.materials',
             'itemHasItems' => fn ($query) => $query->orderBy('share_items.name->ru'),
             'lockConfig.trapEffect',
         ]);
 
+        if ($item->type === ShareItemType::TREASURE_MAP) {
+            $item->load('treasureMapConfig');
+        }
         $skills = Skill::orderBy('name->ru')->get();
         $toolFamilies = GatheringToolFamily::cases();
         $magicSkills = MagicSkill::orderBy('name->ru')->get(['id', 'name'])->mapWithKeys(fn (MagicSkill $skill): array => [$skill->id => $skill->name]);
@@ -239,6 +244,9 @@ class ItemController extends Controller
             foreach ($item->getTranslations('name') as $locale => $name) {
                 $copy->setTranslation('name', $locale, $name.' (копия)');
             }
+            if ($copy->type === ShareItemType::TREASURE_MAP) {
+                $copy->is_active = false;
+            }
             $copy->save();
 
             foreach ($item->stats as $stat) {
@@ -295,6 +303,9 @@ class ItemController extends Controller
         });
 
         $message = 'Предмет скопирован вместе с его характеристиками, эффектами, бафами, дебаффами, требованиями и составом.';
+        if ($copy->type === ShareItemType::TREASURE_MAP) {
+            $message .= ' Копия карты неактивна: создайте для неё настройки поиска перед активацией.';
+        }
         if ($item->magicSkillBook !== null) {
             $message .= ' Привязка к заклинанию не скопирована: одно заклинание может быть связано только с одной книгой.';
         }
@@ -520,6 +531,39 @@ class ItemController extends Controller
         return redirect()->back()->with('success', 'Предмет удалён из пула результата.');
     }
 
+    public function saveArtifactUpgrade(Request $request, ShareItem $item): RedirectResponse
+    {
+        abort_unless($item->type === ShareItemType::ARTIFACT, 404);
+        $data = $request->validate([
+            'is_enabled' => ['required', 'boolean'],
+            'gold_cost' => ['required', 'integer', 'min:0', 'max:2147483647'],
+        ]);
+        $item->artifactUpgradeConfig()->updateOrCreate(['share_item_id' => $item->id], $data);
+
+        return redirect()->to(route('admin.item.info', $item->id).'#tab-artifact-upgrade')->with('success', 'Настройки заточки сохранены.');
+    }
+
+    public function addArtifactUpgradeMaterial(Request $request, ShareItem $item): RedirectResponse
+    {
+        abort_unless($item->type === ShareItemType::ARTIFACT, 404);
+        $data = $request->validate([
+            'share_item_id' => ['required', 'integer', 'exists:share_items,id', 'not_in:'.$item->id],
+            'count' => ['required', 'integer', 'min:1', 'max:1000000'],
+        ]);
+        $config = $item->artifactUpgradeConfig()->firstOrCreate(['share_item_id' => $item->id]);
+        $config->materials()->syncWithoutDetaching([(int) $data['share_item_id'] => ['count' => (int) $data['count']]]);
+
+        return redirect()->to(route('admin.item.info', $item->id).'#tab-artifact-upgrade')->with('success', 'Материал сохранён.');
+    }
+
+    public function deleteArtifactUpgradeMaterial(ShareItem $item, ShareItem $material): RedirectResponse
+    {
+        abort_unless($item->type === ShareItemType::ARTIFACT, 404);
+        $item->artifactUpgradeConfig?->materials()->detach($material->id);
+
+        return redirect()->to(route('admin.item.info', $item->id).'#tab-artifact-upgrade')->with('success', 'Материал удалён.');
+    }
+
     public function addRarityUpgradeMaterial(Request $request, ShareItem $item): RedirectResponse
     {
         $data = $request->validate([
@@ -649,6 +693,9 @@ class ItemController extends Controller
         ]);
 
         $type = ShareItemType::from($request->input('type'));
+        app(TreasureMapPublicationGuard::class)->assertCanActivate(
+            item: $item, type: $type, active: (bool) $request->input('is_active', true),
+        );
 
         $item->setTranslation('name', 'ru', $request->input('name'));
         $item->type = $type;

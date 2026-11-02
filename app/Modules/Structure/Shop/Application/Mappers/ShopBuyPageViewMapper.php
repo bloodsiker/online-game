@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Shop\Application\Mappers;
 
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\PremiumShopItemTooltipStrategy;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
@@ -21,6 +22,7 @@ class ShopBuyPageViewMapper
 {
     public function __construct(
         private readonly ItemTooltipCollector $collector,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
     ) {}
 
     /**
@@ -62,7 +64,7 @@ class ShopBuyPageViewMapper
             money: (int) $user->money,
             diamonds: (int) $user->diamond,
             items: $shopItems->map(
-                static fn (ShopItem $item): ShopBuyItemDTO => new ShopBuyItemDTO(
+                fn (ShopItem $item): ShopBuyItemDTO => new ShopBuyItemDTO(
                     shopItemId: (int) $item->id,
                     itemId: (int) $item->item->id,
                     name: (string) $item->item->name,
@@ -88,6 +90,8 @@ class ShopBuyPageViewMapper
                         ->values()
                         ->all(),
                     infoUrl: route('items.info.share', ['id' => $item->item->id]),
+                    purchaseAvailability: $this->purchaseLimits->availability($user, $item),
+                    minReputationPoints: (int) $item->min_reputation_points,
                 )
             )->all(),
             categories: $categories->map(

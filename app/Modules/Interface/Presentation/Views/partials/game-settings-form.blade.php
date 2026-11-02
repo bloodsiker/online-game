@@ -16,6 +16,7 @@
         'show_map' => __('ui.show_map_hint'),
         'map_side' => __('ui.map_side_hint'),
         'show_item_tooltips' => __('ui.show_item_tooltips_hint'),
+        'auto_loot_enabled' => __('ui.auto_loot_hint'),
     ];
     foreach ($settingHints as $key => &$hint) {
         if (!array_key_exists($key, \App\Modules\User\Domain\Settings\GameSettingsDefinition::defaults())) {
@@ -74,6 +75,19 @@
             ] as $setting)
                 @include('interface::partials.settings-select', ['name' => $setting['name'], 'label' => $setting['label'], 'options' => $sounds, 'selected' => old($setting['name'], $gameSettings[$setting['name']] ?? 0), 'soundPreview' => true])
             @endforeach
+        </div>
+    </section>
+    <section class="game-settings-section">
+        <h2>{{ __('ui.loot') }}</h2>
+        <div class="game-settings-grid">
+            @if($autoLootAvailable ?? false)
+                <input type="hidden" name="auto_loot_enabled" value="0">
+            @endif
+            @include('interface::partials.settings-checkbox', [
+                'name' => 'auto_loot_enabled', 'label' => __('ui.auto_loot'),
+                'checked' => ($autoLootAvailable ?? false) && (bool) old('auto_loot_enabled', $gameSettings['auto_loot_enabled'] ?? true),
+                'disabled' => !($autoLootAvailable ?? false),
+            ])
         </div>
     </section>
     <section class="game-settings-section">

@@ -6,6 +6,7 @@ use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightHitDTO;
 use App\Modules\Battle\Application\Services\BattleLogTranslator;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
+use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
@@ -33,6 +34,7 @@ readonly class MonsterAttackService
         private PlayerRunePassiveService $runePassiveService,
         private RandomizerInterface $random,
         private PlayerSkillService $playerSkillService,
+        private MonsterLootService $monsterLootService = new MonsterLootService,
     ) {}
 
     public function execute(Player $player, MonsterOnLocation $locationMonster, AttackResultDTO $result): void
@@ -153,7 +155,7 @@ readonly class MonsterAttackService
         $reflect = $this->runePassiveService->totalValue($passives, CombatPassiveType::REFLECT);
         if ($reflect > 0 && $hit->getDamage() > 0) {
             $reflectedDamage = max(1, (int) round($hit->getDamage() * $reflect / 100));
-            $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflectedDamage);
+            $this->monsterLootService->damage($locationMonster, $reflectedDamage, $player->user_id);
 
             $result->log(BattleLogTranslator::format(
                 '<p><b class="color-reflect">🔁 Руна отражает %d%% урона назад! %s получает %d урона!</b></p>',
@@ -182,7 +184,7 @@ readonly class MonsterAttackService
             return;
         }
 
-        $locationMonster->hp_now = max(0, $locationMonster->hp_now - $reflected);
+        $this->monsterLootService->damage($locationMonster, $reflected, $player->user_id);
 
         $result->log(BattleLogTranslator::format(
             '<p><b class="color-reflect">🛡 Щит заблокировал удар и отразил %d урона обратно!</b></p>',

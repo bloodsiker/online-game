@@ -13,6 +13,8 @@ use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +48,11 @@ class UseMagicSkill
             return new MagicSkillActionResultDTO('error', 'Цель не найдена', httpCode: 404);
         }
 
-        $castAttempt = $this->castGuard->tryConsume($caster, $skill);
+        $magicSkillLevel = (int) (PlayerSkill::where('player_id', $caster->id)
+            ->where('skill_id', Skill::SKILL_MAGIC_ID)
+            ->value('lvl') ?? 0);
+
+        $castAttempt = $this->castGuard->tryConsume($caster, $skill, $magicSkillLevel);
 
         if (! $castAttempt->ok) {
             return new MagicSkillActionResultDTO('error', $castAttempt->reason, httpCode: 422);
@@ -63,6 +69,7 @@ class UseMagicSkill
                 minHeal: $skill->base_healing,
                 maxHeal: $skill->base_healing,
                 powerCoefficient: $skill->power_coefficient,
+                magicSkillLevel: $magicSkillLevel,
             );
             $target->hp_now = min($targetSheet->getHpMax(), $target->hp_now + $heal);
             $log->log(sprintf('Заклинание восстановило <b>%d HP</b> игроку %s', $heal, $target->user->name));

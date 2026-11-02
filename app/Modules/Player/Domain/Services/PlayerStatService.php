@@ -16,6 +16,7 @@ use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Structure\Blacksmith\Domain\Services\ArtifactUpgradeRules;
 
 class PlayerStatService
 {
@@ -132,6 +133,8 @@ class PlayerStatService
             'right_min_dmg' => (float) $player->min_dmg,
             'right_max_dmg' => (float) $player->max_dmg,
             'magic_attack' => 0.0,
+            // Процентный бонус к итоговой magicPower — база 0, даёт только пассивка «Сила заклинаний», см. MagicHitCalculator
+            'magic_damage_percent' => 0.0,
             // Как и блок щитом — целиком с экипировки (фолиант), базы своей нет
             'magic_critical' => 0.0,
             // Критурон растёт от итоговой интуиции: у каждой первичной статы двойная ценность
@@ -197,6 +200,7 @@ class PlayerStatService
         $sheet->rightMinDmg = $computed['right_min_dmg'];
         $sheet->rightMaxDmg = $computed['right_max_dmg'];
         $sheet->magicAttack = $computed['magic_attack'];
+        $sheet->magicDamagePercent = $computed['magic_damage_percent'];
         $sheet->magicCritical = $computed['magic_critical'];
         $sheet->critDamage = $computed['crit_damage'];
         $sheet->magicCritDamage = $computed['magic_crit_damage'];
@@ -435,6 +439,14 @@ class PlayerStatService
                     isPercent: $stat->value_type === ItemEffectValueType::PERCENT,
                     source: $source,
                 );
+                if ((int) $item->upgrade_lvl > 0) {
+                    $modifiers[] = new StatModifier(
+                        stat: $mappedStat,
+                        value: ArtifactUpgradeRules::bonus((float) $stat->value, (int) $item->upgrade_lvl),
+                        isPercent: $stat->value_type === ItemEffectValueType::PERCENT,
+                        source: $source.':upgrade',
+                    );
+                }
             }
         }
 

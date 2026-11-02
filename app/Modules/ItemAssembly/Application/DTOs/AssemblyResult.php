@@ -11,5 +11,6 @@ final readonly class AssemblyResult
         public string $message,
         public ?int $itemId = null,
         public int $count = 0,
+        public ?int $itemInstanceId = null,
     ) {}
 }

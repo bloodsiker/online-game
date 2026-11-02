@@ -40,7 +40,9 @@
                         @endif
                     </td>
                     <td class="brd2-top">
-                        @if($item->isSystem())
+                        @if($item->isAdministrationReply())
+                            {{ __('post.administration') }}
+                        @elseif($item->isSystem())
                             Системное сообщение
                         @else
                             {{ $item->sender?->name ?? '—' }}

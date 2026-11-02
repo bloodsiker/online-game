@@ -6,6 +6,7 @@ namespace App\Modules\Post\Presentation\Http;
 
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ShareItemTooltipStrategy;
+use App\Modules\Post\Application\Services\AdministrationMailService;
 use App\Modules\Post\Application\UseCases\BulkLetters;
 use App\Modules\Post\Application\UseCases\DeleteLetter;
 use App\Modules\Post\Application\UseCases\GetMailbox;
@@ -24,19 +25,28 @@ final class PostController
         private readonly DeleteLetter $deleteLetter,
         private readonly BulkLetters $bulkLetters,
         private readonly ItemTooltipCollector $tooltipCollector,
+        private readonly AdministrationMailService $administrationMail,
     ) {}
 
     public function index(Request $request): View
     {
         $mode = (string) $request->query('mode', 'inbox');
-        if (! in_array($mode, ['inbox', 'outpost', 'outbox'], strict: true)) {
+        if (! in_array($mode, ['inbox', 'outpost', 'outbox', 'administration'], strict: true)) {
             $mode = 'inbox';
         }
 
         $user = $request->user();
+        abort_unless($user, 401);
+        $thread = $mode === 'administration' && $request->filled('reply_to')
+            ? $this->administrationMail->thread($request->integer('reply_to'), $user) : null;
 
         return view('post::index', [
             'mode' => $mode,
+            'administrationThread' => $thread,
+            'administrationMessages' => $thread ? $this->administrationMail->messages($thread) : collect(),
+            'administrationThreads' => $mode === 'administration'
+                ? $this->administrationMail->threads()->where('sender_user_id', $user->id)->orderByDesc('administration_last_message_at')->paginate(20)->withQueryString()
+                : collect(),
             'letters' => match ($mode) {
                 'inbox' => $this->mailbox->inbox($user),
                 'outpost' => $this->mailbox->sent($user),

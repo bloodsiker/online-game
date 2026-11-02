@@ -18,6 +18,7 @@ class MonsterActiveEffect extends Model
     protected $table = 'monster_active_effects';
 
     protected $fillable = [
+        'source_user_id',
         'location_monster_id', 'effect_id', 'battle_id', 'type',
         'applied_at', 'last_tick_at', 'expires_at', 'stacks', 'current_value',
     ];

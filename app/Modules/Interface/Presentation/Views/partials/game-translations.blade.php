@@ -1,4 +1,5 @@
 @php($gameClientTranslations = array_filter(app('translator')->getLoader()->load(app()->getLocale(), '*', '*'), static fn (string $key): bool => !str_contains($key, '<'), ARRAY_FILTER_USE_KEY))
+@include('auth::session-guard')
 <script>
     window.gameTranslations = @json($gameClientTranslations, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     window.gameTranslate = function (key, parameters) {

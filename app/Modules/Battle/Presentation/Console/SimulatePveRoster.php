@@ -194,6 +194,11 @@ final class RosterReferenceFighter implements FightHitInterface
         return 0;
     }
 
+    public function getMagicDamagePercent(): int
+    {
+        return 0;
+    }
+
     public function getMagicCriticalChance(): int
     {
         return 0;

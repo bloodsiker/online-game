@@ -20,6 +20,6 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/slots/update', [SlotsController::class, 'update'])->name('slots.update');
     Route::get('/hotbar', [HotbarController::class, 'index'])->name('hotbar.index');
     Route::post('/hotbar/set', [HotbarController::class, 'set'])->name('hotbar.set');
-    Route::post('/hotbar/use', [HotbarController::class, 'use'])->name('hotbar.use');
+    Route::post('/hotbar/use', [HotbarController::class, 'use'])->middleware(['prison.context', 'throttle:60,1'])->name('hotbar.use');
     Route::delete('/hotbar/clear/{slot}', [HotbarController::class, 'clear'])->name('hotbar.clear');
 });

@@ -8,6 +8,7 @@ use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\Shop\Application\DTOs\ShopBuyPageDTO;
 use App\Modules\Structure\Shop\Application\Mappers\ShopBuyPageViewMapper;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
+use App\Modules\Structure\Shop\Application\Services\StructureShopAccessService;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
@@ -17,6 +18,7 @@ class GetBuyPage
         private readonly ShopReadRepository $readRepository,
         private readonly ShopBuyPageViewMapper $mapper,
         private readonly ShopCartService $shopCartService,
+        private readonly StructureShopAccessService $access = new StructureShopAccessService,
     ) {}
 
     public function execute(
@@ -27,6 +29,7 @@ class GetBuyPage
     ): ShopBuyPageDTO {
         $shop = $this->readRepository->findStructureOrFail($shopId);
         abort_unless($shop->type === $expectedType, 404);
+        abort_unless($this->access->canVisit($user, $shop), 403, __('commerce.shop_requires_npc'));
         $categories = $shop->categories;
 
         $activeCategoryId = $categories->isNotEmpty()

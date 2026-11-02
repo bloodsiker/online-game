@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\News\Presentation\Http;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Item\Presentation\Services\ItemShortcodeRenderer;
+use App\Modules\Forum\Application\UseCases\GetHotForumTopics;
+use App\Modules\Library\Presentation\Services\LibraryShortcodeRenderer;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsComment;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsPost;
+use App\Modules\Rating\Application\UseCases\GetHomepageRankings;
+use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +18,7 @@ use Illuminate\View\View;
 
 class NewsController extends Controller
 {
-    public function index(Request $request, ItemShortcodeRenderer $shortcodeRenderer): View
+    public function index(Request $request, LibraryShortcodeRenderer $shortcodeRenderer, GetHomepageRankings $rankings, GetHotForumTopics $forum): View
     {
         $selectedNews = null;
 
@@ -23,14 +26,14 @@ class NewsController extends Controller
             $selectedNews = NewsPost::query()
                 ->where('is_active', true)
                 ->with(['visibleComments.user.player'])
-                ->find((int) $request->query('n'));
+                ->findOrFail((int) $request->query('n'));
 
             if ($selectedNews) {
                 $selectedNews->increment('views_count');
             }
         }
 
-        $newsPosts = NewsPost::query()
+        $newsPosts = $selectedNews ? collect() : NewsPost::query()
             ->where('is_active', true)
             ->withCount('visibleComments')
             ->orderByDesc('created_at')
@@ -47,6 +50,8 @@ class NewsController extends Controller
         }
 
         return view('news::index', [
+            ...$rankings->execute(),
+            'hotForumTopics' => $forum->execute(),
             'newsPosts' => $newsPosts,
             'selectedNews' => $selectedNews,
             'newsItemTooltipScript' => $shortcodeRenderer->tooltipScript(),
@@ -59,11 +64,11 @@ class NewsController extends Controller
     public function comment(Request $request, NewsPost $news): RedirectResponse
     {
         if (! auth()->check()) {
-            return redirect()->route('index', ['n' => $news->id])->with('error', 'Комментарии доступны только авторизованным игрокам.');
+            return redirect()->route('index', ['n' => $news->id])->with('error', __('homepage.comments_auth_error'));
         }
 
         if (! $news->is_active || ! $news->allow_comments) {
-            return redirect()->route('index', ['n' => $news->id])->with('error', 'Комментарии к этой новости закрыты.');
+            return redirect()->route('index', ['n' => $news->id])->with('error', __('homepage.comments_closed'));
         }
 
         $data = $request->validate([
@@ -77,6 +82,20 @@ class NewsController extends Controller
             'is_visible' => true,
         ]);
 
-        return redirect()->route('index', ['n' => $news->id])->with('success', 'Комментарий добавлен.');
+        return redirect()->route('index', ['n' => $news->id])->with('success', __('homepage.comment_added'));
+    }
+
+    public function language(Request $request, GameSettingsService $settings): RedirectResponse
+    {
+        $data = $request->validate([
+            'language' => ['required', 'in:ru,uk'],
+            'news_id' => ['nullable', 'integer', 'min:1'],
+        ]);
+        if ($request->user()) {
+            $settings->update((int) $request->user()->id, ['language' => $data['language']]);
+        }
+        $request->session()->put('language', $data['language']);
+
+        return redirect()->route('index', isset($data['news_id']) ? ['n' => $data['news_id']] : []);
     }
 }

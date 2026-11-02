@@ -14,7 +14,7 @@ use Carbon\CarbonInterface;
 final class PlayerTimedEffectService
 {
     /**
-     * Applies every elapsed real-time DoT tick exactly once.
+     * Applies every elapsed real-time damage or healing tick exactly once.
      *
      * The caller must lock the player row inside a transaction. Active effect
      * rows are locked here, so a battle action and a heartbeat cannot consume
@@ -24,10 +24,11 @@ final class PlayerTimedEffectService
         Player $player,
         CarbonInterface $now,
         int $minimumHp = 0,
+        ?int $hpMax = null,
     ): PlayerEffectTickResult {
         $effects = PlayerActiveEffect::query()
             ->where('player_id', $player->id)
-            ->whereIn('type', $this->damageEffectTypes())
+            ->whereIn('type', $this->periodicEffectTypes())
             ->where(fn ($query) => $query
                 ->whereNull('battle_id')
                 ->orWhereHas('battle', fn ($battleQuery) => $battleQuery
@@ -37,6 +38,7 @@ final class PlayerTimedEffectService
             ->get();
 
         $totalDamage = 0;
+        $totalHealing = 0;
         $processedEffects = [];
         $effectsChanged = false;
         $fallbackTickSeconds = max(1, (int) config('game.player_heartbeat_seconds', 10));
@@ -71,13 +73,19 @@ final class PlayerTimedEffectService
                     + max(0, (float) $activeEffect->tick_remainder);
                 $damage = max(0, (int) floor($rawDamage + 0.0000001));
                 $activeEffect->tick_remainder = max(0, round($rawDamage - $damage, 6));
-                $totalDamage += $damage;
+                $isHealing = $activeEffect->type?->isHoT() ?? false;
+                if ($isHealing) {
+                    $totalHealing += $damage;
+                } else {
+                    $totalDamage += $damage;
+                }
 
                 if ($damage > 0) {
                     $processedEffects[] = [
                         'label' => $activeEffect->type?->label() ?? 'Периодический эффект',
                         'emoji' => $activeEffect->type?->emoji() ?? '',
-                        'damage' => $damage,
+                        'damage' => $isHealing ? 0 : $damage,
+                        'healing' => $isHealing ? $damage : 0,
                         'ticks' => $dueTicks,
                     ];
                 }
@@ -109,20 +117,24 @@ final class PlayerTimedEffectService
             }
         }
 
-        if ($totalDamage > 0 && (int) $player->hp_now > 0) {
-            $player->hp_now = max($minimumHp, (int) $player->hp_now - $totalDamage);
+        if (($totalDamage > 0 || $totalHealing > 0) && (int) $player->hp_now > 0) {
+            $hpBefore = (int) $player->hp_now;
+            $player->hp_now = max($minimumHp, $hpBefore - $totalDamage);
+            if ((int) $player->hp_now > 0) {
+                $player->hp_now = min($hpMax ?? (int) $player->hp_max, (int) $player->hp_now + $totalHealing);
+            }
             $player->save();
         }
 
-        return new PlayerEffectTickResult($totalDamage, $processedEffects, $effectsChanged);
+        return new PlayerEffectTickResult($totalDamage, $processedEffects, $effectsChanged, $totalHealing);
     }
 
     /** @return list<string> */
-    private function damageEffectTypes(): array
+    private function periodicEffectTypes(): array
     {
         return array_values(array_map(
             static fn (ActiveEffectType $type): string => $type->value,
-            array_filter(ActiveEffectType::cases(), static fn (ActiveEffectType $type): bool => $type->isDoT()),
+            array_filter(ActiveEffectType::cases(), static fn (ActiveEffectType $type): bool => $type->isDoT() || $type->isHoT()),
         ));
     }
 }

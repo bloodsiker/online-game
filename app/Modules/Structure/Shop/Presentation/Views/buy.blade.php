@@ -241,11 +241,13 @@
 
 @php
     $isBarterShop = $page->shopType === \App\Modules\Structure\Infrastructure\Persistence\Models\Structure::TYPE_BARTER_SHOP;
-    $indexRoute = $isBarterShop ? 'barter_shop' : 'shop';
-    $addCartRoute = $isBarterShop ? 'barter_shop.add_cart' : 'shop.add_cart';
-    $deleteCartRoute = $isBarterShop ? 'barter_shop.delete_cart' : 'shop.delete_cart';
-    $clearCartRoute = $isBarterShop ? 'barter_shop.clear_cart' : 'shop.clear_cart';
-    $purchaseRoute = $isBarterShop ? 'barter_shop.purchase' : 'shop.purchase';
+    $isMageTower = $page->shopType === \App\Modules\Structure\Infrastructure\Persistence\Models\Structure::TYPE_MAGE_TOWER;
+    $routePrefix = $isBarterShop ? 'barter_shop' : ($isMageTower ? 'mage_tower' : 'shop');
+    $indexRoute = $routePrefix;
+    $addCartRoute = $routePrefix.'.add_cart';
+    $deleteCartRoute = $routePrefix.'.delete_cart';
+    $clearCartRoute = $routePrefix.'.clear_cart';
+    $purchaseRoute = $routePrefix.'.purchase';
 
     $btnLeft1 = 'img/bg/btn/btn-left1.gif';
     $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
@@ -354,6 +356,8 @@
                                                                onclick="window.open('{{ $item->infoUrl }}', '', 'width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no'); return false;"
                                                                class="b {{ $isBarterShop ? 'barter-store-item__name' : '' }}"
                                                                style="color:{{ $item->color }}; @unless($isBarterShop) text-overflow: ellipsis; display: block; overflow: hidden; white-space: nowrap; width: 250px; @endunless">{{ $item->name }}</a>
+                                                            <x-game.purchase-limit :availability="$item->purchaseAvailability" />
+                                                            @if($item->minReputationPoints > 0)<div>{{ __("commerce.reputation_required", ["item" => $item->name, "points" => $item->minReputationPoints]) }}</div>@endif
                                                         </td>
                                                     </tr>
                                                     <tr>

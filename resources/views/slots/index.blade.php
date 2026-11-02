@@ -606,6 +606,7 @@
                                                                         data-title="{{ $skill->name }}"
                                                                         data-kind="{{ match($skill->type) { 'attack' => __('Боевое заклинание'), 'buff' => __('Усиление'), 'heal' => __('Лечение'), 'debuff' => __('Ослабление'), default => __('Заклинание') } }}"
                                                                         data-description="{{ $skill->description }}"
+                                                                        data-effects="{{ view('magic-skill::partials.skill-effects', ['skill' => $skill])->render() }}"
                                                                         data-mana="{{ $skill->mana_cost }}"
                                                                         data-cooldown="{{ $skill->cooldown }}"
                                                                         data-damage="{{ $skill->min_damage || $skill->max_damage ? $skill->min_damage.'–'.$skill->max_damage : '' }}"
@@ -760,6 +761,7 @@
             <div class="hotbar-skill-tooltip__kind">${escapeHotbarTooltipText(element.dataset.kind)}</div>
             <div>${escapeHotbarTooltipText(element.dataset.description || @json(__('Описание отсутствует.')))}</div>
             ${rows.length ? `<div class="hotbar-skill-tooltip__stats">${rows.join('')}</div>` : ''}
+            ${element.dataset.effects ? `<div class="hotbar-skill-tooltip__effects">${element.dataset.effects}</div>` : ''}
         `;
         tooltip.style.display = 'block';
         moveHotbarSkillTooltip(event);

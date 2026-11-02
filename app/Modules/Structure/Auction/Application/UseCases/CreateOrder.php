@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
+use App\Modules\Premium\Application\Services\PremiumBonusService;
+use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\AuctionOrder;
@@ -35,6 +37,12 @@ class CreateOrder
 
         DB::transaction(function () use ($user, $auction, $shareItem, $count, $price, $totalCost, $isAnonymous, &$result) {
             $freshUser = User::lockForUpdate()->find($user->id);
+            if ($isAnonymous && app(PremiumBonusService::class)
+                ->value($user->id, PremiumBonus::ANONYMOUS_EXCHANGE) <= 0) {
+                $result = ['ok' => false, 'message' => __('premium.anonymous_unavailable')];
+
+                return;
+            }
 
             if ($freshUser->money < $totalCost) {
                 $result = ['ok' => false, 'message' => sprintf(

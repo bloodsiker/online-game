@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Commerce\Presentation\Http\Requests\ShopPurchaseLimitInput;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Reputation\Domain\Enums\DivineFavorType;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
@@ -58,14 +59,15 @@ class ReputationController extends Controller
             return redirect()->back()->with('success', 'Сохранено.');
         }
 
-        $reputation->load(['npc', 'tiers.quests.quest', 'tiers.featQuest', 'shopItems.item', 'gambleOptions.shareItem', 'exchangeItems.shareItem', 'elixirItem', 'favorMarkerEffect']);
+        $reputation->load(['npc', 'tiers.quests.quest', 'tiers.featQuest', 'shopItems.item', 'categories', 'gambleOptions.shareItem', 'exchangeItems.shareItem', 'elixirItem', 'favorMarkerEffect']);
         $exchangeStructure = $reputation->npc_id
             ? Structure::where('npc_id', $reputation->npc_id)->where('type', Structure::TYPE_REPUTATION_EXCHANGE)->first()
             : null;
         $favorTypes = DivineFavorType::cases();
         $effects = Effect::orderBy('name->ru')->get(['id', 'name']);
+        $structureShop = Structure::where('reputation_id', $reputation->id)->first();
 
-        return view('admin.reputation.info', compact('reputation', 'exchangeStructure', 'favorTypes', 'effects'));
+        return view('admin.reputation.info', compact('reputation', 'exchangeStructure', 'favorTypes', 'effects', 'structureShop'));
     }
 
     public function addTier(Request $request, Reputation $reputation): RedirectResponse
@@ -113,7 +115,17 @@ class ReputationController extends Controller
 
     public function addShopItem(Request $request, Reputation $reputation): RedirectResponse
     {
+        if ($shop = Structure::where('reputation_id', $reputation->id)->first()) {
+            return redirect()->route('admin.structure.info', $shop->id)->with('success', 'Товары этого магазина настраиваются в структуре.');
+        }
+
+        $categoryId = $request->integer('share_structure_category_id') ?: null;
+        if ($categoryId !== null) {
+            abort_unless($reputation->categories()->whereKey($categoryId)->exists(), 422);
+        }
         ReputationShopItem::create([
+            ...ShopPurchaseLimitInput::from($request),
+            'share_structure_category_id' => $categoryId,
             'reputation_id' => $reputation->id,
             'share_item_id' => (int) $request->input('share_item_id'),
             'price' => (int) $request->input('price', 0),
@@ -123,6 +135,21 @@ class ReputationController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Предмет добавлен в магазин.');
+    }
+
+    public function updateShopItem(Request $request, Reputation $reputation, ReputationShopItem $shopItem): RedirectResponse
+    {
+        abort_unless((int) $shopItem->reputation_id === (int) $reputation->id, 404);
+        $shopItem->fill($request->validate([
+            'price' => ['sometimes', 'integer', 'min:0'],
+            'diamond' => ['sometimes', 'integer', 'min:0'],
+            'min_points' => ['sometimes', 'integer', 'min:0'],
+            'sort_order' => ['sometimes', 'integer'],
+        ]));
+        $shopItem->fill(ShopPurchaseLimitInput::from($request));
+        $shopItem->save();
+
+        return back()->with('success', 'Лимит покупки сохранён.');
     }
 
     public function deleteShopItem(Reputation $reputation, ReputationShopItem $shopItem): RedirectResponse

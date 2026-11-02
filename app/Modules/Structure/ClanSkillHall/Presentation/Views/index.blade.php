@@ -116,7 +116,7 @@
                             ['label' => 'Уровень', 'value' => $displayMagicSkill->level],
                         ], array_map(static fn (array $effect): array => [
                             'label' => 'Бонус',
-                            'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
+                            'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
                         ], $displayMagicSkill->effects ?? [])) : [];
                         $requirements = $next?->itemRequirements ?? collect();
                         if ($requirements->isEmpty() && $next?->share_item_id) {
@@ -152,7 +152,7 @@
                         <div class="skill-desc">{{ $definition->description }}</div>
                         <div class="skill-effect">
                             @foreach($next?->magicSkill?->effects ?? [] as $effect)
-                                +{{ $effect['value'] }}{{ !empty($effect['is_percent']) ? '%' : '' }} {{ \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'])?->label() ?? $effect['type'] }}@if(!$loop->last)<br>@endif
+                                +{{ $effect['value'] }}{{ !empty($effect['is_percent']) ? '%' : '' }} {{ \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($effect['type'])?->label() ?? $effect['type'] }}@if(!$loop->last)<br>@endif
                             @endforeach
                             @if($isMaxed)Максимальный уровень@endif
                         </div>

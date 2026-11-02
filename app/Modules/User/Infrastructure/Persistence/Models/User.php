@@ -6,11 +6,14 @@ namespace App\Modules\User\Infrastructure\Persistence\Models;
 
 use App\Modules\Auth\Application\Notifications\GameEmailVerificationNotification;
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Backpack\Domain\Models\BackpackEntry;
 use App\Modules\Clan\Domain\Models\ClanMember;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Moderation\Domain\Models\UserCommunicationMute;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
+use App\Modules\Premium\Application\Services\PremiumBonusService;
+use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
@@ -97,7 +100,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function backpack(): BelongsToMany
     {
-        return $this->belongsToMany(Backpack::class, 'backpacks', 'user_id', 'item_id')->withPivot('equipped');
+        return $this->belongsToMany(Backpack::class, 'backpacks', 'user_id', 'item_id')
+            ->using(BackpackEntry::class)->withPivot('equipped');
     }
 
     public function currentLocation(): BelongsTo
@@ -158,6 +162,9 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->sum('value');
         });
 
-        return $this->bag_count + $extraSlots;
+        $premiumSlots = app(PremiumBonusService::class)
+            ->value($this->id, PremiumBonus::BAG_SLOTS);
+
+        return $this->bag_count + $extraSlots + (int) $premiumSlots;
     }
 }

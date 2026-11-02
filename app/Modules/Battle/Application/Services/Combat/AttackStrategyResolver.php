@@ -47,6 +47,8 @@ readonly class AttackStrategyResolver
 
         if ($action > 0) {
             $playerSkill = $this->playerMagicSkillService->getActiveSkillForBattle($player, $action);
+            $magicSkillLevels = $this->playerSkillLevels($player, [Skill::SKILL_MAGIC_ID]);
+            $magicSkillLevel = $this->skillLevelFrom($magicSkillLevels, Skill::SKILL_MAGIC_ID);
 
             if ($playerSkill instanceof MagicSkill && $playerSkill->isBuffSkill()) {
                 return new MagicBuffStrategy(
@@ -55,6 +57,7 @@ readonly class AttackStrategyResolver
                     casterSheet: $sheet,
                     playerModel: $player,
                     magicSkill: $playerSkill,
+                    magicSkillLevel: $magicSkillLevel,
                 );
             }
 
@@ -64,7 +67,8 @@ readonly class AttackStrategyResolver
                 player: $sheet,
                 playerModel: $player,
                 monster: $monster,
-                magicSkill: $playerSkill
+                magicSkill: $playerSkill,
+                magicSkillLevel: $magicSkillLevel,
             );
         }
 

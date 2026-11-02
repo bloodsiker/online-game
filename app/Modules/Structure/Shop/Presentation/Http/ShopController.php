@@ -96,7 +96,7 @@ class ShopController extends Controller
 
     public function sellItem(Request $request, int $id): mixed
     {
-        $this->ensureStructureType($id);
+        $shop = $this->ensureStructureType($id, [Structure::TYPE_SHOP, Structure::TYPE_MAGE_TOWER]);
 
         /** @var User $user */
         $user = Auth::user();
@@ -112,6 +112,7 @@ class ShopController extends Controller
 
         return view('shop::sell', [
             'page' => $this->getSellPage->execute($user, $id),
+            'indexRoute' => $shop->isMageTower() ? 'mage_tower' : 'shop',
         ]);
     }
 
@@ -120,11 +121,11 @@ class ShopController extends Controller
         return Structure::TYPE_SHOP;
     }
 
-    private function ensureStructureType(int $id): void
+    private function ensureStructureType(int $id, ?array $types = null): Structure
     {
-        Structure::query()
+        return Structure::query()
             ->whereKey($id)
-            ->where('type', $this->expectedType())
+            ->whereIn('type', $types ?? [$this->expectedType()])
             ->firstOrFail();
     }
 }

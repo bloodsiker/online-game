@@ -122,7 +122,7 @@
                                     ['label' => __('Уровень'), 'value' => $displayMagicSkill->level],
                                 ], array_map(static fn (array $effect): array => [
                                     'label' => __('Бонус'),
-                                    'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
+                                    'value' => sprintf('+%s%s %s', $effect['value'] ?? 0, !empty($effect['is_percent']) ? '%' : '', \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? '')),
                                 ], $displayMagicSkill->effects ?? [])) : [];
                             @endphp
 
@@ -173,7 +173,7 @@
                                                     &nbsp;—&nbsp;
                                                     <span class="effect-tag">
                                                         +{{ $eff['value'] }}{{ !empty($eff['is_percent']) ? '%' : '' }}
-                                                        {{ \App\Modules\Clan\Domain\Enums\ClanSkillEffectType::tryFrom($eff['type'])?->label() ?? $eff['type'] }}
+                                                        {{ \App\Modules\Share\Domain\Enums\PassiveBonusStatType::tryFrom($eff['type'])?->label() ?? $eff['type'] }}
                                                     </span>
                                                 @endforeach
                                             @endif

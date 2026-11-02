@@ -19,6 +19,8 @@ use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\Structure\Blacksmith\Domain\Enums\UpgradeScrollType;
+use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\ArtifactUpgradeConfig;
+use App\Modules\TreasureHunt\Infrastructure\Persistence\Models\TreasureMapConfig;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -84,6 +86,11 @@ use Illuminate\Support\Carbon;
  */
 class ShareItem extends Model
 {
+    public function artifactUpgradeConfig(): HasOne
+    {
+        return $this->hasOne(ArtifactUpgradeConfig::class);
+    }
+
     use HasLegacyTranslations;
 
     public array $translatable = ['name', 'description'];
@@ -182,6 +189,11 @@ class ShareItem extends Model
     public function lockConfig(): HasOne
     {
         return $this->hasOne(ShareItemLockConfig::class);
+    }
+
+    public function treasureMapConfig(): HasOne
+    {
+        return $this->hasOne(TreasureMapConfig::class);
     }
 
     public function lockpickConfig(): HasOne

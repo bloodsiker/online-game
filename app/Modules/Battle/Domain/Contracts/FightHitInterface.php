@@ -24,6 +24,9 @@ interface FightHitInterface
     /** Шанс крита заклинания, % — база 0, даёт только экипировка (фолиант). */
     public function getMagicCriticalChance(): int;
 
+    /** Процентный бонус к итоговой силе магии (magicPower) — база 0, даёт пассивка «Сила заклинаний», см. MagicHitCalculator::magicPower() */
+    public function getMagicDamagePercent(): int;
+
     public function getArmor(): int;
 
     public function getCombatClass(): CombatClass;

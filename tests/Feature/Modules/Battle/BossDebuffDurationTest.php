@@ -75,6 +75,7 @@ class BossDebuffDurationTest extends TestCase
             $table->timestamps();
         });
         Schema::create('monster_active_effects', function (Blueprint $table): void {
+            $table->unsignedBigInteger('source_user_id')->nullable();
             $table->id();
             $table->unsignedBigInteger('location_monster_id');
             $table->unsignedBigInteger('effect_id')->nullable();

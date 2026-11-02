@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\News\Presentation\Http\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\News\Application\Services\NewsShortcodeEntities;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsComment;
 use App\Modules\News\Infrastructure\Persistence\Models\NewsPost;
 use App\Modules\Share\Application\Services\ContentTranslationEditor;
@@ -12,6 +13,7 @@ use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class NewsController extends Controller
@@ -46,12 +48,23 @@ class NewsController extends Controller
     public function uploadImage(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'file' => ['required', 'image', 'max:4096'],
+            'file' => ['required', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:4096'],
         ]);
 
-        $path = $this->imageStorage->storeInPublicDirectory($data['file'], 'news');
+        $path = $this->imageStorage->storeOnPublicDisk($data['file'], 'news');
 
-        return response()->json(['url' => asset($path)]);
+        return response()->json(['url' => Storage::disk('public')->url($path)]);
+    }
+
+    public function shortcodeEntities(Request $request, NewsShortcodeEntities $entities): JsonResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:item,monster,npc,skill,magic_skill'],
+            'q' => ['nullable', 'string', 'max:255'],
+            'page' => ['nullable', 'integer', 'min:1', 'max:100000'],
+        ]);
+
+        return response()->json($entities->search($data['type'], trim($data['q'] ?? ''), (int) ($data['page'] ?? 1)));
     }
 
     public function info(Request $request, NewsPost $news, ContentTranslationEditor $translationEditor): View|RedirectResponse
@@ -105,8 +118,6 @@ class NewsController extends Controller
             'created_at' => ['nullable', 'date'],
         ]);
 
-        $news->title = $data['title'];
-        $news->description = $data['description'];
         $news->views_count = (int) ($data['views_count'] ?? 0);
         $news->allow_comments = $request->boolean('allow_comments');
         $news->is_active = $request->boolean('is_active');

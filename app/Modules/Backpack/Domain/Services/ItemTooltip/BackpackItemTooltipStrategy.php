@@ -10,6 +10,7 @@ use App\Modules\Item\Application\ItemTooltip\ItemTooltipPriceFormatter;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipRelationLoader;
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 use App\Modules\Item\Application\ItemTooltip\Strategy\ItemTooltipStrategyInterface;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 
 class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
@@ -33,6 +34,9 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
             $title = $upgradeLvl > 0
                 ? sprintf('%s <span style="color:#2255aa;font-weight:bold;">+%d</span>', $itemInfo->name, $upgradeLvl)
                 : $itemInfo->name;
+            if ($itemInfo->type === ShareItemType::TREASURE_MAP) {
+                $title = $item->getName();
+            }
 
             $collector->add(new ItemTooltipDto(
                 id: $item->id,
@@ -44,7 +48,7 @@ class BackpackItemTooltipStrategy implements ItemTooltipStrategyInterface
                 diamond: '',
                 lev: ['title' => __(' Уровень '), 'value' => '1'],
                 skills: [],
-                desc: $itemInfo->description ?? '',
+                desc: $item->getDescription(),
                 store: false,
                 nogive: ! $itemInfo->is_give,
                 noweight: ! $itemInfo->is_weight,

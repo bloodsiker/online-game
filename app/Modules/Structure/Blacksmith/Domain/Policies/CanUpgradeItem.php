@@ -15,7 +15,6 @@ final class CanUpgradeItem
             ShareItemType::WEAPON,
             ShareItemType::SHIELD,
             ShareItemType::ARMOR,
-            ShareItemType::BELT,
         ], true);
     }
 }

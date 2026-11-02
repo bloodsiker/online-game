@@ -105,6 +105,9 @@ class SeededDotSpellTicksTest extends TestCase
             $table->boolean('is_sell')->default(true);
             $table->boolean('is_auction_sellable')->default(false);
             $table->boolean('is_give')->default(true);
+            $table->boolean('is_stackable')->default(false);
+            $table->boolean('is_use')->default(false);
+            $table->boolean('is_clan_warehouse_allowed')->default(true);
             $table->boolean('is_droppable')->default(true);
             $table->boolean('is_slot_usable')->default(false);
             $table->boolean('is_weight')->default(true);
@@ -133,6 +136,7 @@ class SeededDotSpellTicksTest extends TestCase
             $table->timestamps();
         });
         Schema::create('monster_active_effects', function (Blueprint $table): void {
+            $table->unsignedBigInteger('source_user_id')->nullable();
             $table->id();
             $table->unsignedBigInteger('location_monster_id');
             $table->unsignedBigInteger('effect_id')->nullable();
@@ -152,7 +156,7 @@ class SeededDotSpellTicksTest extends TestCase
             $table->timestamps();
         });
 
-        $spellSkillId = DB::table('skills')->insertGetId(['name' => 'Колдовство']);
+        $spellSkillId = DB::table('skills')->insertGetId(['name' => json_encode(['ru' => 'Колдовство', 'uk' => 'Чаклунство'])]);
 
         // Три атакующих заклинания из AttackSkillSeeder — сидер книг оборачивает
         // их в книги (bookifyExistingAttackSpells) и без них ругается варнингом.

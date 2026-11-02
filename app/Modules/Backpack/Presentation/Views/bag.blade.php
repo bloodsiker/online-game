@@ -164,7 +164,7 @@
 </head>
 <body class="regcolor">
 
-<table cellspacing="0" cellpadding="10" width="100%" height="100%" id="item_list">
+<table cellspacing="0" cellpadding="10" width="100%" height="100%" id="backpack-layout">
     <tbody>
     <tr valign="top">
         <td>
@@ -259,30 +259,54 @@
                                 scrollbar-shadow-color: #CF805F;
                                 scrollbar-track-color: #FFFBD6;
                             }
+                            .backpack-inventory {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 14px;
+                                min-width: 0;
+                            }
                             .backpack_overflow {
-                                height: 100%;
-                                overflow: scroll;
-                                overflow-x: auto;
-                                overflow-y: auto;
                                 position: relative;
                                 z-index: 10;
+                                min-width: 0;
+                            }
+                            .backpack-categories {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 16px;
+                                min-width: 0;
+                            }
+                            .bag_section {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 10px;
+                                min-width: 0;
+                            }
+                            .bag-section__heading {
+                                margin: 0 auto;
                             }
                             .backpack_list {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fill, 70px);
+                                grid-auto-rows: 70px;
+                                gap: 0px;
                                 margin: 0;
                                 padding: 0;
-                                min-height: 71px;
-                            }
-                            .backpack_list li {
+                                min-height: 70px;
                                 list-style: none;
-                                height: 71px;
-                                width: 68px;
-                                margin: 1px;
-                                float: left;
-                                position: relative;
-                                zoom: 1;
                             }
-                            .backpack_list li.item {
-                                zoom: 1;
+                            .backpack_list::before,
+                            .backpack_list::after {
+                                display: none;
+                            }
+                            .backpack_list > li {
+                                height: 71px;
+                                width: 72px;
+                                margin: 0;
+                                float: none;
+                                position: relative;
+                            }
+                            .backpack_list > li.item {
                                 cursor: pointer;
                             }
                             .backpack_list li.item > table {
@@ -290,7 +314,8 @@
                                 top: 5px;
                                 left: 6px;
                                 z-index: 1;
-                                margin: 0 !important;
+                                margin: 0;
+                                background-size: cover;
                             }
                             .backpack_list li.item::after {
                                 content: '';
@@ -301,14 +326,6 @@
                                 height: 71px;
                                 background: url({{ asset('main/images/user-reward-frame.png') }}) 0 0 no-repeat;
                                 pointer-events: none;
-                            }
-                            .backpack_list li.empty {
-                                clear: both;
-                                float: none;
-                                text-align: center;
-                                width: auto;
-                                height: auto;
-                                padding: 5px 0;
                             }
                             .bpdig {
                                 border: solid 1px #6f4a24 !important;
@@ -947,737 +964,25 @@
                                         }
                                     </style>
 {{--                                    <img src="{{ asset('img/bg/bg_inventory.png') }}" alt="" style="display: inline;position: absolute;height: 70%;right: 20px;bottom: 5px;opacity: .4;">--}}
-                                    <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0" class="sumka2_aizen">
-{{--                                        <script src="/js/jquery-ui.js" type="text/javascript"></script>--}}
-{{--                                        <script src="js/jstorages.js?ux=1550526374"></script>--}}
-
-                                        <tbody>
-                                        <tr>
-                                            <td height="1">
-                                                <table class="coll w100 p10h p2v brd2-all">
-                                                    <tbody>
-                                                    <tr class="bg_l">
-                                                        <td nowrap=""><b>{{ __("Вместимость:") }}</b> &nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
-                                                        <td align="right" nowrap="">
-                                                            <b>{{ __("Монет:") }}</b>
-                                                            &nbsp;<b class="redd"><span title="{{ __("Золотой") }}"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
-                                                            &nbsp;&nbsp;&nbsp<b class="redd"><span title="{{ __("Бриллиант") }}"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                                <br>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td valign="top">
-                                                <div id="item_list" class="backpack_overflow lscroll">
-
-                                                    @if($data->getGroup() === 'main')
-                                                        @if($data->hasWeapon() || $data->hasShield() || $data->hasTool())
-                                                            <div id="bag_section" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Оружие, щиты и инструменты") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @if($data->hasWeapon())
-                                                                        @foreach($data->getWeapon() as $item)
-                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                    <tbody>
-                                                                                    <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                            &nbsp;
-                                                                                            @if($item->count > 1)
-                                                                                                <div class="bpdig">
-                                                                                                    {{ $item->count }}
-                                                                                                </div>
-                                                                                            @endif
-                                                                                            <span
-                                                                                                style="position: absolute;right: -1px;top: 41px;"
-                                                                                                act1="5" act2="5" act3="0" rune_h="0"
-                                                                                                aid="23867698" art_id="" cnt="1"
-                                                                                                div_id="AA_23867698" psell="16"
-                                                                                                onmouseover="showItemInfo(this,event,2)"
-                                                                                                onmouseout="showItemInfo(this,event,0)"
-                                                                                                valign="bottom">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    @endif
-
-                                                                    @if($data->hasShield())
-                                                                        @foreach($data->getShield() as $item)
-                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                       style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                    <tbody>
-                                                                                    <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                            &nbsp;
-                                                                                            @if($item->count > 1)
-                                                                                                <div class="bpdig">
-                                                                                                    {{ $item->count }}
-                                                                                                </div>
-                                                                                            @endif
-                                                                                            <span
-                                                                                                style="position: absolute;right: -1px;top: 41px;"
-                                                                                                onmouseover="showItemInfo(this,event,2)"
-                                                                                                onmouseout="showItemInfo(this,event,0)"
-                                                                                                valign="bottom">
-                                                                                            </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    @endif
-
-                                                                    @if($data->hasTool())
-                                                                        @foreach($data->getTool() as $item)
-                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                       style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                    <tbody>
-                                                                                    <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                            &nbsp;
-                                                                                            @if($item->count > 1)
-                                                                                                <div class="bpdig">{{ $item->count }}</div>
-                                                                                            @endif
-                                                                                            <span style="position: absolute;right: -1px;top: 41px;" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom"></span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    @endif
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasArmor())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Доспехи") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getArmor() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                            </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasBag() || $data->hasBelt())
-                                                            <div id="bag_section" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Аксессуары") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @if($data->hasBag())
-                                                                        @foreach($data->getBag() as $item)
-                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0" style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                    <tbody>
-                                                                                    <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                            &nbsp;
-                                                                                            @if($item->count > 1)
-                                                                                                <div class="bpdig">
-                                                                                                    {{ $item->count }}
-                                                                                                </div>
-                                                                                            @endif
-                                                                                            <span
-                                                                                                style="position: absolute;right: -1px;top: 41px;"
-                                                                                                act1="5" act2="5" act3="0" rune_h="0"
-                                                                                                aid="23867698" art_id="" cnt="1"
-                                                                                                div_id="AA_23867698" psell="16"
-                                                                                                onmouseover="showItemInfo(this,event,2)"
-                                                                                                onmouseout="showItemInfo(this,event,0)"
-                                                                                                valign="bottom">
-                                                                                        </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    @endif
-
-                                                                    @if($data->hasBelt())
-                                                                        @foreach($data->getBelt() as $item)
-                                                                            <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                                <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                       style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                    <tbody>
-                                                                                    <tr>
-                                                                                        <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                            &nbsp;
-                                                                                            @if($item->count > 1)
-                                                                                                <div class="bpdig">
-                                                                                                    {{ $item->count }}
-                                                                                                </div>
-                                                                                            @endif
-                                                                                            <span
-                                                                                                style="position: absolute;right: -1px;top: 41px;"
-                                                                                                act1="5" act2="5" act3="0" rune_h="0"
-                                                                                                aid="23867698" art_id="" cnt="1"
-                                                                                                div_id="AA_23867698" psell="16"
-                                                                                                onmouseover="showItemInfo(this,event,2)"
-                                                                                                onmouseout="showItemInfo(this,event,0)"
-                                                                                                valign="bottom">
-                                                                                        </span>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    </tbody>
-                                                                                </table>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    @endif
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasPotion())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Боевые эффекты") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getPotion() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasFood())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Еда") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getFood() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasResource())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Ресурсы") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getResource() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-
-                                                        @if($data->hasScroll())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Свитки") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getScroll() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                    </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasRecipe())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Рецепты") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getRecipe() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            act1="5" act2="5" act3="0" rune_h="0"
-                                                                                            aid="23867698" art_id="" cnt="1"
-                                                                                            div_id="AA_23867698" psell="16"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasChest())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Шкатулки") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable">
-                                                                    @foreach($data->getChest() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="0" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">{{ $item->count }}</div>
-                                                                                        @endif
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasGems())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Камни") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getGems() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-
-                                                        @if($data->hasRunes())
-                                                            <div id="bag_section_{{ random_int(1,100) }}" class="bag_section">
-                                                                <div align="center">
-                                                                    <table border="0" cellspacing="0" cellpadding="0"
-                                                                           style="margin: 0 auto;">
-                                                                        <tbody>
-                                                                        <tr height="22">
-                                                                            <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                            <td align="center" class="tbl-usi-hdr mbg">{{ __("Руны") }}</td>
-                                                                            <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <br>
-                                                                <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                                    @foreach($data->getRunes() as $item)
-                                                                        <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-
-                                                                            <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                                   style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                    <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                        &nbsp;
-                                                                                        @if($item->count > 1)
-                                                                                            <div class="bpdig">
-                                                                                                {{ $item->count }}
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <span
-                                                                                            style="position: absolute;right: -1px;top: 41px;"
-                                                                                            onmouseover="showItemInfo(this,event,2)"
-                                                                                            onmouseout="showItemInfo(this,event,0)"
-                                                                                            valign="bottom">
-                                                                                        </span>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </li>
-                                                                    @endforeach
-                                                                </ul>
-                                                            </div>
-                                                            <br>
-                                                        @endif
-                                                    @endif
-
-                                                    @if($data->getGroup() === 'main' && $data->getTradeGoods()->count())
-                                                        <div id="bag_section_trade_goods" class="bag_section">
-                                                            <div align="center">
-                                                                <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
-                                                                    <tbody>
-                                                                    <tr height="22">
-                                                                        <td width="27" class="tbl-usi-hdr lc"><b></b></td>
-                                                                        <td align="center" class="tbl-usi-hdr mbg">{{ __("Торговые товары") }}</td>
-                                                                        <td width="27" class="tbl-usi-hdr rc"><b></b></td>
-                                                                    </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                            <br>
-                                                            <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable">
-                                                                @foreach($data->getTradeGoods() as $cargo)
-                                                                    <li class="item ui-sortable-handle" data-backpack-id="{{ $cargo->id }}" style="opacity: 1;">
-                                                                        <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                               style="float: left; margin: 1px; background: url('{{ asset($cargo->item->itemInfo->image) }}'); background-size: cover;">
-                                                                            <tbody>
-                                                                            <tr>
-                                                                                <td data-id="{{ $cargo->item->id }}" data-sid="{{ $cargo->item->share_item_id }}" data-type="{{ $cargo->item->itemInfo->type->value }}" data-equipped="0" data-count="{{ $cargo->count }}" data-name="{{ $cargo->item->itemInfo->name }}" data-image="{{ asset($cargo->item->itemInfo->image) }}" data-is-use="0" data-wearable="0" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                    &nbsp;
-                                                                                    @if($cargo->count > 1)
-                                                                                        <div class="bpdig">{{ $cargo->count }}</div>
-                                                                                    @endif
-                                                                                </td>
-                                                                            </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                        <br>
-                                                    @endif
-
-                                                    @if($data->getGroup() === 'key' || $data->getGroup() === 'quest' || $data->getGroup() === 'artifact' || $data->getGroup() === 'gift' || $data->getGroup() === 'misc')
-                                                        <ul class="lscroll backpack_list connected-sortable clearfix ui-sortable" style="">
-                                                            @foreach($data->getBackpack() as $item)
-                                                                <li class="item ui-sortable-handle" data-backpack-id="{{ $item->id }}" style="opacity: 1;">
-
-                                                                    <table width="60" height="60" cellpadding="0" cellspacing="0" border="0"
-                                                                           style="float: left; margin: 1px; background: url('{{ asset($item->item->itemInfo->image) }}'); background-size: cover;">
-                                                                        <tbody>
-                                                                        <tr>
-                                                                            <td data-id="{{ $item->item->id }}" data-sid="{{ $item->item->share_item_id }}" data-type="{{ $item->item->itemInfo->type->value }}" data-equipped="{{ $item->isEquipped() ? '1' : '0' }}" data-count="{{ $item->count }}" data-name="{{ $item->item->itemInfo->name }}" data-image="{{ asset($item->item->itemInfo->image) }}" data-is-use="{{ $item->item->itemInfo->is_use ? '1' : '0' }}" data-wearable="{{ $item->item->itemInfo->type->value === 'artifact' && $item->item->itemInfo->count_use === 0 ? '1' : '0' }}" onclick="showCtxMenu(this, event)" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)" valign="bottom">
-                                                                                &nbsp;
-                                                                                @if($item->count > 1)
-                                                                                    <div class="bpdig">
-                                                                                        {{ $item->count }}
-                                                                                    </div>
-                                                                                @endif
-                                                                                <span
-                                                                                    style="position: absolute;right: -1px;top: 41px;"
-                                                                                    act1="5" act2="5" act3="0" rune_h="0"
-                                                                                    aid="23867698" art_id="" cnt="1"
-                                                                                    div_id="AA_23867698" psell="16"
-                                                                                    onmouseover="showItemInfo(this,event,2)"
-                                                                                    onmouseout="showItemInfo(this,event,0)"
-                                                                                    valign="bottom">
-                                                                                    </span>
-                                                                            </td>
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+                                    <div class="backpack-inventory sumka2_aizen">
+                                        <div class="backpack-inventory__summary">
+                                            <table class="coll w100 p10h p2v brd2-all">
+                                                <tbody>
+                                                <tr class="bg_l">
+                                                    <td nowrap=""><b>{{ __("Вместимость:") }}</b> &nbsp;<b class="redd"><span id="artifact_amount">{{ $data->getCountItems() }}</span>/<span id="artifact_amount_max">{{ $user->getBagCount() }}</span></b></td>
+                                                    <td align="right" nowrap="">
+                                                        <b>{{ __("Монет:") }}</b>
+                                                        &nbsp;<b class="redd"><span title="{{ __("Золотой") }}"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }} </b>
+                                                        &nbsp;&nbsp;&nbsp;<b class="redd"><span title="{{ __("Бриллиант") }}"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }} </b>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div id="item_list" class="backpack_overflow lscroll">
+                                            @include('backpack::partials.inventory')
+                                        </div>
+                                    </div>
 
                                     <script>
                                         var urlMODE = 'user_iframe.php?group=1&update_swf=1';
@@ -2029,6 +1334,8 @@
     <div class="ctx-item" id="ctx-equip"   onclick="ctxAction('equip')">{{ __("Надеть") }}</div>
     <div class="ctx-item" id="ctx-unequip" onclick="ctxAction('unequip')">{{ __("Снять") }}</div>
     <div class="ctx-item" id="ctx-use"     onclick="ctxAction('use')">{{ __("Использовать") }}</div>
+    <div class="ctx-item" id="ctx-treasure" onclick="ctxAction('treasure')">{{ __('treasure.check') }}</div>
+    <div class="ctx-item" id="ctx-treasure-assemble" onclick="ctxAction('treasure-assemble')">{{ __('treasure.assemble') }}</div>
     <div class="ctx-item" id="ctx-learn"   onclick="ctxAction('learn')">{{ __("Изучить") }}</div>
     <div class="ctx-item" id="ctx-chat" onclick="ctxAction('chat')">{{ __("Отправить в чат") }}</div>
     <div class="ctx-item ctx-danger" id="ctx-drop" onclick="ctxAction('drop')">{{ __("Выкинуть") }}</div>
@@ -2132,6 +1439,11 @@
         document.getElementById('ctx-equip').style.display   = (equippable && !equipped) ? '' : 'none';
         document.getElementById('ctx-unequip').style.display = equipped ? '' : 'none';
         document.getElementById('ctx-use').style.display     = usable   ? '' : 'none';
+        document.getElementById('ctx-use').textContent = type === 'chest'
+            ? @json(__('Открыть'))
+            : @json(__('Использовать'));
+        document.getElementById('ctx-treasure').style.display = type === 'treasure_map' ? '' : 'none';
+        document.getElementById('ctx-treasure-assemble').style.display = type === 'treasure_map_fragment' ? '' : 'none';
         document.getElementById('ctx-learn').style.display   = (isBook || isLearnableRecipe) ? '' : 'none';
         document.getElementById('ctx-drop').style.display    = _ctxItemDroppable ? '' : 'none';
 
@@ -2153,6 +1465,17 @@
         document.getElementById('item-ctx-menu').style.display = 'none';
         var base = '{{ url("/items") }}';
         switch (action) {
+            case 'treasure':
+            case 'treasure-assemble':
+                fetch(action === 'treasure' ? @json(url('/treasure/maps')) + '/' + id + '/check' : @json(url('/treasure/fragments')) + '/' + id + '/assemble', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                }).then(async response => {
+                    const data = await response.json();
+                    window.top.showErrorIframe?.(data.message || @json(__('treasure.unavailable')));
+                    if (data.ok) window.location.reload();
+                }).catch(() => window.top.showErrorIframe?.(@json(__('treasure.network_error'))));
+                break;
             case 'info':    itemTooltipOpenInfo(id, null, null, null); break;
             case 'equip':   location.href = base + '/put-on/'     + id; break;
             case 'unequip': location.href = base + '/put-off/'    + id; break;

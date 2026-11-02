@@ -15,7 +15,7 @@ class ShopItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['structure_id', 'share_item_id', 'share_structure_category_id', 'price', 'diamond', 'sort_order'];
+    protected $fillable = ['min_reputation_points', 'purchase_limit_quantity', 'purchase_limit_period_seconds', 'structure_id', 'share_item_id', 'share_structure_category_id', 'price', 'diamond', 'sort_order'];
 
     protected $attributes = [
         'price' => 0,
@@ -24,6 +24,7 @@ class ShopItem extends Model
     ];
 
     protected $casts = [
+        'purchase_limit_quantity' => 'integer', 'purchase_limit_period_seconds' => 'integer',
         'price' => 'integer',
         'diamond' => 'integer',
         'sort_order' => 'integer',

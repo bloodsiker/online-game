@@ -71,9 +71,15 @@ final class AssembleItem
                 }
             }
             $count = (int) $reward->pivot->count;
-            $this->backpack->giveItemsByShareItem($user, $reward, $count);
+            $created = $this->backpack->giveItemsByShareItem($user, $reward, $count);
 
-            return new AssemblyResult(true, __('Сборка завершена. Получено: :item ×:count.', ['item' => $reward->name, 'count' => $count]), $reward->id, $count);
+            return new AssemblyResult(
+                ok: true,
+                message: __('Сборка завершена. Получено: :item ×:count.', ['item' => $reward->name, 'count' => $count]),
+                itemId: $reward->id,
+                count: $count,
+                itemInstanceId: (int) $created[0]->item_id,
+            );
         });
     }
 }

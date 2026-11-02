@@ -28,6 +28,8 @@ enum ShareItemType: string
     case BOOK = 'book';
     case CHEST = 'chest';
     case SCROLL = 'scroll';
+    case TREASURE_MAP = 'treasure_map';
+    case TREASURE_MAP_FRAGMENT = 'treasure_map_fragment';
     case GIFT = 'gift';
     case GEM = 'gem';
     case MOUNT = 'mount';
@@ -88,6 +90,8 @@ enum ShareItemType: string
             self::TRADE_GOODS => __('Торговый товар'),
             self::POTION => __('Эликсир'),
             self::SCROLL => __('Свиток'),
+            self::TREASURE_MAP => __('treasure.map_type'),
+            self::TREASURE_MAP_FRAGMENT => __('treasure.fragment_type'),
             self::QUEST => __('Квест'),
             self::ARTIFACT => __('Артефакт'),
             self::RECIPE => __('Рецепт'),
@@ -125,6 +129,8 @@ enum ShareItemType: string
                 self::LOCKPICK,
                 self::TRADE_GOODS,
                 self::SCROLL,
+                self::TREASURE_MAP,
+                self::TREASURE_MAP_FRAGMENT,
                 self::GEM,
                 self::MOUNT,
                 self::RUNE,

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Library\Presentation\Services;
 
-use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Clan\Domain\Models\ClanSkillLevel;
+use App\Modules\Item\Application\ItemTooltip\ItemTooltipDto;
 use App\Modules\Item\Presentation\Services\ItemShortcodeRenderer;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
+use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Domain\Enums\InjuryBodyPart;
@@ -17,9 +18,11 @@ use App\Modules\Player\Domain\Enums\InjurySeverity;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Player\Infrastructure\Persistence\Models\InjuryType;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
+use App\Modules\Share\Domain\Enums\PassiveBonusStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItemStat;
+use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +35,8 @@ final class LibraryShortcodeRenderer
     /** @var array<string, array<int, Model>> */
     private array $entities = [];
 
+    private array $magicTooltips = [];
+
     public function __construct(private readonly ItemShortcodeRenderer $itemRenderer) {}
 
     public function render(?string $html): string
@@ -39,6 +44,12 @@ final class LibraryShortcodeRenderer
         if ($html === null || $html === '') {
             return '';
         }
+
+        $html = preg_replace_callback(
+            '/\[\[magic_skill_catalog:(combat|passive|support)\]\]/i',
+            fn (array $match): string => $this->renderMagicSkillCatalog(strtolower($match[1])),
+            $html,
+        ) ?? $html;
 
         $html = preg_replace_callback(
             '/\[\[injury_catalog\]\]/i',
@@ -82,12 +93,13 @@ final class LibraryShortcodeRenderer
 
     public function tooltipScript(): string
     {
-        return $this->itemRenderer->tooltipScript();
+        return $this->itemRenderer->tooltipScript()
+            .'<script>Object.assign(window.itemTooltip, '.json_encode((object) $this->magicTooltips, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT).');</script>';
     }
 
     private function pattern(): string
     {
-        return '/\[\[(monster|npc|reputation|map|location):(\d+)(?:\s*;\s*display\s*:\s*(block|inline))?\s*\]\]/i';
+        return '/\[\[(monster|npc|skill|magic_skill|reputation|map|location):(\d+)(?:\s*;\s*display\s*:\s*(block|inline))?\s*\]\]/i';
     }
 
     /** @param array<int, array<int, string>> $matches */
@@ -103,6 +115,8 @@ final class LibraryShortcodeRenderer
             $ids = array_values(array_unique($ids));
             $query = match ($type) {
                 'monster' => Monster::query(),
+                'skill' => Skill::query(),
+                'magic_skill' => MagicSkill::query()->with('skillEffects'),
                 'npc' => Npc::query()->with('location'),
                 'reputation' => Reputation::query(),
                 'map' => Map::query(),
@@ -116,39 +130,49 @@ final class LibraryShortcodeRenderer
     private function renderEntity(string $type, Model $entity, string $display): string
     {
         [$label, $title, $image, $details, $url] = match ($type) {
+            'skill' => [
+                __('contentcards.skill'), $entity->name, null,
+                Str::limit(strip_tags((string) $entity->description), 120),
+                route('rating', ['type' => 'skill_'.$entity->id]),
+            ],
+            'magic_skill' => [
+                __('contentcards.magic_skill'), $entity->name, $entity->image,
+                Str::limit(strip_tags((string) $entity->description), 120),
+                route('magic_skill.info', ['skill' => $entity->id]),
+            ],
             'monster' => [
-                'Монстр',
+                __('contentcards.monster'),
                 $entity->name,
                 $entity->image,
-                sprintf('%d ур. · HP %s · Урон %s–%s', $entity->lvl, format_money($entity->hp), format_money($entity->min_dmg), format_money($entity->max_dmg)),
+                __('contentcards.monster_details', ['level' => $entity->lvl, 'hp' => format_money($entity->hp), 'min' => format_money($entity->min_dmg), 'max' => format_money($entity->max_dmg)]),
                 route('info.monster.catalog', ['id' => $entity->id]),
             ],
             'npc' => [
-                'НПС',
+                __('contentcards.npc'),
                 $entity->name,
                 $entity->image,
-                $entity->location?->name ? 'Локация: '.$entity->location->name : Str::limit(strip_tags((string) $entity->description), 90),
+                $entity->location?->name ? __('contentcards.location_name', ['name' => $entity->location->name]) : Str::limit(strip_tags((string) $entity->description), 90),
                 route('info.npc', ['uuid' => $entity->uuid]),
             ],
             'reputation' => [
-                'Репутация',
+                __('contentcards.reputation'),
                 $entity->name,
                 resolve_storage_image_url($entity->icon),
                 Str::limit(strip_tags((string) $entity->description), 90),
                 route('reputation.index', ['id' => $entity->id]),
             ],
             'map' => [
-                'Карта',
+                __('contentcards.map'),
                 $entity->name,
                 null,
                 null,
                 $entity->slug ? route('map.public', ['slug' => $entity->slug]) : route('map'),
             ],
             'location' => [
-                'Локация',
+                __('contentcards.location'),
                 $entity->name,
                 $entity->image,
-                $entity->map?->name ? 'Карта: '.$entity->map->name : Str::limit(strip_tags((string) $entity->description), 90),
+                $entity->map?->name ? __('contentcards.map_name', ['name' => $entity->map->name]) : Str::limit(strip_tags((string) $entity->description), 90),
                 $entity->map?->slug
                     ? route('map.public', [
                         'slug' => $entity->map->slug,
@@ -161,7 +185,11 @@ final class LibraryShortcodeRenderer
         $imageHtml = $image
             ? '<img class="library-entity-card__image" src="'.e(asset($image)).'" alt="'.e((string) $title).'">'
             : '<span class="library-entity-card__image library-entity-card__image--empty">?</span>';
-        $popupAttribute = in_array($type, ['monster', 'npc'], true) ? ' data-library-info-popup' : '';
+        $popupAttribute = in_array($type, ['monster', 'npc', 'magic_skill'], true) ? ' data-library-info-popup' : '';
+        if ($type === 'magic_skill') {
+            $this->registerMagicTooltip($entity);
+            $popupAttribute .= ' data-id="library_magic_'.$entity->id.'" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"';
+        }
 
         if ($display === 'inline') {
             $inlineImage = $image
@@ -181,8 +209,104 @@ final class LibraryShortcodeRenderer
             .'<span class="library-entity-card__body">'
             .'<span class="library-entity-card__type">'.e($label).'</span>'
             .'<strong class="library-entity-card__title">'.e((string) $title).'</strong>'
-            .'<span class="library-entity-card__details">'.e($details ?: 'Подробнее').'</span>'
+            .'<span class="library-entity-card__details">'.e($details ?: __('contentcards.details')).'</span>'
             .'</span></a>';
+    }
+
+    private function renderMagicSkillCatalog(string $group): string
+    {
+        $query = MagicSkill::query()->with('skillEffects')
+            ->where('slug', 'not like', 'clan_%');
+        if ($group === 'passive') {
+            $query->where('is_passive', true);
+        } else {
+            $query->where('is_passive', false)->whereIn('type', $group === 'combat' ? ['attack'] : ['buff', 'heal', 'debuff']);
+        }
+
+        $skills = $query->orderBy('id')->get();
+        if ($group === 'combat') {
+            $content = $skills->map(fn (MagicSkill $skill): string => $this->renderEntity('magic_skill', $skill, 'block'))->implode('');
+        } else {
+            $groups = $skills->groupBy(fn (MagicSkill $skill): string => $group === 'passive'
+                ? preg_replace('/(?:-\d+|_[ivx]+)$/i', '', (string) $skill->slug)
+                : (string) $skill->type);
+            $content = $groups->map(function ($ranks, string $key) use ($group): string {
+                if ($group === 'passive') {
+                    $title = preg_replace('/\s+(?:[IVXLCDM]+|\d+)$/u', '', $ranks->first()->name);
+                    $cards = $ranks->map(function (MagicSkill $skill): string {
+                        $this->registerMagicTooltip($skill);
+
+                        return view('library::partials.magic-skill-rank', compact('skill'))->render();
+                    })->implode('');
+                } else {
+                    $uk = app()->getLocale() === 'uk';
+                    $title = match ($key) {
+                        'buff' => $uk ? 'Баффи' : 'Баффы',
+                        'debuff' => $uk ? 'Дебаффи' : 'Дебаффы',
+                        default => $uk ? 'Зцілення' : 'Исцеление',
+                    };
+                    $cards = $ranks->groupBy(fn (MagicSkill $skill): string => preg_replace('/\s+(?:[IVXLCDM]+|\d+)$/u', '', $skill->name))
+                        ->map(function ($family, string $name): string {
+                            $icons = $family->map(function (MagicSkill $skill): string {
+                                $this->registerMagicTooltip($skill);
+
+                                return view('library::partials.magic-skill-rank', compact('skill'))->render();
+                            })->implode('');
+
+                            return '<div style="width:100%;margin-bottom:8px;"><b style="display:block;margin-bottom:6px;color:#7e1d0a;">'.e($name).'</b>'
+                                .'<div style="display:flex;flex-wrap:wrap;gap:8px;">'.$icons.'</div></div>';
+                        })->implode('');
+                }
+
+                return view('library::partials.magic-skill-group', compact('title', 'cards'))->render();
+            })->implode('');
+        }
+
+        return '<div class="library-magic-catalog">'.$content.'</div>';
+    }
+
+    private function registerMagicTooltip(MagicSkill $skill): void
+    {
+        $stats = [];
+        if (! $skill->is_passive) {
+            $stats[] = ['title' => __('Расход маны'), 'value' => (string) $skill->mana_cost];
+            $stats[] = ['title' => __('Перезарядка'), 'value' => format_cooldown((int) $skill->cooldown)];
+        }
+        if ($skill->max_damage > 0) {
+            $stats[] = ['title' => __('Урон:'), 'value' => $skill->min_damage.'–'.$skill->max_damage];
+        }
+        if ($skill->base_healing > 0) {
+            $stats[] = ['title' => __('Лечение:'), 'value' => (string) $skill->base_healing];
+        }
+        foreach ($skill->effects ?? [] as $bonus) {
+            if (! is_array($bonus)) {
+                continue;
+            }
+            $type = $bonus['type'] ?? '';
+            $uk = app()->getLocale() === 'uk';
+            $label = match ($type) {
+                'magic_damage_percent' => $uk ? 'Магічна шкода' : 'Магический урон',
+                'debuff_duration_reduction' => $uk ? 'Скорочення тривалості дебаффів' : 'Сокращение длительности дебаффов',
+                'lethal_survive_chance' => $uk ? 'Шанс пережити смертельний удар' : 'Шанс пережить смертельный удар',
+                default => PassiveBonusStatType::tryFrom($type)?->label() ?? $type,
+            };
+            $value = (float) ($bonus['value'] ?? 0);
+            $percent = ! empty($bonus['is_percent']) || $type === 'magic_damage_percent';
+            $stats[] = ['title' => $label, 'value' => ($value > 0 ? '+' : '').$value.($percent ? '%' : '')];
+        }
+
+        $dto = new ItemTooltipDto(
+            id: 'library_magic_'.$skill->id,
+            title: $skill->name,
+            color: '#7e1d0a',
+            image: (string) $skill->image,
+            kind: $skill->is_passive ? __('Пассивка') : __('Заклинание'),
+            price: '', diamond: '', lev: [], skills: [],
+            desc: '<div>'.e((string) $skill->description).'</div>'.view('magic-skill::partials.skill-effects', compact('skill'))->render(),
+            store: false, nogive: false, noweight: false, nosell: false,
+            stats: $stats,
+        );
+        $this->magicTooltips[$dto->id] = $dto->toArray();
     }
 
     private function renderInjuryCatalog(): string
@@ -376,7 +500,7 @@ final class LibraryShortcodeRenderer
     /** @param array<string, mixed> $effect */
     private function clanSkillEffectLabel(array $effect): string
     {
-        $type = ClanSkillEffectType::tryFrom((string) ($effect['type'] ?? ''));
+        $type = PassiveBonusStatType::tryFrom((string) ($effect['type'] ?? ''));
         $value = (float) ($effect['value'] ?? 0);
         $formatted = rtrim(rtrim(number_format(abs($value), 2, '.', ''), '0'), '.');
 

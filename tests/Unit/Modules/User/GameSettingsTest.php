@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\User;
 
+use App\Modules\Auth\Application\Listeners\ActivateLoginSession;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Domain\Settings\GameSettingsDefinition;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -26,14 +27,21 @@ final class GameSettingsTest extends TestCase
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('password')->nullable();
+            $table->string('active_login_token')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
         });
         (require database_path('migrations/2026_10_10_010000_create_user_game_settings_table.php'))->up();
-        DB::table('users')->insert([['id' => 1], ['id' => 2]]);
+        DB::table('users')->insert([
+            ['id' => 1, 'active_login_token' => 'settings-login-token', 'email_verified_at' => now()],
+            ['id' => 2, 'active_login_token' => 'other-login-token', 'email_verified_at' => now()],
+        ]);
     }
 
     private function signIn(): void
     {
-        $this->actingAs(User::query()->without('player')->findOrFail(1))->withSession(['_token' => 'settings-token']);
+        $this->actingAs(User::query()->without('player')->findOrFail(1))->withSession([
+            '_token' => 'settings-token', ActivateLoginSession::SESSION_KEY => 'settings-login-token',
+        ]);
     }
 
     public function test_defaults_show_map_without_creating_database_rows(): void

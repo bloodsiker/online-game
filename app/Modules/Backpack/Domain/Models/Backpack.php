@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Backpack\Domain\Models;
 
+use App\Modules\Backpack\Domain\Models\Concerns\InsertsInventoryAtomically;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Backpack extends Model
 {
     use HasFactory;
+    use InsertsInventoryAtomically;
 
     protected $fillable = ['item_id', 'user_id', 'count', 'sort_order'];
 
@@ -26,6 +28,15 @@ class Backpack extends Model
         'equipped' => 0,
         'count' => 1,
     ];
+
+    public static function createForItem(int $userId, Item $item, int $count = 1): self
+    {
+        $entry = new self(['user_id' => $userId, 'item_id' => $item->id, 'count' => $count]);
+        $entry->setRelation('item', $item);
+        $entry->save();
+
+        return $entry;
+    }
 
     public function item(): BelongsTo
     {

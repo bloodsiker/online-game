@@ -117,19 +117,8 @@
             @endif
 
             {{-- Coins --}}
-            <table class="coll w100 p10h p2v brd2-all" border="0" width="100%">
-                <tbody>
-                <tr class="bg_l">
-                    <td align="left"><b>Кузня:</b> Заточка</td>
-                    <td align="right" nowrap="" style="color:#955c4a;">
-                        <b>Монеты:</b> <b class="redd"><span title="Монеты"><img src="{{ asset('img/icon/m_game.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->money) }}</b>
-                        &nbsp;&nbsp;<b>Бриллианты:</b> <b class="redd"><span title="Бриллианты"><img src="{{ asset('img/icon/m_dmd.gif') }}" border="0" width="11" height="11" align="absmiddle"></span>&nbsp;{{ format_money($user->diamond) }}</b>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            @include('blacksmith::_summary', ['sectionTitle' => __('Заточка')])
 
-            <br>
 
             <form action="{{ route('blacksmith.upgrade.process', ['id' => $blacksmith->id]) }}" method="post" id="upgrade-form">
                 @csrf

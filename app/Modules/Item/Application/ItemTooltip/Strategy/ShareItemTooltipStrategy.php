@@ -12,7 +12,10 @@ use App\Modules\Item\Application\ItemTooltip\ItemTooltipStatsBuilder;
 
 class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
 {
-    public function __construct(private readonly iterable $items) {}
+    public function __construct(
+        private readonly iterable $items,
+        private readonly string $idPrefix = '',
+    ) {}
 
     public function collect(ItemTooltipCollector $collector): void
     {
@@ -26,7 +29,7 @@ class ShareItemTooltipStrategy implements ItemTooltipStrategyInterface
 
         foreach ($shareItems as $shareItem) {
             $collector->add(new ItemTooltipDto(
-                id: $shareItem->id,
+                id: $this->idPrefix === '' ? $shareItem->id : $this->idPrefix.$shareItem->id,
                 title: $shareItem->name,
                 color: $shareItem->rarity->color(),
                 image: $shareItem->image,

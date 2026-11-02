@@ -12,6 +12,7 @@ final class EnsureEmailIsVerified
 {
     /** @var array<int, string> */
     private const ALLOWED_ROUTES = [
+        'auth.session.status',
         'login',
         'register',
         'register.check',

@@ -53,6 +53,8 @@ class StatSheet implements FightHitInterface
 
     public int $magicAttack = 0;
 
+    public int $magicDamagePercent = 0;
+
     public int $magicResistance = 0;
 
     public int $magicCritical = 0;
@@ -113,6 +115,11 @@ class StatSheet implements FightHitInterface
     public function getMagicAttack(): int
     {
         return $this->magicAttack;
+    }
+
+    public function getMagicDamagePercent(): int
+    {
+        return $this->magicDamagePercent;
     }
 
     public function getMagicCriticalChance(): int

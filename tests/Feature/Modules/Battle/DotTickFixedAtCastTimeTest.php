@@ -72,6 +72,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->timestamps();
         });
         Schema::create('monster_active_effects', function (Blueprint $table): void {
+            $table->unsignedBigInteger('source_user_id')->nullable();
             $table->id();
             $table->unsignedBigInteger('location_monster_id');
             $table->unsignedBigInteger('effect_id')->nullable();
@@ -94,6 +95,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
             $table->timestamps();
         });
         Schema::create('players', function (Blueprint $table): void {
+            $table->integer('reputation_rating')->default(0);
             $table->id();
             $table->integer('hp_now')->default(100);
             $table->decimal('experience_multiplier', 6, 3)->default(1.0);
@@ -167,6 +169,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
         $player = new Player;
         $player->hp_now = 100;
         $player->save();
+        $player->setRelation('magicSkills', collect());
         $effect = Effect::create([
             'name' => 'Кровотечение от моба',
             'slug' => 'monster_bleed',
@@ -208,6 +211,7 @@ class DotTickFixedAtCastTimeTest extends TestCase
         $player = new Player;
         $player->hp_now = 100;
         $player->save();
+        $player->setRelation('magicSkills', collect());
         $first = Effect::create([
             'name' => 'Кровотечение заклинания', 'slug' => 'spell_bleed', 'type' => 'debuff',
             'active_type' => 'bleed',

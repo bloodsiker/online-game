@@ -144,7 +144,12 @@
                             <tbody>
                             @forelse($magicSkill->skillEffects as $effect)
                                 <tr style="vertical-align: middle">
-                                    <td><a href="{{ route('admin.effect.info', $effect->id) }}">{{ $effect->name }}</a></td>
+                                    <td>
+                                        <a href="{{ route('admin.effect.info', $effect->id) }}">{{ $effect->name }}</a>
+                                        @if($effect->resolvedActiveType()?->isHoT() && $effect->resolvedDamageScalingType() === \App\Modules\Effect\Domain\Enums\EffectDamageScalingType::TARGET_MAX_HP)
+                                            <div class="text-muted">Восстановление {{ $effect->value_per_tick }}% максимального HP за указанную длительность. Процент настраивается в эффекте.</div>
+                                        @endif
+                                    </td>
                                     <td><span class="badge badge-info">{{ $effect->type }}</span></td>
                                     <td>
                                         <input form="magic-effect-update-{{ $effect->id }}" type="number" min="0" max="100"

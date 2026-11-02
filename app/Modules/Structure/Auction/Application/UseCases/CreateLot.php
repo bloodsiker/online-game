@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Structure\Auction\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
+use App\Modules\Premium\Application\Services\PremiumBonusService;
+use App\Modules\Premium\Domain\Enums\PremiumBonus;
 use App\Modules\Structure\Auction\Application\DTOs\AuctionResultDTO;
 use App\Modules\Structure\Auction\Domain\Models\Auction;
 use App\Modules\Structure\Auction\Domain\Services\AuctionFeeCalculator;
@@ -39,6 +41,12 @@ class CreateLot
 
         DB::transaction(function () use ($user, $auction, $itemId, $amount, $price, $fee, $isAnonymous, &$result) {
             $freshUser = User::lockForUpdate()->findOrFail($user->id);
+            if ($isAnonymous && app(PremiumBonusService::class)
+                ->value($user->id, PremiumBonus::ANONYMOUS_AUCTION) <= 0) {
+                $result = ['ok' => false, 'message' => __('premium.anonymous_unavailable')];
+
+                return;
+            }
             if ($freshUser->money < $fee) {
                 $result = ['ok' => false, 'message' => 'Не достаточно монет что бы оплатить налог.'];
 

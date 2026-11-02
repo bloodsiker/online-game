@@ -6,7 +6,9 @@ namespace App\Modules\Reputation\Application\UseCases;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
+use App\Modules\Commerce\Domain\Exceptions\PurchaseLimitExceeded;
 use App\Modules\Reputation\Application\DTOs\ReputationActionResultDTO;
 use App\Modules\Reputation\Application\Services\ReputationService;
 use App\Modules\Reputation\Domain\Contracts\ReputationReadRepository;
@@ -21,9 +23,23 @@ class BuyReputationShopItem
         private readonly ReputationService $reputationService,
         private readonly BackpackService $backpackService,
         private readonly PurchaseLogger $purchaseLogger,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
     ) {}
 
     public function execute(User $user, int $id, int $itemId): ReputationActionResultDTO
+    {
+        try {
+            return DB::transaction(function () use ($user, $id, $itemId): ReputationActionResultDTO {
+                $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+                return $this->purchase($user, $id, $itemId);
+            });
+        } catch (PurchaseLimitExceeded $exception) {
+            return new ReputationActionResultDTO(false, $exception->getMessage());
+        }
+    }
+
+    private function purchase(User $user, int $id, int $itemId): ReputationActionResultDTO
     {
         $reputation = $this->readRepository->findReputationForShopOrFail($id);
 
@@ -51,6 +67,7 @@ class BuyReputationShopItem
         }
 
         DB::transaction(function () use ($user, $shopItem, $reputation) {
+            $this->purchaseLimits->reserve($user, $shopItem, 1);
             if ($shopItem->price > 0) {
                 $user->decrement('money', $shopItem->price);
             }

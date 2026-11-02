@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\MagicSkill\Domain\Enums\MagicSkillRequirementType;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillRequirement;
 use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Share\Application\Services\ContentTranslationEditor;
+use App\Modules\Share\Domain\Enums\PassiveBonusStatType;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
@@ -201,7 +201,7 @@ class MagicSkillController extends Controller
     {
         $request->validate([
             'passive_effects' => ['nullable', 'array'],
-            'passive_effects.*.type' => ['nullable', 'string', 'in:'.implode(',', array_column(ClanSkillEffectType::cases(), 'value'))],
+            'passive_effects.*.type' => ['nullable', 'string', 'in:'.implode(',', array_column(PassiveBonusStatType::cases(), 'value'))],
             'passive_effects.*.value' => ['nullable', 'numeric', 'between:-100000,100000'],
             'passive_effects.*.is_percent' => ['nullable', 'boolean'],
         ]);

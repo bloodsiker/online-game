@@ -93,7 +93,7 @@ class GetNpcPage
         $reputations = $this->readRepository->getNpcReputations($npc->id);
 
         foreach ($reputations as $reputation) {
-            $pr = $this->reputationService->getOrCreate($player, $reputation);
+            $pr = $this->reputationService->getOrZero($player, $reputation);
             $tier = $this->reputationService->getCurrentTier($reputation, $pr->points);
 
             // Подвиг (feat) предлагается независимо от кулдауна ежедневных заданий
@@ -163,8 +163,10 @@ class GetNpcPage
         $message = session('quest_error') ?? session('quest_success');
         $messageType = session()->has('quest_success') ? 'success' : 'error';
 
-        // Репутации этого НПС, у которых есть магазин — для ссылки на страницу магазина
-        $reputationShops = $reputations->filter(fn ($reputation) => $reputation->shopItems->isNotEmpty())->values();
+        // An active category configures a shop even before its first product is added.
+        $structureReputationIds = $npc->structures->pluck('reputation_id')->filter()->map(fn ($id) => (int) $id)->all();
+        $reputationShops = $reputations->reject(fn ($reputation) => in_array((int) $reputation->id, $structureReputationIds, true))->filter(fn ($reputation) => $reputation->shopItems->isNotEmpty()
+            || $reputation->categories->contains('is_active', true))->values();
 
         return new NpcPageDTO(
             npc: $npc,

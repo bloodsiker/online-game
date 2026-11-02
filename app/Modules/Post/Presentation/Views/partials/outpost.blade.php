@@ -34,7 +34,7 @@
                             <span class="grn" title="Прочитано получателем">✓</span>
                         @endif
                     </td>
-                    <td class="brd2-top">{{ $item->recipient?->name ?? '—' }}</td>
+                    <td class="brd2-top">{{ $item->is_to_administration ? __('post.administration') : ($item->recipient?->name ?? '—') }}</td>
                     <td class="brd2-top" nowrap>{{ $item->created_at->format('d.m.y H:i') }}</td>
                 </tr>
             @endforeach

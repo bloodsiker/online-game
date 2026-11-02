@@ -52,7 +52,19 @@
                                     </td>
                                     <td><a href="{{ route('admin.magic_skill.info', $skill->id) }}">{{ $skill->name }}</a></td>
                                     <td class="text-muted small">{{ $skill->slug }}</td>
-                                    <td><span class="badge badge-primary">{{ $skill->type }}</span></td>
+                                    <td>
+                                        @php
+                                            $typeBadge = match($skill->type) {
+                                                'attack'  => 'badge-danger',
+                                                'debuff'  => 'badge-warning',
+                                                'buff'    => 'badge-success',
+                                                'heal'    => 'badge-info',
+                                                'utility' => 'badge-secondary',
+                                                default   => 'badge-primary',
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $typeBadge }}">{{ $skill->type }}</span>
+                                    </td>
                                     <td>{{ $skill->target_type }}</td>
                                     <td>{{ $skill->level }}</td>
                                     <td>{{ $skill->mana_cost }}</td>

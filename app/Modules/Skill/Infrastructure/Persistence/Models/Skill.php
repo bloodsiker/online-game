@@ -17,5 +17,8 @@ class Skill extends Model
 
     public const SKILL_HAND_ID = 1;
 
+    /** «Колдовство» — навык, усиливающий силу заклинаний и снижающий их стоимость маны, см. HitCalculator::weaponSkillMultiplier(). */
+    public const SKILL_MAGIC_ID = 27;
+
     protected $fillable = ['name', 'description', 'type'];
 }

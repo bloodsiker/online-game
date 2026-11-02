@@ -45,7 +45,7 @@ final readonly class HeartbeatPlayer
             }
 
             $hpBeforeEffects = (int) $player->hp_now;
-            $tickResult = $this->timedEffectService->process($player, $now);
+            $tickResult = $this->timedEffectService->process($player, $now, hpMax: $sheet->getHpMax());
             $dead = $hpBeforeEffects > 0 && (int) $player->hp_now <= 0;
             $deathMessage = null;
 

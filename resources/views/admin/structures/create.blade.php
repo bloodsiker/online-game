@@ -46,6 +46,10 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group mb-3">
+                            <label>Репутация магазина (ID, необязательно)</label>
+                            <input type="number" min="1" name="reputation_id" value="{{ old('reputation_id') }}" class="form-control">
+                        </div>
                         <button class="btn btn-primary">Создать</button>
                         <a href="{{ route('admin.structures') }}" class="btn btn-default">Отмена</a>
                     </form>

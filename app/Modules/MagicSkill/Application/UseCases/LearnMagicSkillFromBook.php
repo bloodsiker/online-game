@@ -11,6 +11,7 @@ use App\Modules\MagicSkill\Application\Services\MagicSkillRequirementService;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkillBook;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,14 @@ class LearnMagicSkillFromBook
     public function execute(User $user, int $shareItemId): LearnMagicSkillResultDTO
     {
         $player = $user->player;
+
+        $atMageTrainer = Structure::query()
+            ->where('type', Structure::TYPE_MAGE_TRAINER)
+            ->whereHas('npc', fn ($query) => $query->where('location_id', $user->location_id))
+            ->exists();
+        if (! $atMageTrainer) {
+            return new LearnMagicSkillResultDTO(ok: false, message: 'Изучать заклинания можно только у Наставника магии', httpCode: 422);
+        }
 
         $book = MagicSkillBook::where('share_item_id', $shareItemId)->with(['magicSkill', 'shareItem'])->first();
 
@@ -67,6 +76,28 @@ class LearnMagicSkillFromBook
                     return new LearnMagicSkillResultDTO(ok: false, message: $unmet, httpCode: 422);
                 }
 
+                // Новый ранг заменяет предыдущий той же ветки (хил/баффы) — иначе
+                // игрок копил бы оба рангa сразу (см. upgrades_skill_id). Переносим
+                // is_equipped/sort_order со старого ранга, чтобы не пропадал со слота.
+                $previousRank = $skill->upgrades_skill_id !== null
+                    ? DB::table('player_magic_skills')
+                        ->where('player_id', $lockedPlayer->id)
+                        ->where('magic_skill_id', $skill->upgrades_skill_id)
+                        ->first()
+                    : null;
+
+                if ($previousRank !== null) {
+                    DB::table('player_magic_skills')
+                        ->where('player_id', $lockedPlayer->id)
+                        ->where('magic_skill_id', $skill->upgrades_skill_id)
+                        ->delete();
+                    DB::table('player_slots')
+                        ->where('player_id', $lockedPlayer->id)
+                        ->where('entity_type', 'skill')
+                        ->where('entity_id', $skill->upgrades_skill_id)
+                        ->update(['entity_id' => $skill->id]);
+                }
+
                 // Блокируем именно строку рюкзака до проверки count и списания:
                 // два одновременных клика не смогут использовать одну книгу.
                 $backpackItem = Backpack::query()
@@ -84,9 +115,9 @@ class LearnMagicSkillFromBook
                 DB::table('player_magic_skills')->insert([
                     'player_id' => $lockedPlayer->id,
                     'magic_skill_id' => $skill->id,
-                    'is_equipped' => false,
+                    'is_equipped' => $previousRank?->is_equipped ?? false,
                     'cooldown_end_at' => null,
-                    'sort_order' => 0,
+                    'sort_order' => $previousRank?->sort_order ?? 0,
                 ]);
 
                 if ($backpackItem->count > 1) {

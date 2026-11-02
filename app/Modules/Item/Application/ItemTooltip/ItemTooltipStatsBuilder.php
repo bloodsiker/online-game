@@ -11,6 +11,7 @@ use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
+use App\Modules\Structure\Blacksmith\Domain\Services\ArtifactUpgradeRules;
 
 /**
  * Строит массив строк характеристик для тултипа предмета.
@@ -97,6 +98,16 @@ final class ItemTooltipStatsBuilder
     /** @return list<array{title: string, value: string}> */
     public static function buildSpecialInfo(ShareItem $item): array
     {
+        if ($item->type === ShareItemType::TREASURE_MAP) {
+            $item->loadMissing('treasureMapConfig');
+            $config = $item->treasureMapConfig;
+            if ($config) {
+                return [
+                    ['title' => __('treasure.required_points'), 'value' => (string) $config->required_reputation],
+                ];
+            }
+        }
+
         return $item->effects
             ->filter(static fn ($effect): bool => $effect->effect_type === ItemEffectType::RESTORE_LOST_EXP)
             ->map(static fn ($effect): array => [
@@ -127,7 +138,7 @@ final class ItemTooltipStatsBuilder
         }
 
         // Бонус заточки: +5% за уровень, так же как считает PlayerStatService::fromEquipment()
-        // (оружие — к урону, слоты брони — к своей броне). Другие слоты заточка не усиливает.
+        // Оружие усиливает свой урон, броня — свою броню, артефакт — все собственные статы.
         $upgradeMultiplier = 1 + ($upgradeLvl * 5 / 100);
         $isWeaponSlot = $item->slot === ShareItemSlot::HAND;
         $isArmorSlot = $item->slot !== null && in_array($item->slot, ShareItemSlot::armorSlots(), true);
@@ -138,19 +149,23 @@ final class ItemTooltipStatsBuilder
         $attackMax = null;
 
         foreach ($item->stats as $stat) {
+            $artifactValue = (float) $stat->value;
+            if ($item->type === ShareItemType::ARTIFACT) {
+                $artifactValue += ArtifactUpgradeRules::bonus($artifactValue, $upgradeLvl);
+            }
             if ($stat->stat_type === ShareItemStatType::ATTACK_MIN) {
-                $attackMin = $stat->value;
+                $attackMin = $artifactValue;
 
                 continue;
             }
             if ($stat->stat_type === ShareItemStatType::ATTACK_MAX) {
-                $attackMax = $stat->value;
+                $attackMax = $artifactValue;
 
                 continue;
             }
 
-            $value = $stat->value;
-            if ($upgradeLvl > 0 && $isArmorSlot && $stat->stat_type === ShareItemStatType::ARMOR && ! $stat->isPercent()) {
+            $value = $item->type === ShareItemType::ARTIFACT ? round($artifactValue, 4) : $stat->value;
+            if ($item->type !== ShareItemType::ARTIFACT && $upgradeLvl > 0 && $isArmorSlot && $stat->stat_type === ShareItemStatType::ARMOR && ! $stat->isPercent()) {
                 $value = floor($value * $upgradeMultiplier);
             }
 
@@ -163,7 +178,7 @@ final class ItemTooltipStatsBuilder
             $stats[] = ['title' => $stat->stat_type->label(), 'value' => '+'.$valueStr];
         }
 
-        if ($upgradeLvl > 0 && $isWeaponSlot) {
+        if ($upgradeLvl > 0 && $isWeaponSlot && $item->type !== ShareItemType::ARTIFACT) {
             $attackMin = $attackMin !== null ? floor($attackMin * $upgradeMultiplier) : null;
             $attackMax = $attackMax !== null ? floor($attackMax * $upgradeMultiplier) : null;
         }

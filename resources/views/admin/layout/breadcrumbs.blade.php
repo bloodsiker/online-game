@@ -27,6 +27,7 @@
         request()->routeIs('admin.referral.stages', 'admin.referral.stage.*') => ['label' => 'Этапы наград', 'route' => 'admin.referral.stages'],
         request()->routeIs('admin.referral.stats') => ['label' => 'Статистика рефералов', 'route' => 'admin.referral.stats'],
         request()->routeIs('admin.post.send', 'admin.post.send.store') => ['label' => 'Почта', 'route' => 'admin.post.send'],
+        request()->routeIs('admin.post.administration.*') => ['label' => 'Обращения к администрации', 'route' => 'admin.post.administration.index'],
         request()->routeIs('admin.users') => ['label' => 'Пользователи', 'route' => 'admin.users'],
         request()->routeIs('admin.dashboard') => ['label' => 'Дашборд', 'route' => 'admin.dashboard'],
         request()->routeIs('admin.scheduled_tasks.*') => ['label' => 'Планировщик', 'route' => 'admin.scheduled_tasks.index'],

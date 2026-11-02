@@ -26,7 +26,7 @@ class MagicSkill extends Model
     protected $table = 'magic_skills';
 
     protected $fillable = [
-        'name', 'slug', 'description', 'image', 'level', 'skill_id', 'type', 'mana_cost',
+        'name', 'slug', 'description', 'image', 'level', 'skill_id', 'upgrades_skill_id', 'type', 'mana_cost',
         'min_damage', 'max_damage', 'power_coefficient', 'base_healing', 'cooldown', 'target_type',
         'is_passive', 'effects',
     ];
@@ -75,9 +75,16 @@ class MagicSkill extends Model
         return $this->belongsTo(Skill::class);
     }
 
+    /** debuff кастуется по врагу тем же путём, что attack (MagicAttackStrategy) — просто урон может быть 0, а ценность в эффекте. */
+    /** Предыдущий ранг той же ветки (хил/баффы) — изучение этого скилла заменяет его, см. LearnMagicSkillFromBook. */
+    public function upgradesSkill(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'upgrades_skill_id');
+    }
+
     public function isAttackSkill(): bool
     {
-        return $this->type === 'attack' && ! $this->is_passive;
+        return in_array($this->type, ['attack', 'debuff'], true) && ! $this->is_passive;
     }
 
     public function isBuffSkill(): bool

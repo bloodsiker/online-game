@@ -101,6 +101,11 @@
         .monster-ability-icon { display: block; float: left; width: 60px; height: 60px; margin: 1px; border: 1px solid #b9774d; background: #2b1b14; }
         .monster-ability-icon:hover { border-color: #f0d08a; }
         .monster-ability-icon img { display: block; width: 60px; height: 60px; object-fit: contain; }
+        .monster-drop-grid { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 5px 2px; padding: 5px 0; }
+        .monster-drop-item { width: 74px; text-align: center; }
+        .monster-drop-icon { position: relative; display: block; width: 72px; height: 71px; margin: 0 auto; background: url({{ asset('main/images/user-reward-frame.png') }}) no-repeat; }
+        .monster-drop-icon img { position: absolute; top: 5px; left: 6px; width: 60px; height: 60px; object-fit: contain; }
+        .monster-drop-count { display: block; margin-top: 3px; color: #955c4a; font-size: 10px; font-weight: bold; }
     </style>
     {!! $itemTooltipScript !!}
     <script>
@@ -391,31 +396,27 @@
                                     <tr>
                                         <td class="tbl-usi_left">&nbsp;</td>
                                         <td class="tbl-usi_bg" valign="top" style="padding:6px 4px;">
-                                            <table class="coll w100 p10h p2v brd2-all">
-                                                <tbody>
+                                            <div class="monster-drop-grid">
                                                 @foreach($page->monster->items as $item)
-                                                <tr class="{{ $loop->even ? 'bg_l' : '' }}">
-                                                    <td class="brd2-top brd2-bt b">
-                                                        <a data-id="{{ (int) $item->id }}"
-                                                           href="{{ route('items.info.share', ['id' => $item->id]) }}"
-                                                           style="color:{{ $item->rarity->color() }}"
-                                                           onmouseover="showItemInfo(this,event,2)"
-                                                           onmouseout="showItemInfo(this,event,0)"
-                                                           onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
-                                                            {{ $item->name }}
-                                                        </a>
-                                                    </td>
-                                                    <td class="brd2-top brd2-bt redd" align="right" style="white-space:nowrap;">
+                                                <div class="monster-drop-item">
+                                                    <a class="monster-drop-icon" data-id="{{ (int) $item->id }}"
+                                                       href="{{ route('items.info.share', ['id' => $item->id]) }}"
+                                                       title="{{ $item->name }}"
+                                                       onmouseover="showItemInfo(this,event,2)"
+                                                       onmouseout="showItemInfo(this,event,0)"
+                                                       onclick="window.open(this.href,'','width=730,height=550,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
+                                                        <img src="{{ $item->image ?: asset('img/bg/empty_slot.gif') }}" alt="{{ $item->name }}">
+                                                    </a>
+                                                    <span class="monster-drop-count">
                                                         @if($item->pivot->min_count != $item->pivot->max_count)
                                                             {{ $item->pivot->min_count }}–{{ $item->pivot->max_count }} шт.
                                                         @else
                                                             {{ $item->pivot->min_count }} шт.
                                                         @endif
-                                                    </td>
-                                                </tr>
+                                                    </span>
+                                                </div>
                                                 @endforeach
-                                                </tbody>
-                                            </table>
+                                            </div>
                                         </td>
                                         <td class="tbl-usi_right">&nbsp;</td>
                                     </tr>

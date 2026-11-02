@@ -10,12 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InfluenceShopItem extends Model
 {
-    protected $fillable = [
+    protected $fillable = ['purchase_limit_quantity', 'purchase_limit_period_seconds',
         'influence_shop_section_id', 'share_item_id', 'required_influence',
         'price', 'diamond', 'purchase_limit', 'sort_order', 'is_active',
     ];
 
     protected $casts = [
+        'purchase_limit_quantity' => 'integer', 'purchase_limit_period_seconds' => 'integer',
         'required_influence' => 'integer', 'price' => 'integer', 'diamond' => 'integer',
         'purchase_limit' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean',
     ];

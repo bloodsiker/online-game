@@ -14,6 +14,24 @@ use Carbon\CarbonInterface;
 
 class ItemUsagePolicyService
 {
+    public function cooldownUntil(Player $player, ShareItem $item): ?CarbonInterface
+    {
+        $limit = $item->useLimit;
+        if ($limit === null) {
+            return null;
+        }
+        $state = PlayerItemUseLimitState::query()
+            ->where('player_id', $player->id)
+            ->where('share_item_use_limit_id', $limit->id)
+            ->first();
+        if ($state === null || $state->uses_count < $limit->max_uses) {
+            return null;
+        }
+        $availableAt = $state->period_started_at->copy()->addSeconds($limit->period_seconds);
+
+        return $availableAt->isFuture() ? $availableAt : null;
+    }
+
     /**
      * Проверяет все правила и сразу резервирует одно использование.
      * Метод должен вызываться внутри общей транзакции использования предмета:

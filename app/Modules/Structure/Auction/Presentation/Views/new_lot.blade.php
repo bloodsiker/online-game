@@ -280,7 +280,7 @@
                                                             <td height="28" class="brd2-top brd2 b">Продать анонимно:</td>
                                                             <td height="28" class="brd2-top brd2 b" align="left" nowrap="">
                                                                 <input type="hidden" name="form[is_anonymous]" value="">
-                                                                <input type="checkbox" name="form[is_anonymous]" value="1" title="Функция доступна для премиума от  уровня." id="_chk_0">&nbsp;<label for="_chk_0"></label><br>
+                                                                <input type="checkbox" name="form[is_anonymous]" value="1" @disabled(app(\App\Modules\Premium\Application\Services\PremiumBonusService::class)->value((int) ($user->id ?? 0), \App\Modules\Premium\Domain\Enums\PremiumBonus::ANONYMOUS_AUCTION) <= 0) title="{{ __('premium.bonus.anonymous_auction') }}" id="_chk_0">&nbsp;<label for="_chk_0"></label><br>
                                                             </td>
                                                         </tr>
                                                         <tr class="">

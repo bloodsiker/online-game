@@ -18,6 +18,9 @@
                             <li class="nav-item active">
                                 <a class="nav-link active" data-bs-target="#tab-main" href="#tab-main" data-bs-toggle="tab">Основная</a>
                             </li>
+                            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::ARTIFACT)
+                                <li class="nav-item"><a class="nav-link" data-bs-target="#tab-artifact-upgrade" href="#tab-artifact-upgrade" data-bs-toggle="tab">Заточка артефакта</a></li>
+                            @endif
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-target="#tab-rarity-upgrade" href="#tab-rarity-upgrade" data-bs-toggle="tab">Апгрейд редкости</a>
                             </li>
@@ -248,6 +251,9 @@
                                                     <option value="1" @selected($item->is_active)>Да</option>
                                                     <option value="0" @selected(!$item->is_active)>Нет</option>
                                                 </select>
+                                                @if($item->type->value === 'treasure_map')
+                                                    <small class="text-muted">Активация доступна после создания настроек поиска в разделе <a href="{{ route('admin.treasure_maps.index') }}">«Карты сокровищ»</a>.</small>
+                                                @endif
                                             </div>
                                             <div class="form-group">
                                                 <label class="col-form-label">Можно продать магазину</label>
@@ -388,6 +394,11 @@
                                     </div>
                                 @endif
 
+                                @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::ARTIFACT)
+                                    <div id="tab-artifact-upgrade" class="tab-pane">
+                                        @include('admin.item.partials.artifact-upgrade')
+                                    </div>
+                                @endif
                                 <div id="tab-rarity-upgrade" class="tab-pane">
                                     <div class="row pt-3 pb-3">
                                         <div class="col-lg-6">
@@ -1104,6 +1115,13 @@
     </div>
 
     {{-- Формы вынесены из основной формы предмета; элементы внутри таба ссылаются на них через form="...". --}}
+    @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::ARTIFACT)
+        <form id="artifact-upgrade-settings" action="{{ route('admin.item.artifact_upgrade.save', $item->id) }}" method="post" class="d-none">@csrf</form>
+        <form id="artifact-upgrade-material-add" action="{{ route('admin.item.artifact_upgrade.material.add', $item->id) }}" method="post" class="d-none">@csrf</form>
+        @foreach($item->artifactUpgradeConfig?->materials ?? [] as $material)
+            <form id="artifact-upgrade-material-delete-{{ $material->id }}" action="{{ route('admin.item.artifact_upgrade.material.delete', ['item' => $item->id, 'material' => $material->id]) }}" method="post" class="d-none">@csrf @method('DELETE')</form>
+        @endforeach
+    @endif
     @foreach($item->recipe?->resultPool ?? [] as $resultItem)
         <form id="recipe-result-weight-{{ $resultItem->id }}" action="{{ route('admin.item.recipe.update_result', ['recipe' => $item->recipe->id, 'item' => $resultItem->id]) }}" method="post" class="d-none">
             @csrf
@@ -1234,8 +1252,8 @@
 
 @push('footer_scripts')
 <script>
-    if (window.location.hash === '#tab-requirements') {
-        const requirementsTab = document.querySelector('[data-bs-target="#tab-requirements"]');
+    if (['#tab-requirements', '#tab-artifact-upgrade'].includes(window.location.hash)) {
+        const requirementsTab = document.querySelector('[data-bs-target="' + window.location.hash + '"]');
         if (requirementsTab && window.bootstrap) {
             bootstrap.Tab.getOrCreateInstance(requirementsTab).show();
         }

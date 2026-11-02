@@ -144,7 +144,7 @@
     <tr height="21">
         <td width="19"><img id="left_1" src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
         <td width="60" id="tab_1" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a id="center_1" href="{{ route('shop', ['id' => $page->shopId]) }}" title="Купить" class="btn_1">Купить</a>
+            <a id="center_1" href="{{ route($indexRoute ?? 'shop', ['id' => $page->shopId]) }}" title="Купить" class="btn_1">Купить</a>
         </td>
         <td width="19"><img id="right_1" src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
 

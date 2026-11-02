@@ -333,7 +333,7 @@
                                 return `
                                     <div class="${cls}" data-slot="${slot.slot}" data-cooldown="${cooldown}" data-cooldown-until="${cooldownUntil}" data-entity-type="${slot.entity_type ?? ''}" data-entity-id="${slot.entity_id ?? ''}">
                                         ${icon}
-                                        <span class="keybind">${slot.slot}</span>
+                                        <span class="keybind">${slot.slot === 10 ? '0' : (slot.slot < 10 ? slot.slot : '')}</span>
                                         <div class="cooldown"></div>
                                         <div class="tooltip">
                                             <div class="name">${name}</div>
@@ -414,21 +414,31 @@
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
+                                            'Accept': 'application/json',
                                             'X-CSRF-TOKEN': hotbarCsrf,
                                         },
                                         body: JSON.stringify({ slot: slotNumber }),
                                     })
                                     .then(r => r.json())
                                     .then(data => {
+                                        if (data.action === 'treasure_check') {
+                                            showHotbarMessage(data.message);
+                                            if (data.status === 'success') {
+                                                refreshHotbar();
+                                                gameFrame.src = @json(route('location'));
+                                            }
+                                            return;
+                                        }
+                                        const itemCooldownUntil = Number(data.cooldown_until || 0);
+                                        if (itemCooldownUntil > Date.now() / 1000 && !data.slot_cleared) {
+                                            startHotbarCooldown(slot, itemCooldownUntil);
+                                            refreshHotbar();
+                                        }
                                         if (data.slot_cleared) {
                                             refreshHotbar();
                                         } else if (data.status === 'success') {
                                             const countEl = slot.querySelector('.count-val');
                                             if (countEl) countEl.textContent = data.count;
-                                            const itemCooldown = Number(slot.dataset.cooldown || 0);
-                                            if (itemCooldown > 0) {
-                                                startHotbarCooldown(slot, Date.now() / 1000 + itemCooldown);
-                                            }
                                         }
                                         if (data.status === 'success') {
                                             const hpMp = {
@@ -503,8 +513,6 @@
                             gameFrame.addEventListener('load', refreshHotbar);
 
                             refreshHotbar();
-
-                            {{-- Хоткеи 1-9 отключены: срабатывали при наборе текста --}}
 
                             // Сворачивание/разворачивание панели
                             let isCollapsed = localStorage.getItem('hotbar-collapsed') === 'true';
@@ -1274,6 +1282,13 @@
             location: '{{ route('location') }}',
         },
         navigate: toLocation,
+        useHotbarSlot: function (slotNumber) {
+            if (typeof useAbility !== 'function') return false;
+            const slot = document.querySelector('#hotbar-slots [data-slot="' + slotNumber + '"]');
+            if (!slot || slot.classList.contains('empty')) return false;
+            useAbility(slotNumber);
+            return true;
+        },
         openMap: function () {
             toggleMap(false);
             toLocation('{{ route('maps') }}');

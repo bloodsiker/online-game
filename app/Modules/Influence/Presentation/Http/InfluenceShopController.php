@@ -7,7 +7,9 @@ namespace App\Modules\Influence\Presentation\Http;
 use App\Http\Controllers\Controller;
 use App\Modules\Backpack\Domain\Services\BackpackService;
 use App\Modules\Commerce\Application\Services\PurchaseLogger;
+use App\Modules\Commerce\Application\Services\ShopPurchaseLimitService;
 use App\Modules\Commerce\Domain\Enums\PurchaseSourceType;
+use App\Modules\Commerce\Domain\Exceptions\PurchaseLimitExceeded;
 use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceShopItem;
 use App\Modules\Influence\Infrastructure\Persistence\Models\InfluenceShopSection;
@@ -25,6 +27,7 @@ final class InfluenceShopController extends Controller
         private readonly MapInfluenceRequirementService $requirements,
         private readonly BackpackService $backpackService,
         private readonly PurchaseLogger $purchaseLogger,
+        private readonly ShopPurchaseLimitService $purchaseLimits = new ShopPurchaseLimitService,
     ) {}
 
     public function index(int $structure): View
@@ -56,60 +59,66 @@ final class InfluenceShopController extends Controller
         $user = Auth::user();
         $quantity = max(1, min(999, $request->integer('quantity', 1)));
 
-        $message = DB::transaction(function () use ($user, $structure, $shopItem, $quantity): string {
-            $item = InfluenceShopItem::query()->with(['section', 'item'])->lockForUpdate()->findOrFail($shopItem->id);
-            abort_unless((int) $item->section->structure_id === $structure && $item->is_active && $item->section->is_active, 404);
-            $required = max((int) $item->required_influence, (int) $item->section->required_influence);
-            if (! $this->requirements->has($user->id, (int) $item->section->map_id, $required)) {
-                return 'Недостаточно влияния для покупки этого товара.';
-            }
+        try {
+            $message = DB::transaction(function () use ($user, $structure, $shopItem, $quantity): string {
+                $item = InfluenceShopItem::query()->with(['section', 'item'])->lockForUpdate()->findOrFail($shopItem->id);
+                abort_unless((int) $item->section->structure_id === $structure && $item->is_active && $item->section->is_active, 404);
+                $required = max((int) $item->required_influence, (int) $item->section->required_influence);
+                if (! $this->requirements->has($user->id, (int) $item->section->map_id, $required)) {
+                    return 'Недостаточно влияния для покупки этого товара.';
+                }
 
-            /** @var User $lockedUser */
-            $lockedUser = User::query()->lockForUpdate()->findOrFail($user->id);
-            $purchase = DB::table('influence_shop_purchases')
-                ->where('user_id', $user->id)
-                ->where('influence_shop_item_id', $item->id)
-                ->lockForUpdate()
-                ->first();
-            if ($item->purchase_limit !== null && ((int) ($purchase->quantity ?? 0) + $quantity) > $item->purchase_limit) {
-                return 'Превышен лимит покупки этого товара.';
-            }
+                /** @var User $lockedUser */
+                $lockedUser = User::query()->lockForUpdate()->findOrFail($user->id);
+                $purchase = DB::table('influence_shop_purchases')
+                    ->where('user_id', $user->id)
+                    ->where('influence_shop_item_id', $item->id)
+                    ->lockForUpdate()
+                    ->first();
+                if ($item->purchase_limit !== null && ((int) ($purchase->quantity ?? 0) + $quantity) > $item->purchase_limit) {
+                    return 'Превышен лимит покупки этого товара.';
+                }
 
-            $money = $item->price * $quantity;
-            $diamond = $item->diamond * $quantity;
-            if ($lockedUser->money < $money || $lockedUser->diamond < $diamond) {
-                return 'Недостаточно средств.';
-            }
+                $money = $item->price * $quantity;
+                $diamond = $item->diamond * $quantity;
+                if ($lockedUser->money < $money || $lockedUser->diamond < $diamond) {
+                    return 'Недостаточно средств.';
+                }
 
-            $lockedUser->decrement('money', $money);
-            $lockedUser->decrement('diamond', $diamond);
-            $this->backpackService->addItemByShareItem($lockedUser, $item->item, $quantity);
-            DB::table('influence_shop_purchases')->updateOrInsert(
-                ['user_id' => $user->id, 'influence_shop_item_id' => $item->id],
-                ['quantity' => (int) ($purchase->quantity ?? 0) + $quantity, 'created_at' => $purchase->created_at ?? now(), 'updated_at' => now()],
-            );
+                $this->purchaseLimits->reserve($lockedUser, $item, $quantity);
+                $lockedUser->decrement('money', $money);
+                $lockedUser->decrement('diamond', $diamond);
+                $this->backpackService->addItemByShareItem($lockedUser, $item->item, $quantity);
+                DB::table('influence_shop_purchases')->updateOrInsert(
+                    ['user_id' => $user->id, 'influence_shop_item_id' => $item->id],
+                    ['quantity' => (int) ($purchase->quantity ?? 0) + $quantity, 'created_at' => $purchase->created_at ?? now(), 'updated_at' => now()],
+                );
 
-            $shop = Structure::query()->findOrFail($structure);
-            $this->purchaseLogger->record(
-                user: $lockedUser,
-                sourceType: PurchaseSourceType::InfluenceShop,
-                lines: [[
-                    'item' => $item->item,
-                    'quantity' => $quantity,
-                    'unit_price' => (int) $item->price,
-                    'unit_diamond' => (int) $item->diamond,
-                    'metadata' => [
-                        'required_influence' => $required,
-                        'section_name' => $item->section->getTranslation('name', 'ru', false),
-                    ],
-                ]],
-                structure: $shop,
-                sourceId: (int) $item->section->map_id,
-                metadata: ['map_id' => (int) $item->section->map_id],
-            );
+                $shop = Structure::query()->findOrFail($structure);
+                $this->purchaseLogger->record(
+                    user: $lockedUser,
+                    sourceType: PurchaseSourceType::InfluenceShop,
+                    lines: [[
+                        'item' => $item->item,
+                        'quantity' => $quantity,
+                        'unit_price' => (int) $item->price,
+                        'unit_diamond' => (int) $item->diamond,
+                        'metadata' => [
+                            'required_influence' => $required,
+                            'section_name' => $item->section->getTranslation('name', 'ru', false),
+                        ],
+                    ]],
+                    structure: $shop,
+                    sourceId: (int) $item->section->map_id,
+                    metadata: ['map_id' => (int) $item->section->map_id],
+                );
 
-            return 'Товар куплен.';
-        });
+                return 'Товар куплен.';
+            });
+
+        } catch (PurchaseLimitExceeded $exception) {
+            $message = $exception->getMessage();
+        }
 
         return back()->with('message', $message);
     }

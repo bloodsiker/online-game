@@ -17,6 +17,13 @@
                class="btn btn-sm btn-default">
                 Участвует в событиях
             </a>
+            @if($item->type === \App\Modules\Share\Domain\Enums\ShareItemType::TREASURE_MAP)
+                @php $treasureConfig = $item->treasureMapConfig; @endphp
+                <a href="{{ $treasureConfig ? route('admin.treasure_maps.edit', $treasureConfig->id) : route('admin.treasure_maps.create', ['share_item_id' => $item->id]) }}"
+                   class="btn btn-sm {{ $treasureConfig ? 'btn-primary' : 'btn-warning' }}">
+                    {{ $treasureConfig ? 'Конфиг поиска' : 'Создать конфиг поиска' }}
+                </a>
+            @endif
         </div>
     </div>
 </div>

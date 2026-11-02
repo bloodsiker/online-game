@@ -220,7 +220,16 @@
                                                             <img src="{{ $slot->item->itemInfo->image }}" style="width:36px" alt="">
                                                         @endif
                                                     </td>
-                                                    <td>{{ $slot->item?->itemInfo?->name ?? '—' }}</td>
+                                                    <td>
+                                                        {{ $slot->item?->itemInfo?->name ?? '—' }}
+                                                        @if($slot->item?->itemInfo?->type === \App\Modules\Share\Domain\Enums\ShareItemType::TREASURE_MAP)
+                                                            @if($slot->item->treasureHunt?->target_location_id)
+                                                                <span class="text-muted">[локация №{{ $slot->item->treasureHunt->target_location_id }}]</span>
+                                                            @else
+                                                                <span class="text-warning">[место клада не назначено]</span>
+                                                            @endif
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $slot->item?->itemInfo?->type?->label() ?? '—' }}</td>
                                                     <td>{{ $slot->count }}</td>
                                                     <td>

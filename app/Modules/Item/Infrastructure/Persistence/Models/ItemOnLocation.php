@@ -37,7 +37,15 @@ class ItemOnLocation extends Model
     protected $casts = [
         'interaction_type' => LocationItemInteractionType::class,
         'expires_at' => 'datetime',
+        'loot_reserved_until' => 'datetime',
     ];
+
+    public function isReservedForAnotherUser(int $userId): bool
+    {
+        return $this->loot_owner_id !== null
+            && (int) $this->loot_owner_id !== $userId
+            && $this->loot_reserved_until?->isFuture();
+    }
 
     public function scopeVisible(Builder $query): Builder
     {

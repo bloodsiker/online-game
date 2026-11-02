@@ -3,6 +3,7 @@
 namespace App\Modules\Battle\Application\Services\Combat\Boss;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\MonsterLootService;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -13,7 +14,8 @@ class BossFightContext
         private MonsterOnLocation $locationMonster,
         private Battle $battle,
         private Player $player,
-        private AttackResultDTO $result
+        private AttackResultDTO $result,
+        private MonsterLootService $monsterLootService = new MonsterLootService,
     ) {}
 
     public function getLocationMonster(): MonsterOnLocation
@@ -63,7 +65,7 @@ class BossFightContext
 
     public function dealDamageToBoss(int $damage): void
     {
-        $this->locationMonster->hp_now = max(0, $this->locationMonster->hp_now - $damage);
+        $this->monsterLootService->damage($this->locationMonster, $damage, $this->player->user_id, $this->battle->id);
     }
 
     public function healBoss(int $amount): void

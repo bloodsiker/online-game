@@ -16,9 +16,13 @@ use App\Modules\Player\Domain\Services\PlayerStatFormulas;
  * физического правило: не контестуется со статой защитника (в отличие от
  * HitCalculator::isCritical()), а даётся исключительно экипировкой атакующего
  * (getMagicCriticalChance(), база 0 — по умолчанию маг без такого оружия не
- * критует вовсе); множитель урона крита — getMagicCritDamage(), отдельная от
- * физического крита стата, растущая исключительно с экипировки (см.
- * ShareItemStatType::MAGIC_CRIT_DAMAGE), без вклада от Интуиции.
+ * критует вовсе), но, как и физический крит, упирается в мягкий потолок —
+ * PlayerStatFormulas::effectiveMagicCriticalChance() асимптотически
+ * ограничивает шанс 75%, иначе сырое значение с нескольких артефактов легко
+ * уходит за 100% (гарантированный крит на каждом касте); множитель урона
+ * крита — getMagicCritDamage(), отдельная от физического крита стата,
+ * растущая исключительно с экипировки (см. ShareItemStatType::MAGIC_CRIT_DAMAGE),
+ * без вклада от Интуиции.
  */
 readonly class MagicHitCalculator
 {
@@ -37,14 +41,16 @@ readonly class MagicHitCalculator
         int $minDamage,
         int $maxDamage,
         float $powerCoefficient,
+        int $magicSkillLevel = 0,
     ): FightHitDTO {
         $dto = new FightHitDTO;
 
         $rolled = random_int(min($minDamage, $maxDamage), max($minDamage, $maxDamage));
-        $rawDamage = $rolled + (int) round($this->magicPower($attacker) * $powerCoefficient);
+        $rawDamage = $rolled + (int) round($this->magicPower($attacker, $magicSkillLevel) * $powerCoefficient);
 
-        $isCrit = $attacker->getMagicCriticalChance() > 0
-            && random_int(1, 100) <= $attacker->getMagicCriticalChance();
+        $magicCritChance = PlayerStatFormulas::effectiveMagicCriticalChance($attacker->getMagicCriticalChance());
+        $isCrit = $magicCritChance > 0
+            && random_int(1, 10000) <= (int) round($magicCritChance * 100);
         if ($isCrit) {
             $dto->setCritical(true);
             $rawDamage = (int) round($rawDamage * PlayerStatFormulas::effectiveCritDamage($attacker->getMagicCritDamage()) / 100);
@@ -64,15 +70,28 @@ readonly class MagicHitCalculator
         int $minHeal,
         int $maxHeal,
         float $powerCoefficient,
+        int $magicSkillLevel = 0,
     ): int {
         $rolled = random_int(min($minHeal, $maxHeal), max($minHeal, $maxHeal));
 
-        return $rolled + (int) round($this->magicPower($caster) * $powerCoefficient);
+        return $rolled + (int) round($this->magicPower($caster, $magicSkillLevel) * $powerCoefficient);
     }
 
-    private function magicPower(FightHitInterface $caster): float
+    /**
+     * Навык «Колдовство» усиливает силу заклинаний той же кривой, что оружейный
+     * навык — физический урон (HitCalculator::weaponSkillMultiplier), ради
+     * симметрии магии и оружия. Интеллект капается мягким потолком
+     * (PlayerStatFormulas::cappedIntelligence) — без него чистый стат-стак
+     * давал бы неограниченный урон без оглядки на magic-снаряжение; magic_attack
+     * с предметов остаётся без ограничения, как урон оружия у физики.
+     */
+    private function magicPower(FightHitInterface $caster, int $magicSkillLevel = 0): float
     {
-        return (float) ($caster->getIntelligence() + $caster->getMagicAttack());
+        $base = PlayerStatFormulas::cappedIntelligence((float) $caster->getIntelligence(), $caster->getLevel())
+            + $caster->getMagicAttack();
+        $base *= 1 + $caster->getMagicDamagePercent() / 100;
+
+        return $base * HitCalculator::weaponSkillMultiplier($magicSkillLevel);
     }
 
     private function levelScale(FightHitInterface $attacker, FightHitInterface $defender): float

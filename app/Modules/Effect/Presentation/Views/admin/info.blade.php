@@ -68,7 +68,7 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="col-form-label">Масштабирование урона</label>
+                                    <label class="col-form-label">Масштабирование урона / лечения</label>
                                     <select class="form-control" name="damage_scaling_type" data-plugin-selectTwo>
                                         <option value="" @selected($effect->damage_scaling_type === null)>Не задано</option>
                                         @foreach($damageScalingTypes as $scalingType)
@@ -94,7 +94,7 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="col-form-label">Значение за тик <small class="text-muted">(урон/лечение)</small></label>
+                                    <label class="col-form-label">{{ $effect->resolvedActiveType()?->isHoT() && $effect->resolvedDamageScalingType() === \App\Modules\Effect\Domain\Enums\EffectDamageScalingType::TARGET_MAX_HP ? 'Всего восстановить, % максимального HP' : 'Значение за тик (урон/лечение)' }}</label>
                                     <input type="number" class="form-control" name="value_per_tick" value="{{ $effect->value_per_tick }}">
                                 </div>
                             </div>

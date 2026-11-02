@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Commerce\Presentation\Http\Requests\ShopPurchaseLimitInput;
 use App\Modules\Share\Application\Services\ContentTranslationEditor;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
@@ -15,6 +16,7 @@ use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItemRequire
 use App\Services\Media\AdminImageStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class StructureController extends Controller
 {
@@ -32,6 +34,7 @@ class StructureController extends Controller
                 'type' => ['required', 'string', 'in:'.implode(',', array_keys(Structure::TYPES))],
                 'location_id' => ['nullable', 'integer', 'exists:locations,id'],
                 'npc_id' => ['nullable', 'integer', 'exists:npcs,id'],
+                'reputation_id' => ['nullable', 'integer', 'exists:reputations,id', 'unique:structures,reputation_id'],
                 'dungeon_id' => ['nullable', 'integer', 'exists:dungeons,id'],
             ]);
 
@@ -40,6 +43,7 @@ class StructureController extends Controller
             $structure->type = $data['type'];
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
+            $structure->reputation_id = $data['reputation_id'] ?? null;
             $structure->dungeon_id = $data['dungeon_id'] ?? null;
             $this->applyImage($structure, $request);
             $structure->save();
@@ -69,12 +73,14 @@ class StructureController extends Controller
                 'type' => ['required', 'string', 'in:'.implode(',', array_keys(Structure::TYPES))],
                 'location_id' => ['nullable', 'integer', 'exists:locations,id'],
                 'npc_id' => ['nullable', 'integer', 'exists:npcs,id'],
+                'reputation_id' => ['nullable', 'integer', 'exists:reputations,id', Rule::unique('structures', 'reputation_id')->ignore($structure->id)],
                 'dungeon_id' => ['nullable', 'integer', 'exists:dungeons,id'],
             ]);
             $translationEditor->fill($structure, $request, ['name', 'description']);
             $structure->type = $data['type'];
             $structure->location_id = $data['location_id'] ?? null;
             $structure->npc_id = $data['npc_id'] ?? null;
+            $structure->reputation_id = $data['reputation_id'] ?? null;
             $structure->dungeon_id = $data['dungeon_id'] ?? null;
             $this->applyImage($structure, $request);
             $structure->save();
@@ -103,6 +109,8 @@ class StructureController extends Controller
         $categoryId = $request->integer('share_structure_category_id') ?: null;
 
         ShopItem::create([
+            ...ShopPurchaseLimitInput::from($request),
+            'min_reputation_points' => $request->validate(['min_reputation_points' => ['nullable', 'integer', 'min:0']])['min_reputation_points'] ?? 0,
             'structure_id' => $structure->id,
             'share_item_id' => (int) $request->input('share_item_id'),
             'share_structure_category_id' => $categoryId,
@@ -168,6 +176,8 @@ class StructureController extends Controller
             abort(404);
         }
 
+        $shopItem->fill(ShopPurchaseLimitInput::from($request));
+        $shopItem->min_reputation_points = $request->validate(['min_reputation_points' => ['nullable', 'integer', 'min:0']])['min_reputation_points'] ?? 0;
         $shopItem->price = max(0, (int) $request->input('price', 0));
         $shopItem->diamond = max(0, (int) $request->input('diamond', 0));
         $shopItem->sort_order = (int) $request->input('sort_order', 0);

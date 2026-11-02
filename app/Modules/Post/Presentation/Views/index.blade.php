@@ -67,6 +67,7 @@
         'inbox'   => 'Входящие сообщения',
         'outpost' => 'Отправленные сообщения',
         'outbox'  => 'Отправка письма',
+        'administration' => __('post.write_administration'),
     ];
 
     $btnLeft1   = 'img/bg/btn/btn-left1.gif';
@@ -104,6 +105,9 @@
     @if(session('post_success'))
         <div class="post-flash-ok">{{ session('post_success') }}</div>
     @endif
+    @if($errors->any())
+        <div class="post-flash-err">{{ $errors->first() }}</div>
+    @endif
     @if(session('post_error'))
         {{-- Ошибки — через игровое модальное окно (popup_global_container) --}}
         <script>
@@ -122,6 +126,8 @@
                     @include('post::partials.inbox')
                 @elseif($mode === 'outpost')
                     @include('post::partials.outpost')
+                @elseif($mode === 'administration')
+                    @include('post::partials.administration-form')
                 @else
                     @include('post::partials.outbox')
                 @endif
@@ -129,7 +135,9 @@
             <td width="2%">&nbsp;</td>
             <td width="49%" valign="top">
                 {{-- Письмо открывается в правом окне, слева остаётся список --}}
-                @if($letter)
+                @if($mode === 'administration')
+                    @include('post::partials.administration-history')
+                @elseif($letter)
                     @include('post::partials.letter')
                 @else
                     @include('post::partials.info')

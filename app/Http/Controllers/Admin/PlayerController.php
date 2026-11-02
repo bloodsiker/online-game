@@ -80,7 +80,7 @@ class PlayerController extends Controller
             ])
             ->values();
 
-        $backpack = Backpack::with('item.itemInfo')
+        $backpack = Backpack::with(['item.itemInfo', 'item.treasureHunt'])
             ->where('user_id', $player->user_id)
             ->orderBy('equipped', 'desc')
             ->orderBy('id')

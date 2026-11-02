@@ -60,6 +60,8 @@ class EloquentMagicSkillRepository implements MagicSkillReadRepository, MagicSki
                 'itemName' => $p['itemName'],
                 'runeName' => $p['runeName'],
                 'runeShareItemId' => $p['runeShareItemId'],
+                'passiveImage' => $p['type']->iconUrl(),
+                'passiveInfoUrl' => route('magic_skill.rune_passive.info', ['type' => $p['type']->value, 'value' => $p['value']]),
                 'label' => $p['type']->label(),
                 'description' => $p['type']->description($p['value']),
             ]);

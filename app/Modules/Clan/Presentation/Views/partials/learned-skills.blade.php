@@ -1,5 +1,5 @@
 @php
-    use App\Modules\Clan\Domain\Enums\ClanSkillEffectType;
+    use App\Modules\Share\Domain\Enums\PassiveBonusStatType;
 
     $fallbackImage = asset('main/images/effects-unavailable.png');
 @endphp
@@ -35,7 +35,7 @@
                             $meta[] = ['label' => __('Тип'), 'value' => $magicSkill->is_passive ? __('Пассивный навык') : __('Активный навык')];
 
                             foreach ($magicSkill->effects ?? [] as $effect) {
-                                $effectName = ClanSkillEffectType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? __('Бонус'));
+                                $effectName = PassiveBonusStatType::tryFrom($effect['type'] ?? '')?->label() ?? ($effect['type'] ?? __('Бонус'));
                                 $effectValue = ($effect['value'] ?? 0).(! empty($effect['is_percent']) ? '%' : '');
                                 $meta[] = ['label' => $effectName, 'value' => '+'.$effectValue];
                             }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Presentation\Http;
 
+use App\Modules\Premium\Application\Services\PremiumBonusService;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Presentation\Http\Requests\UpdateGameSettingsRequest;
 use Illuminate\Contracts\View\View;
@@ -13,13 +14,16 @@ use Illuminate\Http\Request;
 
 final class GameSettingsController
 {
-    public function show(Request $request, GameSettingsService $service): View
+    public function show(Request $request, GameSettingsService $service, PremiumBonusService $premium): View
     {
         if ($request->session()->has('reload_game_after_settings')) {
             $request->session()->keep('message');
         }
 
-        return view('interface::settings', ['tab' => 'game', 'gameSettings' => $service->get($request->user()->id)]);
+        return view('interface::settings', [
+            'tab' => 'game', 'gameSettings' => $service->get($request->user()->id),
+            'autoLootAvailable' => $premium->canAutoLoot($request->user()->id),
+        ]);
     }
 
     public function update(UpdateGameSettingsRequest $request, GameSettingsService $service): JsonResponse|RedirectResponse

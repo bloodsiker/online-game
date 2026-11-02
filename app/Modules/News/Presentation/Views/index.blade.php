@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<html lang="ru-UA" class="lang-ru ru isGuest">
+<html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
-    <title>New Online game</title>
+    <title>{{ __('homepage.game_name') }}</title>
     @vite('resources/js/app.js')
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="New Online game">
-    <meta name="twitter:description" content="New Online game">
+    <meta name="twitter:title" content="{{ __('homepage.game_name') }}">
+    <meta name="twitter:description" content="{{ __('homepage.game_name') }}">
     <meta name="twitter:image" content="{{ asset('main/img/logo_tshare.png') }}">
     <meta name="twitter:domain" content="">
     <meta name="keywords"
           content=""/>
     <meta name="description"
-          content="New Online game"/>
+          content="{{ __('homepage.game_name') }}"/>
 
-    <meta property="og:title" content="New Online game"/>
+    <meta property="og:title" content="{{ __('homepage.game_name') }}"/>
     <meta property="og:image" content="{{ asset('main/img/logo_tshare.png') }}"/>
     <meta property="og:type" content="article"/>
     <meta property="og:url" content="https://dwar.ltd/"/>
-    <meta property="og:site_name" content="New Online game"/>
+    <meta property="og:site_name" content="{{ __('homepage.game_name') }}"/>
     <meta property="fb:admins" content="1"/>
-    <meta property="og:description" content="New Online game"/>
+    <meta property="og:description" content="{{ __('homepage.game_name') }}"/>
     <link rel="icon" type="image/png" href="favicon.ico"/>
-    <link rel="alternate" type="application/rss+xml" title="New Online game." href=""/>
+    <link rel="alternate" type="application/rss+xml" title="{{ __('homepage.game_name') }}." href=""/>
 
 
     <link rel="image_src" href="{{ asset('main/img/logo_tshare.png') }}"/>
@@ -120,11 +120,19 @@
                 color: '-linear-gradient(0.5=#fffb6a, 0.8=#F0A043)',
                 textShadow: '0 1px 1px black, 0 -1px 1px black, 1px 0 rgba(0, 0, 0, 0.5), -1px 0 rgba(0, 0, 0, 0.5)'
             });
+            @if(app()->getLocale() === 'ru')
+                Cufon.replace('.homepage-heading--reference', {
+                    fontFamily: 'Cambria',
+                    fontSize: '18px',
+                    color: '-linear-gradient(0.7=#a87f4f, #ffffb9, #a87f4f)',
+                    textShadow: '1px 1px rgba(0,0,0,0.9), -1px 1px rgba(0,0,0,0.6), 1px -1px rgba(0,0,0,0.6)'
+                });
+            @endif
         }
     </script>
 
 
-    <script type="text/javascript" src="{{ asset('main/js/ru.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('main/js/'.app()->getLocale().'.js') }}"></script>
 
     <script type="text/javascript" src="{{ asset('main/js/underscore.js') }}"></script>
     <script type="text/javascript" src="{{ asset('main/js/backbone.js') }}"></script>
@@ -135,6 +143,65 @@
     <link rel="stylesheet" href="{{ asset('main/css/index_glav.css') }}"/>
 
     <style>
+        .homepage-heading { color: #edcb86; font: bold 16px/24px Tahoma, Arial, sans-serif; text-align: center; text-shadow: 1px 1px #281b10; }
+        .homepage-heading--reference { position: relative; top: -2px; font: normal 18px/26px Cambria, Georgia, 'Times New Roman', serif; }
+        html[lang="uk"] .homepage-heading--reference {
+            background: linear-gradient(to bottom, #a87f4f 10%, #ffffb9 55%, #a87f4f 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            filter: drop-shadow(1px 1px 0 rgba(0,0,0,.9));
+        }
+        .homepage-forum__content { padding: 6px 9px 9px; background: #211b15; border: 1px solid #554537; }
+        .homepage-forum__topic { display: block; padding: 7px 2px; border-bottom: 1px solid #4b3d30; text-decoration: none; }
+        .homepage-forum__title { display: block; color: #e69934; font: bold 11px/16px Tahoma, Arial, sans-serif; overflow-wrap: anywhere; }
+        .homepage-forum__topic:hover .homepage-forum__title { color: #ffe5ab; }
+        .homepage-forum__meta { display: flex; justify-content: space-between; gap: 5px; margin-top: 3px; color: #b59b7a; font: 10px/14px Tahoma, Arial, sans-serif; }
+        .homepage-forum__all { display: block; padding-top: 8px; color: #dfbc7d; text-align: right; font-size: 11px; }
+        .homepage-forum__empty { padding: 6px 0; margin: 0; color: #b59b7a; font-size: 11px; }
+        .homepage-language {
+            position: absolute;
+            right: 12px;
+            top: 68px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            padding: 5px 7px;
+            border: 1px solid #796043;
+            border-radius: 5px;
+            background: rgba(35, 27, 21, .94);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, .35);
+            color: #edcb86;
+            font: 11px/24px Tahoma, Arial, sans-serif;
+            white-space: nowrap;
+        }
+        .homepage-language button {
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 24px;
+            margin: 0;
+            padding: 0;
+            border: 1px solid #796043;
+            border-radius: 3px;
+            background: linear-gradient(#4a3d31, #2c241d);
+            color: #cfb58b;
+            font: bold 11px/1 Tahoma, Arial, sans-serif;
+            text-shadow: 0 1px #1b140e;
+            cursor: pointer;
+        }
+        .homepage-language button:hover,
+        .homepage-language button[aria-pressed="true"] {
+            border-color: #d3a655;
+            background: linear-gradient(#806232, #49351f);
+            color: #ffe2a2;
+        }
+        .homepage-language button:focus-visible { outline: 2px solid #ffe2a2; outline-offset: 2px; }
         input[type=text], input[type=password], textarea, select {
             font: normal 9pt Tahoma;
             border-radius: 3px;
@@ -168,6 +235,12 @@
             left: -2px;
             font-size: 11px;
         }
+
+        .b-post--index .b-post__content {
+            font-size: 11px;
+        }
+
+        @include('partials.content-entity-styles')
 
         .b-great-battles__rating-inner {
             display: inline-block;
@@ -224,14 +297,7 @@
 <script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 <script>
     var temp_effects = {};
-    var strings = {
-        title: 'Временные эффекты',
-        del_after_fight: 'До конца боя',
-        day: 'д',
-        hour: 'ч',
-        min: 'мин',
-        sec: 'сек'
-    };
+    var strings = @json(__('homepage.effects'));
     top.frames['main_frame'] = {};
     top.frames['main_frame'].temp_effects = {};
     top.frames['main_frame'].strings = strings;
@@ -239,6 +305,12 @@
 </script>
 
 <div class="b-page__header">
+    <form class="homepage-language" method="post" action="{{ route('homepage.language') }}" aria-label="{{ __('homepage.language') }}">
+        @csrf
+        @if($selectedNews)<input type="hidden" name="news_id" value="{{ $selectedNews->id }}">@endif
+        <button type="submit" name="language" value="ru" title="Русский" aria-label="Русский" aria-pressed="{{ app()->getLocale() === 'ru' ? 'true' : 'false' }}">RU</button>
+        <button type="submit" name="language" value="uk" title="Українська" aria-label="Українська" aria-pressed="{{ app()->getLocale() === 'uk' ? 'true' : 'false' }}">UK</button>
+    </form>
     <header class="b-nav-lvl-1" style=" width: 900px; ">
 
         <div class="b-nav-lvl-1__decor-border"></div>
@@ -250,7 +322,7 @@
                 <div class="b-nav-lvl-1__create">
                     <a class="b-auth-button" href="{{ route('register') }}">
 				<span class="b-auth-button__content">
-					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">Регистрация</span>
+					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">{{ __('homepage.registration') }}</span>
 				</span>
                     </a>
                 </div>
@@ -260,7 +332,7 @@
         <div class="b-nav-lvl-1__logo">
             <a class="b-auth-button" style="position: relative;left: 24px;top: 7px;">
 					<span class="b-auth-button__content">
-					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">Online: <span data-online-count>{{ $onlineCount }}</span></span>
+					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">{{ __('homepage.online') }}: <span data-online-count>{{ $onlineCount }}</span></span>
 				</span>
             </a>
 
@@ -270,27 +342,27 @@
             <ul class="b-nav-lvl-1__menu-list">
                 <li class="b-nav-lvl-1__menu-item">
                     <a class="b-aside__impo-link" href="{{ route('index') }}"
-                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>Главная</span></a>
+                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>{{ __('homepage.home') }}</span></a>
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
                     <a class="b-aside__impo-link" href="{{ route('library.index') }}"
-                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 8px;top: 8px;"><span>Библиотека</span></a>
+                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 8px;top: 8px;"><span>{{ __('homepage.library') }}</span></a>
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
                     <a class="b-aside__impo-link" href="{{ route('forum.index') }}"
-                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>Форум</span></a>
+                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 23px;top: 8px;"><span>{{ __('homepage.forum') }}</span></a>
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
                     <a class="b-aside__impo-link" href="#"
-                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 10px;top: 8px;"><span>Телеграм</span></a>
+                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 10px;top: 8px;"><span>{{ __('homepage.telegram') }}</span></a>
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
-                    <a class="b-aside__impo-link" href="index.html?&amp;b=1"
-                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 11px;top: 8px;"><span>Контакты</span></a>
+                    <a class="b-aside__impo-link" href="#homepage-support"
+                       style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 11px;top: 8px;"><span>{{ __('homepage.contacts') }}</span></a>
                 </li>
 
             </ul>
@@ -322,7 +394,7 @@
                     <div class="b-aside__shape b-shape--try-fight">
                         <div class="b-shape__header">
                             <div class="b-shape__decor"></div>
-                            <div class="cufon-mp font-head ir">Форма входу</div>
+                            <div class="homepage-heading homepage-heading--reference">{{ __('homepage.login_form') }}</div>
                         </div>
                         <div class="b-shape__content">
                             <div class="">
@@ -349,6 +421,7 @@
                                                             <div id="viewContent">
 
                                                                 <form style="opacity: 1;" action="{{ route('login') }}" method="post">
+                                                                    @csrf
                                                                     <div class="form-wrapper">
                                                                         <fieldset class="p-v-20">
 
@@ -357,29 +430,29 @@
 
                                                                             <div class="input-block">
                                                                                 <div style="display: none;" class="hint hint_top emailHint" name="email-hint">
-                                                                                    <div class="hint-text">Введите ваш e-mail
+                                                                                    <div class="hint-text">{{ __('homepage.email_hint') }}
                                                                                     </div>
                                                                                 </div>
                                                                                 <input class="form-input" type="text"
                                                                                        name="email" id="userEmail" value=""
-                                                                                       placeholder="Введите ваш e-mail">
+                                                                                       placeholder="{{ __('homepage.email_hint') }}">
                                                                             </div>
                                                                         </fieldset>
                                                                         <fieldset class="lt pt-20 pb-30">
                                                                             <input class="form-input" type="password"
                                                                                    name="password" id="userPassword"
                                                                                    maxlength="50"
-                                                                                   placeholder="Введите пароль">
+                                                                                   placeholder="{{ __('homepage.password_hint') }}">
                                                                         </fieldset>
 
                                                                     </div>
 
                                                                 <span style="position: relative;left: 5px;top: -22px;">
                                                                     <button type="submit"><span class="btn big fll quickStartButton">
-                                                                        <span class="btn-link yellow"><span class="title">Войти в игру</span></span>
+                                                                        <span class="btn-link yellow"><span class="title">{{ __('homepage.login') }}</span></span>
                                                                     </span></button>
                                                                     <span onclick="window.location='{{ route('register') }}'"  class="btn big flr createAccountButton" style="position: relative;left: -13px;">
-                                                                        <span class="btn-link yellow"><span class="title">Создать учетную запись</span></span>
+                                                                        <span class="btn-link yellow"><span class="title">{{ __('homepage.create_account') }}</span></span>
                                                                     </span>
                                                                 </span>
                                                                 <input type="submit" style="width: 0px; height: 0px; visibility: hidden;">
@@ -401,7 +474,7 @@
 
                     <div class="b-shape__header">
                         <div class="b-shape__decor"></div>
-                        <div class="cufon-mp font-head font-screens ir">Скрины игры</div>
+                        <div class="homepage-heading homepage-heading--reference">{{ __('homepage.screenshots') }}</div>
                     </div>
                     <div class="b-shape__content b-shape__content--column">
                         <div class="b-slider b-slider--default">
@@ -479,11 +552,13 @@
                         </div>
                     </div>
 
+                    @include('news::partials.hot-forum')
+
                     <div class="b-aside__discuss">
                         <div class="b-shape__content">
                             <div class="b-shape__header">
                                 <div class="b-shape__decor"></div>
-                                <div class="cufon-mp ir font-head">Игра открылась</div>
+                                <div class="homepage-heading homepage-heading--reference">{{ __('homepage.game_opened') }}</div>
                             </div>
                             <br>
 
@@ -491,19 +566,19 @@
                                 <div class="timer-countdown">
                                     <div class="timer-block">
                                         <span id="days" class="title-count"></span>
-                                        <span id="days-word" class="sub-count">дн.</span>
+                                        <span id="days-word" class="sub-count">{{ __('homepage.days') }}</span>
                                     </div>
                                     <div class="timer-block">
                                         <span id="hours" class="title-count"></span>
-                                        <span id="hours-word" class="sub-count">год.</span>
+                                        <span id="hours-word" class="sub-count">{{ __('homepage.hours') }}</span>
                                     </div>
                                     <div class="timer-block">
                                         <span id="minutes" class="title-count"></span>
-                                        <span id="minutes-word" class="sub-count">хв.</span>
+                                        <span id="minutes-word" class="sub-count">{{ __('homepage.minutes') }}</span>
                                     </div>
                                     <div class="timer-block">
                                         <span id="seconds" class="title-count"></span>
-                                        <span id="seconds-word" class="sub-count">сек.</span>
+                                        <span id="seconds-word" class="sub-count">{{ __('homepage.seconds') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -531,12 +606,12 @@
 
                     </div>
 
-                    <div class="b-aside__support">
+                    <div class="b-aside__support" id="homepage-support">
                         <div class="b-aside__support-content">
                             <div class="b-aside__support-title">
-                                <div class="cufon-mp ir font-head font-support">тех. поддержка</div>
+                                <div class="homepage-heading homepage-heading--reference">{{ __('homepage.support') }}</div>
                             </div>
-                            <a href="index.html" class="b-aside__support-link">Email:
+                            <a href="mailto:maldini2@ukr.net" class="b-aside__support-link">Email:
                                 <br>
                                 <span class="__cf_email__" >maldini2@ukr.net</span></a>
 
@@ -577,15 +652,15 @@
                                     </div>
                                     <div class="b-post__footer">
                                         <div class="b-post__more">
-                                            <a href="{{ route('index') }}" class="b-link b-link--default">к списку новостей</a>
+                                            <a href="{{ route('index') }}" class="b-link b-link--default">{{ __('homepage.back_to_news') }}</a>
                                         </div>
                                         <div class="b-post__comments">
                                             <a class="b-link b-link--default" href="{{ route('index', ['n' => $selectedNews->id]) }}">
-                                                <span class="b-icon b-icon--quant">{{ $selectedNews->visibleComments->count() }}</span>коментувати
+                                                <span class="b-icon b-icon--quant">{{ $selectedNews->visibleComments->count() }}</span>{{ __('homepage.comment') }}
                                             </a>
                                             <span align="right"
                                                   style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-                                                <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | Переглядів:
+                                                <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
                                                 <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
                                                 <b style='color:green;'>{{ $selectedNews->views_count }}</b>
                                             </span>
@@ -600,11 +675,11 @@
                                                 {{ csrf_field() }}
                                                 <textarea name="message" rows="3" style="width: 100%; box-sizing: border-box;" required></textarea>
                                                 <div style="text-align: right; margin-top: 6px;">
-                                                    <button type="submit">Добавить комментарий</button>
+                                                    <button type="submit">{{ __('homepage.add_comment') }}</button>
                                                 </div>
                                             </form>
                                         @else
-                                            <div style="color:#8a5a2b;">Комментарии доступны после входа в игру.</div>
+                                            <div style="color:#8a5a2b;">{{ __('homepage.comments_login') }}</div>
                                         @endauth
                                     </div>
                                 @endif
@@ -613,7 +688,7 @@
                                     <div class="b-post__container" style="padding: 8px 12px;">
                                         @foreach($selectedNews->visibleComments as $comment)
                                             <div style="border-top: 1px solid #d7b787; padding: 6px 0;">
-                                                <b style="color:#7a3010;">{{ $comment->user?->player?->name ?? $comment->user?->name ?? 'Игрок' }}</b>
+                                                <b style="color:#7a3010;">{{ $comment->user?->player?->name ?? $comment->user?->name ?? __('homepage.player_fallback') }}</b>
                                                 <span style="color:#8a8a8a; font-size: 10px;">{{ $comment->created_at?->format('d.m.Y H:i') }}</span>
                                                 <div>{{ $comment->message }}</div>
                                             </div>
@@ -628,7 +703,7 @@
                             </div>
                         @endif
 
-                        @if(isset($newsPosts) && $newsPosts->isNotEmpty())
+                        @if(!$selectedNews && isset($newsPosts) && $newsPosts->isNotEmpty())
                             @foreach($newsPosts as $newsPost)
                                 @if(!$selectedNews || $selectedNews->id !== $newsPost->id)
                                     <div class="b-news-item">
@@ -652,15 +727,15 @@
                                             </div>
                                             <div class="b-post__footer">
                                                 <div class="b-post__more">
-                                                    <a href="{{ route('index', ['n' => $newsPost->id]) }}" class="b-link b-link--default">детальніше</a>
+                                                    <a href="{{ route('index', ['n' => $newsPost->id]) }}" class="b-link b-link--default">{{ __('homepage.details') }}</a>
                                                 </div>
                                                 <div class="b-post__comments">
                                                     <a class="b-link b-link--default" href="{{ route('index', ['n' => $newsPost->id]) }}">
-                                                        <span class="b-icon b-icon--quant">{{ $newsPost->visible_comments_count }}</span>коментувати
+                                                        <span class="b-icon b-icon--quant">{{ $newsPost->visible_comments_count }}</span>{{ __('homepage.comment') }}
                                                     </a>
                                                     <span align="right"
                                                           style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-                                                        <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | Переглядів:
+                                                        <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
                                                         <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
                                                         <b style='color:green;'>{{ $newsPost->views_count }}</b>
                                                     </span>
@@ -678,609 +753,9 @@
                             @endforeach
                         @endif
 
-                        <div class="b-news-item">
-                            <div class="b-news-footer" style="padding: 11px 2px 11px 1px;">
-                                <span class="b-news-footer__t"></span>
-                                <span class="b-news-footer__b"></span>
-
-                                <span class="b-news-footer__ct"></span>
-                                <span class="b-news-footer__cb"></span>
-
-                                <span class="b-news-footer__tl"></span>
-                                <span class="b-news-footer__tr"></span>
-                                <span class="b-news-footer__bl"></span>
-                                <span class="b-news-footer__br"></span>
-                                <div class="b-news-footer__cont clearfix">
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">19 червня 2024 23:08</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=67'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Зміни за 1-15 червня</span>
-                                        </h2>
-                                    </div>
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">29 травня 2024 23:13</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=66'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Прискорено реакцію ботів</span>
-                                        </h2>
-                                    </div>
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">29 травня 2024 23:13</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=65'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Оновлення бафера</span>
-                                        </h2>
-                                    </div>
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">29 травня 2024 23:12</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=64'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Зміни при покупці переповненого рюкзака</span>
-                                        </h2>
-                                    </div>
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">29 травня 2024 23:12</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=63'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Фестивальні бали</span>
-                                        </h2>
-                                    </div>
-                                    <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                      style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">19 травня 2024 23:57</span>
-                                        <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                            - <span onclick="location.href='?&b=62'; return false;"
-                                                    style="cursor:pointer;color: #d43415;">Свіжі новини в заточці речей</span>
-                                        </h2>
-                                    </div>
-                                    <div id="add_fast_news" style="display: none;">
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">19 травня 2024 01:19</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=61'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Манускрипт дробления - добавлено в множинне використання</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">16 травня 2024 15:49</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=60'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в продажі сертифіката 50 діамантів</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">15 травня 2024 03:03</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=59'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в хаотичних битвах</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">15 травня 2024 02:59</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=58'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміна дизайну по завершенні бою</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">12 травня 2024 14:27</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=57'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в розділі благословіння</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">11 травня 2024 22:55</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=56'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в скарбниці Шеари</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">10 травня 2024 17:15</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=55'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в рівневих групах побоїща</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">9 травня 2024 00:42</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=54'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Нагорода за 1 місце</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">9 травня 2024 00:41</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=53'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Кількість дропу після бою</span>
-                                            </h2>
-                                        </div>
-                                        <div class="b-news-item__header clearfix" style="margin:0;"><span class=""
-                                                                                                          style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;font-size: 11px;">9 травня 2024 00:41</span>
-                                            <h2 class="b-news-item__head" style="font-size: 11px;margin:0;">
-                                                - <span onclick="location.href='?&b=52'; return false;"
-                                                        style="cursor:pointer;color: #d43415;">Зміни в Обміннику на торговій площі</span>
-                                            </h2>
-                                        </div>
-                                    </div>
-                                    <script>
-                                        function block_openhide(obj) {
-                                            var fn = $('#add_fast_news');
-                                            if (fn.is(":visible") === true) {
-                                                obj.src = '{{ asset('main/images/plus_ma.png') }}';
-                                                fn.hide(600);
-                                            } else {
-                                                obj.src = '{{ asset('main/images/minus_ma.png') }}';
-                                                fn.show(600);
-                                            }
-                                        }
-                                    </script>
-                                    <div class="b-news-item__header clearfix" style="margin:0;">
-                                        <span class="" style="margin: 1px 0 0 6px;float: right;position: relative;height: 16px;">
-                                            <img id="button_openhide" style="cursor: pointer;" onclick="block_openhide(this);" src="{{ asset('main/images/plus_ma.png') }}">
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="b-divider-2">
-                            <div class="b-divider-2__l">
-                                <div class="b-divider-2__l-inner"></div>
-                            </div>
-                            <div class="b-divider-2__r">
-                                <div class="b-divider-2__r-inner"></div>
-                            </div>
-                            <div class="b-divider-2__c"></div>
-                        </div>
-
-                        <div class="b-news-item">
-                            <div class="b-post__container">
-                                <article class="b-post b-post--index">
-                                    <div class="b-post__header">
-
-                                        <h2 class="b-post__footer"><a class="b-post__title-link c-red"
-                                                                      href="index.html?n=387"><b>Подія: Торгова
-                                                    подорож</b>
-
-                                            </a></h2>
-                                    </div>
-                                </article>
-                            </div>
-
-
-                            <article class="b-post b-post--index">
-                                <div class="b-post__container">
-
-                                    <div class="b-post__content js-content">
-                                        <p style="text-align: justify;">
-                                            <script type="text/javascript">art_alt["AA_14308"] = {
-                                                    "id": "14308",
-                                                    "title": "\u0422\u043e\u0440\u0433\u043e\u0432\u0438\u0439 \u0432\u0435\u043a\u0441\u0435\u043b\u044c",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/veksel.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;6","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"4"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0426\u0435\u043d\u043d\u0430\u044f \u0431\u0443\u043c\u0430\u0433\u0430, \u0432\u044b\u0434\u0430\u043d\u043d\u0430\u044f \u0437\u0430 \u043f\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0435 \u0440\u0435\u0441\u0443\u0440\u0441\u044b \u0438 \u0434\u0430\u044e\u0449\u0430\u044f \u043b\u0438\u0446\u0443, \u043a\u043e\u0442\u043e\u0440\u043e\u043c\u0443 \u043e\u043d\u0430 \u0432\u044b\u0434\u0430\u043d\u0430, \u043f\u0440\u0430\u0432\u043e \u043d\u0430 <b style=\"color:#660000\">\u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435 \u0437\u0430\u043c\u043e\u0440\u0441\u043a\u0438\u0445 \u0442\u043e\u0432\u0430\u0440\u043e\u0432<\/b>, \u043f\u0440\u0438\u0432\u0435\u0437\u0435\u043d\u043d\u044b\u0445 \u0438\u0437 \u043f\u043b\u0430\u0432\u0430\u043d\u0438\u044f.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_4101"] = {
-                                                    "id": "4101",
-                                                    "title": "\u0411\u0435\u0441\u044f\u0447\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#339900",
-                                                    "image": "images\/data\/artifacts\/kombokub_green.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;1&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;20","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0411\u0435\u0441\u044f\u0447\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2651\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439 \u0431\u0435\u0441\u043e\u0432, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_4103"] = {
-                                                    "id": "4103",
-                                                    "title": "\u0414\u0435\u043c\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/kombokub_blue.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;1&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;80","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"5"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0414\u0435\u043c\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2877\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_4102"] = {
-                                                    "id": "4102",
-                                                    "title": "\u0414\u044c\u044f\u0432\u043e\u043b\u044c\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#990099",
-                                                    "image": "images\/data\/artifacts\/kombokub_fio.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;2&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;40","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"7"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0414\u044c\u044f\u0432\u043e\u043b\u044c\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2795\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_1523"] = {
-                                                    "id": "1523",
-                                                    "title": "\u0421\u0430\u0440\u043a\u043e\u0444\u0430\u0433 \u00ab\u041a\u043b\u0456\u0449\u00bb",
-                                                    "color": "#990099",
-                                                    "image": "images\/data\/artifacts\/ksleshshkatulka_fio2709.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;5","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"5"},"skills_e":[],"desc":"\u0426\u0435\u043d\u043d\u044b\u0439 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442 \u0441\u043e \u0432\u0440\u0435\u043c\u0435\u043d \u042d\u043f\u043e\u0445\u0438 \u041f\u0435\u0440\u0435\u043c\u0435\u043d, \u043f\u0440\u0438\u043d\u0430\u0434\u043b\u0435\u0436\u0430\u0449\u0438\u0439 \u0433\u043d\u043e\u043c\u0430\u043c. <b>\u0412\u0430\u043c \u0441\u0442\u043e\u0438\u0442 \u0441\u0445\u043e\u0434\u0438\u0442\u044c \u043a \u0410\u043d\u0442\u0438\u043a\u0432\u0430\u0440\u0443, \u043d\u0430\u0439\u0442\u0438 \u043a\u043e\u0442\u043e\u0440\u043e\u0433\u043e \u043c\u043e\u0436\u043d\u043e \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_human.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u041a\u043b\u0435\u0441\u0432\u044b','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044f\u0445 \u041a\u043b\u0435\u0441\u0432\u044b<\/a><\/span> \u0438 \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_magmar.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u0433\u043d\u0435\u043d\u043d\u0430\u044f \u0434\u043e\u043b\u0438\u043d\u0430','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u0433\u043d\u0435\u043d\u043d\u043e\u0439 \u0434\u043e\u043b\u0438\u043d\u0435<\/a><\/span>, \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0435\u0433\u043e \u0437\u0430\u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u0432\u0430\u0448\u0430 \u043d\u0430\u0445\u043e\u0434\u043a\u0430.<\/b>","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_1544"] = {
-                                                    "id": "1544",
-                                                    "title": "\u041c\u0430\u0441\u043a\u0430 \u0416\u0430\u0445\u0443",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/maskahorrorblue_0310.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;2","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"desc":"\u0426\u0435\u043d\u043d\u044b\u0439 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442 \u0441\u043e \u0432\u0440\u0435\u043c\u0435\u043d \u042d\u043f\u043e\u0445\u0438 \u041f\u0435\u0440\u0435\u043c\u0435\u043d, \u043f\u0440\u0438\u043d\u0430\u0434\u043b\u0435\u0436\u0430\u0449\u0438\u0439 \u0433\u043d\u043e\u043c\u0430\u043c. <b>\u0412\u0430\u043c \u0441\u0442\u043e\u0438\u0442 \u0441\u0445\u043e\u0434\u0438\u0442\u044c \u043a \u0410\u043d\u0442\u0438\u043a\u0432\u0430\u0440\u0443, \u043d\u0430\u0439\u0442\u0438 \u043a\u043e\u0442\u043e\u0440\u043e\u0433\u043e \u043c\u043e\u0436\u043d\u043e \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_human.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u041a\u043b\u0435\u0441\u0432\u044b','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044f\u0445 \u041a\u043b\u0435\u0441\u0432\u044b<\/a><\/span> \u0438 \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_magmar.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u0433\u043d\u0435\u043d\u043d\u0430\u044f \u0434\u043e\u043b\u0438\u043d\u0430','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u0433\u043d\u0435\u043d\u043d\u043e\u0439 \u0434\u043e\u043b\u0438\u043d\u0435<\/a><\/span>, \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0435\u0433\u043e \u0437\u0430\u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u0432\u0430\u0448\u0430 \u043d\u0430\u0445\u043e\u0434\u043a\u0430.<\/b>","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <script type="text/javascript">art_alt["AA_1437"] = {
-                                                    "id": "1437",
-                                                    "title": "\u041e\u0433\u043d\u0435\u0432\u0438\u043a",
-                                                    "color": "#339900",
-                                                    "image": "images\/data\/artifacts\/ognevikgreen1009.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u041c\u0456\u0434\u043d\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game1.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;30","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"exp":{"title":"\u0427\u0430\u0441 \u0436\u0438\u0442\u0442\u044f","value":"90\u0434"},"desc":"\u042d\u0442\u043e\u0442 \u043d\u0435\u043e\u0431\u044b\u0447\u043d\u044b\u0439 \u0446\u0432\u0435\u0442\u043e\u043a \u0432\u0435\u0441\u044c\u043c\u0430 \u043e\u043f\u0430\u0441\u0435\u043d. \u0415\u0433\u043e \u043b\u0435\u043f\u0435\u0441\u0442\u043a\u0438, \u0441\u043b\u043e\u0432\u043d\u043e \u044f\u0437\u044b\u043a\u0438 \u043f\u043b\u0430\u043c\u0435\u043d\u0438, \u0442\u0430\u043a \u0438 \u043d\u043e\u0440\u043e\u0432\u044f\u0442 \u043e\u0431\u0436\u0435\u0447\u044c, \u043f\u043e\u044d\u0442\u043e\u043c\u0443 \u0441\u043e\u0440\u0432\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0435\u043f\u0440\u043e\u0441\u0442\u043e \u2013 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e \u043e\u0431\u043b\u0430\u0434\u0430\u0442\u044c \u043e\u0441\u043e\u0431\u044b\u043c\u0438 \u043d\u0430\u0432\u044b\u043a\u0430\u043c\u0438 \u0438\u043b\u0438 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0430\u043c\u0438.  \u0422\u0430\u043a\u0438\u043c\u0438 \u043a\u0430\u043a, \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=1443\&quot;" target=_blank>\u041d\u0435\u0433\u0430\u0442\u043e\u0440\u044b \u0423\u043d\u0430\u0440\u0438\u0443\u0441\u0430<\/a>, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0440\u0430\u0441\u0441\u0435\u0438\u0432\u0430\u044e\u0442 \u043c\u0430\u0433\u0438\u044e \u041e\u0433\u043d\u0435\u0432\u0438\u043a\u0430 \u0438 \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0430\u044e\u0442 \u0435\u0433\u043e \u0432 \u0432\u0430\u0448\u0438\u0445 \u0440\u0443\u043a\u0430\u0445 \u0432 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0435 \u0440\u0430\u0441\u0442\u0435\u043d\u0438\u0435. \u0415\u0441\u043b\u0438 \u0432\u044b \u043d\u0435 \u0437\u0430\u043f\u0430\u0441\u0435\u0442\u0435\u0441\u044c \u041d\u0435\u0433\u0430\u0442\u043e\u0440\u0430\u043c\u0438, \u0442\u043e \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435 \u0441\u0438\u043b\u044c\u043d\u044b\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=1592\&quot;" target=_blank>\u043e\u0436\u043e\u0433\u043e\u0432<\/a> \u0432\u0430\u043c \u0433\u0430\u0440\u0430\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043e.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                        <p style="text-align: center;"><span style="font-size:11px;">Гаряча пора настає для всіх підприємливих та спритних<br/>
-жителів&nbsp;<img alt="" src="info/pictures/image/ico_human_12x13.gif"
-                  style="width: 12px; height: 13px; margin-left: 3px; margin-right: 3px;"/><strong>Огрія</strong>&nbsp;і&nbsp;<img
-                                                    alt="" src="info/pictures/image/ico_magmar_12x13.gif"
-                                                    style="width: 12px; height: 13px; margin-left: 3px; margin-right: 3px;"/><strong>Хаїра</strong>. Скоро обидва материки будуть завалені небаченими заморськими товарами, адже розпочалася <span
-                                                    style="color:#008000;"><strong>торговельна подорож!</strong></span></span>
-                                        </p>
-
-                                        <div style="text-align: center;"><span style="font-size:11px;"><img alt=""
-                                                                                                            src="library/img/torg_banner.png"
-                                                                                                            style="width: 440px; height: 160px; margin-top: 10px; margin-bottom: 10px;"/></span>
-                                        </div>
-
-                                        <div style="text-align: center;"><span style="font-size:11px;"><img alt=""
-                                                                                                            src="info/pictures/image/ico_magmar_12x13.gif"
-                                                                                                            style="width: 12px; height: 13px; margin-left: 3px; margin-right: 3px;"/><strong>Купець Галаш</strong>&nbsp;и&nbsp;<img
-                                                    alt="" src="info/pictures/image/ico_human_12x13.gif"
-                                                    style="width: 12px; height: 13px; margin-left: 3px; margin-right: 3px;"/><strong>барін Вольдемар</strong>&nbsp;вже готують кораблі до відправки. Допоможіть заповнити їхні трюми різними дарами природи континенту, і торговці щедро нагородять вас своїми векселями.<strong>&nbsp;<br/>
-<span style="color:#FF0000;">​Обмін ресурсів</span> </strong>на<strong> <span
-                                                        style="color:#B22222;">Торговій площі</span> </strong>в<strong> <span
-                                                        style="color:#008000;">торговців</span></strong><br/>
-<span style="color:#008000;"><strong>Невдовзі опишу все в бібліотеці, які будуть товари і т.д.</strong></span></span>
-                                        </div>
-
-                                        <center>
-                                            <script type="text/javascript">art_alt["AA_14308"] = {
-                                                    "id": "14308",
-                                                    "title": "\u0422\u043e\u0440\u0433\u043e\u0432\u0438\u0439 \u0432\u0435\u043a\u0441\u0435\u043b\u044c",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/veksel.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;6","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"4"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0426\u0435\u043d\u043d\u0430\u044f \u0431\u0443\u043c\u0430\u0433\u0430, \u0432\u044b\u0434\u0430\u043d\u043d\u0430\u044f \u0437\u0430 \u043f\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0435 \u0440\u0435\u0441\u0443\u0440\u0441\u044b \u0438 \u0434\u0430\u044e\u0449\u0430\u044f \u043b\u0438\u0446\u0443, \u043a\u043e\u0442\u043e\u0440\u043e\u043c\u0443 \u043e\u043d\u0430 \u0432\u044b\u0434\u0430\u043d\u0430, \u043f\u0440\u0430\u0432\u043e \u043d\u0430 <b style=\"color:#660000\">\u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435 \u0437\u0430\u043c\u043e\u0440\u0441\u043a\u0438\u0445 \u0442\u043e\u0432\u0430\u0440\u043e\u0432<\/b>, \u043f\u0440\u0438\u0432\u0435\u0437\u0435\u043d\u043d\u044b\u0445 \u0438\u0437 \u043f\u043b\u0430\u0432\u0430\u043d\u0438\u044f.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_14308_721786" class="superman" style="" div_id
-                                                   width="59" height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table" background="images/data/artifacts/veksel.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(14308, 2, event);"
-                                                        onMouseOut="artifactAltSimple(14308, 0, event);"
-                                                        div_id="artifact_14308_721786"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 14308); return false;"></td>
-                                                </tr>
-                                            </table>
-                                        </center>
-
-                                        <p style="text-align: center;"><span style="font-size:11px;">Більше того, ці цінні папери ви можете отримати в обмін на наступні артефакти: золотий <span
-                                                    style="color:#FF0000;"><strong>Кубок Баддуха</strong></span>, похмурий <span
-                                                    style="color:#800080;"><strong>Саркофаг &laquo;Кліщ&raquo;</strong></span>, зловісна <span
-                                                    style="color:#0000FF;"><strong>маска Жаху</strong></span>, <span
-                                                    style="color:#800080;"><strong>Комбо-куби</strong></span> і&nbsp;т.д.</span>
-                                        </p>
-
-                                        <center>
-                                            <script type="text/javascript">art_alt["AA_4101"] = {
-                                                    "id": "4101",
-                                                    "title": "\u0411\u0435\u0441\u044f\u0447\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#339900",
-                                                    "image": "images\/data\/artifacts\/kombokub_green.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;1&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;20","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0411\u0435\u0441\u044f\u0447\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2651\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439 \u0431\u0435\u0441\u043e\u0432, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_4101_987312" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/kombokub_green.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(4101, 2, event);"
-                                                        onMouseOut="artifactAltSimple(4101, 0, event);"
-                                                        div_id="artifact_4101_987312"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 4101); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <script type="text/javascript">art_alt["AA_4103"] = {
-                                                    "id": "4103",
-                                                    "title": "\u0414\u0435\u043c\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/kombokub_blue.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;1&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;80","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"5"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0414\u0435\u043c\u043e\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2877\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_4103_235929" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/kombokub_blue.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(4103, 2, event);"
-                                                        onMouseOut="artifactAltSimple(4103, 0, event);"
-                                                        div_id="artifact_4103_235929"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 4103); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <script type="text/javascript">art_alt["AA_4102"] = {
-                                                    "id": "4102",
-                                                    "title": "\u0414\u044c\u044f\u0432\u043e\u043b\u044c\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431",
-                                                    "color": "#990099",
-                                                    "image": "images\/data\/artifacts\/kombokub_fio.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-4",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;2&nbsp;<span title=\"\u0421\u0440\u0456\u0431\u043d\u0438\u0439\"><img src="https://dwar.ltd/\&quot;\/images\/m_game2.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;40","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"7"},"skills_e":[],"noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","desc":"\u0414\u044c\u044f\u0432\u043e\u043b\u044c\u0441\u043a\u0438\u0439 \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431 \u0441\u043e\u0441\u0442\u043e\u0438\u0442 \u0438\u0437 \u0447\u0435\u0442\u044b\u0440\u0435\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=2795\&quot;" target=_blank>\u043a\u0443\u0431\u043e\u0432<\/a>, \u0441\u0432\u044f\u0437\u0430\u043d\u043d\u044b\u0445 \u043c\u0435\u0436\u0434\u0443 \u0441\u043e\u0431\u043e\u0439 \u0442\u0430\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0435\u0439, \u0437\u0430\u043a\u043b\u044e\u0447\u0435\u043d\u043d\u044b\u0445 \u0432 \u043a\u0430\u0436\u0434\u043e\u043c \u0438\u0437 \u043d\u0438\u0445. \u0427\u0442\u043e\u0431\u044b \u043f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a\u043e\u043c\u0431\u043e-\u043a\u0443\u0431, \u043d\u0443\u0436\u043d\u043e \u0440\u0430\u0437\u043e\u0431\u0440\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0430 \u0441\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435, \u043d\u043e \u0432 \u044d\u0442\u043e\u043c \u0434\u0435\u043b\u0435 <b>\u0432\u0430\u043c \u043d\u0435 \u043e\u0431\u043e\u0439\u0442\u0438\u0441\u044c \u0431\u0435\u0437 \u043f\u043e\u043c\u043e\u0449\u0438 \u0434\u0435\u043c\u043e\u043d\u043e\u043b\u043e\u0433\u0430<\/b>.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_4102_206602" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/kombokub_fio.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(4102, 2, event);"
-                                                        onMouseOut="artifactAltSimple(4102, 0, event);"
-                                                        div_id="artifact_4102_206602"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 4102); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <script type="text/javascript">art_alt["AA_1523"] = {
-                                                    "id": "1523",
-                                                    "title": "\u0421\u0430\u0440\u043a\u043e\u0444\u0430\u0433 \u00ab\u041a\u043b\u0456\u0449\u00bb",
-                                                    "color": "#990099",
-                                                    "image": "images\/data\/artifacts\/ksleshshkatulka_fio2709.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;5","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"5"},"skills_e":[],"desc":"\u0426\u0435\u043d\u043d\u044b\u0439 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442 \u0441\u043e \u0432\u0440\u0435\u043c\u0435\u043d \u042d\u043f\u043e\u0445\u0438 \u041f\u0435\u0440\u0435\u043c\u0435\u043d, \u043f\u0440\u0438\u043d\u0430\u0434\u043b\u0435\u0436\u0430\u0449\u0438\u0439 \u0433\u043d\u043e\u043c\u0430\u043c. <b>\u0412\u0430\u043c \u0441\u0442\u043e\u0438\u0442 \u0441\u0445\u043e\u0434\u0438\u0442\u044c \u043a \u0410\u043d\u0442\u0438\u043a\u0432\u0430\u0440\u0443, \u043d\u0430\u0439\u0442\u0438 \u043a\u043e\u0442\u043e\u0440\u043e\u0433\u043e \u043c\u043e\u0436\u043d\u043e \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_human.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u041a\u043b\u0435\u0441\u0432\u044b','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044f\u0445 \u041a\u043b\u0435\u0441\u0432\u044b<\/a><\/span> \u0438 \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_magmar.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u0433\u043d\u0435\u043d\u043d\u0430\u044f \u0434\u043e\u043b\u0438\u043d\u0430','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u0433\u043d\u0435\u043d\u043d\u043e\u0439 \u0434\u043e\u043b\u0438\u043d\u0435<\/a><\/span>, \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0435\u0433\u043e \u0437\u0430\u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u0432\u0430\u0448\u0430 \u043d\u0430\u0445\u043e\u0434\u043a\u0430.<\/b>","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_1523_46955" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/ksleshshkatulka_fio2709.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(1523, 2, event);"
-                                                        onMouseOut="artifactAltSimple(1523, 0, event);"
-                                                        div_id="artifact_1523_46955"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 1523); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <script type="text/javascript">art_alt["AA_1544"] = {
-                                                    "id": "1544",
-                                                    "title": "\u041c\u0430\u0441\u043a\u0430 \u0416\u0430\u0445\u0443",
-                                                    "color": "#3300ff",
-                                                    "image": "images\/data\/artifacts\/maskahorrorblue_0310.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u0417\u043e\u043b\u043e\u0442\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game3.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;2","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"desc":"\u0426\u0435\u043d\u043d\u044b\u0439 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442 \u0441\u043e \u0432\u0440\u0435\u043c\u0435\u043d \u042d\u043f\u043e\u0445\u0438 \u041f\u0435\u0440\u0435\u043c\u0435\u043d, \u043f\u0440\u0438\u043d\u0430\u0434\u043b\u0435\u0436\u0430\u0449\u0438\u0439 \u0433\u043d\u043e\u043c\u0430\u043c. <b>\u0412\u0430\u043c \u0441\u0442\u043e\u0438\u0442 \u0441\u0445\u043e\u0434\u0438\u0442\u044c \u043a \u0410\u043d\u0442\u0438\u043a\u0432\u0430\u0440\u0443, \u043d\u0430\u0439\u0442\u0438 \u043a\u043e\u0442\u043e\u0440\u043e\u0433\u043e \u043c\u043e\u0436\u043d\u043e \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_human.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u0438 \u041a\u043b\u0435\u0441\u0432\u044b','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u043a\u0440\u0435\u0441\u0442\u043d\u043e\u0441\u0442\u044f\u0445 \u041a\u043b\u0435\u0441\u0432\u044b<\/a><\/span> \u0438 \u0432 <img src="https://dwar.ltd/\&quot;\/images\/ico_magmar.gif\&quot;" border=0> <span><a href="https://dwar.ltd/\&quot;#\"" onClick=\"showMsg('navigator.php?name=\u041e\u0433\u043d\u0435\u043d\u043d\u0430\u044f \u0434\u043e\u043b\u0438\u043d\u0430','\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440',560,423);return false;\">\u041e\u0433\u043d\u0435\u043d\u043d\u043e\u0439 \u0434\u043e\u043b\u0438\u043d\u0435<\/a><\/span>, \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u0435\u0433\u043e \u0437\u0430\u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u0432\u0430\u0448\u0430 \u043d\u0430\u0445\u043e\u0434\u043a\u0430.<\/b>","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_1544_72393" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/maskahorrorblue_0310.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(1544, 2, event);"
-                                                        onMouseOut="artifactAltSimple(1544, 0, event);"
-                                                        div_id="artifact_1544_72393"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 1544); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <script type="text/javascript">art_alt["AA_1437"] = {
-                                                    "id": "1437",
-                                                    "title": "\u041e\u0433\u043d\u0435\u0432\u0438\u043a",
-                                                    "color": "#339900",
-                                                    "image": "images\/data\/artifacts\/ognevikgreen1009.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "15",
-                                                    "kind": "\u041a\u0432\u0435\u0441\u0442\u043e\u0432\u0456 \u0440\u0435\u0441\u0443\u0440\u0441\u0438",
-                                                    "kind_id": "66",
-                                                    "price": "<span title=\"\u041c\u0456\u0434\u043d\u0438\u0439\"><img src="
-                                                    https://dwar.ltd/\&quot;\/images\/m_game1.gif\&quot;" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;30","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"3"},"skills_e":[],"exp":{"title":"\u0427\u0430\u0441 \u0436\u0438\u0442\u0442\u044f","value":"90\u0434"},"desc":"\u042d\u0442\u043e\u0442 \u043d\u0435\u043e\u0431\u044b\u0447\u043d\u044b\u0439 \u0446\u0432\u0435\u0442\u043e\u043a \u0432\u0435\u0441\u044c\u043c\u0430 \u043e\u043f\u0430\u0441\u0435\u043d. \u0415\u0433\u043e \u043b\u0435\u043f\u0435\u0441\u0442\u043a\u0438, \u0441\u043b\u043e\u0432\u043d\u043e \u044f\u0437\u044b\u043a\u0438 \u043f\u043b\u0430\u043c\u0435\u043d\u0438, \u0442\u0430\u043a \u0438 \u043d\u043e\u0440\u043e\u0432\u044f\u0442 \u043e\u0431\u0436\u0435\u0447\u044c, \u043f\u043e\u044d\u0442\u043e\u043c\u0443 \u0441\u043e\u0440\u0432\u0430\u0442\u044c \u0435\u0433\u043e \u043d\u0435\u043f\u0440\u043e\u0441\u0442\u043e \u2013 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e \u043e\u0431\u043b\u0430\u0434\u0430\u0442\u044c \u043e\u0441\u043e\u0431\u044b\u043c\u0438 \u043d\u0430\u0432\u044b\u043a\u0430\u043c\u0438 \u0438\u043b\u0438 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0430\u043c\u0438.  \u0422\u0430\u043a\u0438\u043c\u0438 \u043a\u0430\u043a, \u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=1443\&quot;" target=_blank>\u041d\u0435\u0433\u0430\u0442\u043e\u0440\u044b \u0423\u043d\u0430\u0440\u0438\u0443\u0441\u0430<\/a>, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0440\u0430\u0441\u0441\u0435\u0438\u0432\u0430\u044e\u0442 \u043c\u0430\u0433\u0438\u044e \u041e\u0433\u043d\u0435\u0432\u0438\u043a\u0430 \u0438 \u043f\u0440\u0435\u0432\u0440\u0430\u0449\u0430\u044e\u0442 \u0435\u0433\u043e \u0432 \u0432\u0430\u0448\u0438\u0445 \u0440\u0443\u043a\u0430\u0445 \u0432 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0435 \u0440\u0430\u0441\u0442\u0435\u043d\u0438\u0435. \u0415\u0441\u043b\u0438 \u0432\u044b \u043d\u0435 \u0437\u0430\u043f\u0430\u0441\u0435\u0442\u0435\u0441\u044c \u041d\u0435\u0433\u0430\u0442\u043e\u0440\u0430\u043c\u0438, \u0442\u043e \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u0435 \u0441\u0438\u043b\u044c\u043d\u044b\u0445 <a href="https://dwar.ltd/\&quot;\/artifact_info.php?artikul_id=1592\&quot;" target=_blank>\u043e\u0436\u043e\u0433\u043e\u0432<\/a> \u0432\u0430\u043c \u0433\u0430\u0440\u0430\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u043d\u043e.","_act1":0,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_1437_883833" class="superman" style="" div_id width="59"
-                                                   height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/ognevikgreen1009.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(1437, 2, event);"
-                                                        onMouseOut="artifactAltSimple(1437, 0, event);"
-                                                        div_id="artifact_1437_883833"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 1437); return false;"></td>
-                                                </tr>
-                                            </table>
-                                        </center>
-                                        </p>
-                                        <div class="clear"></div>
-                                    </div>
-                                </div>
-
-
-                                <div class="b-post__footer">
-                                    <div class="b-post__more"><a href="index.html?n=387" class="b-link b-link--default">детальніше</a>
-                                    </div>
-                                    <div class="b-post__comments"><a class="b-link b-link--default"
-                                                                     href="index.html?n=387"><span
-                                                class="b-icon b-icon--quant">1</span>коментувати</a>
-
-                                        <span align="right"
-                                              style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-
-			<b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> 16 червня 2025 23:59</b> | Переглядів: <img
-                                                src='{{ asset('main/images/news/view.png') }}'
-                                                style='width: 10px;position: relative;top: -1px;'> <b
-                                                style='color:green;'>14564</b></span>
-
-                                    </div>
-                                </div>
-
-                            </article>
-                            <br>
-
-                        </div>
-                        <div class="b-divider-2">
-                            <div class="b-divider-2__l">
-                                <div class="b-divider-2__l-inner"></div>
-                            </div>
-                            <div class="b-divider-2__r">
-                                <div class="b-divider-2__r-inner"></div>
-                            </div>
-                            <div class="b-divider-2__c"></div>
-                        </div>
-
-                        <div class="b-news-item">
-                            <div class="b-post__container">
-                                <article class="b-post b-post--index">
-                                    <div class="b-post__header">
-
-                                        <h2 class="b-post__footer"><a class="b-post__title-link c-red"
-                                                                      href="index.html?n=386"><b>Магічна буря на
-                                                    Плато</b>
-
-                                            </a></h2>
-                                    </div>
-                                </article>
-                            </div>
-
-
-                            <article class="b-post b-post--index">
-                                <div class="b-post__container">
-
-                                    <div class="b-post__content js-content">
-                                        <p style="text-align: justify;">
-                                            <script type="text/javascript">art_alt["AA_15324"] = {
-                                                    "id": "15324",
-                                                    "title": "\u0414\u0430\u0440 \u043c\u043e\u0433\u0443\u0442\u043d\u043e\u0441\u0442\u0456",
-                                                    "color": "#ff0000",
-                                                    "image": "images\/data\/artifacts\/eff_ragecloak.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-1",
-                                                    "kind": "\u0415\u0444\u0435\u043a\u0442\u0438",
-                                                    "kind_id": "65",
-                                                    "price": "<span title=\"\u0414\u0456\u0430\u043c\u0430\u043d\u0442\"><img src=\"{{ asset('img/icon/m_dmd.gif') }}\" border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;5.00","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"1"},"trend":"\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b","skills":[{"title":"% \u0434\u043e\u0431\u043b\u0435\u0441\u0442\u0456","value":"<b>+100<\/b><\/b>"},{"title":"\u0410\u043d\u0442\u0438\u0442\u0440\u0430\u0432\u043c\u0430\u0442\u0438\u0437\u043c","value":"<b>+1000<\/b><\/b>"},{"title":"\u0421\u0438\u043b\u0430","value":"<b>+5000<\/b><\/b>"},{"title":"\u0416\u0438\u0442\u0442\u0454\u0437\u0434\u0430\u0442\u043d\u0456\u0441\u0442\u044c","value":"<b>+5000<\/b><\/b>"},{"title":"\u041c\u0443\u0434\u0440\u0456\u0441\u0442\u044c","value":"<b>+5000<\/b><\/b>"},{"title":"\u0420\u0456\u0432\u0435\u043d\u044c \u0436\u0438\u0442\u0442\u044f","value":"<b>+2500<\/b><\/b>"}],"skills_e":[],"exp":{"title":"\u0427\u0430\u0441 \u0436\u0438\u0442\u0442\u044f","value":"1\u0433"},"nogive":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u043f\u0435\u0440\u0435\u0434\u0430\u0442\u0438!","noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","nosell":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u0437\u0434\u0430\u0442\u0438 \u0432 \u0441\u043a\u0443\u043f\u043a\u0443","nofreeze":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u00ab\u0437\u0430\u043c\u043e\u0440\u043e\u0437\u0438\u0442\u0438\u00bb","desc":"\u0423 \u0432\u043b\u0430\u0434\u0456 \u0434\u0430\u0440\u0443 \u043c\u043e\u0433\u0443\u0442\u043d\u043e\u0441\u0442\u0456 \u0433\u0435\u0440\u043e\u0457 \u0437 \u0434\u0435\u0441\u044f\u0442\u0438\u043a\u0440\u0430\u0442\u043d\u0438\u043c\u0438 \u0441\u0438\u043b\u0430\u043c\u0438 \u043a\u0438\u0434\u0430\u044e\u0442\u044c\u0441\u044f \u043d\u0430 \u0432\u043e\u0440\u043e\u0433\u0456\u0432. \u0412\u0433\u0430\u043c\u0443\u0432\u0430\u0442\u0438 \u0457\u0445 \u043e\u0434\u0435\u0440\u0436\u0438\u043c\u0456\u0441\u0442\u044c \u0431\u0438\u0442\u0432\u043e\u044e \u043c\u043e\u0436\u0435 \u043b\u0438\u0448\u0435 \u043f\u0435\u0440\u0435\u043c\u043e\u0433\u0430!","_act1":1,"_act2":3,"_act3":0,"_puton":0};</script>
-                                        <p style="text-align: center;"><span
-                                                style="font-size: 11px; text-align: center;"><span
-                                                    style="color:#B22222;"><strong>На честь ювілею&nbsp;</strong></span>на&nbsp;</span><span
-                                                style="font-size: 11px; text-align: center; color: rgb(0, 128, 0);"><strong>Плато безмовності</strong></span><span
-                                                style="font-size: 11px; text-align: center;">&nbsp;відбудеться&nbsp;</span><span
-                                                style="font-size: 11px; text-align: center; color: rgb(178, 34, 34);"><strong>магічна буря</strong></span><span
-                                                style="font-size: 11px; text-align: center;">!</span><br/>
-                                            <img alt="" src="news/2024/plato.jpg"
-                                                 style="opacity: 0.9; font-size: 11px; text-align: center; width: 400px; height: 115px;"/><span
-                                                style="font-size:11px;">​<br/>
-<span style="color:#FF0000;"><strong>При вході в бій</strong></span> на Плато вам <span style="color:#B22222;"><strong>автоматично </strong></span>видаватиметься&nbsp;<span
-                                                    style="color:#FF0000;"><strong>Дар могутності</strong></span></span>
-                                        </p>
-
-                                        <center>
-                                            <script type="text/javascript">art_alt["AA_15324"] = {
-                                                    "id": "15324",
-                                                    "title": "\u0414\u0430\u0440 \u043c\u043e\u0433\u0443\u0442\u043d\u043e\u0441\u0442\u0456",
-                                                    "color": "#ff0000",
-                                                    "image": "images\/data\/artifacts\/eff_ragecloak.gif",
-                                                    "slot_num": null,
-                                                    "type_id": "-1",
-                                                    "kind": "\u0415\u0444\u0435\u043a\u0442\u0438",
-                                                    "kind_id": "65",
-                                                    "price": "<span title=\"\u0414\u0456\u0430\u043c\u0430\u043d\u0442\"><img src=\"{{ asset('img/icon/m_dmd.gif') }}\"border=0 width=11 height=11 align=absmiddle><\/span>&nbsp;5.00","lev":{"title":" \u0423\u0440\u043e\u0432\u0435\u043d\u044c ","value":"1"},"trend":"\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b","skills":[{"title":"% \u0434\u043e\u0431\u043b\u0435\u0441\u0442\u0456","value":"<b>+100<\/b><\/b>"},{"title":"\u0410\u043d\u0442\u0438\u0442\u0440\u0430\u0432\u043c\u0430\u0442\u0438\u0437\u043c","value":"<b>+1000<\/b><\/b>"},{"title":"\u0421\u0438\u043b\u0430","value":"<b>+5000<\/b><\/b>"},{"title":"\u0416\u0438\u0442\u0442\u0454\u0437\u0434\u0430\u0442\u043d\u0456\u0441\u0442\u044c","value":"<b>+5000<\/b><\/b>"},{"title":"\u041c\u0443\u0434\u0440\u0456\u0441\u0442\u044c","value":"<b>+5000<\/b><\/b>"},{"title":"\u0420\u0456\u0432\u0435\u043d\u044c \u0436\u0438\u0442\u0442\u044f","value":"<b>+2500<\/b><\/b>"}],"skills_e":[],"exp":{"title":"\u0427\u0430\u0441 \u0436\u0438\u0442\u0442\u044f","value":"1\u0433"},"nogive":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u043f\u0435\u0440\u0435\u0434\u0430\u0442\u0438!","noweight":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u0437\u0430\u0439\u043c\u0430\u0454 \u043c\u0456\u0441\u0446\u044f \u0432 \u0440\u044e\u043a\u0437\u0430\u043a\u0443","nosell":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u0437\u0434\u0430\u0442\u0438 \u0432 \u0441\u043a\u0443\u043f\u043a\u0443","nofreeze":"\u041f\u0440\u0435\u0434\u043c\u0435\u0442 \u043d\u0435 \u043c\u043e\u0436\u043d\u0430 \u00ab\u0437\u0430\u043c\u043e\u0440\u043e\u0437\u0438\u0442\u0438\u00bb","desc":"\u0423 \u0432\u043b\u0430\u0434\u0456 \u0434\u0430\u0440\u0443 \u043c\u043e\u0433\u0443\u0442\u043d\u043e\u0441\u0442\u0456 \u0433\u0435\u0440\u043e\u0457 \u0437 \u0434\u0435\u0441\u044f\u0442\u0438\u043a\u0440\u0430\u0442\u043d\u0438\u043c\u0438 \u0441\u0438\u043b\u0430\u043c\u0438 \u043a\u0438\u0434\u0430\u044e\u0442\u044c\u0441\u044f \u043d\u0430 \u0432\u043e\u0440\u043e\u0433\u0456\u0432. \u0412\u0433\u0430\u043c\u0443\u0432\u0430\u0442\u0438 \u0457\u0445 \u043e\u0434\u0435\u0440\u0436\u0438\u043c\u0456\u0441\u0442\u044c \u0431\u0438\u0442\u0432\u043e\u044e \u043c\u043e\u0436\u0435 \u043b\u0438\u0448\u0435 \u043f\u0435\u0440\u0435\u043c\u043e\u0433\u0430!","_act1":1,"_act2":3,"_act3":0,"_puton":0};</script>
-                                            <table id="artifact_15324_646005" class="superman" style="" div_id
-                                                   width="59" height="59" cellpadding="0" cellspacing="0" border="0"
-                                                   class="artifact-table"
-                                                   background="images/data/artifacts/eff_ragecloak.gif">
-                                                <tr>
-                                                    <td cnt="0" onMouseOver="artifactAltSimple(15324, 2, event);"
-                                                        onMouseOut="artifactAltSimple(15324, 0, event);"
-                                                        div_id="artifact_15324_646005"
-                                                        style="cursor: pointer; position: relative; z-index: 1;"
-                                                        onClick="showArtifactInfo(0, 15324); return false;"></td>
-                                                </tr>
-                                            </table>
-                                            <br/>
-                                            <span style="color:#008000;"><strong><span style="font-size:11px;">Час бурі з </span></strong></span><span
-                                                style="color:#FF0000;"><strong><span
-                                                        style="font-size:11px;">17:00</span></strong></span><span
-                                                style="color:#008000;"><strong><span style="font-size:11px;"> по </span></strong></span><span
-                                                style="color:#FF0000;"><strong><span
-                                                        style="font-size:11px;">20:59</span></strong></span><br/>
-                                            <span style="font-size:11px;">Враховуючи характеристики вам буде дуже добре йти <span
-                                                    style="color:#008000;"><strong>доблесть</strong></span></span>
-                                        </center>
-                                        </p>
-                                        <div class="clear"></div>
-                                    </div>
-                                </div>
-
-
-                                <div class="b-post__footer">
-                                    <div class="b-post__more"><a href="index.html?n=386" class="b-link b-link--default">детальніше</a>
-                                    </div>
-                                    <div class="b-post__comments"><a class="b-link b-link--default"
-                                                                     href="index.html?n=386"><span
-                                                class="b-icon b-icon--quant">4</span>коментувати</a>
-
-                                        <span align="right"
-                                              style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-
-			<b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> 16 червня 2025 12:50</b> | Переглядів: <img
-                                                src='{{ asset('main/images/news/view.png') }}'
-                                                style='width: 10px;position: relative;top: -1px;'> <b
-                                                style='color:green;'>15534</b></span>
-
-                                    </div>
-                                </div>
-
-                            </article>
-                            <br>
-
-                        </div>
-                        <div class="b-divider-2">
-                            <div class="b-divider-2__l">
-                                <div class="b-divider-2__l-inner"></div>
-                            </div>
-                            <div class="b-divider-2__r">
-                                <div class="b-divider-2__r-inner"></div>
-                            </div>
-                            <div class="b-divider-2__c"></div>
-                        </div>
+                        @if(!$selectedNews && $newsPosts->isEmpty())
+                            <p>{{ __('homepage.no_news') }}</p>
+                        @endif
 
 
                     </div>
@@ -1296,7 +771,7 @@
                 <div class="b-index__footer text-center u-style-bg-gradient">
 
 
-                    <a class="b-link b-link--default" href="#">Все новости </a>
+                    <a class="b-link b-link--default" href="#">{{ __('homepage.all_news') }}</a>
                 </div>
             </div>
 
@@ -1304,22 +779,17 @@
                 <div class="b-index__content u-style-bg-gradient">
                     <div class="b-shape__header">
                         <div class="b-shape__decor"></div>
-                        <div class="cufon-mp ir font-head">Eternum</div>
+                        <div class="homepage-heading">{{ __('homepage.game_name') }}</div>
                     </div>
                     <div class="b-shape__content" style="padding: 10px 14px; line-height: 1.6; color: #4b3423; background-image: linear-gradient(90deg, #dcaa68 10%, #ffcc89 50%, #dcaa68 90%); font-size: 11px;">
-                        <p>Когда-то время здесь не текло. Мир был совершенным и неизменным — эпохой, которую немногие помнящие зовут <b>Вечностью</b>. Ни старости, ни увядания, ни движения вперёд. Только покой, застывший навеки.</p>
-                        <p>Потом случилось <b>Раскалывание</b>.</p>
-                        <p>Вечность разбилась — на тысячи осколков, кристаллов, сердец и ядер, рассеянных по земле, воде и камню. Мир наконец начал стареть. Деревья пустили годовые кольца. Смерть перестала быть немыслимой. А вместе с ней пришло и то, чего Вечность никогда не знала — <b>рост</b>.</p>
-                        <p>Осколки не исчезли. Тот, кто находит фрагмент прежнего порядка и вплавляет его в клинок, доспех или собственную судьбу — на миг заимствует частицу утраченного бессмертия. Оружие «возвышается». Плоть закаляется. А самые редкие, не раскрошившиеся фрагменты Вечности становятся артефактами, за которые готовы убивать.</p>
-                        <p>Ты — один из <b>Искателей</b>. Не герой, не спаситель — просто ещё один, кто идёт по следу осколков. Одни хотят собрать их все и вернуть мир в неизменный покой. Другие — урвать частицу бессмертия для себя. Третьи считают, что Вечность и так забрала у мира слишком много, и её нужно похоронить окончательно, чтобы всё наконец могло по-настоящему закончиться.</p>
-                        <p>Выбор — за тобой. Осколки — не за горами.</p>
+                        {!! __('homepage.lore') !!}
                     </div>
                 </div>
             </div>
 
             <footer class="b-footer">
                 <div class="b-footer__content">
-                    <a href="#" target="_blank"><b>Лицензионное соглашение</b></a><br>
+                    <a href="#" target="_blank"><b>{{ __('homepage.license') }}</b></a><br>
                     2024-{{ date('Y') }}
                 </div>
             </footer>
@@ -1332,185 +802,16 @@
 
                 <div class="b-aside__column">
 
-                    <div id="top-users1">
-                        <div class="b-shape b-aside__shape" id="ratings">
-                            <div class="b-shape__header">
-                                <div class="b-shape__decor"></div>
-                                <div class="cufon-mp ir font-head font-top-clans1">Топ игроки</div>
-                            </div>
-                            <div class="b-rate">
-
-                                <div class="b-rate__tabs b-rate__tabs--top">
-                                    <span class="b-rate__tab">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-valor-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-valor"></div>
-                                        </div>
-                                    </span>
-                                    <span class="b-rate__tab b-rate__tab--active">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-all-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-allfaction"></div>
-                                        </div>
-                                    </span>
-                                    <span class="b-rate__tab">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-sadar-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-sadar"></div>
-                                        </div>
-                                    </span>
-                                </div>
-
-                                <div class="b-rate__content">
-
-
-                                    <table class="b-rate__table" ID="rating-users-rating-0">
-                                        <thead class="b-rate__thead">
-                                        <tr>
-                                            <th class="b-rate__th b-rate__th--place">#</th>
-                                            <th class="b-rate__th b-rate__th--clanname">Ник игрока</th>
-                                        </tr>
-                                        </thead>
-                                        <tr class="">
-                                            <td class="b-rate__td b-rate__td--valor">
-                                                1
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--clanname" style="color: #e69934;">&nbsp;
-                                                <a href="clan_info.php?clan_id=21_1" target=_blank title="PrieureDeSion">
-                                                    <img src="{{ asset('main/images/data/clans/clan_byhui.jpg') }}" border=0 width=13 height=13 align="absmiddle"></a>&nbsp;
-                                                    <a><b>Бухий&nbsp;[12]</b></a>&nbsp;
-                                                <a href="user_info.php?nick=Бухий" target=_blank title="Информация о персонаже">
-                                                    <img src="{{ asset('main/images/player_info.gif') }}" border=0 width=10 height=10 align="absmiddle">
-                                                </a>&nbsp;
-                                                <a href="user_info.php?nick=Бухий" target=_blank title="Информация о персонаже">
-                                                    <i class="b-icon-32x32 b-icon-32x32_info"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr class="">
-                                            <td class="b-rate__td b-rate__td--valor">
-                                                2
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--clanname" style="color: #e69934;">&nbsp;
-                                                <a href="clan_info.php?clan_id=21_1" target=_blank title="PrieureDeSion">
-                                                    <img src="{{ asset('main/images/data/clans/gotei13.png') }}" border=0 width=13 height=13 align="absmiddle"></a>&nbsp;
-                                                <a><b>FHToE&nbsp;[12]</b></a>&nbsp;
-                                                <a href="user_info.php?nick=Бухий" target=_blank title="Информация о персонаже">
-                                                    <img src="{{ asset('main/images/player_info.gif') }}" border=0 width=10 height=10 align="absmiddle">
-                                                </a>&nbsp;
-                                                <a href="user_info.php?nick=Бухий" target=_blank title="Информация о персонаже">
-                                                    <i class="b-icon-32x32 b-icon-32x32_info"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div id="top-users2">
-                        <div class="b-shape b-aside__shape" id="ratings2">
-                            <div class="b-shape__header">
-                                <div class="b-shape__decor"></div>
-                                <div class="cufon-mp ir font-head font-top-clans">Топ кланов</div>
-                            </div>
-                            <div class="b-rate">
-
-                                <div class="b-rate__tabs b-rate__tabs--top">
-                                    <span class="b-rate__tab">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-valor-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-valor"></div>
-                                        </div>
-                                    </span>
-                                    <span class="b-rate__tab b-rate__tab--active">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-all-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-allfaction"></div>
-                                        </div>
-				                    </span>
-                                    <span class="b-rate__tab">
-                                        <div class="b-rate__tab-icon">
-                                            <div class="b-icon b-icon--race-sadar-md"></div>
-                                        </div>
-                                        <div class="b-rate__tab-name">
-                                             <div class="cufon cufon-common font-head font-sadar"></div>
-                                        </div>
-                                    </span>
-                                </div>
-
-                                <div class="b-rate__content">
-                                    <table class="b-rate__table" ID="rating2-users-rating-0" style="display: block;">
-                                        <thead class="b-rate__thead">
-                                        <tr>
-                                            <th class="b-rate__th b-rate__th--place">#</th>
-                                            <th class="b-rate__th b-rate__th--clanname" style=" width: 139px; ">
-                                                Название клана
-                                            </th>
-                                            <th class="b-rate__th b-rate__th--points">lvl</th>
-                                        </tr>
-                                        </thead>
-                                        <tr class="b-rate__tr b-rate__tr--even">
-                                            <td class="b-rate__td b-rate__td--valor">
-                                                2
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--clanname" style=" color: #e69934; ">&nbsp;
-                                                <a href="index.html#" onClick="showClanInfo(12); return false;">
-                                                    <img src="{{ asset('main/images/data/clans/gotei13.png') }}" alt="Gotei 13"/> Gotei 13</a>
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--points ">[3]</td>
-                                        </tr>
-                                        <tr class="">
-                                            <td class="b-rate__td b-rate__td--valor">
-                                                3
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--clanname" style=" color: #e69934; ">&nbsp;
-                                                <a href="index.html#" onClick="showClanInfo(12); return false;">
-                                                    <img src="{{ asset('main/images/data/clans/clan_luitb_icon.png') }}" alt="ЛЮТЬ"/> ЛЮТЬ</a>
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--points ">[3]</td>
-                                        </tr>
-                                        <tr class="b-rate__tr b-rate__tr--even">
-                                            <td class="b-rate__td b-rate__td--valor">
-                                                4
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--clanname" style=" color: #e69934; ">&nbsp;
-                                                <a href="index.html#" onClick="showClanInfo(3); return false;">
-                                                    <img src="{{ asset('main/images/data/clans/templiers_desion.gif') }}" alt="TempliersDeSion"/> TempliersDeSion</a>
-                                            </td>
-                                            <td class="b-rate__td b-rate__td--points ">[3]</td>
-                                        </tr>
-                                    </table>
-                                </div>
-
-
-                            </div>
-                        </div>
-
-                    </div>
+                    @include('news::partials.rankings')
 
 
                     <div class="b-shape__header">
                         <div class="b-shape__decor"></div>
-                        <div class="cufon-mp font-head font-screens ir">Прием платежей</div>
+                        <div class="homepage-heading homepage-heading--reference">{{ __('homepage.payments') }}</div>
                     </div>
                     <div>
                         <span style="position: relative;left: 33px;top: 3px;">
-                            <a href="#" class="b-aside__support-link">Оплата осуществляется через<br>Portmone / VISA / Mastercard</a>
+                            <a href="#" class="b-aside__support-link">{{ __('homepage.payments_description') }}<br>Portmone / VISA / Mastercard</a>
                             <img src="{{ asset('main/images/payment/apple.png') }}" width="80px" alt="apple">
                             <img src="{{ asset('main/images/payment/google.png') }}" width="80px" alt="google"><br>
                             <img src="{{ asset('main/images/payment/visa.png') }}" width="80px" alt="viza">
@@ -1524,5 +825,13 @@
 </div>
 
 
+<script>
+    document.addEventListener('click', function (event) {
+        var link = event.target.closest('[data-library-info-popup]');
+        if (!link) return;
+        event.preventDefault();
+        window.open(link.href, '', 'width=730,height=800,resizable=yes,scrollbars=yes');
+    });
+</script>
 </body>
 </html>
