@@ -7,7 +7,7 @@
     const refresh = byId('refresh');
     const empty = byId('empty'), bot = byId('bot'), close = byId('close');
     const detail = byId('detail'), navigation = byId('navigation');
-    const panels = { backpack: byId('inventory'), character: byId('profile'), auction: byId('auction') };
+    const panels = { backpack: byId('inventory'), character: byId('profile'), auction: byId('auction'), chat: byId('chat') };
     const lots = byId('lots'), lotsEmpty = byId('lots-empty'), lotsPagination = byId('lots-pagination');
     const lotsPrevious = byId('lots-previous'), lotsNext = byId('lots-next');
     let view = 'backpack', auctionPage = 1, auctionLastPage = 1;
@@ -17,6 +17,8 @@
     const validCategories = ['main', 'misc', 'key', 'quest', 'artifact', 'gift'];
     let category = validCategories.includes(params.get('category')) ? params.get('category') : 'main';
     let busy = false, sequence = 0, activeRequest, initialScroll = true;
+
+    const chat = new window.TelegramMiniAppChat({ root, initData, labels: () => labels, onAuthError: text => { showMessage(text, true); bot.hidden = false; } });
 
     function showMessage(text, error = false) {
         message.textContent = text;
@@ -193,7 +195,7 @@
     function translate(values, locale) {
         labels = { ...labels, ...values };
         if (['ru', 'uk'].includes(locale)) document.documentElement.lang = locale;
-        document.title = byId('title').textContent = view === 'character' ? labels.character
+        document.title = byId('title').textContent = view === 'chat' ? labels.chat_title : view === 'character' ? labels.character
             : view === 'auction' ? labels.mini_app_auction : labels.backpack;
         for (const element of root.querySelectorAll('[data-telegram-label]')) {
             element.textContent = labels[element.dataset.telegramLabel];
@@ -218,6 +220,8 @@
 
     function switchView(nextView) {
         if (!initData || nextView === view || !Object.hasOwn(panels, nextView)) return;
+        chat.resume = false;
+        chat.stop();
         view = nextView;
         clearContents();
         for (const [key, panel] of Object.entries(panels)) panel.hidden = key !== view;
@@ -235,6 +239,9 @@
         if (!initData) return;
         const requestView = view, current = ++sequence;
         activeRequest?.abort();
+        if (requestView === 'chat') {
+            busy = false; controls(); message.hidden = true; bot.hidden = true; chat.start(); return;
+        }
         const controller = new AbortController();
         activeRequest = controller;
         const timeout = setTimeout(() => controller.abort(), 15000);

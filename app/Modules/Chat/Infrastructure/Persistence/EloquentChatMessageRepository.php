@@ -120,7 +120,10 @@ class EloquentChatMessageRepository implements ChatMessageRepositoryInterface
 
         $systemClause = fn ($q) => $q->where('channel', ChatChannel::System->value)
             ->where('created_at', '>=', $thirtyMinutesAgo);
+        $activeClanId = $user->clanMembership?->clan?->hasPaidTax() === true ? $user->clanMembership->clan_id : null;
         $clanNoticeClause = fn ($q) => $q
+            ->where('clan_id', $activeClanId)
+            ->whereNotNull('clan_id')
             ->where('channel', ChatChannel::Clan->value)
             ->where('type', ChatMessageType::ClanBoss->value)
             ->where('created_at', '>=', Carbon::now()->subMinutes(ChatMessageLifetime::CLAN_SYSTEM_MINUTES));

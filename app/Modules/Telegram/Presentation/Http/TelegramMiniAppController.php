@@ -68,6 +68,12 @@ final class TelegramMiniAppController
             $labels[$key] = __('telegram.'.$key);
         }
 
+        foreach (array_keys(__('telegram')) as $key) {
+            if (str_starts_with($key, 'chat_')) {
+                $labels[$key] = __('telegram.'.$key);
+            }
+        }
+
         return $labels + ['close' => __('ui.close'), 'connection_failed' => __('ui.connection_failed'), 'too_many_attempts' => __('ui.too_many_attempts')];
     }
 }

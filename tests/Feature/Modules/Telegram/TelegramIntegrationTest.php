@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Telegram;
 
+use App\Modules\Chat\Domain\Events\ChatMessageCreated;
 use App\Modules\Telegram\Application\Services\TelegramBackpackPreview;
 use App\Modules\Telegram\Application\Services\TelegramLinkService;
 use App\Modules\Telegram\Application\Services\TelegramReadService;
@@ -12,7 +13,10 @@ use App\Modules\Telegram\Domain\Contracts\TelegramLinkRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -190,6 +194,136 @@ final class TelegramIntegrationTest extends TestCase
         $this->getJson(route('telegram.mini-app.backpack'), $this->apiHeaders())->assertUnauthorized();
         $user = User::query()->without('player')->findOrFail(1)->setRelation('player', null);
         $this->actingAs($user)->getJson(route('telegram.mini-app.backpack'))->assertUnauthorized();
+    }
+
+    public function test_chat_requires_signed_identity_and_rechecks_revocation(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main']))->assertUnauthorized();
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Hi'], $this->apiHeaders())->assertUnauthorized();
+        $this->postJson(route('telegram.mini-app.chat.auth'), ['socket_id' => '1.2', 'channel_name' => 'private-chat.main'])->assertUnauthorized();
+        DB::table('users')->where('id', 1)->update(['email_verified_at' => null]);
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main']), $this->miniAppHeaders())->assertForbidden();
+        app(TelegramLinkRepository::class)->unlink(userId: 1);
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Hi'], $this->miniAppHeaders())->assertForbidden();
+        $this->assertSame(0, DB::table('chat_messages')->count());
+    }
+
+    public function test_chat_filters_private_clan_party_location_and_expired_messages_and_ignores(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        $main = $this->chatMessage(channel: 'main', text: '<script>alert(1)</script>');
+        $private = $this->chatMessage(channel: 'private', text: 'Own private', extra: ['target_user_id' => 1, 'type' => 'private']);
+        $this->chatMessage(channel: 'private', text: 'Foreign private', extra: ['user_id' => 2, 'target_user_id' => 99, 'type' => 'private']);
+        $ownClan = $this->chatMessage(channel: 'clan', text: 'Own clan', extra: ['clan_id' => 1, 'type' => 'clan_boss']);
+        $this->chatMessage(channel: 'clan', text: 'Foreign clan', extra: ['clan_id' => 2, 'type' => 'clan_boss']);
+        $this->chatMessage(channel: 'clan', text: 'Expired clan', extra: ['clan_id' => 1, 'type' => 'clan_boss', 'created_at' => now()->subMinutes(16)]);
+        $this->chatMessage(channel: 'party', text: 'Foreign party', extra: ['party_id' => 2]);
+        $local = $this->chatMessage(channel: 'location', text: 'Current map', extra: ['map_id' => 10]);
+        $this->chatMessage(channel: 'location', text: 'Foreign map', extra: ['map_id' => 20]);
+        $headers = $this->miniAppHeaders();
+        $response = $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main', 'user_id' => 2]), $headers)->assertOk();
+        $this->assertEqualsCanonicalizing([$main, $private, $ownClan], array_column($response->json('messages'), 'id'));
+        $this->assertStringContainsString('&lt;script&gt;', $response->json('messages.0.content'));
+        $this->assertContains('App.Models.User.1', $response->json('subscriptions'));
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'location']), $headers)->assertOk()->assertJsonPath('messages.0.id', $private);
+        $delta = $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'location', 'after_id' => $private, 'ids' => [$main, $local]]), $headers)->assertOk();
+        $this->assertSame([$local], $delta->json('valid_ids'));
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'party']), $headers)->assertUnprocessable();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'system']), $headers)->assertUnprocessable();
+        DB::table('player_relationships')->insert(['player_id' => 1, 'target_id' => 2, 'type' => 'ignore']);
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main']), $headers)->assertOk()->assertJsonCount(1, 'messages');
+        DB::table('clan_members')->delete();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'clan']), $headers)->assertUnprocessable();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main']), $headers)->assertOk()->assertJsonCount(0, 'messages');
+    }
+
+    public function test_chat_sends_as_linked_user_checks_private_recipient_mutes_and_channel_access(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        $headers = $this->miniAppHeaders();
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Hello', 'user_id' => 2], $headers)->assertOk();
+        $this->assertSame(1, (int) DB::table('chat_messages')->value('user_id'));
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'clan', 'message' => 'Clan'], $headers)->assertOk();
+        $this->assertSame(1, (int) DB::table('chat_messages')->where('channel', 'clan')->value('clan_id'));
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'prv[Other] Hello'], $headers)->assertOk();
+        $this->assertSame(2, (int) DB::table('chat_messages')->where('channel', 'private')->value('target_user_id'));
+        foreach (['prv[Missing] Hi', 'prv[Mage <test>] Hi', 'prv[Other] ', ' '] as $text) {
+            $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => $text], $headers)->assertUnprocessable();
+        }
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'private', 'message' => 'No recipient'], $headers)->assertUnprocessable();
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'system', 'message' => 'Forbidden'], $headers)->assertUnprocessable();
+        DB::table('users')->where('id', 2)->update(['last_online_at' => now()->subDay()]);
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'prv[Other] Hi'], $headers)->assertUnprocessable();
+        DB::table('users')->where('id', 2)->update(['last_online_at' => now()]);
+        DB::table('player_relationships')->insert(['player_id' => 2, 'target_id' => 1, 'type' => 'ignore']);
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'prv[Other] Hi'], $headers)->assertUnprocessable();
+        DB::table('user_communication_mutes')->insert(['user_id' => 1, 'scope' => 'chat', 'reason' => 'Spam',
+            'starts_at' => now()->subMinute(), 'expires_at' => now()->addHour()]);
+        $response = $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Muted'], $headers)->assertUnprocessable();
+        $this->assertStringContainsString('Вам заборонено писати', $response->json('errors.message.0'));
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'main']), $headers)->assertOk()->assertJsonPath('mute.message', $response->json('errors.message.0'));
+        $this->assertSame(3, DB::table('chat_messages')->count());
+        Event::assertDispatched(ChatMessageCreated::class, 3);
+        Http::assertNothingSent();
+    }
+
+    public function test_chat_party_channel_and_writing_are_revoked_after_membership_or_tax_changes(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        DB::table('parties')->insert([['id' => 1, 'status' => 'open'], ['id' => 2, 'status' => 'open']]);
+        DB::table('party_members')->insert(['party_id' => 1, 'user_id' => 1]);
+        $own = $this->chatMessage(channel: 'party', text: 'Own party', extra: ['party_id' => 1]);
+        $this->chatMessage(channel: 'party', text: 'Foreign party', extra: ['party_id' => 2]);
+        $headers = $this->miniAppHeaders();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'party']), $headers)->assertOk()
+            ->assertJsonCount(1, 'messages')->assertJsonPath('messages.0.id', $own)
+            ->assertJsonPath('subscriptions.2', 'chat.party.1');
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'party', 'party_id' => 2, 'message' => 'Own party'], $headers)->assertOk();
+        $this->assertSame(1, (int) DB::table('chat_messages')->orderByDesc('id')->value('party_id'));
+        DB::table('party_members')->delete();
+        $this->getJson(route('telegram.mini-app.chat.messages', ['channel' => 'party']), $headers)->assertUnprocessable();
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'party', 'message' => 'Blocked'], $headers)->assertUnprocessable();
+        DB::table('clans')->where('id', 1)->update(['tax_paid_until' => now()->subDay()]);
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'clan', 'message' => 'Blocked'], $headers)->assertUnprocessable();
+        $this->assertSame(3, DB::table('chat_messages')->count());
+    }
+
+    public function test_chat_limits_messages_per_linked_player(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        $headers = $this->miniAppHeaders();
+        foreach (range(1, 20) as $number) {
+            $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Test '.$number], $headers)->assertOk();
+        }
+        $this->postJson(route('telegram.mini-app.chat.send'), ['channel' => 'main', 'message' => 'Rate limited'], $headers)->assertStatus(429);
+        $this->assertSame(20, DB::table('chat_messages')->count());
+    }
+
+    public function test_chat_broadcast_auth_signs_only_permitted_channels_without_game_cookies(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        config(['broadcasting.default' => 'reverb', 'broadcasting.connections.reverb.key' => 'test-public-key',
+            'broadcasting.connections.reverb.secret' => 'test-reverb-secret', 'broadcasting.connections.reverb.app_id' => 'test-app']);
+        Broadcast::purge('reverb');
+        require base_path('routes/channels.php');
+        $headers = $this->miniAppHeaders();
+        foreach (['private-chat.main', 'private-chat.system', 'private-chat.clan.1', 'private-chat.location.10', 'private-App.Models.User.1'] as $channel) {
+            $response = $this->postJson(route('telegram.mini-app.chat.auth'), ['socket_id' => '123.456', 'channel_name' => $channel], $headers)->assertOk();
+            $this->assertSame('test-public-key:'.hash_hmac('sha256', '123.456:'.$channel, 'test-reverb-secret'), $response->json('auth'));
+        }
+        foreach (['private-App.Models.User.2', 'private-chat.clan.2', 'private-chat.location.20', 'private-chat.party.2', 'presence-online', 'private-player.1'] as $channel) {
+            $this->postJson(route('telegram.mini-app.chat.auth'), ['socket_id' => '123.456', 'channel_name' => $channel], $headers)->assertForbidden();
+        }
+        DB::table('clans')->where('id', 1)->update(['tax_paid_until' => now()->subDay()]);
+        $this->postJson(route('telegram.mini-app.chat.auth'), ['socket_id' => '123.456', 'channel_name' => 'private-chat.clan.1'], $headers)->assertForbidden();
+        Http::assertNothingSent();
     }
 
     public function test_mini_app_character_and_auction_require_the_signed_telegram_identity(): void
@@ -678,6 +812,71 @@ final class TelegramIntegrationTest extends TestCase
     {
         return ['update_id' => $id, 'message' => ['from' => ['id' => 10001, 'username' => 'player', 'is_bot' => false, 'language_code' => 'uk'],
             'chat' => ['id' => 10001, 'type' => 'private'], 'text' => $text]];
+    }
+
+    private function chatFixtures(): void
+    {
+        Event::fake([ChatMessageCreated::class]);
+        Bus::fake();
+        Schema::table('users', function (Blueprint $table): void {
+            $table->unsignedBigInteger('location_id')->nullable();
+            $table->timestamp('last_online_at')->nullable();
+        });
+        Schema::create('locations', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('map_id');
+        });
+        Schema::create('clans', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('icon')->nullable();
+            $table->unsignedBigInteger('owner_id')->nullable();
+            $table->timestamp('tax_paid_until')->nullable();
+        });
+        Schema::create('clan_members', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('clan_id');
+        });
+        Schema::create('player_relationships', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('target_id');
+            $table->string('type');
+        });
+        Schema::create('parties', function (Blueprint $table): void {
+            $table->id();
+            $table->string('status');
+        });
+        Schema::create('party_members', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('party_id');
+            $table->unsignedBigInteger('user_id');
+        });
+        Schema::create('chat_messages', function (Blueprint $table): void {
+            $table->id();
+            foreach (['user_id', 'target_user_id', 'clan_id', 'map_id', 'party_id'] as $key) {
+                $table->unsignedBigInteger($key)->nullable();
+            }
+            $table->string('channel');
+            $table->string('type')->default('message');
+            $table->text('message');
+            $table->string('translation_key')->nullable();
+            $table->json('translation_params')->nullable();
+            $table->timestamps();
+        });
+        (require database_path('migrations/2026_09_18_000001_create_user_communication_mutes_table.php'))->up();
+        DB::table('locations')->insert([['id' => 1, 'map_id' => 10], ['id' => 2, 'map_id' => 20]]);
+        DB::table('users')->update(['last_online_at' => now(), 'location_id' => 1]);
+        DB::table('clans')->insert([['id' => 1, 'name' => 'Own', 'tax_paid_until' => now()->addDay()],
+            ['id' => 2, 'name' => 'Other', 'tax_paid_until' => now()->addDay()]]);
+        DB::table('clan_members')->insert(['user_id' => 1, 'clan_id' => 1]);
+    }
+
+    private function chatMessage(string $channel, string $text, array $extra = []): int
+    {
+        return DB::table('chat_messages')->insertGetId($extra + ['user_id' => 2, 'channel' => $channel,
+            'type' => 'message', 'message' => $text, 'created_at' => now(), 'updated_at' => now()]);
     }
 
     private function marketFixtures(): void

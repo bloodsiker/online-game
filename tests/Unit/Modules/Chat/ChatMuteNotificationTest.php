@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Listeners\SendChatMuteSystemMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Models\ChatMessage;
@@ -18,7 +20,8 @@ final class ChatMuteNotificationTest extends TestCase
         $chatService = Mockery::mock(ChatService::class);
         $chatService->shouldReceive('sendSystem')
             ->once()
-            ->with('На персонажа [[user_17]] наложено проклятие молчания на 1 д. 2 ч. 5 мин. Причина: Флуд.')
+            ->with(Mockery::on(fn (mixed $message): bool => $message instanceof LocalizedChatMessage
+                && app(ChatMessageTranslator::class)->render($message, 'ru') === 'На персонажа [[user_17]] наложено проклятие молчания на 1 д. 2 ч. 5 мин. Причина: Флуд.'))
             ->andReturn(new ChatMessage);
 
         (new SendChatMuteSystemMessage($chatService))->handle(
@@ -31,7 +34,8 @@ final class ChatMuteNotificationTest extends TestCase
         $chatService = Mockery::mock(ChatService::class);
         $chatService->shouldReceive('sendSystem')
             ->once()
-            ->with('На персонажа [[user_9]] наложено проклятие молчания на 30 мин. Причина: не указана.')
+            ->with(Mockery::on(fn (mixed $message): bool => $message instanceof LocalizedChatMessage
+                && app(ChatMessageTranslator::class)->render($message, 'ru') === 'На персонажа [[user_9]] наложено проклятие молчания на 30 мин. Причина: не указана.'))
             ->andReturn(new ChatMessage);
 
         (new SendChatMuteSystemMessage($chatService))->handle(

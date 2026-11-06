@@ -47,6 +47,10 @@ final class TelegramServiceProvider extends ServiceProvider
             ->by((string) $request->attributes->get('telegram.account')->telegramUserId));
         RateLimiter::for('telegram-mini-app', static fn (Request $request): Limit => Limit::perMinute(60)
             ->by((string) $request->attributes->get('telegram.account')->telegramUserId));
+        foreach (['read' => 120, 'send' => 20, 'auth' => 60] as $action => $limit) {
+            RateLimiter::for('telegram-chat-'.$action, static fn (Request $request): Limit => Limit::perMinute($limit)
+                ->by((string) $request->attributes->get('telegram.account')->userId));
+        }
         RateLimiter::for('telegram-webhook', static function (Request $request): Limit {
             $id = $request->input('callback_query.from.id', $request->input('message.from.id'));
 

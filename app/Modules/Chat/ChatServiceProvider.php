@@ -17,8 +17,10 @@ use App\Modules\Chat\Application\Listeners\SendPlayerInjuryMessage;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
 use App\Modules\Chat\Application\Listeners\SendWorldEventFinishedMessage;
 use App\Modules\Chat\Application\Listeners\SendWorldEventStartedMessage;
+use App\Modules\Chat\Domain\Contracts\ChatParticipantReader;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Infrastructure\Persistence\EloquentChatMessageRepository;
+use App\Modules\Chat\Infrastructure\Persistence\EloquentChatParticipantReader;
 use App\Modules\Dungeon\Domain\Events\ClanBossDefeated;
 use App\Modules\Dungeon\Domain\Events\ClanBossRewardGranted;
 use App\Modules\Dungeon\Domain\Events\ClanBossRunExpired;
@@ -40,6 +42,7 @@ class ChatServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(ChatParticipantReader::class, EloquentChatParticipantReader::class);
         $this->app->bind(
             ChatMessageRepositoryInterface::class,
             EloquentChatMessageRepository::class,

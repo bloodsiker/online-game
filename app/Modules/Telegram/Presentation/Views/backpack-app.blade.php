@@ -7,11 +7,14 @@
     <title>{{ __('telegram.backpack') }}</title>
     <link rel="stylesheet" href="{{ asset('css/telegram-backpack-mini-app.css') }}?v={{ filemtime(public_path('css/telegram-backpack-mini-app.css')) }}">
     <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
+    <script src="{{ asset('js/telegram-chat-mini-app.js') }}?v={{ filemtime(public_path('js/telegram-chat-mini-app.js')) }}" defer></script>
     <script src="{{ asset('js/telegram-backpack-mini-app.js') }}?v={{ filemtime(public_path('js/telegram-backpack-mini-app.js')) }}" defer></script>
 </head>
 <body>
 <main class="telegram-backpack" id="telegram-backpack-app" data-endpoint="{{ route('telegram.mini-app.backpack', absolute: false) }}"
       data-character-endpoint="{{ route('telegram.mini-app.character', absolute: false) }}" data-auction-endpoint="{{ route('telegram.mini-app.auction', absolute: false) }}"
+      data-chat-messages="{{ route('telegram.mini-app.chat.messages', absolute: false) }}" data-chat-send="{{ route('telegram.mini-app.chat.send', absolute: false) }}"
+      data-chat-auth="{{ route('telegram.mini-app.chat.auth', absolute: false) }}" data-chat-realtime="{{ Vite::asset('resources/js/telegram-chat-realtime.js') }}"
       data-translations="{{ json_encode($labels) }}" data-default-image="{{ asset('img/bg/empty_slot.gif') }}">
     <div class="telegram-backpack__toolbar" id="telegram-backpack-toolbar">
         <header class="telegram-backpack__header">
@@ -60,6 +63,21 @@
             <button type="button" id="telegram-backpack-lots-next" data-telegram-label="next" disabled>{{ __('telegram.next') }}</button>
         </div>
     </section>
+    <section class="telegram-chat" id="telegram-backpack-chat" aria-labelledby="telegram-backpack-title" hidden>
+        <div class="telegram-chat__toolbar">
+            <select id="telegram-chat-channel" aria-label="{{ __('telegram.chat_title') }}"></select>
+            <span id="telegram-chat-status" role="status"></span>
+        </div>
+        <div class="telegram-chat__messages" id="telegram-chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <p class="telegram-chat__notice" id="telegram-chat-empty" hidden></p>
+        <p class="telegram-chat__error" id="telegram-chat-error" role="alert" hidden></p>
+        <p class="telegram-chat__notice" id="telegram-chat-mute" hidden></p>
+        <form class="telegram-chat__composer" id="telegram-chat-form">
+            <label class="telegram-chat__input-label" for="telegram-chat-input" data-telegram-label="chat_reply_hint">{{ __('telegram.chat_reply_hint') }}</label>
+            <div><textarea id="telegram-chat-input" maxlength="500" rows="2" aria-label="{{ __('telegram.chat_placeholder') }}" placeholder="{{ __('telegram.chat_placeholder') }}"></textarea>
+                <button type="submit" id="telegram-chat-send" data-telegram-label="chat_send">{{ __('telegram.chat_send') }}</button></div>
+        </form>
+    </section>
     <nav class="telegram-app-navigation" id="telegram-backpack-navigation" aria-label="{{ __('telegram.mini_app_navigation') }}">
         <button type="button" data-view="character">
             <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span>
@@ -72,6 +90,10 @@
         <button type="button" data-view="auction">
             <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 4 6 6-4 4-6-6zM3 21l10-10M11 3l2-2 9 9-2 2M13 22h9M15 19h5v3h-5z"/></svg></span>
             <span data-telegram-label="mini_app_auction">{{ __('telegram.mini_app_auction') }}</span>
+        </button>
+        <button type="button" data-view="chat">
+            <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11a8 8 0 0 1-8 8H7l-5 3V11a9 9 0 0 1 19 0Z"/><path d="M7 10h9M7 14h6"/></svg></span>
+            <span data-telegram-label="chat_title">{{ __('telegram.chat_title') }}</span>
         </button>
     </nav>
 </main>

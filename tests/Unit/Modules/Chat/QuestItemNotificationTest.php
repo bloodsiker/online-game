@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Chat;
 
+use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Jobs\BroadcastChatMessageExpiration;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
 use App\Modules\Chat\Application\Services\ChatService;
@@ -83,10 +85,12 @@ class QuestItemNotificationTest extends TestCase
         $recipient = new User;
         $recipient->id = 1;
         $recipient->player_id = 101;
+        $recipient->setRelation('clanMembership', null);
 
         $otherUser = new User;
         $otherUser->id = 2;
         $otherUser->player_id = 202;
+        $otherUser->setRelation('clanMembership', null);
 
         $message = $sender->toUser(
             $recipient,
@@ -154,7 +158,8 @@ class QuestItemNotificationTest extends TestCase
         $chatService = Mockery::mock(ChatService::class);
         $chatService->shouldReceive('sendQuestItemDropToUser')
             ->once()
-            ->with($recipient, 'С монстра выпал квестовый предмет: [[share_item_42]]')
+            ->with($recipient, Mockery::on(fn (mixed $message): bool => $message instanceof LocalizedChatMessage
+                && app(ChatMessageTranslator::class)->render($message, 'ru') === 'С монстра выпал квестовый предмет: [[share_item_42]]'))
             ->andReturn(new ChatMessage);
 
         $listener = new SendQuestItemDropMessage($chatService);
