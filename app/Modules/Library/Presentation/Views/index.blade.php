@@ -38,9 +38,9 @@
             <tbody>
             @forelse($articles as $article)
                 <tr>
-                    <td align="center"><a href="{{ $libraryUrls->article(slug: $article->slug) }}">@if($article->cover_image)<img class="library-list-image" src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}">@else<span class="library-muted">нет</span>@endif</a></td>
+                    <td align="center"><a href="{{ $libraryUrls->article(slug: $article->slug, categorySlug: $article->category->slug) }}">@if($article->cover_image)<img class="library-list-image" src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}">@else<span class="library-muted">нет</span>@endif</a></td>
                     <td>
-                        <a class="library-list-title" href="{{ $libraryUrls->article(slug: $article->slug) }}">{{ $article->title }}</a>
+                        <a class="library-list-title" href="{{ $libraryUrls->article(slug: $article->slug, categorySlug: $article->category->slug) }}">{{ $article->title }}</a>
                         @if($article->excerpt)<div class="library-list-excerpt">{{ $article->excerpt }}</div>@endif
                         <div class="library-muted">Просмотров: {{ $article->views_count }}</div>
                     </td>

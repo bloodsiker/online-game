@@ -2,7 +2,7 @@
 <html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
     <title>{{ __('homepage.game_name') }}</title>
-    @vite('resources/js/app.js')
+    @vite('resources/js/homepage.js')
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('homepage.game_name') }}">
@@ -30,116 +30,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
 
-    <script src="{{ asset('main/js/common.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/main.css') }}">
     @if(config('game.prelaunch'))
         <link rel="stylesheet" href="{{ asset('css/prelaunch.css') }}?v={{ filemtime(public_path('css/prelaunch.css')) }}">
     @endif
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/timer.css') }}">
-    <script language="javaScript" src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/art_alt.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/item_tooltip.css') }}?v={{ filemtime(public_path('css/item_tooltip.css')) }}">
-    <script src="{{ asset('main/js/jquery-1.7.1.min.js') }}"></script>
-
     <link rel="stylesheet" href="{{ asset('main/css/portal_desktop.min.css') }}"/>
-
-    <style type="text/css">@font-face {
-            font-family: PT Serif;
-            font-style: normal;
-            font-weight: 400;
-            src: url(cf-fonts/s/pt-serif/5.0.19/cyrillic-ext/400/normal.woff2);
-            unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: PT Serif;
-            font-style: normal;
-            font-weight: 400;
-            src: url(cf-fonts/s/pt-serif/5.0.19/cyrillic/400/normal.woff2);
-            unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: PT Serif;
-            font-style: normal;
-            font-weight: 400;
-            src: url(cf-fonts/s/pt-serif/5.0.19/latin/400/normal.woff2);
-            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: PT Serif;
-            font-style: normal;
-            font-weight: 400;
-            src: url(cf-fonts/s/pt-serif/5.0.19/latin-ext/400/normal.woff2);
-            unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-            font-display: swap;
-        }</style>
 
     <link rel="stylesheet" href="{{ asset('main/css/index.min.css') }}">
     <link rel="stylesheet" href="{{ asset('main/css/ru_fonts.css') }}"/>
     <link rel="stylesheet" href="{{ asset('main/css/i18n_ru.css') }}"/>
 
-
-    <script type="text/javascript" src="{{ asset('main/js/html5shiv-3.7.3.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/modernizr.custom.min.js') }}"></script>
-
-    <script type="text/javascript" src="{{ asset('main/js/vendors.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/fancybox.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/lib.min.js') }}"></script>
-
-
-    <script type="text/javascript" src="{{ asset('main/js/cufon-1.09i.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/Cambria_400.font.js') }}"></script>
-
-
-    <script type="text/javascript">
-        if (typeof Cufon != 'undefined') {
-            Cufon.replace('.js-font-nav-lvl-1', {
-                fontFamily: 'Cambria',
-                color: '-linear-gradient(0.5=#fffb6a, 0.8=#F0A043)',
-                textShadow: '0 1px 1px black, 0 -1px 1px black, 1px 0 rgba(0, 0, 0, 0.5), -1px 0 rgba(0, 0, 0, 0.5)'
-            });
-
-            Cufon.replace('.js-font-nav-lvl-2', {
-                fontFamily: 'Cambria',
-                color: '-linear-gradient(0.5=#fffb6a, 0.8=#F0A043)',
-                textShadow: '0 1px 1px black, 0 -1px 1px black, 1px 0 rgba(0, 0, 0, 0.5), -1px 0 rgba(0, 0, 0, 0.5)'
-            });
-
-            Cufon.replace('.cufon-mp', {
-                fontFamily: 'Cambria',
-                fontSize: '18px',
-                color: '-linear-gradient(0.7=#a87f4f, #ffffb9, #a87f4f)',
-                textShadow: '1px 1px rgba(0,0,0,0.9), -1px 1px rgba(0, 0, 0, 0.6), 1px -1px rgba(0, 0, 0, 0.6)'
-            });
-
-            Cufon.replace('.cufon-common', {
-                fontFamily: 'Cambria',
-                fontSize: '14px',
-                color: '-linear-gradient(0.5=#fffb6a, 0.8=#F0A043)',
-                textShadow: '0 1px 1px black, 0 -1px 1px black, 1px 0 rgba(0, 0, 0, 0.5), -1px 0 rgba(0, 0, 0, 0.5)'
-            });
-            @if(app()->getLocale() === 'ru')
-                Cufon.replace('.homepage-heading--reference', {
-                    fontFamily: 'Cambria',
-                    fontSize: '18px',
-                    color: '-linear-gradient(0.7=#a87f4f, #ffffb9, #a87f4f)',
-                    textShadow: '1px 1px rgba(0,0,0,0.9), -1px 1px rgba(0,0,0,0.6), 1px -1px rgba(0,0,0,0.6)'
-                });
-            @endif
-        }
-    </script>
-
-
-    <script type="text/javascript" src="{{ asset('main/js/'.app()->getLocale().'.js') }}"></script>
-
-    <script type="text/javascript" src="{{ asset('main/js/underscore.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/backbone.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('main/js/main.js') }}"></script>
 
     {{-- PIXI/canvas здесь не используются: канвас нужен только iframe меню (Interface/menu.blade.php) --}}
 
@@ -148,14 +51,6 @@
     <style>
         .homepage-heading { color: #edcb86; font: bold 16px/24px Tahoma, Arial, sans-serif; text-align: center; text-shadow: 1px 1px #281b10; }
         .homepage-heading--reference { position: relative; top: -2px; font: normal 18px/26px Cambria, Georgia, 'Times New Roman', serif; }
-        html[lang="uk"] .homepage-heading--reference {
-            background: linear-gradient(to bottom, #a87f4f 10%, #ffffb9 55%, #a87f4f 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            text-shadow: none;
-            filter: drop-shadow(1px 1px 0 rgba(0,0,0,.9));
-        }
         .homepage-forum__content { padding: 6px 9px 9px; background: #211b15; border: 1px solid #554537; }
         .homepage-forum__topic { display: block; padding: 7px 2px; border-bottom: 1px solid #4b3d30; text-decoration: none; }
         .homepage-forum__title { display: block; color: #e69934; font: bold 11px/16px Tahoma, Arial, sans-serif; overflow-wrap: anywhere; }
@@ -294,18 +189,19 @@
 </head>
 <body class="b-page  b-page--home b-page--theme-home">
 <div id="artifact_alt" style="left:0px;top:0px;width:300px; display:none; position:absolute; z-index: 1001;" onmouseover="this.style.display='none';"></div>
-<script language="javascript" type="text/javascript">var art_alt = new Array();</script>
 {!! $newsItemTooltipScript ?? '' !!}
-<script>window.gebi = window.gebi || function (id) { return document.getElementById(id); };</script>
-<script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}"></script>
 <script>
-    var temp_effects = {};
-    var strings = @json(__('homepage.effects'));
-    top.frames['main_frame'] = {};
-    top.frames['main_frame'].temp_effects = {};
-    top.frames['main_frame'].strings = strings;
-    top.noIframeAlt = true;
+    window.gebi = window.gebi || function (id) { return document.getElementById(id); };
+    window.noIframeAlt = true;
+    window.gameTranslate = (text) => ({
+        'Требования:': @json(__('Требования:')),
+        'Камни:': @json(__('Камни:')),
+        'Руны:': @json(__('Руны:')),
+        'Количество использований': @json(__('Количество использований')),
+    })[text] || text;
 </script>
+<script src="{{ asset('js/item_tooltip.js') }}?v={{ filemtime(public_path('js/item_tooltip.js')) }}" defer></script>
+
 
 <div class="b-page__header">
     <form class="homepage-language" method="post" action="{{ route('homepage.language') }}" aria-label="{{ __('homepage.language') }}">
@@ -374,8 +270,6 @@
         </div>
     </header>
 
-
-
 </div>
 
 <div class="b-page__nav">
@@ -388,11 +282,6 @@
         <aside class="b-page__sidebar b-page__sidebar--left">
             <div class="b-aside b-aside--left">
                 <div class="b-aside__column" style=" position: relative; top: -110px; ">
-                    <div style="text-align: left;position: absolute;top: -142px;left: -2px;">
-                        <div align="center">
-                            <script language="javaScript" src="{{ asset('main/js/counter.js') }}"></script>
-                        </div>
-                    </div>
 
                     <div class="b-aside__shape b-shape--try-fight">
                         <div class="b-shape__header">
@@ -483,81 +372,7 @@
                         <div class="b-shape__decor"></div>
                         <div class="homepage-heading homepage-heading--reference">{{ __('homepage.screenshots') }}</div>
                     </div>
-                    <div class="b-shape__content b-shape__content--column">
-                        <div class="b-slider b-slider--default">
-                            <div class="b-slider__preview">
-                                <div class="b-slider__move js-preview-slider">
-                                    <a href="{{ asset('main/images/screen/1.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/1.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/2.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/2.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/3.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/3.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/4.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/4.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/5.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/5.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/6.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/6.png') }}">
-                                    </a>
-
-                                    <a href="{{ asset('main/images/screen/7.png') }}" rel="sidebar-screens"
-                                       class="b-slider__element js-fancybox">
-                                        <img class="b-slider__image" src="" data-lazy="{{ asset('main/images/screen/7.png') }}">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="b-slider__thumbs">
-                                <div class="b-slider__move js-thumbs-slick">
-                                    <a href="{{ asset('main/images/screen/1.png') }}" rel="sidebar-screens" class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/1.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/2.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/2.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/3.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/3.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/4.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/4.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/5.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/5.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/6.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/6.png') }}">
-                                    </a>
-                                    <a href="{{ asset('main/images/screen/7.png') }}" rel="sidebar-screens"
-                                       class="b-slider__thumb fancybox">
-                                        <img width="78" height="60" class="b-slider__image" src="index.html"
-                                             data-lazy="{{ asset('main/images/screen/7.png') }}">
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @include('news::partials.screenshots')
 
                     @include('news::partials.hot-forum')
 
@@ -569,7 +384,7 @@
                             </div>
                             <br>
 
-                            <div class="timer">
+                            <div class="timer" data-homepage-timer data-started-at="2025-07-01T00:00:00Z">
                                 <div class="timer-countdown">
                                     <div class="timer-block">
                                         <span id="days" class="title-count"></span>
@@ -589,25 +404,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <script>
-                                var endDate = new Date("2025-07-01T00:00:00Z");
 
-                                function updateTimer() {
-                                    var now = new Date();
-                                    var timeDifference = endDate - now;
-
-                                    var days = Math.abs(Math.floor(timeDifference / (1000 * 60 * 60 * 24)));
-                                    var hours = Math.abs(Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-                                    var minutes = Math.abs(Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)));
-                                    var seconds = Math.abs(Math.floor((timeDifference % (1000 * 60)) / 1000));
-
-                                    document.getElementById("days").innerText = (timeDifference < 0 ? "" : "-") + days;
-                                    document.getElementById("hours").innerText = (timeDifference < 0 ? "" : "-") + hours;
-                                    document.getElementById("minutes").innerText = (timeDifference < 0 ? "" : "-") + minutes;
-                                    document.getElementById("seconds").innerText = (timeDifference < 0 ? "" : "-") + seconds;
-                                }
-                                setInterval(updateTimer, 1000);
-                            </script>
                         </div>
 
 
@@ -805,8 +602,6 @@
 
             <div class="b-aside b-aside--right" style=" top: -110px; ">
 
-
-
                 <div class="b-aside__column">
 
                     @include('news::partials.rankings')
@@ -832,14 +627,7 @@
 </div>
 
 
-<script>
-    document.addEventListener('click', function (event) {
-        var link = event.target.closest('[data-library-info-popup]');
-        if (!link) return;
-        event.preventDefault();
-        window.open(link.href, '', 'width=730,height=800,resizable=yes,scrollbars=yes');
-    });
-</script>
+@include('news::partials.lightbox')
 @if(config('game.prelaunch'))
     @include('news::partials.prelaunch-modal')
 @endif

@@ -16,7 +16,7 @@
         <span class="wrap_inner">
             <select class="library-header-native-select" aria-label="{{ __('library.navigation') }}" tabindex="-1">
                 @foreach($articleNavigation as $navigationArticle)
-                    <option value="{{ $libraryUrls->article(slug: $navigationArticle->slug, parameters: ['category' => $selectedCategory->slug]) }}" @selected($navigationArticle->id === $article->id)>
+                    <option value="{{ $libraryUrls->article(slug: $navigationArticle->slug, categorySlug: $navigationArticle->category->slug) }}" @selected($navigationArticle->id === $article->id)>
                         @if($navigationArticle->category_id !== $selectedCategory->id){{ $navigationArticle->category->name }} — @endif{{ $navigationArticle->title }}
                     </option>
                 @endforeach
@@ -30,7 +30,7 @@
                     @foreach($articleNavigation as $navigationArticle)
                         <a
                             class="option @if($navigationArticle->id === $article->id) option_selected @endif"
-                            href="{{ $libraryUrls->article(slug: $navigationArticle->slug, parameters: ['category' => $selectedCategory->slug]) }}"
+                            href="{{ $libraryUrls->article(slug: $navigationArticle->slug, categorySlug: $navigationArticle->category->slug) }}"
                             role="option"
                             aria-selected="{{ $navigationArticle->id === $article->id ? 'true' : 'false' }}"
                         >@if($navigationArticle->category_id !== $selectedCategory->id){{ $navigationArticle->category->name }} — @endif{{ $navigationArticle->title }}</a>

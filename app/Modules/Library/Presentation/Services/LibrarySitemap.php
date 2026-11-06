@@ -31,10 +31,11 @@ final readonly class LibrarySitemap
 
         foreach (LibraryArticle::query()->published()
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
-            ->orderBy('id')->get(['id', 'slug', 'title', 'content', 'updated_at', 'published_at']) as $article) {
+            ->with('category:id,slug')
+            ->orderBy('id')->get(['id', 'category_id', 'slug', 'title', 'content', 'updated_at', 'published_at']) as $article) {
             foreach ($this->seo->articleLocales($article) as $locale) {
                 $entries[] = [
-                    'url' => $this->urls->article(slug: $article->slug, locale: $locale),
+                    'url' => $this->urls->article(slug: $article->slug, locale: $locale, categorySlug: $article->category->slug),
                     'lastmod' => $article->updated_at?->toAtomString(),
                 ];
             }

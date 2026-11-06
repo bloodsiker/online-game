@@ -27,7 +27,7 @@ final readonly class LibrarySeo
     {
         $alternates = [];
         foreach ($this->articleLocales($article) as $locale) {
-            $alternates[$locale] = $this->urls->article(slug: $article->slug, locale: $locale);
+            $alternates[$locale] = $this->urls->article(slug: $article->slug, locale: $locale, categorySlug: $article->category->slug);
         }
         $description = $this->plainText($article->getTranslation('excerpt', app()->getLocale(), false));
         if ($description === '') {
@@ -38,7 +38,7 @@ final readonly class LibrarySeo
             heading: $article->title,
             title: $article->title.' — '.__('library.name').' — '.__('library.brand'),
             description: $description !== '' ? $description : __('library.article_description', ['title' => $article->title]),
-            canonical: $this->urls->article(slug: $article->slug),
+            canonical: $this->urls->article(slug: $article->slug, categorySlug: $article->category->slug),
             alternates: $alternates,
             image: asset($article->cover_image ?: ($article->category?->image ?: 'data/canvas/ui/library.webp')),
             type: 'article',

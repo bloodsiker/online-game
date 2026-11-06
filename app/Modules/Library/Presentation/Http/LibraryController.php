@@ -6,6 +6,7 @@ namespace App\Modules\Library\Presentation\Http;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Library\Application\Services\BestiaryCatalogService;
+use App\Modules\Library\Application\UseCases\GetPublicLibraryArticle;
 use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
@@ -106,7 +107,7 @@ class LibraryController extends Controller
             if ($firstArticle) {
                 return redirect()->to($this->urls->article(
                     slug: $firstArticle->slug,
-                    parameters: ['category' => $selectedCategory->slug],
+                    categorySlug: $firstArticle->category->slug,
                 ));
             }
         }
@@ -122,40 +123,40 @@ class LibraryController extends Controller
         ]);
     }
 
+    public function redirectArticle(string $locale, string $slug, Request $request, GetPublicLibraryArticle $articles): RedirectResponse
+    {
+        $article = $articles->execute(slug: $slug);
+
+        return redirect()->to($this->urls->article(
+            slug: $article->slug, parameters: $request->query(), locale: $locale, categorySlug: $article->category->slug,
+        ), 301);
+    }
+
     public function show(
         string $locale,
+        string $category,
         string $slug,
         Request $request,
         LibraryShortcodeRenderer $renderer,
         LibraryEntityRegistry $entities,
+        GetPublicLibraryArticle $articles,
     ): View|RedirectResponse {
-        $article = LibraryArticle::query()
-            ->published()
-            ->whereHas('category', fn ($query) => $query->where('is_active', true))
-            ->with(['category', 'links'])
-            ->where('slug', $slug)
-            ->firstOrFail();
+        $article = $articles->execute(slug: $slug);
+        if ($category !== $article->category->slug || $request->query->has('category')) {
+            return redirect()->to($this->urls->article(
+                slug: $article->slug, parameters: $request->query(), categorySlug: $article->category->slug,
+            ), 301);
+        }
         $locales = $this->seo->articleLocales($article);
         abort_if($locales === [], 404);
         if (! in_array($locale, $locales, true)) {
-            return redirect()->to($this->urls->article(slug: $article->slug, locale: $locales[0]));
+            return redirect()->to($this->urls->article(slug: $article->slug, locale: $locales[0], categorySlug: $article->category->slug));
         }
 
         LibraryArticle::withoutTimestamps(fn () => $article->increment('views_count'));
         $article->rendered_content = $this->urls->localizeContentLinks($renderer->render($article->content));
         $categories = $this->navigationCategories();
         $navigationCategory = $article->category;
-
-        if ($request->filled('category')) {
-            $requestedCategory = LibraryCategory::query()
-                ->where('is_active', true)
-                ->where('slug', $request->input('category'))
-                ->first();
-
-            if ($requestedCategory && in_array((int) $article->category_id, $this->activeCategoryIds($requestedCategory), true)) {
-                $navigationCategory = $requestedCategory;
-            }
-        }
 
         $articleNavigation = LibraryArticle::query()
             ->published()

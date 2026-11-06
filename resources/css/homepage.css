@@ -1,0 +1,48 @@
+/* Native replacements for Cufon, Slick and Fancybox, scoped to the homepage. */
+.b-page--home .homepage-heading--reference {
+    font-family: Cambria, Georgia, 'Times New Roman', serif;
+    background: linear-gradient(to bottom, #a87f4f 10%, #ffffb9 55%, #a87f4f 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, .9));
+}
+.homepage-gallery .b-slider__preview { box-sizing: content-box; }
+.homepage-gallery__preview { display: block; width: 240px; height: 176px; }
+.homepage-gallery .homepage-gallery__preview img {
+    width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; object-position: top center;
+}
+.homepage-gallery .b-slider__thumbs { margin-top: 5px; }
+.homepage-gallery__track {
+    position: relative; display: flex; width: 240px; height: 62px; margin: 1px auto; padding: 0;
+    overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+.homepage-gallery__track::-webkit-scrollbar { display: none; }
+.homepage-gallery .homepage-gallery__thumb {
+    box-sizing: border-box; display: block; position: relative; flex: 0 0 80px; width: 80px; height: 60px;
+    border: 2px solid #24190e; overflow: hidden; opacity: .65;
+}
+.homepage-gallery .homepage-gallery__thumb img {
+    display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: cover; object-position: top left;
+}
+.homepage-gallery__thumb[aria-current='true'], .homepage-gallery__thumb:hover { border-color: #d7a84c; opacity: 1; }
+.homepage-gallery .b-slider__nav { padding: 0; border: 0; background-color: transparent; }
+.homepage-gallery .b-slider__nav::before { pointer-events: none; }
+.homepage-gallery a:focus-visible, .homepage-gallery button:focus-visible { outline: 2px solid #e3bd65; outline-offset: -2px; }
+.homepage-lightbox {
+    box-sizing: border-box; width: min(1100px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px);
+    margin: auto; padding: 35px 44px 15px; overflow: auto; border: 2px solid #987345; border-radius: 5px;
+    background: #21180f; color: #edcb86; box-shadow: 0 10px 60px #000a;
+}
+.homepage-lightbox::backdrop { background: rgba(10, 7, 5, .88); }
+.homepage-lightbox__image { display: block; width: 100%; height: auto; max-height: calc(100vh - 145px); object-fit: contain; }
+.homepage-lightbox__close, .homepage-lightbox__arrow {
+    position: absolute; padding: 4px 8px; border: 0; background: transparent; color: #edcb86; font: 28px/1 Arial, sans-serif; cursor: pointer;
+}
+.homepage-lightbox__close { top: 4px; right: 5px; }
+.homepage-lightbox__arrow { top: 45%; }
+.homepage-lightbox__arrow--prev { left: 5px; }
+.homepage-lightbox__arrow--next { right: 5px; }
+.homepage-lightbox__counter { display: block; margin-top: 10px; text-align: center; font: 12px Tahoma, sans-serif; }
+body.homepage-lightbox-open { overflow: hidden; }

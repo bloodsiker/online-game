@@ -9,5 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const channel = window.Echo.channel('online-count')
         .listen('.online.count.updated', event => render(event.count));
 
-    channel.subscribed(() => channel.whisper('online-count-request', {}));
+    // Echo exposes whisper() only on private/presence channels; this channel is public.
+    channel.subscribed(() => channel.subscription.trigger('client-online-count-request', {}));
 });

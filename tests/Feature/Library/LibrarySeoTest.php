@@ -42,26 +42,26 @@ final class LibrarySeoTest extends TestCase
         $modifiedAt = $article->updated_at->toAtomString();
 
         $response = $this->withSession(['language' => 'ru'])
-            ->get('/uk/library/treasure?category=guide&utm_source=test')
+            ->get('/uk/library/guide/treasure?utm_source=test')
             ->assertOk()->assertHeader('Content-Language', 'uk')
             ->assertSee('<html lang="uk">', false)
             ->assertSee('<title>Пошук скарбів — Бібліотека — Вічність</title>', false)
             ->assertSee('Український текст')
             ->assertSee('<h1 class="library-page-title">Пошук скарбів</h1>', false);
         $xpath = $this->xpath($response->getContent());
-        $this->assertSame(url('/uk/library/treasure'), $xpath->evaluate('string(//link[@rel="canonical"]/@href)'));
+        $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//link[@rel="canonical"]/@href)'));
         $this->assertSame('Як знайти скарб & отримати нагороду.', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
-        $this->assertSame(url('/ru/library/treasure'), $xpath->evaluate('string(//link[@hreflang="ru"]/@href)'));
-        $this->assertSame(url('/uk/library/treasure'), $xpath->evaluate('string(//link[@hreflang="uk"]/@href)'));
+        $this->assertSame(url('/ru/library/guide/treasure'), $xpath->evaluate('string(//link[@hreflang="ru"]/@href)'));
+        $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//link[@hreflang="uk"]/@href)'));
         $this->assertSame('article', $xpath->evaluate('string(//meta[@property="og:type"]/@content)'));
         $this->assertSame('uk_UA', $xpath->evaluate('string(//meta[@property="og:locale"]/@content)'));
-        $this->assertSame(url('/uk/library/treasure'), $xpath->evaluate('string(//meta[@property="og:url"]/@content)'));
+        $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//meta[@property="og:url"]/@content)'));
         $this->assertSame(asset('covers/treasure.jpg'), $xpath->evaluate('string(//meta[@property="og:image"]/@content)'));
         $this->assertSame($modifiedAt, $xpath->evaluate('string(//meta[@property="article:modified_time"]/@content)'));
         $this->assertSame($modifiedAt, $article->fresh()->updated_at->toAtomString());
         $this->assertSame(1, $article->fresh()->views_count);
 
-        $this->withSession(['language' => 'uk'])->get('/ru/library/treasure')
+        $this->withSession(['language' => 'uk'])->get('/ru/library/guide/treasure')
             ->assertOk()->assertHeader('Content-Language', 'ru')
             ->assertSee('<html lang="ru">', false)->assertSee('Русский текст');
         $this->assertSame('ru', app()->getLocale());
@@ -71,10 +71,29 @@ final class LibrarySeoTest extends TestCase
     {
         $article = $this->article();
         $this->withSession(['language' => 'uk'])->get('/library/treasure?category=guide')
-            ->assertRedirect(url('/uk/library/treasure').'?category=guide');
+            ->assertRedirect(url('/uk/library/guide/treasure'));
         $this->get('/library?category=guide&q=treasure&page=2')
             ->assertRedirect(url('/uk/library').'?category=guide&q=treasure&page=2');
         $this->assertSame(0, $article->fresh()->views_count);
+    }
+
+    public function test_short_localized_urls_and_stale_category_paths_redirect_permanently_without_counting_views(): void
+    {
+        $article = $this->article();
+        $this->get('/uk/library/treasure?category=guide&utm_source=old')
+            ->assertStatus(301)->assertRedirect(url('/uk/library/guide/treasure').'?utm_source=old');
+        $this->get('/ru/library/old-guide/treasure?category&ref=docs')
+            ->assertStatus(301)->assertRedirect(url('/ru/library/guide/treasure').'?ref=docs');
+        $this->get('/ru/library/guide/treasure?category')
+            ->assertStatus(301)->assertRedirect(url('/ru/library/guide/treasure'));
+        $this->assertSame(0, $article->fresh()->views_count);
+
+        $article->category->update(['slug' => 'new-guide']);
+        $this->get('/uk/library/guide/treasure')
+            ->assertStatus(301)->assertRedirect(url('/uk/library/new-guide/treasure'));
+        $response = $this->get('/uk/library/new-guide/treasure')->assertOk();
+        $xpath = $this->xpath($response->getContent());
+        $this->assertSame(url('/uk/library/new-guide/treasure'), $xpath->evaluate('string(//link[@rel="canonical"]/@href)'));
     }
 
     public function test_home_has_language_links_metadata_and_language_specific_navigation(): void
@@ -89,7 +108,7 @@ final class LibrarySeoTest extends TestCase
         $this->assertSame(url('/uk/library'), $xpath->evaluate('string(//link[@rel="canonical"]/@href)'));
         $this->assertSame(1, $xpath->query('//h1')->length);
         $this->get('/uk/library?category=guide')
-            ->assertRedirect(url('/uk/library/treasure').'?category=guide');
+            ->assertRedirect(url('/uk/library/guide/treasure'));
         $this->get('/en/library')->assertNotFound();
     }
 
@@ -113,7 +132,7 @@ final class LibrarySeoTest extends TestCase
         $article->setTranslation('excerpt', 'ru', '');
         $article->setTranslation('content', 'ru', '<p>Первый &amp; второй.</p><p>Третий.</p>[[placeholder:123]]<script>bad()</script>');
         $article->save();
-        $response = $this->get('/ru/library/treasure')->assertOk();
+        $response = $this->get('/ru/library/guide/treasure')->assertOk();
         $xpath = $this->xpath($response->getContent());
         $this->assertSame('Первый & второй. Третий.', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
 
@@ -125,12 +144,16 @@ final class LibrarySeoTest extends TestCase
     public function test_internal_editorial_links_keep_the_selected_language_and_external_links_stay_external(): void
     {
         $article = $this->article();
+        $this->article(slug: 'other');
         $article->setTranslation('content', 'uk', '<a href="/library/other?category=guide&amp;q=x#part">Стаття</a>'
+            .'<a href="/ru/library/other?category=guide-other">Старий переклад</a>'
+            .'<a href="/ru/library/guide-other/other?category">Новий переклад</a>'
             .'<a href="'.url('/library').'?category=guide">Розділ</a>'
             .'<a href="https://example.org/library/other">External</a>')->save();
 
-        $this->get('/uk/library/treasure')->assertOk()
-            ->assertSee('href="'.url('/uk/library/other').'?category=guide&amp;q=x#part"', false)
+        $this->get('/uk/library/guide/treasure')->assertOk()
+            ->assertSee('href="'.url('/uk/library/guide-other/other').'?q=x#part"', false)
+            ->assertSee('href="'.url('/uk/library/guide-other/other').'"', false)
             ->assertSee('href="'.url('/uk/library').'?category=guide"', false)
             ->assertSee('href="https://example.org/library/other"', false);
     }
@@ -162,12 +185,12 @@ final class LibrarySeoTest extends TestCase
     {
         $article = $this->article();
         $article->forgetTranslation('content', 'uk')->save();
-        $this->get('/uk/library/treasure')->assertRedirect(url('/ru/library/treasure'));
-        $response = $this->get('/ru/library/treasure')->assertOk();
+        $this->get('/uk/library/guide/treasure')->assertRedirect(url('/ru/library/guide/treasure'));
+        $response = $this->get('/ru/library/guide/treasure')->assertOk();
         $xpath = $this->xpath($response->getContent());
         $this->assertSame(0, $xpath->query('//link[@hreflang="uk"]')->length);
         $this->assertSame(0, $xpath->query('//meta[@property="og:locale:alternate"]')->length);
-        $this->get('/sitemap.xml')->assertOk()->assertDontSee('/uk/library/treasure', false);
+        $this->get('/sitemap.xml')->assertOk()->assertDontSee('/uk/library/guide/treasure', false);
     }
 
     public function test_sitemap_contains_only_available_published_articles_and_actual_catalog_pages(): void
@@ -190,17 +213,33 @@ final class LibrarySeoTest extends TestCase
         $this->assertCount(8, $locations);
         foreach (['ru', 'uk'] as $locale) {
             $this->assertContains(url('/'.$locale.'/library'), $locations);
-            $this->assertContains(url('/'.$locale.'/library/treasure'), $locations);
+            $this->assertContains(url('/'.$locale.'/library/guide/treasure'), $locations);
             $this->assertContains(url('/'.$locale.'/library').'?category=monsters', $locations);
             $this->assertContains(url('/'.$locale.'/library').'?category=maps', $locations);
         }
         foreach (['draft', 'future', 'hidden', 'deleted'] as $slug) {
             $response->assertDontSee('/library/'.$slug, false);
             $this->get('/ru/library/'.$slug)->assertNotFound();
+            $this->get('/ru/library/guide-'.$slug.'/'.$slug)->assertNotFound();
         }
         $this->assertSame(0, $article->fresh()->views_count);
         $this->assertCount(0, $response->headers->getCookies());
         $this->get('/robots.txt')->assertOk()->assertSee('Sitemap: '.url('/sitemap.xml'), false);
+    }
+
+    public function test_sitemap_builds_categorized_article_urls_without_a_query_for_each_link(): void
+    {
+        foreach (range(1, 30) as $number) {
+            $this->article(slug: 'article-'.$number);
+        }
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        $response = $this->get('/sitemap.xml')->assertOk();
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+        $this->assertLessThanOrEqual(5, count($queries));
+        $response->assertSee('/uk/library/guide-article-30/article-30', false);
+        $this->assertSame(62, substr_count($response->getContent(), '<loc>'));
     }
 
     private function article(string $slug = 'treasure', string $status = LibraryArticle::STATUS_PUBLISHED, ?string $publishedAt = null): LibraryArticle

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'gallery' => ['image' => 'Скріншот гри :number', 'previous' => 'Попередній скріншот', 'next' => 'Наступний скріншот', 'close' => 'Закрити'],
     'hot_forum' => 'Гаряче з форуму',
     'no_forum_topics' => 'На форумі ще немає обговорень.',
     'all_forum_topics' => 'Усі обговорення',

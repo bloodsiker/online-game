@@ -19,6 +19,7 @@ Route::middleware('web')->group(function (): void {
         ->middleware(ApplyLibraryLocale::class)->name('library.localized.')
         ->group(function (): void {
             Route::get('/', [LibraryController::class, 'index'])->name('index');
-            Route::get('/{slug}', [LibraryController::class, 'show'])->name('show');
+            Route::get('/{slug}', [LibraryController::class, 'redirectArticle'])->name('legacy.show');
+            Route::get('/{category}/{slug}', [LibraryController::class, 'show'])->name('show');
         });
 });
