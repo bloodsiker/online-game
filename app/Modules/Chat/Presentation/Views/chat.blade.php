@@ -415,6 +415,7 @@
             .then(function (events) {
                 activeWorldEvents = events;
                 renderWorldEventWidget(events);
+                try { window.top.dispatchEvent(new Event('world-event-state-changed')); } catch (error) {}
             })
             .catch(function () {});
     }
@@ -429,6 +430,7 @@
 
     function handleWorldEventStateChanged() {
         scheduleWorldEventSync();
+        try { window.top.dispatchEvent(new Event('world-event-state-changed')); } catch (error) {}
     }
 
     function scrollToBottom() {
@@ -533,15 +535,17 @@
         return html;
     }
 
-    function handleInviteAction(link, modalTitle) {
+    function handleInviteAction(link, modalTitle, method) {
         if (!link || link.dataset.pending === '1') return false;
 
         link.dataset.pending = '1';
         fetch(link.href, {
+            method: method || 'GET',
             credentials: 'same-origin',
             headers: {
                 'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             }
         })
             .then(function (response) {
@@ -575,7 +579,7 @@
     }
 
     function handleClanInviteAction(link) {
-        return handleInviteAction(link, gameTranslate('Клан'));
+        return handleInviteAction(link, gameTranslate('Клан'), 'POST');
     }
 
     function handlePlayerTradeInviteAction(link) {

@@ -32,28 +32,27 @@ class OpenDeposit
             return new BankResultDTO(false, sprintf('Сумма вклада должна быть от %s до %s монет.', number_format($term['min']), number_format($term['max'])));
         }
 
-        if ($amount > $user->money) {
-            return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
-        }
-
-        $openDeposits = $this->bankDepositRepository->getOpenByUser($user->id);
-
-        if ($openDeposits->contains(fn ($deposit) => $deposit->term_days === $termDays)) {
-            return new BankResultDTO(false, 'У вас уже есть такой депозит!');
-        }
-
-        $this->transactionManager->run(function () use ($user, $amount, $term, $termDays) {
-            $this->bankUserRepository->decrementMoney($user, $amount);
-
+        return $this->transactionManager->run(function () use ($user, $amount, $term, $termDays): BankResultDTO {
+            $lockedUser = $this->bankUserRepository->lockForUpdate($user->id);
+            if ($amount > $lockedUser->money) {
+                return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+            }
+            $openDeposits = $this->bankDepositRepository->getOpenByUser($lockedUser->id);
+            if ($openDeposits->contains(fn ($deposit) => (int) $deposit->term_days === $termDays)) {
+                return new BankResultDTO(false, 'У вас уже есть такой депозит!');
+            }
+            if (! $this->bankUserRepository->decrementMoney($lockedUser, $amount)) {
+                return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+            }
             $this->bankDepositRepository->create(
-                userId: $user->id,
+                userId: $lockedUser->id,
                 amount: $amount,
                 percent: $term['percent'],
                 termDays: $termDays,
                 maturesAt: Carbon::now()->addDays($termDays),
             );
-        });
 
-        return new BankResultDTO(true, sprintf('Вклад «%s» на %s монет открыт.', $term['label'], number_format($amount)));
+            return new BankResultDTO(true, sprintf('Вклад «%s» на %s монет открыт.', $term['label'], number_format($amount)));
+        });
     }
 }

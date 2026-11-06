@@ -9,6 +9,7 @@ use App\Modules\Battle\Infrastructure\MtRandomizer;
 use App\Modules\Battle\Presentation\Console\SimulateBattleTriangle;
 use App\Modules\Battle\Presentation\Console\SimulateLevelingEconomy;
 use App\Modules\Battle\Presentation\Console\SimulatePveEncounter;
+use App\Modules\Battle\Presentation\Console\SimulateGearTiers;
 use App\Modules\Battle\Presentation\Console\SimulatePveRoster;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -28,7 +29,7 @@ class BattleServiceProvider extends ServiceProvider
             ->group(__DIR__.'/Presentation/Http/Route/web.php');
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SimulateBattleTriangle::class, SimulatePveEncounter::class, SimulatePveRoster::class, SimulateLevelingEconomy::class]);
+            $this->commands([SimulateBattleTriangle::class, SimulatePveEncounter::class, SimulatePveRoster::class, SimulateLevelingEconomy::class, SimulateGearTiers::class]);
         }
     }
 }

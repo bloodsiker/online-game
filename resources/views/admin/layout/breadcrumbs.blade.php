@@ -21,6 +21,7 @@
         request()->routeIs('admin.bank.stocks', 'admin.bank.stock.*') => ['label' => 'Акции банка', 'route' => 'admin.bank.stocks'],
         request()->routeIs('admin.action', 'admin.action.*') => ['label' => 'Действия на локации', 'route' => 'admin.action'],
         request()->routeIs('admin.news', 'admin.news.*') => ['label' => 'Новости', 'route' => 'admin.news'],
+        request()->routeIs('admin.launch-subscriptions.*') => ['label' => 'Подписки на открытие', 'route' => 'admin.launch-subscriptions.index'],
         request()->routeIs('admin.library.*') => ['label' => 'Библиотека', 'route' => 'admin.library.articles.index'],
         request()->routeIs('admin.event.world-events.*') => ['label' => 'Мировые события', 'route' => 'admin.event.world-events.index'],
         request()->routeIs('admin.event.activities', 'admin.event.activity.*') => ['label' => 'Активности событий', 'route' => 'admin.event.activities'],

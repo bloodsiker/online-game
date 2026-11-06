@@ -416,11 +416,12 @@
                                                 </td>
                                                 <td class="brd2-top brd2-bt" align="right">
                                                     @if($questInProgress->canComplete)
-                                                        <b class="butt2 pointer"><b>
-                                                            <input value="{{ __('Сдать') }}" type="button"
-                                                                   onclick="event.stopPropagation();location.href='{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}';"
-                                                                   style="width:60px">
-                                                        </b></b>
+                                                        <form method="post" action="{{ route('quest.complete', ['id' => $questInProgress->id, 'npc' => $npc->id]) }}" style="display:inline" onclick="event.stopPropagation()">
+                                                            @csrf
+                                                            <input type="hidden" name="progress_id" value="{{ $questInProgress->questPlayer->id }}">
+                                                            <input type="hidden" name="revision" value="{{ (int) $questInProgress->questPlayer->revision }}">
+                                                            <b class="butt2 pointer"><b><input value="{{ __('Сдать') }}" type="submit" style="width:60px"></b></b>
+                                                        </form>
                                                     @else
                                                         <span style="color:#888; font-size:10px;">{{ __('В процессе') }}</span>
                                                     @endif

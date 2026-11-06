@@ -395,12 +395,14 @@ class LockpickingFlowTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->timestamps();
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_recipe_id');
             $table->unsignedBigInteger('share_item_id');
         });

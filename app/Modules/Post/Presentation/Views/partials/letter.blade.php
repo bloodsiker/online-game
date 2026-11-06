@@ -24,8 +24,10 @@
         @endif
 
         @if($isRecipient && $letter->hasUnclaimedAttachments())
-            &nbsp;<b class="butt2 pointer"><b><input value="Забрать" type="button" style="width: 70px;"
-                onclick="location.href='{{ route('post.claim', $letter->id) }}'"></b></b>
+            <form method="post" action="{{ route('post.claim', $letter->id) }}" style="display:inline;">
+                @csrf
+                &nbsp;<b class="butt2 pointer"><b><input value="Забрать" type="submit" style="width: 70px;"></b></b>
+            </form>
         @endif
     </div>
 @endif
@@ -87,8 +89,12 @@
         <b class="butt1 pointer"><b><input value="Ответить" type="button" style="width: 100px;"
             onclick="location.href='{{ route('post', ['mode' => 'outbox', 'to' => $letter->sender?->name]) }}'"></b></b>
     @endif
-    <b class="butt1 pointer"><b><input value="Удалить" type="button" style="width: 100px;" class="redd"
-        onclick="if (confirm('Удалить письмо «{{ $letter->subject }}»?')) location.href='{{ route('post.delete', ['id' => $letter->id, 'from' => $isRecipient ? 'inbox' : 'outpost']) }}'"></b></b>
+    <form method="post" action="{{ route('post.delete', $letter->id) }}" style="display:inline;"
+          onsubmit='return confirm(@json("Удалить письмо «".$letter->subject."»?"));'>
+        @csrf
+        <input type="hidden" name="from" value="{{ $isRecipient ? 'inbox' : 'outpost' }}">
+        <b class="butt1 pointer"><b><input value="Удалить" type="submit" style="width: 100px;" class="redd"></b></b>
+    </form>
 </div>
 
 @include('post::partials.window-close')

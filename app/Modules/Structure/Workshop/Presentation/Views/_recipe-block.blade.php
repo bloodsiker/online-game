@@ -33,7 +33,7 @@
                             <b class="collection-ico" style="color:rgb(149, 92, 74);">=</b>
                         </td>
                         <td>
-                            <span class="collection-slot">
+                            <div class="collection-slot">
                                 <span class="collection-slot__img"
                                       data-id="{{ $recipe['resultId'] }}"
                                       onmouseover="showItemInfo(this,event,2)"
@@ -42,15 +42,15 @@
                                            onclick="window.open(this.href,'','width=730,height=550,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no');return false;">
                                         <img src="{{ $recipe['resultImage'] }}">
                                     </a>
-                                    @if($showCraftButton ?? true)
-                                        <form class="collect-btn" action="{{ route($craftRouteName, ['id' => $workshop->id, 'recipe' => $recipe['id']]) }}{{ $tabSuffix }}" method="post">
-                                            @csrf
-                                            <b class="butt2 pointer @if(!$recipe['canCraft']) disabled @endif"><b><input value="Создать" type="submit" style="width: 45px;" @disabled(!$recipe['canCraft'])></b></b>
-                                        </form>
-                                    @endif
                                 </span>
+                                @if($showCraftButton ?? true)
+                                    <form class="collect-btn" action="{{ route($craftRouteName, ['id' => $workshop->id, 'recipe' => $recipe['id']]) }}{{ $tabSuffix }}" method="post">
+                                        @csrf
+                                        <b class="butt2 pointer @if(!$recipe['canCraft']) disabled @endif"><b><input value="Создать" type="submit" style="width: 45px;" @disabled(!$recipe['canCraft'])></b></b>
+                                    </form>
+                                @endif
                                 <span class="collection-slot__qty"></span>
-                            </span>
+                            </div>
                         </td>
                     </tr>
                     </tbody>

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Event;
 
+use App\Modules\Auth\Application\Listeners\ActivateLoginSession;
 use App\Modules\Event\Application\UseCases\GetActiveWorldEventWidget;
+use App\Modules\Event\Application\UseCases\GetLocationWorldEvents;
 use App\Modules\Event\Application\UseCases\GetPlayerMapInfluences;
 use App\Modules\Event\Application\UseCases\GetWorldEventCards;
 use App\Modules\Event\Domain\Enums\WorldEventObjectiveType;
@@ -19,11 +21,14 @@ use App\Modules\Event\Infrastructure\Persistence\Models\WorldEvent;
 use App\Modules\Event\Infrastructure\Persistence\Models\WorldEventRun;
 use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemOnLocation;
+use App\Modules\Location\Application\DTOs\TakeLocationItemDTO;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use App\Modules\User\Presentation\Http\Middleware\ApplyGameLocale;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -47,6 +52,89 @@ final class WorldEventServiceTest extends TestCase
     {
         Carbon::setTestNow();
         parent::tearDown();
+    }
+
+    private function localEventUser(int $location = 10): User
+    {
+        DB::table('world_event_runs')->insert([
+            ['id' => 1, 'world_event_id' => 1, 'current_stage_id' => 1, 'status' => 'active', 'starts_at' => now(), 'ends_at' => now()->addHour()],
+            ['id' => 2, 'world_event_id' => 2, 'current_stage_id' => 2, 'status' => 'active', 'starts_at' => now(), 'ends_at' => now()->addHour()],
+        ]);
+
+        return (new User)->forceFill(['id' => 1, 'location_id' => $location]);
+    }
+
+    public function test_local_events_use_spawn_map_and_explicit_locations_not_influence_map(): void
+    {
+        $user = $this->localEventUser();
+        $query = app(GetLocationWorldEvents::class);
+        $this->assertCount(2, $query->execute($user));
+        $user->location_id = 11;
+        $this->assertSame([1], array_column($query->execute($user), 'run_id'));
+        DB::table('locations')->insert(['id' => 99, 'map_id' => 1, 'name' => 'Родительский город']);
+        $user->location_id = 99;
+        $this->assertSame([], $query->execute($user));
+    }
+
+    public function test_local_events_ignore_progress_from_another_stage_and_show_the_personal_limit(): void
+    {
+        $user = $this->localEventUser();
+        DB::table('world_event_player_progress')->insert([
+            ['world_event_run_id' => 1, 'world_event_stage_id' => 99, 'user_id' => 1, 'collected_count' => 5],
+            ['world_event_run_id' => 1, 'world_event_stage_id' => 1, 'user_id' => 2, 'collected_count' => 1],
+        ]);
+        $query = app(GetLocationWorldEvents::class);
+        $cards = collect($query->execute($user))->keyBy('run_id');
+        $this->assertSame(0, $cards[1]['personal']);
+        $this->assertFalse($cards[1]['limit_reached']);
+        $this->assertSame([20], $cards[1]['item_ids']);
+        $this->assertSame([], $cards[2]['item_ids']);
+        DB::table('world_event_player_progress')->insert(['world_event_run_id' => 1, 'world_event_stage_id' => 1, 'user_id' => 1, 'collected_count' => 1]);
+        $cards = collect($query->execute($user))->keyBy('run_id');
+        $this->assertTrue($cards[1]['limit_reached']);
+        $html = view('event::location-cards', ['locationEvents' => $cards->values()->all()])->render();
+        $this->assertStringContainsString(__('local-events.limit'), $html);
+        $this->assertStringContainsString('#event-run-1', $html);
+    }
+
+    public function test_local_events_hide_finished_expired_and_inactive_stages(): void
+    {
+        $user = $this->localEventUser();
+        DB::table('world_event_runs')->where('id', 1)->update(['ends_at' => now()]);
+        DB::table('world_event_stages')->where('id', 2)->update(['is_active' => false]);
+        $query = app(GetLocationWorldEvents::class);
+        $this->assertSame([], $query->execute($user));
+        DB::table('world_event_stages')->where('id', 2)->update(['is_active' => true]);
+        DB::table('world_event_runs')->where('id', 2)->update(['status' => 'completed']);
+        $this->assertSame([], $query->execute($user));
+    }
+
+    public function test_local_events_endpoint_returns_localized_cards_for_the_authenticated_location(): void
+    {
+        $user = $this->localEventUser();
+        app()->setLocale('uk');
+        $user->forceFill(['active_login_token' => 'local-events-test', 'email_verified_at' => now()]);
+        $this->withoutMiddleware(ApplyGameLocale::class);
+        $response = $this->actingAs($user)->withSession([
+            ActivateLoginSession::SESSION_KEY => 'local-events-test',
+        ])->getJson(route('events.location'));
+        $response->assertOk()->assertJsonCount(2, 'events');
+        $this->assertStringContainsString('Знайдіть і зберіть:', $response->json('html'));
+        $response->assertHeader('Cache-Control', 'no-store, private');
+    }
+
+    public function test_local_events_badges_preserve_spawn_identity_for_identical_items(): void
+    {
+        $item = fn (?int $run) => new TakeLocationItemDTO(
+            shareItemId: 20, image: '/test.png', name: 'Осколок', count: 1, infoUrl: '/info',
+            actionLabel: 'Поднять', actionUrl: '/pickup', worldEventRunId: $run,
+        );
+        $html = Blade::render('<x-game.loot-panel :items="$items" :count="2" location-url="/location" />', [
+            'items' => [$item(null), $item(1)],
+        ]);
+        $this->assertSame(1, substr_count($html, 'data-location-event-item'));
+        $this->assertStringContainsString('data-event-run="1" data-item-id="20"', $html);
+        $this->assertSame(2, substr_count($html, 'class="loot-card"'));
     }
 
     public function test_event_starts_and_spawns_only_configured_amount(): void
@@ -113,6 +201,7 @@ final class WorldEventServiceTest extends TestCase
                 ->all(),
         );
         Event::assertDispatchedTimes(MapInfluenceAwarded::class, 1);
+        Event::assertDispatched(MapInfluenceAwarded::class, fn ($event): bool => $event->playerProgress === 1 && $event->playerLimit === 1 && $event->total === 4);
     }
 
     public function test_kill_event_spawns_monsters_and_credits_only_supplied_killer(): void
@@ -459,10 +548,12 @@ final class WorldEventServiceTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_recipe_id');
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedInteger('count')->default(1);

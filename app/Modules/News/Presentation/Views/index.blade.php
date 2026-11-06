@@ -32,6 +32,9 @@
 
     <script src="{{ asset('main/js/common.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/main.css') }}">
+    @if(config('game.prelaunch'))
+        <link rel="stylesheet" href="{{ asset('css/prelaunch.css') }}?v={{ filemtime(public_path('css/prelaunch.css')) }}">
+    @endif
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/timer.css') }}">
     <script language="javaScript" src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('main/css/art_alt.css') }}">
@@ -320,7 +323,7 @@
         <div class="b-nav-lvl-1__auth">
             <div id="userHeadBlock">
                 <div class="b-nav-lvl-1__create">
-                    <a class="b-auth-button" href="{{ route('register') }}">
+                    <a class="b-auth-button" href="{{ config('game.prelaunch') ? route('index', ['launch' => 1]) : route('register') }}" @if(config('game.prelaunch')) data-prelaunch-open @endif>
 				<span class="b-auth-button__content">
 					<span class="b-aside__impo-link" style="font-size: 15px;font-weight: bold;position: relative;color: #d49b2c;left: 1px;top: -3px;">{{ __('homepage.registration') }}</span>
 				</span>
@@ -420,8 +423,12 @@
                                                                  style="display: none;"></div>
                                                             <div id="viewContent">
 
-                                                                <form style="opacity: 1;" action="{{ route('login') }}" method="post">
-                                                                    @csrf
+                                                                <form style="opacity: 1;" action="{{ config('game.prelaunch') ? route('index', ['launch' => 1]) : route('login') }}" method="{{ config('game.prelaunch') ? 'get' : 'post' }}" @if(config('game.prelaunch')) data-prelaunch-login @endif>
+                                                                    @if(config('game.prelaunch'))
+                                                                        <input type="hidden" name="launch" value="1">
+                                                                    @else
+                                                                        @csrf
+                                                                    @endif
                                                                     <div class="form-wrapper">
                                                                         <fieldset class="p-v-20">
 
@@ -434,13 +441,13 @@
                                                                                     </div>
                                                                                 </div>
                                                                                 <input class="form-input" type="text"
-                                                                                       name="email" id="userEmail" value=""
+                                                                                       @if(!config('game.prelaunch')) name="email" @endif id="userEmail" value=""
                                                                                        placeholder="{{ __('homepage.email_hint') }}">
                                                                             </div>
                                                                         </fieldset>
                                                                         <fieldset class="lt pt-20 pb-30">
                                                                             <input class="form-input" type="password"
-                                                                                   name="password" id="userPassword"
+                                                                                   @if(!config('game.prelaunch')) name="password" @endif id="userPassword"
                                                                                    maxlength="50"
                                                                                    placeholder="{{ __('homepage.password_hint') }}">
                                                                         </fieldset>
@@ -448,10 +455,10 @@
                                                                     </div>
 
                                                                 <span style="position: relative;left: 5px;top: -22px;">
-                                                                    <button type="submit"><span class="btn big fll quickStartButton">
+                                                                    <button type="{{ config('game.prelaunch') ? 'button' : 'submit' }}" @if(config('game.prelaunch')) data-prelaunch-open @endif><span class="btn big fll quickStartButton">
                                                                         <span class="btn-link yellow"><span class="title">{{ __('homepage.login') }}</span></span>
                                                                     </span></button>
-                                                                    <span onclick="window.location='{{ route('register') }}'"  class="btn big flr createAccountButton" style="position: relative;left: -13px;">
+                                                                    <span @if(config('game.prelaunch')) data-prelaunch-open role="button" tabindex="0" @else onclick="window.location='{{ route('register') }}'" @endif class="btn big flr createAccountButton" style="position: relative;left: -13px;">
                                                                         <span class="btn-link yellow"><span class="title">{{ __('homepage.create_account') }}</span></span>
                                                                     </span>
                                                                 </span>
@@ -833,5 +840,8 @@
         window.open(link.href, '', 'width=730,height=800,resizable=yes,scrollbars=yes');
     });
 </script>
+@if(config('game.prelaunch'))
+    @include('news::partials.prelaunch-modal')
+@endif
 </body>
 </html>

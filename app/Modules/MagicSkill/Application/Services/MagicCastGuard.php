@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Единая точка списания маны + установки кулдауна для обоих путей применения
  * заклинания (боевой каст и внебоевой баф/хил) — под блокировкой строки
- * player_magic_skills, чтобы два параллельных запроса не списали ману дважды
+ * player → player_magic_skills, чтобы два параллельных запроса не списали ману дважды
  * и не обошли кулдаун одновременно (см. спеку, раздел «Общий механизм каста»).
  */
 class MagicCastGuard
@@ -21,6 +21,8 @@ class MagicCastGuard
     public function tryConsume(Player $player, MagicSkill $skill, int $magicSkillLevel = 0): CastAttemptResult
     {
         return DB::transaction(function () use ($player, $skill, $magicSkillLevel): CastAttemptResult {
+            // Combat already holds player before its pivot. Use the same order outside battle.
+            $freshPlayer = Player::whereKey($player->id)->lockForUpdate()->first();
             $pivot = DB::table('player_magic_skills')
                 ->where('player_id', $player->id)
                 ->where('magic_skill_id', $skill->id)
@@ -36,8 +38,6 @@ class MagicCastGuard
 
                 return CastAttemptResult::failure(sprintf(__('Перезарядка ещё %d сек.'), $remaining));
             }
-
-            $freshPlayer = Player::whereKey($player->id)->lockForUpdate()->first();
 
             // «Колдовство» снижает стоимость маны той же кривой, что усиливает урон/хил (см. MagicHitCalculator::magicPower) — симметрично оружейному навыку.
             $manaCost = (int) ceil($skill->mana_cost / HitCalculator::weaponSkillMultiplier($magicSkillLevel));
@@ -58,6 +58,6 @@ class MagicCastGuard
                 ->update(['cooldown_end_at' => $cooldownEndAt]);
 
             return CastAttemptResult::success();
-        });
+        }, attempts: 3);
     }
 }

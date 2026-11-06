@@ -6,6 +6,7 @@ namespace App\Modules\Clan\Domain\Services;
 
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
+use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanLearnedSkill;
 use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
@@ -13,6 +14,8 @@ use App\Modules\Clan\Domain\Models\ClanSkillLevel;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerMagicSkill;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Database\QueryException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -20,79 +23,84 @@ class ClanSkillService
 {
     public function __construct(
         private readonly ClanLogService $clanLogService,
+        private readonly ClanActionTransaction $actions,
     ) {}
 
     /**
      * Attempt to learn (or upgrade) a clan skill.
      * Returns null on success, or an error message string.
      */
-    public function learn(Clan $clan, ClanSkillDefinition $definition, Player $player, User $user): ?string
+    public function learn(Clan $clan, ClanSkillDefinition $definition, Player $player, User $user, int $expectedLevel = 0): ?string
     {
-        $learned = $clan->learnedSkills()->where('clan_skill_definition_id', $definition->id)->first();
-        $currentLevel = $learned?->current_level ?? 0;
-        $nextLevel = $currentLevel + 1;
-
-        if ($nextLevel > $definition->max_level) {
-            return 'Навык уже достиг максимального уровня.';
-        }
-
-        $levelData = $definition->levels()->where('level', $nextLevel)->first();
-        if (! $levelData) {
-            return 'Данные уровня навыка не найдены.';
-        }
-
-        if ($clan->lvl < $levelData->required_clan_level) {
-            return "Недостаточный уровень клана. Требуется: {$levelData->required_clan_level}.";
-        }
-
-        if ($clan->points < $levelData->required_bonus_points) {
-            return "Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.";
-        }
-
-        if ($user->money < $levelData->required_money) {
-            return "Недостаточно монет. Требуется: {$levelData->required_money}.";
-        }
-
-        $itemRequirements = $this->itemRequirements($levelData);
-        if ($error = $this->validateItemRequirements($player, $itemRequirements)) {
-            return $error;
-        }
-
         try {
-            DB::transaction(function () use ($clan, $definition, $levelData, $learned, $nextLevel, $currentLevel, $player, $user, $itemRequirements) {
-                $freshUser = User::query()->lockForUpdate()->findOrFail($user->id);
-                if ($freshUser->money < $levelData->required_money) {
+            $this->actions->run(clanId: (int) $clan->id, userIds: collect([$user->id]), action: function (Clan $clan, Collection $users) use ($definition, $user, $expectedLevel): void {
+                $user = $users->get($user->id);
+                $membership = $user->clanMembership;
+                if ($membership === null || (int) $membership->clan_id !== (int) $clan->id
+                    || ! $membership->role?->hasPermission(ClanPermission::LEARN_SKILL)) {
+                    throw new \RuntimeException('У вас нет прав изучать навыки клана.');
+                }
+                if (! $clan->hasPaidTax()) {
+                    throw new \RuntimeException('Клановые навыки заблокированы до оплаты ежемесячного налога.');
+                }
+                $players = Player::whereIn('id', $users->pluck('player_id')->filter())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+                $player = $players->get($user->player_id);
+                if ($player === null || (int) $player->user_id !== (int) $user->id) {
+                    throw new \RuntimeException('Персонаж не найден.');
+                }
+                $definition = ClanSkillDefinition::findOrFail($definition->id);
+                $learned = $clan->learnedSkills()->where('clan_skill_definition_id', $definition->id)->lockForUpdate()->first();
+                $currentLevel = (int) ($learned?->current_level ?? 0);
+                if ($currentLevel !== $expectedLevel) {
+                    throw new \RuntimeException(__('clan.action.skill_changed'));
+                }
+                $nextLevel = $currentLevel + 1;
+                if ($nextLevel > $definition->max_level) {
+                    throw new \RuntimeException('Навык уже достиг максимального уровня.');
+                }
+                $levelData = $definition->levels()->where('level', $nextLevel)->first();
+                if ($levelData === null) {
+                    throw new \RuntimeException('Данные уровня навыка не найдены.');
+                }
+                if ($clan->lvl < $levelData->required_clan_level) {
+                    throw new \RuntimeException("Недостаточный уровень клана. Требуется: {$levelData->required_clan_level}.");
+                }
+                if ($clan->points < $levelData->required_bonus_points || $levelData->required_bonus_points < 0) {
+                    throw new \RuntimeException("Недостаточно бонусных очков. Требуется: {$levelData->required_bonus_points}.");
+                }
+                if ($user->money < $levelData->required_money || $levelData->required_money < 0) {
                     throw new \RuntimeException("Недостаточно монет. Требуется: {$levelData->required_money}.");
                 }
-
-                $clan->decrement('points', $levelData->required_bonus_points);
-                $freshUser->decrement('money', $levelData->required_money);
-                $this->consumeItemRequirements($player, $itemRequirements);
-
-                if ($learned) {
+                if ($levelData->required_bonus_points > 0
+                    && Clan::whereKey($clan->id)->where('points', '>=', $levelData->required_bonus_points)->decrement('points', $levelData->required_bonus_points) !== 1) {
+                    throw new \RuntimeException('Недостаточно бонусных очков.');
+                }
+                if ($levelData->required_money > 0
+                    && User::whereKey($user->id)->where('money', '>=', $levelData->required_money)->decrement('money', $levelData->required_money) !== 1) {
+                    throw new \RuntimeException('Недостаточно монет.');
+                }
+                $this->consumeItemRequirements($player, $this->itemRequirements($levelData));
+                if ($learned !== null) {
                     $learned->update(['current_level' => $nextLevel]);
                 } else {
-                    $learned = ClanLearnedSkill::create([
-                        'clan_id' => $clan->id,
-                        'clan_skill_definition_id' => $definition->id,
-                        'current_level' => $nextLevel,
-                    ]);
+                    try {
+                        DB::transaction(fn () => ClanLearnedSkill::create([
+                            'clan_id' => $clan->id, 'clan_skill_definition_id' => $definition->id, 'current_level' => $nextLevel,
+                        ]));
+                    } catch (UniqueConstraintViolationException $exception) {
+                        // The outer transaction must roll back costs before returning a friendly error.
+                        throw new \RuntimeException(__('clan.action.skill_changed'), previous: $exception);
+                    }
                 }
-
                 $this->syncSkillForAllMembers($clan, $definition, $currentLevel, $nextLevel, $levelData);
-
-                $isNew = $currentLevel === 0;
-                $this->clanLogService->write(
-                    $clan,
-                    $player->user_id,
-                    $isNew ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
-                    $isNew
-                        ? 'Изучен новый навык «'.$definition->getTranslation('name', 'ru', false).'»'
-                        : 'Изучен уровень '.$nextLevel.' навыка «'.$definition->getTranslation('name', 'ru', false).'»',
-                );
-            });
-        } catch (\RuntimeException $e) {
-            return $e->getMessage();
+                $this->clanLogService->write($clan, $user->id,
+                    $currentLevel === 0 ? ClanLogAction::SKILL_LEARNED : ClanLogAction::SKILL_UPGRADED,
+                    'Изучен уровень '.$nextLevel.' навыка «'.$definition->getTranslation('name', 'ru', false).'»');
+            }, allMembers: true);
+        } catch (QueryException $exception) {
+            throw $exception;
+        } catch (\RuntimeException $exception) {
+            return $exception->getMessage();
         }
 
         return null;
@@ -108,28 +116,20 @@ class ClanSkillService
                 'name' => $requirement->shareItem?->name ?? 'Предмет',
             ]);
 
-        if ($requirements->isNotEmpty() || $levelData->share_item_id === null) {
-            return $requirements;
+        if ($requirements->isEmpty() && $levelData->share_item_id !== null) {
+            $requirements = collect([[
+                'share_item_id' => (int) $levelData->share_item_id,
+                'count' => (int) ($levelData->share_item_count ?? 1),
+                'name' => $levelData->stoneItem?->name ?? 'Предмет',
+            ]]);
+        }
+        if ($requirements->contains(fn ($requirement) => $requirement['count'] < 1)) {
+            throw new \RuntimeException(__('clan.action.invalid_materials'));
         }
 
-        return collect([[
-            'share_item_id' => (int) $levelData->share_item_id,
-            'count' => (int) ($levelData->share_item_count ?? 1),
-            'name' => $levelData->stoneItem?->name ?? 'Предмет',
-        ]]);
-    }
-
-    private function validateItemRequirements(Player $player, Collection $requirements): ?string
-    {
-        $available = $this->backpacksByShareItem($player, $requirements);
-
-        foreach ($requirements as $requirement) {
-            if ($available->get($requirement['share_item_id'], collect())->sum('count') < $requirement['count']) {
-                return "В рюкзаке недостаточно предметов «{$requirement['name']}». Нужно: {$requirement['count']}.";
-            }
-        }
-
-        return null;
+        return $requirements->groupBy('share_item_id')->map(fn ($group) => [
+            ...$group->first(), 'count' => (int) $group->sum('count'),
+        ])->values();
     }
 
     private function consumeItemRequirements(Player $player, Collection $requirements): void
@@ -168,7 +168,7 @@ class ClanSkillService
         $query = Backpack::query()
             ->where('user_id', $player->user_id)
             ->whereHas('item', fn ($q) => $q->whereIn('share_item_id', $requirements->pluck('share_item_id')))
-            ->with('item');
+            ->with('item')->orderBy('id');
 
         if ($lock) {
             $query->lockForUpdate();

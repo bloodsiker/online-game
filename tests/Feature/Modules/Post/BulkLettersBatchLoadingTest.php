@@ -26,6 +26,11 @@ class BulkLettersBatchLoadingTest extends TestCase
         config()->set('database.connections.sqlite.database', ':memory:');
         DB::purge('sqlite');
 
+        Schema::create('users', function (Blueprint $table): void {
+            $table->id();
+            $table->integer('money')->default(0);
+        });
+        DB::table('users')->insert(['id' => 10]);
         Schema::create('share_items', function (Blueprint $table): void {
             $table->id();
             $table->string('name');

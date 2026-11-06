@@ -56,9 +56,14 @@ class EloquentDungeonSessionRepository implements DungeonSessionRepository
         return $session->refresh();
     }
 
-    public function markCompleted(DungeonSession $session): void
+    public function markCompleted(DungeonSession $session): bool
     {
-        $session->completed_at = now();
-        $session->save();
+        $at = now();
+        $claimed = DungeonSession::whereKey($session->id)->whereNull('completed_at')->update(['completed_at' => $at]);
+        if ($claimed === 1) {
+            $session->completed_at = $at;
+        }
+
+        return $claimed === 1;
     }
 }

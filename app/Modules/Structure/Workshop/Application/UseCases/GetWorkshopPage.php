@@ -49,7 +49,7 @@ class GetWorkshopPage
             })
             ->whereNotNull('kraft_item_id')
             ->with(['itemInfo.skill', 'kraftItem', 'items'])
-            ->orderBy('id')
+            ->displayOrder()
             ->get();
 
         $recipes = $recipeModels
@@ -57,7 +57,7 @@ class GetWorkshopPage
                 $requiredLevel = max(1, (int) $recipe->itemInfo->skill_lvl);
                 $currentLevel = (int) ($skills[$recipe->itemInfo->skill_id] ?? 1);
                 $learned = in_array((int) $recipe->id, $learnedIds, true);
-                $successChance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel);
+                $successChance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel, (int) $recipe->percent);
                 $ingredients = $recipe->items->map(function ($ingredient) use ($resources): array {
                     $available = (int) ($resources[$ingredient->id] ?? 0);
                     $required = (int) $ingredient->pivot->count;

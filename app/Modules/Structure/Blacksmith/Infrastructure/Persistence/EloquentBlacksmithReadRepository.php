@@ -38,6 +38,7 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->where('backpacks.user_id', $user->id)
             ->where('share_items.type', ShareItemType::RECIPE->value)
             ->where('share_recipes.unlock_type', RecipeUnlockType::SINGLE_USE->value)
+            ->orderByRaw('share_recipes.sort_order = 0')->orderBy('share_recipes.sort_order')->orderBy('share_recipes.id')->orderBy('backpacks.id')
             ->get();
     }
 
@@ -108,7 +109,10 @@ class EloquentBlacksmithReadRepository implements BlacksmithReadRepository
             ->where('backpacks.user_id', $user->id)
             ->where('backpacks.equipped', 0)
             ->where('share_items.type', ShareItemType::SCROLL->value)
-            ->where('share_items.upgrade_scroll_type', UpgradeScrollType::BASE->value)
+            ->whereIn('share_items.upgrade_scroll_type', array_map(
+                static fn (UpgradeScrollType $type): string => $type->value,
+                UpgradeScrollType::baseTypes(),
+            ))
             ->get();
     }
 

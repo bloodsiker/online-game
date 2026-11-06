@@ -45,18 +45,18 @@
         .collection-name a:hover { text-decoration: underline; }
         .collection-status { font-size: 12px; color: #489200; }
         .collection-status.disabled { color: #c00000; }
-        .collection-slot { display: inline-block; position: relative; width: 62px; height: 82px; overflow: hidden; vertical-align: top; }
-        .collection-slot__img { display: block; width: 60px; height: 60px; padding: 1px; background: url('{{ asset('img/bg/slot-empty.png') }}') no-repeat; }
+        .collection-slot { display: inline-block; position: relative; width: 72px; min-height: 86px; vertical-align: top; }
+        .collection-slot__img { display: block; position: relative; width: 72px; height: 71px; }
+        .collection-slot__img::after { content: ''; position: absolute; inset: 0; background: url('{{ asset('main/images/user-reward-frame.png') }}') no-repeat; pointer-events: none; }
         .collection-slot__img img { width: 60px; height: 60px; }
-        .collection-slot__img.grayscale { background: #000; }
         .collection-slot__img.grayscale img { opacity: 0.3; }
         .collection-slot__qty { display: block; font-weight: bold; text-align: center; }
         .collection-slot__qty-current { color: #c00000; }
         .collection-slot.active .collection-slot__qty,
         .collection-slot.active .collection-slot__qty-current { color: #489200; }
         .collection-ico { display: inline-block; height: 75px; padding: 5px 0 0; vertical-align: top; font-weight: bold; font-size: 40px; }
-        .collect-btn { margin: 0; }
-        .collection-slot__img a { display: block; cursor: pointer; }
+        .collect-btn { margin: 2px 0 0; text-align: center; }
+        .collection-slot__img a { display: block; position: absolute; left: 6px; top: 5px; width: 60px; height: 60px; cursor: pointer; }
 
         /* Тема мастерской инструментов — тот же хром, что у апгрейда. */
         .upgrade-summary { margin-bottom: 10px; }

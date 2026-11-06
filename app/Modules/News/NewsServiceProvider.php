@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\News;
 
+use App\Modules\News\Presentation\Console\AnnounceGameLaunch;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -11,6 +12,10 @@ class NewsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([AnnounceGameLaunch::class]);
+        }
+
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'news');
 
         Route::middleware(['web'])

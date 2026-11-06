@@ -96,7 +96,7 @@ class CraftProfessionItem
                 }
             }
 
-            $chance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel);
+            $chance = CraftSuccessChanceConfig::chance((int) $recipe->itemInfo->skill_id, $requiredLevel, $currentLevel, (int) $recipe->percent);
 
             if (random_int(1, 100) > $chance) {
                 $failureExperience = max(1, (int) round(max(1, (int) $recipe->itemInfo->skill_exp) / 2));

@@ -539,7 +539,7 @@ class UseItemTest extends TestCase
     {
         $this->giveInventoryItem(500, 104, isDroppable: false);
 
-        $response = $this->get(route('items.drop', ['id' => 104, 'c' => 1, 'qty' => 1]));
+        $response = $this->post(route('items.drop', ['id' => 104, 'c' => 1, 'qty' => 1]));
 
         $response->assertRedirect(route('backpack'))
             ->assertSessionHas('message', 'Этот предмет нельзя выбросить.');
@@ -551,7 +551,7 @@ class UseItemTest extends TestCase
     {
         $this->giveInventoryItem(501, 105, isDroppable: true);
 
-        $response = $this->get(route('items.drop', ['id' => 105, 'c' => 1, 'qty' => 1]));
+        $response = $this->post(route('items.drop', ['id' => 105, 'c' => 1, 'qty' => 1]));
 
         $response->assertRedirect(route('backpack'));
         $this->assertDatabaseMissing('backpacks', ['user_id' => 1, 'item_id' => 105]);
@@ -775,6 +775,7 @@ class UseItemTest extends TestCase
 
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->timestamps();
@@ -812,6 +813,9 @@ class UseItemTest extends TestCase
 
         Schema::create('item_on_locations', function (Blueprint $table): void {
             $table->id();
+            $table->string('interaction_type')->default('pickup');
+            $table->unsignedBigInteger('loot_owner_id')->nullable();
+            $table->timestamp('loot_reserved_until')->nullable();
             $table->unsignedBigInteger('item_id');
             $table->unsignedBigInteger('location_id');
             $table->integer('count')->default(1);

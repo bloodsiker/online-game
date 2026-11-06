@@ -23,6 +23,7 @@ use App\Modules\Player\Domain\Services\PeacefulProfessionExperienceService;
 use App\Modules\Player\Domain\Services\PlayerInjuryService;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
+use App\Modules\Structure\Blacksmith\Infrastructure\Persistence\EloquentBlacksmithReadRepository;
 use App\Modules\Structure\Workshop\Application\UseCases\CraftProfessionItem;
 use App\Modules\Structure\Workshop\Application\UseCases\GetWorkshopPage;
 use App\Modules\Structure\Workshop\Application\UseCases\LearnRecipe;
@@ -436,6 +437,35 @@ class PeacefulProfessionFlowTest extends TestCase
         $this->assertDatabaseHas('player_skills', ['player_id' => 1, 'skill_id' => 10, 'exp' => 7]);
     }
 
+    public function test_workshop_displays_the_configured_recipe_order_before_new_recipes(): void
+    {
+        $this->seedRecipe();
+        DB::table('share_items')->insert([
+            ['id' => 33, 'type' => 'recipe', 'name' => 'Второй рецепт', 'skill_id' => 10, 'skill_lvl' => 1],
+            ['id' => 34, 'type' => 'recipe', 'name' => 'Новый рецепт', 'skill_id' => 10, 'skill_lvl' => 1],
+        ]);
+        DB::table('share_recipes')->insert([
+            ['id' => 2, 'share_item_id' => 33, 'kraft_item_id' => 31, 'unlock_type' => 'learnable', 'sort_order' => 1],
+            ['id' => 3, 'share_item_id' => 34, 'kraft_item_id' => 31, 'unlock_type' => 'learnable', 'sort_order' => 0],
+        ]);
+        $collector = Mockery::mock(ItemTooltipCollector::class);
+        $collector->shouldReceive('collectFrom')->andReturnSelf();
+        $collector->shouldReceive('renderScript')->andReturn('');
+        $page = (new GetWorkshopPage($collector))->execute(user: User::findOrFail(1), structureId: 1, learnedOnly: false);
+        $this->assertSame([2, 1, 3], array_column($page['recipes'], 'id'));
+    }
+
+    public function test_blacksmith_orders_single_use_recipes_by_the_same_setting(): void
+    {
+        $this->seedRecipe(unlockType: 'single_use');
+        DB::table('share_items')->insert(['id' => 33, 'type' => 'recipe', 'name' => 'Второй рецепт', 'skill_id' => 10, 'skill_lvl' => 1]);
+        DB::table('share_recipes')->insert(['id' => 2, 'share_item_id' => 33, 'kraft_item_id' => 31, 'unlock_type' => 'single_use', 'sort_order' => 1]);
+        DB::table('items')->insert(['id' => 302, 'share_item_id' => 33]);
+        DB::table('backpacks')->insert(['user_id' => 1, 'item_id' => 302, 'count' => 1]);
+        $recipes = app(EloquentBlacksmithReadRepository::class)->getCraftRecipes(User::findOrFail(1));
+        $this->assertSame([33, 30], $recipes->map(fn ($row) => (int) $row->item->share_item_id)->all());
+    }
+
     public function test_workshop_profession_tabs_find_translated_recipes_in_both_locales(): void
     {
         $this->seedRecipe();
@@ -525,7 +555,7 @@ class PeacefulProfessionFlowTest extends TestCase
         DB::table('share_items')->insert(['id' => 30, 'type' => 'recipe', 'name' => 'Рецепт настоя', 'image' => '/recipe.png', 'rarity' => 'common', 'skill_id' => 10, 'skill_lvl' => 1, 'skill_exp' => 7]);
         DB::table('share_items')->insert(['id' => 31, 'type' => 'potion', 'name' => 'Травяной настой', 'image' => '/potion.png', 'rarity' => 'common']);
         DB::table('share_items')->insert(['id' => 32, 'type' => 'resource', 'name' => 'Трава', 'image' => '/herb.png', 'rarity' => 'common']);
-        DB::table('share_recipes')->insert(['id' => 1, 'share_item_id' => 30, 'kraft_item_id' => 31, 'percent' => 1, 'unlock_type' => $unlockType]);
+        DB::table('share_recipes')->insert(['id' => 1, 'share_item_id' => 30, 'kraft_item_id' => 31, 'percent' => 100, 'unlock_type' => $unlockType]);
         DB::table('share_recipe_has_items')->insert(['share_recipe_id' => 1, 'share_item_id' => 32, 'count' => 2]);
         DB::table('items')->insert([
             ['id' => 301, 'share_item_id' => 30],
@@ -733,6 +763,7 @@ class PeacefulProfessionFlowTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->integer('percent')->default(100);
@@ -741,6 +772,7 @@ class PeacefulProfessionFlowTest extends TestCase
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_recipe_id');
             $table->unsignedBigInteger('share_item_id');
             $table->integer('count');

@@ -8,6 +8,7 @@ use App\Modules\Backpack\Domain\Services\ItemTooltip\BackpackItemTooltipStrategy
 use App\Modules\Item\Application\ItemTooltip\ItemTooltipCollector;
 use App\Modules\Player\Domain\Services\PlayerStatService;
 use App\Modules\Structure\Blacksmith\Application\DTOs\UpgradePageDTO;
+use App\Modules\Structure\Blacksmith\Domain\Services\UpgradeScrollGrade;
 use App\Modules\Structure\Blacksmith\Domain\Services\UpgradeService;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use Illuminate\Support\Collection;
@@ -48,16 +49,27 @@ class UpgradePageViewMapper
                 'successChanceLucky' => $this->upgradeService->getSuccessChance($lvl, $pity, true),
                 'destroyChance' => $this->upgradeService->getDestroyChance($lvl),
                 'cost' => $this->upgradeService->getGoldCost($lvl),
-                'isMax' => $lvl >= 15,
+                'isMax' => $lvl >= UpgradeService::MAX_LEVEL,
+                'requiredScrollRarity' => UpgradeScrollGrade::requiredRarity($lvl)?->value,
+                'requiredScrollLabel' => UpgradeScrollGrade::requiredRarity($lvl)?->label(),
+                'requiredScrollType' => UpgradeScrollGrade::requiredScrollType($slot->item->itemInfo->type)->value,
+                'requiredScrollTypeLabel' => UpgradeScrollGrade::requiredScrollType($slot->item->itemInfo->type)->label(),
             ];
         })->values()->all();
 
-        $baseScrollViews = $baseScrolls->map(fn ($scroll) => [
-            'id' => $scroll->item->id,
-            'name' => $scroll->item->itemInfo->name,
-            'image' => $scroll->item->itemInfo->image,
-            'count' => $scroll->count,
-        ])->values()->all();
+        $baseScrollViews = $baseScrolls->map(function ($scroll): array {
+            $range = UpgradeScrollGrade::rangeFor($scroll->item->itemInfo->rarity);
+
+            return [
+                'id' => $scroll->item->id,
+                'name' => $scroll->item->itemInfo->name,
+                'image' => $scroll->item->itemInfo->image,
+                'count' => $scroll->count,
+                'rarity' => ($scroll->item->itemInfo->rarity?->value) ?? 'common',
+                'rangeLabel' => $range !== null ? sprintf('+%d…+%d', $range[0], $range[1]) : '',
+                'scrollType' => $scroll->item->itemInfo->upgrade_scroll_type?->value ?? '',
+            ];
+        })->values()->all();
 
         $bonusScrollViews = $bonusScrolls->map(fn ($scroll) => [
             'id' => $scroll->item->id,
@@ -76,6 +88,7 @@ class UpgradePageViewMapper
             baseScrolls: $baseScrollViews,
             bonusScrolls: $bonusScrollViews,
             itemTooltipScript: $itemTooltipScript,
+            maxLevel: UpgradeService::MAX_LEVEL,
         );
     }
 }

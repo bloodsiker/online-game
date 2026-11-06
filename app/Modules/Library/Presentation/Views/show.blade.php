@@ -8,15 +8,15 @@
         class="library-header-select default-select"
         data-library-header-select
         role="combobox"
-        aria-label="Материалы раздела"
+        aria-label="{{ __('library.navigation') }}"
         aria-controls="library-article-options"
         aria-expanded="false"
         tabindex="0"
     >
         <span class="wrap_inner">
-            <select class="library-header-native-select" aria-label="Материалы раздела" tabindex="-1">
+            <select class="library-header-native-select" aria-label="{{ __('library.navigation') }}" tabindex="-1">
                 @foreach($articleNavigation as $navigationArticle)
-                    <option value="{{ route('library.show', ['slug' => $navigationArticle->slug, 'category' => $selectedCategory->slug]) }}" @selected($navigationArticle->id === $article->id)>
+                    <option value="{{ $libraryUrls->article(slug: $navigationArticle->slug, parameters: ['category' => $selectedCategory->slug]) }}" @selected($navigationArticle->id === $article->id)>
                         @if($navigationArticle->category_id !== $selectedCategory->id){{ $navigationArticle->category->name }} — @endif{{ $navigationArticle->title }}
                     </option>
                 @endforeach
@@ -30,7 +30,7 @@
                     @foreach($articleNavigation as $navigationArticle)
                         <a
                             class="option @if($navigationArticle->id === $article->id) option_selected @endif"
-                            href="{{ route('library.show', ['slug' => $navigationArticle->slug, 'category' => $selectedCategory->slug]) }}"
+                            href="{{ $libraryUrls->article(slug: $navigationArticle->slug, parameters: ['category' => $selectedCategory->slug]) }}"
                             role="option"
                             aria-selected="{{ $navigationArticle->id === $article->id ? 'true' : 'false' }}"
                         >@if($navigationArticle->category_id !== $selectedCategory->id){{ $navigationArticle->category->name }} — @endif{{ $navigationArticle->title }}</a>
@@ -47,8 +47,8 @@
 
 @section('content')
     <div class="library-breadcrumbs">
-        <a href="{{ route('library.index') }}">Библиотека</a> →
-        <a href="{{ route('library.index', ['category' => $selectedCategory->slug]) }}">{{ $selectedCategory->name }}</a> →
+        <a href="{{ $libraryUrls->index() }}">{{ __('library.name') }}</a> →
+        <a href="{{ $libraryUrls->index(parameters: ['category' => $selectedCategory->slug]) }}">{{ $selectedCategory->name }}</a> →
         {{ $article->title }}
     </div>
 
@@ -57,12 +57,12 @@
 
     @if($linkedEntities->isNotEmpty())
         <div class="library-related">
-            <b>Связанные игровые объекты:</b><br>
+            <b>{{ __('library.related') }}</b><br>
             @foreach($linkedEntities as $entity)<span class="library-badge">{{ $entity['type'] }}: {{ $entity['label'] }}</span>@endforeach
         </div>
     @endif
 
     <div class="library-muted" style="margin-top:15px">
-        Опубликовано: {{ $article->published_at?->format('d.m.Y H:i') }} · просмотров: {{ $article->views_count }}
+        {{ __('library.published') }} {{ $article->published_at?->format('d.m.Y H:i') }} · {{ __('library.views') }} {{ $article->views_count }}
     </div>
 @endsection

@@ -56,10 +56,13 @@
                                         <span class="butt1 pointer"><span><input type="submit" class="grnn" value="{{ __('clan.application.decline') }}"></span></span>
                                     </form>
                                 @elseif($row['status'] === \App\Modules\Clan\Domain\Enums\ClanJoinRequestStatus::INVITE && $canInvite)
+                                    <form method="post" id="cancel-clan-request-{{ $row['id'] }}" action="{{ route('clan.request.cancel', $row['id']) }}" style="display:inline-block;">
+                                    @csrf
                                     <b class="butt2 pointer"><b>
                                         <input value="{{ __('Удалить') }}" type="button" style="width:100px"
-                                               onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить запрос на вступление?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){location.href='{{ route('clan.request.cancel', $row['id']) }}'});">
+                                               onclick="return top.systemConfirm({!! \Illuminate\Support\Js::from(__('Вы действительно хотите отменить запрос на вступление?')) !!},{!! \Illuminate\Support\Js::from(__('Действие')) !!},false,function(){document.getElementById('cancel-clan-request-{{ $row['id'] }}').submit()});">
                                     </b></b>
+                                    </form>
                                 @else
                                     —
                                 @endif

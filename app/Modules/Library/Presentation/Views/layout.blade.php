@@ -1,9 +1,14 @@
 <!doctype html>
-<html lang="ru">
+@php($libraryUrls = $libraryUrls ?? app(\App\Modules\Library\Presentation\Services\LibraryUrls::class))
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') — @yield('site-section', 'Библиотека')</title>
+    @isset($seo)
+        @include('library::partials.seo')
+    @else
+        <title>@yield('title') — @yield('site-section', __('library.name'))</title>
+    @endisset
     <script src="{{ asset('main/js/common.js') }}"></script>
     <script src="{{ asset('main/js/simple_alt.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('main/css/main_register.css') }}">
@@ -26,6 +31,10 @@
             background-image: url('{{ asset('main/images/theme_old/bg.gif') }}');
         }
         .library-main { top: 100px; padding-bottom: 100px; }
+        .library-page-title { margin: 0 0 14px; color: #700000; font-size: 18px; line-height: 1.3; }
+        .library-language-switch { display: flex; margin: 0 0 10px; gap: 8px; justify-content: flex-end; font-size: 11px; }
+        .library-language-switch a { color: #700000; }
+        .library-language-switch a[aria-current="page"] { font-weight: bold; }
         .library-header-menu-link {
             position: relative;
             z-index: 3;
@@ -312,11 +321,11 @@
                         <div class="b-nav-lvl-1__create">
                             @auth
                                 <a class="b-auth-button" href="{{ route('game') }}">
-                                    <span class="b-auth-button__content"><span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">В игру</span></span>
+                                    <span class="b-auth-button__content"><span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">{{ __('library.play') }}</span></span>
                                 </a>
                             @else
                                 <a class="b-auth-button" href="{{ route('register') }}">
-                                    <span class="b-auth-button__content"><span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">Регистрация</span></span>
+                                    <span class="b-auth-button__content"><span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">{{ __('library.register') }}</span></span>
                                 </a>
                             @endauth
                         </div>
@@ -326,7 +335,7 @@
                 <div class="b-nav-lvl-1__logo">
                     <a class="b-auth-button" style="position:relative;left:24px;top:7px">
                         <span class="b-auth-button__content">
-                            <span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">В игре сейчас: <span data-online-count>{{ $onlineCount }}</span></span>
+                            <span class="b-aside__impo-link" style="font-size:15px;font-weight:bold;position:relative;color:#d49b2c;left:1px;top:-3px">{{ __('library.online') }} <span data-online-count>{{ $onlineCount }}</span></span>
                         </span>
                     </a>
                 </div>
@@ -334,19 +343,19 @@
                 <div class="b-nav-lvl-1__menu">
                     <ul class="b-nav-lvl-1__menu-list">
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
-                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('index') }}"><span>Главная</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('index') }}"><span>{{ __('library.home') }}</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item {{ request()->routeIs('library.*') ? 'is-active' : '' }}" style="list-style-type:none">
-                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('library.index') }}"><span>Библиотека</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ $libraryUrls->index() }}"><span>{{ __('library.name') }}</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item {{ request()->routeIs('forum.*') ? 'is-active' : '' }}" style="list-style-type:none">
-                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('forum.index') }}"><span>Форум</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="{{ route('forum.index') }}"><span>{{ __('library.forum') }}</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
                             <a class="b-aside__impo-link library-header-menu-link" href="#"><span>Телеграм</span></a>
                         </li>
                         <li class="b-nav-lvl-1__menu-item" style="list-style-type:none">
-                            <a class="b-aside__impo-link library-header-menu-link" href="#"><span>Контакты</span></a>
+                            <a class="b-aside__impo-link library-header-menu-link" href="#"><span>{{ __('library.contacts') }}</span></a>
                         </li>
                     </ul>
                 </div>
@@ -369,7 +378,7 @@
                                         @forelse($categories ?? [] as $category)
                                             @include('library::partials.sidebar-category', ['item' => $category, 'depth' => 0])
                                         @empty
-                                            <div class="library-empty">Разделы пока не добавлены.</div>
+                                            <div class="library-empty">{{ __('library.no_categories') }}</div>
                                         @endforelse
                                     @endif
                                     <div class="b-common-block__bgl forum-nav-group"></div>
@@ -393,12 +402,22 @@
                                     @hasSection('panel-header')
                                         @yield('panel-header')
                                     @else
-                                        <span>@yield('panel-title', 'Библиотека')</span>
+                                        <span>@yield('panel-title', __('library.name'))</span>
                                     @endif
                                 </span>
                             </span>
                             <div class="b-common-block__cont"><div class="b-common-block__bgl"><div class="b-common-block__bgr">
-                                <div class="library-common-content">@yield('content')</div>
+                                <div class="library-common-content">
+                                    @isset($seo)
+                                    <nav class="library-language-switch" aria-label="{{ __('library.language') }}">
+                                        @foreach($seo->alternates as $language => $url)
+                                            <a href="{{ $url }}" lang="{{ $language }}" hreflang="{{ $language }}" @if($language === app()->getLocale()) aria-current="page" @endif>{{ $language === 'uk' ? 'Українська' : 'Русский' }}</a>
+                                        @endforeach
+                                    </nav>
+                                    <h1 class="library-page-title">{{ $seo->heading }}</h1>
+                                    @endisset
+                                    @yield('content')
+                                </div>
                             </div></div></div>
                         </div>
                     </div>

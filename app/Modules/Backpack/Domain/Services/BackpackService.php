@@ -250,21 +250,32 @@ class BackpackService
 
     protected function removeBackpackItem(Backpack $backpackItem, int $quantity): bool
     {
-        \DB::transaction(function () use ($backpackItem, $quantity) {
-            if ($backpackItem->count <= $quantity) {
-                $item = $backpackItem->item;
-                $backpackItem->delete();
+        if ($quantity < 1) {
+            return false;
+        }
 
-                $hasOtherReferences = Backpack::where('item_id', $item->id)->exists();
-                if (! $hasOtherReferences) {
+        return \DB::transaction(function () use ($backpackItem, $quantity): bool {
+            $backpackItem = Backpack::query()->whereKey($backpackItem->id)
+                ->where('user_id', $backpackItem->user_id)->where('equipped', 0)->lockForUpdate()->first();
+            if ($backpackItem === null || $backpackItem->count < $quantity) {
+                return false;
+            }
+            if ((int) $backpackItem->count === $quantity) {
+                $item = $backpackItem->item;
+                if (! $backpackItem->delete()) {
+                    return false;
+                }
+
+                $hasOtherReferences = Backpack::where('item_id', $backpackItem->item_id)->exists();
+                if ($item !== null && ! $hasOtherReferences) {
                     $item->delete();
                 }
             } else {
-                $backpackItem->decrement('count', $quantity);
+                return Backpack::whereKey($backpackItem->id)->where('count', '>=', $quantity)->decrement('count', $quantity) === 1;
             }
-        });
 
-        return true;
+            return true;
+        });
     }
 
     public function useItem(User $user, int $backpackId, array $params = []): bool

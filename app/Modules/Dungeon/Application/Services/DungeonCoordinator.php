@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Dungeon\Application\Services;
 
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Battle\Domain\Enums\BattleDetailStatus;
+use App\Modules\Battle\Domain\Enums\BattleStatus;
+use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
+use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Dungeon\Domain\Contracts\DungeonCooldownRepository;
 use App\Modules\Dungeon\Domain\Contracts\DungeonSessionRepository;
 use App\Modules\Dungeon\Domain\Contracts\TransactionManager;
@@ -163,49 +167,63 @@ class DungeonCoordinator
 
     public function expireSessionIfNeeded(User $user): bool
     {
-        $session = $this->sessionRepository->findByUserId($user->id);
-
-        $stageExpired = $session?->run?->status === DungeonRunStatus::ACTIVE
-            && $session->run->stage_expires_at !== null
-            && now()->gt($session->run->stage_expires_at);
-
-        if ($session === null || (! $session->isExpired() && ! $stageExpired)) {
+        $observed = $this->sessionRepository->findByUserId($user->id);
+        if ($observed === null) {
             return false;
         }
+        $ids = $this->sessionUserIds($observed);
 
-        $returnLocationId = $session->dungeon->return_location_id ?? 6;
-
-        $this->transactionManager->run(function () use ($user, $session, $returnLocationId) {
-            if ($session->dungeon_run_id !== null) {
-                $rootSession = DungeonSession::query()
-                    ->where('dungeon_run_id', $session->dungeon_run_id)
-                    ->whereNull('primary_session_id')
-                    ->first() ?? $session;
-                $participantIds = DungeonRunParticipant::query()
-                    ->where('dungeon_run_id', $session->dungeon_run_id)
-                    ->pluck('user_id');
-
-                $this->markRunFailed($session, 'Время этапа истекло.');
-                $this->cleanupSessionMonsters($rootSession, force: true);
-                User::query()->whereIn('id', $participantIds)->update([
-                    'prev_location_id' => DB::raw('location_id'),
-                    'location_id' => $returnLocationId,
-                ]);
-                foreach ($participantIds as $participantId) {
-                    UserLocationChanged::dispatch((int) $participantId);
-                }
-                DungeonSession::query()->where('dungeon_run_id', $session->dungeon_run_id)->delete();
-                $user->location_id = $returnLocationId;
-
-                return;
+        return $this->transactionManager->run(function () use ($user, $observed, $ids): bool {
+            $this->lockSessionUsers($ids);
+            $battleQuery = Battle::whereIn('id',
+                BattleDetail::whereIn('user_id', $ids)->select('battle_id'));
+            if ($observed->dungeon_run_id !== null) {
+                $battleQuery->where('dungeon_run_id', $observed->dungeon_run_id);
+            } else {
+                $battleQuery->whereHas('details', fn ($detail) => $detail->whereHas('locationMonster',
+                    fn ($spawn) => $spawn->where('dungeon_session_id', $observed->monsterSessionId())));
             }
+            $battles = $battleQuery->orderBy('id')->lockForUpdate()->get();
+            if ($observed->dungeon_run_id !== null) {
+                DungeonRun::whereKey($observed->dungeon_run_id)->lockForUpdate()->first();
+            }
+            $session = DungeonSession::with(['dungeon', 'run'])->whereKey($observed->id)->lockForUpdate()->first();
+            $stageExpired = $session?->run?->status === DungeonRunStatus::ACTIVE
+                && $session->run->stage_expires_at !== null && now()->gt($session->run->stage_expires_at);
+            if ($session === null || (! $session->isExpired() && ! $stageExpired)) {
+                return false;
+            }
+            $returnLocationId = $session->dungeon->return_location_id ?? 6;
+            $activeIds = $session->dungeon_run_id === null ? [$session->user_id] : DungeonSession::where('dungeon_run_id', $session->dungeon_run_id)->pluck('user_id')->all();
+            foreach ($battles as $battle) {
+                BattleDetail::where('battle_id', $battle->id)->whereIn('user_id', $activeIds)
+                    ->update(['status' => BattleDetailStatus::DEATH]);
+                if (! BattleDetail::where('battle_id', $battle->id)
+                    ->whereNotNull('user_id')->where('status', BattleDetailStatus::LIFE)->exists()) {
+                    $battle->update(['status' => BattleStatus::FINISH]);
+                }
+            }
+            if ($session->dungeon_run_id !== null) {
+                $root = DungeonSession::where('dungeon_run_id', $session->dungeon_run_id)->whereNull('primary_session_id')->lockForUpdate()->first() ?? $session;
+                $this->markRunFailed($session, 'Время этапа истекло.');
+                $this->cleanupSessionMonsters($root, force: true);
+                User::whereIn('id', $activeIds)->update(['prev_location_id' => DB::raw('location_id'), 'location_id' => $returnLocationId]);
+                DungeonSession::where('dungeon_run_id', $session->dungeon_run_id)->delete();
+            } else {
+                $lockedUser = User::without('player')->findOrFail($user->id);
+                $this->teleportUser($lockedUser, $returnLocationId);
+                $this->cleanupSessionMonsters($session);
+                $this->sessionRepository->delete($session);
+            }
+            DB::afterCommit(function () use ($activeIds): void {
+                foreach ($activeIds as $id) {
+                    UserLocationChanged::dispatch((int) $id);
+                }
+            });
+            $user->location_id = $returnLocationId;
 
-            $this->teleportUser($user, $returnLocationId);
-            $this->cleanupSessionMonsters($session);
-            $this->sessionRepository->delete($session);
+            return true;
         });
-
-        return true;
     }
 
     public function handlePlayerDeath(Player $player): ?string
@@ -240,6 +258,25 @@ class DungeonCoordinator
 
     public function tryAdvanceSurvivalWave(DungeonSession $session, Location $location): void
     {
+        $ids = $this->sessionUserIds($session);
+        $this->transactionManager->run(function () use ($session, $location, $ids): void {
+            $this->lockSessionUsers($ids);
+            if ($session->dungeon_run_id !== null) {
+                $run = DungeonRun::whereKey($session->dungeon_run_id)->lockForUpdate()->first();
+                if ($run === null || $run->status !== DungeonRunStatus::ACTIVE) {
+                    return;
+                }
+            }
+            $session = DungeonSession::whereKey($session->monsterSessionId())->lockForUpdate()->first();
+            if ($session === null || $session->isCompleted() || $session->isExpired()) {
+                return;
+            }
+            $this->advanceSurvivalWaveLocked($session, $location);
+        });
+    }
+
+    private function advanceSurvivalWaveLocked(DungeonSession $session, Location $location): void
+    {
         $dungeon = $location->dungeon;
 
         if ($dungeon === null || ! $dungeon->isSurvival() || $dungeon->wave_count === null) {
@@ -265,8 +302,7 @@ class DungeonCoordinator
         if ($session->current_wave >= $dungeon->wave_count) {
             if ($session->dungeon_run_id !== null) {
                 $this->completeSharedRun($session);
-            } elseif (! $session->isCompleted()) {
-                $this->sessionRepository->markCompleted($session);
+            } elseif ($this->sessionRepository->markCompleted($session)) {
                 $this->rewardService->grant($dungeon, $session->user);
             }
 
@@ -274,9 +310,25 @@ class DungeonCoordinator
         }
 
         $session = $this->sessionRepository->incrementWave($session);
+        if ($session->dungeon_run_id !== null) {
+            DungeonSession::where('dungeon_run_id', $session->dungeon_run_id)->where('id', '!=', $session->id)->update(['current_wave' => $session->current_wave]);
+        }
 
         $location->load('monsters');
         $this->spawnWaveOnLocation($location, $dungeonSessionId);
+    }
+
+    private function sessionUserIds(DungeonSession $session): array
+    {
+        return ($session->dungeon_run_id === null ? DungeonSession::where('id', $session->monsterSessionId())->orWhere('primary_session_id', $session->monsterSessionId())->pluck('user_id') : DungeonRunParticipant::where('dungeon_run_id', $session->dungeon_run_id)->pluck('user_id')->push($session->user_id))
+            ->filter()->unique()->sort()->values()->all();
+    }
+
+    private function lockSessionUsers(array $ids): void
+    {
+        foreach ($ids as $id) {
+            User::without('player')->whereKey($id)->lockForUpdate()->firstOrFail();
+        }
     }
 
     public function spawnWaveOnLocation(Location $location, int $sessionId): void
@@ -539,11 +591,14 @@ class DungeonCoordinator
             return;
         }
 
-        DungeonRun::query()->whereKey($session->dungeon_run_id)->update([
+        $failed = DungeonRun::query()->whereKey($session->dungeon_run_id)->where('status', DungeonRunStatus::ACTIVE)->update([
             'status' => DungeonRunStatus::FAILED->value,
             'failure_reason' => $reason,
             'finished_at' => now(),
         ]);
+        if ($failed === 0) {
+            return;
+        }
         DungeonRunParticipant::query()->where('dungeon_run_id', $session->dungeon_run_id)->update([
             'status' => 'failed',
             'finished_at' => now(),
@@ -552,27 +607,29 @@ class DungeonCoordinator
 
     private function completeSharedRun(DungeonSession $session): void
     {
-        $completed = DungeonRun::query()
-            ->whereKey($session->dungeon_run_id)
-            ->where('status', DungeonRunStatus::ACTIVE->value)
-            ->update([
-                'status' => DungeonRunStatus::COMPLETED->value,
-                'finished_at' => now(),
-                'stage_expires_at' => null,
-            ]);
+        $this->transactionManager->run(function () use ($session): void {
+            $completed = DungeonRun::query()
+                ->whereKey($session->dungeon_run_id)
+                ->where('status', DungeonRunStatus::ACTIVE->value)
+                ->update([
+                    'status' => DungeonRunStatus::COMPLETED->value,
+                    'finished_at' => now(),
+                    'stage_expires_at' => null,
+                ]);
 
-        if ($completed === 0) {
-            return;
-        }
-
-        $run = DungeonRun::query()->with(['dungeon', 'participants.user'])->findOrFail($session->dungeon_run_id);
-        $run->participants()->update(['status' => 'completed', 'finished_at' => now()]);
-        $run->sessions()->update(['completed_at' => now()]);
-        foreach ($run->participants as $participant) {
-            if ($participant->user !== null) {
-                $this->rewardService->grant($run->dungeon, $participant->user);
+            if ($completed === 0) {
+                return;
             }
-        }
+
+            $run = DungeonRun::query()->with(['dungeon', 'participants.user'])->findOrFail($session->dungeon_run_id);
+            $run->participants()->update(['status' => 'completed', 'finished_at' => now()]);
+            $run->sessions()->update(['completed_at' => now()]);
+            foreach ($run->participants as $participant) {
+                if ($participant->user !== null) {
+                    $this->rewardService->grant($run->dungeon, $participant->user);
+                }
+            }
+        });
     }
 
     private function teleportUser(User $user, int $locationId): void

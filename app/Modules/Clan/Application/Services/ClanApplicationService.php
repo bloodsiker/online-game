@@ -10,8 +10,8 @@ use App\Modules\Clan\Application\Notifications\ClanApplicationReceivedNotificati
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanJoinRequest;
 use App\Modules\Clan\Domain\Services\ClanService;
-use App\Modules\Clan\Domain\Services\ClanSkillService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Throwable;
@@ -20,11 +20,15 @@ final readonly class ClanApplicationService
 {
     public function __construct(
         private ClanService $clanService,
-        private ClanSkillService $clanSkillService,
         private ChatService $chatService,
     ) {}
 
     public function apply(User $applicant, Clan $clan): ClanJoinRequest
+    {
+        return DB::transaction(fn () => $this->applyLocked($applicant, $clan), attempts: 3);
+    }
+
+    private function applyLocked(User $applicant, Clan $clan): ClanJoinRequest
     {
         $application = $this->clanService->applyToClan($applicant, $clan);
         $applicant->loadMissing('player');
@@ -41,37 +45,40 @@ final readonly class ClanApplicationService
             ->with('user')
             ->first()?->user ?? $clan->owner;
 
-        if ($leader?->email) {
-            try {
-                Notification::route('mail', $leader->email)->notify(
-                    new ClanApplicationReceivedNotification(
-                        clanName: $clan->name,
-                        applicantName: $applicant->name,
-                        applicantLevel: (int) ($applicant->player?->lvl ?? 0),
-                    ),
-                );
-            } catch (Throwable $exception) {
-                Log::warning('Failed to email clan leader about a join application.', [
-                    'clan_id' => $clan->id,
-                    'applicant_id' => $applicant->id,
-                    'leader_id' => $leader->id,
-                    'exception' => $exception,
-                ]);
+        DB::afterCommit(function () use ($leader, $clan, $applicant): void {
+            if ($leader?->email) {
+                try {
+                    Notification::route('mail', $leader->email)->notify(
+                        new ClanApplicationReceivedNotification(
+                            clanName: $clan->name,
+                            applicantName: $applicant->name,
+                            applicantLevel: (int) ($applicant->player?->lvl ?? 0),
+                        ),
+                    );
+                } catch (Throwable $exception) {
+                    Log::warning('Failed to email clan leader about a join application.', [
+                        'clan_id' => $clan->id,
+                        'applicant_id' => $applicant->id,
+                        'leader_id' => $leader->id,
+                        'exception' => $exception,
+                    ]);
+                }
             }
-        }
+        });
 
         return $application;
     }
 
     public function accept(User $actor, ClanJoinRequest $application): void
     {
+        DB::transaction(fn () => $this->acceptLocked($actor, $application), attempts: 3);
+    }
+
+    private function acceptLocked(User $actor, ClanJoinRequest $application): void
+    {
         $application = $this->clanService->acceptApplication($actor, $application);
         $member = $application->user;
         $clan = $application->clan;
-
-        if ($member->player !== null) {
-            $this->clanSkillService->applyAllSkillsToPlayer($member->player, $clan);
-        }
 
         $this->chatService->sendClanNotice(
             (int) $clan->id,

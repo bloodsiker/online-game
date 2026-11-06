@@ -21,9 +21,9 @@ Route::post('/clan/role/add', [ClanController::class, 'addRole'])->name('clan.ro
 Route::post('/clan/role/save', [ClanController::class, 'saveRoles'])->name('clan.role.save');
 Route::delete('/clan/role/{role}', [ClanController::class, 'deleteRole'])->name('clan.role.delete');
 Route::post('/clan/invite', [ClanController::class, 'invite'])->name('clan.invite');
-Route::get('/clan/invite/accept/{inviteUuid}', [ClanController::class, 'acceptInvite'])->whereUuid('inviteUuid')->name('clan.invite.accept');
-Route::get('/clan/invite/decline/{inviteUuid}', [ClanController::class, 'declineInvite'])->whereUuid('inviteUuid')->name('clan.invite.decline');
-Route::get('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->name('clan.request.cancel');
+Route::post('/clan/invite/accept/{inviteUuid}', [ClanController::class, 'acceptInvite'])->middleware('auth')->whereUuid('inviteUuid')->name('clan.invite.accept');
+Route::post('/clan/invite/decline/{inviteUuid}', [ClanController::class, 'declineInvite'])->middleware('auth')->whereUuid('inviteUuid')->name('clan.invite.decline');
+Route::post('/clan/request/{joinRequest}', [ClanController::class, 'cancelRequest'])->middleware('auth')->name('clan.request.cancel');
 Route::get('/clan/information', [ClanController::class, 'information'])->name('clan.information');
 Route::get('/clan/characteristics', [ClanController::class, 'characteristics'])->name('clan.characteristics');
 Route::get('/clan/logs', [ClanController::class, 'logs'])->name('clan.logs');

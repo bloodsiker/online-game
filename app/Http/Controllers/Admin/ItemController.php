@@ -16,6 +16,7 @@ use App\Modules\Player\Domain\Enums\PlayerStatKey;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestObjective;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
 use App\Modules\Share\Application\UseCases\Admin\DeleteShareItem;
+use App\Modules\Share\Application\UseCases\Admin\ReorderRecipeIngredients;
 use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\GatheringToolFamily;
 use App\Modules\Share\Domain\Enums\ItemBuffReapplyPolicy;
@@ -287,7 +288,7 @@ class ItemController extends Controller
                 $recipe->save();
 
                 $recipe->items()->sync($item->recipe->items->mapWithKeys(
-                    fn (ShareItem $ingredient): array => [$ingredient->id => ['count' => $ingredient->pivot->count]],
+                    fn (ShareItem $ingredient): array => [$ingredient->id => ['count' => $ingredient->pivot->count, 'sort_order' => $ingredient->pivot->sort_order]],
                 )->all());
             }
 
@@ -484,12 +485,39 @@ class ItemController extends Controller
 
     public function addItemToRecipe(Request $request, ShareRecipe $recipe): RedirectResponse
     {
-        $recipe->items()->attach(
-            (int) $request->input('share_item_id'),
-            ['count' => (int) $request->input('count', 1)]
-        );
+        $data = $request->validate([
+            'share_item_id' => ['required', 'integer', 'exists:share_items,id'],
+            'count' => ['sometimes', 'integer', 'min:1', 'max:2147483647'],
+        ]);
+        DB::transaction(function () use ($recipe, $data): void {
+            ShareRecipe::whereKey($recipe->id)->lockForUpdate()->firstOrFail();
+            $position = (int) DB::table('share_recipe_has_items')->where('share_recipe_id', $recipe->id)->max('sort_order') + 1;
+            $recipe->items()->attach((int) $data['share_item_id'], ['count' => (int) ($data['count'] ?? 1), 'sort_order' => $position]);
+        });
 
         return redirect()->back()->with('success', 'Ресурс добавлен.');
+    }
+
+    public function updateIngredientOrder(Request $request, ShareRecipe $recipe, ReorderRecipeIngredients $reorder): RedirectResponse
+    {
+        $data = $request->validate([
+            'ingredient_ids' => ['present', 'array'],
+            'ingredient_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ]);
+        $reorder->execute(recipe: $recipe, ids: collect($data['ingredient_ids'])->map(fn ($id): int => (int) $id));
+
+        return redirect()->back()->with('success', 'Порядок ингредиентов сохранён.');
+    }
+
+    public function updateIngredientInRecipe(Request $request, ShareRecipe $recipe, ShareItem $item): RedirectResponse
+    {
+        abort_unless($recipe->items()->whereKey($item->id)->exists(), 404);
+        $data = $request->validate([
+            'count' => ['required', 'integer', 'min:1', 'max:2147483647'],
+        ]);
+        $recipe->items()->updateExistingPivot($item->id, ['count' => (int) $data['count']]);
+
+        return redirect()->back()->with('success', 'Количество ингредиента обновлено.');
     }
 
     public function deleteItemInRecipe(Request $request, ShareRecipe $recipe, ShareItem $item): RedirectResponse

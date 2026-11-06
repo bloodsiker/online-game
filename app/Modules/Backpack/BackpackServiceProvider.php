@@ -7,6 +7,7 @@ namespace App\Modules\Backpack;
 use App\Modules\Backpack\Application\Listeners\GiveStarterBonus;
 use App\Modules\Backpack\Domain\Repositories\BackpackRepositoryInterface;
 use App\Modules\Backpack\Infrastructure\Persistence\EloquentBackpackRepository;
+use App\Modules\Backpack\Presentation\Console\AuditInventoryDuplicates;
 use App\Modules\User\Domain\Events\UserRegistered;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ class BackpackServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([AuditInventoryDuplicates::class]);
+        }
         Event::listen(UserRegistered::class, GiveStarterBonus::class);
 
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'backpack');

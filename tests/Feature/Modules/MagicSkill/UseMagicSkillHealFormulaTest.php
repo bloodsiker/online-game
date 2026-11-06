@@ -7,6 +7,7 @@ namespace Tests\Feature\Modules\MagicSkill;
 use App\Modules\Battle\Application\Services\Combat\BattleEffectService;
 use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
+use App\Modules\MagicSkill\Application\Services\MagicCastTransaction;
 use App\Modules\MagicSkill\Application\UseCases\UseMagicSkill;
 use App\Modules\MagicSkill\Infrastructure\Persistence\EloquentMagicSkillRepository;
 use App\Modules\MagicSkill\Infrastructure\Persistence\Models\MagicSkill;
@@ -119,6 +120,7 @@ class UseMagicSkillHealFormulaTest extends TestCase
             statService: $statService,
             effectService: $effectService,
             castGuard: $castGuard,
+            castTransaction: new MagicCastTransaction,
             magicHitCalc: $magicHitCalc,
         );
 
@@ -196,6 +198,17 @@ class UseMagicSkillHealFormulaTest extends TestCase
 
     private function createTables(): void
     {
+        foreach (['player_artifacts' => 'player_id', 'player_influence_medals' => 'user_id'] as $name => $ownerColumn) {
+            Schema::create($name, function (Blueprint $table) use ($ownerColumn): void {
+                $table->id();
+                $table->unsignedBigInteger($ownerColumn);
+            });
+        }
+        Schema::create('player_injuries', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->timestamp('expires_at')->nullable();
+        });
         Schema::create('locations', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -224,6 +237,7 @@ class UseMagicSkillHealFormulaTest extends TestCase
             $table->float('intelligence')->default(1.0);
             $table->float('endurance')->default(1.0);
             $table->float('experience_multiplier')->default(1.0);
+            $table->integer('reputation_rating')->default(0);
             $table->integer('free_stats')->default(0);
             $table->timestamps();
         });

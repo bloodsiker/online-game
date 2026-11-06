@@ -23,7 +23,7 @@ class BattleRepository
         return Battle::query()->select(['battles.*']);
     }
 
-    public function findActiveBattleOnLocation(Location $location, ?int $dungeonRunId = null): ?Battle
+    public function findActiveBattleOnLocation(Location $location, ?int $dungeonRunId = null, ?int $monsterSessionId = null, bool $forUpdate = false): ?Battle
     {
         return $this->getQuery()
             ->where(['location_id' => $location->id, 'status' => BattleStatus::ACTIVE])
@@ -32,7 +32,10 @@ class BattleRepository
                 fn (Builder $query) => $query->where('dungeon_run_id', $dungeonRunId),
                 fn (Builder $query) => $query->whereNull('dungeon_run_id'),
             )
-            ->first();
+            ->when($monsterSessionId !== null && $dungeonRunId === null,
+                fn ($query) => $query->whereHas('details', fn ($detail) => $detail->whereHas('locationMonster', fn ($spawn) => $spawn->where('dungeon_session_id', $monsterSessionId))))
+            ->when($forUpdate, fn ($query) => $query->lockForUpdate())
+            ->orderBy('id')->first();
     }
 
     public function hasLivingPlayerInActiveBattle(int $userId, int $locationId): bool
@@ -71,27 +74,27 @@ class BattleRepository
 
     public function createBattleDetails(Battle $battle, ?User $user = null, ?MonsterOnLocation $monsterOnLocation = null): BattleDetail
     {
-        $battleDetails = new BattleDetail;
-        $battleDetails->battle_id = $battle->id;
+        $identity = ['battle_id' => $battle->id];
 
         if ($user instanceof User) {
             GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
-            $battleDetails->user_id = $user->id;
+            $identity['user_id'] = $user->id;
         }
 
         if ($monsterOnLocation instanceof MonsterOnLocation) {
-            $battleDetails->location_monster_id = $monsterOnLocation->id;
+            $identity['location_monster_id'] = $monsterOnLocation->id;
         }
 
-        $battleDetails->save();
-
-        return $battleDetails;
+        // firstOrCreate uses a savepoint and handles only a real unique conflict.
+        return BattleDetail::query()->lockForUpdate()->firstOrCreate(attributes: $identity);
     }
 
     public function createBattleRound(Battle $battle, string $action, User $user): BattleRound
     {
         return DB::transaction(function () use ($battle, $user, $action) {
-            $battle->increment('rounds');
+            $lockedBattle = Battle::whereKey($battle->id)->lockForUpdate()->firstOrFail();
+            $lockedBattle->increment('rounds');
+            $battle->rounds = $lockedBattle->rounds;
 
             $round = BattleRound::create([
                 'battle_id' => $battle->id,

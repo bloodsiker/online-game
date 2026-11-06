@@ -104,6 +104,8 @@ final class MapInfluenceService
                     : (string) (Map::query()->find($mapId)?->name ?? "Карта #{$mapId}"),
                 amount: $amount,
                 total: $after,
+                playerProgress: $sourceType === 'world_event' && isset($metadata['player_progress']) ? (int) $metadata['player_progress'] : null,
+                playerLimit: $sourceType === 'world_event' && isset($metadata['player_limit']) ? (int) $metadata['player_limit'] : null,
             );
 
             return new MapInfluenceAwardResult(

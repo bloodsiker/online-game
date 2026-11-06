@@ -36,6 +36,7 @@ final readonly class AdministrationMailService
     public function send(User $player, string $subject, string $text, ?int $threadId = null): PostLetter
     {
         return DB::transaction(function () use ($player, $subject, $text, $threadId): PostLetter {
+            User::without('player')->whereKey($player->id)->lockForUpdate()->firstOrFail();
             $thread = $threadId === null ? null : $this->threads()->where('sender_user_id', $player->id)
                 ->lockForUpdate()->findOrFail($threadId);
             $letter = PostLetter::query()->create([
@@ -58,7 +59,13 @@ final readonly class AdministrationMailService
     {
         abort_unless($admin->is_admin, 403);
 
-        return DB::transaction(function () use ($admin, $threadId, $text): PostLetter {
+        $recipientId = $this->thread($threadId)->sender_user_id;
+        abort_if($recipientId === null, 422, 'Игрок удалён.');
+
+        return DB::transaction(function () use ($admin, $threadId, $text, $recipientId): PostLetter {
+            collect([$admin->id, $recipientId])->unique()->sort()->each(
+                fn ($id) => User::without('player')->whereKey($id)->lockForUpdate()->firstOrFail(),
+            );
             $thread = $this->threads()->lockForUpdate()->findOrFail($threadId);
             abort_if($thread->sender_user_id === null, 422, 'Игрок удалён.');
             $reply = PostLetter::query()->create([

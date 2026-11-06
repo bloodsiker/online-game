@@ -21,5 +21,6 @@ final readonly class UpgradePageDTO
         public array $baseScrolls,
         public array $bonusScrolls,
         public string $itemTooltipScript,
+        public int $maxLevel = 25,
     ) {}
 }

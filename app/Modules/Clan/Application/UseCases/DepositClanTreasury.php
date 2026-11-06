@@ -33,19 +33,24 @@ class DepositClanTreasury
             abort(404);
         }
 
-        if (! $context->clan->hasPaidTax() && ! $context->membership->role->is_leader) {
-            throw new RuntimeException('До оплаты налога клановый банк доступен только главе.');
-        }
-
-        if ($amount > $user->money) {
-            throw new RuntimeException('Сумма превышает количество монет в кошельке.');
-        }
-
-        $this->transactionManager->run(function () use ($user, $context, $clanWarehouse, $amount) {
-            $user->decrement('money', $amount);
+        $this->transactionManager->run(function () use ($user, $context, $clanWarehouse, $amount): void {
+            $context = $this->resolveClanContext->lockForTreasury(user: $user, clanId: (int) $context->clan->id);
+            $user = $context->user;
+            if (! $context->clan->hasPaidTax() && ! $context->membership->role->is_leader) {
+                throw new RuntimeException('До оплаты налога клановый банк доступен только главе.');
+            }
+            if ((int) $user->money < $amount) {
+                throw new RuntimeException('Сумма превышает количество монет в кошельке.');
+            }
+            if ((int) $context->clan->treasury > PHP_INT_MAX - $amount) {
+                throw new RuntimeException('Превышен допустимый баланс казны.');
+            }
+            if (User::query()->whereKey($user->id)->where('money', '>=', $amount)->decrement('money', $amount) !== 1) {
+                throw new RuntimeException('Сумма превышает количество монет в кошельке.');
+            }
             $context->clan->increment('treasury', $amount);
 
-            $balance = $context->clan->fresh()->treasury;
+            $balance = (int) $context->clan->treasury;
 
             ClanTreasuryLog::create([
                 'clan_id' => $context->clan->id,

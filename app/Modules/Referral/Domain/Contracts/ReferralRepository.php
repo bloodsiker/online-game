@@ -15,6 +15,9 @@ interface ReferralRepository
 
     public function findReferralByReferredUserId(int $referredUserId): ?Referral;
 
+    /** Inside a transaction: users by ID → referred player → referral. */
+    public function lockRewardReferral(Referral $observed): ?Referral;
+
     public function hasReferralForReferredUser(int $referredUserId): bool;
 
     public function createReferral(int $referrerUserId, int $referredUserId): void;

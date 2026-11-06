@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Event\Presentation\Http;
 
 use App\Modules\Event\Application\UseCases\GetActivityCards;
+use App\Modules\Event\Application\UseCases\GetLocationWorldEvents;
 use App\Modules\Event\Application\UseCases\GetPlayerMapInfluences;
 use App\Modules\Event\Application\UseCases\GetWorldEventCards;
 use App\Modules\Event\Domain\Enums\ActivityPeriod;
@@ -23,6 +24,16 @@ final class EventController
         private readonly GetWorldEventCards $getWorldEventCards,
         private readonly GetPlayerMapInfluences $getPlayerMapInfluences,
     ) {}
+
+    public function location(Request $request, GetLocationWorldEvents $events): JsonResponse
+    {
+        $locationEvents = $events->execute($request->user());
+
+        return response()->json([
+            'events' => $locationEvents,
+            'html' => view('event::location-cards', compact('locationEvents'))->render(),
+        ])->header('Cache-Control', 'no-store');
+    }
 
     public function index(Request $request): View
     {

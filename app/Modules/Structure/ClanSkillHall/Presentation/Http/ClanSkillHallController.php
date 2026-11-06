@@ -13,6 +13,7 @@ use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RuntimeException;
 
@@ -50,14 +51,15 @@ class ClanSkillHallController extends Controller
         ]);
     }
 
-    public function learn(int $id, int $skillId): RedirectResponse
+    public function learn(Request $request, int $id, int $skillId): RedirectResponse
     {
         /** @var User $user */
         $user = Auth::user();
         $this->findHall($id);
 
+        $validated = $request->validate(['expected_level' => ['required', 'integer', 'min:0', 'max:254']]);
         try {
-            $error = $this->learnClanSkill->execute($user, $skillId);
+            $error = $this->learnClanSkill->execute(user: $user, definitionId: $skillId, expectedLevel: (int) $validated['expected_level']);
 
             return redirect()->route('clan_skill_hall', ['id' => $id])
                 ->with($error === null ? 'success' : 'message', $error ?? 'Навык клана успешно улучшен!');

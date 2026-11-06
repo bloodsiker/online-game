@@ -9,14 +9,14 @@
 
 @section('content')
     <div class="library-breadcrumbs">
-        <a href="{{ route('library.index') }}">Библиотека</a> → {{ $selectedCategory->name }}
+        <a href="{{ $libraryUrls->index() }}">{{ __('library.name') }}</a> → {{ $selectedCategory->name }}
     </div>
 
     @if($selectedCategory->description)
         <p class="library-map-description">{{ $selectedCategory->description }}</p>
     @endif
 
-    <form class="library-map-location-search" method="get" action="{{ route('library.index') }}">
+    <form class="library-map-location-search" method="get" action="{{ $libraryUrls->index() }}">
         <input type="hidden" name="category" value="{{ $selectedCategory->slug }}">
         <label>
             <span>Номер локации</span>
@@ -29,7 +29,7 @@
         </label>
         <div class="library-map-location-search__actions">
             @if($locationSearchId)
-                <a class="library-game-button" href="{{ route('library.index', ['category' => $selectedCategory->slug]) }}">Сбросить</a>
+                <a class="library-game-button" href="{{ $libraryUrls->index(parameters: ['category' => $selectedCategory->slug]) }}">Сбросить</a>
             @endif
             <button class="library-game-button" type="submit">Найти</button>
         </div>
@@ -51,7 +51,7 @@
                     @endif
                     @if($bestiaryCategory)
                         <a class="library-game-button"
-                           href="{{ route('library.index', ['category' => $bestiaryCategory->slug, 'location_id' => $searchedLocation->id]) }}">Монстры</a>
+                           href="{{ $libraryUrls->index(parameters: ['category' => $bestiaryCategory->slug, 'location_id' => $searchedLocation->id]) }}">Монстры</a>
                     @endif
                 </span>
             </div>

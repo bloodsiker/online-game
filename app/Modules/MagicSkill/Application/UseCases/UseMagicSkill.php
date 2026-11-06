@@ -10,9 +10,11 @@ use App\Modules\Battle\Application\Services\Combat\MagicHitCalculator;
 use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\MagicSkill\Application\DTOs\MagicSkillActionResultDTO;
 use App\Modules\MagicSkill\Application\Services\MagicCastGuard;
+use App\Modules\MagicSkill\Application\Services\MagicCastTransaction;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillReadRepository;
 use App\Modules\MagicSkill\Domain\Contracts\MagicSkillWriteRepository;
 use App\Modules\Player\Domain\Services\PlayerStatService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Player\Infrastructure\Persistence\Models\PlayerSkill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
@@ -28,11 +30,17 @@ class UseMagicSkill
         private readonly BattleEffectService $effectService,
         private readonly MagicCastGuard $castGuard,
         private readonly MagicHitCalculator $magicHitCalc,
+        private readonly MagicCastTransaction $castTransaction,
     ) {}
 
     public function execute(User $user, int $skillId, ?int $targetPlayerId): MagicSkillActionResultDTO
     {
-        $caster = $user->player;
+        return $this->castTransaction->run(actor: $user, targetPlayerId: $targetPlayerId,
+            cast: fn (Player $caster, Player $target) => $this->cast($caster, $target, $skillId));
+    }
+
+    private function cast(Player $caster, Player $target, int $skillId): MagicSkillActionResultDTO
+    {
         $skill = $this->readRepository->findOwnedSkill($caster, $skillId);
 
         if (! $skill) {
@@ -41,11 +49,6 @@ class UseMagicSkill
 
         if (! $skill->isBuffSkill()) {
             return new MagicSkillActionResultDTO('error', 'Это заклинание нельзя использовать вне боя', httpCode: 422);
-        }
-
-        $target = $this->readRepository->findAllyTarget($caster, $targetPlayerId);
-        if (! $target) {
-            return new MagicSkillActionResultDTO('error', 'Цель не найдена', httpCode: 404);
         }
 
         $magicSkillLevel = (int) (PlayerSkill::where('player_id', $caster->id)
@@ -58,6 +61,8 @@ class UseMagicSkill
             return new MagicSkillActionResultDTO('error', $castAttempt->reason, httpCode: 422);
         }
 
+        $this->statService->invalidate($caster);
+        $this->statService->invalidate($target);
         $casterSheet = $this->statService->resolve($caster);
         $targetSheet = $target->id === $caster->id ? $casterSheet : $this->statService->resolve($target);
 

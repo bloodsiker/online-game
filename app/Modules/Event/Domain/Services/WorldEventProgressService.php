@@ -131,6 +131,7 @@ final class WorldEventProgressService
             sourceId: (int) $run->id,
             idempotencyKey: sprintf('world-event:%d:stage:%d:user:%d:progress:%d', $run->id, $stage->id, $user->id, $progress->collected_count),
             description: sprintf('Событие «%s», этап «%s»', $event->title, $stage->title),
+            metadata: ['player_progress' => (int) $progress->collected_count, 'player_limit' => (int) $stage->player_limit],
         );
 
         return new WorldEventCollectionResult(

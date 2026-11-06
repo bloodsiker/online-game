@@ -9,6 +9,7 @@ use App\Modules\Structure\Bank\Domain\Contracts\BankLogRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
+use App\Modules\Structure\Bank\Domain\Services\BankBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class Deposit
@@ -21,24 +22,31 @@ class Deposit
 
     public function execute(User $user, int $amount): BankResultDTO
     {
-        if ($amount > $user->money) {
-            return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+        if ($amount <= 0) {
+            return new BankResultDTO(false, __('bank.invalid_amount'));
         }
 
-        $this->transactionManager->run(function () use ($user, $amount) {
-            $this->bankUserRepository->decrementMoney($user, $amount);
-            $this->bankUserRepository->incrementBankBalance($user, $amount);
-
-            $balanceAfter = $this->bankUserRepository->refresh($user)->bank_balance;
-
+        return $this->transactionManager->run(function () use ($user, $amount): BankResultDTO {
+            $lockedUser = $this->bankUserRepository->lockForUpdate($user->id);
+            if ($amount > $lockedUser->money) {
+                return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+            }
+            if (! BankBalanceLimits::canCreditAccount((int) $lockedUser->bank_balance, $amount)) {
+                return new BankResultDTO(false, __('bank.account_limit'));
+            }
+            if (! $this->bankUserRepository->decrementMoney($lockedUser, $amount)) {
+                return new BankResultDTO(false, 'Сумма превышает количество монет в кошельке.');
+            }
+            $this->bankUserRepository->incrementBankBalance($lockedUser, $amount);
+            $balanceAfter = $this->bankUserRepository->refresh($lockedUser)->bank_balance;
             $this->bankLogRepository->create(
-                userId: $user->id,
+                userId: $lockedUser->id,
                 action: BankAction::DEPOSIT,
                 amount: $amount,
                 balanceAfter: $balanceAfter,
             );
-        });
 
-        return new BankResultDTO(true, sprintf('Вы положили %s монет в банк.', number_format($amount)));
+            return new BankResultDTO(true, sprintf('Вы положили %s монет в банк.', number_format($amount)));
+        });
     }
 }

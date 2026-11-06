@@ -11,5 +11,5 @@ Route::post('/post/administration', [AdministrationMailController::class, 'send'
 Route::get('/post/letter/{id}', [PostController::class, 'letter'])->name('post.letter');
 Route::post('/post/send', [PostController::class, 'send'])->name('post.send');
 Route::post('/post/bulk', [PostController::class, 'bulk'])->name('post.bulk');
-Route::get('/post/letter/{id}/delete', [PostController::class, 'delete'])->name('post.delete');
-Route::get('/post/letter/{id}/claim', [PostController::class, 'claim'])->name('post.claim');
+Route::post('/post/letter/{id}/delete', [PostController::class, 'delete'])->name('post.delete');
+Route::post('/post/letter/{id}/claim', [PostController::class, 'claim'])->name('post.claim');

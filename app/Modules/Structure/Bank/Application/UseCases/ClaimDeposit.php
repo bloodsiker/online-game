@@ -8,6 +8,7 @@ use App\Modules\Structure\Bank\Application\DTOs\BankResultDTO;
 use App\Modules\Structure\Bank\Domain\Contracts\BankDepositRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\TransactionManager;
+use App\Modules\Structure\Bank\Domain\Services\BankBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class ClaimDeposit
@@ -20,20 +21,23 @@ class ClaimDeposit
 
     public function execute(User $user, int $depositId): BankResultDTO
     {
-        $deposit = $this->bankDepositRepository->findOpenForUser($user->id, $depositId);
+        return $this->transactionManager->run(function () use ($user, $depositId): BankResultDTO {
+            // Lock order is user -> deposit in all deposit flows.
+            $lockedUser = $this->bankUserRepository->lockForUpdate($user->id);
+            $deposit = $this->bankDepositRepository->findOpenForUser($lockedUser->id, $depositId, forUpdate: true);
+            if ($deposit === null) {
+                return new BankResultDTO(false, 'Вклад не найден.');
+            }
+            $payout = $deposit->isMatured() ? $deposit->payout() : $deposit->amount;
+            if (! BankBalanceLimits::canCreditWallet((int) $lockedUser->money, $payout)) {
+                return new BankResultDTO(false, __('bank.wallet_limit'));
+            }
+            if (! $this->bankDepositRepository->close($deposit)) {
+                return new BankResultDTO(false, 'Вклад не найден.');
+            }
+            $this->bankUserRepository->incrementMoney($lockedUser, $payout);
 
-        if ($deposit === null) {
-            return new BankResultDTO(false, 'Вклад не найден.');
-        }
-
-        // Досрочное закрытие возвращает только сумму вклада без процентов
-        $payout = $deposit->isMatured() ? $deposit->payout() : $deposit->amount;
-
-        $this->transactionManager->run(function () use ($user, $deposit, $payout) {
-            $this->bankDepositRepository->close($deposit);
-            $this->bankUserRepository->incrementMoney($user, $payout);
+            return new BankResultDTO(true, sprintf('Вклад закрыт. Вы получили %s монет.', number_format($payout)));
         });
-
-        return new BankResultDTO(true, sprintf('Вклад закрыт. Вы получили %s монет.', number_format($payout)));
     }
 }

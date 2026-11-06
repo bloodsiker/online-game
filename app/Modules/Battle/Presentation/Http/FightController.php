@@ -8,6 +8,7 @@ use App\Modules\Battle\Application\Services\Battle\BattleOrchestrator;
 use App\Modules\Battle\Application\Services\Battle\BattleService;
 use App\Modules\Battle\Application\Services\Combat\FightOrchestrator;
 use App\Modules\Battle\Application\UseCases\LeaveClanBossBattle;
+use App\Modules\Battle\Application\UseCases\RunAway;
 use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleDetail;
 use App\Modules\Battle\Infrastructure\Persistence\Models\BattleRound;
@@ -139,7 +140,7 @@ class FightController extends Controller
 
             $context = $this->clanBossAttackContext($id, $monsterId);
             if ($context === null) {
-                throw $exception;
+                return redirect()->route('fight', ['id' => $id])->with('message', $exception->getMessage());
             }
 
             $lairId = (int) $context['lair']->id;
@@ -252,76 +253,23 @@ class FightController extends Controller
             return redirect()->route('fight', ['id' => $id])->with('message', $detentionMessage);
         }
 
-        $battle = Battle::query()->findOrFail($id);
-        if ($this->clanBossDetailForBattle($battle) !== null) {
-            return redirect()->route('fight.clan-boss', ['id' => $id])
-                ->with('message', __('Из боя с клановым боссом можно выйти безопасно через кнопку «Выйти из боя».'));
-        }
-
         if (! Cache::add('cd:fight:'.$user->id, 1, 1)) {
             return redirect()->route('fight', ['id' => $id]);
         }
-        $player = $user->player;
-        $prevLocation = $user->prev_location_id;
-
-        $chanceRun = mt_rand(0, 100);
-
-        if ($battle->status === 1) {
-            if ($chanceRun > 50) {
-                $usersInBattle = BattleDetail::where('user_id', '!=', $user->id)->whereNotNull('user_id')->count();
-                if ($usersInBattle > 0) {
-                    $battleRound = new BattleRound;
-                    $battleRound->battle_id = $battle->id;
-                    $battleRound->round_number = ++$battle->rounds;
-                    $battleRound->user_id = $user->id;
-                    $battleRound->action = '<p>Вы бежали на восток...</p>';
-                    $battleRound->save();
-
-                    BattleDetail::where('user_id', $user->id)->delete();
-                } else {
-                    $battle->status = 0;
-                    $battle->save();
-
-                    $battleRound = new BattleRound;
-                    $battleRound->battle_id = $battle->id;
-                    $battleRound->round_number = ++$battle->rounds;
-                    $battleRound->user_id = $user->id;
-                    $battleRound->action = '<p>Вы бежали на восток...</p>';
-                    $battleRound->save();
-                }
-            } else {
-                $randomAttackedMonster = BattleDetail::with(['locationMonster.monster'])
-                    ->whereNotNull('location_monster_id')
-                    ->where(['battle_id' => $battle->id])
-                    ->where('status', 1)
-                    ->inRandomOrder()
-                    ->first();
-
-                $round = new BattleRound;
-                $round->battle_id = $battle->id;
-                $round->round_number = $battle->rounds;
-                $round->user_id = $user->id;
-                $round->location_monster_id = $randomAttackedMonster->location_monster_id;
-                $round->action = '<p>Вы попытались бежать... не получилось.</p>';
-                $round->save();
-
-                $battle->rounds += 1;
-                $battle->save();
-
-                $fightDTO = (new FightDTO)
-                    ->setBattle($battle)
-                    ->setBattleRound($round)
-                    ->setPlayer($player);
-
-                $playerDecorator = $this->statService->resolve($player);
-
-                return view('battle::attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO'));
-            }
+        try {
+            $fightDTO = app(RunAway::class)->execute($user, (int) $id);
+        } catch (HttpException $exception) {
+            return redirect()->route('fight', ['id' => $id])->with('message', $exception->getMessage());
         }
+        if ($fightDTO !== null) {
+            $battle = $fightDTO->getBattle();
+            $round = $fightDTO->getBattleRound();
+            $randomAttackedMonster = $fightDTO->getAttackedMonster();
+            $player = $fightDTO->getPlayer();
+            $playerDecorator = $this->statService->resolve($player);
 
-        $user->prev_location_id = $user->location_id;
-        $user->location_id = $prevLocation;
-        $user->save();
+            return view('battle::attack', compact('battle', 'round', 'randomAttackedMonster', 'player', 'playerDecorator', 'fightDTO'));
+        }
 
         return view('battle::run_away');
     }

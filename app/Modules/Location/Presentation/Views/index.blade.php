@@ -183,6 +183,8 @@
                 <b><a href="" class="location-name">{{ $page->name }}</a></b> <span>({{ $page->locationId }})</span>
             </div>
 
+            @include('event::location-widget')
+
             @if($resumableTrade !== null)
                 <div id="location-trade-return" class="center" style="margin:8px 0;" data-expires-at="{{ $resumableTrade->expires_at->toIso8601String() }}">
                     <span class="butt1 pointer"><span>

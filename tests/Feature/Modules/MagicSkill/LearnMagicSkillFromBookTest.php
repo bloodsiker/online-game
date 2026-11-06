@@ -27,6 +27,17 @@ class LearnMagicSkillFromBookTest extends TestCase
         DB::purge('sqlite');
 
         $this->createTables();
+        Schema::create('npcs', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('location_id');
+        });
+        Schema::create('structures', function (Blueprint $table): void {
+            $table->id();
+            $table->string('type');
+            $table->unsignedBigInteger('npc_id');
+        });
+        DB::table('npcs')->insert(['id' => 1, 'location_id' => 1]);
+        DB::table('structures')->insert(['type' => 'mage_trainer', 'npc_id' => 1]);
 
         DB::table('races')->insert(['id' => 1, 'name' => 'Человек']);
         DB::table('players')->insert([
@@ -43,6 +54,7 @@ class LearnMagicSkillFromBookTest extends TestCase
         DB::table('users')->insert([
             'id' => 1,
             'player_id' => 1,
+            'location_id' => 1,
             'name' => 'Игрок',
             'email' => 'player@example.test',
             'password' => 'password',
@@ -365,6 +377,7 @@ class LearnMagicSkillFromBookTest extends TestCase
 
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id');
             $table->integer('percent')->default(60);
@@ -373,6 +386,7 @@ class LearnMagicSkillFromBookTest extends TestCase
 
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_recipe_id');
             $table->unsignedBigInteger('share_item_id');
             $table->integer('count')->default(1);

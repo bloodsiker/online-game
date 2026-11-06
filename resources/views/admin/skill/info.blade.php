@@ -5,6 +5,9 @@
 @endsection
 
 @section('body')
+    <div class="mb-3">
+        <a href="{{ route('admin.skill.recipes', $skill->id) }}" class="btn btn-primary btn-sm">Рецепты профессии</a>
+    </div>
 
     <div class="row">
         <div class="col-md-5">

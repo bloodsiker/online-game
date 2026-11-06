@@ -17,7 +17,7 @@ class LearnClanSkill
         private readonly ClanSkillService $skillService,
     ) {}
 
-    public function execute(User $user, int $definitionId): ?string
+    public function execute(User $user, int $definitionId, int $expectedLevel = 0): ?string
     {
         $context = $this->resolveClanContext->requirePermission(
             $user,
@@ -37,6 +37,6 @@ class LearnClanSkill
 
         $definition = ClanSkillDefinition::findOrFail($definitionId);
 
-        return $this->skillService->learn($context->clan, $definition, $player, $user);
+        return $this->skillService->learn(clan: $context->clan, definition: $definition, player: $player, user: $user, expectedLevel: $expectedLevel);
     }
 }

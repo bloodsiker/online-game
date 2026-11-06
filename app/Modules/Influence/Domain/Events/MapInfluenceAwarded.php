@@ -18,5 +18,7 @@ final class MapInfluenceAwarded implements ShouldDispatchAfterCommit
         public readonly string $mapName,
         public readonly int $amount,
         public readonly int $total,
+        public readonly ?int $playerProgress = null,
+        public readonly ?int $playerLimit = null,
     ) {}
 }

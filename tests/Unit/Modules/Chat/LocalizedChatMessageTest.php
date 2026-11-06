@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace Tests\Unit\Modules\Chat;
 
 use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
+use App\Modules\Chat\Application\Listeners\SendMapInfluenceAwardedMessage;
 use App\Modules\Chat\Application\Services\ChatMessageTranslator;
+use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Application\UseCases\GetMessages;
 use App\Modules\Chat\Application\UseCases\SendSystemMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Chat\Domain\Repositories\ChatMessageRepositoryInterface;
 use App\Modules\Chat\Domain\Services\MessageRenderer;
+use App\Modules\Influence\Domain\Events\MapInfluenceAwarded;
+use App\Modules\Quest\Application\Services\QuestRewardService;
 use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
-use App\Modules\Quest\Presentation\Http\QuestController;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +30,23 @@ use Tests\TestCase;
 
 final class LocalizedChatMessageTest extends TestCase
 {
+    public function test_event_influence_notice_contains_the_awarded_progress_and_total(): void
+    {
+        $user = (new User)->forceFill(['id' => 1]);
+        $chat = Mockery::mock(ChatService::class);
+        $chat->shouldReceive('sendQuestToUser')->once()->with($user, Mockery::on(function ($message): bool {
+            $this->assertSame('chat.influence_event', $message->key);
+            $ru = app(ChatMessageTranslator::class)->render($message, 'ru');
+            $this->assertSame('Ваше влияние на карте <b>«Нейрин»</b> увеличено на <b>+1</b>. Ваш прогресс: <b>5/5</b>. Текущее влияние на карте: <b>58</b>.', $ru);
+            $this->assertStringContainsString('Ваш прогрес: <b>5/5</b>', app(ChatMessageTranslator::class)->render($message, 'uk'));
+
+            return true;
+        }))->andReturn(new ChatMessage);
+        (new SendMapInfluenceAwardedMessage($chat))->handle(
+            new MapInfluenceAwarded(user: $user, mapName: 'Нейрин', amount: 1, total: 58, playerProgress: 5, playerLimit: 5),
+        );
+    }
+
     public function test_clan_online_notice_shows_level_and_info_icon_without_smiley(): void
     {
         $message = new LocalizedChatMessage('chat.clan_member_online', [
@@ -149,7 +169,7 @@ final class LocalizedChatMessageTest extends TestCase
         $exp = (new $rewardClass)->forceFill(['type' => QuestRewardType::EXP, 'amount' => 100]);
         $item = (new $rewardClass)->forceFill(['type' => QuestRewardType::ITEM, 'amount' => 2, 'share_item_id' => null]);
         $quest->setRelation('rewards', new Collection([$exp, $item]));
-        $reflection = new \ReflectionClass(QuestController::class);
+        $reflection = new \ReflectionClass(QuestRewardService::class);
         $message = $reflection->getMethod('buildQuestCompleteMessage')->invoke($reflection->newInstanceWithoutConstructor(), $quest);
         $uk = app(ChatMessageTranslator::class)->render($message, 'uk');
         $this->assertStringContainsString('Квест <b>«Испытание»</b> завершено!', $uk);

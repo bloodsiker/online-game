@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Changes the public homepage's login/registration buttons to the launch signup dialog.
+    'prelaunch' => (bool) env('GAME_PRELAUNCH', false),
+
     'online_timeout_minutes' => (int) env('PLAYER_ONLINE_TIMEOUT_MINUTES', 30),
     /*
     |--------------------------------------------------------------------------

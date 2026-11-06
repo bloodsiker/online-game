@@ -27,5 +27,6 @@
         :item-tooltip-script="$page->itemTooltipScript"
         empty-message="{{ __('Вы не нашли здесь ничего стоящего.') }}"
     />
+    @include('event::location-widget')
 </body>
 </html>

@@ -9,14 +9,14 @@
 
 @section('content')
     <div class="library-breadcrumbs">
-        <a href="{{ route('library.index') }}">Библиотека</a> → {{ $selectedCategory->name }}
+        <a href="{{ $libraryUrls->index() }}">{{ __('library.name') }}</a> → {{ $selectedCategory->name }}
     </div>
 
     @if($selectedCategory->description)
         <p class="library-bestiary-description">{{ $selectedCategory->description }}</p>
     @endif
 
-    <form class="library-bestiary-filters" method="get" action="{{ route('library.index') }}">
+    <form class="library-bestiary-filters" method="get" action="{{ $libraryUrls->index() }}">
         <input type="hidden" name="category" value="{{ $selectedCategory->slug }}">
 
         <div class="library-bestiary-filters__row">
@@ -64,7 +64,7 @@
         </div>
 
         <div class="library-actions">
-            <a class="library-game-button" href="{{ route('library.index', ['category' => $selectedCategory->slug]) }}">Сбросить</a>
+            <a class="library-game-button" href="{{ $libraryUrls->index(parameters: ['category' => $selectedCategory->slug]) }}">Сбросить</a>
             <button class="library-game-button" type="submit">Найти</button>
         </div>
     </form>

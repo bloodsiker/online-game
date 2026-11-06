@@ -629,35 +629,47 @@
                                             <div class="col-md-8">
                                                 <div class="mb-3">
                                                     <a class="modal-with-zoom-anim ws-normal btn btn-sm btn-primary" href="#modalAddResource">Добавить ресурс</a>
+                                                    <button type="submit" class="btn btn-sm btn-default" form="recipe-ingredient-order" id="recipe-order-save" disabled>Сохранить порядок</button>
+                                                    <small class="text-muted">Перетащите строки за ↕ или используйте клавиши ↑ ↓ на маркере.</small>
                                                 </div>
                                                 <div class="table-responsive">
                                                     <table class="table table-hover table-bordered mb-none">
                                                         <thead>
                                                         <tr>
+                                                            <th width="30"></th>
                                                             <th width="45"></th>
                                                             <th>Название</th>
                                                             <th width="100">Кол-во</th>
                                                             <th width="70"></th>
                                                         </tr>
                                                         </thead>
-                                                        <tbody>
+                                                        <tbody id="recipe-ingredient-rows">
                                                         @forelse($item->recipe->items as $needItem)
-                                                            <tr style="vertical-align: middle">
+                                                            <tr style="vertical-align: middle" data-ingredient-row="{{ $needItem->pivot->id }}">
+                                                                <td>
+                                                                    <button type="button" class="btn btn-xs btn-default recipe-ingredient-handle" draggable="true" title="Изменить порядок: перетащите или нажмите ↑ ↓" aria-label="Переместить {{ $needItem->name }}" style="cursor:grab">↕</button>
+                                                                </td>
                                                                 <td>
                                                                     @if($needItem->image)
                                                                         <img src="{{ $needItem->image }}" width="36" alt="">
                                                                     @endif
                                                                 </td>
                                                                 <td><a href="{{ route('admin.item.info', $needItem->id) }}">{{ $needItem->name }}</a></td>
-                                                                <td>{{ $needItem->pivot->count }}</td>
                                                                 <td>
+                                                                    <input type="number" class="form-control form-control-sm" name="count"
+                                                                           form="recipe-ingredient-count-{{ $needItem->id }}"
+                                                                           value="{{ $needItem->pivot->count }}" min="1" max="2147483647" step="1" required
+                                                                           aria-label="Количество ингредиента: {{ $needItem->name }}">
+                                                                </td>
+                                                                <td>
+                                                                    <button type="submit" class="btn btn-xs btn-primary mb-1" form="recipe-ingredient-count-{{ $needItem->id }}">Сохранить</button>
                                                                     <a href="{{ route('admin.item.recipe.delete_item', ['recipe' => $item->recipe->id, 'item' => $needItem->id]) }}"
                                                                        class="btn btn-xs btn-danger"
                                                                        onclick="return confirm('Удалить?')">Удалить</a>
                                                                 </td>
                                                             </tr>
                                                         @empty
-                                                            <tr><td colspan="4" class="text-center text-muted">Нет ресурсов</td></tr>
+                                                            <tr><td colspan="5" class="text-center text-muted">Нет ресурсов</td></tr>
                                                         @endforelse
                                                         </tbody>
                                                     </table>
@@ -1127,6 +1139,21 @@
             @csrf
         </form>
     @endforeach
+    @if($item->recipe)
+        <form id="recipe-ingredient-order" action="{{ route('admin.item.recipe.ingredient_order', ['recipe' => $item->recipe->id]) }}" method="post" class="d-none">
+            @csrf
+            <div id="recipe-ingredient-order-values">
+                @foreach($item->recipe->items as $ingredient)
+                    <input type="hidden" name="ingredient_ids[]" value="{{ $ingredient->pivot->id }}">
+                @endforeach
+            </div>
+        </form>
+    @endif
+    @foreach($item->recipe?->items ?? [] as $ingredient)
+        <form id="recipe-ingredient-count-{{ $ingredient->id }}" action="{{ route('admin.item.recipe.update_ingredient', ['recipe' => $item->recipe->id, 'item' => $ingredient->id]) }}" method="post" class="d-none">
+            @csrf
+        </form>
+    @endforeach
     <form id="req-form" action="{{ route('admin.item.requirement.add', $item->id) }}" method="post" class="d-none">
         @csrf
     </form>
@@ -1252,6 +1279,52 @@
 
 @push('footer_scripts')
 <script>
+(() => {
+    const body = document.getElementById('recipe-ingredient-rows');
+    const values = document.getElementById('recipe-ingredient-order-values');
+    const save = document.getElementById('recipe-order-save');
+    if (!body || !values || !save) return;
+    let dragged = null;
+    const initial = [...body.querySelectorAll('[data-ingredient-row]')].map(row => row.dataset.ingredientRow).join(',');
+    function updateOrder() {
+        const ids = [...body.querySelectorAll('[data-ingredient-row]')].map(row => row.dataset.ingredientRow);
+        values.replaceChildren(...ids.map(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden'; input.name = 'ingredient_ids[]'; input.value = id;
+            return input;
+        }));
+        save.disabled = ids.join(',') === initial;
+    }
+    body.addEventListener('dragstart', event => {
+        const handle = event.target.closest('.recipe-ingredient-handle');
+        if (!handle) { event.preventDefault(); return; }
+        dragged = handle.closest('[data-ingredient-row]');
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', dragged.dataset.ingredientRow);
+        dragged.style.opacity = '0.5';
+    });
+    body.addEventListener('dragover', event => {
+        const target = event.target.closest('[data-ingredient-row]');
+        if (!dragged || !target || dragged === target) return;
+        event.preventDefault();
+        const rect = target.getBoundingClientRect();
+        body.insertBefore(dragged, event.clientY < rect.top + rect.height / 2 ? target : target.nextSibling);
+    });
+    body.addEventListener('drop', event => { if (dragged) { event.preventDefault(); updateOrder(); } });
+    body.addEventListener('dragend', () => {
+        if (dragged) dragged.style.opacity = '';
+        dragged = null; updateOrder();
+    });
+    body.addEventListener('keydown', event => {
+        const handle = event.target.closest('.recipe-ingredient-handle');
+        if (!handle || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        const row = handle.closest('[data-ingredient-row]');
+        if (event.key === 'ArrowUp' && row.previousElementSibling) body.insertBefore(row, row.previousElementSibling);
+        if (event.key === 'ArrowDown' && row.nextElementSibling) body.insertBefore(row.nextElementSibling, row);
+        handle.focus(); updateOrder();
+    });
+})();
     if (['#tab-requirements', '#tab-artifact-upgrade'].includes(window.location.hash)) {
         const requirementsTab = document.querySelector('[data-bs-target="' + window.location.hash + '"]');
         if (requirementsTab && window.bootstrap) {

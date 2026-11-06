@@ -14,10 +14,9 @@ use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Influence\Domain\Services\MapInfluenceRequirementService;
 use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
 use App\Modules\Player\Domain\Services\ExperienceService;
-use App\Modules\Player\Infrastructure\Persistence\Models\Player;
-use App\Modules\Player\Infrastructure\Persistence\Models\PlayerLocationAccess;
+use App\Modules\Quest\Application\Services\QuestActionTransaction;
+use App\Modules\Quest\Application\UseCases\CompleteQuest;
 use App\Modules\Quest\Domain\Enums\QuestPlayerStatus;
-use App\Modules\Quest\Domain\Enums\QuestRewardType;
 use App\Modules\Quest\Domain\Enums\QuestType;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Quest\Domain\Services\QuestStageRuntimeService;
@@ -27,17 +26,15 @@ use App\Modules\Quest\Infrastructure\Persistence\Models\QuestClanProgress;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestDialogue;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayer;
 use App\Modules\Quest\Infrastructure\Persistence\Models\QuestPlayerObjective;
-use App\Modules\Quest\Infrastructure\Persistence\Models\QuestReward;
-use App\Modules\Quest\Infrastructure\Persistence\Models\QuestStage;
 use App\Modules\Reputation\Application\Services\ReputationService;
-use App\Modules\Reputation\Domain\Events\ReputationMedalEarned;
-use App\Modules\Reputation\Infrastructure\Persistence\Models\Reputation;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTier;
 use App\Modules\Reputation\Infrastructure\Persistence\Models\ReputationTierQuest;
+use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class QuestController extends Controller
 {
@@ -109,6 +106,7 @@ class QuestController extends Controller
         $user = Auth::user();
         $player = $user->player;
 
+        $questPlayer = null;
         // --- CLAN QUEST ---
         if ($quest->isClan()) {
             $clanMembership = $user->clanMembership;
@@ -162,7 +160,7 @@ class QuestController extends Controller
             return view('quest::quest', compact(
                 'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
                 'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
-                'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage'
+                'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage', 'questPlayer'
             ));
         }
 
@@ -211,7 +209,7 @@ class QuestController extends Controller
         return view('quest::quest', compact(
             'quest', 'npc', 'inProgress', 'visibleObjectives', 'currentStage',
             'canComplete', 'progressMap', 'clanProgress', 'isAcceptor', 'canAccept',
-            'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage'
+            'dialoguePage', 'dialogueNextUrl', 'showObjectives', 'stageMessage', 'questPlayer'
         ));
     }
 
@@ -253,9 +251,8 @@ class QuestController extends Controller
         return [$currentDialogue, $nextUrl, $isLast];
     }
 
-    public function takeClan($id, Request $request)
+    private function takeClan($id, Request $request, User $user)
     {
-        $user = Auth::user();
         $quest = Quest::findOrFail($id);
         $npcId = $request->integer('npc');
 
@@ -279,6 +276,10 @@ class QuestController extends Controller
         $existing = QuestClanProgress::where('clan_id', $clan->id)
             ->where('quest_id', $quest->id)
             ->first();
+
+        if ($existing?->status === QuestPlayerStatus::IN_PROGRESS) {
+            return redirect()->route('npc', ['id' => $npcId])->with('quest_error', 'Клан уже выполняет этот квест.');
+        }
 
         // Repeatable on cooldown
         if ($existing
@@ -310,6 +311,7 @@ class QuestController extends Controller
                 $existing->objectives()->delete();
                 $existing->update([
                     'user_id' => $user->id,
+                    'revision' => (int) $existing->revision + 1,
                     'status' => QuestPlayerStatus::IN_PROGRESS,
                     ...$this->questStageRuntimeService->stateFor($firstStage),
                     'completed_at' => null,
@@ -346,14 +348,22 @@ class QuestController extends Controller
             );
         });
 
-        $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.clan_quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
+        DB::afterCommit(fn () => $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.clan_quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')])));
 
         return redirect()->route('npc', ['id' => $npcId]);
     }
 
     public function cancelQuest(int $id): RedirectResponse
     {
-        $player = Auth::user()->player;
+        $progress = QuestPlayer::whereKey($id)->where('player_id', Auth::user()->player_id)->firstOrFail();
+
+        return app(QuestActionTransaction::class)->run(Auth::user(), $progress->quest,
+            fn (User $user) => $this->cancelQuestLocked($id, $user));
+    }
+
+    private function cancelQuestLocked(int $id, User $user): RedirectResponse
+    {
+        $player = $user->player;
 
         $questPlayer = QuestPlayer::where('player_id', $player->id)
             ->where('id', $id)
@@ -393,7 +403,14 @@ class QuestController extends Controller
 
     public function cancelClanQuest($id, Request $request)
     {
-        $user = Auth::user();
+        $progress = QuestClanProgress::findOrFail($id);
+
+        return app(QuestActionTransaction::class)->run(Auth::user(), $progress->quest,
+            fn (User $user) => $this->cancelClanQuestLocked($id, $request, $user));
+    }
+
+    private function cancelClanQuestLocked($id, Request $request, User $user)
+    {
         $npcId = $request->integer('npc');
 
         $clanMembership = $user->clanMembership;
@@ -438,218 +455,16 @@ class QuestController extends Controller
         return $redirectRoute->with('quest_success', 'Клановый квест отменён.');
     }
 
-    public function completeClan($id, Request $request)
-    {
-        $user = Auth::user();
-        $player = $user->player;
-        $quest = Quest::findOrFail($id);
-        $quest->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
-        $hasStages = $quest->hasStages();
-        $npcId = $request->integer('npc');
-
-        $clanMembership = $user->clanMembership;
-        if (! $clanMembership) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Вы не состоите в клане.');
-        }
-
-        $clan = $clanMembership->clan;
-
-        $clanProgress = QuestClanProgress::where('clan_id', $clan->id)
-            ->where('quest_id', $quest->id)
-            ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('objectives.questObjective', 'currentStage')
-            ->first();
-
-        if (! $clanProgress) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Клановый квест не найден или уже завершён.');
-        }
-
-        if ((int) $clanProgress->user_id !== $user->id) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Сдать квест может только тот, кто его принял.');
-        }
-
-        // --- STAGED ---
-        if ($clanProgress->current_stage_id !== null) {
-            if (! $clanProgress->isCurrentStageComplete()) {
-                $message = $this->questStageRuntimeService->messageFor($clanProgress)
-                    ?: 'Не все задания текущего этапа выполнены.';
-
-                return redirect()->route('npc', ['id' => $npcId])
-                    ->with('quest_error', $message);
-            }
-
-            $currentStage = $clanProgress->currentStage;
-            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem', 'grantItem']);
-
-            foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = $objective->shareItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-
-            foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
-                if (! $objective->share_item_id) {
-                    continue;
-                }
-                $shareItem = $objective->collectItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-
-            $nextStage = QuestStage::where('quest_id', $quest->id)
-                ->where('order', '>', $currentStage->order)
-                ->with('objectives.shareItem')
-                ->orderBy('order')
-                ->first();
-
-            if ($nextStage) {
-                DB::transaction(function () use ($user, $currentStage, $nextStage, $clanProgress) {
-                    foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = $objective->shareItem;
-                        if ($shareItem) {
-                            $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-                    foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
-                        if (! $objective->share_item_id) {
-                            continue;
-                        }
-                        $shareItem = $objective->collectItem;
-                        if ($shareItem) {
-                            $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-                    if ($currentStage->grantItem) {
-                        $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
-                    }
-
-                    $clanProgress->update($this->questStageRuntimeService->stateFor($nextStage));
-                    foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = $objective->shareItem;
-                        if ($shareItem) {
-                            $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-                });
-
-                return redirect()->route('quest', ['id' => $quest->id, 'npc' => $npcId]);
-            }
-
-            DB::transaction(function () use ($user, $currentStage, $clanProgress) {
-                foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = $objective->shareItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-                foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
-                    if (! $objective->share_item_id) {
-                        continue;
-                    }
-                    $shareItem = $objective->collectItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-
-                if ($currentStage->grantItem) {
-                    $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
-                }
-
-                $clanProgress->update($this->questStageRuntimeService->stateFor(null));
-            });
-
-            $clanProgress->refresh();
-        }
-
-        // --- FINAL COMPLETION ---
-        if (! $hasStages && ! $clanProgress->isAllObjectivesComplete()) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Не все задания квеста выполнены.');
-        }
-
-        if (! $hasStages) {
-            foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                $shareItem = $objective->shareItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-            foreach ($quest->objectives->where('type', 'collect') as $objective) {
-                if (! $objective->share_item_id) {
-                    continue;
-                }
-                $shareItem = $objective->collectItem;
-                if ($shareItem && ! $this->backpackService->hasItemByShareItem($user, $shareItem, $objective->required_amount)) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-        }
-
-        DB::transaction(function () use ($user, $player, $quest, $clanProgress, $clan, $hasStages) {
-            if (! $hasStages) {
-                foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = $objective->shareItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-                foreach ($quest->objectives->where('type', 'collect') as $objective) {
-                    if (! $objective->share_item_id) {
-                        continue;
-                    }
-                    $shareItem = $objective->collectItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-            }
-
-            foreach ($quest->rewards as $reward) {
-                match ($reward->type) {
-                    QuestRewardType::EXP => $this->giveExp($player, (int) $reward->amount),
-                    QuestRewardType::MONEY => $this->giveMoney($player, (int) $reward->amount),
-                    QuestRewardType::ITEM => $this->giveItem($user, $reward),
-                    QuestRewardType::LOCATION_ACCESS => $this->giveLocationAccess($player, $reward, $quest),
-                    QuestRewardType::CLAN_POINTS => $this->giveClanPoints($clan, (int) $reward->amount, $user),
-                    QuestRewardType::REPUTATION_POINTS => null, // clan quests don't give reputation
-                };
-            }
-
-            $resetAt = $quest->reset_period ? now()->addSeconds($quest->reset_period) : null;
-
-            $clanProgress->update([
-                'status' => QuestPlayerStatus::COMPLETED,
-                'completed_at' => now(),
-                'reset_at' => $resetAt,
-            ]);
-
-            $this->clanLogService->write(
-                $clan,
-                $user,
-                ClanLogAction::QUEST_COMPLETED,
-                'Квест: '.$quest->getTranslation('title', 'ru', false),
-            );
-        });
-
-        $this->chatService->sendSystemToUser($user, $this->buildQuestCompleteMessage($quest));
-
-        return redirect()->route('npc', ['id' => $npcId])
-            ->with('quest_success', 'Клановый квест выполнен! Награда получена.');
-    }
-
     public function take($id, Request $request)
     {
-        $user = Auth::user();
+        $quest = Quest::findOrFail($id);
+
+        return app(QuestActionTransaction::class)->run(Auth::user(), $quest,
+            fn (User $user) => $this->takeLocked($id, $request, $user));
+    }
+
+    private function takeLocked($id, Request $request, User $user)
+    {
         $player = $user->player;
         $quest = Quest::findOrFail($id);
         $npcId = $request->integer('npc');
@@ -661,7 +476,7 @@ class QuestController extends Controller
 
         // Clan quests have their own take method
         if ($quest->isClan()) {
-            return $this->takeClan($id, $request);
+            return $this->takeClan($id, $request, $user);
         }
 
         // Квест-подвиг нельзя взять прямым запросом до достижения его тира.
@@ -704,6 +519,7 @@ class QuestController extends Controller
                 $existingQuestPlayer->objectives()->delete();
                 $existingQuestPlayer->update([
                     'status' => QuestPlayerStatus::IN_PROGRESS,
+                    'revision' => (int) $existingQuestPlayer->revision + 1,
                     ...$this->questStageRuntimeService->stateFor($firstStage),
                     'completed_at' => null,
                     'reset_at' => null,
@@ -719,7 +535,7 @@ class QuestController extends Controller
                 $this->giveDeliverItems($existingQuestPlayer->player->user, $quest, $firstStage?->id);
             });
 
-            $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
+            DB::afterCommit(fn () => $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')])));
 
             return redirect()->route('npc', ['id' => $npcId]);
         }
@@ -776,270 +592,29 @@ class QuestController extends Controller
             $existingQuestPlayer = $questPlayer;
         });
 
-        $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')]));
+        DB::afterCommit(fn () => $this->chatService->sendQuestToUser($user, new LocalizedChatMessage('chat.quest_started', ['title' => LocalizedChatMessage::contentName($quest, 'title')])));
 
         return redirect()->route('npc', ['id' => $npcId]);
     }
 
-    public function complete($id, Request $request)
+    public function complete($id, Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        $player = $user->player;
+        $data = $request->validate(['progress_id' => 'required|integer|min:1', 'revision' => 'required|integer|min:0']);
         $quest = Quest::findOrFail($id);
-        $npcId = $request->integer('npc');
-
-        if ($quest->isClan()) {
-            return $this->completeClan($id, $request);
+        try {
+            $advanced = app(CompleteQuest::class)->execute(
+                user: Auth::user(), quest: $quest,
+                progressId: (int) $data['progress_id'], revision: (int) $data['revision'],
+            );
+        } catch (ValidationException $exception) {
+            return redirect()->route('npc', ['id' => $request->integer('npc')])->with('quest_error', $exception->validator->errors()->first());
+        }
+        if ($advanced) {
+            return redirect()->route('quest', ['id' => $quest->id, 'npc' => $request->integer('npc')]);
         }
 
-        $quest->loadMissing(['objectives.shareItem', 'objectives.collectItem']);
-        $hasStages = $quest->hasStages();
-
-        $questPlayer = QuestPlayer::where('player_id', $player->id)
-            ->where('quest_id', $quest->id)
-            ->where('status', QuestPlayerStatus::IN_PROGRESS)
-            ->with('objectives.questObjective', 'currentStage')
-            ->first();
-
-        if (! $questPlayer) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Квест не найден или уже завершён.');
-        }
-
-        // --- STAGED QUEST: player is on an active stage ---
-        if ($questPlayer->current_stage_id !== null) {
-            if (! $questPlayer->isCurrentStageComplete()) {
-                $message = $this->questStageRuntimeService->messageFor($questPlayer)
-                    ?: 'Не все задания текущего этапа выполнены.';
-
-                return redirect()->route('npc', ['id' => $npcId])
-                    ->with('quest_error', $message);
-            }
-
-            $currentStage = $questPlayer->currentStage;
-            $currentStage->loadMissing(['objectives.shareItem', 'objectives.collectItem', 'grantItem']);
-
-            // Проверка наличия предметов одним агрегатным запросом
-            $stageShareItemIds = $currentStage->objectives
-                ->whereIn('type', ['deliver', 'collect'])
-                ->map(fn ($objective) => $objective->requiredShareItemId())
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-            $backpackCounts = $this->backpackService->countByShareItemIds($user, $stageShareItemIds);
-
-            foreach ($currentStage->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
-                $requiredShareItemId = $objective->requiredShareItemId();
-                if (! $requiredShareItemId) {
-                    continue;
-                }
-                $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
-                if ($shareItem && ($backpackCounts[$requiredShareItemId] ?? 0) < $objective->required_amount) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-
-            $nextStage = QuestStage::where('quest_id', $quest->id)
-                ->where('order', '>', $currentStage->order)
-                ->with('objectives.shareItem')
-                ->orderBy('order')
-                ->first();
-
-            if ($nextStage) {
-                DB::transaction(function () use ($user, $currentStage, $nextStage, $questPlayer) {
-                    // Remove deliver items for completed stage
-                    foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = $objective->shareItem;
-                        if ($shareItem) {
-                            $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-
-                    // Remove collect items for completed stage
-                    foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
-                        if (! $objective->share_item_id) {
-                            continue;
-                        }
-                        $shareItem = $objective->collectItem;
-                        if ($shareItem) {
-                            $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-
-                    // NPC текущего (только что завершённого) этапа физически вручает предмет
-                    if ($currentStage->grantItem) {
-                        $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
-                    }
-
-                    $questPlayer->update($this->questStageRuntimeService->stateFor($nextStage));
-
-                    // Give deliver items for the new stage
-                    foreach ($nextStage->objectives->where('type', 'deliver') as $objective) {
-                        $shareItem = $objective->shareItem;
-                        if ($shareItem) {
-                            $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
-                        }
-                    }
-                });
-
-                // Redirect to quest detail page so the NPC delivers the new stage briefing
-                return redirect()->route('quest', ['id' => $quest->id, 'npc' => $npcId]);
-            }
-
-            // Last stage done — remove its deliver and collect items and fall through to quest completion
-            DB::transaction(function () use ($user, $currentStage, $questPlayer) {
-                foreach ($currentStage->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = $objective->shareItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-                foreach ($currentStage->objectives->where('type', 'collect') as $objective) {
-                    if (! $objective->share_item_id) {
-                        continue;
-                    }
-                    $shareItem = $objective->collectItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-
-                if ($currentStage->grantItem) {
-                    $this->backpackService->addItemByShareItem($user, $currentStage->grantItem, $currentStage->grant_amount);
-                }
-
-                $questPlayer->update($this->questStageRuntimeService->stateFor(null));
-            });
-
-            $questPlayer->refresh();
-        }
-
-        // --- NON-STAGED QUEST or all stages done: final completion ---
-        if (! $hasStages && ! $questPlayer->isAllObjectivesComplete()) {
-            return redirect()->route('npc', ['id' => $npcId])
-                ->with('quest_error', 'Не все задания квеста выполнены.');
-        }
-
-        // Check deliver and collect items for non-staged quest
-        if (! $hasStages) {
-            // Проверка наличия предметов одним агрегатным запросом
-            $finalShareItemIds = $quest->objectives
-                ->whereIn('type', ['deliver', 'collect'])
-                ->map(fn ($objective) => $objective->requiredShareItemId())
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-            $backpackCounts = $this->backpackService->countByShareItemIds($user, $finalShareItemIds);
-
-            foreach ($quest->objectives->whereIn('type', ['deliver', 'collect']) as $objective) {
-                $requiredShareItemId = $objective->requiredShareItemId();
-                if (! $requiredShareItemId) {
-                    continue;
-                }
-                $shareItem = $objective->type === 'deliver' ? $objective->shareItem : $objective->collectItem;
-                if ($shareItem && ($backpackCounts[$requiredShareItemId] ?? 0) < $objective->required_amount) {
-                    return redirect()->route('npc', ['id' => $npcId])
-                        ->with('quest_error', "В рюкзаке нет нужного предмета: {$shareItem->name}.");
-                }
-            }
-        }
-
-        DB::transaction(function () use ($user, $player, $quest, $questPlayer, $hasStages) {
-            // Remove deliver and collect items from backpack (non-staged only; staged already handled above)
-            if (! $hasStages) {
-                foreach ($quest->objectives->where('type', 'deliver') as $objective) {
-                    $shareItem = $objective->shareItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-                foreach ($quest->objectives->where('type', 'collect') as $objective) {
-                    if (! $objective->share_item_id) {
-                        continue;
-                    }
-                    $shareItem = $objective->collectItem;
-                    if ($shareItem) {
-                        $this->backpackService->removeItemByShareItem($user, $shareItem, $objective->required_amount);
-                    }
-                }
-            }
-
-            // Give rewards
-            foreach ($quest->rewards as $reward) {
-                match ($reward->type) {
-                    QuestRewardType::EXP => $this->giveExp($player, (int) $reward->amount),
-                    QuestRewardType::MONEY => $this->giveMoney($player, (int) $reward->amount),
-                    QuestRewardType::ITEM => $this->giveItem($user, $reward),
-                    QuestRewardType::LOCATION_ACCESS => $this->giveLocationAccess($player, $reward, $quest),
-                    QuestRewardType::CLAN_POINTS => null, // personal quests can't have clan_points reward
-                    QuestRewardType::REPUTATION_POINTS => $this->giveReputationPoints($player, $reward),
-                };
-            }
-
-            $resetAt = $quest->isRepeatable() && $quest->reset_period
-                ? now()->addSeconds($quest->reset_period)
-                : null;
-
-            $questPlayer->update([
-                'status' => QuestPlayerStatus::COMPLETED,
-                'completed_at' => now(),
-                'reset_at' => $resetAt,
-            ]);
-
-            $this->reputationService->syncReputationRating($player);
-        });
-
-        // Send personal system chat notification about quest completion
-        $this->chatService->sendSystemToUser($user, $this->buildQuestCompleteMessage($quest));
-
-        // Квест-подвиг: если для него настроена отдельная feat-медаль — объявляем всем.
-        $featTier = ReputationTier::where('feat_quest_id', $quest->id)->with('reputation')->first();
-        if ($featTier && $featTier->hasFeatMedal()) {
-            event(new ReputationMedalEarned($player, $featTier, $featTier->feat_medal_name, isFeat: true));
-        }
-
-        return redirect()->route('npc', ['id' => $npcId])
+        return redirect()->route('npc', ['id' => $request->integer('npc')])
             ->with('quest_success', 'Квест выполнен! Награда получена.');
-    }
-
-    private function buildQuestCompleteMessage(Quest $quest): LocalizedChatMessage
-    {
-        $parts = [];
-
-        foreach ($quest->rewards as $reward) {
-            if ($parts !== []) {
-                $parts[] = ' | ';
-            }
-            $parts[] = match ($reward->type) {
-                QuestRewardType::EXP => new LocalizedChatMessage('chat.reward_exp', ['amount' => $reward->amount]),
-                QuestRewardType::MONEY => new LocalizedChatMessage('chat.reward_money', ['amount' => $reward->amount]),
-                QuestRewardType::ITEM => [($reward->amount > 1 ? "{$reward->amount}x " : ''), (
-                    $reward->share_item_id && $reward->itemInfo
-                        ? "[[share_item_{$reward->share_item_id}]]"
-                        : new LocalizedChatMessage('chat.reward_item')
-                )],
-                QuestRewardType::LOCATION_ACCESS => new LocalizedChatMessage('chat.reward_access', ['location' => $reward->location?->name ?? new LocalizedChatMessage('chat.location')]),
-                QuestRewardType::CLAN_POINTS => new LocalizedChatMessage('chat.reward_clan', ['amount' => $reward->amount]),
-                QuestRewardType::REPUTATION_POINTS => new LocalizedChatMessage('chat.reward_reputation', ['amount' => $reward->amount]),
-            };
-        }
-
-        return new LocalizedChatMessage('chat.quest_completed', ['title' => LocalizedChatMessage::contentName($quest, 'title'), 'reward' => new LocalizedChatMessage('chat.reward', ['parts' => $parts])]);
-    }
-
-    private function giveClanPoints(Clan $clan, int $amount, $user): void
-    {
-        $clan->increment('points', $amount);
-        $user->clanMembership?->increment('points', $amount);
-        $this->clanLogService->write(
-            $clan,
-            $user,
-            ClanLogAction::BONUS_POINTS_EARNED,
-            "+{$amount} очков за клановый квест",
-        );
     }
 
     private function giveDeliverItems($user, Quest $quest, ?int $stageId = null): void
@@ -1057,52 +632,6 @@ class QuestController extends Controller
             if ($shareItem) {
                 $this->backpackService->addItemByShareItem($user, $shareItem, $objective->required_amount);
             }
-        }
-    }
-
-    private function giveExp(Player $player, int $amount): void
-    {
-        $experience = $this->experienceService->calculateGain($player, $amount);
-
-        if ($experience > 0) {
-            $player->increment('exp', $experience);
-        }
-    }
-
-    private function giveMoney($player, int $amount): void
-    {
-        $player->user->increment('money', $amount);
-    }
-
-    private function giveItem($user, QuestReward $reward): void
-    {
-        if ($reward->share_item_id && $reward->itemInfo) {
-            $this->backpackService->addItemByShareItem($user, $reward->itemInfo, (int) ($reward->amount ?: 1));
-        }
-    }
-
-    private function giveLocationAccess($player, QuestReward $reward, Quest $quest): void
-    {
-        if ($reward->location_id) {
-            PlayerLocationAccess::firstOrCreate([
-                'player_id' => $player->id,
-                'location_id' => $reward->location_id,
-                'quest_id' => $quest->id,
-            ]);
-        }
-    }
-
-    private function giveReputationPoints($player, QuestReward $reward): void
-    {
-        if (! $reward->reputation_id) {
-            return;
-        }
-        $reputation = Reputation::find($reward->reputation_id);
-        if ($reputation) {
-            // 2-дневный кулдаун касается только квестов из пула тира;
-            // подвиги (feat) и прочие квесты с наградой репутацией его не трогают
-            $touchCooldown = $reward->quest?->reputationTierQuests()->exists() ?? false;
-            $this->reputationService->addPoints($player, $reputation, (int) $reward->amount, $touchCooldown);
         }
     }
 }

@@ -21,8 +21,10 @@ class ShopCartService
         $quantity = max(1, $quantity);
 
         return DB::transaction(function () use ($user, $shopItemId, $quantity) {
+            User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $cartItem = ShopCart::where('user_id', $user->id)
                 ->where('shop_item_id', $shopItemId)
+                ->lockForUpdate()
                 ->first();
 
             if ($cartItem) {
@@ -37,12 +39,13 @@ class ShopCartService
             }
 
             return $cartItem->load('shopItem');
-        });
+        }, attempts: 3);
     }
 
     public function updateQuantity(User $user, int $shopItemId, int $quantity, ?int $structureId = null): ?ShopCart
     {
         return DB::transaction(function () use ($user, $shopItemId, $quantity, $structureId) {
+            User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $cartItem = ShopCart::where('user_id', $user->id)
                 ->where('shop_item_id', $shopItemId)
                 ->when($structureId !== null, fn ($query) => $query->whereHas(
@@ -66,16 +69,20 @@ class ShopCartService
 
     public function removeItem(User $user, int $cartId, ?int $structureId = null): bool
     {
-        return ShopCart::where('user_id', $user->id)
-            ->where('id', $cartId)
-            ->when(
-                $structureId !== null,
-                fn ($query) => $query->whereHas(
-                    'shopItem',
-                    fn ($shopItemQuery) => $shopItemQuery->where('structure_id', $structureId),
-                ),
-            )
-            ->delete() > 0;
+        return DB::transaction(function () use ($user, $cartId, $structureId): bool {
+            User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            return ShopCart::where('user_id', $user->id)
+                ->where('id', $cartId)
+                ->when(
+                    $structureId !== null,
+                    fn ($query) => $query->whereHas(
+                        'shopItem',
+                        fn ($shopItemQuery) => $shopItemQuery->where('structure_id', $structureId),
+                    ),
+                )
+                ->delete() > 0;
+        }, attempts: 3);
     }
 
     public function getCart(User $user, int $structureId): ShopCartDTO
@@ -114,10 +121,14 @@ class ShopCartService
 
     public function clearCart(User $user, int $structureId): int
     {
-        return ShopCart::where('user_id', $user->id)
-            ->join('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
-            ->where('shop_items.structure_id', $structureId)
-            ->delete();
+        return DB::transaction(function () use ($user, $structureId): int {
+            User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            return ShopCart::where('user_id', $user->id)
+                ->join('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
+                ->where('shop_items.structure_id', $structureId)
+                ->delete();
+        }, attempts: 3);
     }
 
     public function getTotalPrice(User $user, int $structureId): float

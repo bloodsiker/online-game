@@ -7,6 +7,7 @@ namespace App\Modules\Post\Application\UseCases;
 use App\Modules\Post\Infrastructure\Persistence\Models\PostLetter;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class GetMailbox
 {
@@ -62,13 +63,19 @@ class GetMailbox
      */
     private function pruneExpired(User $user): void
     {
-        PostLetter::query()
-            ->where('recipient_user_id', $user->id)
-            ->whereNull('recipient_deleted_at')
-            ->where(function ($q): void {
-                $q->where(fn ($q2) => $q2->whereNull('read_at')->where('created_at', '<', now()->subDays(self::UNREAD_TTL_DAYS)))
-                    ->orWhere(fn ($q2) => $q2->whereNotNull('read_at')->where('read_at', '<', now()->subDays(self::READ_TTL_DAYS)));
-            })
-            ->update(['recipient_deleted_at' => now()]);
+        DB::transaction(function () use ($user): void {
+            User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $expired = PostLetter::query()
+                ->where('recipient_user_id', $user->id)
+                ->whereNull('recipient_deleted_at')
+                ->where(function ($q): void {
+                    $q->where(fn ($q2) => $q2->whereNull('read_at')->where('created_at', '<', now()->subDays(self::UNREAD_TTL_DAYS)))
+                        ->orWhere(fn ($q2) => $q2->whereNotNull('read_at')->where('read_at', '<', now()->subDays(self::READ_TTL_DAYS)));
+                })
+                ->orderBy('id')->lockForUpdate()->pluck('id');
+            if ($expired->isNotEmpty()) {
+                PostLetter::whereIn('id', $expired)->update(['recipient_deleted_at' => now()]);
+            }
+        });
     }
 }

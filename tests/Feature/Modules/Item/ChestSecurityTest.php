@@ -276,6 +276,8 @@ class ChestSecurityTest extends TestCase
 
     private function userOnLocation(int $id, int $locationId): User
     {
+        DB::table('users')->updateOrInsert(['id' => $id], ['location_id' => $locationId]);
+        DB::table('locations')->insertOrIgnore(['id' => $locationId]);
         $user = $this->user($id);
         $user->location_id = $locationId;
         $location = new Location;
@@ -316,9 +318,14 @@ class ChestSecurityTest extends TestCase
             $table->string('reward_type');
             $table->timestamps();
         });
+        Schema::create('locations', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('dungeon_id')->nullable();
+        });
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->integer('money')->default(0);
+            $table->unsignedBigInteger('location_id')->nullable();
             $table->timestamps();
         });
         Schema::create('share_item_lock_configs', function (Blueprint $table): void {
@@ -339,12 +346,14 @@ class ChestSecurityTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedBigInteger('kraft_item_id')->nullable();
             $table->timestamps();
         });
         Schema::create('share_recipe_has_items', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_recipe_id');
             $table->unsignedBigInteger('share_item_id');
             $table->integer('count')->default(1);

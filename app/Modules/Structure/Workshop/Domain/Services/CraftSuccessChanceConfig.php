@@ -11,10 +11,13 @@ namespace App\Modules\Structure\Workshop\Domain\Services;
  * (см. TIER_THRESHOLDS — общие для всех мирных профессий: 1/50/100/150/200,
  * потолок навыка 300). Остальные профессии (не из списка) крафтят как
  * раньше — гарантированно.
+ *
+ * $maxChance — потолок шанса рецепта (share_recipes.percent): для редких
+ * конечных продуктов (свитки заточки, рунный ключ) шанс не дорастает до 100%.
  */
 final class CraftSuccessChanceConfig
 {
-    private const APPLICABLE_SKILL_IDS = [18, 20, 21, 22, 23]; // Алхимик, Ремесленник, Кузнец, Колдун, Ювелир
+    private const APPLICABLE_SKILL_IDS = [18, 19, 20, 21, 22, 23]; // Алхимик, Кулинар, Ремесленник, Кузнец, Колдун, Ювелир
 
     private const TIER_THRESHOLDS = [1, 50, 100, 150, 200, 300];
 
@@ -25,22 +28,24 @@ final class CraftSuccessChanceConfig
         return in_array($skillId, self::APPLICABLE_SKILL_IDS, true);
     }
 
-    public static function chance(int $skillId, int $requiredLevel, int $currentLevel): int
+    public static function chance(int $skillId, int $requiredLevel, int $currentLevel, int $maxChance = 100): int
     {
+        $maxChance = max(1, min(100, $maxChance));
+
         if (! self::isApplicable($skillId)) {
-            return 100;
+            return $maxChance;
         }
 
         $nextThreshold = self::nextThreshold($requiredLevel);
 
         if ($nextThreshold <= $requiredLevel) {
-            return 100;
+            return $maxChance;
         }
 
         $progress = ($currentLevel - $requiredLevel) / ($nextThreshold - $requiredLevel);
         $chance = self::BASE_CHANCE + $progress * (100 - self::BASE_CHANCE);
 
-        return (int) min(100, max(self::BASE_CHANCE, round($chance)));
+        return (int) min($maxChance, max(self::BASE_CHANCE, round($chance)));
     }
 
     private static function nextThreshold(int $requiredLevel): int

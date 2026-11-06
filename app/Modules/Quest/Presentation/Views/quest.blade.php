@@ -295,7 +295,7 @@
                                             @elseif($dialoguePage)
                                                 {{-- Реплика — вариант ответа блоком, как в диалоге с НПС (на последней сама ведёт к принятию квеста) --}}
                                                 <tr class="bg_l brd2-all fs-12 pointer"
-                                                    onclick="location.href='{{ $dialogueNextUrl }}'"
+                                                    onclick="@if($showObjectives) document.getElementById('quest-take-form').requestSubmit() @else location.href='{{ $dialogueNextUrl }}' @endif"
                                                     onmouseover="this.className += ' bg_l2';" onmouseout="this.className = this.className.split(' bg_l2').join('');">
                                                     <td width="1%"><img src="{{ asset('img/icon/qst_talk.gif') }}" alt=""></td>
                                                     <td class="ajustify" colspan="2"><b>{{ $dialoguePage->reply_text }}</b></td>
@@ -304,7 +304,7 @@
                                                 <tr>
                                                     <td colspan="3" align="center">
                                                         <span class="butt1 pointer">
-                                                            <span><input value="{{ __('Далее') }}" type="submit" onclick="location.href='{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                            <span><input value="{{ __('Далее') }}" type="submit" onclick="document.getElementById('quest-take-form').requestSubmit()" class="grnn"></span>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -345,7 +345,7 @@
                                             <tr>
                                                 <td colspan="3" align="center">
                                                     <span class="butt1 pointer">
-                                                        <span><input value="{{ __('Сдать') }}" type="submit" onclick="location.href='{{ route('quest.complete', ['id' => $quest->id, 'npc' => $npc->id]) }}'" class="grnn"></span>
+                                                        <span><input value="{{ __('Сдать') }}" type="submit" onclick="document.getElementById('quest-complete-form').requestSubmit()" class="grnn"></span>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -428,5 +428,14 @@
 <script>
 </script>
 
+<form id="quest-take-form" method="post" action="{{ route('quest.take', ['id' => $quest->id, 'npc' => $npc?->id]) }}" hidden>@csrf</form>
+@php($actionProgress = $clanProgress ?? $questPlayer ?? null)
+@if($actionProgress)
+<form id="quest-complete-form" method="post" action="{{ route('quest.complete', ['id' => $quest->id, 'npc' => $npc?->id]) }}" hidden>
+    @csrf
+    <input name="progress_id" value="{{ $actionProgress->id }}">
+    <input name="revision" value="{{ (int) $actionProgress->revision }}">
+</form>
+@endif
 </body>
 </html>

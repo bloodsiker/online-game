@@ -12,6 +12,7 @@ use App\Modules\Post\Application\UseCases\DeleteLetter;
 use App\Modules\Post\Application\UseCases\GetMailbox;
 use App\Modules\Post\Application\UseCases\ReadLetter;
 use App\Modules\Post\Application\UseCases\SendLetter;
+use App\Modules\Post\Domain\Exceptions\ClaimAttachmentsBlocked;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,7 +94,11 @@ final class PostController
         $ids = (array) $request->input('ids', []);
         $mode = $request->input('from') === 'outpost' ? 'outpost' : 'inbox';
 
-        $affected = $this->bulkLetters->execute($request->user(), $ids, $action);
+        try {
+            $affected = $this->bulkLetters->execute($request->user(), $ids, $action);
+        } catch (ClaimAttachmentsBlocked $exception) {
+            return redirect()->route('post', ['mode' => $mode])->with('post_error', $exception->getMessage());
+        }
 
         return redirect()->route('post', ['mode' => $mode])->with(
             $affected > 0 ? 'post_success' : 'post_error',
@@ -128,7 +133,11 @@ final class PostController
 
     public function claim(Request $request, int $id): RedirectResponse
     {
-        $affected = $this->bulkLetters->execute($request->user(), [$id], 'claim');
+        try {
+            $affected = $this->bulkLetters->execute($request->user(), [$id], 'claim');
+        } catch (ClaimAttachmentsBlocked $exception) {
+            return redirect()->route('post.letter', $id)->with('post_error', $exception->getMessage());
+        }
 
         return redirect()->route('post.letter', $id)->with(
             $affected > 0 ? 'post_success' : 'post_error',
@@ -140,7 +149,7 @@ final class PostController
     {
         $this->deleteLetter->execute($request->user(), $id);
 
-        $mode = (string) $request->query('from', 'inbox');
+        $mode = (string) $request->input('from', 'inbox');
 
         return redirect()->route('post', ['mode' => $mode === 'outpost' ? 'outpost' : 'inbox'])
             ->with('post_success', 'Письмо удалено.');

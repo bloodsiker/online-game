@@ -116,6 +116,8 @@ Route::delete('/item/{item}', [ItemController::class, 'destroy'])->name('item.de
 Route::post('/item/{item}/duplicate', [ItemController::class, 'duplicate'])->name('item.duplicate');
 Route::post('/item/recipe/{recipe}/update', [ItemController::class, 'updateRecipe'])->name('item.recipe.update');
 Route::post('/item/recipe/{recipe}', [ItemController::class, 'addItemToRecipe'])->name('item.recipe.add_item');
+Route::post('/item/recipe/{recipe}/ingredient/{item}', [ItemController::class, 'updateIngredientInRecipe'])->name('item.recipe.update_ingredient');
+Route::post('/item/recipe/{recipe}/ingredient-order', [ItemController::class, 'updateIngredientOrder'])->name('item.recipe.ingredient_order');
 Route::get('/item/recipe/{recipe}/delete/{item}', [ItemController::class, 'deleteItemInRecipe'])->name('item.recipe.delete_item');
 Route::post('/item/recipe/{recipe}/result', [ItemController::class, 'addResultToRecipe'])->name('item.recipe.add_result');
 Route::post('/item/recipe/{recipe}/result/{item}', [ItemController::class, 'updateResultInRecipe'])->name('item.recipe.update_result');
@@ -165,6 +167,7 @@ Route::get('/monsters', [MonsterController::class, 'list'])->name('monsters');
 
 Route::get('/structure/{structure}/shop/delete_item/{item}', [StructureController::class, 'infoShopDeleteItem'])->name('structure.info.shop_delete_item');
 Route::post('/structure/{structure}/shop', [StructureController::class, 'infoShop'])->name('structure.info.shop');
+Route::post('/structure/{structure}/shop/order', [StructureController::class, 'reorderShopItems'])->name('structure.info.shop_order');
 Route::post('/structure/{structure}/shop/{shopItem}', [StructureController::class, 'infoShopUpdate'])->name('structure.info.shop_update');
 Route::post('/structure/{structure}/shop/{shopItem}/requirement', [StructureController::class, 'infoShopAddRequirement'])->name('structure.info.shop_requirement.add');
 Route::delete('/structure/{structure}/shop/{shopItem}/requirement/{requirement}', [StructureController::class, 'infoShopDeleteRequirement'])->name('structure.info.shop_requirement.delete');
@@ -223,6 +226,8 @@ Route::get('/npc/{npc}/dialogue/node/{node}/option/{option}/delete', [NpcControl
 Route::match(['GET', 'POST'], '/npc/{npc}', [NpcController::class, 'info'])->name('npc.info');
 
 Route::match(['GET', 'POST'], '/skill/create', [SkillController::class, 'create'])->name('skill.create');
+Route::get('/skill/{skill}/recipes', [SkillController::class, 'recipes'])->name('skill.recipes');
+Route::post('/skill/{skill}/recipes/order', [SkillController::class, 'saveRecipeOrder'])->name('skill.recipes.order');
 Route::post('/skill/{skill}/peaceful-requirements', [SkillController::class, 'updatePeacefulProfessionRequirements'])->name('skill.peaceful-requirements.update');
 Route::match(['GET', 'POST'], '/skill/{skill}', [SkillController::class, 'info'])->name('skill.info');
 Route::get('/skills', [SkillController::class, 'list'])->name('skills');

@@ -249,6 +249,12 @@
                             <span>Новости</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.launch-subscriptions.*') ? 'nav-active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.launch-subscriptions.index') }}">
+                            <i class="bx bx-envelope" aria-hidden="true"></i>
+                            <span>Подписки на открытие</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.library.*') ? 'nav-active nav-parent nav-expanded' : 'nav-parent' }}">
                         <a class="nav-link" href="#">
                             <i class="bx bx-library" aria-hidden="true"></i>

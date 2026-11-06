@@ -7,9 +7,9 @@ namespace App\Modules\Structure\Blacksmith\Domain\Services;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\Item\Infrastructure\Persistence\Models\ItemRune;
+use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
-use App\Modules\Share\Domain\Enums\CombatPassiveType;
 use App\Modules\Structure\Blacksmith\Domain\Enums\RuneRarity;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 

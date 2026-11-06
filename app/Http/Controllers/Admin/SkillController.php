@@ -6,16 +6,34 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Share\Application\Services\ContentTranslationEditor;
+use App\Modules\Share\Application\UseCases\Admin\ManageProfessionRecipes;
 use App\Modules\Skill\Infrastructure\Persistence\Models\Skill;
 use App\Modules\Skill\Infrastructure\Persistence\Models\SkillLevelRequirement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class SkillController extends Controller
 {
     private const PEACEFUL_PROFESSION_MAX_LEVEL = 300;
+
+    public function recipes(Skill $skill, ManageProfessionRecipes $catalog): View
+    {
+        return view('admin.skill.recipes', ['skill' => $skill, 'recipes' => $catalog->get($skill)]);
+    }
+
+    public function saveRecipeOrder(Request $request, Skill $skill, ManageProfessionRecipes $catalog): RedirectResponse
+    {
+        $data = $request->validate([
+            'recipe_ids' => ['present', 'array'],
+            'recipe_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ]);
+        $catalog->reorder(skill: $skill, ids: collect($data['recipe_ids'])->map(fn ($id): int => (int) $id));
+
+        return redirect()->route('admin.skill.recipes', $skill->id)->with('success', 'Порядок рецептов сохранён.');
+    }
 
     public function list()
     {

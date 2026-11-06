@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Modules\Player\Domain\Services\PlayerStatFormulas;
+use App\Modules\Player\Application\UseCases\RecalculatePlayerHp;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use Illuminate\Console\Command;
 
@@ -18,37 +18,28 @@ class RecalculatePlayersHp extends Command
 
     protected $description = 'Пересчитать hp_max всех игроков по формуле «HP от уровня и выносливости»';
 
-    public function handle(): int
+    public function handle(RecalculatePlayerHp $recalculate): int
     {
         $dry = (bool) $this->option('dry-run');
 
-        Player::query()->with('user')->chunkById(200, function ($players) use ($dry): void {
+        Player::query()->select('id')->chunkById(200, function ($players) use ($dry, $recalculate): void {
             foreach ($players as $player) {
-                $newHpMax = PlayerStatFormulas::DEFAULT_HP
-                    + PlayerStatFormulas::HP_PER_LEVEL * (max(1, (int) $player->lvl) - 1)
-                    + PlayerStatFormulas::HP_PER_ENDURANCE * max(0, $player->getEndurance() - 1);
-
-                $oldHpMax = (int) $player->hp_max;
-                $newHpNow = $oldHpMax > 0
-                    ? min($newHpMax, (int) round($player->hp_now * $newHpMax / $oldHpMax))
-                    : $newHpMax;
+                $result = $recalculate->execute(playerId: (int) $player->id, dryRun: $dry);
+                if ($result === null) {
+                    continue;
+                }
 
                 $this->line(sprintf(
                     '%s (lvl %d): hp_max %d → %d, hp_now %d → %d%s',
-                    $player->user?->name ?? ('#'.$player->id),
-                    $player->lvl,
-                    $oldHpMax,
-                    $newHpMax,
-                    $player->hp_now,
-                    $newHpNow,
+                    $result->name,
+                    $result->level,
+                    $result->oldHpMax,
+                    $result->newHpMax,
+                    $result->oldHpNow,
+                    $result->newHpNow,
                     $dry ? ' [dry-run]' : '',
                 ));
 
-                if (! $dry) {
-                    $player->hp_max = $newHpMax;
-                    $player->hp_now = $newHpNow;
-                    $player->save();
-                }
             }
         });
 

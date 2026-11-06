@@ -30,10 +30,13 @@ final readonly class HeartbeatPlayer
     {
         return DB::transaction(function () use ($user, $touchOnline): PlayerHeartbeatDTO {
             $now = now();
+            $user = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $player = Player::query()
-                ->whereKey($user->player->id)
+                ->whereKey($user->player_id)
                 ->lockForUpdate()
                 ->firstOrFail();
+            $player->setRelation('user', $user);
+            $user->setRelation('player', $player);
 
             if ($touchOnline) {
                 $this->onlinePresenceService->touch((int) $user->id, $now);

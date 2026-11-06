@@ -1,7 +1,18 @@
+<div data-shop-sort-block>
+    <form action="{{ route('admin.structure.info.shop_order', $structure->id) }}" method="post" class="p-2">
+        @csrf
+        <input type="hidden" name="category_id" value="{{ $categoryId }}">
+        <span data-shop-order-values>
+            @foreach($items as $shopItem)<input type="hidden" name="item_ids[]" value="{{ $shopItem->id }}">@endforeach
+        </span>
+        <button type="submit" class="btn btn-sm btn-primary" data-shop-order-save disabled>Сохранить порядок</button>
+        <small class="text-muted">Перетащите товары за ↕ или используйте ↑ ↓ на маркере. Порядок сохраняется внутри категории.</small>
+    </form>
 <div class="table-responsive">
     <table class="table table-hover table-bordered mb-none">
         <thead>
         <tr>
+            <th width="35"></th>
             <th width="45"></th>
             <th>Название</th>
             <th width="130">Цена (монеты)</th>
@@ -14,9 +25,10 @@
             <th width="150"></th>
         </tr>
         </thead>
-        <tbody>
+        <tbody data-shop-sort-rows>
         @forelse($items as $shopItem)
-            <tr style="vertical-align: middle">
+            <tr style="vertical-align: middle" data-shop-sort-id="{{ $shopItem->id }}">
+                <td><button type="button" class="btn btn-xs btn-default" data-shop-sort-handle draggable="true" style="cursor:grab" title="Перетащите или нажмите ↑ ↓" aria-label="Переместить товар">↕</button></td>
                 <td>
                     @if($shopItem->item?->image)
                         <img src="{{ $shopItem->item->image }}" width="36" alt="">
@@ -121,8 +133,61 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="{{ $structure->isBarterShop() ? 8 : 7 }}" class="text-center text-muted">Нет предметов</td></tr>
+            <tr><td colspan="{{ $structure->isBarterShop() ? 9 : 8 }}" class="text-center text-muted">Нет предметов</td></tr>
         @endforelse
         </tbody>
     </table>
 </div>
+</div>
+@once
+@push('footer_scripts')
+<script>
+(() => {
+    if (window.location.hash === '#tab-shop') document.querySelector('a[href="#tab-shop"]')?.click();
+    document.querySelectorAll('[data-shop-sort-block]').forEach(block => {
+        const body = block.querySelector('[data-shop-sort-rows]');
+        const values = block.querySelector('[data-shop-order-values]');
+        const save = block.querySelector('[data-shop-order-save]');
+        const rows = () => [...body.querySelectorAll('[data-shop-sort-id]')];
+        const initial = rows().map(row => row.dataset.shopSortId).join(',');
+        let dragged = null;
+        function update() {
+            const ids = rows().map(row => row.dataset.shopSortId);
+            values.replaceChildren(...ids.map(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden'; input.name = 'item_ids[]'; input.value = id;
+                return input;
+            }));
+            save.disabled = ids.join(',') === initial;
+        }
+        body.addEventListener('dragstart', event => {
+            const handle = event.target.closest('[data-shop-sort-handle]');
+            if (!handle) { event.preventDefault(); return; }
+            dragged = handle.closest('[data-shop-sort-id]');
+            dragged.style.opacity = '0.5';
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', dragged.dataset.shopSortId);
+        });
+        body.addEventListener('dragover', event => {
+            const target = event.target.closest('[data-shop-sort-id]');
+            if (!dragged || !target || target === dragged) return;
+            event.preventDefault();
+            const rect = target.getBoundingClientRect();
+            body.insertBefore(dragged, event.clientY < rect.top + rect.height / 2 ? target : target.nextSibling);
+        });
+        body.addEventListener('drop', event => { if (dragged) { event.preventDefault(); update(); } });
+        body.addEventListener('dragend', () => { if (dragged) dragged.style.opacity = ''; dragged = null; update(); });
+        body.addEventListener('keydown', event => {
+            const handle = event.target.closest('[data-shop-sort-handle]');
+            if (!handle || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+            event.preventDefault();
+            const row = handle.closest('[data-shop-sort-id]');
+            if (event.key === 'ArrowUp' && row.previousElementSibling) body.insertBefore(row, row.previousElementSibling);
+            if (event.key === 'ArrowDown' && row.nextElementSibling) body.insertBefore(row.nextElementSibling, row);
+            handle.focus(); update();
+        });
+    });
+})();
+</script>
+@endpush
+@endonce

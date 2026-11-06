@@ -16,5 +16,6 @@ final readonly class TakeLocationItemDTO
         public string $actionUrl,
         public ?string $lockpickingUrl = null,
         public ?string $rarityColor = null,
+        public ?int $worldEventRunId = null,
     ) {}
 }

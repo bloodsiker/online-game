@@ -94,7 +94,9 @@ final readonly class PlayerMovementService
         $capacity = $user->getBagCount();
         $speedModifier = $this->getSpeedModifier($backpackUsed, $capacity);
 
-        $this->applyMove($user, $location->$direction);
+        if (! $this->applyMove($user, $location->$direction)) {
+            return MoveResultDTO::blocked(__('Нельзя покинуть локацию во время боя.'));
+        }
 
         return MoveResultDTO::success(speedModifier: $speedModifier);
     }
@@ -170,12 +172,16 @@ final readonly class PlayerMovementService
         return null;
     }
 
-    private function applyMove(User $user, int $newLocationId): void
+    private function applyMove(User $user, int $newLocationId): bool
     {
         $oldLocationId = (int) $user->location_id;
 
-        DB::transaction(function () use ($user, $newLocationId): void {
+        $moved = DB::transaction(function () use ($user, $newLocationId): bool {
             $freshUser = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            if ((int) $freshUser->location_id !== (int) $user->location_id
+                || $this->battleRepository->hasLivingPlayerInActiveBattle($freshUser->id, $freshUser->location_id)) {
+                return false;
+            }
 
             GatheringAttempt::query()->where('player_id', $user->player->id)->delete();
 
@@ -186,7 +192,12 @@ final readonly class PlayerMovementService
             // Синхронізуємо передану модель: після move() вона читається мапером.
             $user->prev_location_id = $freshUser->prev_location_id;
             $user->location_id = $freshUser->location_id;
+
+            return true;
         });
+        if (! $moved) {
+            return false;
+        }
 
         // Інвалідуємо список "хто на локації" для обох локацій.
         Cache::forget('who:users_on_location:'.$oldLocationId);
@@ -196,6 +207,8 @@ final readonly class PlayerMovementService
             Cache::forget('who:users_on_location:'.$oldLocationId.':run:'.$dungeonRunId);
             Cache::forget('who:users_on_location:'.$newLocationId.':run:'.$dungeonRunId);
         }
+
+        return true;
     }
 
     private function getSpeedModifier(int $used, int $capacity): float

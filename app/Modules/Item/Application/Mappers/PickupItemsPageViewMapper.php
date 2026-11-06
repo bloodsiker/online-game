@@ -42,6 +42,8 @@ class PickupItemsPageViewMapper
                             ? route('items.lockpick.show', ['id' => $item->item->id, 'modal' => 1])
                             : null,
                         rarityColor: $item->item->itemInfo->rarity?->color(),
+                        worldEventRunId: $item->world_event_run_id === null ? null : (int) $item->world_event_run_id,
+                        shareItemId: (int) $item->item->share_item_id,
                     );
                 }
             )->all(),

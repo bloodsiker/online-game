@@ -9,7 +9,7 @@
         </a>
         @if($bestiaryCategory)
             <a class="library-map-monsters"
-               href="{{ route('library.index', ['category' => $bestiaryCategory->slug, 'map_id' => $node->id]) }}"
+               href="{{ $libraryUrls->index(parameters: ['category' => $bestiaryCategory->slug, 'map_id' => $node->id]) }}"
                title="Монстры карты {{ $node->name }}"
                aria-label="Монстры карты {{ $node->name }}">⚔</a>
         @endif

@@ -8,6 +8,7 @@ use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Services\ClanService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -19,6 +20,13 @@ class InviteToClan
     ) {}
 
     public function execute(User $user, ?string $nickname): void
+    {
+        DB::transaction(function () use ($user, $nickname): void {
+            $this->executeLocked($user, $nickname);
+        }, attempts: 3);
+    }
+
+    private function executeLocked(User $user, ?string $nickname): void
     {
         if ($nickname === null || $nickname === '') {
             throw new RuntimeException('Введите ник игрока.');

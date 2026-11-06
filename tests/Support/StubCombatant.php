@@ -84,6 +84,11 @@ final class StubCombatant implements FightHitInterface
         return $this->magicResistance;
     }
 
+    public function getMagicDamagePercent(): int
+    {
+        return 0;
+    }
+
     public function getMagicAttack(): int
     {
         return $this->magicAttack;

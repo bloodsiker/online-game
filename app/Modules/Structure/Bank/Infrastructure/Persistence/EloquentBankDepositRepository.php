@@ -21,11 +21,12 @@ class EloquentBankDepositRepository implements BankDepositRepository
         ]);
     }
 
-    public function findOpenForUser(int $userId, int $depositId): ?BankDeposit
+    public function findOpenForUser(int $userId, int $depositId, bool $forUpdate = false): ?BankDeposit
     {
         return BankDeposit::where('id', $depositId)
             ->where('user_id', $userId)
             ->whereNull('closed_at')
+            ->when($forUpdate, fn ($query) => $query->lockForUpdate())
             ->first();
     }
 
@@ -46,9 +47,8 @@ class EloquentBankDepositRepository implements BankDepositRepository
             ->get();
     }
 
-    public function close(BankDeposit $deposit): void
+    public function close(BankDeposit $deposit): bool
     {
-        $deposit->closed_at = now();
-        $deposit->save();
+        return BankDeposit::whereKey($deposit->id)->whereNull('closed_at')->update(['closed_at' => now()]) === 1;
     }
 }

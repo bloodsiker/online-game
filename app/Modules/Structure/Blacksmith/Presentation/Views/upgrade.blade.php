@@ -263,6 +263,9 @@
                                                         @if($scroll['count'] > 1)
                                                             <span style="color:#888;">({{ $scroll['count'] }})</span>
                                                         @endif
+                                                        @if($scroll['rangeLabel'] !== '')
+                                                            <br><span style="color:#666; font-size:10px;">Заточка {{ $scroll['rangeLabel'] }}</span>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @empty
@@ -433,12 +436,16 @@
         let html = '';
 
         if (d.isMax) {
-            html = `${itemHtml}<div class="lvl-max">Максимальный уровень +15<br>Заточка невозможна.</div>`;
+            html = `${itemHtml}<div class="lvl-max">Максимальный уровень +{{ $maxUpgradeLevel ?? 25 }}<br>Заточка невозможна.</div>`;
         } else {
             const scroll = selectedBaseScrollId ? baseScrollData[selectedBaseScrollId] : null;
             const scrollHtml = scroll
                 ? `<img src="${scroll.image}" width="28" height="28" style="vertical-align:middle;margin-right:4px;"><b>${scroll.name}</b>${scroll.count > 1 ? ` <span style="color:#888;">(${scroll.count})</span>` : ''}`
                 : `<span style="color:#c00;">— не выбран —</span>`;
+            const scrollMismatch = scroll && ((d.requiredScrollRarity && scroll.rarity !== d.requiredScrollRarity) || scroll.scrollType !== d.requiredScrollType);
+            const gradeHtml = d.requiredScrollLabel
+                ? `<div style="margin:2px 0; font-size:11px; color:${scrollMismatch ? '#c00' : '#666'};">${scrollMismatch ? 'Свиток не подходит! ' : ''}Нужен: <b>${d.requiredScrollTypeLabel}</b> (${d.requiredScrollLabel})</div>`
+                : '';
 
             const bonus = selectedBonusScrollId ? bonusScrollData[selectedBonusScrollId] : null;
             const bonusHtml = bonus
@@ -461,10 +468,11 @@
                     <div class="rep-progress-bar__text">${chance.toFixed(0)}%</div>
                 </div>
                 ${d.destroyChance > 0 ? `<span style="color:#c00;">Шанс уничтожения: <b>${d.destroyChance}%</b></span><br>` : ''}
-                ${d.failStreak >= 10 ? `<span style="color:#489200;">⚡ Гарантированный успех!</span><br>` : (d.pity > 0 ? `<span style="color:#888;">Pity: +${d.pity * 2}%</span><br>` : '')}
+                ${d.level < 15 ? (d.failStreak >= 10 ? `<span style="color:#489200;">⚡ Гарантированный успех!</span><br>` : (d.pity > 0 ? `<span style="color:#888;">Pity: +${d.pity * 2}%</span><br>` : '')) : ''}
                 <br>
                 <span>Стоимость: <img src="{{ asset('img/icon/m_game.gif') }}" width="10" height="10"> <b>${d.cost.toLocaleString()}</b></span><br>
                 <div style="margin:6px 0 2px; font-size:11px; color:#666;">Свиток: ${scrollHtml}</div>
+                ${gradeHtml}
                 <div style="margin:0 0 4px; font-size:11px; color:#666;">Доп. свиток: ${bonusHtml}</div>
                 <div class="rep-progress-bar upgrade-progress-wrap" id="upgrade-progress-wrap" title="Выполняется заточка">
                     <div class="rep-progress-bar__bg">

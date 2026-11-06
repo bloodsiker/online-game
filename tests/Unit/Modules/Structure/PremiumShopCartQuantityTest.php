@@ -34,6 +34,8 @@ final class PremiumShopCartQuantityTest extends TestCase
         self::assertSame('sqlite', DB::connection()->getDriverName());
         self::assertSame(':memory:', DB::connection()->getDatabaseName());
 
+        Schema::create('users', fn (Blueprint $table) => $table->id());
+        DB::table('users')->insert([['id' => 1], ['id' => 2]]);
         Schema::create('share_items', function (Blueprint $table): void {
             $table->id();
             $table->text('name')->nullable();

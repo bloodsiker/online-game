@@ -22,5 +22,5 @@ interface DungeonSessionRepository
 
     public function incrementWave(DungeonSession $session): DungeonSession;
 
-    public function markCompleted(DungeonSession $session): void;
+    public function markCompleted(DungeonSession $session): bool;
 }

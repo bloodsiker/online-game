@@ -112,6 +112,7 @@ class ReputationService
         $quest = $randomTierQuest->quest;
 
         return DB::transaction(function () use ($player, $quest) {
+            Player::whereKey($player->id)->lockForUpdate()->firstOrFail();
             // Строка на пару (игрок, квест) единственная (UNIQUE):
             // повторная выдача ежедневки переиспользует её, как это делает
             // QuestController::take() для repeatable-квестов.
@@ -124,8 +125,11 @@ class ReputationService
             if ($questPlayer) {
                 $questPlayer->objectives()->delete();
                 $questPlayer->update([
+                    'revision' => (int) $questPlayer->revision + 1,
                     'status' => QuestPlayerStatus::IN_PROGRESS,
                     'current_stage_id' => $quest->firstStage()?->id,
+                    'current_stage_started_at' => null,
+                    'current_stage_ready_at' => null,
                     'completed_at' => null,
                     'reset_at' => null,
                 ]);

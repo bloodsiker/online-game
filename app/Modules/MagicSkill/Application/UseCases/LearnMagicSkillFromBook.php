@@ -13,7 +13,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -133,22 +133,8 @@ class LearnMagicSkillFromBook
 
                 return new LearnMagicSkillResultDTO(ok: true, message: sprintf('Выучено: «%s»', $skill->name));
             });
-        } catch (QueryException $e) {
-            if (! $this->isUniqueConstraintViolation($e)) {
-                throw $e;
-            }
-
+        } catch (UniqueConstraintViolationException $e) {
             return new LearnMagicSkillResultDTO(ok: false, message: 'Заклинание уже изучено', httpCode: 422);
         }
-    }
-
-    /**
-     * SQLSTATE 23000 — integrity constraint violation, тот же код что у MySQL
-     * (Duplicate entry) и у SQLite (UNIQUE constraint failed), которые
-     * используются в dev/test и в проде соответственно (см. CLAUDE.md).
-     */
-    private function isUniqueConstraintViolation(QueryException $e): bool
-    {
-        return $e->getCode() === '23000';
     }
 }

@@ -151,7 +151,7 @@
 	                                                    </h2>
 	                                                </header>
 	                                                <div class="card-body p-0">
-	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $categoryItems, 'structure' => $structure])
+	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $categoryItems, 'structure' => $structure, 'categoryId' => $category->id])
 	                                                </div>
 	                                            </section>
 	                                        @endforeach
@@ -165,7 +165,7 @@
 	                                                    </h2>
 	                                                </header>
 	                                                <div class="card-body p-0">
-	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $uncategorizedItems->sortByDesc('sort_order'), 'structure' => $structure])
+	                                                    @include('admin.structures.partials.shop_items_table', ['items' => $uncategorizedItems->sortByDesc('sort_order'), 'structure' => $structure, 'categoryId' => null])
 	                                                </div>
 	                                            </section>
 	                                        @endif

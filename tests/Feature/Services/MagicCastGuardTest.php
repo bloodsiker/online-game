@@ -27,6 +27,7 @@ class MagicCastGuardTest extends TestCase
             $table->integer('mp_now')->default(10);
             // Player::$attributes defaults experience_multiplier to 1.0 on every insert.
             $table->float('experience_multiplier')->default(1.0);
+            $table->integer('reputation_rating')->default(0);
             $table->timestamps();
         });
         Schema::create('magic_skills', function (Blueprint $table): void {

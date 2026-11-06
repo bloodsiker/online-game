@@ -19,7 +19,7 @@ Route::middleware(['auth', 'prison.context'])->group(function (): void {
         ->name('fight.leave-clan-boss');
 
     // Мутації стану бою: throttle проти автоклікерів (клієнтський кулдаун обходиться).
-    Route::get('/fight/run-away/{id}', [FightController::class, 'runAway'])
+    Route::post('/fight/run-away/{id}', [FightController::class, 'runAway'])
         ->middleware('throttle:120,1')
         ->name('fight.run-away');
     Route::get('/fight/attack/monster/{id}', [FightController::class, 'attackMonster'])

@@ -9,6 +9,7 @@ use App\Modules\Structure\Bank\Domain\Contracts\BankLogRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\BankUserRepository;
 use App\Modules\Structure\Bank\Domain\Contracts\TransactionManager;
 use App\Modules\Structure\Bank\Domain\Enums\BankAction;
+use App\Modules\Structure\Bank\Domain\Services\BankBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class Withdraw
@@ -21,24 +22,31 @@ class Withdraw
 
     public function execute(User $user, int $amount): BankResultDTO
     {
-        if ($amount > $user->bank_balance) {
-            return new BankResultDTO(false, 'Сумма превышает баланс банковского счёта.');
+        if ($amount <= 0) {
+            return new BankResultDTO(false, __('bank.invalid_amount'));
         }
 
-        $this->transactionManager->run(function () use ($user, $amount) {
-            $this->bankUserRepository->decrementBankBalance($user, $amount);
-            $this->bankUserRepository->incrementMoney($user, $amount);
-
-            $balanceAfter = $this->bankUserRepository->refresh($user)->bank_balance;
-
+        return $this->transactionManager->run(function () use ($user, $amount): BankResultDTO {
+            $lockedUser = $this->bankUserRepository->lockForUpdate($user->id);
+            if ($amount > $lockedUser->bank_balance) {
+                return new BankResultDTO(false, 'Сумма превышает баланс банковского счёта.');
+            }
+            if (! BankBalanceLimits::canCreditWallet((int) $lockedUser->money, $amount)) {
+                return new BankResultDTO(false, __('bank.wallet_limit'));
+            }
+            if (! $this->bankUserRepository->decrementBankBalance($lockedUser, $amount)) {
+                return new BankResultDTO(false, 'Сумма превышает баланс банковского счёта.');
+            }
+            $this->bankUserRepository->incrementMoney($lockedUser, $amount);
+            $balanceAfter = $this->bankUserRepository->refresh($lockedUser)->bank_balance;
             $this->bankLogRepository->create(
-                userId: $user->id,
+                userId: $lockedUser->id,
                 action: BankAction::WITHDRAW,
                 amount: $amount,
                 balanceAfter: $balanceAfter,
             );
-        });
 
-        return new BankResultDTO(true, sprintf('Вы сняли %s монет из банка.', number_format($amount)));
+            return new BankResultDTO(true, sprintf('Вы сняли %s монет из банка.', number_format($amount)));
+        });
     }
 }

@@ -32,6 +32,7 @@ final class AuctionItemSelectionFilterTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->unsignedBigInteger('share_item_id');
         });
         Schema::create('backpacks', function (Blueprint $table): void {

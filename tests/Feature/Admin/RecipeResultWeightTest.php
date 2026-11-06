@@ -29,6 +29,7 @@ final class RecipeResultWeightTest extends TestCase
         });
         Schema::create('share_recipes', function (Blueprint $table): void {
             $table->id();
+            $table->unsignedInteger('sort_order')->default(0);
         });
         Schema::create('share_recipe_results', function (Blueprint $table): void {
             $table->id();

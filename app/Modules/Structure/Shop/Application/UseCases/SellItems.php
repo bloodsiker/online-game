@@ -10,7 +10,9 @@ use App\Modules\Structure\Shop\Application\DTOs\ShopResultDTO;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopInventoryRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\ShopReadRepository;
 use App\Modules\Structure\Shop\Domain\Contracts\TransactionManager;
+use App\Modules\User\Domain\Services\WalletBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use RuntimeException;
 
 class SellItems
 {
@@ -35,44 +37,57 @@ class SellItems
             return new ShopResultDTO(false, 'Не выбраны предметы для продажи');
         }
 
-        $items = $this->readRepository->getSelectedSellableItems($user->id, array_map('intval', array_keys($filtered)));
-
-        $total = 0;
-        $idsToDelete = [];
-
-        $this->transactionManager->run(function () use ($filtered, $items, $user, &$total, &$idsToDelete): void {
+        $updatedBalance = null;
+        $result = $this->transactionManager->run(function () use ($filtered, $user, &$updatedBalance): ShopResultDTO {
+            $lockedUser = $this->inventoryRepository->lockUser((int) $user->id);
+            $items = $this->readRepository->getSelectedSellableItems(
+                userId: (int) $lockedUser->id,
+                itemIds: array_map('intval', array_keys($filtered)),
+                forUpdate: true,
+            );
+            $total = 0;
+            $sales = [];
             foreach ($items as $sellItem) {
-                $requested = (int) ($filtered[$sellItem->item_id]['count'] ?? 0);
-
-                if ($requested <= 0) {
+                $quantity = min(max(0, (int) ($filtered[$sellItem->item_id]['count'] ?? 0)), (int) $sellItem->count);
+                if ($quantity <= 0) {
                     continue;
                 }
-
-                if ($requested < $sellItem->count) {
-                    $money = (int) round($sellItem->item->itemInfo->price / 2) * $requested;
-                    $total += $money;
-                    $sellItem->count -= $requested;
-                    $this->inventoryRepository->saveBackpackItem($sellItem);
-                    $qtySold = $requested;
-                } else {
-                    $money = (int) round($sellItem->item->itemInfo->price / 2) * $sellItem->count;
-                    $total += $money;
-                    $qtySold = $sellItem->count;
-                    $idsToDelete[] = (int) $sellItem->item_id;
+                $unitPrice = max(0, (int) round($sellItem->item->itemInfo->price / 2));
+                if ($unitPrice > intdiv(WalletBalanceLimits::MAX_BALANCE - $total, $quantity)) {
+                    return new ShopResultDTO(false, 'Превышен допустимый баланс кошелька.');
                 }
-
-                $this->itemActionLogger->log($user, $sellItem->item->itemInfo, $sellItem->item->upgrade_lvl, ItemActionType::SELL, $qtySold, $money);
+                $money = $unitPrice * $quantity;
+                $total += $money;
+                $sales[] = [$sellItem, $quantity, $money];
             }
-
-            $user->money += $total;
-            $this->inventoryRepository->saveUser($user);
-
-            if ($idsToDelete !== []) {
-                $this->inventoryRepository->deleteBackpackItems($user->id, $idsToDelete);
-                $this->inventoryRepository->deleteItemsByIds($idsToDelete);
+            if ($sales === []) {
+                return new ShopResultDTO(false, 'Нет доступных предметов для продажи.');
             }
+            if ($total > 0 && ! WalletBalanceLimits::canCredit((int) $lockedUser->money, $total)) {
+                return new ShopResultDTO(false, 'Превышен допустимый баланс кошелька.');
+            }
+            foreach ($sales as [$sellItem, $quantity, $money]) {
+                if (! $this->inventoryRepository->consumeBackpackItem($sellItem, $quantity)) {
+                    throw new RuntimeException('Предметы для продажи изменились. Повторите попытку.');
+                }
+                $this->itemActionLogger->log(
+                    user: $lockedUser,
+                    shareItem: $sellItem->item->itemInfo,
+                    upgradeLvl: (int) $sellItem->item->upgrade_lvl,
+                    action: ItemActionType::SELL,
+                    count: $quantity,
+                    money: $money,
+                );
+            }
+            $this->inventoryRepository->creditMoney($lockedUser, $total);
+            $updatedBalance = (int) $lockedUser->money;
+
+            return new ShopResultDTO(true, sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')));
         });
+        if ($result->ok && $updatedBalance !== null) {
+            $user->money = $updatedBalance;
+        }
 
-        return new ShopResultDTO(true, sprintf('Продано на %s монет', number_format($total, 0, ',', ' ')));
+        return $result;
     }
 }

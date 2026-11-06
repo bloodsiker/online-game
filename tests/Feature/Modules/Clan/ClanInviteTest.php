@@ -21,6 +21,7 @@ use App\Modules\Clan\Domain\Models\ClanJoinRequest;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;
@@ -166,6 +167,37 @@ class ClanInviteTest extends TestCase
         $refreshed = ClanJoinRequest::query()->sole();
         $this->assertSame(ClanJoinRequestStatus::INVITE, $refreshed->status);
         $this->assertNotSame($firstUuid, $refreshed->uuid);
+    }
+
+    public function test_outer_rollback_removes_invite_log_and_chat_without_broadcasting(): void
+    {
+        Event::fake([ChatMessageCreated::class]);
+        DB::beginTransaction();
+        app(InviteToClan::class)->execute($this->leader, $this->candidate->name);
+        DB::rollBack();
+        $this->assertDatabaseCount('clan_join_requests', 0);
+        $this->assertDatabaseCount('clan_logs', 0);
+        $this->assertDatabaseCount('chat_messages', 0);
+        Event::assertNotDispatched(ChatMessageCreated::class);
+    }
+
+    public function test_application_rollback_does_not_email_the_leader_or_leave_a_chat_notice(): void
+    {
+        Notification::fake();
+        DB::beginTransaction();
+        app(ClanApplicationService::class)->apply($this->candidate, Clan::findOrFail($this->clanId));
+        Notification::assertNothingSent();
+        DB::rollBack();
+        Notification::assertNothingSent();
+        $this->assertDatabaseCount('clan_join_requests', 0);
+        $this->assertDatabaseCount('chat_messages', 0);
+    }
+
+    public function test_invite_actions_and_cancellation_are_post_only(): void
+    {
+        foreach (['clan.invite.accept', 'clan.invite.decline', 'clan.request.cancel'] as $name) {
+            $this->assertSame(['POST'], app('router')->getRoutes()->getByName($name)->methods());
+        }
     }
 
     public function test_player_can_apply_and_notifies_clan_chat_and_leader_email(): void

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $location_id
@@ -54,6 +55,29 @@ class MonsterOnLocation extends Model
 
     public function regenerate(): void
     {
+        $pendingDamage = $this->isDirty('hp_now') ? max(0, (int) $this->getRawOriginal('hp_now') - (int) $this->hp_now) : 0;
+        DB::transaction(function () use ($pendingDamage): void {
+            $locked = self::with('monster')->whereKey($this->id)->lockForUpdate()->first();
+            if ($locked === null) {
+                return;
+            }
+            // Effects may have applied DoT in memory inside the enclosing combat transaction.
+            if ($pendingDamage > 0 && $locked->active && $locked->hp_now > 0) {
+                $locked->hp_now = max(0, $locked->hp_now - $pendingDamage);
+                $locked->save();
+            }
+            $locked->regenerateLocked();
+            $this->hp_now = $locked->hp_now;
+            $this->last_regen_at = $locked->last_regen_at;
+            $this->active = $locked->active;
+        });
+    }
+
+    private function regenerateLocked(): void
+    {
+        if (! $this->active || $this->hp_now <= 0) {
+            return;
+        }
         // Общие инстансы клан-боссов и отмеченные в админке монстры не регенерируют HP.
         if ($this->clan_boss_stage_state_id !== null || $this->monster->does_not_regenerate_hp) {
             return;

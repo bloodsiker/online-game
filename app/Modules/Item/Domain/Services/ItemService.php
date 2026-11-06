@@ -22,6 +22,7 @@ use App\Modules\Player\Infrastructure\Persistence\Models\PlayerInjury;
 use App\Modules\Quest\Domain\Services\QuestProgressService;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemType;
+use App\Modules\TreasureHunt\Infrastructure\Persistence\Models\TreasureHunt;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -40,8 +41,13 @@ class ItemService
 
     public function pickUpFromLocation(User $user, int $itemId): string
     {
-        return DB::transaction(function () use ($user, $itemId) {
+        $moneyBalance = null;
+        $message = DB::transaction(function () use ($user, $itemId, &$moneyBalance) {
+            $user = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $location = $user->currentLocation;
+            if ($location === null) {
+                return __('Локация недоступна.');
+            }
             $query = ItemOnLocation::visible()
                 ->where('location_id', $location->id)
                 ->where('item_id', $itemId);
@@ -86,119 +92,167 @@ class ItemService
             $instantReward = $this->deliverPickedItem($user, $item, $count);
 
             if ($instantReward !== null) {
+                $moneyBalance = (int) $user->money;
+
                 return sprintf(
                     __('Вы получили <b>%s</b> монет.'),
                     number_format($instantReward->amount, 0, '', ' '),
                 );
             }
 
-            $message = sprintf(__('Вы подняли предмет <b>"%s"</b>...'), $item->itemInfo->name);
-            if ($eventCollection !== null) {
-                $message .= sprintf(
-                    __(' Влияние: <b>+%d</b>. Ваш прогресс: <b>%d/%d</b>. Текущее влияние на карте: <b>%d</b>.'),
-                    $eventCollection->influenceAwarded,
-                    $eventCollection->playerProgress,
-                    $eventCollection->playerLimit,
-                    $eventCollection->mapInfluence,
-                );
-                if ($eventCollection->stageAdvanced) {
-                    $message .= sprintf(
-                        __(' Начался следующий этап: <b>«%s»</b>.'),
-                        e($eventCollection->nextStageTitle ?? ''),
-                    );
-                }
-            }
-
-            return $message;
+            return sprintf(__('Вы подняли предмет <b>"%s"</b>'), e($item->itemInfo->name));
         });
+        if ($moneyBalance !== null) {
+            $user->money = $moneyBalance;
+        }
+
+        return $message;
     }
 
     public function drop(User $user, int $itemId, int $qty): ?string
     {
-        $backpackItem = Backpack::with('item.itemInfo')
-            ->where('user_id', $user->id)
-            ->where('item_id', $itemId)
-            ->first();
-
-        if (! $backpackItem) {
-            return null;
+        if ($qty <= 0) {
+            return __('Укажите корректное количество.');
         }
 
-        $item = $backpackItem->item;
-        if (! $item->itemInfo->is_droppable) {
-            return __('Этот предмет нельзя выбросить.');
-        }
-
-        $qty = max(1, min($qty, $backpackItem->count));
-        $isQuestItem = $item->itemInfo->type === ShareItemType::QUEST;
-        $fullyRemoved = $qty >= $backpackItem->count;
-
-        if ($fullyRemoved) {
-            $backpackItem->delete();
-        } else {
-            $backpackItem->count -= $qty;
-            $backpackItem->save();
-        }
-
-        $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::DROP, $qty);
-
-        // Квестовые предметы не выпадают на землю — они безвозвратно уничтожаются
-        if ($isQuestItem) {
-            $this->questProgressService->decreaseCollectProgress($user->player, $item->share_item_id, $qty);
-
+        return DB::transaction(function () use ($user, $itemId, $qty): ?string {
+            $user = User::without('player')->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $backpackItem = Backpack::query()->where('user_id', $user->id)->where('item_id', $itemId)
+                ->orderBy('id')->lockForUpdate()->first();
+            if ($backpackItem === null || $backpackItem->count < 1) {
+                return __('Предмет больше недоступен.');
+            }
+            if ($backpackItem->isEquipped()) {
+                return __('Невозможно выбросить надетый предмет.');
+            }
+            $item = $backpackItem->item;
+            if (! $item->itemInfo->is_droppable) {
+                return __('Этот предмет нельзя выбросить.');
+            }
+            $qty = min($qty, (int) $backpackItem->count);
+            $isQuestItem = $item->itemInfo->type === ShareItemType::QUEST;
+            $location = $isQuestItem ? null : $user->currentLocation;
+            if (! $isQuestItem && $location === null) {
+                return __('Локация недоступна.');
+            }
+            $fullyRemoved = $qty === (int) $backpackItem->count;
+            if (Backpack::query()->whereKey($backpackItem->id)->where('count', '>=', $qty)->decrement('count', $qty) !== 1) {
+                throw new \RuntimeException('Inventory changed while dropping an item.');
+            }
             if ($fullyRemoved) {
-                $item->delete();
+                $backpackItem->delete();
+            }
+            $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::DROP, $qty);
+
+            if ($isQuestItem) {
+                $this->questProgressService->decreaseCollectProgress($user->player, $item->share_item_id, $qty);
+                if ($fullyRemoved && ! Backpack::query()->where('item_id', $itemId)->exists()) {
+                    $item->delete();
+                }
+
+                return null;
             }
 
+            // Never share a mutable Item between the remaining stack and ground loot.
+            $sharedInstance = Backpack::query()->where('item_id', $itemId)->exists()
+                || ItemOnLocation::query()->where('item_id', $itemId)->exists();
+            $groundItem = $fullyRemoved && ! $sharedInstance ? $item : $this->copySplitItem($item);
+            if ($groundItem->itemInfo->type === ShareItemType::TREASURE_MAP) {
+                $this->moveTreasureHunt($groundItem, (int) $user->id);
+            }
+            $slot = new ItemOnLocation;
+            $slot->item_id = $groundItem->id;
+            $slot->location_id = $location->id;
+            $slot->count = $qty;
+            $slot->expires_at = $item->itemInfo->groundExpiresAt();
+            $slot->interaction_type = LocationItemInteractionType::PICKUP;
+            // A discarded item is public loot, including items previously reserved in battle.
+            $slot->loot_owner_id = null;
+            $slot->loot_reserved_until = null;
+            if ($location->dungeon_id !== null) {
+                $slot->dungeon_session_id = DungeonSession::where('user_id', $user->id)->first()?->monsterSessionId();
+            }
+            $slot->save();
+
             return null;
-        }
-
-        $locationData = [
-            'count' => $qty,
-            'expires_at' => $item->itemInfo->groundExpiresAt(),
-        ];
-        if ($item->itemInfo->type === ShareItemType::CHEST) {
-            $locationData['interaction_type'] = LocationItemInteractionType::PICKUP->value;
-        }
-
-        $user->currentLocation->itemsOnLocation()->attach($itemId, $locationData);
-
-        return null;
+        });
     }
 
     public function handOver(User $user, Item $item, User $toUser): ?string
     {
-        if (! $item->itemInfo->is_give) {
-            return __('Этот предмет нельзя передать другому игроку.');
+        if ((int) $user->id === (int) $toUser->id) {
+            return __('Нельзя передать предмет самому себе.');
         }
 
-        if ($user->location_id !== $toUser->location_id) {
-            return sprintf(__('Персонаж %s не находиться рядом возле вас'), $toUser->name);
-        }
+        return DB::transaction(function () use ($user, $item, $toUser): ?string {
+            $users = collect([$user->id, $toUser->id])->sort()->mapWithKeys(
+                fn ($id): array => [$id => User::without('player')->whereKey($id)->lockForUpdate()->firstOrFail()],
+            );
+            $user = $users->get($user->id);
+            $toUser = $users->get($toUser->id);
+            if ((int) $user->location_id <= 0 || (int) $user->location_id !== (int) $toUser->location_id) {
+                return sprintf(__('Персонаж %s не находиться рядом возле вас'), $toUser->name);
+            }
+            $backpackItem = Backpack::query()->where('user_id', $user->id)->where('item_id', $item->id)
+                ->orderBy('id')->lockForUpdate()->first();
+            if ($backpackItem === null || $backpackItem->count < 1) {
+                return __('Предмет больше недоступен.');
+            }
+            if ($backpackItem->isEquipped()) {
+                return __('Не возможно передать, предмет надет на персонажа');
+            }
+            $item = $backpackItem->item;
+            if (! $item->itemInfo->is_give) {
+                return __('Этот предмет нельзя передать другому игроку.');
+            }
+            // Keep the exact instance, quantity, expiration and upgrades.
+            if (Backpack::query()->where('item_id', $item->id)->where('id', '!=', $backpackItem->id)->exists()
+                || ItemOnLocation::query()->where('item_id', $item->id)->exists()) {
+                $item = $this->copySplitItem($item);
+                $backpackItem->item_id = $item->id;
+            }
+            $backpackItem->user_id = $toUser->id;
+            $backpackItem->save();
+            if ($item->itemInfo->type === ShareItemType::TREASURE_MAP) {
+                $this->moveTreasureHunt($item, (int) $toUser->id);
+            }
+            $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::GIVE, (int) $backpackItem->count, null, $toUser);
 
-        $backpackItem = Backpack::where('user_id', $user->id)
-            ->where('item_id', $item->id)
-            ->first();
-
-        if (! $backpackItem) {
             return null;
+        });
+    }
+
+    private function copySplitItem(Item $item): Item
+    {
+        $copy = $item->replicate()->setRelations([]);
+        $copy->save();
+        foreach (['gems' => 'socket_count', 'runes' => 'rune_slot_count'] as $relation => $countField) {
+            if ((int) $item->$countField > 0) {
+                foreach ($item->$relation()->without($relation === 'gems' ? 'gemInfo' : 'runeInfo')->get() as $attachment) {
+                    $attachmentCopy = $attachment->replicate();
+                    $attachmentCopy->item_id = $copy->id;
+                    $attachmentCopy->save();
+                }
+            }
+        }
+        if ($item->itemInfo->type === ShareItemType::TREASURE_MAP && $item->treasureHunt !== null) {
+            $hunt = $item->treasureHunt->replicate();
+            $hunt->map_item_id = $copy->id;
+            $hunt->forceFill($this->stoppedTreasureSearch())->save();
         }
 
-        if ($backpackItem->isEquipped()) {
-            return __('Не возможно передать, предмет надет на персонажа');
-        }
+        return $copy;
+    }
 
-        $backpackItem->delete();
+    private function stoppedTreasureSearch(): array
+    {
+        return ['search_token' => null, 'started_at' => null, 'completes_at' => null, 'expires_at' => null, 'chance_snapshot' => null];
+    }
 
-        Backpack::create([
-            'item_id' => $item->id,
-            'user_id' => $toUser->id,
-            'count' => 1,
-        ]);
-
-        $this->itemActionLogger->log($user, $item->itemInfo, $item->upgrade_lvl, ItemActionType::GIVE, 1, null, $toUser);
-
-        return null;
+    private function moveTreasureHunt(Item $item, int $userId): void
+    {
+        TreasureHunt::query()->where('map_item_id', $item->id)
+            ->update(['user_id' => $userId] + $this->stoppedTreasureSearch());
     }
 
     public function openChest(User $user, int $itemId): ?int
@@ -653,7 +707,7 @@ class ItemService
             return $instantReward;
         }
 
-        if ($item->itemInfo->is_stackable) {
+        if ($item->itemInfo->is_stackable && $item->itemInfo->type !== ShareItemType::TREASURE_MAP) {
             $existing = Backpack::query()
                 ->where('user_id', $user->id)
                 ->where('equipped', 0)
@@ -665,10 +719,12 @@ class ItemService
                             fn ($query) => $query->where('expires_at', $item->expires_at),
                         );
                 })
-                ->first();
+                ->orderBy('id')->lockForUpdate()->first();
             if ($existing) {
                 $existing->increment('count', $count);
-                if ($existing->item_id !== $item->id) {
+                if ((int) $existing->item_id !== (int) $item->id
+                    && ! Backpack::query()->where('item_id', $item->id)->exists()
+                    && ! ItemOnLocation::query()->where('item_id', $item->id)->exists()) {
                     $item->delete();
                 }
 
@@ -676,7 +732,15 @@ class ItemService
             }
         }
 
-        Backpack::createForItem(userId: (int) $user->id, item: $item, count: $count);
+        if ($item->itemInfo->type === ShareItemType::TREASURE_MAP) {
+            $this->moveTreasureHunt($item, (int) $user->id);
+        }
+        $sameInstance = Backpack::query()->where('user_id', $user->id)->where('item_id', $item->id)->lockForUpdate()->first();
+        if ($sameInstance !== null) {
+            $sameInstance->increment('count', $count);
+        } else {
+            Backpack::createForItem(userId: (int) $user->id, item: $item, count: $count);
+        }
 
         return null;
     }

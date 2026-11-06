@@ -35,7 +35,9 @@
 
                 @unless($randomAttackedMonster?->locationMonster?->isClanBoss())
                     <div class="fight-act fight-act-flee">
-                        <b class="butt1 pointer"><b><button type="button" class="butt1" onclick="location.href='{{ route('fight.run-away', ['id' => $battle->id]) }}'">&larr; {{ __("Убежать") }}</button></b></b>
+                        <form method="post" action="{{ route('fight.run-away', ['id' => $battle->id]) }}">@csrf
+                            <b class="butt1 pointer"><b><button type="submit" class="butt1">&larr; {{ __("Убежать") }}</button></b></b>
+                        </form>
                     </div>
                 @endunless
 

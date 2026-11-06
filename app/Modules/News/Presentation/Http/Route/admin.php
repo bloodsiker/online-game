@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Modules\News\Presentation\Http\Admin\LaunchSubscriptionController;
 use App\Modules\News\Presentation\Http\Admin\NewsController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/launch-subscriptions', LaunchSubscriptionController::class)->name('launch-subscriptions.index');
 
 Route::get('/news', [NewsController::class, 'list'])->name('news');
 Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');

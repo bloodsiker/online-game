@@ -16,7 +16,10 @@ final readonly class SendMapInfluenceAwardedMessage
     {
         $this->chatService->sendQuestToUser(
             $event->user,
-            new LocalizedChatMessage('chat.influence', ['map' => $event->mapName, 'amount' => $event->amount]),
+            new LocalizedChatMessage(
+                $event->playerProgress !== null && $event->playerLimit !== null ? 'chat.influence_event' : 'chat.influence',
+                ['map' => $event->mapName, 'amount' => $event->amount, 'progress' => $event->playerProgress, 'limit' => $event->playerLimit, 'total' => $event->total],
+            ),
         );
     }
 }

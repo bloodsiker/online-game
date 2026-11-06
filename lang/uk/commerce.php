@@ -7,4 +7,5 @@ return [
     'purchase_blocked' => 'Перевищено ліміт купівлі «:item».',
     'purchase_available' => 'Наступне оновлення ліміту: :date.',
     'treasure_maps' => 'Карти скарбів',
+    'wallet_limit' => 'Перевищено максимальний баланс гаманця.',
 ];

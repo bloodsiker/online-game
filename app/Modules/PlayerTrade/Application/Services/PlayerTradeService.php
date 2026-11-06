@@ -10,6 +10,7 @@ use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Item\Infrastructure\Persistence\Models\Item;
 use App\Modules\PlayerTrade\Domain\Events\PlayerTradeChanged;
 use App\Modules\PlayerTrade\Infrastructure\Persistence\Models\PlayerTradeSession;
+use App\Modules\User\Domain\Services\WalletBalanceLimits;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -108,8 +109,8 @@ class PlayerTradeService
             if (! $trade || (int) $trade->target_user_id !== (int) $user->id || $trade->status !== PlayerTradeSession::PENDING) {
                 throw new RuntimeException(__('Приглашение на торговлю не найдено или уже обработано.'));
             }
-            if ($trade->expires_at?->isPast()) {
-                $trade->update(['status' => PlayerTradeSession::CANCELLED]);
+            if ($this->isExpired($trade)) {
+                $this->expireIfNeeded($trade);
 
                 return $trade;
             }
@@ -149,14 +150,15 @@ class PlayerTradeService
 
     public function page(User $user, string $uuid): array
     {
-        $trade = $this->findForUser($user, $uuid);
+        $trade = DB::transaction(function () use ($user, $uuid): PlayerTradeSession {
+            $trade = $this->findForUser($user, $uuid, lock: true);
+            $this->expireIfNeeded($trade);
+
+            return $trade;
+        }, attempts: 3);
         if ($trade->status === PlayerTradeSession::PENDING && (int) $trade->initiator_user_id !== (int) $user->id) {
             throw new RuntimeException(__('Примите приглашение в чате, чтобы открыть сделку.'));
         }
-        if ($trade->expires_at?->isPast() && in_array($trade->status, [PlayerTradeSession::PENDING, PlayerTradeSession::ACTIVE], true)) {
-            $trade->update(['status' => PlayerTradeSession::CANCELLED]);
-        }
-
         $inventory = Backpack::query()
             ->with(['item.itemInfo'])
             ->where('user_id', $user->id)
@@ -182,9 +184,7 @@ class PlayerTradeService
     {
         return DB::transaction(function () use ($user, $uuid): array {
             $trade = $this->findForUser($user, $uuid, lock: true);
-            if ($trade->expires_at?->isPast() && in_array($trade->status, [PlayerTradeSession::PENDING, PlayerTradeSession::ACTIVE], true)) {
-                $trade->update(['status' => PlayerTradeSession::CANCELLED]);
-            }
+            $this->expireIfNeeded($trade);
             if ($trade->status === PlayerTradeSession::ACTIVE && ! $this->areNearby($trade->initiator, $trade->target)) {
                 $this->clearReadiness($trade);
             }
@@ -220,7 +220,7 @@ class PlayerTradeService
         $blockReason = DB::transaction(function () use ($user, $uuid, $items, $money): ?string {
             $trade = PlayerTradeSession::query()->where('uuid', $uuid)->lockForUpdate()->first();
             if (! $trade || ! in_array((int) $user->id, [(int) $trade->initiator_user_id, (int) $trade->target_user_id], true)
-                || $trade->status !== PlayerTradeSession::ACTIVE || $trade->expires_at?->isPast()) {
+                || $trade->status !== PlayerTradeSession::ACTIVE || $this->isExpired($trade)) {
                 throw new RuntimeException(__('Сделка не активна или истёк срок её действия.'));
             }
             $users = $this->lockParticipants($trade);
@@ -278,8 +278,8 @@ class PlayerTradeService
             if ($trade->status !== PlayerTradeSession::ACTIVE) {
                 throw new RuntimeException(__('Сделка больше не активна.'));
             }
-            if ($trade->expires_at?->isPast()) {
-                $trade->update(['status' => PlayerTradeSession::CANCELLED]);
+            if ($this->isExpired($trade)) {
+                $this->expireIfNeeded($trade);
 
                 return __('Срок сделки истёк.');
             }
@@ -334,10 +334,23 @@ class PlayerTradeService
             (int) $initiator->id => $trade->initiator_offer ?? ['items' => [], 'money' => 0],
             (int) $target->id => $trade->target_offer ?? ['items' => [], 'money' => 0],
         ];
+        $balances = [];
         foreach ($offers as $ownerId => $offer) {
-            if ((int) ($offer['money'] ?? 0) > (int) $users->get($ownerId)->money) {
+            $outgoing = (int) ($offer['money'] ?? 0);
+            $receiverId = $ownerId === (int) $initiator->id ? (int) $target->id : (int) $initiator->id;
+            $incoming = (int) ($offers[$receiverId]['money'] ?? 0);
+            $current = (int) $users->get($ownerId)->money;
+            if ($outgoing < 0 || $outgoing > $current) {
                 throw new RuntimeException(__('Монет в кошельке стало недостаточно; сделка не завершена.'));
             }
+            if ($incoming < 0 || $incoming > WalletBalanceLimits::MAX_BALANCE || $current > WalletBalanceLimits::MAX_BALANCE) {
+                throw new RuntimeException(__('commerce.wallet_limit'));
+            }
+            $balance = $current - $outgoing + $incoming;
+            if ($balance < 0 || $balance > WalletBalanceLimits::MAX_BALANCE) {
+                throw new RuntimeException(__('commerce.wallet_limit'));
+            }
+            $balances[$ownerId] = $balance;
         }
 
         $transferRows = [];
@@ -355,12 +368,16 @@ class PlayerTradeService
             }
         }
 
-        foreach ($offers as $ownerId => $offer) {
-            $amount = (int) ($offer['money'] ?? 0);
-            if ($amount > 0) {
-                $users->get($ownerId)->decrement('money', $amount);
-                $receiverId = $ownerId === (int) $initiator->id ? (int) $target->id : (int) $initiator->id;
-                $users->get($receiverId)->increment('money', $amount);
+        // Settle net amounts: equal offers must not overflow an intermediate wallet balance.
+        foreach ($balances as $ownerId => $balance) {
+            $difference = $balance - (int) $users->get($ownerId)->money;
+            $changed = match (true) {
+                $difference > 0 => User::whereKey($ownerId)->where('money', '<=', WalletBalanceLimits::MAX_BALANCE - $difference)->increment('money', $difference),
+                $difference < 0 => User::whereKey($ownerId)->where('money', '>=', -$difference)->decrement('money', -$difference),
+                default => 1,
+            };
+            if ($changed !== 1) {
+                throw new RuntimeException(__('Монет в кошельке стало недостаточно; сделка не завершена.'));
             }
         }
 
@@ -478,14 +495,18 @@ class PlayerTradeService
         ]);
     }
 
-    private function findActiveForUser(User $user, string $uuid): PlayerTradeSession
+    private function expireIfNeeded(PlayerTradeSession $trade): void
     {
-        $trade = $this->findForUser($user, $uuid);
-        if ($trade->status !== PlayerTradeSession::ACTIVE || $trade->expires_at?->isPast()) {
-            throw new RuntimeException(__('Сделка не активна или истёк срок её действия.'));
+        // Only callers holding the session row lock may expire it. A terminal status is immutable.
+        if (in_array($trade->status, [PlayerTradeSession::PENDING, PlayerTradeSession::ACTIVE], true)
+            && $this->isExpired($trade)) {
+            $trade->update(['status' => PlayerTradeSession::CANCELLED, 'initiator_confirmed' => false, 'target_confirmed' => false]);
         }
+    }
 
-        return $trade;
+    private function isExpired(PlayerTradeSession $trade): bool
+    {
+        return $trade->expires_at !== null && $trade->expires_at->lte(now());
     }
 
     private function ensureNoOpenTrade(int $userId): void

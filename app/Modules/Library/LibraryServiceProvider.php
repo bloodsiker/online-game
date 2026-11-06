@@ -13,8 +13,7 @@ class LibraryServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__.'/Presentation/Views', 'library');
 
-        Route::middleware(['web'])
-            ->group(__DIR__.'/Presentation/Http/Route/web.php');
+        $this->loadRoutesFrom(__DIR__.'/Presentation/Http/Route/web.php');
 
         Route::middleware(['web', 'isAdmin'])
             ->prefix('admin')

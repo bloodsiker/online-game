@@ -9,6 +9,7 @@ use App\Modules\Clan\Domain\Models\ClanSkillDefinition;
 use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Library\Presentation\Services\LibraryUrls;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Location\Infrastructure\Persistence\Models\Map;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
@@ -40,7 +41,7 @@ class LibraryPublicPageTest extends TestCase
         $this->assertStringContainsString('10 ударов подряд', $article->getTranslation('content', 'ru'));
         $this->assertStringContainsString('6 годин', $article->getTranslation('content', 'uk'));
 
-        $this->get(route('library.show', ['slug' => 'klanovye-bossy', 'category' => 'klan']))
+        $this->get(app(LibraryUrls::class)->article(slug: 'klanovye-bossy', parameters: ['category' => 'klan']))
             ->assertOk()
             ->assertSee('Клановые боссы')
             ->assertSee('Каменный Страж')
@@ -56,8 +57,7 @@ class LibraryPublicPageTest extends TestCase
         $this->assertSame('Снаряжение', $category->name);
         $this->assertSame(3, $category->articles()->count());
 
-        $response = $this->get(route('library.show', [
-            'slug' => 'snariazhenie-tir-2',
+        $response = $this->get(app(LibraryUrls::class)->article(slug: 'snariazhenie-tir-2', parameters: [
             'category' => $category->slug,
         ]))
             ->assertOk()
@@ -133,7 +133,7 @@ class LibraryPublicPageTest extends TestCase
         $regular->locations()->attach($location->id);
         $boss->locations()->attach($location->id);
 
-        $this->get(route('library.index', [
+        $this->get(app(LibraryUrls::class)->index(parameters: [
             'category' => $category->slug,
             'q' => 'Библиотечный',
             'location_id' => $location->id,
@@ -150,7 +150,7 @@ class LibraryPublicPageTest extends TestCase
             ->assertSee('data-library-info-popup', false)
             ->assertSee(route('info.monster.catalog', ['id' => $boss->id]), false);
 
-        $this->get(route('library.index', [
+        $this->get(app(LibraryUrls::class)->index(parameters: [
             'category' => $category->slug,
             'q' => 'Библиотечный',
             'boss' => '1',
@@ -171,7 +171,7 @@ class LibraryPublicPageTest extends TestCase
         $map = Map::query()->whereNotNull('slug')->whereHas('locations')->firstOrFail();
         $location = Location::query()->where('map_id', $map->id)->firstOrFail();
 
-        $this->get(route('library.index', ['category' => $category->slug]))
+        $this->get(app(LibraryUrls::class)->index(parameters: ['category' => $category->slug]))
             ->assertOk()
             ->assertSee('library-map-tree', false)
             ->assertSee('library_maps.css', false)
@@ -182,7 +182,7 @@ class LibraryPublicPageTest extends TestCase
             ->assertSee('Монстры карты')
             ->assertSee('name="location_id"', false);
 
-        $this->get(route('library.index', [
+        $this->get(app(LibraryUrls::class)->index(parameters: [
             'category' => $category->slug,
             'location_id' => $location->id,
         ]))
@@ -205,7 +205,7 @@ class LibraryPublicPageTest extends TestCase
 
         $missingLocationId = (int) Location::query()->max('id') + 1000;
 
-        $this->get(route('library.index', [
+        $this->get(app(LibraryUrls::class)->index(parameters: [
             'category' => $category->slug,
             'location_id' => $missingLocationId,
         ]))
@@ -248,10 +248,10 @@ class LibraryPublicPageTest extends TestCase
             'status' => LibraryArticle::STATUS_DRAFT,
         ]);
 
-        $this->get(route('library.index', ['category' => $category->slug]))
-            ->assertRedirect(route('library.show', ['slug' => $article->slug, 'category' => $category->slug]));
+        $this->get(app(LibraryUrls::class)->index(parameters: ['category' => $category->slug]))
+            ->assertRedirect(app(LibraryUrls::class)->article(slug: $article->slug, parameters: ['category' => $category->slug]));
 
-        $this->get(route('library.show', $article->slug))
+        $this->get(app(LibraryUrls::class)->article(slug: $article->slug))
             ->assertOk()
             ->assertSee('Лесной паук')
             ->assertSee('Пещерная крыса')
@@ -287,11 +287,11 @@ class LibraryPublicPageTest extends TestCase
             'status' => LibraryArticle::STATUS_DRAFT,
         ]);
 
-        $this->get(route('library.show', 'fisher-test'))
+        $this->get(app(LibraryUrls::class)->article(slug: 'fisher-test'))
             ->assertOk()
             ->assertSee('Описание профессии', false);
 
-        $this->get(route('library.show', 'draft-test'))->assertNotFound();
+        $this->get(app(LibraryUrls::class)->article(slug: 'draft-test'))->assertNotFound();
     }
 
     public function test_article_renders_game_entity_shortcode_as_a_card(): void
@@ -332,7 +332,7 @@ class LibraryPublicPageTest extends TestCase
             'published_at' => now(),
         ]);
 
-        $this->get(route('library.show', 'city-guards-shortcode-test'))
+        $this->get(app(LibraryUrls::class)->article(slug: 'city-guards-shortcode-test'))
             ->assertOk()
             ->assertSee('library-entity-card--reputation', false)
             ->assertSee('library-entity-card--npc', false)
@@ -372,7 +372,7 @@ class LibraryPublicPageTest extends TestCase
             'published_at' => now(),
         ]);
 
-        $this->get(route('library.show', 'item-shortcode-tooltip-test'))
+        $this->get(app(LibraryUrls::class)->article(slug: 'item-shortcode-tooltip-test'))
             ->assertOk()
             ->assertSee('data-id="'.$item->id.'"', false)
             ->assertSee('onmouseover="showItemInfo(this,event,2)"', false)
@@ -425,7 +425,7 @@ class LibraryPublicPageTest extends TestCase
             'published_at' => now(),
         ]);
 
-        $this->get(route('library.show', 'game-frame-test'))
+        $this->get(app(LibraryUrls::class)->article(slug: 'game-frame-test'))
             ->assertOk()
             ->assertSee('css/library_game_frame.css', false)
             ->assertSee('class="library-game-frame"', false)
@@ -459,7 +459,7 @@ class LibraryPublicPageTest extends TestCase
 
         $this->assertNotEmpty($injuries);
 
-        $response = $this->get(route('library.show', 'injury-catalog-shortcode-test'))
+        $response = $this->get(app(LibraryUrls::class)->article(slug: 'injury-catalog-shortcode-test'))
             ->assertOk()
             ->assertSee('library-injury-catalog', false)
             ->assertSee('Часть тела')
@@ -511,7 +511,7 @@ class LibraryPublicPageTest extends TestCase
         $this->assertNotEmpty($premiumArtifactIds);
         $this->assertGreaterThan($premiumArtifactIds->count(), $artifacts->count());
 
-        $response = $this->get(route('library.show', 'artifact-catalog-shortcode-test'))
+        $response = $this->get(app(LibraryUrls::class)->article(slug: 'artifact-catalog-shortcode-test'))
             ->assertOk()
             ->assertSee('library-artifact-catalog', false)
             ->assertSee('library-artifact-catalog-group--game', false)
@@ -567,7 +567,7 @@ class LibraryPublicPageTest extends TestCase
 
         $this->assertNotEmpty($skills);
 
-        $response = $this->get(route('library.show', 'clan-skills-catalog-shortcode-test'))
+        $response = $this->get(app(LibraryUrls::class)->article(slug: 'clan-skills-catalog-shortcode-test'))
             ->assertOk()
             ->assertSee('library-clan-skills', false)
             ->assertSee('css/library_clan_skill_catalog.css', false)

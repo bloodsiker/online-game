@@ -8,6 +8,7 @@ use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Clan\Domain\Services\ClanService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DeclineClanInvite
 {
@@ -17,6 +18,13 @@ class DeclineClanInvite
     ) {}
 
     public function execute(User $user, string $inviteUuid): void
+    {
+        DB::transaction(function () use ($user, $inviteUuid): void {
+            $this->executeLocked($user, $inviteUuid);
+        }, attempts: 3);
+    }
+
+    private function executeLocked(User $user, string $inviteUuid): void
     {
         $joinRequest = $this->clanService->declineInvite($user, $inviteUuid);
 

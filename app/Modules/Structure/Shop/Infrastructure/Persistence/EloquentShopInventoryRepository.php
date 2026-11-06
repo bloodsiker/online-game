@@ -11,26 +11,31 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 class EloquentShopInventoryRepository implements ShopInventoryRepository
 {
-    public function saveUser(User $user): void
+    public function lockUser(int $userId): User
     {
-        $user->save();
+        return User::without('player')->whereKey($userId)->lockForUpdate()->firstOrFail();
     }
 
-    public function saveBackpackItem(Backpack $backpack): void
+    public function creditMoney(User $user, int $amount): void
     {
-        $backpack->save();
+        if ($amount > 0) {
+            $user->increment('money', $amount);
+        }
     }
 
-    public function deleteBackpackItems(int $userId, array $itemIds): void
+    public function consumeBackpackItem(Backpack $backpack, int $quantity): bool
     {
-        Backpack::where('user_id', $userId)
-            ->whereIn('item_id', $itemIds)
-            ->delete();
-    }
+        if ($quantity <= 0 || Backpack::query()->whereKey($backpack->id)
+            ->where('user_id', $backpack->user_id)->where('equipped', 0)
+            ->where('count', '>=', $quantity)->decrement('count', $quantity) !== 1) {
+            return false;
+        }
+        Backpack::query()->whereKey($backpack->id)->where('count', 0)->delete();
+        if (! Backpack::query()->where('item_id', $backpack->item_id)->exists()) {
+            Item::query()->whereKey($backpack->item_id)->delete();
+        }
 
-    public function deleteItemsByIds(array $itemIds): void
-    {
-        Item::whereIn('id', $itemIds)->delete();
+        return true;
     }
 
     public function createBackpackItem(int $userId, int $shareItemId, int $countUse, int $count): void

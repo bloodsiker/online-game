@@ -11,6 +11,7 @@ use App\Modules\Share\Infrastructure\Persistence\Models\ShareAction;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareItem;
 use App\Modules\Share\Infrastructure\Persistence\Models\ShareStructureCategory;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Structure\Shop\Application\UseCases\ReorderShopItems;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItem;
 use App\Modules\Structure\Shop\Infrastructure\Persistence\Models\ShopItemRequirement;
 use App\Services\Media\AdminImageStorage;
@@ -93,6 +94,7 @@ class StructureController extends Controller
             'npc',
             'clanBossDungeon',
             'categories',
+            'shopItems' => fn ($query) => $query->orderByDesc('sort_order')->orderBy('id'),
             'shopItems.item',
             'shopItems.category',
             'shopItems.requirements.item',
@@ -102,6 +104,19 @@ class StructureController extends Controller
         $allCategories = ShareStructureCategory::orderBy('name->ru')->get();
 
         return view('admin.structures.info', compact('structure', 'allActions', 'allCategories'));
+    }
+
+    public function reorderShopItems(Request $request, Structure $structure, ReorderShopItems $reorder): RedirectResponse
+    {
+        $data = $request->validate([
+            'category_id' => ['nullable', 'integer', 'min:1'],
+            'item_ids' => ['present', 'array'],
+            'item_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ]);
+        $reorder->execute(structure: $structure, categoryId: empty($data['category_id']) ? null : (int) $data['category_id'],
+            ids: collect($data['item_ids'])->map(fn ($id): int => (int) $id));
+
+        return redirect()->to(route('admin.structure.info', $structure->id).'#tab-shop')->with('success', 'Порядок товаров сохранён.');
     }
 
     public function infoShop(Request $request, Structure $structure): RedirectResponse

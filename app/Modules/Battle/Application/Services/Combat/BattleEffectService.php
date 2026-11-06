@@ -11,6 +11,7 @@ use App\Modules\Battle\Infrastructure\Persistence\Models\Battle;
 use App\Modules\Effect\Application\DTOs\PlayerEffectNotificationDTO;
 use App\Modules\Effect\Domain\Enums\ActiveEffectType;
 use App\Modules\Effect\Domain\Enums\EffectDamageScalingType;
+use App\Modules\Effect\Domain\Services\DebuffImmunityService;
 use App\Modules\Effect\Infrastructure\Persistence\Models\Effect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
@@ -121,12 +122,26 @@ class BattleEffectService
         $type = $effect->resolvedActiveType();
         // null type = buff with stat_modifiers, no DoT/stun processing needed
 
+        if ($type !== null && $this->immuneToDebuff($player, $type, $result)) {
+            return;
+        }
+
+        // Баффы одного семейства (slug «family__grade», напр. эликсиры разных тиров)
+        // не складываются: новый тир заменяет действующий.
+        $familyEffectIds = $type === null && str_contains((string) $effect->slug, '__')
+            ? Effect::query()->where('slug', 'like', strtok((string) $effect->slug, '_').'%')
+                ->pluck('slug', 'id')
+                ->filter(fn (string $slug): bool => explode('__', $slug)[0] === explode('__', (string) $effect->slug)[0])
+                ->keys()
+                ->all()
+            : [$effect->id];
+
         $existing = PlayerActiveEffect::where('player_id', $player->id)
             ->whereNull('battle_id')
             ->when(
                 $type !== null,
                 fn ($query) => $query->where('type', $type),
-                fn ($query) => $query->where('effect_id', $effect->id),
+                fn ($query) => $query->whereIn('effect_id', $familyEffectIds),
             )
             ->first();
 
@@ -194,6 +209,10 @@ class BattleEffectService
         Battle $battle,
         AttackResultDTO $result
     ): void {
+        if ($this->immuneToDebuff($player, $type, $result)) {
+            return;
+        }
+
         $isTimedDoT = $type->isDoT();
         $isTimedControl = $type->isControl();
         $isPersistentTimedEffect = $isTimedDoT || $isTimedControl;
@@ -613,5 +632,24 @@ class BattleEffectService
         $chancePercent = $this->maxPassiveBonusValue($player, 'lethal_survive_chance');
 
         return $chancePercent > 0 && random_int(1, 100) <= $chancePercent;
+    }
+
+    /** Иммунитет от противоядия блокирует повторное наложение яда, кровотечения, горения или паралича. */
+    private function immuneToDebuff(Player $player, ActiveEffectType $type, AttackResultDTO $result): bool
+    {
+        if (! ($type->isDoT() || $type === ActiveEffectType::PARALYSIS)) {
+            return false;
+        }
+
+        if (! app(DebuffImmunityService::class)->isImmune((int) $player->id, $type)) {
+            return false;
+        }
+
+        $result->log(BattleLogTranslator::format(
+            '<p class="color-buff">🛡️ Иммунитет: эффект <b>%s</b> не подействовал.</p>',
+            $type->label(),
+        ));
+
+        return true;
     }
 }

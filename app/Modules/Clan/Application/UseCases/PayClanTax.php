@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace App\Modules\Clan\Application\UseCases;
 
-use App\Modules\Clan\Domain\Contracts\TransactionManager;
 use App\Modules\Clan\Domain\Enums\ClanLogAction;
 use App\Modules\Clan\Domain\Enums\ClanPermission;
 use App\Modules\Clan\Domain\Models\Clan;
 use App\Modules\Clan\Domain\Models\ClanTaxPayment;
+use App\Modules\Clan\Domain\Services\ClanActionTransaction;
 use App\Modules\Clan\Domain\Services\ClanLogService;
 use App\Modules\Clan\Domain\Services\ClanSkillService;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
+use Illuminate\Support\Collection;
 use RuntimeException;
 
 class PayClanTax
 {
     public function __construct(
         private readonly ResolveClanContext $resolveClanContext,
-        private readonly TransactionManager $transactionManager,
+        private readonly ClanActionTransaction $actions,
         private readonly ClanSkillService $clanSkillService,
         private readonly ClanLogService $clanLogService,
     ) {}
@@ -40,8 +42,12 @@ class PayClanTax
         $amount = max(1, (int) config('game.clan_monthly_tax', 1000000));
 
         /** @var Clan $clan */
-        $clan = $this->transactionManager->run(function () use ($context, $user, $clanBank, $amount): Clan {
-            $clan = Clan::query()->lockForUpdate()->findOrFail($context->clan->id);
+        $clan = $this->actions->run(clanId: (int) $context->clan->id, userIds: collect([$user->id]), action: function (Clan $clan, Collection $users) use ($user, $clanBank, $amount): Clan {
+            $user = $users->get($user->id);
+            if ($user->clanMembership === null || (int) $user->clanMembership->clan_id !== (int) $clan->id
+                || ! $user->clanMembership->role?->hasPermission(ClanPermission::PAY_TAX)) {
+                throw new RuntimeException('У вас нет права оплачивать налог клана.');
+            }
 
             if ($clan->treasury < $amount) {
                 throw new RuntimeException('В казне клана недостаточно монет для оплаты налога.');
@@ -83,10 +89,11 @@ class PayClanTax
                 ),
             );
 
-            return $clan;
-        });
+            Player::whereIn('id', $users->pluck('player_id')->filter())->orderBy('id')->lockForUpdate()->get();
+            $this->clanSkillService->applyAllSkillsToClanMembers($clan);
 
-        $this->clanSkillService->applyAllSkillsToClanMembers($clan);
+            return $clan;
+        }, allMembers: true);
 
         return sprintf(
             'Налог оплачен: %s монет. Действует до %s.',

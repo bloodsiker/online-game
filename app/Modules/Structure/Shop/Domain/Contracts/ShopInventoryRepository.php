@@ -9,19 +9,11 @@ use App\Modules\User\Infrastructure\Persistence\Models\User;
 
 interface ShopInventoryRepository
 {
-    public function saveUser(User $user): void;
+    public function lockUser(int $userId): User;
 
-    public function saveBackpackItem(Backpack $backpack): void;
+    public function creditMoney(User $user, int $amount): void;
 
-    /**
-     * @param  list<int>  $itemIds
-     */
-    public function deleteBackpackItems(int $userId, array $itemIds): void;
-
-    /**
-     * @param  list<int>  $itemIds
-     */
-    public function deleteItemsByIds(array $itemIds): void;
+    public function consumeBackpackItem(Backpack $backpack, int $quantity): bool;
 
     public function createBackpackItem(int $userId, int $shareItemId, int $countUse, int $count): void;
 }

@@ -35,5 +35,5 @@ interface ShopReadRepository
      * @param  list<int>  $itemIds
      * @return Collection<int, Backpack>
      */
-    public function getSelectedSellableItems(int $userId, array $itemIds): Collection;
+    public function getSelectedSellableItems(int $userId, array $itemIds, bool $forUpdate = false): Collection;
 }

@@ -23,6 +23,7 @@ class EloquentShopReadRepository implements ShopReadRepository
             ->where('structure_id', $structureId)
             ->when($categoryId !== null, fn ($query) => $query->where('share_structure_category_id', $categoryId))
             ->orderByDesc('sort_order')
+            ->orderBy('id')
             ->get();
     }
 
@@ -69,7 +70,7 @@ class EloquentShopReadRepository implements ShopReadRepository
             ->get();
     }
 
-    public function getSelectedSellableItems(int $userId, array $itemIds): Collection
+    public function getSelectedSellableItems(int $userId, array $itemIds, bool $forUpdate = false): Collection
     {
         return Backpack::select('backpacks.*')
             ->with('item.itemInfo')
@@ -79,6 +80,8 @@ class EloquentShopReadRepository implements ShopReadRepository
             ->whereIn('item_id', $itemIds)
             ->where('backpacks.equipped', 0)
             ->where('share_items.is_sell', 1)
+            ->orderBy('backpacks.id')
+            ->when($forUpdate, fn ($query) => $query->lockForUpdate())
             ->get();
     }
 }

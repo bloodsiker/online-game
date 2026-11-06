@@ -183,6 +183,7 @@
                             @if($canLearn)
                                 <form method="post" action="{{ route('clan_skill_hall.learn', ['id' => $hall->id, 'skillId' => $definition->id]) }}" style="margin-top:7px;">
                                     @csrf
+                                    <input type="hidden" name="expected_level" value="{{ $currentLevel }}">
                                     <b class="butt2 pointer {{ !$canLearnThis ? 'disabled' : '' }}"><b><input type="submit" value="{{ $currentLevel ? 'Улучшить' : 'Изучить' }}" {{ !$canLearnThis ? 'disabled' : '' }}></b></b>
                                 </form>
                             @endif

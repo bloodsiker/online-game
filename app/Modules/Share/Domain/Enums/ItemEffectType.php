@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Share\Domain\Enums;
 
+use App\Modules\Effect\Domain\Enums\ActiveEffectType;
+
 enum ItemEffectType: string
 {
     case HEAL_HP = 'heal_hp';
@@ -17,6 +19,12 @@ enum ItemEffectType: string
     case CHANGE_RACE = 'change_race';
     case CHANGE_AVATAR = 'change_avatar';
     case GRANT_DIAMONDS = 'grant_diamonds';
+    // Противоядия: снимают дебафф своего типа; value — лечение HP в %,
+    // duration_seconds — иммунитет к повторному наложению этого дебаффа.
+    case CURE_POISON = 'cure_poison';
+    case CURE_BLEED = 'cure_bleed';
+    case CURE_BURN = 'cure_burn';
+    case CURE_PARALYSIS = 'cure_paralysis';
 
     public function label(): string
     {
@@ -32,14 +40,31 @@ enum ItemEffectType: string
             self::CHANGE_RACE => __('Смена расы'),
             self::CHANGE_AVATAR => __('Смена аватара'),
             self::GRANT_DIAMONDS => __('Начисление бриллиантов'),
+            self::CURE_POISON => __('Снятие отравления'),
+            self::CURE_BLEED => __('Снятие кровотечения'),
+            self::CURE_BURN => __('Снятие горения'),
+            self::CURE_PARALYSIS => __('Снятие паралича'),
         };
     }
 
     public function isInstant(): bool
     {
         return match ($this) {
-            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS, self::GRANT_DIAMONDS => true,
+            self::HEAL_HP, self::HEAL_MP, self::DAMAGE_HP, self::RESTORE_LOST_EXP, self::RESPEC_STATS, self::GRANT_DIAMONDS,
+            self::CURE_POISON, self::CURE_BLEED, self::CURE_BURN, self::CURE_PARALYSIS => true,
             default => false,
+        };
+    }
+
+    /** Какой дебафф снимает противоядие (null — эффект не противоядие). */
+    public function curedEffectType(): ?ActiveEffectType
+    {
+        return match ($this) {
+            self::CURE_POISON => ActiveEffectType::POISON,
+            self::CURE_BLEED => ActiveEffectType::BLEED,
+            self::CURE_BURN => ActiveEffectType::BURN,
+            self::CURE_PARALYSIS => ActiveEffectType::PARALYSIS,
+            default => null,
         };
     }
 

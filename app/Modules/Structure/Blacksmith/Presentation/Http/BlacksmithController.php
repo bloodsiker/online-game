@@ -150,6 +150,7 @@ class BlacksmithController extends Controller
             'baseScrolls' => $page->baseScrolls,
             'bonusScrolls' => $page->bonusScrolls,
             'itemTooltipScript' => $page->itemTooltipScript,
+            'maxUpgradeLevel' => $page->maxLevel,
         ]);
     }
 

@@ -15,19 +15,26 @@ class UpgradeService
 
     private const GUARANTEED_SUCCESS_STREAK = 10;
 
+    /** С этого текущего уровня «жалость» (бонус за провалы и гарантия) больше не работает. */
+    private const PITY_MAX_LEVEL = 15;
+
     /** success% at each level (index = target level) */
     private const SUCCESS_CHANCES = [
         0 => 100, 1 => 100, 2 => 100, 3 => 100, 4 => 100, 5 => 100,
         6 => 80,  7 => 75,  8 => 70,  9 => 60,  10 => 50,
         11 => 40,  12 => 30,  13 => 25,  14 => 20,  15 => 15,
+        16 => 12,  17 => 10,  18 => 9,   19 => 7,   20 => 6,
+        21 => 5,   22 => 4,   23 => 3,   24 => 3,   25 => 2,
     ];
 
     /** destroy% at each level on failure (index = current level before attempt) */
     private const DESTROY_CHANCES = [
         12 => 10, 13 => 20, 14 => 30,
+        15 => 30, 16 => 32, 17 => 34, 18 => 36, 19 => 38,
+        20 => 40, 21 => 42, 22 => 45, 23 => 48, 24 => 50,
     ];
 
-    private const MAX_LEVEL = 15;
+    public const MAX_LEVEL = 25;
 
     public function getSuccessChance(int $currentLevel, int $pity, bool $isLucky): float
     {
@@ -36,8 +43,9 @@ class UpgradeService
         }
 
         $targetLevel = $currentLevel + 1;
-        $base = self::SUCCESS_CHANCES[$targetLevel] ?? 15;
-        $total = $base + ($pity * 2) + ($isLucky ? 15 : 0);
+        $base = self::SUCCESS_CHANCES[$targetLevel] ?? 2;
+        $pityBonus = $currentLevel < self::PITY_MAX_LEVEL ? $pity * 2 : 0;
+        $total = $base + $pityBonus + ($isLucky ? 15 : 0);
 
         return min(100.0, (float) $total);
     }
@@ -84,7 +92,8 @@ class UpgradeService
             $this->consumeScroll($bonusScrollSlot);
         }
 
-        $guaranteed = $item->upgrade_fail_streak >= self::GUARANTEED_SUCCESS_STREAK;
+        $guaranteed = $currentLevel < self::PITY_MAX_LEVEL
+            && $item->upgrade_fail_streak >= self::GUARANTEED_SUCCESS_STREAK;
         $successChance = $this->getSuccessChance($currentLevel, $item->upgrade_pity, $isLucky);
         $roll = mt_rand(1, 100);
         $success = $guaranteed || $roll <= $successChance;

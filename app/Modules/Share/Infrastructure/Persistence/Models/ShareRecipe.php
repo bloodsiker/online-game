@@ -6,6 +6,7 @@ namespace App\Modules\Share\Infrastructure\Persistence\Models;
 
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Share\Domain\Enums\RecipeUnlockType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,12 @@ class ShareRecipe extends Model
         return $this->unlock_type === RecipeUnlockType::LEARNABLE;
     }
 
+    public function scopeDisplayOrder(Builder $query): Builder
+    {
+        // Newly created recipes (0) follow the explicitly arranged ones.
+        return $query->orderByRaw('share_recipes.sort_order = 0')->orderBy('share_recipes.sort_order')->orderBy('share_recipes.id');
+    }
+
     public function itemInfo(): BelongsTo
     {
         return $this->belongsTo(ShareItem::class, 'share_item_id');
@@ -38,7 +45,8 @@ class ShareRecipe extends Model
     public function items(): BelongsToMany
     {
         return $this->belongsToMany(ShareItem::class, 'share_recipe_has_items', 'share_recipe_id', 'share_item_id')
-            ->withPivot('count');
+            ->withPivot(['id', 'count', 'sort_order'])
+            ->orderByPivot('sort_order')->orderByPivot('id');
     }
 
     /** Пул случайного результата (используется, когда is_random_result=true, вместо kraftItem). */

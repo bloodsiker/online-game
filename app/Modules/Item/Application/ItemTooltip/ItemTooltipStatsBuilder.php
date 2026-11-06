@@ -193,6 +193,20 @@ final class ItemTooltipStatsBuilder
 
         // Активные эффекты из share_item_effects (зелья, баффы)
         foreach ($item->effects as $effect) {
+            // Противоядие: снятие дебаффа + иммунитет + лечение показываем отдельными строками,
+            // даже при нулевом лечении (сам факт снятия — главное свойство предмета).
+            if ($effect->effect_type->curedEffectType() !== null) {
+                $stats[] = ['title' => $effect->effect_type->label(), 'value' => '✓'];
+                if ((int) $effect->duration_seconds > 0) {
+                    $stats[] = ['title' => __('Иммунитет'), 'value' => $effect->duration_seconds.' сек.'];
+                }
+                if ((float) $effect->value > 0) {
+                    $stats[] = ['title' => ItemEffectType::HEAL_HP->label(), 'value' => '+'.$effect->value.'%'];
+                }
+
+                continue;
+            }
+
             // Нулевое значение эффекта — либо ничего не даёт, либо техническая
             // заглушка (сумма считается динамически в самой стратегии эффекта,
             // см. RestoreLostExpStrategy/RespecStatsStrategy) — строку не показываем.

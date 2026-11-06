@@ -10,9 +10,8 @@
 
 <style>
     .loot-frame {
-        /*width: 100%;*/
-        /*max-width: 760px;*/
-        /*margin: 0 auto;*/
+        width: min(100%, 520px);
+        table-layout: fixed;
         border-collapse: separate;
         border-spacing: 0;
         empty-cells: show;
@@ -168,6 +167,7 @@
     }
 
     .loot-message {
+        overflow-wrap: anywhere;
         margin: 8px 9px 0;
         padding: 7px 9px;
         border: 1px solid #a8b985;
@@ -296,6 +296,7 @@
 
     .loot-footer {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: center;
         gap: 8px;
@@ -380,6 +381,9 @@
                                             @endif
                                         </div>
                                         <div class="loot-item-hint">
+                                            @if(!empty($item->worldEventRunId))
+                                                <a hidden class="local-event-item" data-location-event-item data-event-run="{{ $item->worldEventRunId }}" data-item-id="{{ $item->shareItemId }}"></a>
+                                            @endif
                                             {{ $item->actionLabel === 'Поднять'
                                                 ? __('Предмет можно забрать в рюкзак')
                                                 : __('Сундук можно открыть и осмотреть') }}

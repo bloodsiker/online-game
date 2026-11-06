@@ -4,6 +4,7 @@ namespace App\Modules\Item\Application\ItemEffect;
 
 use App\Modules\Item\Application\ItemEffect\Strategies\BuffAttackStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\BuffDefenseStrategy;
+use App\Modules\Item\Application\ItemEffect\Strategies\CureDebuffStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\GrantDiamondsStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealHpStrategy;
 use App\Modules\Item\Application\ItemEffect\Strategies\HealMpStrategy;
@@ -23,6 +24,10 @@ class ItemEffectStrategyFactory
         ItemEffectType::RESTORE_LOST_EXP->value => RestoreLostExpStrategy::class,
         ItemEffectType::RESPEC_STATS->value => RespecStatsStrategy::class,
         ItemEffectType::GRANT_DIAMONDS->value => GrantDiamondsStrategy::class,
+        ItemEffectType::CURE_POISON->value => CureDebuffStrategy::class,
+        ItemEffectType::CURE_BLEED->value => CureDebuffStrategy::class,
+        ItemEffectType::CURE_BURN->value => CureDebuffStrategy::class,
+        ItemEffectType::CURE_PARALYSIS->value => CureDebuffStrategy::class,
     ];
 
     public static function make(ItemEffectType $type): ItemEffectStrategyInterface

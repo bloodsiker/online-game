@@ -4,6 +4,7 @@ namespace App\Modules\Battle\Application\Services\Combat;
 
 use App\Modules\Battle\Application\DTOs\AttackResultDTO;
 use App\Modules\Battle\Application\DTOs\FightDTO;
+use App\Modules\Battle\Application\Services\Battle\BattleActionLocks;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossMechanicsService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossPhaseService;
 use App\Modules\Battle\Application\Services\Combat\Boss\BossShieldService;
@@ -35,8 +36,10 @@ readonly class FightOrchestrator
 
     public function attack(int $id, int $monsterId, int $action): FightDTO
     {
-        return \DB::transaction(function () use ($id, $monsterId, $action) {
-            $user = Auth::user();
+        $userIds = app(BattleActionLocks::class)->userIds($id, Auth::id());
+
+        return \DB::transaction(function () use ($id, $monsterId, $action, $userIds) {
+            $user = app(BattleActionLocks::class)->users($userIds)->get(Auth::id());
             $player = Player::query()
                 ->whereKey($user->player->id)
                 ->lockForUpdate()
@@ -81,38 +84,16 @@ readonly class FightOrchestrator
                 $attackedMonster->location_monster_id,
             );
 
-            if ($attackedMonster->status->isDeath()) {
-                return $fightDTO->setBattle($battle)
-                    ->setBattleRound($battleRound)
-                    ->setAttackedMonster($attackedMonster)
-                    ->setPlayer($player)
-                    ->setAttackedMonster(null);
-            }
+            abort_if($attackedMonster->status->isDeath(), 409, __('Этот противник уже побеждён.'));
 
-            $locationMonster = $attackedMonster->locationMonster;
+            // Every spawn is shared mutable state, even outside clan-boss battles.
+            $locationMonster = MonsterOnLocation::query()->with('monster.effects')
+                ->whereKey($attackedMonster->location_monster_id)->lockForUpdate()->firstOrFail();
+            abort_if($locationMonster->hp_now <= 0 || ! $locationMonster->active, 409, __('Этот противник уже побеждён.'));
             $monster = $locationMonster->monster;
             $isBoss = $monster->isBoss();
-
-            // Клан-босс: общий инстанс на весь клан. Перезагружаем строку под
-            // lockForUpdate (параллельные бои разных сокланов), проверяем лимиты.
             $clanBossStage = null;
             if ($locationMonster->isClanBoss()) {
-                $locationMonster = MonsterOnLocation::query()
-                    ->with(['monster.effects'])
-                    ->whereKey($locationMonster->id)
-                    ->lockForUpdate()
-                    ->firstOrFail();
-                $monster = $locationMonster->monster;
-
-                // Босса уже добил соклан в соседнем бою — тихо завершаем раунд.
-                if ($locationMonster->hp_now <= 0 || ! $locationMonster->active) {
-                    return $fightDTO->setBattle($battle)
-                        ->setBattleRound($battleRound)
-                        ->setAttackedMonster($attackedMonster)
-                        ->setPlayer($player)
-                        ->setAttackedMonster(null);
-                }
-
                 try {
                     $clanBossStage = $this->clanBossService->assertCanHit($user, $locationMonster);
                 } catch (\RuntimeException $e) {

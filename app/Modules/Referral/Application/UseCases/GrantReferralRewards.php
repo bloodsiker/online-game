@@ -26,26 +26,24 @@ final readonly class GrantReferralRewards
             return;
         }
 
-        $claimedStageIds = $this->referralRepository->getClaimedStageIds($referral->id);
-        $stages = $this->referralRepository->getUnlockedStages($player->lvl, $claimedStageIds);
-
-        if ($stages->isEmpty()) {
-            return;
-        }
-
-        $referrerId = $referral->referrer->id;
-
-        $this->transactionManager->run(function () use ($stages, $referral, $referrerId): void {
+        $this->transactionManager->run(function () use ($referral): void {
+            $referral = $this->referralRepository->lockRewardReferral($referral);
+            if ($referral === null) {
+                return;
+            }
+            $claimedStageIds = $this->referralRepository->getClaimedStageIds($referral->id);
+            $stages = $this->referralRepository->getUnlockedStages((int) $referral->referred->player->lvl, $claimedStageIds);
+            $referrerId = (int) $referral->referrer_user_id;
             foreach ($stages as $stage) {
+                if ($stage->reward_value < 1 || ($stage->reward_type === ReferralRewardType::ITEM && $stage->reward_item_id === null)) {
+                    throw new \RuntimeException('Некорректная настройка реферальной награды.');
+                }
+                $this->referralRepository->createClaim($referral->id, $stage->id);
                 match ($stage->reward_type) {
                     ReferralRewardType::GOLD => $this->rewardIssuer->grantGold($referrerId, $stage->reward_value),
                     ReferralRewardType::DIAMOND => $this->rewardIssuer->grantDiamonds($referrerId, $stage->reward_value),
-                    ReferralRewardType::ITEM => $stage->reward_item_id !== null
-                        ? $this->rewardIssuer->grantItem($referrerId, $stage->reward_item_id, $stage->reward_value)
-                        : null,
+                    ReferralRewardType::ITEM => $this->rewardIssuer->grantItem($referrerId, $stage->reward_item_id, $stage->reward_value),
                 };
-
-                $this->referralRepository->createClaim($referral->id, $stage->id);
             }
         });
     }

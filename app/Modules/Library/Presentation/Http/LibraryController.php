@@ -10,7 +10,9 @@ use App\Modules\Library\Domain\Enums\LibraryCategoryContentType;
 use App\Modules\Library\Domain\Services\LibraryEntityRegistry;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryArticle;
 use App\Modules\Library\Infrastructure\Persistence\Models\LibraryCategory;
+use App\Modules\Library\Presentation\Services\LibrarySeo;
 use App\Modules\Library\Presentation\Services\LibraryShortcodeRenderer;
+use App\Modules\Library\Presentation\Services\LibraryUrls;
 use App\Modules\Location\Application\UseCases\GetMapsPage;
 use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +23,10 @@ use Illuminate\View\View;
 
 class LibraryController extends Controller
 {
+    public function __construct(private readonly LibrarySeo $seo, private readonly LibraryUrls $urls) {}
+
     public function index(
+        string $locale,
         Request $request,
         BestiaryCatalogService $bestiary,
         GetMapsPage $mapsPage,
@@ -44,6 +49,8 @@ class LibraryController extends Controller
             ]);
 
             return view('library::bestiary', [
+                'seo' => $this->seo->index(request: $request, category: $selectedCategory),
+                'libraryUrls' => $this->urls,
                 'categories' => $categories,
                 'selectedCategory' => $selectedCategory,
                 'filters' => $filters,
@@ -65,6 +72,8 @@ class LibraryController extends Controller
                 : null;
 
             return view('library::maps', [
+                'seo' => $this->seo->index(request: $request, category: $selectedCategory),
+                'libraryUrls' => $this->urls,
                 'categories' => $categories,
                 'selectedCategory' => $selectedCategory,
                 'page' => $mapsPage->execute($currentMapId !== null ? (int) $currentMapId : null),
@@ -95,10 +104,10 @@ class LibraryController extends Controller
             $firstArticle = $articlesQuery->first();
 
             if ($firstArticle) {
-                return redirect()->route('library.show', [
-                    'slug' => $firstArticle->slug,
-                    'category' => $selectedCategory->slug,
-                ]);
+                return redirect()->to($this->urls->article(
+                    slug: $firstArticle->slug,
+                    parameters: ['category' => $selectedCategory->slug],
+                ));
             }
         }
 
@@ -106,23 +115,34 @@ class LibraryController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('library::index', compact('categories', 'articles', 'selectedCategory'));
+        return view('library::index', [
+            ...compact('categories', 'articles', 'selectedCategory'),
+            'seo' => $this->seo->index(request: $request, category: $selectedCategory),
+            'libraryUrls' => $this->urls,
+        ]);
     }
 
     public function show(
+        string $locale,
         string $slug,
         Request $request,
         LibraryShortcodeRenderer $renderer,
         LibraryEntityRegistry $entities,
-    ): View {
+    ): View|RedirectResponse {
         $article = LibraryArticle::query()
             ->published()
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->with(['category', 'links'])
             ->where('slug', $slug)
             ->firstOrFail();
-        $article->increment('views_count');
-        $article->rendered_content = $renderer->render($article->content);
+        $locales = $this->seo->articleLocales($article);
+        abort_if($locales === [], 404);
+        if (! in_array($locale, $locales, true)) {
+            return redirect()->to($this->urls->article(slug: $article->slug, locale: $locales[0]));
+        }
+
+        LibraryArticle::withoutTimestamps(fn () => $article->increment('views_count'));
+        $article->rendered_content = $this->urls->localizeContentLinks($renderer->render($article->content));
         $categories = $this->navigationCategories();
         $navigationCategory = $article->category;
 
@@ -153,6 +173,8 @@ class LibraryController extends Controller
         ]);
 
         return view('library::show', [
+            'seo' => $this->seo->article($article),
+            'libraryUrls' => $this->urls,
             'article' => $article,
             'selectedCategory' => $navigationCategory,
             'linkedEntities' => $linkedEntities,

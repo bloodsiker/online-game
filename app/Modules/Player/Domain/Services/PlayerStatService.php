@@ -16,6 +16,7 @@ use App\Modules\Share\Domain\Enums\ItemEffectType;
 use App\Modules\Share\Domain\Enums\ItemEffectValueType;
 use App\Modules\Share\Domain\Enums\ShareItemSlot;
 use App\Modules\Share\Domain\Enums\ShareItemStatType;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Structure\Blacksmith\Domain\Services\ArtifactUpgradeRules;
 
 class PlayerStatService
@@ -361,6 +362,7 @@ class PlayerStatService
                 $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handLeft->itemInfo->name);
                 $modifiers[] = new StatModifier('left_min_dmg', $weaponMinDamage * $upgradeLvl * 0.05, false, $upgradeSource);
                 $modifiers[] = new StatModifier('left_max_dmg', $weaponMaxDamage * $upgradeLvl * 0.05, false, $upgradeSource);
+                array_push($modifiers, ...$this->handUpgradeModifiers($equip->handLeft, $upgradeLvl, $upgradeSource));
             }
         }
 
@@ -385,6 +387,40 @@ class PlayerStatService
                 $upgradeSource = sprintf('upgrade:+%d %s', $upgradeLvl, $equip->handRight->itemInfo->name);
                 $modifiers[] = new StatModifier('right_min_dmg', $weaponMinDamage * $upgradeLvl * 0.05, false, $upgradeSource);
                 $modifiers[] = new StatModifier('right_max_dmg', $weaponMaxDamage * $upgradeLvl * 0.05, false, $upgradeSource);
+                array_push($modifiers, ...$this->handUpgradeModifiers($equip->handRight, $upgradeLvl, $upgradeSource));
+            }
+        }
+
+        return $modifiers;
+    }
+
+    /**
+     * Заточка вещи в руке сверх физического урона: щит получает +5% за уровень к своей
+     * броне и плоскому блоку, магическое оружие — к своему magic_attack. Бонус плоский,
+     * считается только от собственных статов предмета (как у брони и оружия).
+     *
+     * @return StatModifier[]
+     */
+    private function handUpgradeModifiers(Item $item, int $upgradeLvl, string $source): array
+    {
+        $isShield = $item->itemInfo->type === ShareItemType::SHIELD;
+        $scaled = $isShield
+            ? [ShareItemStatType::ARMOR->value => 'armor', ShareItemStatType::BLOCK_FLAT->value => 'block_flat']
+            : [ShareItemStatType::MAGIC_ATTACK->value => 'magic_attack'];
+
+        $totals = [];
+        foreach ($item->itemInfo->stats as $stat) {
+            $key = $scaled[$stat->stat_type->value] ?? null;
+            if ($key === null || $stat->value_type === ItemEffectValueType::PERCENT) {
+                continue;
+            }
+            $totals[$key] = ($totals[$key] ?? 0.0) + (float) $stat->value;
+        }
+
+        $modifiers = [];
+        foreach ($totals as $key => $value) {
+            if ($value > 0) {
+                $modifiers[] = new StatModifier($key, $value * $upgradeLvl * 0.05, false, $source);
             }
         }
 

@@ -454,12 +454,14 @@ readonly class AttackService
             ->where('battle_id', $battle->id)
             ->where('location_monster_id', '!=', $locMonster->id)
             ->where('status', BattleDetailStatus::LIFE)
-            ->with('locationMonster.monster')
+            ->orderBy('id')
+            ->lockForUpdate()
             ->first();
 
-        $secondMonster = $secondTarget?->locationMonster;
+        $secondMonster = $secondTarget === null ? null : MonsterOnLocation::query()
+            ->with('monster')->whereKey($secondTarget->location_monster_id)->lockForUpdate()->first();
 
-        if (! $secondMonster || $secondMonster->hp_now <= 0) {
+        if (! $secondMonster || ! $secondMonster->active || $secondMonster->hp_now <= 0) {
             return;
         }
 

@@ -114,6 +114,8 @@ class PurchaseCart
                         ->join('items', 'backpacks.item_id', '=', 'items.id')
                         ->where('backpacks.user_id', $lockedUser->id)
                         ->whereIn('items.share_item_id', $stackableShareItemIds)
+                        ->orderBy('backpacks.id')
+                        ->lockForUpdate()
                         ->get()
                         ->keyBy('stack_share_item_id');
 
@@ -137,8 +139,7 @@ class PurchaseCart
                     $existing = $existingStacks->get($shareItemId);
 
                     if ($existing instanceof Backpack) {
-                        $existing->count += $itemInCart->quantity;
-                        $existing->save();
+                        $existing->increment('count', (int) $itemInCart->quantity);
                     } else {
                         $item = new Item;
                         $item->share_item_id = $shareItem->id;

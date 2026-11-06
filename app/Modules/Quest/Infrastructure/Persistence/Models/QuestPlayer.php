@@ -18,6 +18,7 @@ class QuestPlayer extends Model
 
     protected $casts = [
         'status' => QuestPlayerStatus::class,
+        'revision' => 'integer',
         'reset_at' => 'datetime',
         'completed_at' => 'datetime',
         'current_stage_started_at' => 'datetime',
@@ -26,7 +27,7 @@ class QuestPlayer extends Model
 
     protected $fillable = [
         'player_id', 'quest_id', 'status', 'current_stage_id',
-        'current_stage_started_at', 'current_stage_ready_at', 'completed_at', 'reset_at',
+        'current_stage_started_at', 'current_stage_ready_at', 'completed_at', 'reset_at', 'revision',
     ];
 
     protected $attributes = ['status' => QuestPlayerStatus::IN_PROGRESS];

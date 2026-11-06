@@ -16,6 +16,7 @@ use App\Modules\Monster\Infrastructure\Persistence\MonsterOnLocationRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BattleService
 {
@@ -29,7 +30,19 @@ class BattleService
 
     public function battleOnLocation(Location $location): ?Battle
     {
-        $user = Auth::user();
+        // Wave rewards/spawning must not acquire other participant locks while holding the entry mutex.
+        if ($location->dungeon_id !== null) {
+            $session = $this->getActiveDungeonSession->execute(Auth::id());
+            if ($session !== null) {
+                $this->handleSurvivalWave($session, $location);
+            }
+        }
+
+        return $this->enterAtomically($location, fn (User $user) => $this->battleOnLocationLocked($location, $user));
+    }
+
+    private function battleOnLocationLocked(Location $location, User $user): ?Battle
+    {
         $now = Carbon::now();
         $battle = null;
 
@@ -46,10 +59,9 @@ class BattleService
             $dungeonRunId = $session->dungeon_run_id;
 
             // Survival: если все монстры волны мертвы — спавним следующую волну
-            $this->handleSurvivalWave($session, $location);
         }
 
-        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $dungeonRunId);
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $dungeonRunId, $dungeonSessionId, forUpdate: true);
         if ($battle instanceof Battle) {
             $battleDetails = BattleDetail::where(['user_id' => $user->id, 'battle_id' => $battle->id])->first();
             if (! $battleDetails instanceof BattleDetail) {
@@ -80,7 +92,7 @@ class BattleService
                 $monsterQuery->whereNull('dungeon_session_id');
             }
 
-            $monsterOnLocation = $monsterQuery->get()->filter(function ($monster) {
+            $monsterOnLocation = $monsterQuery->orderBy('id')->lockForUpdate()->get()->filter(function ($monster) {
                 return mt_rand(0, 100) < $monster->getAggression();
             });
 
@@ -167,10 +179,35 @@ class BattleService
 
     public function attackMonster(Location $location, int $id): ?Battle
     {
-        $user = Auth::user();
+        return $this->enterAtomically($location, fn (User $user) => $this->attackMonsterLocked($location, $id, $user));
+    }
+
+    private function enterAtomically(Location $location, callable $enter): ?Battle
+    {
+        $actor = Auth::user();
+        $active = $this->battleRepository->findActiveBattleOnLocation($location);
+        $ids = $active === null ? [$actor->id] : app(BattleActionLocks::class)->userIds($active->id, $actor->id);
+
+        return DB::transaction(function () use ($location, $actor, $ids, $enter): ?Battle {
+            $users = app(BattleActionLocks::class)->users($ids);
+            if ((int) $users->get($actor->id)->location_id !== (int) $location->id) {
+                return null;
+            }
+            DB::table('battle_entry_locks')->insertOrIgnore(['location_id' => $location->id]);
+            DB::table('battle_entry_locks')->where('location_id', $location->id)->lockForUpdate()->first();
+
+            return $enter($users->get($actor->id));
+        }, attempts: 3);
+    }
+
+    private function attackMonsterLocked(Location $location, int $id, User $user): ?Battle
+    {
         $session = $location->dungeon_id !== null
             ? $this->getActiveDungeonSession->execute($user->id)
             : null;
+        if ($location->dungeon_id !== null && $session === null) {
+            return null;
+        }
         $dungeonSessionId = $session?->monsterSessionId();
 
         $monsterAttacked = MonsterOnLocation::with(['monster'])
@@ -192,8 +229,14 @@ class BattleService
         // На локации бой может уже идти: моб напал первым или дерётся другой
         // игрок. Заводить второй бой нельзя — findActiveBattleOnLocation()
         // отдаёт старший, и удары уходят не в тот бой, что показан игроку.
-        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $session?->dungeon_run_id);
+        $battle = $this->battleRepository->findActiveBattleOnLocation($location, $session?->dungeon_run_id, $dungeonSessionId, forUpdate: true);
 
+        // An existing battle is locked before the spawn. With no battle, the entry mutex
+        // makes it safe to validate the locked spawn before creating any participant rows.
+        $monsterAttacked = MonsterOnLocation::with('monster')->whereKey($id)->where('active', 1)->lockForUpdate()->first();
+        if ($monsterAttacked === null || $monsterAttacked->hp_now <= 0) {
+            return null;
+        }
         if ($battle instanceof Battle) {
             $this->joinExistingBattle($battle, $user);
         } else {

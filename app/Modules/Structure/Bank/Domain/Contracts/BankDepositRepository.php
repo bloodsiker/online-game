@@ -11,7 +11,7 @@ interface BankDepositRepository
 {
     public function create(int $userId, int $amount, float $percent, int $termDays, \DateTimeInterface $maturesAt): BankDeposit;
 
-    public function findOpenForUser(int $userId, int $depositId): ?BankDeposit;
+    public function findOpenForUser(int $userId, int $depositId, bool $forUpdate = false): ?BankDeposit;
 
     /** @return Collection<int, BankDeposit> */
     public function getOpenByUser(int $userId): Collection;
@@ -19,5 +19,5 @@ interface BankDepositRepository
     /** @return Collection<int, BankDeposit> */
     public function getClosedByUser(int $userId, int $limit = 10): Collection;
 
-    public function close(BankDeposit $deposit): void;
+    public function close(BankDeposit $deposit): bool;
 }

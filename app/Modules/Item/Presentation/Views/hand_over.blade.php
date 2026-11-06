@@ -28,7 +28,7 @@
             {{ __('Вы можете передать предмет') }} "<b>{{ $page->itemName }}</b>" {{ __('персонажам, которые находятся поблизости:') }}
             <ul>
                 @foreach($page->candidates as $user)
-                    <li><a href="{{ $user->url }}">{{ $user->name }}</a></li>
+                    <li><form method="post" action="{{ $user->url }}" style="display:inline">@csrf<button type="submit" style="border:0;background:none;padding:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline">{{ $user->name }}</button></form></li>
                 @endforeach
             </ul>
         @else
@@ -41,7 +41,7 @@
 </td></tr></tbody></table>
 <script>
 @if (session()->has('message'))
-window.parent.showErrorIframe('{{ session('message') }}')
+window.parent.showErrorIframe(@json(session('message')))
 @endif
 </script>
 </body>

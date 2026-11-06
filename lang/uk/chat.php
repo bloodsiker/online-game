@@ -21,6 +21,7 @@ return [
     'no_reason' => 'не вказана',
     'injury' => '<b style="color:#ba0000">Отримано травму: :name на :minutes хв.</b>',
     'influence' => 'Ваш вплив на карті <b>«:map»</b> збільшено на <b>+:amount</b>.',
+    'influence_event' => 'Ваш вплив на карті <b>«:map»</b> збільшено на <b>+:amount</b>. Ваш прогрес: <b>:progress/:limit</b>. Поточний вплив на карті: <b>:total</b>.',
     'quest_item' => 'З монстра випав квестовий предмет: [[share_item_:item_id]]',
     'world_event_started' => ':speak: Почалася подія :event! Вирушайте на карту :map.',
     'event_link' => '<a href=":url" style="color:inherit;text-decoration:underline" onclick="try{window.top.toggleMap(false);window.top.toLocation(this.href,true);return false;}catch(e){}"><em>«:title»</em></a>',

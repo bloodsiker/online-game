@@ -17,6 +17,7 @@ class GetShopItems
             ->where('shop_items.structure_id', $structureId)
             ->where('share_structure_category_id', $categoryId)
             ->orderBy('shop_items.sort_order', 'desc')
+            ->orderBy('shop_items.id')
             ->get();
     }
 }
