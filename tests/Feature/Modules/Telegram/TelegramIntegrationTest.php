@@ -238,6 +238,20 @@ final class TelegramIntegrationTest extends TestCase
         $this->assertStringNotContainsString('action="'.route('telegram.link').'"', $html);
     }
 
+    public function test_settings_link_can_be_created_as_json_for_the_modal_without_redirecting(): void
+    {
+        $user = User::query()->without('player')->findOrFail(1)->setRelation('player', null);
+        $this->actingAs($user)->withSession(['active_login_token' => 'session-1']);
+        $response = $this->postJson(route('telegram.link'), ['user_id' => 2])->assertOk()
+            ->assertJsonPath('ok', true)->assertSessionMissing('telegram_link');
+        $this->assertStringStartsWith('https://t.me/eternity_test_bot?start=', $response->json('url'));
+        parse_str(parse_url($response->json('url'), PHP_URL_QUERY), $query);
+        $this->assertSame(hash('sha256', $query['start']), DB::table('telegram_link_tokens')->where('user_id', 1)->value('token_hash'));
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $this->link();
+        $this->postJson(route('telegram.link'))->assertUnprocessable()->assertJsonValidationErrors('telegram');
+    }
+
     public function test_settings_block_has_game_buttons_status_and_localization(): void
     {
         $html = view('telegram::settings', ['telegramAvailable' => true])->render();

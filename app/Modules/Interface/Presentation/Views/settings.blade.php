@@ -74,6 +74,16 @@
         .telegram-settings-actions { margin: 10px 0 0; line-height: normal; }
         .telegram-settings-actions .butt1 { vertical-align: middle; }
         .telegram-settings-actions .butt1 input { min-width: 130px; }
+        .telegram-overlay { position: fixed; inset: 0; z-index: 1002; background: rgba(0, 0, 0, .45); }
+        .telegram-modal { position: fixed; z-index: 1003; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 480px; max-width: calc(100vw - 24px); max-height: calc(100vh - 24px); overflow-y: auto; }
+        .telegram-modal .popup_global_container { width: 100%; }
+        .telegram-modal .popup_global_content { padding: 12px 18px 6px; line-height: 1.6; }
+        .telegram-modal__link { text-align: center; overflow-wrap: anywhere; }
+        .telegram-modal__link a { color: #9b1c0d; font-weight: bold; }
+        .telegram-modal__actions { text-align: center; line-height: normal; }
+        .telegram-modal__actions .butt1 { vertical-align: middle; }
+        .telegram-modal__actions input { width: 80px; }
+        .telegram-overlay[hidden], .telegram-modal[hidden], .telegram-modal [hidden] { display: none; }
         .password-overlay { position: fixed; inset: 0; z-index: 1002; background: rgba(0, 0, 0, .45); }
         .password-modal { position: fixed; z-index: 1003; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: calc(100vh - 24px); overflow-y: auto; width: 420px; max-width: calc(100vw - 24px); }
         .password-modal .popup_global_container { width: 100%; }
@@ -120,6 +130,7 @@
     @if($tab === 'game')
         @include('interface::partials.change-password-modal')
         <script src="{{ asset('js/change-password-modal.js') }}?v={{ filemtime(public_path('js/change-password-modal.js')) }}" defer></script>
+        <script src="{{ asset('js/telegram-link-modal.js') }}?v={{ filemtime(public_path('js/telegram-link-modal.js')) }}" defer></script>
         <script src="{{ asset('js/settings-tooltips.js') }}?v={{ filemtime(public_path('js/settings-tooltips.js')) }}" defer></script>
         <script src="{{ asset('js/notification-sounds.js') }}?v={{ filemtime(public_path('js/notification-sounds.js')) }}" data-sound-base="{{ asset('audio/notifications') }}/" defer></script>
     @endif

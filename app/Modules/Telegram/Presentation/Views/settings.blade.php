@@ -12,17 +12,21 @@
                 <span class="butt1 pointer"><span><input type="submit" value="{{ __('telegram.unlink') }}"></span></span>
             </form>
         @elseif($telegramAvailable ?? false)
-            @if(session('telegram_link'))
-                <p><b>{{ __('telegram.link_instructions', ['minutes' => config('telegram.link_ttl_minutes')]) }}</b></p>
-                <p><a href="{{ session('telegram_link') }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{{ __('telegram.open_bot') }}</a></p>
-                <p>{{ __('telegram.refresh_hint') }}</p>
-            @endif
-            <form class="telegram-settings-actions" action="{{ route('telegram.link') }}" method="post">
+            <form class="telegram-settings-actions" action="{{ route('telegram.link') }}" method="post" data-telegram-link-form>
                 @csrf
-                <span class="butt1 pointer"><span><input type="submit" value="{{ session('telegram_link') ? __('telegram.new_link') : __('telegram.connect') }}"></span></span>
+                <span class="butt1 pointer"><span><input type="submit" value="{{ __('telegram.connect') }}"></span></span>
             </form>
+            @if(session('telegram_link'))
+                <noscript>
+                    <p>{{ __('telegram.link_instructions', ['minutes' => config('telegram.link_ttl_minutes')]) }}</p>
+                    <p><a href="{{ session('telegram_link') }}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{{ __('telegram.open_bot') }}</a></p>
+                </noscript>
+            @endif
         @else
             <p>{{ __('telegram.unavailable') }}</p>
         @endif
     </div>
 </section>
+@if(!($telegramAccount ?? null) && ($telegramAvailable ?? false))
+    @include('telegram::link-modal')
+@endif
