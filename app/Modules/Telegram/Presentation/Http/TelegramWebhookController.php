@@ -21,7 +21,7 @@ final class TelegramWebhookController
             'callback_query.message.chat' => ['sometimes', 'array'], 'callback_query.data' => ['sometimes', 'string', 'max:64']]);
         $reply = $bot->handle(update: array_replace($request->all(), ['update_id' => (int) $request->input('update_id')]));
         // Acknowledge after committing all database work; the webhook response updates the photo.
-        if (($reply['method'] ?? null) === 'editMessageMedia') {
+        if (in_array($reply['method'] ?? null, ['editMessageMedia', 'editMessageCaption'], true)) {
             $callbacks->acknowledge(callbackId: $request->input('callback_query.id'));
         }
 

@@ -16,7 +16,6 @@ final class TelegramBackpackBotService
 
     public function __construct(
         private readonly TelegramReadService $read,
-        private readonly TelegramBackpackPreview $preview,
         private readonly TelegramLinkRepository $links,
         private readonly TelegramUpdateRepository $updates,
     ) {}
@@ -25,43 +24,18 @@ final class TelegramBackpackBotService
     public function pageReply(int $userId, int $chatId, BackpackCategory $category = BackpackCategory::MAIN, int $page = 1, ?int $messageId = null): array
     {
         return $this->withLocale($this->read->locale(userId: $userId), function () use ($userId, $chatId, $category, $page, $messageId): array {
-            $list = $this->read->backpack(userId: $userId, category: $category, page: $page);
-            $lines = ['<b>'.__('telegram.backpack').' — '.$category->label().'</b>'];
-            foreach ($list['data'] as $index => $item) {
-                $name = mb_substr(preg_replace('/\s+/u', ' ', $item['name']), 0, 65);
-                $lines[] = ($index + 1).'. '.htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').' ×'.$item['quantity'];
-            }
-            if (! $list['data']) {
-                $lines[] = __('telegram.backpack_empty');
-            }
-            $meta = $list['meta'];
-            $lines[] = __('telegram.pagination', ['page' => $meta['current_page'], 'last' => $meta['last_page'], 'total' => $meta['total']]);
-            $caption = implode("\n", $lines);
-            $buttons = [];
-            $navigation = [];
-            if ($meta['current_page'] > 1) {
-                $navigation[] = ['text' => '← '.__('telegram.previous'), 'callback_data' => 'bag:'.$category->value.':'.($meta['current_page'] - 1)];
-            }
-            $navigation[] = ['text' => '↻ '.$meta['current_page'].'/'.$meta['last_page'], 'callback_data' => 'bag:'.$category->value.':'.$meta['current_page']];
-            if ($meta['current_page'] < $meta['last_page']) {
-                $navigation[] = ['text' => __('telegram.next').' →', 'callback_data' => 'bag:'.$category->value.':'.($meta['current_page'] + 1)];
-            }
-            $buttons[] = $navigation;
-            $groups = [];
-            foreach ($list['categories'] as $group) {
-                $groups[] = ['text' => ($group['key'] === $category->value ? '• ' : '').$group['label'].' ('.$group['positions'].')',
-                    'callback_data' => 'bag:'.$group['key'].':1'];
-            }
-            $buttons = [...$buttons, ...array_chunk($groups, 2)];
-            $image = $this->preview->create(userId: $userId, telegramId: $chatId, items: $list['data']);
+            $this->read->character(userId: $userId);
+            $keyboard = ['inline_keyboard' => [[['text' => __('telegram.mini_app_open'), 'web_app' => [
+                'url' => secure_url(route('telegram.backpack.app', ['category' => $category->value, 'page' => $page, 'lang' => app()->getLocale()], absolute: false)),
+            ]]]]];
+            $text = __('telegram.mini_app_intro');
             if ($messageId !== null) {
-                return ['method' => 'editMessageMedia', 'chat_id' => $chatId, 'message_id' => $messageId,
-                    'media' => ['type' => 'photo', 'media' => $image, 'caption' => $caption, 'parse_mode' => 'HTML'],
-                    'reply_markup' => ['inline_keyboard' => $buttons]];
+                // Upgrade buttons on old photo messages without generating another collage.
+                return ['method' => 'editMessageCaption', 'chat_id' => $chatId, 'message_id' => $messageId,
+                    'caption' => $text, 'reply_markup' => $keyboard];
             }
 
-            return ['method' => 'sendPhoto', 'chat_id' => $chatId, 'photo' => $image, 'caption' => $caption,
-                'parse_mode' => 'HTML', 'reply_markup' => ['inline_keyboard' => $buttons]];
+            return ['method' => 'sendMessage', 'chat_id' => $chatId, 'text' => $text, 'reply_markup' => $keyboard];
         });
     }
 

@@ -8,4 +8,5 @@ return [
     'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET', ''),
     'api_secret' => env('TELEGRAM_API_SECRET', ''),
     'link_ttl_minutes' => 10,
+    'mini_app_auth_max_age_seconds' => 3600,
 ];

@@ -3,14 +3,20 @@
 declare(strict_types=1);
 
 use App\Modules\Telegram\Presentation\Http\Middleware\AuthenticateTelegramApi;
+use App\Modules\Telegram\Presentation\Http\Middleware\AuthenticateTelegramMiniApp;
 use App\Modules\Telegram\Presentation\Http\Middleware\AuthenticateTelegramWebhook;
 use App\Modules\Telegram\Presentation\Http\TelegramApiController;
 use App\Modules\Telegram\Presentation\Http\TelegramBackpackPreviewController;
+use App\Modules\Telegram\Presentation\Http\TelegramMiniAppController;
 use App\Modules\Telegram\Presentation\Http\TelegramWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/telegram/webhook', TelegramWebhookController::class)
     ->middleware([AuthenticateTelegramWebhook::class, 'throttle:telegram-webhook'])->name('telegram.webhook');
+
+Route::get('/telegram/backpack', [TelegramMiniAppController::class, 'show'])->name('telegram.backpack.app');
+Route::get('/api/v1/telegram/mini-app/backpack', [TelegramMiniAppController::class, 'backpack'])
+    ->middleware([AuthenticateTelegramMiniApp::class, 'throttle:telegram-mini-app'])->name('telegram.mini-app.backpack');
 
 Route::get('/telegram/backpack/preview/{token}', TelegramBackpackPreviewController::class)
     ->where('token', '[a-f0-9]{48}')->middleware(['signed', 'throttle:120,1'])->name('telegram.backpack.preview');

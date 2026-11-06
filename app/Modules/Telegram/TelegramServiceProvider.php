@@ -45,6 +45,8 @@ final class TelegramServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/Presentation/Http/Route/api.php');
         RateLimiter::for('telegram-api', static fn (Request $request): Limit => Limit::perMinute(60)
             ->by((string) $request->attributes->get('telegram.account')->telegramUserId));
+        RateLimiter::for('telegram-mini-app', static fn (Request $request): Limit => Limit::perMinute(60)
+            ->by((string) $request->attributes->get('telegram.account')->telegramUserId));
         RateLimiter::for('telegram-webhook', static function (Request $request): Limit {
             $id = $request->input('callback_query.from.id', $request->input('message.from.id'));
 
