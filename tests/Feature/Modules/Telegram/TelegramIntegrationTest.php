@@ -171,7 +171,8 @@ final class TelegramIntegrationTest extends TestCase
     {
         $response = $this->get(route('telegram.backpack.app', ['lang' => 'uk']))->assertOk()
             ->assertSee('telegram.org/js/telegram-web-app.js', false)
-            ->assertSee('id="telegram-backpack-items"', false)->assertSee('Завантажуємо рюкзак…');
+            ->assertSee('id="telegram-backpack-items"', false)->assertSee('lang="uk"', false)
+            ->assertSee('id="telegram-backpack-message" role="status" aria-live="polite" hidden></p>', false);
         $response->assertHeader('Referrer-Policy', 'no-referrer');
         $this->assertStringContainsString('frame-ancestors', $response->headers->get('Content-Security-Policy'));
         foreach (['Mage &lt;test&gt;', 'test-bot-token', config('telegram.api_secret'), config('telegram.webhook_secret')] as $private) {

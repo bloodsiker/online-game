@@ -25,6 +25,7 @@
         previous.disabled = busy || page <= 1;
         next.disabled = busy || page >= lastPage;
         refresh.disabled = busy || !initData;
+        root.classList.toggle('is-loading', busy);
         grid.setAttribute('aria-busy', String(busy));
     }
 
@@ -94,7 +95,13 @@
         for (const group of groups) {
             const button = document.createElement('button');
             button.type = 'button';
-            button.textContent = group.label + ' (' + group.positions + ')';
+            const label = document.createElement('span');
+            label.textContent = group.label;
+            const count = document.createElement('span');
+            count.className = 'telegram-backpack__category-count';
+            count.textContent = String(group.positions);
+            button.append(label, count);
+            button.setAttribute('aria-label', group.label + ': ' + group.positions);
             button.setAttribute('aria-pressed', String(group.key === category));
             button.addEventListener('click', () => load(group.key, 1));
             categories.append(button);
@@ -105,8 +112,11 @@
         labels = { ...labels, ...values };
         if (['ru', 'uk'].includes(locale)) document.documentElement.lang = locale;
         document.title = byId('title').textContent = labels.backpack;
-        refresh.textContent = labels.mini_app_refresh;
-        close.textContent = byId('detail-close').textContent = labels.close;
+        refresh.setAttribute('aria-label', labels.mini_app_refresh);
+        refresh.title = labels.mini_app_refresh;
+        close.setAttribute('aria-label', labels.close);
+        close.title = labels.close;
+        byId('detail-close').textContent = labels.close;
         previous.textContent = '← ' + labels.previous;
         next.textContent = labels.next + ' →';
         empty.textContent = labels.backpack_empty;
@@ -123,7 +133,7 @@
         busy = true;
         controls();
         if (detail.open) detail.close();
-        showMessage(labels.mini_app_loading);
+        message.hidden = true;
         bot.hidden = true;
         try {
             const url = new URL(root.dataset.endpoint, window.location.href);
@@ -180,6 +190,11 @@
         return;
     }
     close.hidden = false;
+    const applyTheme = () => {
+        if (['light', 'dark'].includes(webApp.colorScheme)) document.documentElement.dataset.theme = webApp.colorScheme;
+    };
+    applyTheme();
+    webApp.onEvent?.('themeChanged', applyTheme);
     webApp.ready();
     webApp.expand();
     load(category, page);
