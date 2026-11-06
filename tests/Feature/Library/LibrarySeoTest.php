@@ -33,6 +33,7 @@ final class LibrarySeoTest extends TestCase
         Schema::table('library_categories', function (Blueprint $table): void {
             $table->string('content_type')->default('articles');
         });
+        (require database_path('migrations/2026_09_16_000001_create_forum_tables.php'))->up();
     }
 
     public function test_article_metadata_and_body_use_url_language_and_clean_canonical(): void
@@ -210,7 +211,8 @@ final class LibrarySeoTest extends TestCase
         $this->assertNotFalse($xml);
         $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $locations = array_map('strval', $xml->xpath('//s:loc'));
-        $this->assertCount(8, $locations);
+        $this->assertCount(9, $locations);
+        $this->assertContains(route('forum.index'), $locations);
         foreach (['ru', 'uk'] as $locale) {
             $this->assertContains(url('/'.$locale.'/library'), $locations);
             $this->assertContains(url('/'.$locale.'/library/guide/treasure'), $locations);
@@ -239,7 +241,7 @@ final class LibrarySeoTest extends TestCase
         DB::disableQueryLog();
         $this->assertLessThanOrEqual(5, count($queries));
         $response->assertSee('/uk/library/guide-article-30/article-30', false);
-        $this->assertSame(62, substr_count($response->getContent(), '<loc>'));
+        $this->assertSame(63, substr_count($response->getContent(), '<loc>'));
     }
 
     private function article(string $slug = 'treasure', string $status = LibraryArticle::STATUS_PUBLISHED, ?string $publishedAt = null): LibraryArticle

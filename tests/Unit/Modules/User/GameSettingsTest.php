@@ -31,6 +31,7 @@ final class GameSettingsTest extends TestCase
             $table->timestamp('email_verified_at')->nullable();
         });
         (require database_path('migrations/2026_10_10_010000_create_user_game_settings_table.php'))->up();
+        (require database_path('migrations/2026_11_06_120000_create_telegram_links_tables.php'))->up();
         DB::table('users')->insert([
             ['id' => 1, 'active_login_token' => 'settings-login-token', 'email_verified_at' => now()],
             ['id' => 2, 'active_login_token' => 'other-login-token', 'email_verified_at' => now()],

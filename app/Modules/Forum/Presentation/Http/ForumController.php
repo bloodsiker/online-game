@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Forum\Application\Services\ForumService;
 use App\Modules\Forum\Application\Services\ForumWriter;
 use App\Modules\Forum\Infrastructure\Persistence\Models\ForumPost;
+use App\Modules\Forum\Infrastructure\Persistence\Models\ForumTopic;
 use App\Modules\Moderation\Application\Services\CommunicationMuteService;
 use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Moderation\Domain\Exceptions\UserMutedException;
@@ -77,7 +78,7 @@ class ForumController extends Controller
 
         $viewedKey = 'forum_viewed_'.$topic->id;
         if (! session()->has($viewedKey)) {
-            $topic->increment('views_count');
+            ForumTopic::withoutTimestamps(fn () => $topic->increment('views_count'));
             session()->put($viewedKey, true);
         }
 

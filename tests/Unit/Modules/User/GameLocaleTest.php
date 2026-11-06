@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\User;
 
+use App\Modules\Auth\Application\Listeners\ActivateLoginSession;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -23,9 +24,15 @@ final class GameLocaleTest extends TestCase
         }
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
+            $table->string('active_login_token');
+            $table->timestamp('email_verified_at');
         });
         (require database_path('migrations/2026_10_10_010000_create_user_game_settings_table.php'))->up();
-        DB::table('users')->insert([['id' => 1], ['id' => 2]]);
+        (require database_path('migrations/2026_11_06_120000_create_telegram_links_tables.php'))->up();
+        DB::table('users')->insert([
+            ['id' => 1, 'active_login_token' => 'locale-session-1', 'email_verified_at' => now()],
+            ['id' => 2, 'active_login_token' => 'locale-session-2', 'email_verified_at' => now()],
+        ]);
         DB::table('user_game_settings')->insert(['user_id' => 2, 'settings' => json_encode(['language' => 'uk'])]);
         Route::middleware('web')->get('/_test/locale', function (Request $request, GameSettingsService $settings) {
             if ($request->user()) {
@@ -39,7 +46,8 @@ final class GameLocaleTest extends TestCase
 
     private function signIn(int $id): void
     {
-        $this->actingAs(User::query()->without('player')->findOrFail($id));
+        $this->actingAs(User::query()->without('player')->findOrFail($id)->setRelation('clanMembership', null))
+            ->withSession([ActivateLoginSession::SESSION_KEY => 'locale-session-'.$id]);
     }
 
     public function test_player_language_applies_to_pages_frames_and_ajax_without_leaking(): void

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Library\Presentation\Http;
 
-use App\Modules\Library\Presentation\Services\LibrarySitemap;
+use App\Modules\Interface\Presentation\Services\SiteSitemap;
 use Illuminate\Http\Response;
 
 final class LibrarySitemapController
 {
-    public function index(LibrarySitemap $sitemap): Response
+    public function index(SiteSitemap $sitemap): Response
     {
         return response()->view('library::sitemap', ['entries' => $sitemap->entries()])
             ->header('Content-Type', 'application/xml; charset=UTF-8');

@@ -31,18 +31,19 @@
 .homepage-gallery .b-slider__nav::before { pointer-events: none; }
 .homepage-gallery a:focus-visible, .homepage-gallery button:focus-visible { outline: 2px solid #e3bd65; outline-offset: -2px; }
 .homepage-lightbox {
-    box-sizing: border-box; width: min(1100px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px);
-    margin: auto; padding: 35px 44px 15px; overflow: auto; border: 2px solid #987345; border-radius: 5px;
+    box-sizing: border-box; width: 90vw; height: 90vh; height: 90dvh;
+    max-width: none; max-height: none;
+    margin: auto; padding: 30px 36px 26px; overflow: hidden; border: 2px solid #987345; border-radius: 5px;
     background: #21180f; color: #edcb86; box-shadow: 0 10px 60px #000a;
 }
 .homepage-lightbox::backdrop { background: rgba(10, 7, 5, .88); }
-.homepage-lightbox__image { display: block; width: 100%; height: auto; max-height: calc(100vh - 145px); object-fit: contain; }
+.homepage-lightbox__image { display: block; width: 100%; height: 100%; max-height: none; object-fit: contain; }
 .homepage-lightbox__close, .homepage-lightbox__arrow {
     position: absolute; padding: 4px 8px; border: 0; background: transparent; color: #edcb86; font: 28px/1 Arial, sans-serif; cursor: pointer;
 }
 .homepage-lightbox__close { top: 4px; right: 5px; }
-.homepage-lightbox__arrow { top: 45%; }
+.homepage-lightbox__arrow { top: 50%; transform: translateY(-50%); }
 .homepage-lightbox__arrow--prev { left: 5px; }
 .homepage-lightbox__arrow--next { right: 5px; }
-.homepage-lightbox__counter { display: block; margin-top: 10px; text-align: center; font: 12px Tahoma, sans-serif; }
+.homepage-lightbox__counter { position: absolute; right: 36px; bottom: 7px; left: 36px; display: block; text-align: center; font: 12px Tahoma, sans-serif; }
 body.homepage-lightbox-open { overflow: hidden; }

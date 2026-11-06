@@ -191,23 +191,24 @@ class ItemController extends Controller
         ]);
     }
 
+    // Публичные страницы (ссылки из библиотеки): гость и боты открывают их без авторизации.
     public function info(int $id): mixed
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         return view('item::info', [
-            'page' => $this->getItemInfoPage->execute($id, $user->player),
+            'page' => $this->getItemInfoPage->execute($id, $user?->player),
         ]);
     }
 
     public function infoByShareItem(int $id): mixed
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = Auth::user();
 
         return view('item::info', [
-            'page' => $this->getItemInfoPage->executeByShareItemId($id, $user->player),
+            'page' => $this->getItemInfoPage->executeByShareItemId($id, $user?->player),
         ]);
     }
 

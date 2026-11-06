@@ -71,6 +71,9 @@
         .game-settings-actions .butt1 input { width: 170px; }
         .game-settings-security { text-align: center; }
         .game-settings-security .butt1 input { width: 120px; }
+        .telegram-settings-actions { margin: 10px 0 0; line-height: normal; }
+        .telegram-settings-actions .butt1 { vertical-align: middle; }
+        .telegram-settings-actions .butt1 input { min-width: 130px; }
         .password-overlay { position: fixed; inset: 0; z-index: 1002; background: rgba(0, 0, 0, .45); }
         .password-modal { position: fixed; z-index: 1003; left: 50%; top: 50%; transform: translate(-50%, -50%); max-height: calc(100vh - 24px); overflow-y: auto; width: 420px; max-width: calc(100vw - 24px); }
         .password-modal .popup_global_container { width: 100%; }
@@ -111,6 +114,7 @@
             @include('interface::partials.profile-form')
         @else
             @include('interface::partials.game-settings-form')
+            @include('telegram::settings')
         @endif
     </section>
     @if($tab === 'game')

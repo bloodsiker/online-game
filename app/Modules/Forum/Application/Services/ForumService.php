@@ -12,6 +12,10 @@ use Illuminate\Support\Collection;
 
 class ForumService
 {
+    public const TOPICS_PER_PAGE = 20;
+
+    public const POSTS_PER_PAGE = 15;
+
     /**
      * @return Collection<int, ForumSection>
      */
@@ -52,7 +56,7 @@ class ForumService
             ->firstOrFail();
     }
 
-    public function sectionTopics(ForumSection $section, int $perPage = 20): LengthAwarePaginator
+    public function sectionTopics(ForumSection $section, int $perPage = self::TOPICS_PER_PAGE): LengthAwarePaginator
     {
         return ForumTopic::query()
             ->where('section_id', $section->id)
@@ -74,7 +78,7 @@ class ForumService
             ->findOrFail($id);
     }
 
-    public function topicPosts(ForumTopic $topic, int $perPage = 15): LengthAwarePaginator
+    public function topicPosts(ForumTopic $topic, int $perPage = self::POSTS_PER_PAGE): LengthAwarePaginator
     {
         return $topic->posts()
             ->with(['author.player', 'author.clanMembership.clan'])

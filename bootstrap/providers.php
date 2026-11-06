@@ -33,6 +33,7 @@ use App\Modules\Referral\ReferralServiceProvider;
 use App\Modules\Reputation\ReputationServiceProvider;
 use App\Modules\Share\ShareServiceProvider;
 use App\Modules\Structure\StructureServiceProvider;
+use App\Modules\Telegram\TelegramServiceProvider;
 use App\Modules\Trade\TradeServiceProvider;
 use App\Modules\TreasureHunt\TreasureHuntServiceProvider;
 use App\Modules\User\UserServiceProvider;
@@ -72,6 +73,7 @@ return [
     StructureServiceProvider::class,
     TradeServiceProvider::class,
     TreasureHuntServiceProvider::class,
+    TelegramServiceProvider::class,
     ClanServiceProvider::class,
     BackpackServiceProvider::class,
     EventServiceProvider::class,

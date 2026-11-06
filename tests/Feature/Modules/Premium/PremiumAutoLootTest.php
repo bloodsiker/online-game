@@ -120,6 +120,7 @@ final class PremiumAutoLootTest extends TestCase
         }
         (require database_path('migrations/2026_10_30_000001_add_premium_auto_loot_bonus.php'))->up();
         (require database_path('migrations/2026_10_10_010000_create_user_game_settings_table.php'))->up();
+        (require database_path('migrations/2026_11_06_120000_create_telegram_links_tables.php'))->up();
         DB::table('users')->insert(['id' => 1, 'name' => 'Test', 'money' => 100, 'active_login_token' => 'premium-settings-token', 'email_verified_at' => now()]);
         DB::table('monsters')->insert(['id' => 1]);
         DB::table('monster_on_locations')->insert(['id' => 1, 'monster_id' => 1]);
