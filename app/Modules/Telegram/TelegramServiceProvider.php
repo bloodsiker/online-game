@@ -6,10 +6,14 @@ namespace App\Modules\Telegram;
 
 use App\Modules\Structure\Auction\Domain\Contracts\OwnMarketListingsReader;
 use App\Modules\Structure\Auction\Infrastructure\Persistence\EloquentOwnMarketListingsReader;
+use App\Modules\Telegram\Domain\Contracts\BackpackPreviewRenderer;
+use App\Modules\Telegram\Domain\Contracts\TelegramCallbackResponder;
 use App\Modules\Telegram\Domain\Contracts\TelegramLinkRepository;
 use App\Modules\Telegram\Domain\Contracts\TelegramUpdateRepository;
+use App\Modules\Telegram\Infrastructure\Images\GdBackpackPreviewRenderer;
 use App\Modules\Telegram\Infrastructure\Persistence\DatabaseTelegramLinkRepository;
 use App\Modules\Telegram\Infrastructure\Persistence\DatabaseTelegramUpdateRepository;
+use App\Modules\Telegram\Infrastructure\TelegramCallbackAcknowledger;
 use App\Modules\Telegram\Presentation\Console\ConfigureTelegramWebhook;
 use App\Modules\Telegram\Presentation\Console\PruneTelegramUpdates;
 use App\Modules\User\Domain\Contracts\CharacterSummaryReader;
@@ -27,6 +31,8 @@ final class TelegramServiceProvider extends ServiceProvider
     {
         $this->app->bind(TelegramLinkRepository::class, DatabaseTelegramLinkRepository::class);
         $this->app->bind(TelegramUpdateRepository::class, DatabaseTelegramUpdateRepository::class);
+        $this->app->bind(BackpackPreviewRenderer::class, GdBackpackPreviewRenderer::class);
+        $this->app->bind(TelegramCallbackResponder::class, TelegramCallbackAcknowledger::class);
         $this->app->bind(CharacterSummaryReader::class, DatabaseCharacterSummaryReader::class);
         $this->app->bind(OwnMarketListingsReader::class, EloquentOwnMarketListingsReader::class);
     }
@@ -39,8 +45,11 @@ final class TelegramServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/Presentation/Http/Route/api.php');
         RateLimiter::for('telegram-api', static fn (Request $request): Limit => Limit::perMinute(60)
             ->by((string) $request->attributes->get('telegram.account')->telegramUserId));
-        RateLimiter::for('telegram-webhook', static fn (Request $request): Limit => Limit::perMinute(120)
-            ->by((string) $request->input('message.from.id', $request->ip())));
+        RateLimiter::for('telegram-webhook', static function (Request $request): Limit {
+            $id = $request->input('callback_query.from.id', $request->input('message.from.id'));
+
+            return Limit::perMinute(120)->by(is_scalar($id) ? (string) $id : (string) $request->ip());
+        });
         if ($this->app->runningInConsole()) {
             $this->commands([ConfigureTelegramWebhook::class, PruneTelegramUpdates::class]);
             $this->callAfterResolving(Schedule::class, static function (Schedule $schedule): void {

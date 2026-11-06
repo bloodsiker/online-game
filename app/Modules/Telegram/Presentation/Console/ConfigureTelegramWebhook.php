@@ -32,7 +32,7 @@ final class ConfigureTelegramWebhook extends Command
         try {
             $response = Http::connectTimeout(5)->timeout(15)->post('https://api.telegram.org/bot'.config('telegram.bot_token').'/setWebhook', [
                 'url' => $base.'/telegram/webhook', 'secret_token' => config('telegram.webhook_secret'),
-                'allowed_updates' => ['message'],
+                'allowed_updates' => ['message', 'callback_query'],
             ]);
         } catch (ConnectionException) {
             // Do not print HTTP exceptions: their URL contains the bot token.

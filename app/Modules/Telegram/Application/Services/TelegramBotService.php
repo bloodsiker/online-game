@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Telegram\Application\Services;
 
+use App\Modules\Backpack\Domain\Enums\BackpackCategory;
 use App\Modules\Telegram\Domain\Contracts\TelegramLinkRepository;
 use App\Modules\Telegram\Domain\Contracts\TelegramUpdateRepository;
 use Illuminate\Support\Traits\Localizable;
@@ -18,6 +19,7 @@ final class TelegramBotService
         private readonly TelegramLinkRepository $links,
         private readonly TelegramUpdateRepository $updates,
         private readonly TelegramReadService $read,
+        private readonly TelegramBackpackBotService $backpack,
     ) {}
 
     /** @param array<string, mixed> $update
@@ -25,6 +27,9 @@ final class TelegramBotService
      */
     public function handle(array $update): array
     {
+        if (isset($update['callback_query'])) {
+            return $this->backpack->callback(update: $update);
+        }
         $message = $update['message'] ?? [];
         $telegramId = $message['from']['id'] ?? 0;
         // Never send private account data to groups or accept a forwarded sender identity.
@@ -76,6 +81,18 @@ final class TelegramBotService
                 } elseif (in_array($message['text'], [__('telegram.exchange', locale: 'ru'), __('telegram.exchange', locale: 'uk')], true)) {
                     $command = '/exchange';
                     unset($parts[1]);
+                } elseif (in_array($message['text'], [__('telegram.backpack', locale: 'ru'), __('telegram.backpack', locale: 'uk')], true)) {
+                    $command = '/backpack';
+                    unset($parts[1], $parts[2]);
+                }
+                if ($command === '/backpack') {
+                    $category = BackpackCategory::tryFrom($parts[1] ?? 'main');
+                    $page = $parts[2] ?? '1';
+                    if (! $category || ! ctype_digit($page) || (int) $page < 1 || (int) $page > 100000) {
+                        return $this->reply(chatId: $telegramId, text: __('telegram.invalid_backpack_selection'));
+                    }
+
+                    return $this->backpack->pageReply(userId: $account->userId, chatId: $telegramId, category: $category, page: (int) $page);
                 }
                 if ($command === '/character') {
                     return $this->reply(chatId: $telegramId, text: __('telegram.character_reply', [
@@ -117,7 +134,7 @@ final class TelegramBotService
     {
         $result = ['method' => 'sendMessage', 'chat_id' => $chatId, 'text' => $text, 'parse_mode' => 'HTML'];
         if ($menu) {
-            $result['reply_markup'] = ['keyboard' => [[__('telegram.character')], [__('telegram.auction'), __('telegram.exchange')]], 'resize_keyboard' => true];
+            $result['reply_markup'] = ['keyboard' => [[__('telegram.character'), __('telegram.backpack')], [__('telegram.auction'), __('telegram.exchange')]], 'resize_keyboard' => true];
         } else {
             $result['reply_markup'] = ['remove_keyboard' => true];
         }

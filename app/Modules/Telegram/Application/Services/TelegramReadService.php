@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Telegram\Application\Services;
 
+use App\Modules\Backpack\Domain\Enums\BackpackCategory;
+use App\Modules\Backpack\Domain\Repositories\BackpackReadRepository;
 use App\Modules\Structure\Auction\Domain\Contracts\OwnMarketListingsReader;
 use App\Modules\User\Application\Services\GameSettingsService;
 use App\Modules\User\Domain\Contracts\CharacterSummaryReader;
@@ -17,6 +19,7 @@ final class TelegramReadService
         private readonly CharacterSummaryReader $characters,
         private readonly OwnMarketListingsReader $market,
         private readonly GameSettingsService $settings,
+        private readonly BackpackReadRepository $backpack,
     ) {}
 
     public function locale(int $userId): string
@@ -28,6 +31,16 @@ final class TelegramReadService
     public function character(int $userId): array
     {
         return $this->characters->read(userId: $userId) ?? abort(403, 'Character unavailable.');
+    }
+
+    /** @return array{category: string, categories: list<array<string, mixed>>, data: list<array<string, mixed>>, meta: array<string, int>} */
+    public function backpack(int $userId, BackpackCategory $category = BackpackCategory::MAIN, int $page = 1, int $perPage = 8): array
+    {
+        $this->character(userId: $userId);
+
+        return $this->withLocale($this->locale(userId: $userId), fn (): array => $this->backpack->page(
+            userId: $userId, category: $category, page: $page, perPage: $perPage,
+        ));
     }
 
     /** @return array{data: list<array<string, mixed>>, meta: array<string, int>} */

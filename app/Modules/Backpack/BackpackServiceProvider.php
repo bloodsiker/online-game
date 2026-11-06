@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Backpack;
 
 use App\Modules\Backpack\Application\Listeners\GiveStarterBonus;
+use App\Modules\Backpack\Domain\Repositories\BackpackReadRepository;
 use App\Modules\Backpack\Domain\Repositories\BackpackRepositoryInterface;
+use App\Modules\Backpack\Infrastructure\Persistence\EloquentBackpackReadRepository;
 use App\Modules\Backpack\Infrastructure\Persistence\EloquentBackpackRepository;
 use App\Modules\Backpack\Presentation\Console\AuditInventoryDuplicates;
 use App\Modules\User\Domain\Events\UserRegistered;
@@ -17,6 +19,7 @@ class BackpackServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(BackpackReadRepository::class, EloquentBackpackReadRepository::class);
         $this->app->bind(
             BackpackRepositoryInterface::class,
             EloquentBackpackRepository::class,

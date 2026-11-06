@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\Telegram;
 
 use App\Modules\Telegram\Application\Services\TelegramLinkService;
+use App\Modules\Telegram\Domain\Contracts\BackpackPreviewRenderer;
 use App\Modules\Telegram\Domain\Contracts\TelegramLinkRepository;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,6 +13,7 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -50,11 +52,25 @@ final class TelegramIntegrationTest extends TestCase
         Schema::create('share_items', function (Blueprint $table): void {
             $table->id();
             $table->text('name');
+            $table->string('type')->default('resource');
+            $table->string('rarity')->default('common');
+            $table->string('image')->nullable();
+            $table->unsignedInteger('count_use')->default(0);
         });
         Schema::create('items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('share_item_id');
             $table->unsignedInteger('upgrade_lvl')->default(0);
+            $table->unsignedInteger('count_use')->default(0);
+            $table->timestamp('expires_at')->nullable();
+        });
+        Schema::create('backpacks', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('item_id');
+            $table->unsignedInteger('count')->default(1);
+            $table->boolean('equipped')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
         });
         foreach (['auctions' => 'item_id', 'auction_orders' => 'share_item_id'] as $name => $itemColumn) {
             Schema::create($name, function (Blueprint $table) use ($itemColumn): void {
@@ -118,6 +134,164 @@ final class TelegramIntegrationTest extends TestCase
         foreach (['per_page=51', 'per_page=0', 'page=-1', 'page[]=1'] as $query) {
             $this->getJson(route('telegram.api.auction').'?'.$query, $this->apiHeaders())->assertUnprocessable();
         }
+    }
+
+    public function test_backpack_api_filters_categories_counts_stacks_and_excludes_other_players_equipment_and_expired_items(): void
+    {
+        $this->getJson(route('telegram.api.backpack'))->assertUnauthorized();
+        $this->link();
+        $this->backpackFixtures();
+        $response = $this->getJson(route('telegram.api.backpack', ['user_id' => 2]), $this->apiHeaders())->assertOk()
+            ->assertJsonPath('category', 'main')->assertJsonPath('meta.total', 10)->assertJsonPath('meta.last_page', 2)
+            ->assertJsonPath('meta.per_page', 8)->assertJsonCount(8, 'data')->assertJsonCount(6, 'categories')
+            ->assertJsonPath('data.0.name', 'Агат <магічний>')->assertJsonPath('data.0.quantity', 500)
+            ->assertJsonPath('data.0.image_url', asset('/storage/telegram-test/icon.png'));
+        $categories = collect($response->json('categories'))->keyBy('key');
+        $this->assertSame(10, $categories['main']['positions']);
+        $this->assertSame(1, $categories['artifact']['positions']);
+        $this->getJson(route('telegram.api.backpack', ['category' => 'artifact']), $this->apiHeaders())->assertOk()
+            ->assertJsonPath('meta.total', 1)->assertJsonCount(1, 'data')->assertJsonPath('data.0.upgrade_level', 2)
+            ->assertJsonPath('data.0.name', 'Предмет 3 +2');
+        foreach (['misc', 'key', 'quest', 'gift'] as $category) {
+            $this->getJson(route('telegram.api.backpack', ['category' => $category]), $this->apiHeaders())
+                ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonCount(1, 'data');
+        }
+        $this->getJson(route('telegram.api.backpack', ['page' => 999]), $this->apiHeaders())->assertOk()
+            ->assertJsonPath('meta.current_page', 2)->assertJsonCount(2, 'data');
+        foreach (['category=unknown', 'category[]=main', 'per_page=0', 'per_page=51', 'page=-1'] as $query) {
+            $this->getJson(route('telegram.api.backpack').'?'.$query, $this->apiHeaders())->assertUnprocessable();
+        }
+        $this->assertSame(1000, (int) DB::table('users')->where('id', 1)->value('money'));
+        $this->assertSame(19, DB::table('backpacks')->count());
+    }
+
+    public function test_bot_backpack_returns_numbered_picture_and_inline_category_pagination_buttons(): void
+    {
+        $this->link();
+        $this->backpackFixtures();
+        $response = $this->postJson(route('telegram.webhook'), $this->update('/backpack'), $this->webhookHeaders())
+            ->assertOk()->assertJsonPath('method', 'sendPhoto')->assertJsonPath('chat_id', 10001);
+        $this->assertStringContainsString('Агат &lt;магічний&gt; ×500', $response->json('caption'));
+        $this->assertLessThanOrEqual(1024, mb_strlen(html_entity_decode(strip_tags($response->json('caption')))));
+        $buttons = collect($response->json('reply_markup.inline_keyboard'))->flatten(1)->pluck('callback_data');
+        $this->assertContains('bag:main:2', $buttons);
+        $this->assertContains('bag:artifact:1', $buttons);
+        $this->assertNotContains('bag:main:0', $buttons);
+        $image = $this->get($response->json('photo'))->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->assertSame("\x89PNG\r\n\x1a\n", substr($image->getContent(), 0, 8));
+        $decoded = imagecreatefromstring($image->getContent());
+        $this->assertSame(600, imagesx($decoded));
+        $this->assertSame(324, imagesy($decoded));
+        $this->assertSame(0xFF0000, imagecolorat($decoded, 70, 60) & 0xFFFFFF);
+        imagedestroy($decoded);
+        Http::assertNothingSent();
+    }
+
+    public function test_backpack_callbacks_edit_same_message_acknowledge_after_transaction_and_reset_page_when_switching_category(): void
+    {
+        $this->link();
+        $this->backpackFixtures();
+        $transactionLevels = [];
+        Http::fake(function ($request) use (&$transactionLevels) {
+            $transactionLevels[] = DB::transactionLevel();
+
+            return Http::response(['ok' => true]);
+        });
+        $response = $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:main:2'), $this->webhookHeaders())
+            ->assertOk()->assertJsonPath('method', 'editMessageMedia')->assertJsonPath('message_id', 77)
+            ->assertJsonPath('chat_id', 10001)->assertJsonPath('media.type', 'photo');
+        $this->assertStringContainsString('2/2', $response->json('media.caption'));
+        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/answerCallbackQuery')
+            && $request['callback_query_id'] === 'callback-1');
+        $this->assertSame([0], $transactionLevels);
+        $buttons = collect($response->json('reply_markup.inline_keyboard'))->flatten(1)->pluck('callback_data');
+        $this->assertContains('bag:main:1', $buttons);
+        $this->assertNotContains('bag:main:3', $buttons);
+        $response = $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:artifact:1', 2), $this->webhookHeaders())
+            ->assertOk()->assertJsonPath('method', 'editMessageMedia');
+        $this->assertStringContainsString('Предмет 3 +2', $response->json('media.caption'));
+        $this->assertStringContainsString('1/1', $response->json('media.caption'));
+        $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:artifact:1', 2), $this->webhookHeaders())
+            ->assertExactJson($response->json());
+        $this->assertSame(2, DB::table('telegram_webhook_updates')->count());
+    }
+
+    public function test_backpack_callbacks_do_not_accept_other_chats_invalid_categories_or_revoked_links(): void
+    {
+        $this->link();
+        $update = $this->callbackUpdate('bag:main:1');
+        $update['callback_query']['message']['chat']['id'] = 20002;
+        $this->postJson(route('telegram.webhook'), $update, $this->webhookHeaders())->assertExactJson(['ok' => true]);
+        $update = $this->callbackUpdate('bag:main:1');
+        $update['callback_query']['message']['chat']['type'] = 'group';
+        $this->postJson(route('telegram.webhook'), $update, $this->webhookHeaders())->assertExactJson(['ok' => true]);
+        $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:other:1'), $this->webhookHeaders())->assertOk()
+            ->assertJsonPath('method', 'answerCallbackQuery')->assertJsonPath('show_alert', true);
+        DB::table('users')->where('id', 1)->update(['email_verified_at' => null]);
+        $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:main:1', 2), $this->webhookHeaders())
+            ->assertJsonPath('text', __('telegram.account_unavailable', locale: 'uk'));
+        app(TelegramLinkRepository::class)->unlink(userId: 1);
+        $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:main:1', 3), $this->webhookHeaders())
+            ->assertJsonPath('method', 'answerCallbackQuery')->assertJsonPath('show_alert', true);
+        Http::assertNothingSent();
+    }
+
+    public function test_backpack_picture_requires_a_valid_signature_and_stops_working_after_unlink(): void
+    {
+        $this->link();
+        $this->backpackFixtures();
+        $photo = $this->postJson(route('telegram.webhook'), $this->update('/backpack'), $this->webhookHeaders())->assertOk()->json('photo');
+        $this->get($photo)->assertOk();
+        $this->get(strtok($photo, '?'))->assertForbidden();
+        $this->get($photo.'&changed=1')->assertForbidden();
+        app(TelegramLinkRepository::class)->unlink(userId: 1);
+        $this->get($photo)->assertNotFound();
+    }
+
+    public function test_backpack_previews_reuse_unchanged_contents_and_expire(): void
+    {
+        $this->link();
+        $this->backpackFixtures();
+        $first = $this->postJson(route('telegram.webhook'), $this->update('/backpack'), $this->webhookHeaders())->assertOk()->json('photo');
+        $again = $this->postJson(route('telegram.webhook'), $this->update('/backpack', 2), $this->webhookHeaders())->assertOk()->json('photo');
+        $this->assertSame(parse_url($first, PHP_URL_PATH), parse_url($again, PHP_URL_PATH));
+        $this->get($first)->assertOk();
+        $this->travel(25)->hours();
+        try {
+            $this->get($first)->assertForbidden();
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_empty_backpack_and_stale_page_are_displayed_without_errors(): void
+    {
+        $this->link();
+        $this->getJson(route('telegram.api.backpack', ['category' => 'artifact', 'page' => 3]), $this->apiHeaders())
+            ->assertOk()->assertJsonPath('meta.current_page', 1)->assertJsonPath('meta.last_page', 1)->assertJsonCount(0, 'data');
+        $response = $this->postJson(route('telegram.webhook'), $this->update('/backpack artifact 2'), $this->webhookHeaders())
+            ->assertOk()->assertJsonPath('method', 'sendPhoto');
+        $this->assertStringContainsString(__('telegram.backpack_empty', locale: 'uk'), $response->json('caption'));
+        $this->get($response->json('photo'))->assertOk();
+    }
+
+    public function test_backpack_renderer_displays_real_webp_icons(): void
+    {
+        Storage::fake('public');
+        $this->assertTrue(function_exists('imagewebp'), 'PHP image must be built with GD WebP support.');
+        $icon = imagecreatetruecolor(12, 12);
+        imagefill($icon, 0, 0, imagecolorallocate($icon, 0, 255, 0));
+        ob_start();
+        imagewebp($icon, quality: 100);
+        Storage::disk('public')->put('telegram-test/icon.webp', ob_get_clean());
+        imagedestroy($icon);
+        $png = app(BackpackPreviewRenderer::class)->render(items: [['image_url' => asset('/storage/telegram-test/icon.webp'),
+            'quantity' => 10, 'rarity_color' => '#666666', 'upgrade_level' => 0]]);
+        $decoded = imagecreatefromstring($png);
+        $pixel = imagecolorsforindex($decoded, imagecolorat($decoded, 70, 60));
+        $this->assertGreaterThan(240, $pixel['green']);
+        $this->assertLessThan(10, $pixel['red']);
+        imagedestroy($decoded);
     }
 
     public function test_link_tokens_are_hashed_single_use_and_new_link_invalidates_previous_one(): void
@@ -293,7 +467,7 @@ final class TelegramIntegrationTest extends TestCase
         Http::assertNothingSent();
         $this->artisan('telegram:set-webhook', ['--url' => 'https://game.example.test'])->assertSuccessful();
         Http::assertSent(fn ($request): bool => $request['url'] === 'https://game.example.test/telegram/webhook'
-            && $request['secret_token'] === config('telegram.webhook_secret') && $request['allowed_updates'] === ['message']);
+            && $request['secret_token'] === config('telegram.webhook_secret') && $request['allowed_updates'] === ['message', 'callback_query']);
         config(['app.url' => 'https://default.example.test']);
         $this->artisan('telegram:set-webhook')->assertSuccessful();
         Http::assertSent(fn ($request): bool => $request['url'] === 'https://default.example.test/telegram/webhook');
@@ -351,6 +525,37 @@ final class TelegramIntegrationTest extends TestCase
         foreach ([1, 2] as $owner) {
             DB::table('auction_orders')->insert(['user_id' => $owner, 'structure_id' => 13,
                 'share_item_id' => 1, 'count' => 3, 'price' => 20, 'created_at' => now(), 'updated_at' => now()]);
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function callbackUpdate(string $data, int $id = 1): array
+    {
+        return ['update_id' => $id, 'callback_query' => ['id' => 'callback-'.$id, 'data' => $data,
+            'from' => ['id' => 10001, 'is_bot' => false, 'language_code' => 'uk'],
+            'message' => ['message_id' => 77, 'chat' => ['id' => 10001, 'type' => 'private']]]];
+    }
+
+    private function backpackFixtures(): void
+    {
+        Storage::fake('public');
+        $icon = imagecreatetruecolor(12, 12);
+        imagefill($icon, 0, 0, imagecolorallocate($icon, 255, 0, 0));
+        ob_start();
+        imagepng($icon);
+        Storage::disk('public')->put('telegram-test/icon.png', ob_get_clean());
+        imagedestroy($icon);
+        foreach ([1 => 'resource', 2 => 'fish', 3 => 'artifact', 4 => 'key', 5 => 'quest', 6 => 'gift', 7 => 'misc', 8 => 'trade_goods', 9 => 'treasure_map'] as $id => $type) {
+            DB::table('share_items')->insert(['id' => $id, 'name' => json_encode(['ru' => 'Предмет RU '.$id,
+                'uk' => $id === 1 ? 'Агат <магічний>' : 'Предмет '.$id]), 'type' => $type,
+                'image' => 'telegram-test/icon.png']);
+            DB::table('items')->insert(['id' => $id, 'share_item_id' => $id, 'upgrade_lvl' => $id === 3 ? 2 : 0]);
+            DB::table('backpacks')->insert(['id' => $id, 'user_id' => 1, 'item_id' => $id, 'count' => $id === 1 ? 500 : 1]);
+        }
+        foreach (range(10, 19) as $id) {
+            DB::table('items')->insert(['id' => $id, 'share_item_id' => 1, 'expires_at' => $id === 17 ? now()->subMinute() : null]);
+            DB::table('backpacks')->insert(['id' => $id, 'user_id' => $id === 19 ? 2 : 1, 'item_id' => $id,
+                'count' => $id === 18 ? 0 : 1, 'equipped' => $id === 16]);
         }
     }
 }
