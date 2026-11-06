@@ -20,7 +20,7 @@ Route::post('/login', [LoginController::class, 'login'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])
-    ->name('register')
+    ->name('register.store')
     ->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/register/check', [RegisterController::class, 'registerCheck'])->name('register.check');
 Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
