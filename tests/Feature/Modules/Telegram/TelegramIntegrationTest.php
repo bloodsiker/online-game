@@ -172,6 +172,8 @@ final class TelegramIntegrationTest extends TestCase
         $response = $this->get(route('telegram.backpack.app', ['lang' => 'uk']))->assertOk()
             ->assertSee('telegram.org/js/telegram-web-app.js', false)
             ->assertSee('id="telegram-backpack-items"', false)->assertSee('lang="uk"', false)
+            ->assertSee('id="telegram-backpack-navigation"', false)->assertSee('data-view="character"', false)
+            ->assertSee('data-view="backpack"', false)->assertSee('data-view="auction"', false)
             ->assertSee('id="telegram-backpack-message" role="status" aria-live="polite" hidden></p>', false);
         $response->assertHeader('Referrer-Policy', 'no-referrer');
         $this->assertStringContainsString('frame-ancestors', $response->headers->get('Content-Security-Policy'));
@@ -188,6 +190,59 @@ final class TelegramIntegrationTest extends TestCase
         $this->getJson(route('telegram.mini-app.backpack'), $this->apiHeaders())->assertUnauthorized();
         $user = User::query()->without('player')->findOrFail(1)->setRelation('player', null);
         $this->actingAs($user)->getJson(route('telegram.mini-app.backpack'))->assertUnauthorized();
+    }
+
+    public function test_mini_app_character_and_auction_require_the_signed_telegram_identity(): void
+    {
+        $this->link();
+        foreach (['character', 'auction'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint))->assertUnauthorized();
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->apiHeaders())->assertUnauthorized();
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders(token: 'other-bot'))->assertUnauthorized();
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders(timestamp: now()->subHours(2)->timestamp))->assertUnauthorized();
+        }
+        $this->getJson(route('telegram.mini-app.character', ['user_id' => 2]), $this->miniAppHeaders())->assertOk()
+            ->assertJsonPath('character.nickname', 'Mage <test>')->assertJsonPath('character.level', 10)
+            ->assertJsonPath('character.money', 1000)->assertJsonPath('character.diamonds', '56.75')
+            ->assertJsonPath('labels.mini_app_auction', 'Аукціон');
+        DB::table('users')->where('id', 1)->update(['email_verified_at' => null]);
+        foreach (['character', 'auction'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders())->assertForbidden();
+        }
+        app(TelegramLinkRepository::class)->unlink(userId: 1);
+        foreach (['character', 'auction'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders())->assertForbidden()
+                ->assertJsonPath('code', 'telegram_not_linked');
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_mini_app_auction_shows_only_own_active_lots_with_icons_prices_and_pages(): void
+    {
+        $this->link();
+        $this->marketFixtures();
+        DB::table('share_items')->where('id', 1)->update(['image' => 'items/agate.webp', 'rarity' => 'rare']);
+        foreach (range(5, 14) as $id) {
+            DB::table('auctions')->insert(['id' => $id, 'user_id' => 1, 'structure_id' => 9,
+                'item_id' => 1, 'count' => 2, 'price' => 80, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        $headers = $this->miniAppHeaders();
+        $response = $this->getJson(route('telegram.mini-app.auction', ['user_id' => 2]), $headers)->assertOk()
+            ->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
+            ->assertJsonPath('meta.total', 12)->assertJsonPath('meta.per_page', 10)->assertJsonCount(10, 'data')
+            ->assertJsonPath('data.0.name', 'Агат +2')->assertJsonPath('data.0.quantity', 2)
+            ->assertJsonPath('data.0.image_url', asset('storage/items/agate.webp'))->assertJsonPath('data.0.rarity', 'rare')
+            ->assertJsonPath('data.0.upgrade_level', 2)->assertJsonPath('data.0.total_price', 80)->assertJsonPath('data.0.unit_price', 40);
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $this->getJson(route('telegram.mini-app.auction', ['page' => 2]), $headers)->assertOk()
+            ->assertJsonPath('meta.current_page', 2)->assertJsonPath('meta.last_page', 2)->assertJsonCount(2, 'data');
+        foreach (['page=-1', 'page[]=1', 'page=100001'] as $query) {
+            $this->getJson(route('telegram.mini-app.auction').'?'.$query, $headers)->assertUnprocessable();
+        }
+        DB::table('auctions')->where('user_id', 1)->delete();
+        $this->getJson(route('telegram.mini-app.auction'), $headers)->assertOk()->assertJsonCount(0, 'data');
+        $this->assertSame(1000, (int) DB::table('users')->where('id', 1)->value('money'));
+        Http::assertNothingSent();
     }
 
     public function test_mini_app_returns_all_own_items_grouped_by_category_without_pagination(): void

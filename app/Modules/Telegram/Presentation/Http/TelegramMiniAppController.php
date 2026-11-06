@@ -34,13 +34,37 @@ final class TelegramMiniAppController
         ] + $read->allBackpackItems(userId: $userId)));
     }
 
+    public function character(Request $request, TelegramReadService $read): JsonResponse
+    {
+        $userId = $request->attributes->get('telegram.account')->userId;
+
+        return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
+            'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
+            'character' => $read->character(userId: $userId),
+        ]));
+    }
+
+    public function auction(Request $request, TelegramReadService $read): JsonResponse
+    {
+        $input = $request->validate(['page' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
+        $userId = $request->attributes->get('telegram.account')->userId;
+
+        return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
+            'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
+            'character' => $read->character(userId: $userId),
+        ] + $read->listings(userId: $userId, type: 'auction', page: (int) ($input['page'] ?? 1), perPage: 10)));
+    }
+
     /** @return array<string, string> */
     private function labels(): array
     {
         $labels = [];
         foreach (['backpack', 'backpack_empty', 'mini_app_open_from_bot', 'mini_app_session_expired', 'mini_app_loading',
             'mini_app_load_failed', 'mini_app_refresh', 'mini_app_empty', 'mini_app_quantity', 'mini_app_type',
-            'mini_app_upgrade', 'mini_app_open', 'previous', 'next', 'account_unavailable', 'not_linked'] as $key) {
+            'mini_app_upgrade', 'mini_app_open', 'previous', 'next', 'account_unavailable', 'not_linked',
+            'character', 'coins', 'mini_app_bag', 'mini_app_auction', 'mini_app_navigation', 'mini_app_level',
+            'mini_app_money', 'mini_app_diamonds', 'mini_app_own_lots', 'mini_app_no_lots', 'mini_app_lot',
+            'mini_app_total_price', 'mini_app_unit_price', 'mini_app_market_page'] as $key) {
             $labels[$key] = __('telegram.'.$key);
         }
 

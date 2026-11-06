@@ -17,7 +17,7 @@ final class EloquentOwnMarketListingsReader implements OwnMarketListingsReader
         return Auction::query()->where('user_id', $userId)->where('count', '>', 0)
             ->with([
                 'item' => static fn (BelongsTo $query): BelongsTo => $query->select(['id', 'share_item_id', 'upgrade_lvl']),
-                'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name']),
+                'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name', 'image', 'rarity']),
             ])->orderByDesc('id')->paginate(perPage: $perPage, page: $page)
             ->through(static function (Auction $lot): array {
                 $level = (int) ($lot->item?->upgrade_lvl ?? 0);
@@ -26,6 +26,8 @@ final class EloquentOwnMarketListingsReader implements OwnMarketListingsReader
                     'id' => (int) $lot->id, 'structure_id' => $lot->structure_id,
                     'item_id' => (int) $lot->item_id, 'share_item_id' => $lot->item?->share_item_id,
                     'name' => ($lot->item?->itemInfo?->name ?? '—').($level > 0 ? ' +'.$level : ''),
+                    'image_url' => asset($lot->item?->itemInfo?->image ?: 'img/bg/empty_slot.gif'),
+                    'rarity' => $lot->item?->itemInfo?->rarity?->value, 'upgrade_level' => $level,
                     'quantity' => (int) $lot->count, 'total_price' => (int) $lot->price,
                     'unit_price' => round($lot->price / $lot->count, 2),
                     'created_at' => $lot->created_at?->toIso8601String(),

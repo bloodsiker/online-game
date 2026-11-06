@@ -11,6 +11,7 @@
 </head>
 <body>
 <main class="telegram-backpack" id="telegram-backpack-app" data-endpoint="{{ route('telegram.mini-app.backpack', absolute: false) }}"
+      data-character-endpoint="{{ route('telegram.mini-app.character', absolute: false) }}" data-auction-endpoint="{{ route('telegram.mini-app.auction', absolute: false) }}"
       data-translations="{{ json_encode($labels) }}" data-default-image="{{ asset('img/bg/empty_slot.gif') }}">
     <div class="telegram-backpack__toolbar" id="telegram-backpack-toolbar">
         <header class="telegram-backpack__header">
@@ -30,10 +31,49 @@
     <p class="telegram-backpack__bot" id="telegram-backpack-bot" hidden>
         <a href="https://t.me/{{ config('telegram.bot_username') }}" target="_blank" rel="noopener noreferrer">{{ __('telegram.open_bot') }}</a>
     </p>
-    <section class="telegram-backpack__panel" aria-labelledby="telegram-backpack-title">
+    <section class="telegram-backpack__panel" id="telegram-backpack-inventory" aria-labelledby="telegram-backpack-title">
         <div id="telegram-backpack-items" aria-busy="true"></div>
         <p class="telegram-backpack__empty" id="telegram-backpack-empty" hidden>{{ __('telegram.mini_app_empty') }}</p>
     </section>
+    <section class="telegram-backpack__panel" id="telegram-backpack-profile" aria-labelledby="telegram-backpack-title" hidden>
+        <div id="telegram-backpack-profile-content" hidden>
+            <div class="telegram-profile__identity">
+                <span class="telegram-profile__icon" aria-hidden="true">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/></svg>
+                </span>
+                <h2 id="telegram-backpack-profile-name"></h2>
+                <p><span data-telegram-label="mini_app_level">{{ __('telegram.mini_app_level') }}</span> <b id="telegram-backpack-profile-level"></b></p>
+            </div>
+            <div class="telegram-profile__balances">
+                <div><span data-telegram-label="mini_app_money">{{ __('telegram.mini_app_money') }}</span><b><img src="{{ asset('img/icon/m_game.gif') }}" width="14" height="14" alt=""> <span id="telegram-backpack-profile-money"></span></b></div>
+                <div><span data-telegram-label="mini_app_diamonds">{{ __('telegram.mini_app_diamonds') }}</span><b><img src="{{ asset('img/icon/m_dmd.gif') }}" width="14" height="14" alt=""> <span id="telegram-backpack-profile-diamonds"></span></b></div>
+            </div>
+        </div>
+    </section>
+    <section class="telegram-backpack__panel" id="telegram-backpack-auction" aria-labelledby="telegram-backpack-title" hidden>
+        <h2 class="telegram-market__heading" data-telegram-label="mini_app_own_lots">{{ __('telegram.mini_app_own_lots') }}</h2>
+        <div class="telegram-market__lots" id="telegram-backpack-lots"></div>
+        <p class="telegram-backpack__empty" id="telegram-backpack-lots-empty" hidden data-telegram-label="mini_app_no_lots">{{ __('telegram.mini_app_no_lots') }}</p>
+        <div class="telegram-market__pagination" id="telegram-backpack-lots-pagination" hidden>
+            <button type="button" id="telegram-backpack-lots-previous" data-telegram-label="previous" disabled>{{ __('telegram.previous') }}</button>
+            <span id="telegram-backpack-lots-page" role="status" aria-live="polite"></span>
+            <button type="button" id="telegram-backpack-lots-next" data-telegram-label="next" disabled>{{ __('telegram.next') }}</button>
+        </div>
+    </section>
+    <nav class="telegram-app-navigation" id="telegram-backpack-navigation" aria-label="{{ __('telegram.mini_app_navigation') }}">
+        <button type="button" data-view="character">
+            <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span>
+            <span data-telegram-label="character">{{ __('telegram.character') }}</span>
+        </button>
+        <button type="button" data-view="backpack" aria-current="page">
+            <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="17" rx="4"/><path d="M8 5V4a4 4 0 0 1 8 0v1M8 14h8v5H8zM7 10h10"/></svg></span>
+            <span data-telegram-label="mini_app_bag">{{ __('telegram.mini_app_bag') }}</span>
+        </button>
+        <button type="button" data-view="auction">
+            <span class="telegram-app-navigation__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 4 6 6-4 4-6-6zM3 21l10-10M11 3l2-2 9 9-2 2M13 22h9M15 19h5v3h-5z"/></svg></span>
+            <span data-telegram-label="mini_app_auction">{{ __('telegram.mini_app_auction') }}</span>
+        </button>
+    </nav>
 </main>
 <dialog class="telegram-backpack-detail" id="telegram-backpack-detail" aria-labelledby="telegram-backpack-detail-name">
     <div class="telegram-backpack-detail__picture"><img id="telegram-backpack-detail-image" width="80" height="80" alt=""></div>

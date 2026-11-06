@@ -15,8 +15,12 @@ Route::post('/telegram/webhook', TelegramWebhookController::class)
     ->middleware([AuthenticateTelegramWebhook::class, 'throttle:telegram-webhook'])->name('telegram.webhook');
 
 Route::get('/telegram/backpack', [TelegramMiniAppController::class, 'show'])->name('telegram.backpack.app');
-Route::get('/api/v1/telegram/mini-app/backpack', [TelegramMiniAppController::class, 'backpack'])
-    ->middleware([AuthenticateTelegramMiniApp::class, 'throttle:telegram-mini-app'])->name('telegram.mini-app.backpack');
+Route::prefix('api/v1/telegram/mini-app')->name('telegram.mini-app.')
+    ->middleware([AuthenticateTelegramMiniApp::class, 'throttle:telegram-mini-app'])->group(function (): void {
+        Route::get('/backpack', [TelegramMiniAppController::class, 'backpack'])->name('backpack');
+        Route::get('/character', [TelegramMiniAppController::class, 'character'])->name('character');
+        Route::get('/auction-lots', [TelegramMiniAppController::class, 'auction'])->name('auction');
+    });
 
 Route::get('/telegram/backpack/preview/{token}', TelegramBackpackPreviewController::class)
     ->where('token', '[a-f0-9]{48}')->middleware(['signed', 'throttle:120,1'])->name('telegram.backpack.preview');
