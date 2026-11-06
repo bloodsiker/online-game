@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Telegram\Presentation\Http;
 
 use App\Modules\Telegram\Application\Services\TelegramReadService;
-use App\Modules\Telegram\Presentation\Http\Requests\TelegramBackpackRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,14 +24,14 @@ final class TelegramMiniAppController
                 'Content-Security-Policy' => "frame-ancestors 'self' https://web.telegram.org https://*.telegram.org; base-uri 'self'"]));
     }
 
-    public function backpack(TelegramBackpackRequest $request, TelegramReadService $read): JsonResponse
+    public function backpack(Request $request, TelegramReadService $read): JsonResponse
     {
         $userId = $request->attributes->get('telegram.account')->userId;
 
         return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
             'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
             'character' => $read->character(userId: $userId),
-        ] + $read->backpack(userId: $userId, category: $request->category(), page: $request->pageNumber(), perPage: $request->pageSize())));
+        ] + $read->allBackpackItems(userId: $userId)));
     }
 
     /** @return array<string, string> */
@@ -40,7 +39,7 @@ final class TelegramMiniAppController
     {
         $labels = [];
         foreach (['backpack', 'backpack_empty', 'mini_app_open_from_bot', 'mini_app_session_expired', 'mini_app_loading',
-            'mini_app_load_failed', 'mini_app_refresh', 'mini_app_page', 'mini_app_quantity', 'mini_app_type',
+            'mini_app_load_failed', 'mini_app_refresh', 'mini_app_empty', 'mini_app_quantity', 'mini_app_type',
             'mini_app_upgrade', 'mini_app_open', 'previous', 'next', 'account_unavailable', 'not_linked'] as $key) {
             $labels[$key] = __('telegram.'.$key);
         }

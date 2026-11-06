@@ -190,22 +190,53 @@ final class TelegramIntegrationTest extends TestCase
         $this->actingAs($user)->getJson(route('telegram.mini-app.backpack'))->assertUnauthorized();
     }
 
-    public function test_mini_app_returns_only_bound_users_items_with_individual_icons_and_pagination(): void
+    public function test_mini_app_returns_all_own_items_grouped_by_category_without_pagination(): void
     {
         $this->link();
         $this->backpackFixtures();
+        // More than the server API's maximum page size, to catch accidental truncation.
+        foreach (range(20, 79) as $id) {
+            DB::table('items')->insert(['id' => $id, 'share_item_id' => 1]);
+            DB::table('backpacks')->insert(['id' => $id, 'user_id' => 1, 'item_id' => $id, 'count' => 2]);
+        }
         $headers = $this->miniAppHeaders(extra: ['signature' => 'test-signature-field']);
-        $response = $this->getJson(route('telegram.mini-app.backpack', ['user_id' => 2, 'telegram_user_id' => 20002]), $headers)
-            ->assertOk()->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
-            ->assertJsonPath('data.0.quantity', 500)->assertJsonPath('meta.total', 10)->assertJsonCount(8, 'data')
+        $response = $this->getJson(route('telegram.mini-app.backpack', [
+            'user_id' => 2, 'telegram_user_id' => 20002, 'category' => 'artifact', 'page' => 2, 'per_page' => 8,
+        ]), $headers)->assertOk()->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
+            ->assertJsonPath('data.0.quantity', 500)->assertJsonPath('meta.total', 75)->assertJsonCount(75, 'data')
             ->assertJsonPath('data.0.image_url', asset('/storage/telegram-test/icon.png'));
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
-        $this->getJson(route('telegram.mini-app.backpack', ['page' => 2]), $headers)->assertOk()
-            ->assertJsonPath('meta.current_page', 2)->assertJsonCount(2, 'data');
-        $this->getJson(route('telegram.mini-app.backpack', ['category' => 'artifact', 'page' => 2]), $headers)->assertOk()
-            ->assertJsonPath('meta.current_page', 1)->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.upgrade_level', 2);
-        $this->getJson(route('telegram.mini-app.backpack', ['category' => 'wrong']), $headers)->assertUnprocessable();
-        $this->assertSame(19, DB::table('backpacks')->count());
+        $this->assertSame(['total' => 75], $response->json('meta'));
+        $items = collect($response->json('data'));
+        $this->assertSame(70, $items->where('category', 'main')->count());
+        foreach (['artifact', 'key', 'quest', 'gift', 'misc'] as $category) {
+            $this->assertSame(1, $items->where('category', $category)->count());
+        }
+        $this->assertSame(2, $items->firstWhere('category', 'artifact')['upgrade_level']);
+        foreach ([16, 17, 18, 19] as $excluded) {
+            $this->assertFalse($items->contains('item_id', $excluded));
+        }
+        foreach ($response->json('categories') as $category) {
+            $group = $items->where('category', $category['key']);
+            $this->assertSame($group->count(), $category['positions']);
+            $this->assertSame($group->sum('quantity'), $category['quantity']);
+        }
+        $this->assertSame(79, DB::table('backpacks')->count());
+        Http::assertNothingSent();
+    }
+
+    public function test_bot_menu_has_a_full_width_app_button_and_no_backpack_button(): void
+    {
+        $this->link();
+        $response = $this->postJson(route('telegram.webhook'), $this->update('/start'), $this->webhookHeaders())->assertOk();
+        $keyboard = $response->json('reply_markup.keyboard');
+        $this->assertSame(['Вечность app'], $keyboard[0]);
+        $this->assertNotContains('Рюкзак', array_merge(...$keyboard));
+        foreach (['Вечность app', '/app', '/backpack'] as $index => $command) {
+            $reply = $this->postJson(route('telegram.webhook'), $this->update($command, $index + 2), $this->webhookHeaders())
+                ->assertOk()->assertJsonPath('reply_markup.inline_keyboard.0.0.text', 'Вечность app');
+            $this->assertMiniAppUrl($reply->json('reply_markup.inline_keyboard.0.0.web_app.url'));
+        }
         Http::assertNothingSent();
     }
 
@@ -266,7 +297,7 @@ final class TelegramIntegrationTest extends TestCase
         $response = $this->postJson(route('telegram.webhook'), $this->callbackUpdate('bag:main:2'), $this->webhookHeaders())
             ->assertOk()->assertJsonPath('method', 'editMessageCaption')->assertJsonPath('message_id', 77)
             ->assertJsonPath('chat_id', 10001);
-        $this->assertMiniAppUrl($response->json('reply_markup.inline_keyboard.0.0.web_app.url'), page: 2);
+        $this->assertMiniAppUrl($response->json('reply_markup.inline_keyboard.0.0.web_app.url'));
         Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/answerCallbackQuery')
             && $request['callback_query_id'] === 'callback-1');
         $this->assertSame([0], $transactionLevels);
@@ -623,12 +654,12 @@ final class TelegramIntegrationTest extends TestCase
         return app(TelegramBackpackPreview::class)->create(userId: 1, telegramId: 10001, items: $page['data']);
     }
 
-    private function assertMiniAppUrl(string $url, int $page = 1): void
+    private function assertMiniAppUrl(string $url): void
     {
         $this->assertSame('https', parse_url($url, PHP_URL_SCHEME));
         $this->assertSame('/telegram/backpack', parse_url($url, PHP_URL_PATH));
         parse_str(parse_url($url, PHP_URL_QUERY), $query);
-        $this->assertSame(['category' => 'main', 'page' => (string) $page, 'lang' => 'uk'], $query);
+        $this->assertSame(['category' => 'main', 'lang' => 'uk'], $query);
     }
 
     private function backpackFixtures(): void

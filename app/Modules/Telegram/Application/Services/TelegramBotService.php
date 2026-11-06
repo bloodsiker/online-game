@@ -84,8 +84,11 @@ final class TelegramBotService
                 } elseif (in_array($message['text'], [__('telegram.backpack', locale: 'ru'), __('telegram.backpack', locale: 'uk')], true)) {
                     $command = '/backpack';
                     unset($parts[1], $parts[2]);
+                } elseif (in_array($message['text'], [__('telegram.app', locale: 'ru'), __('telegram.app', locale: 'uk')], true)) {
+                    $command = '/app';
+                    unset($parts[1], $parts[2]);
                 }
-                if ($command === '/backpack') {
+                if (in_array($command, ['/app', '/backpack'], true)) {
                     $category = BackpackCategory::tryFrom($parts[1] ?? 'main');
                     $page = $parts[2] ?? '1';
                     if (! $category || ! ctype_digit($page) || (int) $page < 1 || (int) $page > 100000) {
@@ -134,7 +137,7 @@ final class TelegramBotService
     {
         $result = ['method' => 'sendMessage', 'chat_id' => $chatId, 'text' => $text, 'parse_mode' => 'HTML'];
         if ($menu) {
-            $result['reply_markup'] = ['keyboard' => [[__('telegram.character'), __('telegram.backpack')], [__('telegram.auction'), __('telegram.exchange')]], 'resize_keyboard' => true];
+            $result['reply_markup'] = ['keyboard' => [[__('telegram.app')], [__('telegram.character')], [__('telegram.auction'), __('telegram.exchange')]], 'resize_keyboard' => true];
         } else {
             $result['reply_markup'] = ['remove_keyboard' => true];
         }

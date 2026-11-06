@@ -12,31 +12,28 @@
 <body>
 <main class="telegram-backpack" id="telegram-backpack-app" data-endpoint="{{ route('telegram.mini-app.backpack', absolute: false) }}"
       data-translations="{{ json_encode($labels) }}" data-default-image="{{ asset('img/bg/empty_slot.gif') }}">
-    <header class="telegram-backpack__header">
-        <div><h1 id="telegram-backpack-title">{{ __('telegram.backpack') }}</h1><p id="telegram-backpack-character" hidden></p></div>
-        <div class="telegram-backpack__actions">
-            <button type="button" id="telegram-backpack-refresh" aria-label="{{ __('telegram.mini_app_refresh') }}" title="{{ __('telegram.mini_app_refresh') }}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></svg>
-            </button>
-            <button type="button" id="telegram-backpack-close" aria-label="{{ __('ui.close') }}" title="{{ __('ui.close') }}" hidden>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
-            </button>
-        </div>
-    </header>
-    <nav class="telegram-backpack__categories" id="telegram-backpack-categories" aria-label="{{ __('telegram.backpack') }}"></nav>
+    <div class="telegram-backpack__toolbar" id="telegram-backpack-toolbar">
+        <header class="telegram-backpack__header">
+            <div><h1 id="telegram-backpack-title">{{ __('telegram.backpack') }}</h1><p id="telegram-backpack-character" hidden></p></div>
+            <div class="telegram-backpack__actions">
+                <button type="button" id="telegram-backpack-refresh" aria-label="{{ __('telegram.mini_app_refresh') }}" title="{{ __('telegram.mini_app_refresh') }}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></svg>
+                </button>
+                <button type="button" id="telegram-backpack-close" aria-label="{{ __('ui.close') }}" title="{{ __('ui.close') }}" hidden>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+                </button>
+            </div>
+        </header>
+        <nav class="telegram-backpack__categories" id="telegram-backpack-categories" aria-label="{{ __('telegram.backpack') }}"></nav>
+    </div>
     <p class="telegram-backpack__message" id="telegram-backpack-message" role="status" aria-live="polite" hidden></p>
     <p class="telegram-backpack__bot" id="telegram-backpack-bot" hidden>
         <a href="https://t.me/{{ config('telegram.bot_username') }}" target="_blank" rel="noopener noreferrer">{{ __('telegram.open_bot') }}</a>
     </p>
     <section class="telegram-backpack__panel" aria-labelledby="telegram-backpack-title">
-        <div class="telegram-backpack__grid" id="telegram-backpack-items" aria-busy="true"></div>
-        <p class="telegram-backpack__empty" id="telegram-backpack-empty" hidden>{{ __('telegram.backpack_empty') }}</p>
+        <div id="telegram-backpack-items" aria-busy="true"></div>
+        <p class="telegram-backpack__empty" id="telegram-backpack-empty" hidden>{{ __('telegram.mini_app_empty') }}</p>
     </section>
-    <footer class="telegram-backpack__pagination">
-        <button type="button" id="telegram-backpack-previous" disabled>← {{ __('telegram.previous') }}</button>
-        <span id="telegram-backpack-page" role="status" aria-live="polite"></span>
-        <button type="button" id="telegram-backpack-next" disabled>{{ __('telegram.next') }} →</button>
-    </footer>
 </main>
 <dialog class="telegram-backpack-detail" id="telegram-backpack-detail" aria-labelledby="telegram-backpack-detail-name">
     <div class="telegram-backpack-detail__picture"><img id="telegram-backpack-detail-image" width="80" height="80" alt=""></div>

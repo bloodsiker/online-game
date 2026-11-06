@@ -43,6 +43,14 @@ final class TelegramReadService
         ));
     }
 
+    /** @return array{categories: list<array<string, mixed>>, data: list<array<string, mixed>>, meta: array{total: int}} */
+    public function allBackpackItems(int $userId): array
+    {
+        $this->character(userId: $userId);
+
+        return $this->withLocale($this->locale(userId: $userId), fn (): array => $this->backpack->all(userId: $userId));
+    }
+
     /** @return array{data: list<array<string, mixed>>, meta: array<string, int>} */
     public function listings(int $userId, string $type, int $page = 1, int $perPage = 10): array
     {

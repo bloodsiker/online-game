@@ -23,10 +23,10 @@ final class TelegramBackpackBotService
     /** @return array<string, mixed> */
     public function pageReply(int $userId, int $chatId, BackpackCategory $category = BackpackCategory::MAIN, int $page = 1, ?int $messageId = null): array
     {
-        return $this->withLocale($this->read->locale(userId: $userId), function () use ($userId, $chatId, $category, $page, $messageId): array {
+        return $this->withLocale($this->read->locale(userId: $userId), function () use ($userId, $chatId, $category, $messageId): array {
             $this->read->character(userId: $userId);
             $keyboard = ['inline_keyboard' => [[['text' => __('telegram.mini_app_open'), 'web_app' => [
-                'url' => secure_url(route('telegram.backpack.app', ['category' => $category->value, 'page' => $page, 'lang' => app()->getLocale()], absolute: false)),
+                'url' => secure_url(route('telegram.backpack.app', ['category' => $category->value, 'lang' => app()->getLocale()], absolute: false)),
             ]]]]];
             $text = __('telegram.mini_app_intro');
             if ($messageId !== null) {

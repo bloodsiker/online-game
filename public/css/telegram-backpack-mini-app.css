@@ -1,19 +1,19 @@
 :root {
     color-scheme: light;
     font: 14px/1.45 Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    --md-background: #f7f5fa;
-    --md-surface: #ffffff;
-    --md-surface-container: #eeebf3;
-    --md-on-surface: #1d1b20;
-    --md-on-surface-variant: #625d6b;
-    --md-primary: #6750a4;
+    --md-background: #fff3dc;
+    --md-surface: #fffaf0;
+    --md-surface-container: #ffedca;
+    --md-on-surface: #4d321d;
+    --md-on-surface-variant: #896444;
+    --md-primary: #a85816;
     --md-on-primary: #ffffff;
-    --md-primary-container: #eaddff;
-    --md-on-primary-container: #352052;
-    --md-outline: #ddd8e3;
+    --md-primary-container: #ffdf9c;
+    --md-on-primary-container: #63360f;
+    --md-outline: #efd1a2;
     --md-error-container: #fce9e7;
     --md-error: #9f251d;
-    --md-shadow: 0 1px 3px #21182c0b, 0 2px 6px #21182c05;
+    --md-shadow: 0 1px 3px #9b57100b, 0 2px 6px #9b571005;
     color: var(--md-on-surface);
     background: var(--md-background);
 }
@@ -39,7 +39,7 @@ button {
     touch-action: manipulation;
 }
 button:hover:not(:disabled) { background: var(--md-primary-container); }
-button:active:not(:disabled) { box-shadow: inset 0 0 0 40px #6750a415; }
+button:active:not(:disabled) { box-shadow: inset 0 0 0 40px #a8581615; }
 button:disabled { opacity: .38; cursor: default; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 3px; }
 [hidden] { display: none !important; }
@@ -52,7 +52,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--md-primary); ou
 .telegram-backpack__actions button { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; background: transparent; color: var(--md-on-surface-variant); border-radius: 50%; }
 .telegram-backpack__actions svg { display: block; }
 .is-loading #telegram-backpack-refresh svg { animation: telegram-refresh 1s linear infinite; }
-.telegram-backpack__categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.telegram-backpack__toolbar { position: sticky; top: 0; z-index: 2; padding: 8px 0 12px; background: var(--md-background); }
+.telegram-backpack__category { margin: 0 0 24px; scroll-margin-top: var(--toolbar-height, 180px); }
+.telegram-backpack__category h2 { margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--md-outline); font-size: 16px; font-weight: 600; color: var(--md-primary); }
+.telegram-backpack__categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
 .telegram-backpack__categories button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 10px; border: 1px solid var(--md-outline); border-radius: 12px; background: transparent; color: var(--md-on-surface-variant); font-size: 12px; }
 .telegram-backpack__categories button[aria-pressed="true"] { border-color: transparent; background: var(--md-primary-container); color: var(--md-on-primary-container); }
 .telegram-backpack__category-count { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 7px; background: var(--md-surface-container); font-size: 10px; font-weight: 600; }
@@ -64,10 +67,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--md-primary); ou
 .telegram-backpack__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; transition: opacity .16s; }
 .is-loading .telegram-backpack__grid { opacity: .6; }
 .telegram-backpack__item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; padding: 12px 6px; border: 1px solid transparent; border-radius: 16px; background: var(--md-surface); box-shadow: var(--md-shadow); color: inherit; }
-.telegram-backpack__item:hover:not(:disabled) { background: var(--md-surface); border-color: var(--md-outline); box-shadow: 0 3px 10px #21182c14; }
+.telegram-backpack__item:hover:not(:disabled) { background: var(--md-surface); border-color: var(--md-outline); box-shadow: 0 3px 10px #9b571014; }
 .telegram-backpack__icon { display: block; position: relative; width: 60px; height: 60px; flex: 0 0 60px; border-radius: 10px; background: var(--md-surface-container); }
 .telegram-backpack__icon img { display: block; width: 60px; height: 60px; border-radius: 10px; object-fit: contain; }
-.telegram-backpack__quantity { position: absolute; z-index: 1; right: -4px; bottom: -4px; min-width: 20px; max-width: 64px; padding: 1px 5px; border: 2px solid var(--md-surface); border-radius: 9px; background: #34313b; color: #ffffff; font-size: 10px; font-weight: 600; line-height: 15px; overflow-wrap: anywhere; }
+.telegram-backpack__quantity { position: absolute; z-index: 1; right: -4px; bottom: -4px; min-width: 20px; max-width: 64px; padding: 1px 5px; border: 2px solid var(--md-surface); border-radius: 9px; background: #845021; color: #ffffff; font-size: 10px; font-weight: 600; line-height: 15px; overflow-wrap: anywhere; }
 .telegram-backpack__upgrade { position: absolute; z-index: 1; left: -4px; top: -4px; padding: 1px 5px; border: 2px solid var(--md-surface); border-radius: 8px; color: var(--md-on-primary); background: var(--md-primary); font-size: 10px; font-weight: 600; }
 .telegram-backpack__name { width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; text-align: center; font-size: 11px; font-weight: 500; line-height: 1.4; min-height: 31px; }
 .rarity-common { color: #67636e; }
@@ -77,66 +80,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--md-primary); ou
 .rarity-legendary { color: #b3261e; }
 .rarity-heroic { color: #995c00; }
 .telegram-backpack__empty { margin: 0; padding: 32px 16px; border-radius: 20px; background: var(--md-surface); color: var(--md-on-surface-variant); text-align: center; font-size: 13px; }
-.telegram-backpack__pagination { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 20px; padding: 12px 0 0; border-top: 1px solid var(--md-outline); }
-.telegram-backpack__pagination button { flex-shrink: 0; font-size: 12px; padding-inline: 13px; }
-#telegram-backpack-next { background: var(--md-primary); color: var(--md-on-primary); }
-#telegram-backpack-next:hover:not(:disabled) { box-shadow: 0 2px 6px #6750a430; }
-.telegram-backpack__pagination span { color: var(--md-on-surface-variant); text-align: center; font-size: 11px; line-height: 1.4; }
-.telegram-backpack-detail { width: 340px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 0; border-radius: 28px; background: var(--md-surface); color: var(--md-on-surface); text-align: center; box-shadow: 0 12px 40px #17131d40; }
-.telegram-backpack-detail::backdrop { background: #19151f80; backdrop-filter: blur(2px); }
+.telegram-backpack-detail { width: 340px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 0; border-radius: 28px; background: var(--md-surface); color: var(--md-on-surface); text-align: center; box-shadow: 0 12px 40px #663b1640; }
+.telegram-backpack-detail::backdrop { background: #44270f80; backdrop-filter: blur(2px); }
 .telegram-backpack-detail h2 { margin: 20px 0 14px; font-size: 20px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
 .telegram-backpack-detail p { margin: 8px 0; font-size: 13px; color: var(--md-on-surface-variant); }
 .telegram-backpack-detail__picture { width: 80px; height: 80px; margin: 0 auto; border-radius: 16px; background: var(--md-surface-container); }
 .telegram-backpack-detail__picture img { display: block; object-fit: contain; border-radius: 16px; }
 .telegram-backpack-detail button { margin-top: 20px; min-width: 112px; background: var(--md-primary); color: var(--md-on-primary); }
-:root[data-theme="dark"] {
-    color-scheme: dark;
-    --md-background: #141218;
-    --md-surface: #211e26;
-    --md-surface-container: #2c2832;
-    --md-on-surface: #e8e0eb;
-    --md-on-surface-variant: #c5bdce;
-    --md-primary: #d0bcff;
-    --md-on-primary: #381e72;
-    --md-primary-container: #4f378b;
-    --md-on-primary-container: #eaddff;
-    --md-outline: #443f4c;
-    --md-error-container: #49302e;
-    --md-error: #ffb4ab;
-    --md-shadow: 0 2px 6px #00000018;
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        color-scheme: dark;
-        --md-background: #141218;
-        --md-surface: #211e26;
-        --md-surface-container: #2c2832;
-        --md-on-surface: #e8e0eb;
-        --md-on-surface-variant: #c5bdce;
-        --md-primary: #d0bcff;
-        --md-on-primary: #381e72;
-        --md-primary-container: #4f378b;
-        --md-on-primary-container: #eaddff;
-        --md-outline: #443f4c;
-        --md-error-container: #49302e;
-        --md-error: #ffb4ab;
-        --md-shadow: 0 2px 6px #00000018;
-    }
-}
-:root[data-theme="dark"] .rarity-common { color: #c5bdce; }
-:root[data-theme="dark"] .rarity-uncommon { color: #8bce8d; }
-:root[data-theme="dark"] .rarity-rare { color: #a9b8ff; }
-:root[data-theme="dark"] .rarity-epic { color: #e8a8eb; }
-:root[data-theme="dark"] .rarity-legendary { color: #ffb4ab; }
-:root[data-theme="dark"] .rarity-heroic { color: #edc274; }
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .rarity-common { color: #c5bdce; }
-    :root:not([data-theme="light"]) .rarity-uncommon { color: #8bce8d; }
-    :root:not([data-theme="light"]) .rarity-rare { color: #a9b8ff; }
-    :root:not([data-theme="light"]) .rarity-epic { color: #e8a8eb; }
-    :root:not([data-theme="light"]) .rarity-legendary { color: #ffb4ab; }
-    :root:not([data-theme="light"]) .rarity-heroic { color: #edc274; }
-}
 @keyframes telegram-refresh { to { transform: rotate(360deg); } }
-@media (max-width: 359px) { .telegram-backpack__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .telegram-backpack__pagination button { padding-inline: 10px; } }
+@media (max-width: 359px) { .telegram-backpack__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
