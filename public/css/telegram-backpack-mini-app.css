@@ -22,8 +22,10 @@
 body {
     margin: 0;
     padding: max(16px, var(--tg-content-safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right)) calc(104px + max(env(safe-area-inset-bottom), var(--tg-content-safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left));
-    background: var(--app-gradient);
-    background-attachment: fixed;
+    background-color: #fff7e8;
+    background-image: var(--app-gradient);
+    background-size: 100% var(--tg-viewport-stable-height, 100dvh);
+    background-repeat: no-repeat;
     min-height: var(--tg-viewport-stable-height, 100dvh);
     overflow-x: clip;
 }
@@ -62,13 +64,16 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--md-primary); ou
     width: 100vw;
     margin-left: calc(50% - 50vw);
     padding: 8px max(16px, calc((100vw - 560px) / 2), env(safe-area-inset-right)) 12px max(16px, calc((100vw - 560px) / 2), env(safe-area-inset-left));
-    background: var(--app-gradient);
-    background-attachment: fixed;
+    /* Keep an opaque background when mobile WebViews repaint the sticky panel. */
+    background-color: #ffdda5;
+    background-image: var(--app-gradient);
+    background-size: 100% var(--tg-viewport-stable-height, 100dvh);
+    background-repeat: no-repeat;
 }
 .telegram-backpack__category { margin: 0 0 24px; scroll-margin-top: var(--toolbar-height, 180px); }
 .telegram-backpack__category h2 { margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--md-outline); font-size: 16px; font-weight: 600; color: var(--md-primary); }
 .telegram-backpack__categories { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
-.telegram-backpack__categories button { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 10px; border: 1px solid var(--md-outline); border-radius: 12px; background: transparent; color: var(--md-on-surface-variant); font-size: 12px; }
+.telegram-backpack__categories button { -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 10px; border: 1px solid var(--md-outline); border-radius: 12px; background: transparent; color: var(--md-on-surface-variant); font-size: 12px; }
 .telegram-backpack__categories button[aria-pressed="true"] { border-color: transparent; background: var(--md-primary-container); color: var(--md-on-primary-container); }
 .telegram-backpack__category-count { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 7px; background: var(--md-surface-container); font-size: 10px; font-weight: 600; }
 .telegram-backpack__categories button[aria-pressed="true"] .telegram-backpack__category-count { background: var(--md-primary); color: var(--md-on-primary); }

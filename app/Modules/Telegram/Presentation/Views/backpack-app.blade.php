@@ -7,14 +7,13 @@
     <title>{{ __('telegram.backpack') }}</title>
     <link rel="stylesheet" href="{{ asset('css/telegram-backpack-mini-app.css') }}?v={{ filemtime(public_path('css/telegram-backpack-mini-app.css')) }}">
     <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
-    <script src="{{ asset('js/telegram-chat-mini-app.js') }}?v={{ filemtime(public_path('js/telegram-chat-mini-app.js')) }}" defer></script>
-    <script src="{{ asset('js/telegram-backpack-mini-app.js') }}?v={{ filemtime(public_path('js/telegram-backpack-mini-app.js')) }}" defer></script>
+    @vite('resources/js/mini-app/game.js')
 </head>
 <body>
 <main class="telegram-backpack" id="telegram-backpack-app" data-endpoint="{{ route('telegram.mini-app.backpack', absolute: false) }}"
       data-character-endpoint="{{ route('telegram.mini-app.character', absolute: false) }}" data-auction-endpoint="{{ route('telegram.mini-app.auction', absolute: false) }}"
       data-chat-messages="{{ route('telegram.mini-app.chat.messages', absolute: false) }}" data-chat-send="{{ route('telegram.mini-app.chat.send', absolute: false) }}"
-      data-chat-auth="{{ route('telegram.mini-app.chat.auth', absolute: false) }}" data-chat-realtime="{{ Vite::asset('resources/js/telegram-chat-realtime.js') }}"
+      data-chat-auth="{{ route('telegram.mini-app.chat.auth', absolute: false) }}" data-chat-realtime="{{ Vite::asset('resources/js/mini-app/chat-realtime.js') }}"
       data-reputations-endpoint="{{ route('telegram.mini-app.reputations', absolute: false) }}" data-influences-endpoint="{{ route('telegram.mini-app.influences', absolute: false) }}"
       data-online-endpoint="{{ route('telegram.mini-app.online', absolute: false) }}" data-online-count-endpoint="{{ route('telegram.mini-app.online-count', absolute: false) }}"
       data-default-avatar="{{ asset('img/avatar/dark_elf.jpg') }}"

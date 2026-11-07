@@ -1,3 +1,5 @@
+import './chat.js';
+
 (() => {
     const root = document.getElementById('telegram-backpack-app');
     if (!root) return;
@@ -229,7 +231,16 @@
                 const clan = document.createElement('img'); clan.width = clan.height = 16; clan.src = imageUrl(player.clan_icon); clan.alt = player.clan_name || ''; row.append(clan);
             }
             const name = document.createElement('a'); const url = new URL(player.profile_url, location.href);
-            if (['http:', 'https:'].includes(url.protocol) && url.origin === location.origin) { name.href = url.href; name.target = '_blank'; name.rel = 'noopener noreferrer'; }
+            if (['http:', 'https:'].includes(url.protocol) && url.origin === location.origin) {
+                name.href = url.href; name.target = '_blank'; name.rel = 'noopener noreferrer';
+                name.addEventListener('click', event => {
+                    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || typeof webApp?.openLink !== 'function') return;
+                    try {
+                        webApp.openLink(url.href);
+                        event.preventDefault();
+                    } catch (error) { /* Fall back to the regular link if the Telegram client cannot open it. */ }
+                });
+            }
             name.textContent = player.name + ' [' + player.level + ']'; row.append(name);
             if (player.clan_name) { const clanName = document.createElement('small'); clanName.textContent = player.clan_name; row.append(clanName); }
             list.append(row);

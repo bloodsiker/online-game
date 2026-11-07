@@ -130,7 +130,7 @@
     @if($tab === 'game')
         @include('interface::partials.change-password-modal')
         <script src="{{ asset('js/change-password-modal.js') }}?v={{ filemtime(public_path('js/change-password-modal.js')) }}" defer></script>
-        <script src="{{ asset('js/telegram-link-modal.js') }}?v={{ filemtime(public_path('js/telegram-link-modal.js')) }}" defer></script>
+        @vite('resources/js/mini-app/link-modal.js')
         <script src="{{ asset('js/settings-tooltips.js') }}?v={{ filemtime(public_path('js/settings-tooltips.js')) }}" defer></script>
         <script src="{{ asset('js/notification-sounds.js') }}?v={{ filemtime(public_path('js/notification-sounds.js')) }}" data-sound-base="{{ asset('audio/notifications') }}/" defer></script>
     @endif
