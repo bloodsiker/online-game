@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Modules\Chat;
 
 use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
-use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Listeners\SendChatMuteSystemMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Domain\Models\ChatMessage;
 use App\Modules\Moderation\Domain\Events\ChatMuteImposed;

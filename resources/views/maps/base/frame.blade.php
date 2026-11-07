@@ -243,3 +243,5 @@
 </table>
 
 @include('maps.partials.frame-script')
+
+@include('maps.partials.live-players')

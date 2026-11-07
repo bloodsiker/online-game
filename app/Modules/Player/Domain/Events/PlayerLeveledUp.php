@@ -10,6 +10,7 @@ use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+/** Post-commit notifications/rewards only; level-dependent stats are applied via PlayerLevelChanged. */
 class PlayerLeveledUp implements ShouldDispatchAfterCommit
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;

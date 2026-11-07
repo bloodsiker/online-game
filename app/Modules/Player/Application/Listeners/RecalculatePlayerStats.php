@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules\Player\Application\Listeners;
 
 use App\Modules\Player\Domain\Events\PlayerChangeStat;
-use App\Modules\Player\Domain\Events\PlayerLeveledUp;
+use App\Modules\Player\Domain\Events\PlayerLevelChanged;
 use App\Modules\Player\Infrastructure\Persistence\Models\Experience;
 
 class RecalculatePlayerStats
@@ -19,7 +21,7 @@ class RecalculatePlayerStats
     /**
      * Handle the event.
      */
-    public function handle(PlayerLeveledUp $event): void
+    public function handle(PlayerLevelChanged $event): void
     {
         $player = $event->player;
         $race = $player->race;

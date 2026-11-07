@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Telegram;
 
+use App\Modules\Interface\Domain\Contracts\OnlinePlayersReader;
+use App\Modules\Interface\Infrastructure\Persistence\EloquentOnlinePlayersReader;
 use App\Modules\Structure\Auction\Domain\Contracts\OwnMarketListingsReader;
 use App\Modules\Structure\Auction\Infrastructure\Persistence\EloquentOwnMarketListingsReader;
 use App\Modules\Telegram\Domain\Contracts\BackpackPreviewRenderer;
@@ -16,8 +18,10 @@ use App\Modules\Telegram\Infrastructure\Persistence\DatabaseTelegramUpdateReposi
 use App\Modules\Telegram\Infrastructure\TelegramCallbackAcknowledger;
 use App\Modules\Telegram\Presentation\Console\ConfigureTelegramWebhook;
 use App\Modules\Telegram\Presentation\Console\PruneTelegramUpdates;
+use App\Modules\User\Domain\Contracts\CharacterDetailsReader;
 use App\Modules\User\Domain\Contracts\CharacterSummaryReader;
 use App\Modules\User\Infrastructure\Persistence\DatabaseCharacterSummaryReader;
+use App\Modules\User\Infrastructure\Persistence\EloquentCharacterDetailsReader;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
@@ -33,6 +37,8 @@ final class TelegramServiceProvider extends ServiceProvider
         $this->app->bind(TelegramUpdateRepository::class, DatabaseTelegramUpdateRepository::class);
         $this->app->bind(BackpackPreviewRenderer::class, GdBackpackPreviewRenderer::class);
         $this->app->bind(TelegramCallbackResponder::class, TelegramCallbackAcknowledger::class);
+        $this->app->bind(CharacterDetailsReader::class, EloquentCharacterDetailsReader::class);
+        $this->app->bind(OnlinePlayersReader::class, EloquentOnlinePlayersReader::class);
         $this->app->bind(CharacterSummaryReader::class, DatabaseCharacterSummaryReader::class);
         $this->app->bind(OwnMarketListingsReader::class, EloquentOwnMarketListingsReader::class);
     }

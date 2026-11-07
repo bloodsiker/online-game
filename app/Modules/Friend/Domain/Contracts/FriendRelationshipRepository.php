@@ -57,5 +57,12 @@ interface FriendRelationshipRepository
      */
     public function getIgnoredUserIdsByPlayerId(int $playerId): array;
 
+    /**
+     * ID пользователей (users.id), с которыми у игрока связь данного типа.
+     *
+     * @return list<int>
+     */
+    public function getTargetUserIds(int $playerId, PlayerRelationshipType $type, ?string $status = null): array;
+
     public function isIgnoring(int $playerId, int $targetId): bool;
 }

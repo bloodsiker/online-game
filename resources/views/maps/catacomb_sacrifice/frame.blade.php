@@ -3624,3 +3624,5 @@
         }
     });
 </script>
+
+@include('maps.partials.live-players')

@@ -112,6 +112,17 @@ class EloquentFriendRelationshipRepository implements FriendRelationshipReposito
             ->all();
     }
 
+    public function getTargetUserIds(int $playerId, PlayerRelationshipType $type, ?string $status = null): array
+    {
+        return PlayerRelationship::where('player_relationships.player_id', $playerId)
+            ->where('player_relationships.type', $type)
+            ->when($status !== null, fn ($query) => $query->where('player_relationships.status', $status))
+            ->join('users', 'player_relationships.target_id', '=', 'users.player_id')
+            ->pluck('users.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
     public function isIgnoring(int $playerId, int $targetId): bool
     {
         return PlayerRelationship::where('player_id', $playerId)

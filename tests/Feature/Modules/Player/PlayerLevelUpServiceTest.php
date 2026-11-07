@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Modules\Player;
 
+use App\Modules\Battle\Application\DTOs\AttackResultDTO;
+use App\Modules\Battle\Application\Services\Combat\AttackService;
 use App\Modules\Player\Application\Listeners\RecalculatePlayerStats;
 use App\Modules\Player\Domain\Events\PlayerChangeStat;
+use App\Modules\Player\Domain\Events\PlayerLevelChanged;
 use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
@@ -105,7 +108,8 @@ class PlayerLevelUpServiceTest extends TestCase
     public function test_it_raises_each_level_with_natural_stat_gains(): void
     {
         Event::forget(PlayerLeveledUp::class);
-        Event::listen(PlayerLeveledUp::class, RecalculatePlayerStats::class);
+        Event::forget(PlayerLevelChanged::class);
+        Event::listen(PlayerLevelChanged::class, RecalculatePlayerStats::class);
         Event::fake([PlayerChangeStat::class]);
 
         $player = app(PlayerLevelUpService::class)->raiseToLevel(Player::findOrFail(1), 3);
@@ -122,5 +126,74 @@ class PlayerLevelUpServiceTest extends TestCase
         $this->assertSame(24.0, $player->endurance);
         $this->assertSame(16, $player->free_stats);
         Event::assertDispatchedTimes(PlayerChangeStat::class, 2);
+    }
+
+    private function useSynchronousProgression(array &$notifications): void
+    {
+        Event::forget(PlayerLeveledUp::class);
+        Event::listen(PlayerLeveledUp::class, static function (PlayerLeveledUp $event) use (&$notifications): void {
+            $notifications[] = ['level' => (int) $event->player->lvl, 'threshold' => (int) $event->player->exp_up];
+        });
+        Event::fake([PlayerChangeStat::class]);
+    }
+
+    public function test_battle_level_gain_updates_threshold_before_commit_and_keeps_notification_snapshots(): void
+    {
+        $notifications = [];
+        $this->useSynchronousProgression($notifications);
+        DB::beginTransaction();
+        $player = Player::query()->lockForUpdate()->findOrFail(1);
+        $player->exp = 350;
+        $result = new AttackResultDTO;
+
+        app(AttackService::class)->checkLevelUp($player, $result);
+
+        $this->assertSame(3, (int) $player->lvl);
+        $this->assertSame(600, (int) $player->exp_up);
+        $this->assertSame(350, (int) $player->exp);
+        $this->assertSame(16, (int) $player->free_stats);
+        $this->assertSame([], $notifications);
+        $this->assertStringContainsString('<b>2</b>', $result->getSideLog());
+        $this->assertStringContainsString('<b>3</b>', $result->getSideLog());
+        DB::commit();
+
+        $this->assertSame([['level' => 2, 'threshold' => 300], ['level' => 3, 'threshold' => 600]], $notifications);
+        Event::assertDispatchedTimes(PlayerChangeStat::class, 2);
+    }
+
+    public function test_rolled_back_level_gain_restores_experience_stats_and_sends_no_notifications(): void
+    {
+        $notifications = [];
+        $this->useSynchronousProgression($notifications);
+        DB::beginTransaction();
+        $player = Player::query()->lockForUpdate()->findOrFail(1);
+        $player->exp = 100;
+        app(PlayerLevelUpService::class)->raiseFromExperience($player);
+        $this->assertSame(2, (int) $player->lvl);
+        $this->assertSame(300, (int) $player->exp_up);
+        DB::rollBack();
+
+        $stored = Player::findOrFail(1);
+        $this->assertSame(1, (int) $stored->lvl);
+        $this->assertSame(0, (int) $stored->exp);
+        $this->assertSame(100, (int) $stored->exp_up);
+        $this->assertSame(0, (int) $stored->free_stats);
+        $this->assertSame([], $notifications);
+    }
+
+    public function test_maximum_configured_level_does_not_loop_or_consume_excess_experience(): void
+    {
+        $notifications = [];
+        $this->useSynchronousProgression($notifications);
+        DB::transaction(function (): void {
+            $player = Player::query()->lockForUpdate()->findOrFail(1);
+            $player->exp = 10000;
+            app(PlayerLevelUpService::class)->raiseFromExperience($player);
+            $this->assertSame(3, (int) $player->lvl);
+            $this->assertSame(10000, (int) $player->exp);
+            app(PlayerLevelUpService::class)->raiseFromExperience($player);
+            $this->assertSame(16, (int) $player->free_stats);
+        });
+        $this->assertCount(2, $notifications);
     }
 }

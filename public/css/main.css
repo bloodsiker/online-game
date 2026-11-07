@@ -385,7 +385,7 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
 
 /*******   HOT SLOT  ***********/
 .hotbar-container {
-    position: absolute;
+    position: fixed;
     min-height: 44px;
     bottom: 0;
     left: 50%;
@@ -560,6 +560,8 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
 
 
 .hotbar-drag-handle {
+    touch-action: none;
+    user-select: none;
     position: absolute;
     left: -15px;
     top: 50%;
@@ -638,17 +640,13 @@ input.input-custom[type="checkbox"]:checked + .custom-checkbox {
 }
 
 .hotbar-container.dragging {
+    z-index: 9999;
     opacity: 0.8;
     cursor: move !important;
 }
 
 .hotbar-container.dragging * {
     cursor: move !important;
-}
-
-/* КРИТИЧНО: Блокируем iframe при перетаскивании */
-#game-frame.pointer-events-none {
-    pointer-events: none;
 }
 
 /* Overlay для перехвата событий мыши */

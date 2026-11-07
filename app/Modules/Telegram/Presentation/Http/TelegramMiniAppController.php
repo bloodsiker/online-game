@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Telegram\Presentation\Http;
 
+use App\Modules\Telegram\Application\Services\TelegramProfileService;
 use App\Modules\Telegram\Application\Services\TelegramReadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,13 +35,13 @@ final class TelegramMiniAppController
         ] + $read->allBackpackItems(userId: $userId)));
     }
 
-    public function character(Request $request, TelegramReadService $read): JsonResponse
+    public function character(Request $request, TelegramReadService $read, TelegramProfileService $profile): JsonResponse
     {
         $userId = $request->attributes->get('telegram.account')->userId;
 
         return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
             'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
-            'character' => $read->character(userId: $userId),
+            'character' => $profile->character(userId: $userId),
         ]));
     }
 
@@ -53,6 +54,42 @@ final class TelegramMiniAppController
             'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
             'character' => $read->character(userId: $userId),
         ] + $read->listings(userId: $userId, type: 'auction', page: (int) ($input['page'] ?? 1), perPage: 10)));
+    }
+
+    public function reputations(Request $request, TelegramReadService $read, TelegramProfileService $profile): JsonResponse
+    {
+        $userId = $request->attributes->get('telegram.account')->userId;
+
+        return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
+            'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
+            'character' => $read->character(userId: $userId), 'data' => $profile->reputations(userId: $userId),
+        ]));
+    }
+
+    public function influences(Request $request, TelegramReadService $read, TelegramProfileService $profile): JsonResponse
+    {
+        $userId = $request->attributes->get('telegram.account')->userId;
+
+        return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
+            'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
+            'character' => $read->character(userId: $userId), 'data' => $profile->influences(userId: $userId),
+        ]));
+    }
+
+    public function onlineCount(Request $request, TelegramProfileService $profile): JsonResponse
+    {
+        return response()->json(['ok' => true, 'online_count' => $profile->onlineCount(userId: $request->attributes->get('telegram.account')->userId)]);
+    }
+
+    public function online(Request $request, TelegramReadService $read, TelegramProfileService $profile): JsonResponse
+    {
+        $input = $request->validate(['page' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
+        $userId = $request->attributes->get('telegram.account')->userId;
+
+        return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
+            'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
+            'character' => $read->character(userId: $userId),
+        ] + $profile->onlinePlayers(userId: $userId, page: (int) ($input['page'] ?? 1))));
     }
 
     /** @return array<string, string> */
@@ -69,7 +106,7 @@ final class TelegramMiniAppController
         }
 
         foreach (array_keys(__('telegram')) as $key) {
-            if (str_starts_with($key, 'chat_')) {
+            if (str_starts_with($key, 'chat_') || str_starts_with($key, 'profile_')) {
                 $labels[$key] = __('telegram.'.$key);
             }
         }

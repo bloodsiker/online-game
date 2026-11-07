@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Modules\Chat;
 
 use App\Modules\Chat\Application\DTOs\LocalizedChatMessage;
-use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Jobs\BroadcastChatMessageExpiration;
 use App\Modules\Chat\Application\Listeners\SendQuestItemDropMessage;
+use App\Modules\Chat\Application\Services\ChatMessageTranslator;
 use App\Modules\Chat\Application\Services\ChatService;
 use App\Modules\Chat\Application\UseCases\SendSystemMessage;
 use App\Modules\Chat\Domain\Enums\ChatChannel;

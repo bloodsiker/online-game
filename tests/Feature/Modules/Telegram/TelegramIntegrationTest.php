@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature\Modules\Telegram;
 
 use App\Modules\Chat\Domain\Events\ChatMessageCreated;
+use App\Modules\Player\Application\DTOs\CharacterDTO;
+use App\Modules\Player\Application\DTOs\PlayerSkillDTO;
+use App\Modules\Player\Application\UseCases\GetCharacter;
+use App\Modules\Player\Domain\DTO\StatSheet;
+use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 use App\Modules\Telegram\Application\Services\TelegramBackpackPreview;
 use App\Modules\Telegram\Application\Services\TelegramLinkService;
 use App\Modules\Telegram\Application\Services\TelegramReadService;
@@ -329,6 +334,7 @@ final class TelegramIntegrationTest extends TestCase
     public function test_mini_app_character_and_auction_require_the_signed_telegram_identity(): void
     {
         $this->link();
+        $this->profileFixtures();
         foreach (['character', 'auction'] as $endpoint) {
             $this->getJson(route('telegram.mini-app.'.$endpoint))->assertUnauthorized();
             $this->getJson(route('telegram.mini-app.'.$endpoint), $this->apiHeaders())->assertUnauthorized();
@@ -349,6 +355,122 @@ final class TelegramIntegrationTest extends TestCase
                 ->assertJsonPath('code', 'telegram_not_linked');
         }
         Http::assertNothingSent();
+    }
+
+    public function test_mini_app_profile_uses_resolved_stats_avatar_and_grouped_skills(): void
+    {
+        $this->link();
+        $this->profileFixtures();
+        $this->getJson(route('telegram.mini-app.character', ['user_id' => 2]), $this->miniAppHeaders())->assertOk()
+            ->assertJsonPath('character.avatar_url', asset('storage/race-avatars/hero.webp'))
+            ->assertJsonPath('character.stats.0.value', 40)->assertJsonPath('character.race', 'Людина')
+            ->assertJsonPath('character.diamonds', '56.75')->assertJsonPath('character.resources.0.current', 80)
+            ->assertJsonPath('character.resources.0.max', 100)->assertJsonPath('character.resources.2.progress', 25)
+            ->assertJsonPath('character.skills.0.key', 'combat')->assertJsonPath('character.skills.0.skills.0.name', 'Мечі')
+            ->assertJsonPath('character.skills.0.skills.0.progress', 20)
+            ->assertJsonPath('character.skills.1.key', 'peaceful')->assertJsonPath('character.skills.1.skills.0.progress', 50);
+        DB::table('user_profiles')->delete();
+        $this->getJson(route('telegram.mini-app.character'), $this->miniAppHeaders())->assertOk()
+            ->assertJsonPath('character.avatar_url', asset('img/avatar/dark_elf.jpg'));
+    }
+
+    public function test_mini_app_reputations_and_influences_use_own_progress_without_creating_rows(): void
+    {
+        $this->link();
+        $this->profileFixtures();
+        Schema::create('reputations', function (Blueprint $table): void {
+            $table->id();
+            $table->text('name');
+            $table->string('icon')->nullable();
+            $table->unsignedBigInteger('npc_id')->nullable();
+        });
+        Schema::create('reputation_tiers', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('reputation_id');
+            $table->integer('min_points');
+            $table->text('medal_name')->nullable();
+            $table->string('medal_icon')->nullable();
+        });
+        Schema::create('player_reputations', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('reputation_id');
+            $table->integer('points');
+        });
+        Schema::create('player_reputation_medals', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('tier_id');
+            $table->boolean('is_feat')->default(false);
+        });
+        DB::table('reputations')->insert([['id' => 1, 'name' => json_encode(['ru' => 'Кладоискатель', 'uk' => 'Шукач скарбів'])], ['id' => 2, 'name' => json_encode(['ru' => 'Новая', 'uk' => 'Нова'])]]);
+        DB::table('reputation_tiers')->insert(['reputation_id' => 1, 'min_points' => 500]);
+        DB::table('player_reputations')->insert([['player_id' => 1, 'reputation_id' => 1, 'points' => 125], ['player_id' => 2, 'reputation_id' => 1, 'points' => 9000]]);
+        $this->getJson(route('telegram.mini-app.reputations', ['user_id' => 2]), $this->miniAppHeaders())->assertOk()
+            ->assertJsonPath('data.0.name', 'Шукач скарбів')->assertJsonPath('data.0.points', 125)->assertJsonPath('data.0.progress', 25)->assertJsonPath('data.1.points', 0);
+        $this->assertSame(2, DB::table('player_reputations')->count());
+        Schema::create('maps', function (Blueprint $table): void {
+            $table->id();
+            $table->text('name');
+        });
+        Schema::create('map_influences', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('map_id');
+            $table->unsignedBigInteger('user_id');
+            $table->integer('influence');
+        });
+        Schema::create('map_influence_levels', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('map_id');
+            $table->unsignedBigInteger('influence_medal_id')->nullable();
+            $table->text('name')->nullable();
+            $table->integer('required_influence');
+            $table->boolean('is_active')->default(true);
+        });
+        DB::table('maps')->insert(['id' => 1, 'name' => json_encode(['ru' => 'Нейрин', 'uk' => 'Нейрін'])]);
+        DB::table('map_influence_levels')->insert([['map_id' => 1, 'required_influence' => 100], ['map_id' => 1, 'required_influence' => 200]]);
+        DB::table('map_influences')->insert([['map_id' => 1, 'user_id' => 1, 'influence' => 150], ['map_id' => 1, 'user_id' => 2, 'influence' => 9000]]);
+        $this->getJson(route('telegram.mini-app.influences', ['user_id' => 2]), $this->miniAppHeaders())->assertOk()
+            ->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Нейрін')->assertJsonPath('data.0.points', 150)
+            ->assertJsonPath('data.0.progress', 50)->assertJsonPath('data.0.next', 200);
+        $this->assertSame(2, DB::table('map_influences')->count());
+    }
+
+    public function test_mini_app_online_count_and_pages_only_expose_public_online_players(): void
+    {
+        $this->link();
+        $this->chatFixtures();
+        foreach (range(3, 34) as $id) {
+            DB::table('players')->insert(['id' => $id, 'lvl' => 5]);
+            DB::table('users')->insert(['id' => $id, 'name' => sprintf('Player %02d', $id), 'player_id' => $id,
+                'email_verified_at' => $id === 33 ? null : now(), 'last_online_at' => $id === 34 ? now()->subDay() : now()]);
+        }
+        $this->getJson(route('telegram.mini-app.online-count'), $this->miniAppHeaders())->assertOk()->assertJsonPath('online_count', 32);
+        $response = $this->getJson(route('telegram.mini-app.online'), $this->miniAppHeaders())->assertOk()
+            ->assertJsonCount(25, 'data')->assertJsonPath('meta.total', 32)->assertJsonPath('meta.last_page', 2);
+        foreach ($response->json('data') as $player) {
+            $this->assertSame(['id', 'name', 'level', 'clan_name', 'clan_icon', 'profile_url'], array_keys($player));
+            $this->assertNotContains($player['id'], [33, 34]);
+        }
+        $this->getJson(route('telegram.mini-app.online', ['page' => 2]), $this->miniAppHeaders())->assertOk()->assertJsonCount(7, 'data');
+        $this->getJson(route('telegram.mini-app.online', ['page' => -1]), $this->miniAppHeaders())->assertUnprocessable();
+    }
+
+    public function test_profile_subpages_and_online_require_signed_binding_and_verified_account(): void
+    {
+        $this->link();
+        foreach (['reputations', 'influences', 'online', 'online-count'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint))->assertUnauthorized();
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->apiHeaders())->assertUnauthorized();
+        }
+        DB::table('users')->where('id', 1)->update(['email_verified_at' => null]);
+        foreach (['reputations', 'influences', 'online', 'online-count'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders())->assertForbidden();
+        }
+        app(TelegramLinkRepository::class)->unlink(userId: 1);
+        foreach (['reputations', 'influences', 'online', 'online-count'] as $endpoint) {
+            $this->getJson(route('telegram.mini-app.'.$endpoint), $this->miniAppHeaders())->assertForbidden();
+        }
     }
 
     public function test_mini_app_auction_shows_only_own_active_lots_with_icons_prices_and_pages(): void
@@ -812,6 +934,47 @@ final class TelegramIntegrationTest extends TestCase
     {
         return ['update_id' => $id, 'message' => ['from' => ['id' => 10001, 'username' => 'player', 'is_bot' => false, 'language_code' => 'uk'],
             'chat' => ['id' => 10001, 'type' => 'private'], 'text' => $text]];
+    }
+
+    private function profileFixtures(): void
+    {
+        Schema::table('players', function (Blueprint $table): void {
+            $table->unsignedBigInteger('race_id')->default(1);
+        });
+        Schema::create('user_profiles', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('avatar')->nullable();
+        });
+        Schema::create('races', function (Blueprint $table): void {
+            $table->id();
+            $table->text('name');
+        });
+        Schema::create('skills', function (Blueprint $table): void {
+            $table->id();
+            $table->text('name');
+            $table->string('type');
+        });
+        Schema::create('player_skills', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('player_id');
+            $table->unsignedBigInteger('skill_id');
+        });
+        DB::table('races')->insert(['id' => 1, 'name' => json_encode(['ru' => 'Человек', 'uk' => 'Людина'])]);
+        DB::table('user_profiles')->insert(['user_id' => 1, 'avatar' => 'storage/race-avatars/hero.webp']);
+        $sheet = new StatSheet;
+        $sheet->strength = 40;
+        $sheet->armor = 25;
+        $sheet->hpMax = 100;
+        $sheet->mpMax = 50;
+        $this->mock(GetCharacter::class)->shouldReceive('execute')
+            ->withArgs(static fn (Player $player): bool => (int) $player->id === 1)
+            ->andReturn(new CharacterDTO(playerName: 'Mage <test>', level: 10, raceName: 'Людина',
+                hpNow: 80, mpNow: 25, money: 1000, diamond: 56, bankBalance: 0, bankAccount: null,
+                exp: 250, expUp: 1000, expPercent: 25, victory: 1, death: 0, freeStats: 3,
+                baseStrength: 5, baseIntuition: 1, baseAgility: 1, baseIntelligence: 1, baseWisdom: 1, baseEndurance: 1,
+                stats: $sheet, skills: [new PlayerSkillDTO('Мечі', 10, 200, 1000, 1000, 'combat'), new PlayerSkillDTO('Травник', 2, 50, 100, 100, 'peaceful')],
+                weaponDamage: ['min' => 12, 'max' => 18]));
     }
 
     private function chatFixtures(): void

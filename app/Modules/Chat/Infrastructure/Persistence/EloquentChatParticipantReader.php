@@ -15,7 +15,7 @@ final class EloquentChatParticipantReader implements ChatParticipantReader
         return User::query()->withOnly([
             'player' => static fn (BelongsTo $relation): BelongsTo => $relation->withOnly([])->select(['id', 'lvl']),
             'currentLocation' => static fn (BelongsTo $relation): BelongsTo => $relation->select(['id', 'map_id']),
-            'clanMembership.clan',
+            'clanMembership.clan' => static fn (BelongsTo $relation): BelongsTo => $relation->withOnly([]),
         ])->whereKey($userId)->whereNotNull('email_verified_at')->first();
     }
 

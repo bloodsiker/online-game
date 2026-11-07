@@ -25,8 +25,8 @@ use App\Modules\Event\Domain\Services\WorldEventKillService;
 use App\Modules\Monster\Infrastructure\Persistence\Models\Monster;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterActiveEffect;
 use App\Modules\Monster\Infrastructure\Persistence\Models\MonsterOnLocation;
-use App\Modules\Player\Domain\Events\PlayerLeveledUp;
 use App\Modules\Player\Domain\Services\ExperienceService;
+use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Domain\Services\PlayerRunePassiveService;
 use App\Modules\Player\Domain\Services\PlayerSkillService;
 use App\Modules\Player\Domain\Services\PlayerStatService;
@@ -57,6 +57,7 @@ readonly class AttackService
         private DivineFavorService $divineFavorService,
         private DungeonStageService $dungeonStageService,
         private ChatService $chatService,
+        private PlayerLevelUpService $levelUpService,
         private MonsterLootService $monsterLootService = new MonsterLootService,
     ) {}
 
@@ -809,18 +810,9 @@ readonly class AttackService
 
     public function checkLevelUp(Player $player, AttackResultDTO $result)
     {
-        // while, не if: один хит может принести сразу несколько уровней опыта
-        // (например, крупный килл-добивающий урон или активный Эликсир
-        // опыта) — exp при этом не урезается до exp_up, поэтому избыток
-        // должен быть разобран по уровням сразу, а не по одному за хит.
-        while ($player->exp >= $player->exp_up) {
-            $player->lvl++;
-            $player->save();
-
-            event(new PlayerLeveledUp($player));
-
-            $result->logSide(BattleLogTranslator::format('<p class="msg-levelup">&#9650; Вы получили новый уровень <b>%s</b>!</p>', $player->lvl));
-        }
+        $this->levelUpService->raiseFromExperience($player, static function (Player $leveledPlayer) use ($result): void {
+            $result->logSide(BattleLogTranslator::format('<p class="msg-levelup">&#9650; Вы получили новый уровень <b>%s</b>!</p>', $leveledPlayer->lvl));
+        });
     }
 
     private function calculateExperience(Player $player, Monster $monster, int $damage, int $monsterMaxHp, float $xpMultiplier = 1.0): int

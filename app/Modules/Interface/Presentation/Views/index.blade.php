@@ -514,123 +514,133 @@
 
                             refreshHotbar();
 
-                            // Сворачивание/разворачивание панели
-                            let isCollapsed = localStorage.getItem('hotbar-collapsed') === 'true';
-
-                            if (isCollapsed) {
-                                hotbar.classList.add('collapsed');
-                                toggleIcon.textContent = '▶';
+                            // Позиция панели задаётся относительно всего окна, а не игрового блока.
+                            function hotbarStorage(key, value) {
+                                try {
+                                    if (value === undefined) return localStorage.getItem(key);
+                                    localStorage.setItem(key, value);
+                                } catch (error) { /* Панель работает и при недоступном localStorage. */ }
+                                return null;
                             }
+
+                            let isCollapsed = hotbarStorage('hotbar-collapsed') === 'true';
+                            let hasHotbarPosition = false;
+                            let hotbarPositionReady = false;
+                            let dragPointer = null;
+                            let offsetX = 0;
+                            let offsetY = 0;
+
+                            hotbar.classList.toggle('collapsed', isCollapsed);
+                            toggleIcon.textContent = isCollapsed ? '▶' : '◀';
+
+                            function positionHotbar(left, top) {
+                                const rect = hotbar.getBoundingClientRect();
+                                // Оставляем доступными ручку слева и кнопку сворачивания справа.
+                                const margin = 18;
+                                const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+                                const maxTop = Math.max(0, window.innerHeight - rect.height);
+                                hotbar.style.left = Math.max(margin, Math.min(left, maxLeft)) + 'px';
+                                hotbar.style.top = Math.max(0, Math.min(top, maxTop)) + 'px';
+                                hotbar.style.bottom = 'auto';
+                                hotbar.style.transform = 'none';
+                            }
+
+                            function saveHotbarPosition() {
+                                hotbarStorage('hotbar-position', JSON.stringify({
+                                    left: hotbar.style.left,
+                                    top: hotbar.style.top,
+                                    coordinateSpace: 'viewport'
+                                }));
+                            }
+
+                            function fitHotbar() {
+                                if (!hotbarPositionReady || dragPointer !== null) return;
+                                if (hasHotbarPosition) {
+                                    const rect = hotbar.getBoundingClientRect();
+                                    positionHotbar(rect.left, rect.top);
+                                } else {
+                                    // Начальное положение по-прежнему по центру внизу игрового поля.
+                                    const frame = bodyContent.getBoundingClientRect();
+                                    const rect = hotbar.getBoundingClientRect();
+                                    positionHotbar(frame.left + (frame.width - rect.width) / 2, frame.bottom - rect.height);
+                                }
+                            }
+
+                            function initializeHotbarPosition() {
+                                // Убираем зависимость от обрезки и слоёв таблиц игрового интерфейса.
+                                document.body.append(dragOverlay, hotbar);
+                                try {
+                                    const pos = JSON.parse(hotbarStorage('hotbar-position'));
+                                    const left = Number.parseFloat(pos?.left);
+                                    const top = Number.parseFloat(pos?.top);
+                                    if (Number.isFinite(left) && Number.isFinite(top)) {
+                                        const frame = bodyContent.getBoundingClientRect();
+                                        const legacy = pos.coordinateSpace !== 'viewport';
+                                        positionHotbar(left + (legacy ? frame.left + bodyContent.clientLeft : 0),
+                                            top + (legacy ? frame.top + bodyContent.clientTop : 0));
+                                        hasHotbarPosition = true;
+                                        saveHotbarPosition();
+                                    }
+                                } catch (error) { /* Повреждённое сохранение не мешает открыть панель. */ }
+                                hotbarPositionReady = true;
+                                fitHotbar();
+                                const observer = new ResizeObserver(fitHotbar);
+                                observer.observe(hotbar);
+                                observer.observe(bodyContent);
+                            }
+
+                            document.addEventListener('DOMContentLoaded', initializeHotbarPosition, { once: true });
+                            window.addEventListener('resize', fitHotbar);
 
                             toggleButton.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 const rect = hotbar.getBoundingClientRect();
-                                const parentRect = bodyContent.getBoundingClientRect();
                                 isCollapsed = !isCollapsed;
-
-                                if (isCollapsed) {
-                                    hotbar.classList.add('collapsed');
-                                    toggleIcon.textContent = '▶';
-                                } else {
-                                    hotbar.classList.remove('collapsed');
-                                    toggleIcon.textContent = '◀';
-                                }
-
-                                // Сохраняем правый край панели при изменении ширины.
-                                const width = hotbar.getBoundingClientRect().width;
-                                const left = rect.right - parentRect.left - bodyContent.clientLeft - width;
-                                const maxLeft = Math.max(0, bodyContent.clientWidth - width);
-                                hotbar.style.left = Math.max(0, Math.min(left, maxLeft)) + 'px';
-                                hotbar.style.top = (rect.top - parentRect.top - bodyContent.clientTop) + 'px';
-                                hotbar.style.bottom = 'auto';
-                                hotbar.style.transform = 'none';
-
-                                localStorage.setItem('hotbar-position', JSON.stringify({
-                                    left: hotbar.style.left,
-                                    top: hotbar.style.top
-                                }));
-                                localStorage.setItem('hotbar-collapsed', isCollapsed);
+                                hotbar.classList.toggle('collapsed', isCollapsed);
+                                toggleIcon.textContent = isCollapsed ? '▶' : '◀';
+                                // Правый край и высота позиции не меняются при сворачивании.
+                                hasHotbarPosition = true;
+                                positionHotbar(rect.right - hotbar.getBoundingClientRect().width, rect.top);
+                                saveHotbarPosition();
+                                hotbarStorage('hotbar-collapsed', isCollapsed);
                             });
 
-                            // Drag and Drop для hotbar
-                            let isDragging = false;
-                            let offsetX = 0;
-                            let offsetY = 0;
-
-                            // Загрузка сохраненной позиции
-                            const savedPos = localStorage.getItem('hotbar-position');
-                            if (savedPos) {
-                                const pos = JSON.parse(savedPos);
-                                hotbar.style.left = pos.left;
-                                hotbar.style.top = pos.top;
-                                hotbar.style.bottom = 'auto';
-                                hotbar.style.transform = 'none';
-                            }
-
-                            dragHandle.addEventListener('mousedown', startDrag);
-
-                            function startDrag(e) {
-                                isDragging = true;
-                                hotbar.classList.add('dragging');
-
-                                gameFrame.classList.add('pointer-events-none');
-                                dragOverlay.classList.add('active');
-
+                            dragHandle.addEventListener('pointerdown', (e) => {
+                                if (e.button !== 0 || dragPointer !== null) return;
                                 const rect = hotbar.getBoundingClientRect();
-                                const parentRect = bodyContent.getBoundingClientRect();
-
                                 offsetX = e.clientX - rect.left;
                                 offsetY = e.clientY - rect.top;
-
-                                hotbar.style.left = (rect.left - parentRect.left) + 'px';
-                                hotbar.style.top = (rect.top - parentRect.top) + 'px';
-                                hotbar.style.bottom = 'auto';
-                                hotbar.style.transform = 'none';
-
+                                dragPointer = e.pointerId;
+                                hasHotbarPosition = true;
+                                hotbar.classList.add('dragging');
+                                dragOverlay.classList.add('active');
+                                dragHandle.setPointerCapture(e.pointerId);
                                 e.preventDefault();
                                 e.stopPropagation();
-                            }
+                            });
 
-                            document.addEventListener('mousemove', drag);
-                            document.addEventListener('mouseup', stopDrag);
-
-                            function drag(e) {
-                                if (!isDragging) return;
-
+                            document.addEventListener('pointermove', (e) => {
+                                if (e.pointerId !== dragPointer) return;
+                                positionHotbar(e.clientX - offsetX, e.clientY - offsetY);
                                 e.preventDefault();
+                            });
 
-                                const parentRect = bodyContent.getBoundingClientRect();
-                                const hotbarRect = hotbar.getBoundingClientRect();
-
-                                let newX = e.clientX - parentRect.left - offsetX;
-                                let newY = e.clientY - parentRect.top - offsetY;
-
-                                newX = Math.max(0, Math.min(newX, parentRect.width - hotbarRect.width));
-                                newY = Math.max(0, Math.min(newY, parentRect.height - hotbarRect.height));
-
-                                hotbar.style.left = newX + 'px';
-                                hotbar.style.top = newY + 'px';
+                            function stopHotbarDrag(e) {
+                                if (dragPointer === null || (e?.pointerId !== undefined && e.pointerId !== dragPointer)) return;
+                                const pointerId = dragPointer;
+                                dragPointer = null;
+                                if (dragHandle.hasPointerCapture(pointerId)) dragHandle.releasePointerCapture(pointerId);
+                                hotbar.classList.remove('dragging');
+                                dragOverlay.classList.remove('active');
+                                saveHotbarPosition();
                             }
 
-                            function stopDrag(e) {
-                                if (isDragging) {
-                                    isDragging = false;
-                                    hotbar.classList.remove('dragging');
-
-                                    gameFrame.classList.remove('pointer-events-none');
-                                    dragOverlay.classList.remove('active');
-
-                                    localStorage.setItem('hotbar-position', JSON.stringify({
-                                        left: hotbar.style.left,
-                                        top: hotbar.style.top
-                                    }));
-
-                                    e.preventDefault();
-                                }
-                            }
-
+                            document.addEventListener('pointerup', stopHotbarDrag);
+                            document.addEventListener('pointercancel', stopHotbarDrag);
+                            dragHandle.addEventListener('lostpointercapture', stopHotbarDrag);
+                            window.addEventListener('blur', () => stopHotbarDrag());
                             document.addEventListener('selectstart', (e) => {
-                                if (isDragging) e.preventDefault();
+                                if (dragPointer !== null) e.preventDefault();
                             });
                         </script>
                         @else
@@ -1591,6 +1601,8 @@
         };
     }
 
+    const onlinePresenceSubscribers = new Set();
+
     function sendOnlinePresenceSnapshot(targetWindow = null) {
         if (!onlinePresenceReady) return;
 
@@ -1611,10 +1623,25 @@
         try {
             const chatFrame = document.getElementById('chat-frame');
             const whoFrame = chatFrame?.contentDocument?.getElementById('who-frame');
-            whoFrame?.contentWindow?.postMessage(message, window.location.origin);
+            if (whoFrame?.contentWindow && !onlinePresenceSubscribers.has(whoFrame.contentWindow)) {
+                whoFrame.contentWindow.postMessage(message, window.location.origin);
+            }
         } catch (error) {
             // Фрейм списка ещё не загрузился; он запросит снимок после загрузки.
         }
+
+        // Окна, запросившие снимок (карты — maps/partials/live-players), получают и все обновления.
+        onlinePresenceSubscribers.forEach(function (subscriber) {
+            try {
+                if (subscriber.closed) {
+                    onlinePresenceSubscribers.delete(subscriber);
+                    return;
+                }
+                subscriber.postMessage(message, window.location.origin);
+            } catch (error) {
+                onlinePresenceSubscribers.delete(subscriber);
+            }
+        });
     }
 
     function syncPublicOnlineCount() {
@@ -1680,6 +1707,7 @@
         if (event.origin !== window.location.origin || !event.data) return;
 
         if (event.data.type === 'requestOnlinePresence') {
+            if (event.source) onlinePresenceSubscribers.add(event.source);
             sendOnlinePresenceSnapshot(event.source);
         } else if (event.data.type === 'playerLocationChanged') {
             refreshOnlinePresenceLocation(event.data.locationId);

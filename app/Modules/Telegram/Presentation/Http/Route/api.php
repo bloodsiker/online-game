@@ -21,6 +21,10 @@ Route::prefix('api/v1/telegram/mini-app')->name('telegram.mini-app.')
         Route::get('/backpack', [TelegramMiniAppController::class, 'backpack'])->name('backpack');
         Route::get('/character', [TelegramMiniAppController::class, 'character'])->name('character');
         Route::get('/auction-lots', [TelegramMiniAppController::class, 'auction'])->name('auction');
+        Route::get('/reputations', [TelegramMiniAppController::class, 'reputations'])->name('reputations');
+        Route::get('/influences', [TelegramMiniAppController::class, 'influences'])->name('influences');
+        Route::get('/online-count', [TelegramMiniAppController::class, 'onlineCount'])->name('online-count');
+        Route::get('/online', [TelegramMiniAppController::class, 'online'])->name('online');
     });
 
 Route::prefix('api/v1/telegram/mini-app/chat')->name('telegram.mini-app.chat.')

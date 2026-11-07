@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Item\Application\ItemEffect\Strategies;
 
 use App\Modules\Item\Application\ItemEffect\ValueObjects\ItemEffectValue;
-use App\Modules\Player\Domain\Events\PlayerLeveledUp;
+use App\Modules\Player\Domain\Services\PlayerLevelUpService;
 use App\Modules\Player\Domain\Services\PlayerRevivalService;
 use App\Modules\Player\Infrastructure\Persistence\Models\Player;
 
@@ -17,7 +17,10 @@ use App\Modules\Player\Infrastructure\Persistence\Models\Player;
  */
 class RestoreLostExpStrategy implements ItemEffectStrategyInterface
 {
-    public function __construct(private readonly PlayerRevivalService $revivalService) {}
+    public function __construct(
+        private readonly PlayerRevivalService $revivalService,
+        private readonly PlayerLevelUpService $levelUpService,
+    ) {}
 
     public function apply(Player $player, ItemEffectValue $effect, ?int $hpMax = null, ?int $mpMax = null): void
     {
@@ -34,12 +37,7 @@ class RestoreLostExpStrategy implements ItemEffectStrategyInterface
         // Восстановленный опыт мог оказаться уже выше exp_up (если игрок
         // получил уровень между смертью и использованием предмета) —
         // проводим через ту же проверку, что и обычный опыт с боя.
-        while ($player->exp >= $player->exp_up) {
-            $player->lvl++;
-            $player->save();
-
-            event(new PlayerLeveledUp($player));
-        }
+        $this->levelUpService->raiseFromExperience($player);
 
         $player->save();
 
