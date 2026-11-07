@@ -197,7 +197,7 @@
                                         <input type="hidden" name="referrer" value=""/>
                                         <input type="hidden" name="ref_code" value="{{ $refCode ?? '' }}"/>
                                         @csrf
-                                        <center>
+                                        <div class="legacy-center" style="text-align: center; text-align: -webkit-center; text-align: -moz-center;">
                                             <div class="b-common-wrapper">
                                                 <div class="b-column-wrapper b-column-wrapper_equal clearfix">
                                                     <div class="b-divider-5">
@@ -255,13 +255,13 @@
                                                         <div class="tbl8" style="margin: 5px 0px 5px 0px;" align="left">
                                                             <div style="text-align: justify;font-size: 11px;">
                                                                 <p></p>
-                                                                <center>
+                                                                <div class="legacy-center" style="text-align: center; text-align: -webkit-center; text-align: -moz-center;">
                                                                     <ul style="list-style-type: none;;">
                                                                         @foreach ($errors->all() as $error)
                                                                          <li style="color: red;">{{ $error }}</li>
                                                                         @endforeach
                                                                     </ul>
-                                                                </center>
+                                                                </div>
                                                                 <p></p>
                                                             </div>
                                                         </div>
@@ -653,11 +653,10 @@
                                                     </p>
                                                 </div>
                                             </div>
-                                        </center>
+                                        </div>
                                     </form>
 
                                 </div>
-                                </center>
                             </div>
                         </div>
                     </div>
@@ -671,8 +670,8 @@
 
             <div class="b-footer__bottom">
 					<span class="b-footer__copyright-block">
-						<center>Цей проект не є комерційним.<br>
-Проект створено з метою об'єднання людей із загальними інтересами.</center>
+						<div class="legacy-center" style="text-align: center; text-align: -webkit-center; text-align: -moz-center;">Цей проект не є комерційним.<br>
+Проект створено з метою об'єднання людей із загальними інтересами.</div>
 					</span>
                 &nbsp;
                 <span class="b-footer__copyright-block">

@@ -1,52 +1,38 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
-    <title>{{ __('homepage.game_name') }}</title>
+    <meta charset="utf-8">
+    @include('partials.seo', ['url' => url('/')])
     @vite('resources/js/homepage.js')
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ __('homepage.game_name') }}">
-    <meta name="twitter:description" content="{{ __('homepage.game_name') }}">
-    <meta name="twitter:image" content="{{ asset('main/img/logo_tshare.png') }}">
-    <meta name="twitter:domain" content="">
-    <meta name="keywords"
-          content=""/>
-    <meta name="description"
-          content="{{ __('homepage.game_name') }}"/>
-
-    <meta property="og:title" content="{{ __('homepage.game_name') }}"/>
-    <meta property="og:image" content="{{ asset('main/img/logo_tshare.png') }}"/>
-    <meta property="og:type" content="article"/>
-    <meta property="og:url" content="https://dwar.ltd/"/>
-    <meta property="og:site_name" content="{{ __('homepage.game_name') }}"/>
-    <meta property="fb:admins" content="1"/>
-    <meta property="og:description" content="{{ __('homepage.game_name') }}"/>
     @include('partials.favicons')
-    <link rel="alternate" type="application/rss+xml" title="{{ __('homepage.game_name') }}." href=""/>
-
-
-    <link rel="image_src" href="{{ asset('main/img/logo_tshare.png') }}"/>
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'VideoGame',
+            'name' => __('homepage.game_name').' (Eternum)',
+            'alternateName' => 'Eternum',
+            'description' => __('homepage.seo_description'),
+            'url' => url('/'),
+            'image' => asset('img/og-image.jpg'),
+            'genre' => ['MMORPG', 'RPG', 'Fantasy'],
+            'gamePlatform' => 'Web browser',
+            'applicationCategory' => 'Game',
+            'operatingSystem' => 'Any',
+            'inLanguage' => ['ru', 'uk'],
+            'playMode' => 'MultiPlayer',
+            'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('main/css/main.css') }}">
-    @if(config('game.prelaunch'))
-        <link rel="stylesheet" href="{{ asset('css/prelaunch.css') }}?v={{ filemtime(public_path('css/prelaunch.css')) }}">
-    @endif
-    <link rel="stylesheet" type="text/css" href="{{ asset('main/css/timer.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('main/css/art_alt.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/item_tooltip.css') }}?v={{ filemtime(public_path('css/item_tooltip.css')) }}">
-    <link rel="stylesheet" href="{{ asset('main/css/portal_desktop.min.css') }}"/>
+    @include('partials.legacy-css', ['bundle' => 'homepage'])
 
-    <link rel="stylesheet" href="{{ asset('main/css/index.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/ru_fonts.css') }}"/>
-    <link rel="stylesheet" href="{{ asset('main/css/i18n_ru.css') }}"/>
 
 
     {{-- PIXI/canvas здесь не используются: канвас нужен только iframe меню (Interface/menu.blade.php) --}}
 
-    <link rel="stylesheet" href="{{ asset('main/css/index_glav.css') }}"/>
 
     <style>
         .homepage-heading { color: #edcb86; font: bold 16px/24px Tahoma, Arial, sans-serif; text-align: center; text-shadow: 1px 1px #281b10; }
@@ -415,9 +401,9 @@
                             <div class="b-aside__support-title">
                                 <div class="homepage-heading homepage-heading--reference">{{ __('homepage.support') }}</div>
                             </div>
-                            <a href="mailto:maldini2@ukr.net" class="b-aside__support-link">Email:
+                            <x-protected-email :email="config('game.support_email')" class="b-aside__support-link">Email:
                                 <br>
-                                <span class="__cf_email__" >maldini2@ukr.net</span></a>
+                            </x-protected-email>
 
                         </div>
                     </div>
@@ -464,8 +450,8 @@
                                             </a>
                                             <span align="right"
                                                   style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-                                                <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
-                                                <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
+                                                <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' alt='{{ __('Дата публикации') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
+                                                <img src='{{ asset('main/images/news/view.png') }}' alt='{{ __('Просмотры') }}' style='width: 10px;position: relative;top: -1px;'>
                                                 <b style='color:green;'>{{ $selectedNews->views_count }}</b>
                                             </span>
                                         </div>
@@ -539,8 +525,8 @@
                                                     </a>
                                                     <span align="right"
                                                           style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
-                                                        <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
-                                                        <img src='{{ asset('main/images/news/view.png') }}' style='width: 10px;position: relative;top: -1px;'>
+                                                        <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' alt='{{ __('Дата публикации') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
+                                                        <img src='{{ asset('main/images/news/view.png') }}' alt='{{ __('Просмотры') }}' style='width: 10px;position: relative;top: -1px;'>
                                                         <b style='color:green;'>{{ $newsPost->views_count }}</b>
                                                     </span>
                                                 </div>
@@ -563,14 +549,14 @@
 
 
                     </div>
-                    <center>
+                    <div class="legacy-center" style="text-align: center; text-align: -webkit-center; text-align: -moz-center;">
                         <div class="b-pager b-pager--default pull-right">
                             <div class="b-pager__container">
                                 <ul class="b-pager__list">
                                 </ul>
                             </div>
                         </div>
-                    </center>
+                    </div>
                 </div>
                 <div class="b-index__footer text-center u-style-bg-gradient">
 

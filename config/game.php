@@ -4,6 +4,9 @@ return [
     // Changes the public homepage's login/registration buttons to the launch signup dialog.
     'prelaunch' => (bool) env('GAME_PRELAUNCH', false),
 
+    // Адрес техподдержки на главной. В HTML не попадает открытым текстом (components/protected-email).
+    'support_email' => env('SUPPORT_EMAIL', 'maldini2@ukr.net'),
+
     'online_timeout_minutes' => (int) env('PLAYER_ONLINE_TIMEOUT_MINUTES', 30),
     /*
     |--------------------------------------------------------------------------

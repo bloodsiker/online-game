@@ -1,0 +1,28 @@
+{
+    "homepage": [
+        "main/css/main.css",
+        "css/prelaunch.css",
+        "main/css/timer.css",
+        "main/css/art_alt.css",
+        "css/item_tooltip.css",
+        "main/css/portal_desktop.min.css",
+        "main/css/index.min.css",
+        "main/css/ru_fonts.css",
+        "main/css/i18n_ru.css",
+        "main/css/index_glav.css"
+    ],
+    "library": [
+        "main/css/main_register.css",
+        "main/css/register.css",
+        "main/css/index.css",
+        "main/css/css.css",
+        "main/css/mainnew.css",
+        "main/css/art_alt.css",
+        "css/item_tooltip.css",
+        "css/library_game_frame.css",
+        "css/library_injury_catalog.css",
+        "css/library_artifact_catalog.css",
+        "css/library_clan_skill_catalog.css",
+        "css/library_equipment.css"
+    ]
+}

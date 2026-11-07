@@ -1,5 +1,6 @@
 <title>{{ $seo->title }}</title>
 <meta name="description" content="{{ $seo->description }}">
+<meta name="keywords" content="{{ $seo->heading }}, {{ __('homepage.seo_keywords') }}">
 <meta name="robots" content="{{ $seo->robots }}">
 <link rel="canonical" href="{{ $seo->canonical }}">
 @foreach($seo->alternates as $language => $url)
@@ -27,3 +28,15 @@
 <meta name="twitter:title" content="{{ $seo->title }}">
 <meta name="twitter:description" content="{{ $seo->description }}">
 <meta name="twitter:image" content="{{ $seo->image }}">
+{{-- Дублинское ядро (Dublin Core) --}}
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.title" content="{{ $seo->title }}">
+<meta name="DC.description" content="{{ $seo->description }}">
+<meta name="DC.subject" content="{{ $seo->heading }}">
+<meta name="DC.language" content="{{ app()->getLocale() }}">
+<meta name="DC.creator" content="{{ __('homepage.game_name') }} (Eternum)">
+<meta name="DC.publisher" content="{{ __('homepage.game_name') }} (Eternum)">
+<meta name="DC.type" content="{{ $seo->type === 'article' ? 'Text' : 'Collection' }}">
+<meta name="DC.format" content="text/html">
+<meta name="DC.identifier" content="{{ $seo->canonical }}">
+@if($seo->publishedAt)<meta name="DC.date" content="{{ $seo->publishedAt }}">@endif

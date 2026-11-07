@@ -1,7 +1,14 @@
 <html>
 <head>
-    <title>{{ $page->monster->name }}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="UTF-8">
+    @php
+        $seoText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($page->monster->description))));
+    @endphp
+    @include('partials.seo', [
+        'title' => __(':name [:lvl] — монстр игры :game', ['name' => $page->monster->name, 'lvl' => $page->monster->lvl, 'game' => __('homepage.game_name')]),
+        'description' => mb_strlen($seoText) >= 70 ? $seoText : __(':name, :lvl уровень: здоровье :hp, опыт за победу :exp. Где обитает и какую добычу оставляет — бестиарий браузерной MMORPG :game.', ['name' => $page->monster->name, 'lvl' => $page->monster->lvl, 'hp' => $page->monster->hp, 'exp' => $page->monster->exp, 'game' => __('homepage.game_name')]),
+        'type' => 'website',
+    ])
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 11px; }
         .b { font-weight: 700; }

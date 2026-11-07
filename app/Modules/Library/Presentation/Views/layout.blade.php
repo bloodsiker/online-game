@@ -11,18 +11,7 @@
     @endisset
     <script src="{{ asset('main/js/common.js') }}"></script>
     <script src="{{ asset('main/js/simple_alt.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('main/css/main_register.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/register.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/index.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/css.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/mainnew.css') }}">
-    <link rel="stylesheet" href="{{ asset('main/css/art_alt.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/item_tooltip.css') }}?v={{ filemtime(public_path('css/item_tooltip.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/library_game_frame.css') }}?v={{ filemtime(public_path('css/library_game_frame.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/library_injury_catalog.css') }}?v={{ filemtime(public_path('css/library_injury_catalog.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/library_artifact_catalog.css') }}?v={{ filemtime(public_path('css/library_artifact_catalog.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/library_clan_skill_catalog.css') }}?v={{ filemtime(public_path('css/library_clan_skill_catalog.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/library_equipment.css') }}?v={{ filemtime(public_path('css/library_equipment.css')) }}">
+    @include('partials.legacy-css', ['bundle' => 'library'])
     @stack('styles')
     <style>
         html, body { min-height: 100%; }

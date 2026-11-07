@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>
-    @include('interface::partials.game-translations')
     <meta charset="UTF-8">
-    <title>{{ $page->name }} - {{ __("информация о предмете") }}</title>
+    @include('interface::partials.game-translations')
+    @php
+        $seoText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($page->description))));
+    @endphp
+    @include('partials.seo', [
+        'title' => __(':name — предмет игры :game', ['name' => $page->name, 'game' => __('homepage.game_name')]),
+        'description' => mb_strlen($seoText) >= 70 ? $seoText : __(':name — предмет браузерной фэнтезийной MMORPG :game: характеристики, требования, где получить и для чего используется.', ['name' => $page->name, 'game' => __('homepage.game_name')]),
+        'type' => 'website',
+    ])
     <style>
         html, body { height: 100%; margin: 0; }
         body {

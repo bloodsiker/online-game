@@ -1,7 +1,14 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
-    <title>{{ $page->npc->name }}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="UTF-8">
+    @php
+        $seoText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($page->npc->description))));
+    @endphp
+    @include('partials.seo', [
+        'title' => __(':name — персонаж мира игры :game', ['name' => $page->npc->name, 'game' => __('homepage.game_name')]),
+        'description' => mb_strlen($seoText) >= 70 ? $seoText : __(':name — персонаж мира браузерной фэнтезийной MMORPG :game: где найти, какие задания и товары предлагает.', ['name' => $page->npc->name, 'game' => __('homepage.game_name')]),
+        'type' => 'website',
+    ])
     <style>
         * { font-family: Tahoma, Geneva, sans-serif; font-size: 11px; }
         .b { font-weight: 700; }
