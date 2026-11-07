@@ -140,6 +140,7 @@
 <dialog class="telegram-backpack-detail" id="telegram-backpack-detail" aria-labelledby="telegram-backpack-detail-name">
     <div class="telegram-backpack-detail__picture"><img id="telegram-backpack-detail-image" width="100" height="100" alt=""></div>
     <h2 id="telegram-backpack-detail-name"></h2>
+    <p class="telegram-backpack-detail__description" id="telegram-backpack-detail-description" hidden></p>
     <p id="telegram-backpack-detail-quantity"></p>
     <p id="telegram-backpack-detail-type"></p>
     <p id="telegram-backpack-detail-upgrade" hidden></p>

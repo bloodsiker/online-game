@@ -59,6 +59,11 @@
 
     function itemDetails(item) {
         byId('detail-name').textContent = item.name;
+        const content = new DOMParser().parseFromString(String(item.description || '').replace(/<br\s*\/?>|<\/(?:p|div|li)>/gi, '\n'), 'text/html');
+        for (const element of content.querySelectorAll('script, style, iframe, object, embed')) element.remove();
+        const description = byId('detail-description');
+        description.textContent = content.body.textContent.trim();
+        description.hidden = !description.textContent;
         assignImage(byId('detail-image'), item.image_url, item.name);
         byId('detail-quantity').textContent = labels.mini_app_quantity + ': ' + item.quantity;
         byId('detail-type').textContent = labels.mini_app_type + ': ' + item.type_label;

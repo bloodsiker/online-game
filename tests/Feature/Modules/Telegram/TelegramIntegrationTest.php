@@ -63,6 +63,7 @@ final class TelegramIntegrationTest extends TestCase
         Schema::create('share_items', function (Blueprint $table): void {
             $table->id();
             $table->text('name');
+            $table->text('description')->nullable();
             $table->string('type')->default('resource');
             $table->string('rarity')->default('common');
             $table->string('image')->nullable();
@@ -477,7 +478,8 @@ final class TelegramIntegrationTest extends TestCase
     {
         $this->link();
         $this->marketFixtures();
-        DB::table('share_items')->where('id', 1)->update(['image' => 'items/agate.webp', 'rarity' => 'rare']);
+        DB::table('share_items')->where('id', 1)->update(['image' => 'items/agate.webp', 'rarity' => 'rare',
+            'description' => json_encode(['ru' => 'Камень для ремесла.', 'uk' => 'Камінь для ремесла.'])]);
         foreach (range(5, 24) as $id) {
             DB::table('auctions')->insert(['id' => $id, 'user_id' => 1, 'structure_id' => 9,
                 'item_id' => 1, 'count' => 2, 'price' => 80, 'created_at' => now(), 'updated_at' => now()]);
@@ -487,6 +489,7 @@ final class TelegramIntegrationTest extends TestCase
             ->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
             ->assertJsonPath('meta.total', 22)->assertJsonPath('meta.per_page', 20)->assertJsonCount(20, 'data')
             ->assertJsonPath('data.0.name', 'Агат +2')->assertJsonPath('data.0.quantity', 2)
+            ->assertJsonPath('data.0.description', 'Камінь для ремесла.')
             ->assertJsonPath('data.0.image_url', asset('storage/items/agate.webp'))->assertJsonPath('data.0.rarity', 'rare')
             ->assertJsonPath('data.0.upgrade_level', 2)->assertJsonPath('data.0.total_price', 80)->assertJsonPath('data.0.unit_price', 40);
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
@@ -563,6 +566,8 @@ final class TelegramIntegrationTest extends TestCase
     {
         $this->link();
         $this->backpackFixtures();
+        DB::table('share_items')->where('id', 1)->update(['description' => json_encode(['ru' => 'Русское описание.', 'uk' => 'Український опис.'])]);
+        DB::table('share_items')->where('id', 3)->update(['description' => json_encode(['ru' => 'Описание без перевода.'])]);
         // More than the server API's maximum page size, to catch accidental truncation.
         foreach (range(20, 79) as $id) {
             DB::table('items')->insert(['id' => $id, 'share_item_id' => 1]);
@@ -574,6 +579,7 @@ final class TelegramIntegrationTest extends TestCase
         ]), $headers)->assertOk()->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
             ->assertJsonPath('data.0.quantity', 500)->assertJsonPath('meta.total', 75)->assertJsonCount(75, 'data')
             ->assertJsonPath('data.0.image_url', asset('/storage/telegram-test/icon.png'));
+        $response->assertJsonPath('data.0.description', 'Український опис.');
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
         $this->assertSame(['total' => 75], $response->json('meta'));
         $items = collect($response->json('data'));
@@ -582,6 +588,8 @@ final class TelegramIntegrationTest extends TestCase
             $this->assertSame(1, $items->where('category', $category)->count());
         }
         $this->assertSame(2, $items->firstWhere('category', 'artifact')['upgrade_level']);
+        $this->assertSame('Описание без перевода.', $items->firstWhere('category', 'artifact')['description']);
+        $this->assertSame('', $items->firstWhere('category', 'key')['description']);
         foreach ([16, 17, 18, 19] as $excluded) {
             $this->assertFalse($items->contains('item_id', $excluded));
         }

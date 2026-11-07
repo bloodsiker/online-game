@@ -29,7 +29,7 @@ final class EloquentAuctionListingsReader implements AuctionListingsReader
             })
             ->with([
                 'item' => static fn (BelongsTo $query): BelongsTo => $query->select(['id', 'share_item_id', 'upgrade_lvl']),
-                'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name', 'image', 'rarity', 'type']),
+                'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name', 'description', 'image', 'rarity', 'type']),
             ])->orderByDesc('id')->paginate(perPage: $perPage, page: $page)
             ->through(static function (Auction $lot): array {
                 $level = (int) ($lot->item?->upgrade_lvl ?? 0);
@@ -39,6 +39,7 @@ final class EloquentAuctionListingsReader implements AuctionListingsReader
                     'id' => (int) $lot->id, 'structure_id' => $lot->structure_id,
                     'item_id' => (int) $lot->item_id, 'share_item_id' => $lot->item?->share_item_id,
                     'name' => ($info?->name ?? '—').($level > 0 ? ' +'.$level : ''),
+                    'description' => $info?->description ?? '',
                     'image_url' => asset($info?->image ?: 'img/bg/empty_slot.gif'),
                     'rarity' => $info?->rarity?->value, 'type' => $info?->type?->value, 'type_label' => $info?->type?->label(),
                     'upgrade_level' => $level, 'quantity' => (int) $lot->count, 'total_price' => (int) $lot->price,

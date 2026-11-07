@@ -54,7 +54,7 @@ final class EloquentBackpackReadRepository implements BackpackReadRepository
     {
         return $query->select('backpacks.*')->with([
             'item' => static fn (BelongsTo $query): BelongsTo => $query->select(['id', 'share_item_id', 'upgrade_lvl', 'count_use']),
-            'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name', 'type', 'image', 'rarity', 'count_use']),
+            'item.itemInfo' => static fn (BelongsTo $query): BelongsTo => $query->withOnly([])->select(['id', 'name', 'description', 'type', 'image', 'rarity', 'count_use']),
         ])->orderBy('backpacks.sort_order')->orderBy('backpacks.id');
     }
 
@@ -105,6 +105,7 @@ final class EloquentBackpackReadRepository implements BackpackReadRepository
 
                 return ['backpack_id' => (int) $entry->id, 'item_id' => (int) $entry->item_id,
                     'share_item_id' => (int) $item->share_item_id, 'name' => $item->getName().($level > 0 ? ' +'.$level : ''),
+                    'description' => $info->description ?? '',
                     'quantity' => (int) $entry->count, 'image_url' => asset($info->image),
                     'category' => $categories[$info->type->value],
                     'type' => $info->type->value, 'type_label' => $info->type->isGatheringResource() ? ShareItemType::RESOURCE->label() : $info->type->label(),
