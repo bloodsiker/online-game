@@ -8,6 +8,7 @@ use App\Modules\Location\Infrastructure\Persistence\Models\Location;
 use App\Modules\Quest\Infrastructure\Persistence\Models\Quest;
 use App\Modules\Share\Infrastructure\Localization\HasLegacyTranslations;
 use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
+use App\Modules\Trade\Infrastructure\Persistence\Models\TradePost;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +51,11 @@ class Npc extends Model
     public function movement(): HasOne
     {
         return $this->hasOne(NpcMovement::class);
+    }
+
+    public function activeTradePost(): HasOne
+    {
+        return $this->hasOne(TradePost::class, 'npc_id')->where('is_active', true);
     }
 
     public function startQuests(): HasMany

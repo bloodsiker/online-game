@@ -7,6 +7,10 @@ namespace Tests\Feature\Modules\Trade;
 use App\Modules\Backpack\Domain\DTO\BackpackDTO;
 use App\Modules\Backpack\Domain\Models\Backpack;
 use App\Modules\Backpack\Domain\Services\BackpackService;
+use App\Modules\Npc\Application\DTOs\NpcPageDTO;
+use App\Modules\Npc\Application\UseCases\GetNpcPage;
+use App\Modules\Npc\Infrastructure\Persistence\Models\Npc;
+use App\Modules\Npc\Presentation\Http\NpcController;
 use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Share\Infrastructure\Localization\LocalizedContentSeederQuery;
 use App\Modules\Trade\Application\Services\TradeAdminService;
@@ -15,6 +19,7 @@ use App\Modules\Trade\Domain\Services\TradeBalance;
 use App\Modules\Trade\Infrastructure\Persistence\Models\TradePost;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Js;
@@ -201,6 +206,38 @@ class TradeFlowTest extends TestCase
         $this->assertStringContainsString('Вольный торг: Нейрин', $html);
         $this->assertStringContainsString('value="Далее"', $html);
         $this->assertStringContainsString(Js::from(route('trade.show', 1))->toHtml(), $html);
+    }
+
+    public function test_npc_page_uses_localized_active_trade_post_name_instead_of_raw_json(): void
+    {
+        $user = User::query()->findOrFail(1);
+        Auth::setUser($user);
+        $npc = Npc::query()->with('activeTradePost')->findOrFail(1);
+        $page = new NpcPageDTO(npc: $npc, quests: collect(), questsInProgress: collect(), questsOnCooldown: collect(),
+            message: null, messageType: 'error', player: $user->player);
+        $this->mock(GetNpcPage::class)->shouldReceive('execute')->with($user, 1)->andReturn($page);
+        $controller = app(NpcController::class);
+
+        foreach ([
+            [json_encode(['ru' => 'Город', 'uk' => 'Місто']), 'ru', 'Город'],
+            [json_encode(['ru' => 'Город', 'uk' => 'Місто']), 'uk', 'Місто'],
+            [json_encode(['ru' => 'Город']), 'uk', 'Город'],
+            ['Нейрин', 'uk', 'Нейрин'],
+        ] as [$name, $locale, $expected]) {
+            DB::table('trade_posts')->where('id', 1)->update(['name' => $name]);
+            $npc->load('activeTradePost');
+            app()->setLocale($locale);
+            $post = $controller->index(id: 1)->getData()['tradePost'];
+            $this->assertInstanceOf(TradePost::class, $post);
+            $this->assertSame($expected, $post->name);
+            $html = view('trade::npc-shop', ['post' => $post])->render();
+            $this->assertStringContainsString('Вольный торг: '.$expected, $html);
+            $this->assertStringNotContainsString('&quot;ru&quot;', $html);
+        }
+
+        DB::table('trade_posts')->where('id', 1)->update(['is_active' => false]);
+        $npc->load('activeTradePost');
+        $this->assertNull($controller->index(id: 1)->getData()['tradePost']);
     }
 
     public function test_tabs_show_only_the_selected_trade_section(): void

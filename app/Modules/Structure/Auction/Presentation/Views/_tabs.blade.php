@@ -1,3 +1,4 @@
+@include('partials.image-tabs-fix')
 @php
     $btnLeft1   = 'img/bg/btn/btn-left1.gif';
     $btnCenter1 = 'img/bg/btn/btn-cent1.gif';
@@ -26,25 +27,48 @@
     $tabs = $group === 'exchange' ? $exchangeTabs : $commissionTabs;
 @endphp
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+{{--
+    Вкладки и «Выход» — в отдельных таблицах без width=100%: они сжимаются по содержимому.
+    В одной таблице на всю ширину Safari раздаёт свободное место и ячейкам-уголкам (width=19),
+    из-за чего между уголками и фоном кнопки появлялись разрывы, а подписи переносились.
+--}}
+<table border="0" cellspacing="0" cellpadding="0" width="100%" class="auction-tabs" style="position: relative; top: 0px;">
     <tbody>
-    <tr height="21">
-        @foreach($tabs as $tab)
-            @php $isActive = ($activeTab === $tab['key']); @endphp
-            <td width="19"><img src="{{ asset($isActive ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-            <td width="{{ $tab['width'] }}" align="center" style="background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-                <a href="{{ $tab['route'] }}" title="{{ $tab['label'] }}" class="{{ $isActive ? 'btn_2' : 'btn_1' }}">{{ $tab['label'] }}</a>
-            </td>
-            <td width="19"><img src="{{ asset($isActive ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>
-        @endforeach
-
-        <td></td>
-
-        <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21"><br></td>
-        <td width="2%" align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
-            <a href="{{ route('location') }}" title="Выход" class="btn_1">Выход</a>
+    <tr>
+        <td align="left" valign="top">
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                <tr height="21">
+                    @foreach($tabs as $tab)
+                        @php $isActive = ($activeTab === $tab['key']); @endphp
+                        <td width="19"><img src="{{ asset($isActive ? $btnLeft2 : $btnLeft1) }}" width="19" height="21" alt=""></td>
+                        <td nowrap align="center" style="min-width: {{ $tab['width'] }}px; background: url({{ asset($isActive ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                            <a href="{{ $tab['route'] }}" title="{{ $tab['label'] }}" class="{{ $isActive ? 'btn_2' : 'btn_1' }}">{{ $tab['label'] }}</a>
+                        </td>
+                        <td width="19"><img src="{{ asset($isActive ? $btnRight2 : $btnRight1) }}" width="19" height="21" alt=""></td>
+                    @endforeach
+                </tr>
+                </tbody>
+            </table>
         </td>
-        <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21"><br></td>
+        <td align="right" valign="top">
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tbody>
+                <tr height="21">
+                    <td width="19"><img src="{{ asset($btnLeft1) }}" width="19" height="21" alt=""></td>
+                    <td nowrap align="center" style="background: url({{ asset($btnCenter1) }}) center top repeat-x; padding: 0px 2px 6px;">
+                        <a href="{{ route('location') }}" title="Выход" class="btn_1">Выход</a>
+                    </td>
+                    <td width="19"><img src="{{ asset($btnRight1) }}" width="19" height="21" alt=""></td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
     </tr>
     </tbody>
 </table>
+
+<style>
+    /* Уголки кнопок — блоком: без зазора под картинкой (baseline) и без <br>. */
+    .auction-tabs img { display: block; }
+</style>

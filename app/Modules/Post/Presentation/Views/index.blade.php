@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    @include('partials.image-tabs-fix')
     <meta charset="UTF-8">
     <title>Почта</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">

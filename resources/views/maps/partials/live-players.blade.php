@@ -8,6 +8,7 @@
     В клетке: кольцо 32px (несколько игроков — число внутри), ники по наведению. Цвет — по отношению к вам:
     соклан — зелёный, друг — синий, враг — чёрный, остальные — оранжевый.
     При переходе это кольцо плавно едет по карте в новую клетку (без ника). Свой персонаж не учитывается.
+    Свой маркер (.ulocation) тоже переезжает плавно: обёртка над ulocation() карты, прокрутка — smooth.
 --}}
 <style>
     /*
@@ -70,6 +71,28 @@
         box-shadow: inset 0 0 0 3px var(--ring);
         pointer-events: none;
         transition: transform 0.8s ease-in-out;
+    }
+
+    /* Свой персонаж в пути: копия кольца .ulocation на всю клетку едет в новую клетку. */
+    .live-self-walker {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 60;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background-color: rgba(181, 147, 135, 0.3);
+        box-shadow: inset 0 0 0 4px #B59387;
+        animation: ula 1s linear infinite;
+        pointer-events: none;
+        transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* Новая клетка ждёт, пока кольцо доедет. */
+    .ulocation.live-self-arriving {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        animation: none !important;
     }
 </style>
 
@@ -200,6 +223,94 @@
             if (event.origin !== origin || !event.data || event.data.type !== 'onlinePresenceSnapshot') return;
             applySnapshot(Array.isArray(event.data.users) ? event.data.users : []);
         });
+
+        // --- Свой персонаж: плавный переезд кольца вместо прыжка ---
+        // Карта ставит маркер функцией ulocation(lid) (класс .ulocation на #u{lid}), предыдущая клетка — prevlocation.
+        if (typeof window.ulocation === 'function') {
+            const placeMarker = window.ulocation;
+            let selfMove = null;
+
+            const pageRect = (el) => {
+                const r = el.getBoundingClientRect();
+                return { x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height };
+            };
+
+            const finishSelfMove = () => {
+                if (!selfMove) return;
+                clearTimeout(selfMove.timer);
+                selfMove.ghost.remove();
+                selfMove.target.classList.remove('live-self-arriving');
+                selfMove = null;
+            };
+
+            window.ulocation = function (lid) {
+                const from = Number(window.prevlocation || 0);
+                const to = Number(lid || 0);
+                const fromEl = document.getElementById('u' + from);
+                const toEl = document.getElementById('u' + to);
+
+                finishSelfMove();
+                if (from <= 0 || from === to || !fromEl || !toEl) {
+                    return placeMarker.apply(this, arguments);
+                }
+
+                const a = pageRect(fromEl);
+                const result = placeMarker.apply(this, arguments);   // ставит .ulocation на новую клетку и прокручивает карту
+                const b = pageRect(toEl);
+
+                const ghost = document.createElement('div');
+                ghost.className = 'live-self-walker';
+                ghost.style.width = a.w + 'px';
+                ghost.style.height = a.h + 'px';
+                ghost.style.transform = 'translate(' + a.x + 'px, ' + a.y + 'px)';
+                document.body.appendChild(ghost);
+                toEl.classList.add('live-self-arriving');
+
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    ghost.style.transform = 'translate(' + (b.x + (b.w - a.w) / 2) + 'px, ' + (b.y + (b.h - a.h) / 2) + 'px)';
+                }));
+                selfMove = { ghost, target: toEl, timer: setTimeout(finishSelfMove, WALK_MS) };
+
+                return result;
+            };
+
+            // Камера едет за кольцом: та же длительность и кривая (ease-in-out), что у transition кольца.
+            // Ручная прокрутка пользователем прерывает автопрокрутку.
+            let cameraFrame = 0;
+            const stopCamera = () => { if (cameraFrame) cancelAnimationFrame(cameraFrame); cameraFrame = 0; };
+            ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach((type) => window.addEventListener(type, stopCamera, { passive: true }));
+            const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+            const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            window.elementCenter = function (lid) {
+                const el = document.getElementById('u' + lid);
+                if (!el) return;
+
+                const r = el.getBoundingClientRect();
+                const root = document.scrollingElement || document.documentElement;
+                const maxX = Math.max(0, root.scrollWidth - window.innerWidth);
+                const maxY = Math.max(0, root.scrollHeight - window.innerHeight);
+                const fromX = window.scrollX;
+                const fromY = window.scrollY;
+                const toX = Math.min(maxX, Math.max(0, fromX + r.left + r.width / 2 - window.innerWidth / 2));
+                const toY = Math.min(maxY, Math.max(0, fromY + r.top + r.height / 2 - window.innerHeight / 2));
+
+                stopCamera();
+                if (reducedMotion || (Math.abs(toX - fromX) < 1 && Math.abs(toY - fromY) < 1)) {
+                    window.scrollTo(toX, toY);
+                    return;
+                }
+
+                const start = performance.now();
+                const step = (now) => {
+                    const t = Math.min(1, (now - start) / WALK_MS);
+                    const k = easeInOut(t);
+                    window.scrollTo(fromX + (toX - fromX) * k, fromY + (toY - fromY) * k);
+                    cameraFrame = t < 1 ? requestAnimationFrame(step) : 0;
+                };
+                cameraFrame = requestAnimationFrame(step);
+            };
+        }
 
         // Первый снимок — по запросу; дальше оболочка присылает его сама при каждом изменении.
         try { window.top.postMessage({ type: 'requestOnlinePresence' }, origin); } catch (e) { /* другой origin */ }

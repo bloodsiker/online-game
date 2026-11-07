@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>
+    @include('partials.image-tabs-fix')
     <meta charset="UTF-8">
     <title>{{ $npc->name }} - {{ $node->title }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/main.css') }}">

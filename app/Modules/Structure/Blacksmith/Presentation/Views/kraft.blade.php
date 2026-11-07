@@ -85,6 +85,9 @@
         .artifact-assembly__ingredient { flex: 0 0 72px; width: 72px; min-height: 88px; text-align: center; }
         .artifact-assembly .upgrade-icon { box-sizing: content-box; flex: 0 0 auto; text-decoration: none; }
         .artifact-assembly__count { display: block; margin-top: 4px; font-weight: bold; white-space: nowrap; }
+        /* Нет в рюкзаке нужного количества — картинка тусклая (как недоступные отмычки и закрытые медали репутации). */
+        .artifact-assembly .is-missing .upgrade-icon img { opacity: .42; filter: grayscale(.85); transition: opacity .15s, filter .15s; }
+        .artifact-assembly .is-missing .upgrade-icon:hover img { opacity: .75; filter: grayscale(.4); }
         .artifact-assembly__equals { flex: 0 0 auto; align-self: flex-start; display: flex; align-items: center; height: 71px; font-size: 28px; font-weight: bold; color: #8d2616; }
         .artifact-assembly__result { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; text-align: center; }
         .artifact-assembly__result-preview { width: 100px; min-height: 88px; }

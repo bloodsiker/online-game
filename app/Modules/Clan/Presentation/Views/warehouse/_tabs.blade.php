@@ -1,3 +1,4 @@
+@include('partials.image-tabs-fix')
 @php
     $btnLeft1   = 'img/bg/btn/btn-left1.gif';
     $btnCenter1 = 'img/bg/btn/btn-cent1.gif';

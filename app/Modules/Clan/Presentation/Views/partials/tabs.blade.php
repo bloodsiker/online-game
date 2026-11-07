@@ -1,3 +1,4 @@
+@include('partials.image-tabs-fix')
 @php
     $clanTabs = [
         ['route' => 'clan.member',      'label' => __('Состав клана')],

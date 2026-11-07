@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
 <head>
+    @include('partials.image-tabs-fix')
     @include('interface::partials.game-translations')
     <meta charset="utf-8">
     <meta name="csrf-token" content="{{ $csrfToken }}">

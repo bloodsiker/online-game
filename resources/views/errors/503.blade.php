@@ -39,15 +39,7 @@
             box-shadow: 0 0 0 4px rgba(18, 12, 7, .8), 0 20px 60px rgba(0, 0, 0, .7);
         }
         .logo { width: 96px; height: 96px; filter: drop-shadow(0 0 14px rgba(237, 203, 134, .35)); }
-        .code {
-            margin: 18px 0 0;
-            color: #edcb86;
-            font: bold 56px/1 Cambria, Georgia, 'Times New Roman', serif;
-            letter-spacing: .08em;
-            text-shadow: 2px 2px #281b10, 0 0 24px rgba(237, 203, 134, .25);
-        }
-        .status { margin: 6px 0 22px; color: #b59b7a; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; }
-        h1 { margin: 0 0 10px; color: #edcb86; font: bold 20px/1.4 Cambria, Georgia, serif; text-shadow: 1px 1px #281b10; }
+        h1 { margin: 20px 0 10px; color: #edcb86; font: bold 20px/1.4 Cambria, Georgia, serif; text-shadow: 1px 1px #281b10; }
         p { margin: 0 0 10px; }
         .muted { color: #b59b7a; font-size: 12px; }
         .divider { height: 1px; margin: 22px 0 18px; background: linear-gradient(90deg, transparent, #7a6046, transparent); }
@@ -77,8 +69,6 @@
 <body>
     <main class="box">
         <img class="logo" src="/main/img/logo.png" alt="{{ __('homepage.game_name') }}">
-        <div class="code">503</div>
-        <div class="status">Service Unavailable</div>
 
         <h1>Идут технические работы</h1>
         <p>Мир {{ __('homepage.game_name') }} ненадолго закрыт: мы обновляем игру.</p>

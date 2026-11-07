@@ -20,7 +20,7 @@ class EloquentNpcReadRepository implements NpcReadRepository
 {
     public function findNpcByIdOrFail(int $id): Npc
     {
-        return Npc::with(['structures.actions', 'location'])->findOrFail($id);
+        return Npc::with(['structures.actions', 'location', 'activeTradePost'])->findOrFail($id);
     }
 
     public function findNpcByUuidOrFail(string $uuid): Npc

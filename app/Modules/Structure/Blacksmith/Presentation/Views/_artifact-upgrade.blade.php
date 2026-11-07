@@ -34,7 +34,7 @@
                         <span class="artifact-assembly__count">+{{ $level }}</span>
                     </div>
                     <span class="artifact-upgrade__symbol" aria-hidden="true">+</span>
-                    <div class="artifact-upgrade__operand" title="{{ $source->name }} +0">
+                    <div @class(['artifact-upgrade__operand', 'is-missing' => $upgrade['donors'] < 1]) title="{{ $source->name }} +0">
                         <a class="upgrade-icon" href="{{ route('items.info.share', ['id' => $source->id]) }}"
                            data-id="artifact_template_{{ $source->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                            onclick="window.open(this.href, '', 'width=730,height=700,resizable=yes,scrollbars=yes'); return false;">
@@ -44,7 +44,7 @@
                     </div>
                     @foreach($upgrade['materials'] as $material)
                         <span class="artifact-upgrade__symbol" aria-hidden="true">+</span>
-                        <div class="artifact-upgrade__operand" title="{{ $material['item']->name }}">
+                        <div @class(['artifact-upgrade__operand', 'is-missing' => $material['available'] < $material['needed']]) title="{{ $material['item']->name }}">
                             <a class="upgrade-icon" href="{{ route('items.info.share', ['id' => $material['item']->id]) }}"
                                data-id="artifact_template_{{ $material['item']->id }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                                onclick="window.open(this.href, '', 'width=730,height=700,resizable=yes,scrollbars=yes'); return false;">

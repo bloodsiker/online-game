@@ -13,7 +13,7 @@
         <div class="artifact-assembly__row">
             <div class="artifact-assembly__ingredients">
                 @foreach($assembly['ingredients'] as $item)
-                    <div class="artifact-assembly__ingredient">
+                    <div @class(['artifact-assembly__ingredient', 'is-missing' => ! $item['active']])>
                         <a class="upgrade-icon" href="{{ route('items.info.share', ['id' => $item['id']]) }}"
                            data-id="{{ $item['id'] }}" onmouseover="showItemInfo(this,event,2)" onmouseout="showItemInfo(this,event,0)"
                            onclick="window.open(this.href, '', 'width=730,height=700,resizable=yes,scrollbars=yes'); return false;">
