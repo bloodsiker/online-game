@@ -193,7 +193,7 @@
         <td align="center" valign="middle">
             <table height="10%" width="860" border="0" cellspacing="0" cellpadding="0" align="center">
                 <tbody>
-                <tr><td height="25">&nbsp;</td></tr>
+                @include('partials.info-logo')
                 <tr>
                     <td>
                         <div class="common-block">

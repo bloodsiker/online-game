@@ -21,7 +21,7 @@
     <meta property="og:site_name" content="{{ __('homepage.game_name') }}"/>
     <meta property="fb:admins" content="1"/>
     <meta property="og:description" content="{{ __('homepage.game_name') }}"/>
-    <link rel="icon" type="image/png" href="favicon.ico"/>
+    @include('partials.favicons')
     <link rel="alternate" type="application/rss+xml" title="{{ __('homepage.game_name') }}." href=""/>
 
 

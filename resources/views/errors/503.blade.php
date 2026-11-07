@@ -16,7 +16,7 @@
     <meta name="robots" content="noindex">
     <meta http-equiv="refresh" content="{{ $refresh }}">
     <title>{{ __('homepage.game_name') }} — технические работы</title>
-    <link rel="icon" type="image/png" href="/favicon.ico">
+    @include('partials.favicons')
     <style>
         * { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; }
