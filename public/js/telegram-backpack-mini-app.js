@@ -10,6 +10,8 @@
     const panels = { backpack: byId('inventory'), character: byId('profile'), auction: byId('auction'), chat: byId('chat'), reputations: byId('reputations'), influences: byId('influences'), online: byId('online') };
     const lots = byId('lots'), lotsEmpty = byId('lots-empty'), lotsPagination = byId('lots-pagination');
     const lotsPrevious = byId('lots-previous'), lotsNext = byId('lots-next');
+    const auctionForm = byId('auction-filters');
+    let auctionScope = 'all', auctionFilters = { name: '', type: '', rarity: '' };
     let view = 'backpack', auctionPage = 1, auctionLastPage = 1, onlinePage = 1, onlineLastPage = 1;
     const profileViews = ['character', 'reputations', 'influences'];
     const profileTabs = byId('profile-tabs'), onlineCount = byId('online-count');
@@ -36,6 +38,7 @@
         for (const [key, panel] of Object.entries(panels)) panel.setAttribute('aria-busy', String(busy && view === key));
         lotsPrevious.disabled = busy || auctionPage <= 1;
         lotsNext.disabled = busy || auctionPage >= auctionLastPage;
+        for (const button of auctionForm.querySelectorAll('button')) button.disabled = busy || !initData;
         byId('online-previous').disabled = busy || onlinePage <= 1;
         byId('online-next').disabled = busy || onlinePage >= onlineLastPage;
     }
@@ -254,6 +257,12 @@
     }
 
     function renderLots(data) {
+        for (const [key, choices] of Object.entries({ type: data.filters.types, rarity: data.filters.rarities })) {
+            const select = auctionForm.elements.namedItem(key), value = select.value;
+            select.replaceChildren(new Option(labels[key === 'type' ? 'auction_any_type' : 'auction_any_rarity'], ''));
+            for (const choice of choices) select.append(new Option(choice.label, choice.value));
+            select.value = value;
+        }
         lots.replaceChildren();
         for (const lot of data.data) {
             const card = document.createElement('article');
@@ -267,7 +276,7 @@
             image.loading = 'lazy';
             assignImage(image, lot.image_url, lot.name);
             picture.append(image);
-            picture.addEventListener('click', () => itemDetails({ ...lot, type_label: labels.mini_app_lot }));
+            picture.addEventListener('click', () => itemDetails({ ...lot, type_label: lot.type_label || labels.mini_app_lot }));
             const description = document.createElement('div');
             description.className = 'telegram-market__description';
             const name = document.createElement('h3');
@@ -290,6 +299,7 @@
         }
         auctionPage = data.meta.current_page;
         auctionLastPage = data.meta.last_page;
+        lotsEmpty.textContent = labels[auctionScope === 'mine' ? 'mini_app_no_lots' : 'auction_empty'];
         lotsEmpty.hidden = data.data.length > 0;
         lotsPagination.hidden = data.meta.total === 0;
         byId('lots-page').textContent = labels.mini_app_market_page.replace(/:(page|last|total)/g,
@@ -365,6 +375,12 @@
             const url = new URL(endpoint, window.location.href);
             if (url.origin !== window.location.origin) throw new Error('Invalid API origin');
             if (['auction', 'online'].includes(requestView)) url.searchParams.set('page', String(nextPage));
+            if (requestView === 'auction') {
+                url.searchParams.set('scope', auctionScope);
+                if (auctionScope === 'all') {
+                    for (const [key, value] of Object.entries(auctionFilters)) if (value) url.searchParams.set(key, value);
+                }
+            }
             const response = await fetch(url, {
                 credentials: 'omit', cache: 'no-store', signal: controller.signal,
                 headers: { Accept: 'application/json', 'X-Telegram-Init-Data': initData },
@@ -413,6 +429,20 @@
         button.addEventListener('click', () => switchView(button.dataset.view));
     }
     for (const button of profileTabs.querySelectorAll('[data-profile-view]')) button.addEventListener('click', () => switchView(button.dataset.profileView));
+    for (const button of root.querySelectorAll('[data-auction-scope]')) button.addEventListener('click', () => {
+        if (!initData || button.dataset.auctionScope === auctionScope) return;
+        auctionScope = button.dataset.auctionScope; auctionPage = 1;
+        for (const tab of root.querySelectorAll('[data-auction-scope]')) tab.setAttribute('aria-pressed', String(tab.dataset.auctionScope === auctionScope));
+        auctionForm.hidden = auctionScope === 'mine';
+        lots.replaceChildren(); lotsEmpty.hidden = lotsPagination.hidden = true;
+        load(1);
+    });
+    auctionForm.addEventListener('submit', event => {
+        event.preventDefault();
+        auctionFilters = Object.fromEntries(['name', 'type', 'rarity'].map(key => [key, auctionForm.elements.namedItem(key).value.trim()]));
+        auctionPage = 1; load(1);
+    });
+    auctionForm.addEventListener('reset', () => { auctionFilters = { name: '', type: '', rarity: '' }; auctionPage = 1; load(1); });
     byId('online-previous').addEventListener('click', () => load(onlinePage - 1));
     byId('online-next').addEventListener('click', () => load(onlinePage + 1));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshOnlineCount(); });

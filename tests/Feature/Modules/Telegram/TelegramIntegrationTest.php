@@ -478,26 +478,84 @@ final class TelegramIntegrationTest extends TestCase
         $this->link();
         $this->marketFixtures();
         DB::table('share_items')->where('id', 1)->update(['image' => 'items/agate.webp', 'rarity' => 'rare']);
-        foreach (range(5, 14) as $id) {
+        foreach (range(5, 24) as $id) {
             DB::table('auctions')->insert(['id' => $id, 'user_id' => 1, 'structure_id' => 9,
                 'item_id' => 1, 'count' => 2, 'price' => 80, 'created_at' => now(), 'updated_at' => now()]);
         }
         $headers = $this->miniAppHeaders();
-        $response = $this->getJson(route('telegram.mini-app.auction', ['user_id' => 2]), $headers)->assertOk()
+        $response = $this->getJson(route('telegram.mini-app.auction', ['scope' => 'mine', 'user_id' => 2]), $headers)->assertOk()
             ->assertJsonPath('locale', 'uk')->assertJsonPath('character.nickname', 'Mage <test>')
-            ->assertJsonPath('meta.total', 12)->assertJsonPath('meta.per_page', 10)->assertJsonCount(10, 'data')
+            ->assertJsonPath('meta.total', 22)->assertJsonPath('meta.per_page', 20)->assertJsonCount(20, 'data')
             ->assertJsonPath('data.0.name', 'Агат +2')->assertJsonPath('data.0.quantity', 2)
             ->assertJsonPath('data.0.image_url', asset('storage/items/agate.webp'))->assertJsonPath('data.0.rarity', 'rare')
             ->assertJsonPath('data.0.upgrade_level', 2)->assertJsonPath('data.0.total_price', 80)->assertJsonPath('data.0.unit_price', 40);
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
-        $this->getJson(route('telegram.mini-app.auction', ['page' => 2]), $headers)->assertOk()
+        $this->getJson(route('telegram.mini-app.auction', ['scope' => 'mine', 'page' => 2]), $headers)->assertOk()
             ->assertJsonPath('meta.current_page', 2)->assertJsonPath('meta.last_page', 2)->assertJsonCount(2, 'data');
         foreach (['page=-1', 'page[]=1', 'page=100001'] as $query) {
             $this->getJson(route('telegram.mini-app.auction').'?'.$query, $headers)->assertUnprocessable();
         }
         DB::table('auctions')->where('user_id', 1)->delete();
-        $this->getJson(route('telegram.mini-app.auction'), $headers)->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson(route('telegram.mini-app.auction', ['scope' => 'mine']), $headers)->assertOk()->assertJsonCount(0, 'data');
         $this->assertSame(1000, (int) DB::table('users')->where('id', 1)->value('money'));
+        Http::assertNothingSent();
+    }
+
+    public function test_mini_app_all_auction_lots_include_other_owners_and_structures_with_twenty_per_page(): void
+    {
+        $this->link();
+        $this->marketFixtures();
+        foreach (range(5, 25) as $id) {
+            DB::table('auctions')->insert(['id' => $id, 'user_id' => 2, 'structure_id' => 99,
+                'item_id' => 1, 'count' => 2, 'price' => 80, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        $headers = $this->miniAppHeaders();
+        $response = $this->getJson(route('telegram.mini-app.auction', ['per_page' => 100, 'user_id' => 2]), $headers)->assertOk()
+            ->assertJsonPath('scope', 'all')->assertJsonPath('meta.total', 24)->assertJsonPath('meta.per_page', 20)
+            ->assertJsonCount(20, 'data')->assertJsonPath('data.0.id', 25)->assertJsonPath('data.0.structure_id', 99)
+            ->assertJsonPath('filters.types.0.value', 'resource')->assertJsonPath('filters.types.0.label', 'Ресурси')
+            ->assertJsonCount(6, 'filters.rarities')->assertJsonPath('filters.rarities.0.label', 'Звичайний');
+        foreach ($response->json('data') as $lot) {
+            $this->assertArrayNotHasKey('user_id', $lot);
+            $this->assertArrayNotHasKey('seller', $lot);
+        }
+        $this->getJson(route('telegram.mini-app.auction', ['page' => 2]), $headers)->assertOk()
+            ->assertJsonPath('meta.current_page', 2)->assertJsonCount(4, 'data');
+        $this->getJson(route('telegram.mini-app.auction', ['scope' => 'mine']), $headers)->assertOk()
+            ->assertJsonPath('meta.total', 2)->assertJsonCount(2, 'data');
+        $this->assertSame(1000, (int) DB::table('users')->where('id', 1)->value('money'));
+        Http::assertNothingSent();
+    }
+
+    public function test_mini_app_auction_combines_localized_name_type_and_rarity_filters(): void
+    {
+        $this->link();
+        $this->marketFixtures();
+        foreach ([
+            [2, ['ru' => 'Красный эликсир', 'uk' => 'Червоний еліксир'], 'potion', 'rare', 2],
+            [3, ['ru' => 'Красный камень'], 'resource', 'rare', 2],
+            [4, ['ru' => 'Красный эликсир', 'uk' => 'Червоний еліксир'], 'potion', 'common', 2],
+            [5, ['ru' => 'Красный эликсир', 'uk' => 'Червоний еліксир'], 'potion', 'rare', 0],
+        ] as [$id, $name, $type, $rarity, $count]) {
+            DB::table('share_items')->insert(['id' => $id, 'name' => json_encode($name), 'type' => $type, 'rarity' => $rarity]);
+            DB::table('items')->insert(['id' => $id, 'share_item_id' => $id]);
+            DB::table('auctions')->insert(['id' => $id + 10, 'user_id' => 2, 'structure_id' => 9,
+                'item_id' => $id, 'count' => $count, 'price' => 100, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        $headers = $this->miniAppHeaders();
+        $this->getJson(route('telegram.mini-app.auction', ['name' => 'Червоний', 'type' => 'potion', 'rarity' => 'rare']), $headers)
+            ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.name', 'Червоний еліксир')
+            ->assertJsonPath('data.0.type_label', 'Еліксир')->assertJsonPath('data.0.id', 12);
+        $this->getJson(route('telegram.mini-app.auction', ['name' => 'Красный', 'type' => 'resource']), $headers)
+            ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.name', 'Красный камень');
+        $this->getJson(route('telegram.mini-app.auction', ['name' => 'Червоний', 'type' => 'resource']), $headers)
+            ->assertOk()->assertJsonPath('meta.total', 0)->assertJsonCount(0, 'data');
+        $this->getJson(route('telegram.mini-app.auction', ['rarity' => 'common']), $headers)
+            ->assertOk()->assertJsonPath('meta.total', 4);
+        foreach (['scope=other', 'scope[]=mine', 'name[]=test', 'name='.str_repeat('a', 101),
+            'type=invalid', 'type[]=potion', 'rarity=invalid', 'rarity[]=rare'] as $query) {
+            $this->getJson(route('telegram.mini-app.auction').'?'.$query, $headers)->assertUnprocessable();
+        }
         Http::assertNothingSent();
     }
 

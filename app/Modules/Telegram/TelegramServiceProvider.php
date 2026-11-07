@@ -6,7 +6,9 @@ namespace App\Modules\Telegram;
 
 use App\Modules\Interface\Domain\Contracts\OnlinePlayersReader;
 use App\Modules\Interface\Infrastructure\Persistence\EloquentOnlinePlayersReader;
+use App\Modules\Structure\Auction\Domain\Contracts\AuctionListingsReader;
 use App\Modules\Structure\Auction\Domain\Contracts\OwnMarketListingsReader;
+use App\Modules\Structure\Auction\Infrastructure\Persistence\EloquentAuctionListingsReader;
 use App\Modules\Structure\Auction\Infrastructure\Persistence\EloquentOwnMarketListingsReader;
 use App\Modules\Telegram\Domain\Contracts\BackpackPreviewRenderer;
 use App\Modules\Telegram\Domain\Contracts\TelegramCallbackResponder;
@@ -41,6 +43,7 @@ final class TelegramServiceProvider extends ServiceProvider
         $this->app->bind(OnlinePlayersReader::class, EloquentOnlinePlayersReader::class);
         $this->app->bind(CharacterSummaryReader::class, DatabaseCharacterSummaryReader::class);
         $this->app->bind(OwnMarketListingsReader::class, EloquentOwnMarketListingsReader::class);
+        $this->app->bind(AuctionListingsReader::class, EloquentAuctionListingsReader::class);
     }
 
     public function boot(): void

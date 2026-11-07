@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Telegram\Presentation\Http;
 
+use App\Modules\Share\Domain\Enums\ItemRarity;
+use App\Modules\Share\Domain\Enums\ShareItemType;
 use App\Modules\Telegram\Application\Services\TelegramProfileService;
 use App\Modules\Telegram\Application\Services\TelegramReadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Traits\Localizable;
+use Illuminate\Validation\Rule;
 
 final class TelegramMiniAppController
 {
@@ -47,13 +50,21 @@ final class TelegramMiniAppController
 
     public function auction(Request $request, TelegramReadService $read): JsonResponse
     {
-        $input = $request->validate(['page' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
+        $input = $request->validate([
+            'page' => ['sometimes', 'integer', 'min:1', 'max:100000'],
+            'scope' => ['sometimes', Rule::in(['all', 'mine'])],
+            'name' => ['nullable', 'string', 'max:100'],
+            'type' => ['nullable', Rule::enum(ShareItemType::class)],
+            'rarity' => ['nullable', Rule::enum(ItemRarity::class)],
+        ]);
         $userId = $request->attributes->get('telegram.account')->userId;
 
         return $this->withLocale($read->locale(userId: $userId), fn (): JsonResponse => response()->json([
             'ok' => true, 'locale' => app()->getLocale(), 'labels' => $this->labels(),
             'character' => $read->character(userId: $userId),
-        ] + $read->listings(userId: $userId, type: 'auction', page: (int) ($input['page'] ?? 1), perPage: 10)));
+        ] + $read->auction(userId: $userId, scope: $input['scope'] ?? 'all', page: (int) ($input['page'] ?? 1),
+            name: trim($input['name'] ?? ''), type: isset($input['type']) ? ShareItemType::from($input['type']) : null,
+            rarity: isset($input['rarity']) ? ItemRarity::from($input['rarity']) : null)));
     }
 
     public function reputations(Request $request, TelegramReadService $read, TelegramProfileService $profile): JsonResponse
@@ -106,7 +117,7 @@ final class TelegramMiniAppController
         }
 
         foreach (array_keys(__('telegram')) as $key) {
-            if (str_starts_with($key, 'chat_') || str_starts_with($key, 'profile_')) {
+            if (str_starts_with($key, 'chat_') || str_starts_with($key, 'profile_') || str_starts_with($key, 'auction_')) {
                 $labels[$key] = __('telegram.'.$key);
             }
         }

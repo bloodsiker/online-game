@@ -82,7 +82,19 @@
         </div>
     </section>
     <section class="telegram-backpack__panel" id="telegram-backpack-auction" aria-labelledby="telegram-backpack-title" hidden>
-        <h2 class="telegram-market__heading" data-telegram-label="mini_app_own_lots">{{ __('telegram.mini_app_own_lots') }}</h2>
+        <nav class="telegram-market__tabs" aria-label="{{ __('telegram.mini_app_auction') }}">
+            <button type="button" data-auction-scope="all" aria-pressed="true" data-telegram-label="auction_all">{{ __('telegram.auction_all') }}</button>
+            <button type="button" data-auction-scope="mine" aria-pressed="false" data-telegram-label="auction_mine">{{ __('telegram.auction_mine') }}</button>
+        </nav>
+        <form class="telegram-market__filters" id="telegram-backpack-auction-filters">
+            <label class="telegram-market__search"><span data-telegram-label="auction_search">{{ __('telegram.auction_search') }}</span><input type="search" name="name" maxlength="100" autocomplete="off"></label>
+            <label><span data-telegram-label="auction_type">{{ __('telegram.auction_type') }}</span><select name="type"><option value="" data-telegram-label="auction_any_type">{{ __('telegram.auction_any_type') }}</option></select></label>
+            <label><span data-telegram-label="auction_rarity">{{ __('telegram.auction_rarity') }}</span><select name="rarity"><option value="" data-telegram-label="auction_any_rarity">{{ __('telegram.auction_any_rarity') }}</option></select></label>
+            <div class="telegram-market__filter-actions">
+                <button type="submit" data-telegram-label="auction_apply">{{ __('telegram.auction_apply') }}</button>
+                <button type="reset" data-telegram-label="auction_reset">{{ __('telegram.auction_reset') }}</button>
+            </div>
+        </form>
         <div class="telegram-market__lots" id="telegram-backpack-lots"></div>
         <p class="telegram-backpack__empty" id="telegram-backpack-lots-empty" hidden data-telegram-label="mini_app_no_lots">{{ __('telegram.mini_app_no_lots') }}</p>
         <div class="telegram-market__pagination" id="telegram-backpack-lots-pagination" hidden>
