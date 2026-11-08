@@ -1,4 +1,4 @@
-<section class="b-shape b-aside__shape homepage-forum">
+<div class="b-shape b-aside__shape homepage-forum">
     <div class="b-shape__header">
         <div class="b-shape__decor"></div>
         <div class="homepage-heading homepage-heading--reference">{{ __('homepage.hot_forum') }}</div>
@@ -18,4 +18,4 @@
         @endforelse
         <a class="homepage-forum__all" href="{{ route('forum.index') }}">{{ __('homepage.all_forum_topics') }} »</a>
     </div>
-</section>
+</div>

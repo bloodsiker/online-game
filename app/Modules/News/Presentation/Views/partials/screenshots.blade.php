@@ -1,5 +1,5 @@
 <div class="b-shape__content b-shape__content--column">
-    <div class="b-slider b-slider--default homepage-gallery" data-homepage-gallery aria-label="{{ __('homepage.screenshots') }}">
+    <div class="b-slider b-slider--default homepage-gallery" data-homepage-gallery role="region" aria-label="{{ __('homepage.screenshots') }}">
         <div class="b-slider__preview">
             <a class="homepage-gallery__preview" data-gallery-preview href="{{ asset('main/images/screen/1.png') }}" aria-haspopup="dialog">
                 <img class="b-slider__image" src="{{ asset('main/images/screen/1.png') }}" width="240" height="176" decoding="async" alt="{{ __('homepage.gallery.image', ['number' => 1]) }}">

@@ -5,7 +5,7 @@
             <div class="homepage-heading homepage-heading--reference">{{ __('homepage.top_players') }}</div>
         </div>
         <div class="b-rate"><div class="b-rate__content">
-            <table class="b-rate__table" id="rating-users-rating-0" cellspacing="0" cellpadding="0" style="width:100%">
+            <table class="b-rate__table" id="rating-users-rating-0" style="width:100%">
                 <thead class="b-rate__thead"><tr>
                     <th class="b-rate__th b-rate__th--place">#</th>
                     <th class="b-rate__th b-rate__th--clanname">{{ __('homepage.player') }}</th>
@@ -38,7 +38,7 @@
             <div class="homepage-heading homepage-heading--reference">{{ __('homepage.top_clans') }}</div>
         </div>
         <div class="b-rate"><div class="b-rate__content">
-            <table class="b-rate__table" id="rating2-users-rating-0" cellspacing="0" cellpadding="0" style="width:100%">
+            <table class="b-rate__table" id="rating2-users-rating-0" style="width:100%">
                 <thead class="b-rate__thead"><tr>
                     <th class="b-rate__th b-rate__th--place">#</th>
                     <th class="b-rate__th b-rate__th--clanname">{{ __('homepage.clan') }}</th>

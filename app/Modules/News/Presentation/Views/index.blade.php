@@ -24,7 +24,7 @@
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 
     @include('partials.legacy-css', ['bundle' => 'homepage'])
@@ -174,6 +174,7 @@
 
 </head>
 <body class="b-page  b-page--home b-page--theme-home">
+<h1 class="visually-hidden">{{ __('homepage.seo_title') }}</h1>
 <div id="artifact_alt" style="left:0px;top:0px;width:300px; display:none; position:absolute; z-index: 1001;" onmouseover="this.style.display='none';"></div>
 {!! $newsItemTooltipScript ?? '' !!}
 <script>
@@ -191,7 +192,7 @@
 
 <div class="b-page__header">
     <form class="homepage-language" method="post" action="{{ route('homepage.language') }}" aria-label="{{ __('homepage.language') }}">
-        @csrf
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
         @if($selectedNews)<input type="hidden" name="news_id" value="{{ $selectedNews->id }}">@endif
         <button type="submit" name="language" value="ru" title="Русский" aria-label="Русский" aria-pressed="{{ app()->getLocale() === 'ru' ? 'true' : 'false' }}">RU</button>
         <button type="submit" name="language" value="uk" title="Українська" aria-label="Українська" aria-pressed="{{ app()->getLocale() === 'uk' ? 'true' : 'false' }}">UK</button>
@@ -302,7 +303,7 @@
                                                                     @if(config('game.prelaunch'))
                                                                         <input type="hidden" name="launch" value="1">
                                                                     @else
-                                                                        @csrf
+                                                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                                     @endif
                                                                     <div class="form-wrapper">
                                                                         <fieldset class="p-v-20">
@@ -311,7 +312,7 @@
                                                                         <fieldset class="lt pt-10">
 
                                                                             <div class="input-block">
-                                                                                <div style="display: none;" class="hint hint_top emailHint" name="email-hint">
+                                                                                <div style="display: none;" class="hint hint_top emailHint" data-name="email-hint">
                                                                                     <div class="hint-text">{{ __('homepage.email_hint') }}
                                                                                     </div>
                                                                                 </div>
@@ -448,8 +449,7 @@
                                             <a class="b-link b-link--default" href="{{ route('index', ['n' => $selectedNews->id]) }}">
                                                 <span class="b-icon b-icon--quant">{{ $selectedNews->visibleComments->count() }}</span>{{ __('homepage.comment') }}
                                             </a>
-                                            <span align="right"
-                                                  style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
+                                            <span style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
                                                 <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' alt='{{ __('Дата публикации') }}' style='width: 10px;position: relative;top: -1px;'> {{ $selectedNews->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
                                                 <img src='{{ asset('main/images/news/view.png') }}' alt='{{ __('Просмотры') }}' style='width: 10px;position: relative;top: -1px;'>
                                                 <b style='color:green;'>{{ $selectedNews->views_count }}</b>
@@ -462,7 +462,7 @@
                                     <div class="b-post__container" style="padding: 8px 12px;">
                                         @auth
                                             <form method="post" action="{{ route('news.comment', $selectedNews->id) }}">
-                                                {{ csrf_field() }}
+                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                 <textarea name="message" rows="3" style="width: 100%; box-sizing: border-box;" required></textarea>
                                                 <div style="text-align: right; margin-top: 6px;">
                                                     <button type="submit">{{ __('homepage.add_comment') }}</button>
@@ -523,8 +523,7 @@
                                                     <a class="b-link b-link--default" href="{{ route('index', ['n' => $newsPost->id]) }}">
                                                         <span class="b-icon b-icon--quant">{{ $newsPost->visible_comments_count }}</span>{{ __('homepage.comment') }}
                                                     </a>
-                                                    <span align="right"
-                                                          style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
+                                                    <span style="font-size: 9px;color: #a56262;position: absolute;top: 1px;right: 121px;">
                                                         <b style='color:darkred;'><img src='{{ asset('main/images/news/date.png') }}' alt='{{ __('Дата публикации') }}' style='width: 10px;position: relative;top: -1px;'> {{ $newsPost->created_at?->format('d.m.Y H:i') }}</b> | {{ __('homepage.views') }}:
                                                         <img src='{{ asset('main/images/news/view.png') }}' alt='{{ __('Просмотры') }}' style='width: 10px;position: relative;top: -1px;'>
                                                         <b style='color:green;'>{{ $newsPost->views_count }}</b>
@@ -600,9 +599,9 @@
                     <div>
                         <span style="position: relative;left: 33px;top: 3px;">
                             <a href="#" class="b-aside__support-link">{{ __('homepage.payments_description') }}<br>Portmone / VISA / Mastercard</a>
-                            <img src="{{ asset('main/images/payment/apple.png') }}" width="80px" alt="apple">
-                            <img src="{{ asset('main/images/payment/google.png') }}" width="80px" alt="google"><br>
-                            <img src="{{ asset('main/images/payment/visa.png') }}" width="80px" alt="viza">
+                            <img src="{{ asset('main/images/payment/apple.png') }}" width="80" alt="apple">
+                            <img src="{{ asset('main/images/payment/google.png') }}" width="80" alt="google"><br>
+                            <img src="{{ asset('main/images/payment/visa.png') }}" width="80" alt="visa">
 						</span>
                     </div>
                 </div>

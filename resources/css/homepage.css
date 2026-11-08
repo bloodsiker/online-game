@@ -47,3 +47,21 @@
 .homepage-lightbox__arrow--next { right: 5px; }
 .homepage-lightbox__counter { position: absolute; right: 36px; bottom: 7px; left: 36px; display: block; text-align: center; font: 12px Tahoma, sans-serif; }
 body.homepage-lightbox-open { overflow: hidden; }
+
+/* Вместо cellspacing="0" cellpadding="0" у таблиц рейтинга (устаревшие атрибуты).
+   :where() — нулевая специфичность, как у атрибутов: любые существующие стили отступов сильнее. */
+:where(.b-rate__table) { border-spacing: 0; }
+:where(.b-rate__table) :where(td, th) { padding: 0; }
+
+/* Заголовок страницы для поисковиков и экранных дикторов, визуально скрыт. */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}

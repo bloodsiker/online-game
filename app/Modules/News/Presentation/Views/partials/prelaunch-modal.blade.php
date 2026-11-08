@@ -11,7 +11,7 @@
               @if(!session()->has('launch_subscription_message')) hidden @endif
               data-sending="{{ __('prelaunch.sending') }}" data-error="{{ __('prelaunch.error') }}"
               data-expired="{{ __('prelaunch.expired') }}" data-rate-limited="{{ __('prelaunch.rate_limited') }}">
-            @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <p>{{ __('prelaunch.signup_hint') }}</p>
             <label for="prelaunch-email">{{ __('prelaunch.email') }}</label>
             <input id="prelaunch-email" name="email" type="email" maxlength="254" required autocomplete="email" value="{{ old('email') }}">
