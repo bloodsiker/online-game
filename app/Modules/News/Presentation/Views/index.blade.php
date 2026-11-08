@@ -2,6 +2,7 @@
 <html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
     <meta charset="utf-8">
+    @include('partials.google-tag')
     @include('partials.seo', ['url' => url('/')])
     @vite('resources/js/homepage.js')
     @include('partials.favicons')

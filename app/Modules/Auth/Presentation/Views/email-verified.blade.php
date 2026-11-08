@@ -2,6 +2,7 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ __('auth.email_verification.verified_title') }}</title>
     <link rel="stylesheet" href="{{ asset('main/css/main_register.css') }}">

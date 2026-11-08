@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     @include('partials.seo', [
         'title' => __(':name [:lvl] — персонаж игры :game', ['name' => $user->name, 'lvl' => $user->player->lvl, 'game' => __('homepage.game_name')]),
         'description' => __(':name — :race, :class, :lvl уровень. Профиль персонажа браузерной фэнтезийной MMORPG :game: экипировка, характеристики и статистика боёв.', ['name' => $user->name, 'race' => $user->player->race?->name ?? '—', 'class' => $stats->getDisplayCombatClassLabel(), 'lvl' => $user->player->lvl, 'game' => __('homepage.game_name')]),

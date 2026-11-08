@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Тег Google (GTM). Пустое значение — тег не выводится.
+    'google_tag' => [
+        'id' => env('GOOGLE_TAG_ID', 'GTM-M9R2VFHZ'),
+        // Локально и в тестах аналитику не шлём.
+        'enabled' => env('GOOGLE_TAG_ENABLED', ! in_array(env('APP_ENV'), ['local', 'testing'], true)),
+    ],
+
 ];

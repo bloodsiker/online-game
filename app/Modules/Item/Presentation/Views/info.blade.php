@@ -2,6 +2,7 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     @include('interface::partials.game-translations')
     @php
         $seoText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($page->description))));

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
+    @include('partials.google-tag')
     <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
     <title>New Online game</title>
 

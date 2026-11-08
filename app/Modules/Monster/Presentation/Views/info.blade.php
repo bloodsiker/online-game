@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     @php
         $seoText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($page->monster->description))));
     @endphp

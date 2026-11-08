@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     <title>{{ $skill->name }} - информация о заклинании</title>
     <style>
         html, body { height: 100%; margin: 0; }

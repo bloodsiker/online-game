@@ -2,6 +2,7 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
+    @include('partials.google-tag')
     <meta name="robots" content="noindex">
     <title>{{ config('app.name') }}</title>
 </head>
