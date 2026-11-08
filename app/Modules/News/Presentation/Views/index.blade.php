@@ -243,7 +243,7 @@
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
-                    <a class="b-aside__impo-link" href="#"
+                    <a class="b-aside__impo-link" href="{{ config('game.telegram_channel') }}" target="_blank" rel="noopener"
                        style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 10px;top: 8px;"><span>{{ __('homepage.telegram') }}</span></a>
                 </li>
 
