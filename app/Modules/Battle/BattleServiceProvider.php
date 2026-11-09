@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Battle;
 
+use App\Modules\Battle\Domain\Contracts\HomepageBossBattlesReader;
 use App\Modules\Battle\Domain\Contracts\RandomizerInterface;
 use App\Modules\Battle\Infrastructure\MtRandomizer;
+use App\Modules\Battle\Infrastructure\Persistence\EloquentHomepageBossBattlesReader;
 use App\Modules\Battle\Presentation\Console\SimulateBattleTriangle;
+use App\Modules\Battle\Presentation\Console\SimulateGearTiers;
 use App\Modules\Battle\Presentation\Console\SimulateLevelingEconomy;
 use App\Modules\Battle\Presentation\Console\SimulatePveEncounter;
-use App\Modules\Battle\Presentation\Console\SimulateGearTiers;
 use App\Modules\Battle\Presentation\Console\SimulatePveRoster;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -18,6 +20,7 @@ class BattleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(HomepageBossBattlesReader::class, EloquentHomepageBossBattlesReader::class);
         $this->app->bind(RandomizerInterface::class, MtRandomizer::class);
     }
 

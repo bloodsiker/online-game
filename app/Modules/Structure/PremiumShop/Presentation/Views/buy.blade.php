@@ -191,7 +191,7 @@
 
 @include('premium_shop::_nav', ['activeMenu' => 'shop'])
 
-<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px;">
+<table border="0" cellspacing="0" cellpadding="0" width="100%" style="position: relative; top: 0px; margin-top: 5px;">
     <tbody>
     <tr height="21">
         @foreach($shop->categories as $category)
@@ -199,7 +199,7 @@
                 $active = $activeCategoryId === $category->id;
             @endphp
             <td width="19"><img id="left_1" src="{{ asset($active ? $btnLeft2 : $btnLeft1) }}" width="19" height="21"><br></td>
-            <td width="60" id="tab_1" align="center" style="background: url({{ asset($active ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0 2px 6px;">
+            <td width="60" id="tab_1" align="center" style="background: url({{ asset($active ? $btnCenter2 : $btnCenter1) }}) center top repeat-x; padding: 0 2px 4px;">
                 <a id="center_1" href="{{ route('premium.shop', ['category_id' => $category->id]) }}" title="Купить" class="{{ $active ? 'btn_2' : 'btn_1' }}">{{ $category->name }}</a>
             </td>
             <td width="19"><img id="right_1" src="{{ asset($active ? $btnRight2 : $btnRight1) }}" width="19" height="21"><br></td>

@@ -2,8 +2,16 @@
 <html lang="{{ app()->getLocale() }}" class="lang-{{ app()->getLocale() }} {{ app()->getLocale() }} {{ auth()->check() ? 'isUser' : 'isGuest' }}">
 <head>
     <meta charset="utf-8">
+    @php
+        $archiveListing = ($isNewsArchive ?? false) && !$selectedNews;
+        $archivePage = $archiveListing ? $newsPosts->currentPage() : 1;
+    @endphp
     @include('partials.google-tag')
-    @include('partials.seo', ['url' => url('/')])
+    @include('partials.seo', [
+        'url' => $archiveListing ? route('news.index', $archivePage > 1 ? ['page' => $archivePage] : []) : url('/'),
+        'title' => $archiveListing ? ($archivePage > 1 ? __('homepage.news_archive_page_title', ['page' => $archivePage]) : __('homepage.news_archive_title')) : __('homepage.seo_title'),
+        'description' => $archiveListing ? __('homepage.news_archive_description') : __('homepage.seo_description'),
+    ])
     @vite('resources/js/homepage.js')
     @include('partials.favicons')
     <script type="application/ld+json">
@@ -175,7 +183,7 @@
 
 </head>
 <body class="b-page  b-page--home b-page--theme-home">
-<h1 class="visually-hidden">{{ __('homepage.seo_title') }}</h1>
+@unless($archiveListing)<h1 class="visually-hidden">{{ __('homepage.seo_title') }}</h1>@endunless
 <div id="artifact_alt" style="left:0px;top:0px;width:300px; display:none; position:absolute; z-index: 1001;" onmouseover="this.style.display='none';"></div>
 {!! $newsItemTooltipScript ?? '' !!}
 <script>
@@ -195,6 +203,7 @@
     <form class="homepage-language" method="post" action="{{ route('homepage.language') }}" aria-label="{{ __('homepage.language') }}">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
         @if($selectedNews)<input type="hidden" name="news_id" value="{{ $selectedNews->id }}">@endif
+        @if($archiveListing)<input type="hidden" name="archive_page" value="{{ $archivePage }}">@endif
         <button type="submit" name="language" value="ru" title="Русский" aria-label="Русский" aria-pressed="{{ app()->getLocale() === 'ru' ? 'true' : 'false' }}">RU</button>
         <button type="submit" name="language" value="uk" title="Українська" aria-label="Українська" aria-pressed="{{ app()->getLocale() === 'uk' ? 'true' : 'false' }}">UK</button>
     </form>
@@ -258,6 +267,11 @@
         </div>
     </header>
 
+    <div class="homepage-logo">
+        <a href="{{ route('index') }}" title="{{ __('homepage.game_name') }}">
+            <img src="{{ asset('img/logo/Logoo500.webp') }}" width="330" height="110" alt="{{ __('homepage.game_name') }}" decoding="async" fetchpriority="high">
+        </a>
+    </div>
 </div>
 
 <div class="b-page__nav">
@@ -362,6 +376,8 @@
                     </div>
                     @include('news::partials.screenshots')
 
+                    @include('news::partials.boss-battles')
+
                     @include('news::partials.hot-forum')
 
                     <div class="b-aside__discuss">
@@ -372,7 +388,7 @@
                             </div>
                             <br>
 
-                            <div class="timer" data-homepage-timer data-started-at="2025-07-01T00:00:00Z">
+                            <div class="timer" data-homepage-timer data-started-at="2026-11-09T18:00:00+02:00">
                                 <div class="timer-countdown">
                                     <div class="timer-block">
                                         <span id="days" class="title-count"></span>
@@ -403,9 +419,7 @@
                             <div class="b-aside__support-title">
                                 <div class="homepage-heading homepage-heading--reference">{{ __('homepage.support') }}</div>
                             </div>
-                            <x-protected-email :email="config('game.support_email')" class="b-aside__support-link">Email:
-                                <br>
-                            </x-protected-email>
+                            <x-protected-email :email="config('game.support_email')" class="b-aside__support-link" />
 
                         </div>
                     </div>
@@ -417,7 +431,7 @@
 
             <div class="b-index">
                 <div class="b-index__header u-style-bg-gradient">
-
+                    @if($archiveListing)<h1 class="homepage-news-heading">{{ __('homepage.all_news') }}</h1>@endif
                 </div>
                 <div class="b-index__content u-style-bg-gradient">
 
@@ -444,7 +458,7 @@
                                     </div>
                                     <div class="b-post__footer">
                                         <div class="b-post__more">
-                                            <a href="{{ route('index') }}" class="b-link b-link--default">{{ __('homepage.back_to_news') }}</a>
+                                            <a href="{{ route('news.index') }}" class="b-link b-link--default">{{ __('homepage.back_to_news') }}</a>
                                         </div>
                                         <div class="b-post__comments">
                                             <a class="b-link b-link--default" href="{{ route('index', ['n' => $selectedNews->id]) }}">
@@ -494,7 +508,9 @@
                             </div>
                         @endif
 
-                        @if(!$selectedNews && isset($newsPosts) && $newsPosts->isNotEmpty())
+                        @if($archiveListing)
+                            @include('news::partials.archive-list')
+                        @elseif(!$selectedNews && isset($newsPosts) && $newsPosts->isNotEmpty())
                             @foreach($newsPosts as $newsPost)
                                 @if(!$selectedNews || $selectedNews->id !== $newsPost->id)
                                     <div class="b-news-item">
@@ -549,19 +565,12 @@
 
 
                     </div>
-                    <div class="legacy-center" style="text-align: center; text-align: -webkit-center; text-align: -moz-center;">
-                        <div class="b-pager b-pager--default pull-right">
-                            <div class="b-pager__container">
-                                <ul class="b-pager__list">
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                    @if($archiveListing){{ $newsPosts->links('news::partials.pagination') }}@endif
                 </div>
                 <div class="b-index__footer text-center u-style-bg-gradient">
 
 
-                    <a class="b-link b-link--default" href="#">{{ __('homepage.all_news') }}</a>
+                    <a class="b-link b-link--default" href="{{ $archiveListing ? route('index') : route('news.index') }}">{{ $archiveListing ? __('homepage.home') : __('homepage.all_news') }}</a>
                 </div>
             </div>
 
@@ -613,6 +622,12 @@
 </div>
 
 
+@if(config('game.telegram_channel'))
+    <a class="homepage-telegram" href="{{ config('game.telegram_channel') }}" target="_blank" rel="noopener noreferrer"
+       title="{{ __('homepage.telegram') }}" aria-label="{{ __('homepage.telegram') }}">
+        <img src="{{ asset('main/images/news/telegram.svg') }}" width="58" height="58" alt="" aria-hidden="true">
+    </a>
+@endif
 @include('news::partials.lightbox')
 @if(config('game.prelaunch'))
     @include('news::partials.prelaunch-modal')

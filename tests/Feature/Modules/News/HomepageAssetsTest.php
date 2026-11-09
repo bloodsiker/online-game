@@ -26,10 +26,10 @@ final class HomepageAssetsTest extends TestCase
             $this->assertStringContainsString('js/item_tooltip.js', $html);
             $this->assertStringNotContainsString('src="index.html"', $html);
             $this->assertStringNotContainsString('src=""', $html);
-            $this->assertSame(7, substr_count($html, 'data-gallery-index='));
+            $this->assertSame(15, substr_count($html, 'data-gallery-index='));
             $this->assertStringContainsString('id="homepage-lightbox"', $html);
             $this->assertStringContainsString(__('homepage.gallery.close'), $html);
-            $this->assertStringContainsString(__('homepage.gallery.image', ['number' => 7]), $html);
+            $this->assertStringContainsString(__('homepage.gallery.image', ['number' => 15]), $html);
         }
     }
 }

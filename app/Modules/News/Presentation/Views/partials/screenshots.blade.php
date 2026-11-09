@@ -1,15 +1,25 @@
+@php
+    // full — лайтбокс, preview — большое превью (240×126), thumb — миниатюра (80×60).
+    // Файлы: N-N.webp (2000px), N-Nsm.webp (750px), N-Nxs.webp (160×120).
+    $screens = collect(range(1, 15))->map(fn (int $number): array => [
+        'full' => asset("main/images/screen/{$number}-{$number}.webp"),
+        'preview' => asset("main/images/screen/{$number}-{$number}sm.webp"),
+        'thumb' => asset("main/images/screen/{$number}-{$number}xs.webp"),
+    ]);
+    $first = $screens->first();
+@endphp
 <div class="b-shape__content b-shape__content--column">
     <div class="b-slider b-slider--default homepage-gallery" data-homepage-gallery role="region" aria-label="{{ __('homepage.screenshots') }}">
         <div class="b-slider__preview">
-            <a class="homepage-gallery__preview" data-gallery-preview href="{{ asset('main/images/screen/1.png') }}" aria-haspopup="dialog">
-                <img class="b-slider__image" src="{{ asset('main/images/screen/1.png') }}" width="240" height="176" decoding="async" alt="{{ __('homepage.gallery.image', ['number' => 1]) }}">
+            <a class="homepage-gallery__preview" data-gallery-preview href="{{ $first['full'] }}" aria-haspopup="dialog">
+                <img class="b-slider__image" src="{{ $first['preview'] }}" width="240" height="126" decoding="async" alt="{{ __('homepage.gallery.image', ['number' => 1]) }}">
             </a>
         </div>
         <div class="b-slider__thumbs">
             <div class="homepage-gallery__track" data-gallery-track>
-                @foreach(range(1, 7) as $number)
-                    <a class="homepage-gallery__thumb" data-gallery-index="{{ $number - 1 }}" href="{{ asset('main/images/screen/'.$number.'.png') }}" aria-current="{{ $number === 1 ? 'true' : 'false' }}">
-                        <img src="{{ asset('main/images/screen/'.$number.'.png') }}" width="78" height="60" loading="lazy" decoding="async" alt="{{ __('homepage.gallery.image', ['number' => $number]) }}">
+                @foreach($screens as $index => $screen)
+                    <a class="homepage-gallery__thumb" data-gallery-index="{{ $index }}" data-preview="{{ $screen['preview'] }}" href="{{ $screen['full'] }}" aria-current="{{ $index === 0 ? 'true' : 'false' }}">
+                        <img src="{{ $screen['thumb'] }}" width="78" height="60" loading="lazy" decoding="async" alt="{{ __('homepage.gallery.image', ['number' => $index + 1]) }}">
                     </a>
                 @endforeach
             </div>

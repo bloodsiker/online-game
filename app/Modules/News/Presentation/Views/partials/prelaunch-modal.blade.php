@@ -2,7 +2,7 @@
         data-open-on-load="{{ request()->boolean('launch') || session()->has('launch_subscription_message') ? '1' : '0' }}">
     <section class="prelaunch-modal__content">
         <button class="prelaunch-modal__close" type="button" data-prelaunch-close aria-label="{{ __('prelaunch.close') }}">×</button>
-        <div class="prelaunch-modal__ornament" aria-hidden="true">✦</div>
+        <img class="prelaunch-modal__ornament" src="{{ asset('img/logo/Logo100.webp') }}" srcset="{{ asset('img/logo/Logo200.webp') }} 2x" width="72" height="72" alt="" decoding="async">
         <h2 id="prelaunch-title">{{ __('prelaunch.title') }}</h2>
         <p>{{ __('prelaunch.intro') }}</p>
         <p class="prelaunch-modal__availability">{{ __('prelaunch.availability') }}</p>

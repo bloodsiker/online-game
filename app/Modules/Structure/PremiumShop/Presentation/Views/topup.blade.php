@@ -262,7 +262,7 @@
                                                 @if($paymentSettings?->minimum_amount_minor > 0)<b style="color:#fff200;">{{ __('payments.minimum', ['amount' => number_format($paymentSettings->minimum_amount_minor / 100, 2, '.', ' ')]) }}</b><br>@endif
                                                 <br><br>
                                                 <b style="color:red;">При желании вы можете пополнить счёт другому игроку, указав его ID</b><br><b style="color:green;">Начисление на баланс: от 5 мин до 6 часов<br>Рабочее время: с 09:00 по 23:00</b>, в другое время лучше не пополнять, если не хотите ждать до утра<br>
-                                                Администратор: <b>Aizen&nbsp;[12]</b>
+                                                Администратор: @include('premium_shop::_administrator')
                                                 @if(!$paymentSettings?->is_enabled)<p>{{ __('payments.disabled') }}</p>@endif
                                                 @if($errors->any())<p style="color:#fffc00">{{ $errors->first() }}</p>@endif
                                                 </span>
@@ -378,7 +378,7 @@
                                                     </div>
                                                     <div class="step">
                                                         <h3>Готово</h3>
-                                                        <p>После оплаты напишите администратору <b>Aizen&nbsp;[12]</b> на внутреннюю почту игры (справа), или свяжитесь с нами в Discord: <b>aizenukraine</b>.</p>
+                                                        <p>После оплаты напишите администратору @include('premium_shop::_administrator') на внутреннюю почту игры (справа), или свяжитесь с нами в Discord: <b>aizenukraine</b>.</p>
                                                         <p><b>После проверки транзакции средства будут зачислены.</b></p>
                                                         <div class="nav"><b class="butt1 pointer"><b><input value="← Назад" type="submit" class="grnn" style="font-size:9px!important" onclick="showStep(3);return false;"></b></b></div>
                                                     </div>
@@ -520,7 +520,7 @@
                                                                 <p>В разделе <b>"Перевод средств"</b><br>укажите номер кошелька и сумму перевода.</p>
                                                                 <div class="warn">⚠ Внимательно проверяйте номер перед подтверждением</div>
                                                             </div>
-                                                            <p>После перевода сообщите администратору <b>Aizen&nbsp;[12]</b> для быстрого зачисления.</p>
+                                                            <p>После перевода сообщите администратору @include('premium_shop::_administrator') для быстрого зачисления.</p>
                                                             <div class="nav"><b class="butt1 pointer"><b><input value="← Назад" type="submit" class="grnn" style="font-size:9px!important" onclick="showStepVolet(3);return false;"></b></b></div>
                                                         </div>
                                                     </div>
@@ -842,6 +842,21 @@
 @include('payments::_history', ['orders' => $paymentOrders])
 
 <script>
+function paymentAdministratorPrivate(name) {
+    try {
+        var gameDocument = window.top.document;
+        var bottomFrame = gameDocument.getElementById('bottom-frame');
+        var chatFrame = gameDocument.getElementById('chat-frame');
+        if (!bottomFrame && chatFrame && chatFrame.contentDocument) {
+            bottomFrame = chatFrame.contentDocument.getElementById('bottom-frame');
+        }
+        if (bottomFrame && bottomFrame.contentWindow) {
+            bottomFrame.contentWindow.postMessage({type: 'insertPrivate', name: name}, window.location.origin);
+        }
+    } catch (error) {}
+    return false;
+}
+
 var max_amount = 30000;
 var paymentUnitPrice = @json($paymentRate);
 var paymentRateMinor = @json($paymentSettings?->diamond_price_minor ?? 650);

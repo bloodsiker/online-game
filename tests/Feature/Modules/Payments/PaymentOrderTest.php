@@ -29,9 +29,14 @@ final class PaymentOrderTest extends TestCase
             $this->markTestSkipped('Только SQLite :memory:, игровая база не используется.');
         }
         config(['session.driver' => 'array', 'cache.default' => 'array']);
+        Schema::create('players', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedInteger('lvl');
+        });
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
+            $table->unsignedBigInteger('player_id')->nullable();
             $table->integer('diamond')->default(10);
             $table->integer('money')->default(100);
             $table->boolean('is_admin')->default(false);
@@ -249,7 +254,10 @@ final class PaymentOrderTest extends TestCase
     {
         $order = $this->createOrder();
         $this->loginAs(1)->get(route('payments.orders.show', $order->public_id))->assertOk()->assertSee($order->public_id);
-        $this->get(route('premium.topup'))->assertOk()->assertSee('top-up-form')->assertSee('Мои ордера');
+        $this->get(route('premium.topup'))->assertOk()->assertSee('top-up-form')->assertSee('Мои ордера')
+            ->assertSee('PaymentUser1')->assertDontSee('Aizen')
+            ->assertSee(route('info.user', ['id' => 1]))
+            ->assertSee('img/icon/users-arrow.gif')->assertSee('main/images/player_info.gif');
         $this->loginAs(3)->get(route('admin.payment_orders.index'))->assertOk()->assertSee('ручное подтверждение', false);
         $this->get(route('admin.payment_orders.show', $order->public_id))->assertOk()->assertSee('Подтвердить оплату');
         $this->post(route('admin.payment_orders.confirm', $order->public_id), ['confirmed_payment' => 1])->assertRedirect();

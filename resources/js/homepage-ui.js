@@ -14,7 +14,7 @@ export function initializeGallery(gallery, dialog) {
         selected = (index + thumbnails.length) % thumbnails.length;
         const thumbnail = thumbnails[selected];
         preview.href = thumbnail.href;
-        previewImage.src = thumbnail.href;
+        previewImage.src = thumbnail.dataset?.preview || thumbnail.href;
         previewImage.alt = thumbnail.querySelector('img').alt;
         thumbnails.forEach((item, position) => item.setAttribute('aria-current', position === selected ? 'true' : 'false'));
 

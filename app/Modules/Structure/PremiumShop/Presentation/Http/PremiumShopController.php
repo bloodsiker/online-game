@@ -14,6 +14,7 @@ use App\Modules\Structure\Infrastructure\Persistence\Models\Structure;
 use App\Modules\Structure\PremiumShop\Application\UseCases\GetShopItems;
 use App\Modules\Structure\PremiumShop\Application\UseCases\PurchaseCart;
 use App\Modules\Structure\Shop\Application\Services\ShopCartService;
+use App\Modules\User\Domain\Contracts\PublicCharacterReader;
 use App\Modules\User\Infrastructure\Persistence\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -127,7 +128,7 @@ class PremiumShopController extends Controller
         return redirect()->back();
     }
 
-    public function topup(): View
+    public function topup(PublicCharacterReader $characters): View
     {
         /** @var User $user */
         $user = Auth::user();
@@ -140,8 +141,9 @@ class PremiumShopController extends Controller
         $paymentRequestId = (string) Str::uuid();
         $paymentRate = ($paymentSettings?->diamond_price_minor ?? 650) / 100;
         $paymentDefaultDiamonds = max(1, (int) ceil(($paymentSettings?->minimum_amount_minor ?? 50000) / ($paymentSettings?->diamond_price_minor ?: 650)));
+        $paymentAdministrator = $characters->find(userId: 1);
 
-        return view('premium_shop::topup', compact('user', 'paymentSettings', 'paymentOrders', 'paymentRequestId', 'paymentRate', 'paymentDefaultDiamonds'));
+        return view('premium_shop::topup', compact('user', 'paymentSettings', 'paymentOrders', 'paymentRequestId', 'paymentRate', 'paymentDefaultDiamonds', 'paymentAdministrator'));
     }
 
     public function stock(ItemTooltipCollector $tooltipCollector): mixed
