@@ -14,6 +14,6 @@ final readonly class SiteSitemap
     /** @return list<array{url: string, lastmod: ?string}> */
     public function entries(): array
     {
-        return [...$this->library->entries(), ...$this->forum->entries()];
+        return [['url' => route('index'), 'lastmod' => null], ...$this->library->entries(), ...$this->forum->entries()];
     }
 }

@@ -80,7 +80,8 @@ final class PrelaunchTest extends TestCase
         $this->assertSame(3, substr_count($html, ' data-prelaunch-open'));
         $this->assertStringContainsString('id="prelaunch-modal"', $html);
         $this->assertStringContainsString('data-prelaunch-login', $html);
-        $this->assertStringContainsString('css/prelaunch.css', $html);
+        // prelaunch.css подключён отдельно или входит в собранный бандл главной.
+        $this->assertMatchesRegularExpression('~css/prelaunch\.css|build/legacy/homepage-[0-9a-f]+\.css~', $html);
         $this->assertStringContainsString('js/prelaunch.js', $html);
         $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">'.$html);

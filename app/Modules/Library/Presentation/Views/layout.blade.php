@@ -8,7 +8,8 @@
     @isset($seo)
         @include('library::partials.seo')
     @else
-        <title>@yield('title') — @yield('site-section', __('library.name'))</title>
+        <title>@yield('title') — {{ __('library.seo_brand') }}</title>
+        <meta name="robots" content="noindex, follow">
     @endisset
     <script src="{{ asset('main/js/common.js') }}"></script>
     <script src="{{ asset('main/js/simple_alt.js') }}"></script>

@@ -46,12 +46,12 @@ final class LibrarySeoTest extends TestCase
             ->get('/uk/library/guide/treasure?utm_source=test')
             ->assertOk()->assertHeader('Content-Language', 'uk')
             ->assertSee('<html lang="uk">', false)
-            ->assertSee('<title>Пошук скарбів — Бібліотека — Вічність</title>', false)
+            ->assertSee('<title>Пошук скарбів — Бібліотека — Вічність (Eternum)</title>', false)
             ->assertSee('Український текст')
             ->assertSee('<h1 class="library-page-title">Пошук скарбів</h1>', false);
         $xpath = $this->xpath($response->getContent());
         $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//link[@rel="canonical"]/@href)'));
-        $this->assertSame('Як знайти скарб & отримати нагороду.', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
+        $this->assertSame('Як знайти скарб & отримати нагороду. Браузерна MMORPG «Вічність» (Eternum).', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
         $this->assertSame(url('/ru/library/guide/treasure'), $xpath->evaluate('string(//link[@hreflang="ru"]/@href)'));
         $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//link[@hreflang="uk"]/@href)'));
         $this->assertSame('article', $xpath->evaluate('string(//meta[@property="og:type"]/@content)'));
@@ -121,7 +121,7 @@ final class LibrarySeoTest extends TestCase
             @section("sidebar", "Разделы форума")
             @section("content", "Контент форума")');
 
-        $this->assertStringContainsString('<title>Тест форума — Форум</title>', $html);
+        $this->assertStringContainsString('<title>Тест форума — Вечность (Eternum)</title>', $html);
         $this->assertStringContainsString('Контент форума', $html);
         $this->assertStringNotContainsString('class="library-language-switch"', $html);
         $this->assertStringNotContainsString('<h1 class="library-page-title">', $html);
@@ -135,7 +135,7 @@ final class LibrarySeoTest extends TestCase
         $article->save();
         $response = $this->get('/ru/library/guide/treasure')->assertOk();
         $xpath = $this->xpath($response->getContent());
-        $this->assertSame('Первый & второй. Третий.', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
+        $this->assertSame('Первый & второй. Третий. Браузерная MMORPG «Вечность» (Eternum).', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
 
         $article->setTranslation('content', 'ru', '[[artifact_catalog]]')->save();
         $seo = app(LibrarySeo::class)->article($article);
@@ -211,7 +211,8 @@ final class LibrarySeoTest extends TestCase
         $this->assertNotFalse($xml);
         $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
         $locations = array_map('strval', $xml->xpath('//s:loc'));
-        $this->assertCount(9, $locations);
+        $this->assertCount(10, $locations);
+        $this->assertSame(1, count(array_keys($locations, route('index'), true)));
         $this->assertContains(route('forum.index'), $locations);
         foreach (['ru', 'uk'] as $locale) {
             $this->assertContains(url('/'.$locale.'/library'), $locations);
@@ -241,7 +242,7 @@ final class LibrarySeoTest extends TestCase
         DB::disableQueryLog();
         $this->assertLessThanOrEqual(5, count($queries));
         $response->assertSee('/uk/library/guide-article-30/article-30', false);
-        $this->assertSame(63, substr_count($response->getContent(), '<loc>'));
+        $this->assertSame(64, substr_count($response->getContent(), '<loc>'));
     }
 
     private function article(string $slug = 'treasure', string $status = LibraryArticle::STATUS_PUBLISHED, ?string $publishedAt = null): LibraryArticle

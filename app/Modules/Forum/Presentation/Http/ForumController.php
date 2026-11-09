@@ -9,6 +9,7 @@ use App\Modules\Forum\Application\Services\ForumService;
 use App\Modules\Forum\Application\Services\ForumWriter;
 use App\Modules\Forum\Infrastructure\Persistence\Models\ForumPost;
 use App\Modules\Forum\Infrastructure\Persistence\Models\ForumTopic;
+use App\Modules\Forum\Presentation\Services\ForumSeo;
 use App\Modules\Moderation\Application\Services\CommunicationMuteService;
 use App\Modules\Moderation\Domain\Enums\CommunicationScope;
 use App\Modules\Moderation\Domain\Exceptions\UserMutedException;
@@ -24,6 +25,7 @@ class ForumController extends Controller
         private readonly ForumService $forum,
         private readonly ForumWriter $writer,
         private readonly CommunicationMuteService $communicationMuteService,
+        private readonly ForumSeo $seo,
     ) {}
 
     public function index(): View
@@ -31,6 +33,7 @@ class ForumController extends Controller
         $sections = $this->forum->sectionsTree();
 
         return view('forum::index', [
+            'seo' => $this->seo->index(),
             'sections' => $sections,
             'forumSections' => $sections,
         ]);
@@ -41,10 +44,12 @@ class ForumController extends Controller
         $section = $this->forum->findSection($slug);
         /** @var ?User $user */
         $user = Auth::user();
+        $topics = $this->forum->sectionTopics($section);
 
         return view('forum::section', [
+            'seo' => $this->seo->section($section, $topics),
             'section' => $section,
-            'topics' => $this->forum->sectionTopics($section),
+            'topics' => $topics,
             'forumSections' => $this->forum->sectionsTree(),
             'forumMute' => $user === null
                 ? null
@@ -66,6 +71,7 @@ class ForumController extends Controller
         $sections = $this->forum->sectionsTree();
 
         return view('forum::search', [
+            'seo' => $this->seo->search($query),
             'query' => $query,
             'topics' => $this->forum->searchTopics($query),
             'forumSections' => $sections,
@@ -85,9 +91,12 @@ class ForumController extends Controller
         /** @var ?User $user */
         $user = Auth::user();
 
+        $posts = $this->forum->topicPosts($topic);
+
         return view('forum::topic', [
+            'seo' => $this->seo->topic($topic, $posts),
             'topic' => $topic,
-            'posts' => $this->forum->topicPosts($topic),
+            'posts' => $posts,
             'userVote' => $this->forum->userVote($topic->id, $user?->id),
             'canModerate' => $user !== null && $this->writer->canModerate($user),
             'canComment' => $user !== null && $this->writer->canComment($user, $topic->section),

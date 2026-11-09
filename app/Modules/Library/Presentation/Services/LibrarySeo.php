@@ -36,8 +36,8 @@ final readonly class LibrarySeo
 
         return new LibrarySeoData(
             heading: $article->title,
-            title: $article->title.' — '.__('library.name').' — '.__('library.brand'),
-            description: $description !== '' ? $description : __('library.article_description', ['title' => $article->title]),
+            title: $article->title.' — '.__('library.name').' — '.__('library.seo_brand'),
+            description: $this->withGame($description !== '' ? $description : __('library.article_description', ['title' => $article->title])),
             canonical: $this->urls->article(slug: $article->slug, categorySlug: $article->category->slug),
             alternates: $alternates,
             image: asset($article->cover_image ?: ($article->category?->image ?: 'data/canvas/ui/library.webp')),
@@ -65,7 +65,7 @@ final readonly class LibrarySeo
         }
 
         $heading = $request->filled('q') ? __('library.search') : ($category?->name ?? __('library.name'));
-        $title = $heading.' — '.__('library.brand');
+        $title = $heading.' — '.($category || $request->filled('q') ? __('library.name').' — ' : '').__('library.seo_brand');
         if ($page !== false && $page > 1) {
             $title .= ' — '.__('library.page', ['number' => $page]);
         }
@@ -77,9 +77,9 @@ final readonly class LibrarySeo
         return new LibrarySeoData(
             heading: $heading,
             title: $title,
-            description: $this->plainText($category?->description ?? '') ?: ($category
+            description: $this->withGame($this->plainText($category?->description ?? '') ?: ($category
                 ? __('library.category_description', ['category' => $category->name])
-                : __('library.description')),
+                : __('library.description'))),
             canonical: $this->urls->index(parameters: $parameters),
             alternates: $alternates,
             image: asset($category?->image ?: 'data/canvas/ui/library.webp'),
@@ -87,7 +87,29 @@ final readonly class LibrarySeo
         );
     }
 
-    private function plainText(string $html): string
+    /**
+     * Описание с названием игры, чтобы поисковик понимал, к какой игре относится страница.
+     * Итог — до 160 символов.
+     */
+    public function withGame(string $description): string
+    {
+        $description = Str::squish($description);
+        if (Str::contains($description, ['«'.__('library.brand').'»', 'Eternum'], ignoreCase: true)) {
+            return Str::limit($description, 157, '…');
+        }
+        $suffix = __('library.seo_suffix');
+        $room = 160 - mb_strlen($suffix) - 1;
+
+        if ($description === '') {
+            return $suffix;
+        }
+        $body = Str::limit($description, $room - 1, '…');
+        $body = str_ends_with($body, '…') ? $body : rtrim($body, '.!?;:,').'.';
+
+        return $body.' '.$suffix;
+    }
+
+    public function plainText(string $html): string
     {
         $text = preg_replace('~<(script|style)\b[^>]*>.*?</\1>~is', ' ', $html) ?? $html;
         $text = preg_replace('/\[\[.*?\]\]/s', ' ', $text) ?? $text;

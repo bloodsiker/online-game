@@ -23,4 +23,11 @@ return [
     'related' => 'Пов’язані ігрові об’єкти:',
     'published' => 'Опубліковано:',
     'views' => 'Переглядів:',
+    // SEO: назва гри в title/description сторінок бібліотеки та форуму.
+    'seo_brand' => 'Вічність (Eternum)',
+    'seo_suffix' => 'Браузерна MMORPG «Вічність» (Eternum).',
+    'forum_name' => 'Форум',
+    'forum_search' => 'Пошук по форуму',
+    'forum_description' => 'Форум браузерної MMORPG «Вічність» (Eternum): новини, гайди, питання новачків, клани, торгівля та спілкування гравців.',
+    'forum_section_description' => ':section — розділ форуму гри «Вічність» (Eternum): теми, обговорення та поради гравців.',
 ];
