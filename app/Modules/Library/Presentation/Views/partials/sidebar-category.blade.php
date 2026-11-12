@@ -4,7 +4,7 @@
 
 @if($depth === 0)
     <div class="b-common-block__bgl library-nav-root {{ $isSelected ? 'active' : '' }}">
-        <a class="library-nav-root-link" href="{{ $libraryUrls->index(parameters: ['category' => $item->slug]) }}" title="{{ $item->name }}"><u>{{ $item->name }}</u></a>
+        <a class="library-nav-root-link" href="{{ $libraryUrls->category($item) }}" title="{{ $item->name }}"><u>{{ $item->name }}</u></a>
     </div>
     @if($item->children->isNotEmpty())
         <div class="b-common-block__cont">
@@ -22,7 +22,7 @@
 @else
     <li class="library-nav-item">
         <div class="library-nav-link-wrapper {{ $isSelected ? 'active' : '' }}">
-            <a class="library-nav-link" href="{{ $libraryUrls->index(parameters: ['category' => $item->slug]) }}" title="{{ $item->name }}">{{ $item->name }}</a>
+            <a class="library-nav-link" href="{{ $libraryUrls->category($item) }}" title="{{ $item->name }}">{{ $item->name }}</a>
         </div>
         @if($item->children->isNotEmpty())
             <ul class="library-nav-sub">

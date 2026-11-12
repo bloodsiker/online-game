@@ -8,7 +8,9 @@ use App\Modules\Premium\Application\Services\PremiumBonusService;
 use App\Modules\Telegram\Application\Services\TelegramLinkService;
 use App\Modules\Telegram\Domain\Contracts\TelegramLinkRepository;
 use App\Modules\User\Application\Services\GameSettingsService;
+use App\Modules\User\Application\Services\PlayerVisibilityMaps;
 use App\Modules\User\Presentation\Http\Requests\UpdateGameSettingsRequest;
+use App\Modules\User\Presentation\Http\Requests\UpdateMapPlayersRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +18,7 @@ use Illuminate\Http\Request;
 
 final class GameSettingsController
 {
-    public function show(Request $request, GameSettingsService $service, PremiumBonusService $premium, TelegramLinkRepository $telegram, TelegramLinkService $telegramService): View
+    public function show(Request $request, GameSettingsService $service, PremiumBonusService $premium, TelegramLinkRepository $telegram, TelegramLinkService $telegramService, PlayerVisibilityMaps $visibilityMaps): View
     {
         if ($request->session()->has('reload_game_after_settings')) {
             $request->session()->keep('message');
@@ -27,6 +29,7 @@ final class GameSettingsController
             'autoLootAvailable' => $premium->canAutoLoot($request->user()->id),
             'telegramAccount' => $telegram->forUser(userId: $request->user()->id),
             'telegramAvailable' => $telegramService->available(),
+            'visibilityMaps' => $visibilityMaps->options(),
         ]);
     }
 
@@ -40,5 +43,20 @@ final class GameSettingsController
         }
 
         return redirect()->route('settings')->with('message', $message)->with('reload_game_after_settings', true);
+    }
+
+    /** Шестерёнка на карте: скрыть/показать других игроков на текущей карте. */
+    public function updateMapPlayers(UpdateMapPlayersRequest $request, GameSettingsService $service): JsonResponse
+    {
+        $mapId = (int) $request->validated('map_id');
+        $hidden = (bool) $request->validated('hidden');
+        $settings = $service->setMapPlayersHidden(userId: $request->user()->id, mapId: $mapId, hidden: $hidden);
+
+        return response()->json([
+            'ok' => true,
+            'map_id' => $mapId,
+            'hidden' => in_array($mapId, $settings['hidden_players_maps'], true),
+            'message' => __('ui.settings_saved'),
+        ]);
     }
 }

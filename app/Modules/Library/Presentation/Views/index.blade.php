@@ -7,7 +7,7 @@
     @if(!$selectedCategory && !request()->filled('q'))
         <div class="library-home-grid">
             @forelse($categories as $category)
-                <a class="library-home-tile {{ $category->image ? '' : 'library-home-tile--empty' }}" href="{{ $libraryUrls->index(parameters: ['category' => $category->slug]) }}">
+                <a class="library-home-tile {{ $category->image ? '' : 'library-home-tile--empty' }}" href="{{ $libraryUrls->category($category) }}">
                     @if($category->image)<img src="{{ asset($category->image) }}" alt="{{ $category->name }}">@endif
                     <span>{{ $category->name }}</span>
                 </a>

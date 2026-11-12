@@ -67,6 +67,7 @@
         .game-settings-volume::-moz-range-progress { height: 9px; border-radius: 3px; background: #ffe88f; }
         .game-settings-volume::-moz-range-thumb { width: 13px; height: 13px; border: 1px solid #db9f73; border-radius: 3px; background: #fff1c5; }
         .game-settings-volume:focus-visible { outline: 1px solid #9c6c3b; outline-offset: 2px; border-radius: 3px; }
+        .game-settings-note { margin: 0 0 6px; padding: 0 10px; font-size: 10px; color: #927660; }
         .game-settings-actions { text-align: center; padding-top: 8px; }
         .game-settings-actions .butt1 input { width: 170px; }
         .game-settings-security { text-align: center; }

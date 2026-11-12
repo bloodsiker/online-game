@@ -25,6 +25,8 @@ final class GameSettingsDefinition
         'sound_dungeon' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
         'sound_mail' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
         'sound_gathering' => ['default' => 0, 'type' => 'int', 'rules' => ['sometimes', 'required', 'integer', 'between:0,6']],
+        // Карты (maps.id), на которых не показываются другие игроки и их перемещение. 0 — пустое значение формы.
+        'hidden_players_maps' => ['default' => [], 'type' => 'id_list', 'rules' => ['sometimes', 'array', 'max:200'], 'item_rules' => ['integer', 'min:0']],
     ];
 
     public static function defaults(): array
@@ -34,7 +36,15 @@ final class GameSettingsDefinition
 
     public static function rules(): array
     {
-        return array_map(fn (array $definition): array => $definition['rules'], self::DEFINITIONS);
+        $rules = [];
+        foreach (self::DEFINITIONS as $key => $definition) {
+            $rules[$key] = $definition['rules'];
+            if (isset($definition['item_rules'])) {
+                $rules[$key.'.*'] = $definition['item_rules'];
+            }
+        }
+
+        return $rules;
     }
 
     public static function normalize(array $values): array
@@ -47,11 +57,27 @@ final class GameSettingsDefinition
                     'int' => self::normalizeInteger(key: $key, value: $values[$key]),
                     'language' => in_array($values[$key], ['ru', 'uk'], true) ? $values[$key] : 'ru',
                     'map_side' => in_array($values[$key], ['left', 'right'], true) ? $values[$key] : 'right',
+                    'id_list' => self::normalizeIds(value: $values[$key]),
                 };
             }
         }
 
         return $result;
+    }
+
+    /** @return list<int> уникальные положительные id по возрастанию */
+    private static function normalizeIds(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+        $ids = array_values(array_unique(array_filter(
+            array_map(fn (mixed $id): int => is_numeric($id) ? (int) $id : 0, $value),
+            fn (int $id): bool => $id > 0,
+        )));
+        sort($ids);
+
+        return $ids;
     }
 
     private static function normalizeInteger(string $key, mixed $value): int

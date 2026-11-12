@@ -48,7 +48,7 @@
 @section('content')
     <div class="library-breadcrumbs">
         <a href="{{ $libraryUrls->index() }}">{{ __('library.name') }}</a> →
-        <a href="{{ $libraryUrls->index(parameters: ['category' => $selectedCategory->slug]) }}">{{ $selectedCategory->name }}</a> →
+        <a href="{{ $libraryUrls->category($selectedCategory) }}">{{ $selectedCategory->name }}</a> →
         {{ $article->title }}
     </div>
 

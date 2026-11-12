@@ -25,6 +25,15 @@ final class GameSettingsService
         return $settings;
     }
 
+    /** Скрыть/показать других игроков на одной карте, не трогая остальные отметки. */
+    public function setMapPlayersHidden(int $userId, int $mapId, bool $hidden): array
+    {
+        $ids = $this->get($userId)['hidden_players_maps'] ?? [];
+        $ids = $hidden ? [...$ids, $mapId] : array_values(array_diff($ids, [$mapId]));
+
+        return $this->update(userId: $userId, values: ['hidden_players_maps' => $ids]);
+    }
+
     public function update(int $userId, array $values): array
     {
         $settings = DB::transaction(function () use ($userId, $values): array {

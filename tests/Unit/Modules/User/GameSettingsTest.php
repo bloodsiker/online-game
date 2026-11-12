@@ -231,4 +231,61 @@ final class GameSettingsTest extends TestCase
         }
         $this->assertStringContainsString('window.refreshHotbar = () => {}', $hidden);
     }
+
+    public function test_hidden_players_maps_are_saved_as_unique_positive_ids(): void
+    {
+        $this->signIn();
+        $this->postJson(route('settings.update'), [
+            '_token' => 'settings-token', 'hidden_players_maps' => ['0', '7', '3', '7', '12'],
+        ])->assertOk()->assertJsonPath('settings.hidden_players_maps', [3, 7, 12]);
+        $this->assertSame([3, 7, 12], app(GameSettingsService::class)->get(userId: 1)['hidden_players_maps']);
+        $this->assertSame([], app(GameSettingsService::class)->get(userId: 2)['hidden_players_maps']);
+
+        // Пустая форма (только скрытый «0») снимает все отметки.
+        $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'hidden_players_maps' => ['0']])
+            ->assertOk()->assertJsonPath('settings.hidden_players_maps', []);
+
+        foreach (['abc', ['x'], [-1]] as $invalid) {
+            $this->postJson(route('settings.update'), ['_token' => 'settings-token', 'hidden_players_maps' => $invalid])
+                ->assertUnprocessable();
+        }
+        $this->assertSame([], GameSettingsDefinition::normalize(['hidden_players_maps' => 'abc'])['hidden_players_maps']);
+    }
+
+    public function test_map_gear_toggles_players_on_one_map_only(): void
+    {
+        Schema::create('maps', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->text('name');
+            $table->string('folder')->nullable();
+            $table->string('slug')->nullable();
+            $table->timestamps();
+        });
+        DB::table('maps')->insert([
+            ['id' => 1, 'name' => '{"ru":"Город","uk":"Місто"}', 'folder' => 'city/main', 'slug' => 'city'],
+            ['id' => 5, 'name' => '{"ru":"Канализация","uk":"Каналізація"}', 'folder' => 'city/sewers', 'slug' => 'sewers'],
+            ['id' => 9, 'name' => '{"ru":"Подземелье","uk":"Підземелля"}', 'folder' => 'dungeon', 'slug' => 'dungeon'],
+        ]);
+        $this->signIn();
+
+        $this->postJson(route('settings.map-players'), ['_token' => 'settings-token', 'map_id' => 5, 'hidden' => true])
+            ->assertOk()->assertJson(['ok' => true, 'map_id' => 5, 'hidden' => true]);
+        $this->postJson(route('settings.map-players'), ['_token' => 'settings-token', 'map_id' => 1, 'hidden' => true])
+            ->assertOk()->assertJsonPath('hidden', true);
+        $this->assertSame([1, 5], app(GameSettingsService::class)->get(userId: 1)['hidden_players_maps']);
+
+        $this->postJson(route('settings.map-players'), ['_token' => 'settings-token', 'map_id' => 5, 'hidden' => false])
+            ->assertOk()->assertJsonPath('hidden', false);
+        $this->assertSame([1], app(GameSettingsService::class)->get(userId: 1)['hidden_players_maps']);
+        $this->assertSame([], app(GameSettingsService::class)->get(userId: 2)['hidden_players_maps']);
+
+        // Подземелье, несуществующая карта и мусор не принимаются.
+        foreach ([['map_id' => 9, 'hidden' => true], ['map_id' => 404, 'hidden' => true], ['map_id' => 1, 'hidden' => 'maybe'], []] as $payload) {
+            $this->postJson(route('settings.map-players'), ['_token' => 'settings-token', ...$payload])->assertUnprocessable();
+        }
+        $this->assertSame([1], app(GameSettingsService::class)->get(userId: 1)['hidden_players_maps']);
+        $this->get(route('settings'))->assertOk()->assertSee('setting-hidden-players-map-5', false)
+            ->assertDontSee('setting-hidden-players-map-9', false);
+    }
 }

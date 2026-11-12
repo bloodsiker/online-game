@@ -17,6 +17,7 @@
         'map_side' => __('ui.map_side_hint'),
         'show_item_tooltips' => __('ui.show_item_tooltips_hint'),
         'auto_loot_enabled' => __('ui.auto_loot_hint'),
+        'hidden_players_maps' => __('ui.hidden_players_maps_hint'),
     ];
     foreach ($settingHints as $key => &$hint) {
         if (!array_key_exists($key, \App\Modules\User\Domain\Settings\GameSettingsDefinition::defaults())) {
@@ -108,6 +109,22 @@
             @include('interface::partials.settings-checkbox', ['name' => 'show_item_tooltips', 'label' => __('ui.show_item_tooltips'), 'checked' => (bool) old('show_item_tooltips', $gameSettings['show_item_tooltips'] ?? true)])
         </div>
     </section>
+    @if(!empty($visibilityMaps))
+        @php($hiddenPlayersMaps = array_map('intval', (array) old('hidden_players_maps', $gameSettings['hidden_players_maps'] ?? [])))
+        <section class="game-settings-section">
+            <h2>{{ __('ui.hidden_players_maps') }}</h2>
+            <p class="game-settings-note" data-setting-hint="{{ $settingHints['hidden_players_maps'] }}">{{ __('ui.hidden_players_maps_note') }}</p>
+            <div class="game-settings-grid">
+                <input type="hidden" name="hidden_players_maps[]" value="0">
+                @foreach($visibilityMaps as $mapId => $mapName)
+                    <div class="game-settings-control">
+                        <label for="setting-hidden-players-map-{{ $mapId }}">{{ $mapName }}</label>
+                        <input class="game-settings-checkbox" id="setting-hidden-players-map-{{ $mapId }}" name="hidden_players_maps[]" type="checkbox" value="{{ $mapId }}" @checked(in_array((int) $mapId, $hiddenPlayersMaps, true))>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
     <div class="game-settings-actions">
         <span class="butt1 pointer"><span><input type="submit" value="{{ __('ui.save_changes') }}"></span></span>
         <p class="profile-preview-note">{{ __('ui.settings_note') }}</p>

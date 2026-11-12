@@ -1162,6 +1162,8 @@
     });
 </script>
 
+@include('interface::partials.map-settings-modal')
+
 <div id="logout_confirm_overlay" style="display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 1100;" onclick="hideLogoutConfirm()"></div>
 <div id="logout_confirm" class="popup_global_container" style="display: none; position: fixed; left: 50%; top: 30%; width: 380px; margin-left: -190px; z-index: 1101;">
     <div class="popup-top-left">

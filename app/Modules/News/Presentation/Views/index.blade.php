@@ -242,7 +242,7 @@
                 </li>
 
                 <li class="b-nav-lvl-1__menu-item">
-                    <a class="b-aside__impo-link" href="{{ route('library.index') }}"
+                    <a class="b-aside__impo-link" href="{{ route('library.localized.index', ['locale' => app()->getLocale() === 'uk' ? 'uk' : 'ru']) }}"
                        style="font-size: 13px;font-weight: bold;position: relative;color: #d49b2c;left: 8px;top: 8px;"><span>{{ __('homepage.library') }}</span></a>
                 </li>
 

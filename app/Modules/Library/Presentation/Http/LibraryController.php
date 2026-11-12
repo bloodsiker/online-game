@@ -88,7 +88,7 @@ class LibraryController extends Controller
         }
 
         $categoryIds = $selectedCategory
-            ? $this->activeCategoryIds($selectedCategory)
+            ? $this->urls->activeCategoryIds($selectedCategory)
             : [];
 
         $articlesQuery = LibraryArticle::query()
@@ -102,7 +102,8 @@ class LibraryController extends Controller
             ->orderBy('id');
 
         if ($selectedCategory && ! $request->filled('q')) {
-            $firstArticle = $articlesQuery->first();
+            // Тот же выбор, что и в LibraryUrls::category() — ссылки ведут сразу на эту статью.
+            $firstArticle = $this->urls->firstArticle($selectedCategory);
 
             if ($firstArticle) {
                 return redirect()->to($this->urls->article(
@@ -162,7 +163,7 @@ class LibraryController extends Controller
             ->published()
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->with('category')
-            ->whereIn('category_id', $this->activeCategoryIds($navigationCategory))
+            ->whereIn('category_id', $this->urls->activeCategoryIds($navigationCategory))
             ->orderBy('sort_order')
             ->orderByDesc('published_at')
             ->orderBy('id')
@@ -216,25 +217,5 @@ class LibraryController extends Controller
         };
 
         return $build(0);
-    }
-
-    /** @return array<int, int> */
-    private function activeCategoryIds(LibraryCategory $category): array
-    {
-        $ids = [(int) $category->id];
-        $pending = [(int) $category->id];
-
-        while ($pending !== []) {
-            $children = LibraryCategory::query()
-                ->where('is_active', true)
-                ->whereIn('parent_id', $pending)
-                ->pluck('id')
-                ->map(fn ($id): int => (int) $id)
-                ->all();
-            $ids = [...$ids, ...$children];
-            $pending = $children;
-        }
-
-        return array_values(array_unique($ids));
     }
 }

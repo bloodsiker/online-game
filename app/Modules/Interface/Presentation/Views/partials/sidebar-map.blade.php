@@ -55,4 +55,6 @@
                 </tbody>
             </table>
             </div>
+            <button type="button" class="map-settings-btn" id="map-settings-btn" hidden
+                    title="{{ __('ui.map_settings') }}" aria-label="{{ __('ui.map_settings') }}" aria-haspopup="dialog" onclick="openMapSettings()">&#9881;</button>
         </td>

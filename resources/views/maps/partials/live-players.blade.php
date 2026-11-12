@@ -99,6 +99,17 @@
 <script>
     (function () {
         const viewerId = {{ (int) (auth()->id() ?? 0) }};
+        @php
+            // Настройка «Скрывать других игроков на картах»: на отмеченной карте не рисуем чужие кольца и их переезды.
+            $liveViewer = auth()->user();
+            $liveMapId = $liveViewer ? app(\App\Modules\User\Application\Services\PlayerVisibilityMaps::class)
+                ->currentMapId(request()->string('s')->toString(), $liveViewer->currentLocation?->map_id) : null;
+            $liveMapName = $liveMapId !== null ? (app(\App\Modules\User\Application\Services\PlayerVisibilityMaps::class)->options()[$liveMapId] ?? null) : null;
+            $liveHidden = $liveMapName !== null && in_array((int) $liveMapId,
+                app(\App\Modules\User\Application\Services\GameSettingsService::class)->get((int) $liveViewer->id)['hidden_players_maps'] ?? [], true);
+        @endphp
+        const liveMap = @json($liveMapName !== null ? ['id' => (int) $liveMapId, 'name' => $liveMapName] : null);
+        let hideOthers = @json($liveHidden);
         @php $mapRelations = app(\App\Modules\Friend\Application\UseCases\GetMapRelations::class)->execute(auth()->user())->toArray(); @endphp
         const relations = @json($mapRelations);
         const friends = new Set(relations.friends);
@@ -220,9 +231,26 @@
         }
 
         window.addEventListener('message', (event) => {
-            if (event.origin !== origin || !event.data || event.data.type !== 'onlinePresenceSnapshot') return;
-            applySnapshot(Array.isArray(event.data.users) ? event.data.users : []);
+            if (event.origin !== origin || !event.data) return;
+            if (event.data.type === 'onlinePresenceSnapshot') {
+                applySnapshot(!hideOthers && Array.isArray(event.data.users) ? event.data.users : []);
+            } else if (event.data.type === 'mapPlayersVisibility' && liveMap && Number(event.data.mapId) === liveMap.id) {
+                // Переключено шестерёнкой на боковой карте — применяем сразу, без перезагрузки фрейма.
+                hideOthers = !!event.data.hidden;
+                window.liveMapInfo.hidden = hideOthers;
+                leaving.forEach((timer) => clearTimeout(timer));
+                leaving.clear();
+                players.clear();
+                render();
+                if (!hideOthers) window.top.postMessage({ type: 'requestOnlinePresence' }, origin);
+            }
         });
+
+        // Какая карта открыта: оболочка читает это после загрузки фрейма (шестерёнка на боковой карте).
+        window.liveMapInfo = liveMap ? { id: liveMap.id, name: liveMap.name, hidden: hideOthers } : null;
+        if (window.frameElement && window.frameElement.id === 'map-frame') {
+            window.top.postMessage({ type: 'mapPlayersInfo' }, origin);
+        }
 
         // --- Свой персонаж: плавный переезд кольца вместо прыжка ---
         // Карта ставит маркер функцией ulocation(lid) (класс .ulocation на #u{lid}), предыдущая клетка — prevlocation.
