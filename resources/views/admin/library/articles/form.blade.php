@@ -156,7 +156,7 @@
                         <div class="form-group">
                             <label class="col-form-label">Обложка</label>
                             <input type="file" class="form-control" name="cover_image" accept="image/*">
-                            @if($article?->cover_image)<img src="{{ asset($article->cover_image) }}" alt="" class="mt-2" style="max-width:100%;max-height:180px">@endif
+                            @if($article?->cover_image)<img src="{{ public_media_url($article->cover_image) }}" alt="" class="mt-2" style="max-width:100%;max-height:180px">@endif
                         </div>
                         @if($article)
                             <div class="form-group"><label class="col-form-label">Просмотры</label><input class="form-control" value="{{ $article->views_count }}" disabled></div>

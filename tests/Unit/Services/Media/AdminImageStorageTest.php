@@ -29,24 +29,27 @@ final class AdminImageStorageTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_it_creates_monthly_directories_inside_public_path(): void
+    public function test_media_url_prefers_public_static_files_and_falls_back_to_storage(): void
     {
-        Carbon::setTestNow('2026-02-01 00:00:00');
-        $publicPath = storage_path('framework/testing/admin-image-storage');
-        File::deleteDirectory($publicPath);
+        Storage::fake('public');
+        $publicPath = storage_path('framework/testing/media-url');
+        File::ensureDirectoryExists($publicPath.'/main/images');
+        File::put($publicPath.'/main/images/a.jpg', 'x');
         $this->app->usePublicPath($publicPath);
 
         try {
-            $path = app(AdminImageStorage::class)->storeInPublicDirectory(
-                UploadedFile::fake()->image('cover.jpg'),
-                'library/covers',
-            );
+            $this->assertSame(asset('main/images/a.jpg'), public_media_url('main/images/a.jpg'));
+            $this->assertSame(Storage::disk('public')->url('library/categories/2026/11/b.webp'), public_media_url('library/categories/2026/11/b.webp'));
+            $this->assertSame('/storage/x.webp', public_media_url('/storage/x.webp'));
+            $this->assertSame('https://cdn.example/x.webp', public_media_url('https://cdn.example/x.webp'));
+            $this->assertSame(asset('img/avatar/dark_elf.jpg'), public_media_url(null, fallback: 'img/avatar/dark_elf.jpg'));
+            $this->assertNull(public_media_url(''));
 
-            $this->assertMatchesRegularExpression('#^library/covers/2026/02/[a-f0-9-]+\.jpg$#', $path);
-            $this->assertFileExists($publicPath.'/'.$path);
+            $this->assertSame('race-avatars/2026/10/a.jpg', public_media_path('http://localhost:85/storage/race-avatars/2026/10/a.jpg'));
+            $this->assertSame('main/images/data/user_pic/b.jpg', public_media_path('https://eternum-rpg.com/main/images/data/user_pic/b.jpg'));
+            $this->assertSame('race-avatars/c.jpg', public_media_path('race-avatars/c.jpg'));
         } finally {
             File::deleteDirectory($publicPath);
-            Carbon::setTestNow();
         }
     }
 }

@@ -280,7 +280,7 @@
                     </td>
                     <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
                         <div class="profile-avatar-frame">
-                            <img class="profile-avatar-frame__image" src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ auth()->user()?->name }}">
+                            <img class="profile-avatar-frame__image" src="{{ public_media_url(auth()->user()?->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ auth()->user()?->name }}">
                         </div>
                     </td>
                     <td class="item-hero"

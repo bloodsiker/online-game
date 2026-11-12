@@ -52,7 +52,7 @@
         {{ $article->title }}
     </div>
 
-    @if($article->cover_image)<img class="library-cover" src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}">@endif
+    @if($article->cover_image)<img class="library-cover" src="{{ public_media_url($article->cover_image) }}" alt="{{ $article->title }}">@endif
     <article class="library-article-content">{!! $article->rendered_content !!}</article>
 
     @if($linkedEntities->isNotEmpty())

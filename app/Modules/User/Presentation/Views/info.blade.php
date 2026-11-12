@@ -279,7 +279,7 @@
                                                     </td>
                                                     <td class="profile-avatar-cell" align="center" rowspan="4" colspan="3">
                                                         <div class="profile-avatar-frame">
-                                                            <img class="profile-avatar-frame__image" src="{{ asset($user->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ $user->name }}">
+                                                            <img class="profile-avatar-frame__image" src="{{ public_media_url($user->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ $user->name }}">
                                                         </div>
                                                     </td>
                                                     <td {!! $slotAttrs($injuriesBySlot->has('forearm') ? null : $equip?->forearmSlot) !!}>

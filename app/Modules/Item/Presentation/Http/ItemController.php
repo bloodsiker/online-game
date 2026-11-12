@@ -428,7 +428,7 @@ class ItemController extends Controller
                 ], 422);
             }
 
-            if ($user->profile?->avatar === $newAvatar->image_url) {
+            if (public_media_path((string) $user->profile?->avatar) === $newAvatar->image_path) {
                 return response()->json([
                     'status' => 'error',
                     'message' => __('Это уже ваш текущий аватар.'),
@@ -506,7 +506,7 @@ class ItemController extends Controller
 
         if ($newAvatar !== null) {
             $profile = $user->profile ?? $user->profile()->create([]);
-            $profile->avatar = $newAvatar->image_url;
+            $profile->avatar = $newAvatar->image_path;
             $profile->save();
         }
 

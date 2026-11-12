@@ -47,7 +47,7 @@ final class TelegramProfileService
             $groups[] = ['key' => $type, 'label' => __('telegram.profile_'.$type.'_skills'), 'skills' => $skills];
         }
 
-        return $summary + ['avatar_url' => asset($user->profile?->avatar ?: 'img/avatar/dark_elf.jpg'),
+        return $summary + ['avatar_url' => public_media_url($user->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg'),
             'race' => $character->raceName, 'stats' => collect($stats)->map(static fn ($value, string $label): array => [
                 'label' => __($label), 'value' => $value,
             ])->values()->all(), 'skills' => $groups,

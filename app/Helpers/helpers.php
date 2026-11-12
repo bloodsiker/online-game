@@ -88,6 +88,47 @@ if (! function_exists('resolve_storage_image_url')) {
     }
 }
 
+if (! function_exists('public_media_url')) {
+    /**
+     * URL картинки, путь которой хранится в БД относительно сайта: статика из public/
+     * ('main/images/...', 'img/...') или загрузка на диск 'public' ('race-avatars/...', 'library/...').
+     * Сначала ищем статический файл в public/, иначе — диск 'public' (/storage/...).
+     * Готовые адреса (http..., /...) возвращаются как есть; пустой путь — $fallback из public/.
+     */
+    function public_media_url(?string $value, ?string $fallback = null): ?string
+    {
+        if ($value === null || $value === '') {
+            return $fallback !== null ? asset($fallback) : null;
+        }
+        if (preg_match('~^(?:https?:)?//|^/~', $value) === 1) {
+            return $value;
+        }
+        if (str_starts_with($value, 'storage/')) {
+            return asset($value);   // старый вид пути: уже с префиксом ссылки public/storage
+        }
+
+        return is_file(public_path($value)) ? asset($value) : Storage::disk('public')->url($value);
+    }
+}
+
+if (! function_exists('public_media_path')) {
+    /**
+     * Обратное к public_media_url(): из сохранённого полного адреса этого сайта делает относительный путь
+     * ('http://host/storage/race-avatars/x.jpg' → 'race-avatars/x.jpg', 'https://host/main/a.jpg' → 'main/a.jpg').
+     * Домен снимается любой (localhost, dev, prod): в БД остаётся путь, не зависящий от окружения.
+     * Значение без домена возвращается как есть.
+     */
+    function public_media_path(string $value): string
+    {
+        if (preg_match('~^(?:https?:)?//[^/]+(/.*)$~', $value, $match) !== 1) {
+            return $value;
+        }
+        $path = ltrim((string) parse_url($match[1], PHP_URL_PATH), '/');
+
+        return str_starts_with($path, 'storage/') ? substr($path, strlen('storage/')) : $path;
+    }
+}
+
 if (! function_exists('map_transition_url')) {
     /**
      * Формирует ссылку перехода между картами с учётом текущего режима просмотра.

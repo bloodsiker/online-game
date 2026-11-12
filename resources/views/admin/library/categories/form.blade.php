@@ -52,7 +52,7 @@
                         <div class="form-group">
                             <label class="col-form-label">Изображение</label>
                             <input type="file" class="form-control" name="image" accept="image/*">
-                            @if($category?->image)<img src="{{ asset($category->image) }}" alt="" class="mt-2" style="max-width:160px;max-height:100px">@endif
+                            @if($category?->image)<img src="{{ public_media_url($category->image) }}" alt="" class="mt-2" style="max-width:160px;max-height:100px">@endif
                         </div>
                         <div class="checkbox-custom checkbox-default mt-3">
                             <input type="checkbox" id="is-active" name="is_active" value="1" @checked(old('is_active', $category?->is_active ?? true))>

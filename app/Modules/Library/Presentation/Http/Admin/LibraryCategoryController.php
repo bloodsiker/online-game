@@ -116,7 +116,7 @@ class LibraryCategoryController extends Controller
         $translationEditor->fill($category, $request, ['name', 'description'], ['name']);
 
         if ($request->hasFile('image')) {
-            $category->image = $this->imageStorage->storeInPublicDirectory(
+            $category->image = $this->imageStorage->storeOnPublicDisk(
                 $request->file('image'),
                 'library/categories',
             );

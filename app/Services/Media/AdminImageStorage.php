@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Media;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use RuntimeException;
 
 final class AdminImageStorage
@@ -20,17 +18,6 @@ final class AdminImageStorage
         }
 
         return $path;
-    }
-
-    public function storeInPublicDirectory(UploadedFile $file, string $directory): string
-    {
-        $monthlyDirectory = $this->monthlyDirectory($directory);
-        File::ensureDirectoryExists(public_path($monthlyDirectory));
-
-        $filename = Str::uuid()->toString().'.'.$file->extension();
-        $file->move(public_path($monthlyDirectory), $filename);
-
-        return $monthlyDirectory.'/'.$filename;
     }
 
     private function monthlyDirectory(string $directory): string

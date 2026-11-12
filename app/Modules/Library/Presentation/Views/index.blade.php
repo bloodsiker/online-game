@@ -8,7 +8,7 @@
         <div class="library-home-grid">
             @forelse($categories as $category)
                 <a class="library-home-tile {{ $category->image ? '' : 'library-home-tile--empty' }}" href="{{ $libraryUrls->category($category) }}">
-                    @if($category->image)<img src="{{ asset($category->image) }}" alt="{{ $category->name }}">@endif
+                    @if($category->image)<img src="{{ public_media_url($category->image) }}" alt="{{ $category->name }}">@endif
                     <span>{{ $category->name }}</span>
                 </a>
             @empty
@@ -38,7 +38,7 @@
             <tbody>
             @forelse($articles as $article)
                 <tr>
-                    <td align="center"><a href="{{ $libraryUrls->article(slug: $article->slug, categorySlug: $article->category->slug) }}">@if($article->cover_image)<img class="library-list-image" src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}">@else<span class="library-muted">нет</span>@endif</a></td>
+                    <td align="center"><a href="{{ $libraryUrls->article(slug: $article->slug, categorySlug: $article->category->slug) }}">@if($article->cover_image)<img class="library-list-image" src="{{ public_media_url($article->cover_image) }}" alt="{{ $article->title }}">@else<span class="library-muted">нет</span>@endif</a></td>
                     <td>
                         <a class="library-list-title" href="{{ $libraryUrls->article(slug: $article->slug, categorySlug: $article->category->slug) }}">{{ $article->title }}</a>
                         @if($article->excerpt)<div class="library-list-excerpt">{{ $article->excerpt }}</div>@endif

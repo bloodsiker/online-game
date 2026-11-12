@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 final class LibrarySeoTest extends TestCase
@@ -57,7 +58,8 @@ final class LibrarySeoTest extends TestCase
         $this->assertSame('article', $xpath->evaluate('string(//meta[@property="og:type"]/@content)'));
         $this->assertSame('uk_UA', $xpath->evaluate('string(//meta[@property="og:locale"]/@content)'));
         $this->assertSame(url('/uk/library/guide/treasure'), $xpath->evaluate('string(//meta[@property="og:url"]/@content)'));
-        $this->assertSame(asset('covers/treasure.jpg'), $xpath->evaluate('string(//meta[@property="og:image"]/@content)'));
+        // Обложки статей — загрузки на диск 'public' (/storage/...).
+        $this->assertSame(Storage::disk('public')->url('covers/treasure.jpg'), $xpath->evaluate('string(//meta[@property="og:image"]/@content)'));
         $this->assertSame($modifiedAt, $xpath->evaluate('string(//meta[@property="article:modified_time"]/@content)'));
         $this->assertSame($modifiedAt, $article->fresh()->updated_at->toAtomString());
         $this->assertSame(1, $article->fresh()->views_count);

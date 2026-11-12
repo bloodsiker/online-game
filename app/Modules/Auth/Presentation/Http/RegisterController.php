@@ -60,8 +60,8 @@ class RegisterController extends Controller
                 ->where('race_id', $request->integer('race'))
                 ->where('sex', $request->string('sex')->toString())
                 ->findOrFail($request->integer('avatar'))
-                ->image_url
-            : asset(config('registration_avatars.'.(string) $request->string('sex').'.'.(string) $request->string('avatar').'.image'));
+                ->image_path
+            : (string) config('registration_avatars.'.(string) $request->string('sex').'.'.(string) $request->string('avatar').'.image');
         $user->profile()->create([
             'sex' => $request->string('sex')->toString(),
             'avatar' => $avatarPath,

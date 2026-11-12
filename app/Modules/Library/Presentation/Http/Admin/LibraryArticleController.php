@@ -100,7 +100,8 @@ class LibraryArticleController extends Controller
         $data = $request->validate(['file' => ['required', 'image', 'max:4096']]);
 
         return response()->json([
-            'url' => asset($this->imageStorage->storeInPublicDirectory($data['file'], 'library/content')),
+            // Адрес от корня сайта: в HTML статьи не попадает домен окружения.
+            'url' => '/storage/'.$this->imageStorage->storeOnPublicDisk($data['file'], 'library/content'),
         ]);
     }
 
@@ -176,7 +177,7 @@ class LibraryArticleController extends Controller
         ]);
 
         if ($request->hasFile('cover_image')) {
-            $article->cover_image = $this->imageStorage->storeInPublicDirectory(
+            $article->cover_image = $this->imageStorage->storeOnPublicDisk(
                 $request->file('cover_image'),
                 'library/covers',
             );

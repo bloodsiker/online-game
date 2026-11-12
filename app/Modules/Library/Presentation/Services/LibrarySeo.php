@@ -40,7 +40,7 @@ final readonly class LibrarySeo
             description: $this->withGame($description !== '' ? $description : __('library.article_description', ['title' => $article->title])),
             canonical: $this->urls->article(slug: $article->slug, categorySlug: $article->category->slug),
             alternates: $alternates,
-            image: asset($article->cover_image ?: ($article->category?->image ?: 'data/canvas/ui/library.webp')),
+            image: public_media_url($article->cover_image ?: $article->category?->image, fallback: 'data/canvas/ui/library.webp'),
             type: 'article',
             publishedAt: $article->published_at?->toAtomString(),
             modifiedAt: $article->updated_at?->toAtomString(),

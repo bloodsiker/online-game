@@ -322,7 +322,7 @@
                                 <x-game.inset-frame class="char-card">
                                     <div class="char-card-body" style="text-align:center;">
                                         <div class="char-name">{{ $character->playerName }}</div>
-                                        <img src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}"
+                                        <img src="{{ public_media_url(auth()->user()?->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}"
                                              class="char-portrait" alt="{{ __('Портрет') }}">
                                         <div style="font-size:11px; color:#59483d;">
                                             {{ __('Ур.') }} <b>{{ $character->level }}</b>

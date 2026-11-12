@@ -101,7 +101,8 @@ class RaceController extends Controller
         $publicUrl = $avatar->image_url;
         $avatar->delete();
 
-        if (! UserProfile::query()->where('avatar', $publicUrl)->exists()) {
+        // Профиль хранит относительный путь; старые записи могли сохранить полный адрес.
+        if (! UserProfile::query()->whereIn('avatar', [$avatar->image_path, $publicUrl])->exists()) {
             Storage::disk('public')->delete($avatar->image_path);
         }
 

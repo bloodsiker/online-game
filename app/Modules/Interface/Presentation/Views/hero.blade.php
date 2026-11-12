@@ -135,7 +135,7 @@
 
                 <div class="avatar-container">
                     <div class="avatar-frame">
-                        <img src="{{ asset(auth()->user()?->profile?->avatar ?: 'img/avatar/dark_elf.jpg') }}" alt="{{ __('Аватар гравця') }}" class="avatar-img" id="avatarImg">
+                        <img src="{{ public_media_url(auth()->user()?->profile?->avatar, fallback: 'img/avatar/dark_elf.jpg') }}" alt="{{ __('Аватар гравця') }}" class="avatar-img" id="avatarImg">
                     </div>
                 </div>
 
